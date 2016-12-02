@@ -23,7 +23,7 @@ function BigItem:init()
 	GameLogic.GetFilters():add_filter("block_types", function(xmlRoot) 
 		
 		local blocks = commonlib.XPath.selectNode(xmlRoot, "/blocks/");
-		log({"blocks",blocks});
+
 		if(blocks) then
 			blocks[#blocks+1] = {name="block", attr={
 				id = 512, 
@@ -38,7 +38,6 @@ function BigItem:init()
 			LOG.std(nil, "info", "DemoItem", "a new block is registered");
 		end
 
-		log({"xmlRoot",xmlRoot});
 		return xmlRoot;
 	end)
 

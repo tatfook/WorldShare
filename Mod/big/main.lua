@@ -1,7 +1,7 @@
 ﻿--[[
-Title: 
-Author(s):  
-Date: 
+Title: BigMod
+Author(s):  Big
+Date: 2016/12/1
 Desc: 
 use the lib:
 ------------------------------------------------------------
@@ -14,6 +14,8 @@ NPL.load("(gl)Mod/big/BigItem.lua");
 NPL.load("(gl)Mod/big/BigGUI.lua");
 NPL.load("(gl)Mod/big/BigEntity.lua");
 NPL.load("(gl)Mod/big/BigSceneContext.lua");
+NPL.load("(gl)Mod/big/Login.lua");
+NPL.load("(gl)Mod/big/ShowLogin.lua");
 
 local BigSceneContext = commonlib.gettable("Mod.big.BigSceneContext");
 
@@ -23,10 +25,14 @@ local BigItem		  = commonlib.gettable("Mod.big.BigItem");
 local BigGUI          = commonlib.gettable("Mod.big.BigGUI");
 local BigEntity		  = commonlib.gettable("Mod.big.BigEntity");
 local BigCommand	  = commonlib.gettable("Mod.big.BigCommand");
+local Login			  = commonlib.gettable("Mod.big.Login");
 
 local Big = commonlib.inherit(commonlib.gettable("Mod.ModBase"),commonlib.gettable("Mod.big"));
 
+LOG.SetLogLevel("DEBUG");
+
 function Big:ctor()
+
 end
 
 -- virtual function get mod name
@@ -46,10 +52,16 @@ function Big:init()
 	BigCommand:init();
 
 	BigSceneContext:ApplyToDefaultContext();
-	LOG.std(nil, "info", "Big", "plugin initialized");
+
+	local page = "Mod/big/ShowLogin.html";
+	GameLogic.GetFilters():add_filter("LoginPage",function ()
+		return page;
+	end);
+
 end
 
 function Big:OnInitDesktop()
+	LOG.std(nil,"debug","big","OnInitDesktop");
 	return true;
 end
 
@@ -61,7 +73,7 @@ function Big:OnWorldLoad()
 	LOG.std(nil,"info","big","Mod big on world loaded");
 
 	BigGUI:OnWorldLoad();
-	BigItem:OnWorldLoad();
+	--BigItem:OnWorldLoad();
 end
 
 function Big:handleKeyEvent(event)
@@ -72,9 +84,9 @@ function Big:OnActivateDesktop(mode)
 	local Desktop = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop");
 
 	if(Desktop.mode) then
-		--GameLogic.AddBBS("test",L"Big进入编辑模式",4000,"0 255 0");
+		-- GameLogic.ADDBBS("test",L"Big进入编辑模式",4000,"0 255 0");
 	else
-		--GameLogic.AddBBS("test",L"Big进入游戏模式",4000,"255 255 0");
+		-- GameLogic.AddBBS("test",L"Big进入游戏模式",4000,"255 255 0");
 	end
 
 	return;
@@ -90,9 +102,11 @@ function Big:OnDestroy()
 end
 
 function Big:OnClickExitApp()
-	_guihelper.MessageBox("wanna exit?" , function()
-		ParaEngine.GetAttributeObject():SetField("IsWindowClosingAllowed", true);
-		ParaGlobal.ExitApp();
-	end)
+	--_guihelper.MessageBox("wanna exit?" , function()
+		--ParaEngine.GetAttributeObject():SetField("IsWindowClosingAllowed", true);
+		--ParaGlobal.ExitApp();
+	--end)
+	ParaEngine.GetAttributeObject():SetField("IsWindowClosingAllowed", true);
+	ParaGlobal.ExitApp();
 	return true;
 end

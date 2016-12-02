@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Mod\big\BigGUI.html" />
+    <Content Include="Mod\big\ShowLogin.html" />
     <Content Include="script/**" />
     <Content Include="Mod/big\main.lua" />
   </ItemGroup>

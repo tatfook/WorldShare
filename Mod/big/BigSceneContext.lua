@@ -24,6 +24,10 @@ function BigSceneContext:ApplyToDefaultContext()
 	GameLogic.GetFilters():add_filter("DefaultContext", function(context)
 	   return BigSceneContext:CreateGetInstance("BigSceneContext");
 	end);
+
+	GameLogic.GetFilters():add_filter("OKOK",function(text)
+		LOG.std(nil, "debug", "SceneContext", text);
+	end);
 end
 
 -- static method: reset scene context to vanila scene context
@@ -32,11 +36,13 @@ function BigSceneContext:ResetDefaultContext()
 end
 
 function BigSceneContext:mouseReleaseEvent(event)
-	if(event:button() == "left") then
-		--_guihelper.MessageBox("You clicked in Demo Scene Context. Switching to default context?", function()
-			--self:ResetDefaultContext();
-			--GameLogic.ActivateDefaultContext();
-		--end)
-		return false;
-	end
+	--if(event:button() == "left") then
+		----_guihelper.MessageBox("You clicked in Demo Scene Context. Switching to default context?", function()
+			----self:ResetDefaultContext();
+			----GameLogic.ActivateDefaultContext();
+		----end)
+		--return false;
+	--end
+
+	self:ResetDefaultContext();
 end
