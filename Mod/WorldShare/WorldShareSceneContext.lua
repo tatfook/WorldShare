@@ -13,16 +13,16 @@ BigSceneContext:ApplyToDefaultContext();
 NPL.load("(gl)script/ide/System/Core/SceneContext.lua");
 local GameLogic = commonlib.gettable("MyCompany.Aries.Game.GameLogic")
 
-local BigSceneContext = commonlib.inherit(commonlib.gettable("System.Core.SceneContext"), commonlib.gettable("Mod.big.BigSceneContext"));
-function BigSceneContext:ctor()
+local WorldShareSceneContext = commonlib.inherit(commonlib.gettable("System.Core.SceneContext"), commonlib.gettable("Mod.WorldShare.WorldShareSceneContext"));
+function WorldShareSceneContext:ctor()
     self:EnableAutoCamera(true);
 end
 
 -- static method: use this demo scene context as default context
-function BigSceneContext:ApplyToDefaultContext()
-	BigSceneContext:ResetDefaultContext();
+function WorldShareSceneContext:ApplyToDefaultContext()
+	WorldShareSceneContext:ResetDefaultContext();
 	GameLogic.GetFilters():add_filter("DefaultContext", function(context)
-	   return BigSceneContext:CreateGetInstance("BigSceneContext");
+	   return BigSceneContext:CreateGetInstance("WorldShareSceneContext");
 	end);
 
 	GameLogic.GetFilters():add_filter("OKOK",function(text)
@@ -31,11 +31,11 @@ function BigSceneContext:ApplyToDefaultContext()
 end
 
 -- static method: reset scene context to vanila scene context
-function BigSceneContext:ResetDefaultContext()
+function WorldShareSceneContext:ResetDefaultContext()
 	GameLogic.GetFilters():remove_all_filters("DefaultContext");
 end
 
-function BigSceneContext:mouseReleaseEvent(event)
+function WorldShareSceneContext:mouseReleaseEvent(event)
 	--if(event:button() == "left") then
 		----_guihelper.MessageBox("You clicked in Demo Scene Context. Switching to default context?", function()
 			----self:ResetDefaultContext();

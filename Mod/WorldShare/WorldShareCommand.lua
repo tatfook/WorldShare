@@ -12,17 +12,17 @@ local BigCommand = commonlib.gettable("Mod.big.BigCommand");
 local Commands = commonlib.gettable("MyCompany.Aries.Game.Commands");
 local CommandManager = commonlib.gettable("MyCompany.Aries.Game.CommandManager");
 
-local ShareCommand = commonlib.inherit(nil,commonlib.gettable("Mod.Share.ShareCommand"));
+local WorldShareCommand = commonlib.inherit(nil,commonlib.gettable("Mod.WorldShare.WorldShareCommand"));
 
-function ShareCommand:ctor()
+function WorldShareCommand:ctor()
 end
 
-function ShareCommand:init()
-	LOG.std(nil, "info", "BigCommand", "init");
+function WorldShareCommand:init()
+	LOG.std(nil, "info", "ShareCommand", "init");
 	self:InstallCommand();
 end
 
-function ShareCommand:InstallCommand()
+function WorldShareCommand:InstallCommand()
 	Commands["demo"] = {
 		name="demo", 
 		quick_ref="/demo", 

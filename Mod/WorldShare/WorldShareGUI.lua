@@ -10,31 +10,31 @@ local BigGUI = commonlib.gettable("Mod.Test.DemoGUI");
 ------------------------------------------------------------
 ]]
 
-local ShareGUI = commonlib.inherit(nil,commonlib.gettable("Mod.Share.ShareGUI"));
+local WorldShareGUI = commonlib.inherit(nil,commonlib.gettable("Mod.WorldShare.WorldShareGUI"));
 
-function ShareGUI:ctor()
+function WorldShareGUI:ctor()
 end
 
-function ShareGUI:init()
-	LOG.std(nil, "info", "BigGUI", "init");
+function WorldShareGUI:init()
+	LOG.std(nil, "info", "WorldShareGUI", "init");
 end
 
-function ShareGUI:ShowMyGUI()
+function WorldShareGUI:ShowMyGUI()
 	if(not self.page) then
 		-- create if not created before
 		NPL.load("(gl)script/kids/3DMapSystemApp/mcml/PageCtrl.lua");
-		self.page = Map3DSystem.mcml.PageCtrl:new({url="Mod/Share/ShareGUI.html"});		
-		self.page:Create("BigGUI", nil, "_ct", -350,-200,700,400);
+		self.page = Map3DSystem.mcml.PageCtrl:new({url="Mod/WorldShare/WorldShareGUI.html"});		
+		self.page:Create("WorldShareGUI", nil, "_ct", -350,-200,700,400);
 	end
 end
 
-function ShareGUI:ShowLogin()
+function WorldShareGUI:ShowLogin()
 	-- NPL.load("(gl)script/kids/3DMapSystemApp/mcml/PageCtrl.lua");
 	-- self.page = Map3DSystem.mcml.PageCtrl:new({url="Mod/big/ShowLogin.html"});
 	-- self.page:Create("BigGUI", nil, "_ct", -430,-235,860,470);
 	
 	System.App.Commands.Call("File.MCMLWindowFrame", {
-		url  = "Mod/Share/ShareLogin.html", 
+		url  = "Mod/WorldShare/ShareLogin.html", 
 		name = "LoadMainWorld", 
 		isShowTitleBar = false,
 		DestroyOnClose = false, -- prevent many ViewProfile pages staying in memory / false will only hide window
@@ -51,31 +51,31 @@ function ShareGUI:ShowLogin()
 		cancelShowAnimation = true,
 	});
 
-	LOG.std(nil, "info", "ShareGUI", "ShareGUI ShowLogin");
+	LOG.std(nil, "info", "WorldShareGUI", "WorldShareGUI ShowLogin");
 end
 
-function ShareGUI:HideLogin()
+function WorldShareGUI:HideLogin()
 	self.page:Close();
-	LOG.std(nil, "debug", "ShareGUI", "ShareGUI HideLogin");
+	LOG.std(nil, "debug", "WorldShareGUI", "WorldShareGUI HideLogin");
 end
 
-function ShareGUI:OnLogin()
-	LOG.std(nil, "info", "ShareGUI", "ShareGUI Login");
+function WorldShareGUI:OnLogin()
+	LOG.std(nil, "info", "WorldShareGUI", "WorldShareGUI Login");
 end
 
-function ShareGUI:OnWorldLoad()
+function WorldShareGUI:OnWorldLoad()
 	self:ShowLogin();
 	--self:ShowMyGUI();
 end
 
-function ShareGUI:OnLeaveWorld()
+function WorldShareGUI:OnLeaveWorld()
 end
 
-function ShareGUI:OnInitDesktop()
+function WorldShareGUI:OnInitDesktop()
 	
 end
 
-function ShareGUI:handleKeyEvent(event)
+function WorldShareGUI:handleKeyEvent(event)
 	if(event.keyname == "DIK_SPACE") then
 		_guihelper.MessageBox("you pressed "..event.keyname.." from Demo GUI");
 		return true;

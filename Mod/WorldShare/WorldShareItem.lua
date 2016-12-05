@@ -1,21 +1,21 @@
 --[[
-Title: ShareItem
+Title: WorldShareItem
 Author(s):  Big
 Date: 2016.12.1
 Desc: 
 use the lib:
 ------------------------------------------------------------
-NPL.load("(gl)Mod/Share/ShareItem.lua");
-local ShareItem = commonlib.gettable("Mod.Share.ShareItem");
+NPL.load("(gl)Mod/WorldShare/WorldShareItem.lua");
+local WorldShareItem = commonlib.gettable("Mod.WorldShare.ShareItem");
 ------------------------------------------------------------
 ]]
-local ShareItem = commonlib.inherit(nil,commonlib.gettable("Mod.Share.ShareItem"));
+local WorldShareItem = commonlib.inherit(nil,commonlib.gettable("Mod.WorldShare.WorldShareItem"));
 
-function ShareItem:ctor()
+function WorldShareItem:ctor()
 end
 
-function ShareItem:init()
-	LOG.std(nil, "info", "ShareItem", "init");
+function WorldShareItem:init()
+	LOG.std(nil, "info", "WorldShareItem", "init");
 
 	xmlRoot = GameLogic.GetFilters():apply_filters("show", xmlRoot);
 	
@@ -53,7 +53,7 @@ function ShareItem:init()
 
 end
 
-function ShareItem:OnWorldLoad()
+function WorldShareItem:OnWorldLoad()
 	if(self.isInited) then
 		return 
 	end

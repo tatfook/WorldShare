@@ -5,14 +5,14 @@ Date: 2016/12/1
 Desc: 
 use the lib:
 ------------------------------------------------------------
-NPL.load("(gl)Mod/big/ShowLogin.lua");
-local ShowLogin = commonlib.gettable("Mod.big.ShowLogin");
+NPL.load("(gl)Mod/WorldShare/ShowLogin.lua");
+local ShowLogin = commonlib.gettable("Mod.WorldShare.ShowLogin");
 ------------------------------------------------------------
 ]]
 NPL.load("(gl)script/ide/System/os/GetUrl.lua");
 NPL.load("(gl)script/ide/System/Windows/mcml/DOM.lua");
 
-local ShowLogin = commonlib.inherit(nil,commonlib.gettable("Mod.big.ShowLogin"));
+local ShowLogin = commonlib.inherit(nil,commonlib.gettable("Mod.WorldShare.ShowLogin"));
 local Page;
 
 ShowLogin.login_type = 1;
