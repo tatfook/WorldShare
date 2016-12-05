@@ -12,7 +12,7 @@
 	            GameLogic         = commonlib.gettable("MyCompany.Aries.Game.GameLogic");
 	            InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld");
 	            local MainLogin   = commonlib.gettable("MyCompany.Aries.Game.MainLogin");
-	            ShowLogin         = commonlib.gettable("Mod.big.ShowLogin");
+	            ShowLogin         = commonlib.gettable("Mod.Share.ShowLogin");
 
 	            InternetLoadWorld.OnInit();
 	            ShowLogin.OnInit();
@@ -249,15 +249,25 @@
 	            	ShowLogin:loginAction(account,password,function (err, msg, data)
 							if(data['token']) then
 								local token = data['token'];
+								local site  = "http://localhost:8099";
 
 								ShowLogin:getUserInfo(token,function(err, msg, data)
 									if(data['_id']) then
 										_guihelper.MessageBox(L"登陆成功");
 
 										if(data['github']) then
-											ShowLogin.username = 
+											ShowLogin.username = data['displayName'];
+											ShowLogin.userid   = data['_id'];
+
+											local myPackages = Page:GetNode("myPackages");
+											myPackages:SetAttribute("href",site.."/wiki/mod/packages/packages_projects#/paracraft?userid="..data['_id']);
 											ShowLogin:changeLoginType(3);
 										else
+											--_guihelper.ShowDialogBox(L"绑定是否完成？",nil,nil,500,300,function()end,function()end);
+
+											local clientLogin = Page:GetNode("clientLogin");
+											clientLogin:SetAttribute("href",site.."/wiki/mod/packages/client_login#/?token="..token);
+
 											ShowLogin:changeLoginType(2);
 										end
 									else
@@ -271,6 +281,13 @@
 	            	);
 	            end
 
+	            function logout()
+	            	ShowLogin:changeLoginType(1);
+	            end
+
+	            function syncPackages()
+	            	
+	            end
             ]]>
         </script>
         <div style="width:860px;height:470px;">
@@ -379,23 +396,23 @@
                     <pe:if condition="<%=ShowLogin.login_type == 2 %>">
 	                    <div name="bindgithub" style="float:left;base-font-size:16px;font-size:16px;margin-left:4px;margin-top:10px;width:290px;height:325px;padding:20px;color: #ffffff;">
 	                    	<div>Paracraft网络数据由github支持。绑定github数据源后才可以进行网络保存。</div>
-	                    	<input type="button" style="margin-left: 55px;width: 140px;height: 40px;margin-top: 80px;" class="button_highlight" value="数据源绑定" />
+	                    	<input type="button" name="clientLogin" style="margin-left: 55px;width: 140px;height: 40px;margin-top: 80px;" class="button_highlight" value="数据源绑定" />
 	                    </div>
                     </pe:if>
                     <!-- 登陆成功页面 -->
                     <pe:if condition="<%=ShowLogin.login_type == 3 %>">
 	                    <div name="loginsuccess" style="float:left;base-font-size:16px;font-size:16px;margin-left:4px;margin-top:10px;width:290px;height:325px;padding:20px;color: #ffffff;">
-	                    	<div>你已使用<span style="color:#ff6666">#Username#</span>成功登录。</div>
+	                    	<div>你已使用<span style="color:#ff6666"><%=ShowLogin.username%></span>成功登录。</div>
 	                    	<div>我的作品网站</div>
-	                    	<div>http://username.wikicraft.cn</div>
+	                    	<div>http://www.wikicraft.cn/wiki/mod/packages/packages_projects#/paracraft?userid=<%=ShowLogin.userid%></div>
 	                    	<div>
 	                    		<input type="button" name="" style="width:58px;height:40px;margin-left: 192px;margin-top:20px;margin-bottom:20px;" class="button_highlight" value="分享" />
 	                    	</div>
 	                    	<div>
-	                    		<input type="button" name="" style="width: 130px;height: 31px;margin-left: 60px;margin-bottom:20px;" class="button_highlight" value="打开作品网站" />
+	                    		<input type="button" name="myPackages" style="width: 130px;height: 31px;margin-left: 60px;margin-bottom:20px;" class="button_highlight" value="打开作品网站" />
 	                    	</div>
 	                    	<div>
-	                    		<input type="button" name="" style="width: 130px;height: 31px;margin-left: 60px;margin-bottom:20px;" class="button_highlight" value="退出登录" />
+	                    		<input type="button" name="" style="width: 130px;height: 31px;margin-left: 60px;margin-bottom:20px;" onclick="logout()" class="button_highlight" value="退出登录" />
 	                    	</div>
 	                    </div>
                     </pe:if>
@@ -479,9 +496,11 @@
                                 <div style="margin:10px;font-weight:bold;color:#ffffff"><%=L"正在搜索, 请稍候 ... " %></div>
                             </FetchingDataTemplate>
                         </pe:gridview>
-                        <div>
-                        	<input type="button" name="" style="float: right;margin-left:195px;width: 140px;height: 31px;margin-top: -31px;" class="button_highlight" value="同步全部作品" />
-                        </div>
+                        <pe:if condition="<%=ShowLogin.login_type == 3 %>">
+	                        <div>
+	                        	<input type="button" name="" style="float: right;margin-left:195px;width: 140px;height: 31px;margin-top: -31px;" class="button_highlight" value="同步全部作品" />
+	                        </div>
+                        </pe:if>
                     </div>
 
                     <!--<div style="margin-left:10px;margin-top:7px;width:640px;height:25px;background:url(Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#263 346 36 36:15 15 15 15);">

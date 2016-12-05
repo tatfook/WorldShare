@@ -1,21 +1,21 @@
 --[[
-Title: DemoItem
+Title: ShareItem
 Author(s):  Big
-Date: 2016.11.22
-Desc: a demo block item
+Date: 2016.12.1
+Desc: 
 use the lib:
 ------------------------------------------------------------
-NPL.load("(gl)Mod/big/BigItem.lua");
-local BigItem = commonlib.gettable("Mod.big.BigItem");
+NPL.load("(gl)Mod/Share/ShareItem.lua");
+local ShareItem = commonlib.gettable("Mod.Share.ShareItem");
 ------------------------------------------------------------
 ]]
-local BigItem = commonlib.inherit(nil,commonlib.gettable("Mod.big.BigItem"));
+local ShareItem = commonlib.inherit(nil,commonlib.gettable("Mod.Share.ShareItem"));
 
-function BigItem:ctor()
+function ShareItem:ctor()
 end
 
-function BigItem:init()
-	LOG.std(nil, "info", "BigItem", "init");
+function ShareItem:init()
+	LOG.std(nil, "info", "ShareItem", "init");
 
 	xmlRoot = GameLogic.GetFilters():apply_filters("show", xmlRoot);
 	
@@ -28,7 +28,7 @@ function BigItem:init()
 			blocks[#blocks+1] = {name="block", attr={
 				id = 512, 
 				threeSideTex = "true",
-				text = "Big Item",
+				text = "Share Item",
 				name = "DemoItem",
 				texture="Texture/blocks/bookshelf_three.png",
 				obstruction="true",
@@ -53,7 +53,7 @@ function BigItem:init()
 
 end
 
-function BigItem:OnWorldLoad()
+function ShareItem:OnWorldLoad()
 	if(self.isInited) then
 		return 
 	end
