@@ -40,18 +40,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Mod\WorldShare\ShareGUI.html" />
     <Content Include="Mod\WorldShare\ShowLogin.html" />
     <Content Include="script/**" />
   </ItemGroup>
   <ItemGroup>
     <None Include="InstallPackages.bat" />
     <None Include="Mod\WorldShare\main.lua" />
-    <None Include="Mod\WorldShare\ShareCommand.lua" />
-    <None Include="Mod\WorldShare\ShareEntity.lua" />
-    <None Include="Mod\WorldShare\ShareGUI.lua" />
-    <None Include="Mod\WorldShare\ShareItem.lua" />
-    <None Include="Mod\WorldShare\ShareSceneContext.lua" />
     <None Include="Mod\WorldShare\ShowLogin.lua" />
     <None Include="README.md" />
     <None Include="Run.bat" />

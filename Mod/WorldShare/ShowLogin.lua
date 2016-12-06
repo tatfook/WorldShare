@@ -12,7 +12,8 @@ local ShowLogin = commonlib.gettable("Mod.WorldShare.ShowLogin");
 NPL.load("(gl)script/ide/System/os/GetUrl.lua");
 NPL.load("(gl)script/ide/System/Windows/mcml/DOM.lua");
 
-local ShowLogin = commonlib.inherit(nil,commonlib.gettable("Mod.WorldShare.ShowLogin"));
+local ShowLogin   = commonlib.inherit(nil,commonlib.gettable("Mod.WorldShare.ShowLogin"));
+InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld");
 local Page;
 
 ShowLogin.login_type = 1;
@@ -37,4 +38,13 @@ end
 function ShowLogin:changeLoginType(_type)
 	self.login_type = _type;
 	Page:Refresh(0.01);
+end
+
+function ShowLogin.OnClickSelectedWorld(_index)
+	InternetLoadWorld.selected_world_index = _index or 1;
+	Page:Refresh(0.01);
+
+	if(mouse_button == "left") then
+		InternetLoadWorld.DeleteSelectedWorld();
+	end
 end

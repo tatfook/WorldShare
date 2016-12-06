@@ -253,7 +253,6 @@
 
 								ShowLogin:getUserInfo(token,function(err, msg, data)
 									if(data['_id']) then
-										_guihelper.MessageBox(L"登陆成功");
 
 										if(data['github']) then
 											ShowLogin.username = data['displayName'];
@@ -263,8 +262,6 @@
 											myPackages:SetAttribute("href",site.."/wiki/mod/packages/packages_projects#/paracraft?userid="..data['_id']);
 											ShowLogin:changeLoginType(3);
 										else
-											--_guihelper.ShowDialogBox(L"绑定是否完成？",nil,nil,500,300,function()end,function()end);
-
 											local clientLogin = Page:GetNode("clientLogin");
 											clientLogin:SetAttribute("href",site.."/wiki/mod/packages/client_login#/?token="..token);
 
@@ -281,12 +278,30 @@
 	            	);
 	            end
 
+	            function checkGitBind()
+	            	_guihelper.MessageBox(L"请确定绑定GITHUB是否成功？", function(res)
+						if(res and res == _guihelper.DialogResult.Yes) then
+							-- pressed YES
+						end
+					end, _guihelper.MessageBoxButtons.YesNo);
+	            end
+
 	            function logout()
 	            	ShowLogin:changeLoginType(1);
 	            end
 
 	            function syncPackages()
-	            	
+	            	--echo(InternetLoadWorld.DS_Func_Worlds);
+	            	echo(InternetLoadWorld.ServerPage_ds);
+
+	            	-- log({InternetLoadWorld.selected_world_index,
+	            	-- 	 InternetLoadWorld.type_ds,
+	            	-- 	 InternetLoadWorld.ds_collection,
+	            	-- 	 InternetLoadWorld.ServerPage_ds});
+
+	            	_guihelper.MessageBox(L"正在同步中....",function(res)
+
+	            	end);
 	            end
             ]]>
         </script>
@@ -396,7 +411,7 @@
                     <pe:if condition="<%=ShowLogin.login_type == 2 %>">
 	                    <div name="bindgithub" style="float:left;base-font-size:16px;font-size:16px;margin-left:4px;margin-top:10px;width:290px;height:325px;padding:20px;color: #ffffff;">
 	                    	<div>Paracraft网络数据由github支持。绑定github数据源后才可以进行网络保存。</div>
-	                    	<input type="button" name="clientLogin" style="margin-left: 55px;width: 140px;height: 40px;margin-top: 80px;" class="button_highlight" value="数据源绑定" />
+	                    	<input type="button" onclick="checkGitBind" name="clientLogin" style="margin-left: 55px;width: 140px;height: 40px;margin-top: 80px;" class="button_highlight" value="数据源绑定"/>
 	                    </div>
                     </pe:if>
                     <!-- 登陆成功页面 -->
@@ -423,6 +438,7 @@
                         <pe:gridview RememberScrollPos="true" style="margin-left:5px;" AllowPaging="false" VerticalScrollBarStep="59" DefaultNodeHeight="59" ItemsPerLine="1" name="gw_world_ds" DataSource='<%=InternetLoadWorld.DS_Func_Worlds%>'>
                             <Columns>
                                 <pe:if condition='<%= BeHasWorldInSlot(Eval("is_empty_slot"),Eval("is_buy_slot"))%>'>
+                                	<!--选中的项-->
                                     <pe:if condition='<%= Eval("index") == InternetLoadWorld.selected_world_index%>'>
                                         <div name='<%=Eval("index")%>' style="position:relative;margin-left:3px;margin-top:5px;height:54px;width:330px;" class="mc_button_green">
                                             <div style="position:relative;margin-left:10px;margin-top:5px;base-font-size:18px;font-size:18px;text-align:left;color:#ffffff;font-weight:bold;">
@@ -441,10 +457,11 @@
                                                     <!--<input name='<%=Eval("slot_id")%>' type="button" value="上传当前世界" style="position:relative;margin-left:100px;margin-top:12px;width:120px;height:32px;font-size:18px;font-weight:bold;color:#ffffff;shadow-quality:8;shadow-color:#80133f48;text-shadow:true;" onclick="OnSaveToSlot" class="mc_light_grey_button_with_fillet"/>-->
                                                 </div>
                                             </pe:if>
-                                            <input type="button" tooltip='<%=L"右键删除"%>' style="position:relative;width:280px;height:57px;background:" name='<%=Eval("index")%>' onclick="InternetLoadWorld.OnClickSelectedWorld" />
+                                            <!-- <input type="button" tooltip='<%=L"右键删除"%>' style="position:relative;width:280px;height:57px;background:" name='<%=Eval("index")%>' onclick="InternetLoadWorld.OnClickSelectedWorld" /> -->
                                         </div>
                                     </pe:if>
-                                    <pe:if condition='<%= Eval("index") ~= InternetLoadWorld.selected_world_index%>'>
+                                    <!--未选中的项-->
+                                    <pe:if condition='<%= Eval("index") ~= InternetLoadWorld.selected_world_index%>'> 
                                         <div name='<%=Eval("index")%>' style="position:relative;margin-left:3px;margin-top:5px;height:54px;width:330px;" class="mc_button_black">
                                             <div style="position:relative;margin-left:10px;margin-top:5px;base-font-size:18px;font-size:18px;text-align:left;color:#ffffff;font-weight:bold;">
                                                 <%=Eval("text") %><%=if_else(Eval("is_zip")==true, L".zip", "")%>
@@ -459,8 +476,8 @@
                                     </pe:if>
                                     <div style="position:relative;margin-left:165px;margin-top:8px;">
                                         <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) == 100%>'>
-                                            <input type="button" value='<%=L"标记\n状态" %>' style="text-singleline:false;margin-right:5px;width:51px;height:46px;font-size:12px;font-weight:bold;" onclick="InternetLoadWorld.EnterWorld" name='<%=Eval("index")%>' class="mc_button_blue" />
-                                            <input type="button" value='<%=L"删除" %>' style="margin-right:5px;width:51px;height:46px;font-size:12px;font-weight:bold;" onclick="InternetLoadWorld.EnterWorld" name='<%=Eval("index")%>' class="mc_button_blue" />
+                                            <input type="button" value='<%=L"仅\n本地" %>' style="text-singleline:false;margin-right:5px;width:51px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue"/>
+                                            <input type="button" value='<%=L"删除" %>' style="margin-right:5px;width:51px;height:46px;font-size:12px;font-weight:bold;" onclick='ShowLogin.OnClickSelectedWorld' name='<%=Eval("index")%>' class="mc_button_blue" />
                                             <input type="button" value='<%=L"进入" %>' style="width:51px;height:46px;font-size:12px;font-weight:bold;" onclick="InternetLoadWorld.EnterWorld" name='<%=Eval("index")%>' class="mc_button_blue" />
                                         </pe:if>
                                         <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) < 100 %>'>
@@ -498,7 +515,7 @@
                         </pe:gridview>
                         <pe:if condition="<%=ShowLogin.login_type == 3 %>">
 	                        <div>
-	                        	<input type="button" name="" style="float: right;margin-left:195px;width: 140px;height: 31px;margin-top: -31px;" class="button_highlight" value="同步全部作品" />
+	                        	<input type="button" onclick='syncPackages' style="float: right;margin-left:195px;width: 140px;height: 31px;margin-top: -31px;" class="button_highlight" value="同步全部作品" />
 	                        </div>
                         </pe:if>
                     </div>
