@@ -17,6 +17,7 @@ InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.Inter
 local Page;
 
 ShowLogin.login_type = 1;
+local site  = "http://localhost:8099";
 
 function ShowLogin:ctor()
 end
@@ -26,13 +27,11 @@ function ShowLogin.OnInit()
 end
 
 function ShowLogin:loginAction(_account,_password,_callback)
-	LOG.std(nil, "debug", "loginAction", _account.._password);
-
-	System.os.GetUrl({url = "http://localhost:8099/api/wiki/models/user/login", json = true,form = {email=_account,password=_password}},_callback);
+	System.os.GetUrl({url = site.."/api/wiki/models/user/login", json = true,form = {email=_account,password=_password}},_callback);
 end
 
-function ShowLogin:getUserInfo(_token,_callback)
-	System.os.GetUrl({url = "http://localhost:8099/api/wiki/models/user/",json = true,headers = {Authorization = "Bearer ".._token}},_callback);
+function ShowLogin:getUserInfo(_callback)
+	System.os.GetUrl({url = site.."/api/wiki/models/user/",json = true,headers = {Authorization = "Bearer "..self.token}},_callback);
 end
 
 function ShowLogin:changeLoginType(_type)
@@ -47,4 +46,13 @@ function ShowLogin.OnClickSelectedWorld(_index)
 	if(mouse_button == "left") then
 		InternetLoadWorld.DeleteSelectedWorld();
 	end
+end
+
+function ShowLogin:syncWorldsList(_worldsName,_callback)
+	System.os.GetUrl({
+					  url = site.."/api/mod/WorldShare/models/worlds",
+					  json=true,
+					  headers = {Authorization = "Bearer "..self.token},
+					  form = {worldsName = _worldsName}
+					  },_callback);
 end

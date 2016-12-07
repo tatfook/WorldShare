@@ -248,10 +248,10 @@
 
 	            	ShowLogin:loginAction(account,password,function (err, msg, data)
 							if(data['token']) then
-								local token = data['token'];
+								ShowLogin.token = data['token'];
 								local site  = "http://localhost:8099";
 
-								ShowLogin:getUserInfo(token,function(err, msg, data)
+								ShowLogin:getUserInfo(function(err, msg, data)
 									if(data['_id']) then
 
 										if(data['github']) then
@@ -261,9 +261,10 @@
 											local myPackages = Page:GetNode("myPackages");
 											myPackages:SetAttribute("href",site.."/wiki/mod/packages/packages_projects#/paracraft?userid="..data['_id']);
 											ShowLogin:changeLoginType(3);
+											syncWorldsList();
 										else
 											local clientLogin = Page:GetNode("clientLogin");
-											clientLogin:SetAttribute("href",site.."/wiki/mod/packages/client_login#/?token="..token);
+											clientLogin:SetAttribute("href",site.."/wiki/mod/WorldShare/client_login#/?token="..ShowLogin.token);
 
 											ShowLogin:changeLoginType(2);
 										end
@@ -290,17 +291,21 @@
 	            	ShowLogin:changeLoginType(1);
 	            end
 
-	            function syncPackages()
+	            function syncWorldsList()
 	            	--echo(InternetLoadWorld.DS_Func_Worlds);
-	            	echo(InternetLoadWorld.ServerPage_ds);
+	            	local localWorlds = InternetLoadWorld.ServerPage_ds[1]['ds'];
+	            	local worldsName  = {};
 
-	            	-- log({InternetLoadWorld.selected_world_index,
-	            	-- 	 InternetLoadWorld.type_ds,
-	            	-- 	 InternetLoadWorld.ds_collection,
-	            	-- 	 InternetLoadWorld.ServerPage_ds});
+	            	for key,value in ipairs(localWorlds) do
+	            		worldsName[#worldsName+1] = value["foldername"];
+	            	end
 
-	            	_guihelper.MessageBox(L"正在同步中....",function(res)
+	            	ShowLogin:syncWorldsList(worldsName,function(err, msg, data)
+	            		log(data);
 
+	            		_guihelper.MessageBox(L"同步成功",function(res)
+
+	            		end);
 	            	end);
 	            end
             ]]>
