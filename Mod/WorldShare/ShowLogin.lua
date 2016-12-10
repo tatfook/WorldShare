@@ -17,7 +17,7 @@ InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.Inter
 local Page;
 
 ShowLogin.login_type = 1;
-local site  = "http://localhost:8099";
+ShowLogin.site  = "http://localhost:8099";
 
 function ShowLogin:ctor()
 end
@@ -27,11 +27,11 @@ function ShowLogin.OnInit()
 end
 
 function ShowLogin:loginAction(_account,_password,_callback)
-	System.os.GetUrl({url = site.."/api/wiki/models/user/login", json = true,form = {email=_account,password=_password}},_callback);
+	System.os.GetUrl({url = self.site.."/api/wiki/models/user/login", json = true,form = {email=_account,password=_password}},_callback);
 end
 
 function ShowLogin:getUserInfo(_callback)
-	System.os.GetUrl({url = site.."/api/wiki/models/user/",json = true,headers = {Authorization = "Bearer "..self.token}},_callback);
+	System.os.GetUrl({url = self.site.."/api/wiki/models/user/",json = true,headers = {Authorization = "Bearer "..self.token}},_callback);
 end
 
 function ShowLogin:changeLoginType(_type)
@@ -39,18 +39,41 @@ function ShowLogin:changeLoginType(_type)
 	Page:Refresh(0.01);
 end
 
-function ShowLogin.OnClickSelectedWorld(_index)
-	InternetLoadWorld.selected_world_index = _index or 1;
-	Page:Refresh(0.01);
+function ShowLogin:deleteWorld(_selectWorldInfor)
+	System.App.Commands.Call("File.MCMLWindowFrame", {
+		url  = "Mod/WorldShare/DeleteWorld.html", 
+		name = "DeleteWorld", 
+		isShowTitleBar = false,
+		DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory / false will only hide window
+		style = CommonCtrl.WindowFrame.ContainerStyle,
+		zorder = 0,
+		allowDrag = true,
+		bShow = bShow,
+		directPosition = true,
+			align = "_ct",
+			x = -500/2,
+			y = -270/2,
+			width = 500,
+			height = 270,
+		cancelShowAnimation = true,
+	});
+end
 
-	if(mouse_button == "left") then
-		InternetLoadWorld.DeleteSelectedWorld();
-	end
+function ShowLogin:deleteWorldLocal()
+	InternetLoadWorld.DeleteSelectedWorld();
+end
+
+function ShowLogin:deleteWorldGithub()
+
+end
+
+function ShowLogin:deleteWorldAll()
+
 end
 
 function ShowLogin:getWorldsList(_callback) --_worldsName,
 	System.os.GetUrl({
-					  url = site.."/api/mod/WorldShare/models/worlds",
+					  url = self.site.."/api/mod/WorldShare/models/worlds",
 					  json=true,
 					  headers = {Authorization = "Bearer "..self.token},
 					  --form = {worldsNameForm = _worldsName}

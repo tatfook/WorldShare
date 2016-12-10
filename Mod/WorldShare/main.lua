@@ -71,6 +71,26 @@ function WorldShare:init()
 
 		return false;
 	end);
+
+	GameLogic.GetFilters():add_filter("SaveWorldPage.ShowSharePage",function (bEnable)
+		System.App.Commands.Call("File.MCMLWindowFrame", {
+			url = "Mod/WorldShare/ExitWorld.html",
+			name = "SaveWorldPage.ShowSharePage",
+			isShowTitleBar = false,
+			DestroyOnClose = true,
+			style = CommonCtrl.WindowFrame.ContainerStyle,
+			allowDrag = true,
+			isTopLevel = true,
+			directPosition = true,
+				align = "_ct",
+				x = -310/2,
+				y = -270/2,
+				width = 310,
+				height = 270,
+		});
+
+		return false;
+	end);
 end
 
 function WorldShare:OnInitDesktop()
@@ -114,11 +134,11 @@ function WorldShare:OnDestroy()
 end
 
 function WorldShare:OnClickExitApp()
-	--_guihelper.MessageBox("wanna exit?" , function()
-		--ParaEngine.GetAttributeObject():SetField("IsWindowClosingAllowed", true);
-		--ParaGlobal.ExitApp();
-	--end)
-	ParaEngine.GetAttributeObject():SetField("IsWindowClosingAllowed", true);
-	ParaGlobal.ExitApp();
-	return true;
+	-- _guihelper.MessageBox("wanna exit?" , function()
+	-- 	ParaEngine.GetAttributeObject():SetField("IsWindowClosingAllowed", true);
+	-- 	ParaGlobal.ExitApp();
+	-- end)
+
+	-- ParaEngine.GetAttributeObject():SetField("IsWindowClosingAllowed", true);
+	-- ParaGlobal.ExitApp();
 end

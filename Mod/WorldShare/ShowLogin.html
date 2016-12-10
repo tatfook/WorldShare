@@ -16,8 +16,6 @@
 
 	            InternetLoadWorld.OnInit();
 	            ShowLogin.OnInit();
-
-	            local site  = "http://localhost:8099";
 	            
 	            function IsMCVersion()
 		            if(System.options.mc) then
@@ -263,7 +261,7 @@
 											ShowLogin.login 	   = data['login']; -- github用户名 后面用到
 
 											local myPackages = Page:GetNode("myPackages");
-											myPackages:SetAttribute("href",site.."/wiki/mod/packages/packages_projects#/paracraft?userid="..data['_id']);
+											myPackages:SetAttribute("href",ShowLogin.site.."/wiki/mod/packages/packages_projects#/paracraft?userid="..data['_id']);
 											ShowLogin:changeLoginType(3);
 											syncWorldsList();
 										else
@@ -283,7 +281,7 @@
 	            end
 
 	            function checkGitBind()
-	            	ParaGlobal.ShellExecute("open", site.."/wiki/mod/WorldShare/client_login#/?token="..ShowLogin.token, "", "", 1);
+	            	ParaGlobal.ShellExecute("open", ShowLogin.site.."/wiki/mod/WorldShare/client_login#/?token="..ShowLogin.token, "", "", 1);
 	            	checkGitBindAction();
 	            end
 
@@ -299,7 +297,7 @@
 									ShowLogin.userid   = data['_id'];
 
 									local myPackages = Page:GetNode("myPackages");
-									myPackages:SetAttribute("href",site.."/wiki/mod/packages/packages_projects#/paracraft?userid="..data['_id']);
+									myPackages:SetAttribute("href",ShowLogin.site.."/wiki/mod/packages/packages_projects#/paracraft?userid="..data['_id']);
 									ShowLogin:changeLoginType(3);
 									syncWorldsList();
 								else
@@ -316,6 +314,14 @@
 
 	            function syncWorldsList()
 	            	local localWorlds = InternetLoadWorld.ServerPage_ds[1]['ds'];
+
+	            	-- 防止重复数据
+	            	if(not ShowLogin.originLocalWorlds) then
+	            		ShowLogin.originLocalWorlds = commonlib.copy(localWorlds);
+	            	else
+	            		localWorlds = commonlib.copy(ShowLogin.originLocalWorlds);
+	            	end
+
 	            	--[[
 						status代码含义:
 						1:仅本地
@@ -364,11 +370,18 @@
 	            				localWorlds[kl].status = 1; --仅本地
 	            			end
 	            		end
-
-	            		_guihelper.MessageBox(L"刷新列表成功");
-	            		log(localWorlds);
+	            		
 	            		Page:Refresh(0.01);
 	            	end);
+	            end
+
+	            function deleteWorld(_index)
+	            	Page:CloseWindow();
+
+	            	local index = tonumber(_index);
+		            local selectedWorldInfor = InternetLoadWorld.cur_ds[_index];
+
+		            ShowLogin:deleteWorld(selectedWorldInfor);
 	            end
             ]]>
         </script>
@@ -569,7 +582,7 @@
                                         </pe:if>
                                     </div>
                                     <pe:if condition='<%= Eval("index") == InternetLoadWorld.selected_world_index%>'>
-                                		<input type="button" value='<%=L"删除" %>' style="margin-left:160px;margin-top:8px;width:51px;height:46px;font-size:12px;font-weight:bold;" onclick='ShowLogin.OnClickSelectedWorld' name='<%=Eval("index")%>' class="mc_button_blue" />
+                                		<input type="button" value='<%=L"删除" %>' style="margin-left:160px;margin-top:8px;width:51px;height:46px;font-size:12px;font-weight:bold;" onclick='deleteWorld' name='<%=Eval("index")%>' class="mc_button_blue" />
                                 	</pe:if>
                                 </pe:if>
                                 <pe:if condition='<%= not BeHasWorldInSlot(Eval("is_empty_slot"),Eval("is_buy_slot"))%>'>
@@ -595,11 +608,11 @@
                                 <div style="margin:10px;font-weight:bold;color:#ffffff"><%=L"正在搜索, 请稍候 ... " %></div>
                             </FetchingDataTemplate>
                         </pe:gridview>
-                        <pe:if condition="<%=ShowLogin.login_type == 3 %>">
+                        <!-- <pe:if condition="<%=ShowLogin.login_type == 3 %>">
 	                        <div>
 	                        	<input type="button" onclick='syncWorldsList' style="float: right;margin-left:195px;width: 140px;height: 31px;margin-top: -31px;" class="button_highlight" value="刷新列表" />
 	                        </div>
-                        </pe:if>
+                        </pe:if> -->
                     </div>
 
                     <!--<div style="margin-left:10px;margin-top:7px;width:640px;height:25px;background:url(Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#263 346 36 36:15 15 15 15);">

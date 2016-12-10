@@ -1,0 +1,30 @@
+<!-- "script/apps/Aries/Creator/Game/Login/InternetLoadWorld.html" -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>exit world sync,by big,2016/12/10</title>
+</head>
+<body>
+    <pe:mcml>
+        <script type="text/npl" refresh="false" src="SyncGUI.lua">
+            <![CDATA[
+                SyncGUI = commonlib.gettable("Mod.WorldShare.v");
+                SyncGUI:OnInit();
+
+             ]]>
+        </script>
+        <div style="width:500px;height:270px;">
+            <aries:window mode="thin" width="500" height="270" style="float:left;" title='<%=L"与Github同步" %>'>
+                <div style="padding:20px;font-size:18px;base-font-size:18px;color:#ffffff">
+                    <div>
+                        下载进度：12123/12354646
+                    </div>
+                    <div>
+                        <div style="width: 300px;height: 30px;background-color: #666666"></div>
+                    </div>
+                </div>
+            </aries:window>
+        </div>
+    </pe:mcml>
+</body>
+</html>

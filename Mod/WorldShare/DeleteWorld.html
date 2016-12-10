@@ -1,0 +1,59 @@
+<!-- "script/apps/Aries/Creator/Game/Login/InternetLoadWorld.html" -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>delete world sync,by big,2016/12/10</title>
+</head>
+<body>
+    <pe:mcml>
+        <script type="text/npl" refresh="false" src="ShowLogin.lua">
+            <![CDATA[
+            	ShowLogin       = commonlib.gettable("Mod.WorldShare.ShowLogin");
+                local MainLogin = commonlib.gettable("MyCompany.Aries.Game.MainLogin");
+
+            	ShowLogin:OnInit();
+
+            	function deleteLocal()
+                    ShowLogin:deleteWorldLocal();
+                end
+
+                function deleteGithub()
+                    _guihelper.MessageBox(L"只删除远程");
+                end
+
+                function deleteAll()
+                    _guihelper.MessageBox(L"删除全部");
+                end
+
+                function goBack()
+                    Page:CloseWindow();
+                    NPL.load("(gl)script/apps/Aries/Creator/WorldCommon.lua");
+                    local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
+                    if(not WorldCommon.GetWorldInfo()) then
+                        MainLogin.state.IsLoadMainWorldRequested = nil;
+                        MainLogin:next_step();
+                    end
+                end
+             ]]>
+        </script>
+        <div style="width:500px;height:270px;">
+            <aries:window mode="thin" width="500" height="270" style="float:left;" title='<%=L"删除世界" %>'>
+            	<div style="padding:30px;font-size:18px;base-font-size:18px;color:#ffffff">
+            		<div>
+            			<input type="button" onclick="deleteLocal"  class="button_highlight" style="margin-left:150px;width: 130px;height: 30px;" name="" value="只删除本地" />
+                    </div>
+                    <div style="margin-top:20px;">
+            			<input type="button" onclick="deleteGithub" class="button_highlight" style="margin-left:150px;width: 130px;height: 30px;"  name="" value="只删除远程" />
+                    </div>
+                    <div style="margin-top:20px;">
+                        <input type="button" onclick="deleteAll"    class="button_highlight" style="margin-left:150px;width: 130px;height: 30px;"  name="" value="全部删除" />
+                    </div>
+                    <div style="margin-top:20px;">
+                        <input type="button" onclick="goBack"       class="button_highlight" style="margin-left:150px;width: 130px;height: 30px;"  name="" value="返回上级" />
+                    </div>
+            	</div>
+            </aries:window>
+        </div>
+    </pe:mcml>
+</body>
+</html>
