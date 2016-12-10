@@ -1,0 +1,66 @@
+<!-- "script/apps/Aries/Creator/Game/Login/InternetLoadWorld.html" -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>onWorldload sync,by big,2016/12/9</title>
+</head>
+<body>
+    <pe:mcml>
+        <script type="text/npl" refresh="false" src="WorldShareGUI.lua">
+            <![CDATA[
+            	WorldShareGUI = commonlib.gettable("Mod.WorldShare.WorldShareGUI");
+            	WorldShareGUI:init();
+
+            	function useLocal()
+            		Page:CloseWindow();
+
+                    if(tonumber(WorldShareGUI.currentRevison) < tonumber(WorldShareGUI.githubRevison)) then
+                        WorldShareGUI:useLocal();
+                    elseif(tonumber(WorldShareGUI.currentRevison) > tonumber(WorldShareGUI.githubRevison)) then
+                        _guihelper.MessageBox("开始同步--将本地大小有变化的文件上传到github"); -- 上传或更新
+                    end
+            	end
+
+            	function useGithub()
+            		Page:CloseWindow();
+
+                    if(tonumber(WorldShareGUI.githubRevison) < tonumber(WorldShareGUI.currentRevison)) then
+                        WorldShareGUI:useGithub();
+                    elseif(tonumber(WorldShareGUI.githubRevison) > tonumber(WorldShareGUI.currentRevison)) then
+                        _guihelper.MessageBox("开始同步--将github大小有变化的文件下载到本地");-- 下载或覆盖
+                    end
+            	end
+            	function useOffline()
+            		Page:CloseWindow();
+            	end
+             ]]>
+        </script>
+        <div style="width:500px;height:270px;">
+            <aries:window mode="thin" width="500" height="270" style="float:left;" title='<%=L"与Github同步" %>'>
+            	<div style="padding:20px;font-size:18px;base-font-size:18px;color:#ffffff">
+            		<div style="margin-left:80px;margin-top:40px;">
+                		远程版本号：
+                		<pe:if condition="<%=WorldShareGUI.githubRevison == 0 %>">
+                			正在获取中...
+                		</pe:if>
+                		<pe:if condition="<%=WorldShareGUI.githubRevison ~= 0 %>">
+                			<%=WorldShareGUI.githubRevison %>
+                			<input onclick="useGithub" class="button_highlight" style="margin-left:10px;width: 130px;height:30px;" type="button" value="使用远程版本" />
+                		</pe:if>
+	                </div>
+	                <div style="margin-left:80px;margin-top:30px;">
+	                	本地版本号：<%=WorldShareGUI.currentRevison %>
+	                	<pe:if condition="<%=WorldShareGUI.githubRevison == 0 %>">
+	                		<input onclick="useOffline" class="button_highlight" style="margin-left:10px;width: 130px;height:30px;" type="button" value="使用本地离线版本" />
+	                	</pe:if>
+	                	<pe:if condition="<%=WorldShareGUI.githubRevison ~= 0 %>">
+	                		<input onclick="useLocal" class="button_highlight" style="margin-left:10px;width: 130px;height:30px;" type="button" value="使用本地版本" />
+	                	</pe:if>
+	                </div>
+            	</div>
+            </aries:window>
+        </div>
+    </pe:mcml>
+</body>
+</html>
+

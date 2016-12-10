@@ -1,12 +1,12 @@
 --[[
-Title: BigCommand
-Author(s):  
-Date: 
+Title: WorldShareCommand
+Author(s):  big
+Date: 2016.12.9
 Desc: 
 use the lib:
 ------------------------------------------------------------
-NPL.load("(gl)Mod/big/BigCommand.lua");
-local BigCommand = commonlib.gettable("Mod.big.BigCommand");
+NPL.load("(gl)Mod/WorldShare/WorldShareCommand.lua");
+local WorldShareCommand = commonlib.gettable("Mod.WorldShare.WorldShareCommand");
 ------------------------------------------------------------
 ]]
 local Commands = commonlib.gettable("MyCompany.Aries.Game.Commands");
@@ -18,7 +18,7 @@ function WorldShareCommand:ctor()
 end
 
 function WorldShareCommand:init()
-	LOG.std(nil, "info", "ShareCommand", "init");
+	LOG.std(nil, "debug", "ShareCommand", "init");
 	self:InstallCommand();
 end
 
@@ -31,6 +31,7 @@ function WorldShareCommand:InstallCommand()
 			_guihelper.MessageBox("this is from demo command");
 		end,
 	};
+	
 	Commands["demo2"] = {
 		name="demo2", 
 		quick_ref="/demo2", 

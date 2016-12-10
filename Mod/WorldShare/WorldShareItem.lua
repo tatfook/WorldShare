@@ -15,13 +15,12 @@ function WorldShareItem:ctor()
 end
 
 function WorldShareItem:init()
-	LOG.std(nil, "info", "WorldShareItem", "init");
+	LOG.std(nil, "debug", "WorldShareItem", "init");
 
 	xmlRoot = GameLogic.GetFilters():apply_filters("show", xmlRoot);
 	
 	-- register a new block item, id < 512 is internal blocks, which is not recommended to modify. 
 	GameLogic.GetFilters():add_filter("block_types", function(xmlRoot) 
-		
 		local blocks = commonlib.XPath.selectNode(xmlRoot, "/blocks/");
 
 		if(blocks) then
@@ -35,11 +34,12 @@ function WorldShareItem:init()
 				solid="true",
 				cubeMode="true",
 			}}
+
 			LOG.std(nil, "info", "DemoItem", "a new block is registered");
 		end
 
 		return xmlRoot;
-	end)
+	end);
 
 	-- add block to category list to be displayed in builder window (E key)
 	GameLogic.GetFilters():add_filter("block_list", function(xmlRoot) 

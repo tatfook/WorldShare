@@ -5,53 +5,49 @@ Date:
 Desc: 
 use the lib:
 ------------------------------------------------------------
-NPL.load("(gl)Mod/Test/BigGUI.lua");
-local BigGUI = commonlib.gettable("Mod.Test.DemoGUI");
+NPL.load("(gl)Mod/WorldShare/WorldShareGUI.lua");
+local WorldShareGUI = commonlib.gettable("Mod.WorldShare.WorldShareGUI");
 ------------------------------------------------------------
 ]]
+NPL.load("(gl)script/apps/Aries/Creator/WorldCommon.lua");
+NPL.load("(gl)script/apps/Aries/Creator/Game/World/WorldRevision.lua");
+NPL.load("(gl)Mod/WorldShare/ShowLogin.lua");
 
 local WorldShareGUI = commonlib.inherit(nil,commonlib.gettable("Mod.WorldShare.WorldShareGUI"));
+local WorldCommon   = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
+local WorldRevision = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision");
+local ShowLogin     = commonlib.gettable("Mod.WorldShare.ShowLogin");
+
+WorldShareGUI.githubApi = "https://api.github.com/";
 
 function WorldShareGUI:ctor()
 end
 
 function WorldShareGUI:init()
-	LOG.std(nil, "info", "WorldShareGUI", "init");
+	Page = document:GetPageCtrl();
+	LOG.std(nil, "debug", "WorldShareGUI", "init");
 end
 
-function WorldShareGUI:ShowMyGUI()
-	if(not self.page) then
-		-- create if not created before
-		NPL.load("(gl)script/kids/3DMapSystemApp/mcml/PageCtrl.lua");
-		self.page = Map3DSystem.mcml.PageCtrl:new({url="Mod/WorldShare/WorldShareGUI.html"});		
-		self.page:Create("WorldShareGUI", nil, "_ct", -350,-200,700,400);
-	end
-end
-
-function WorldShareGUI:ShowLogin()
-	-- NPL.load("(gl)script/kids/3DMapSystemApp/mcml/PageCtrl.lua");
-	-- self.page = Map3DSystem.mcml.PageCtrl:new({url="Mod/big/ShowLogin.html"});
-	-- self.page:Create("BigGUI", nil, "_ct", -430,-235,860,470);
-	
+function WorldShareGUI:StartSyncPage()	
 	System.App.Commands.Call("File.MCMLWindowFrame", {
-		url  = "Mod/WorldShare/ShareLogin.html", 
-		name = "LoadMainWorld", 
+		url  = "Mod/WorldShare/StartSync.html", 
+		name = "SyncWorldShare", 
 		isShowTitleBar = false,
-		DestroyOnClose = false, -- prevent many ViewProfile pages staying in memory / false will only hide window
+		DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory / false will only hide window
 		style = CommonCtrl.WindowFrame.ContainerStyle,
 		zorder = 0,
 		allowDrag = true,
 		bShow = bShow,
 		directPosition = true,
 			align = "_ct",
-			x = -860/2,
-			y = -470/2,
-			width = 860,
-			height = 470,
+			x = -500/2,
+			y = -270/2,
+			width = 500,
+			height = 270,
 		cancelShowAnimation = true,
 	});
 
-	LOG.std(nil, "info", "WorldShareGUI", "WorldShareGUI ShowLogin");
+	LOG.std(nil, "debug", "WorldShareGUI", "WorldShareGUI ShowLogin");
 end
 
 function WorldShareGUI:HideLogin()
@@ -60,19 +56,47 @@ function WorldShareGUI:HideLogin()
 end
 
 function WorldShareGUI:OnLogin()
-	LOG.std(nil, "info", "WorldShareGUI", "WorldShareGUI Login");
+	LOG.std(nil, "debug", "WorldShareGUI", "WorldShareGUI Login");
 end
 
 function WorldShareGUI:OnWorldLoad()
-	self:ShowLogin();
-	--self:ShowMyGUI();
+	local getWorldInfo = WorldCommon:GetWorldInfo();
+	local worldDir     = GameLogic.GetWorldDirectory();
+	local xmlRevison   = WorldRevision:new():init(worldDir);
+
+	LOG.std(nil,"debug","getWorldInfo",getWorldInfo);
+	LOG.std(nil,"debug","worldDir",worldDir);
+	LOG.std(nil,"debug","revison",xmlRevison);
+
+	if(ShowLogin.login) then --如果为登陆状态 则比较版本
+		local foldername = worldDir:match("worlds/DesignHouse/(%w+)/");
+
+		self.currentRevison = xmlRevison["current_revision"];
+		self.githubRevison  = 0;
+
+		self:getFileShaList(foldername,function(err, msg, data)
+			local tree = data["tree"];
+			for key,value in ipairs(tree) do
+				if(value["path"] == "revision.xml" and value["type"] == "blob") then
+					local contentUrl = "https://raw.githubusercontent.com/".. ShowLogin.login .."/".. foldername .."/master/revision.xml";
+					self:githubApiGet(contentUrl,function(err,msg,data)
+						self.githubRevison = data;
+						Page:Refresh(0.01);
+					end)
+				end
+			end
+		end);
+
+		if(self.currentRevison ~= self.githubRevison) then
+			self:StartSyncPage();
+		end
+	end
 end
 
 function WorldShareGUI:OnLeaveWorld()
 end
 
 function WorldShareGUI:OnInitDesktop()
-	
 end
 
 function WorldShareGUI:handleKeyEvent(event)
@@ -80,4 +104,68 @@ function WorldShareGUI:handleKeyEvent(event)
 		_guihelper.MessageBox("you pressed "..event.keyname.." from Demo GUI");
 		return true;
 	end
+end
+
+function WorldShareGUI:useLocal()
+	System.App.Commands.Call("File.MCMLWindowFrame", {
+		url  = "Mod/WorldShare/StartSyncUseLocal.html", 
+		name = "SyncWorldShare", 
+		isShowTitleBar = false,
+		DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory / false will only hide window
+		style = CommonCtrl.WindowFrame.ContainerStyle,
+		zorder = 0,
+		allowDrag = true,
+		bShow = bShow,
+		directPosition = true,
+			align = "_ct",
+			x = -500/2,
+			y = -270/2,
+			width = 500,
+			height = 270,
+		cancelShowAnimation = true,
+	});
+end
+
+function WorldShareGUI:useGithub()
+	System.App.Commands.Call("File.MCMLWindowFrame", {
+		url  = "Mod/WorldShare/StartSyncUseGithub.html", 
+		name = "SyncWorldShare", 
+		isShowTitleBar = false,
+		DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory / false will only hide window
+		style = CommonCtrl.WindowFrame.ContainerStyle,
+		zorder = 0,
+		allowDrag = true,
+		bShow = bShow,
+		directPosition = true,
+			align = "_ct",
+			x = -500/2,
+			y = -270/2,
+			width = 500,
+			height = 270,
+		cancelShowAnimation = true,
+	});
+end
+
+function WorldShareGUI:getFileShaList(_foldername, _callback)
+	local url = self.githubApi .. "repos/" .. ShowLogin.login .. "/" .. _foldername .. "/git/trees/master?recursive=1";
+
+	self:githubApiGet(url,_callback);
+end
+
+function WorldShareGUI:getAllresponse(_callback)
+	local github_token = ShowLogin.github_token;
+
+	local url = self.githubApi .. "user/repos?access_token=" .. github_token["access_token"] .. "&type=owner";
+
+    self:githubApiGet(url,_callback);
+end
+
+function WorldShareGUI:githubApiGet(_url,_callback)
+	local github_token = ShowLogin.github_token;
+
+	System.os.GetUrl({url = _url,
+					  json = true,
+					  headers = {Authorization  = github_token["token_type"].." "..github_token["access_token"],
+								 ["User-Agent"] = "npl"}
+					 },_callback);
 end

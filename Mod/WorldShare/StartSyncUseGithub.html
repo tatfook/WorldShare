@@ -1,0 +1,37 @@
+<!-- "script/apps/Aries/Creator/Game/Login/InternetLoadWorld.html" -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>use github sync,by big,2016/12/10</title>
+</head>
+<body>
+    <pe:mcml>
+        <script type="text/npl" refresh="false" src="WorldShareGUI.lua">
+            <![CDATA[
+            	WorldShareGUI = commonlib.gettable("Mod.WorldShare.WorldShareGUI");
+            	WorldShareGUI:init();
+
+            	function replace()
+            		_guihelper.MessageBox("replace");
+            	end
+
+            	function cancel()
+            		Page:CloseWindow();
+            		WorldShareGUI:StartSyncPage();
+            	end
+             ]]>
+        </script>
+        <div style="width:500px;height:270px;">
+            <aries:window mode="thin" width="500" height="270" style="float:left;" title='<%=L"与Github同步" %>'>
+            	<div style="padding:40px;font-size:18px;base-font-size:18px;color:#ffffff">
+            		<div>你是否确定用远程的更低的版本<%= WorldShareGUI.githubRevison%>, 替换本地更高的版本<%= WorldShareGUI.currentRevison%>？</div>
+            		<div style="margin-top:30px;">
+            			<input type="button" onclick="replace" class="button_highlight" style="margin-left:130px;width: 60px;height: 30px;" name="" value="替换" />
+            			<input type="button" onclick="cancel" class="button_highlight" style="margin-left:20px;width: 60px;height: 30px;"  name="" value="取消" />
+            		</div>
+            	</div>
+            </aries:window>
+        </div>
+    </pe:mcml>
+</body>
+</html>

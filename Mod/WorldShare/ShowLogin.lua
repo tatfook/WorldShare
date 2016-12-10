@@ -48,11 +48,11 @@ function ShowLogin.OnClickSelectedWorld(_index)
 	end
 end
 
-function ShowLogin:syncWorldsList(_worldsName,_callback)
+function ShowLogin:getWorldsList(_callback) --_worldsName,
 	System.os.GetUrl({
 					  url = site.."/api/mod/WorldShare/models/worlds",
 					  json=true,
 					  headers = {Authorization = "Bearer "..self.token},
-					  form = {worldsName = _worldsName}
+					  --form = {worldsNameForm = _worldsName}
 					  },_callback);
 end

@@ -1,7 +1,7 @@
 --[[
-Title: BigEntity
-Author(s):  
-Date: 
+Title: WorldShareEntity
+Author(s):  big
+Date: 2016.12.9
 Desc: 
 use the lib:
 ------------------------------------------------------------
@@ -15,5 +15,5 @@ function WorldShareEntity:ctor()
 end
 
 function WorldShareEntity:init()
-	LOG.std(nil, "info", "WorldShareEntity", "init");
+	LOG.std(nil, "debug", "WorldShareEntity", "init");
 end

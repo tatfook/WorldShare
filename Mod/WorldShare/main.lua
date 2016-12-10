@@ -30,7 +30,6 @@ local WorldShare = commonlib.inherit(commonlib.gettable("Mod.ModBase"),commonlib
 LOG.SetLogLevel("DEBUG");
 
 function WorldShare:ctor()
-
 end
 
 -- virtual function get mod name
@@ -51,11 +50,26 @@ function WorldShare:init()
 
 	WorldShareSceneContext:ApplyToDefaultContext();
 
-	LOG.std(nil, "info", "OKOKOKOK", "11111111111");
+	GameLogic.GetFilters():add_filter("InternetLoadWorld.ShowPage",function (bEnable, bShow)
+		System.App.Commands.Call("File.MCMLWindowFrame", {
+			url = "Mod/WorldShare/ShowLogin.html", 
+			name = "LoadMainWorld", 
+			isShowTitleBar = false,
+			DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
+			style = CommonCtrl.WindowFrame.ContainerStyle,
+			zorder = 0,
+			allowDrag = false,
+			bShow = bShow,
+			directPosition = true,
+				align = "_ct",
+				x = -860/2,
+				y = -470/2,
+				width = 860,
+				height = 470,
+			cancelShowAnimation = true,
+		});
 
-	local page = "Mod/WorldShare/ShowLogin.html";
-	GameLogic.GetFilters():add_filter("LoginPage",function ()
-		return page;
+		return false;
 	end);
 end
 
@@ -69,10 +83,9 @@ end
 
 -- called when a new world is loaded. 
 function WorldShare:OnWorldLoad()
-	LOG.std(nil,"info","Share","Mod big on world loaded");
+	LOG.std(nil,"debug","Share","Mod WorldShare on world loaded");
 
 	WorldShareGUI:OnWorldLoad();
-	--BigItem:OnWorldLoad();
 end
 
 function WorldShare:handleKeyEvent(event)

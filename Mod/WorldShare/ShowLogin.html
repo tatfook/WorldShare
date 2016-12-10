@@ -2,7 +2,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <title>2009.8.2</title>
+    <title>world share login mod,by big,2016/12/9</title>
 </head>
 <body>
     <pe:mcml>
@@ -16,6 +16,8 @@
 
 	            InternetLoadWorld.OnInit();
 	            ShowLogin.OnInit();
+
+	            local site  = "http://localhost:8099";
 	            
 	            function IsMCVersion()
 		            if(System.options.mc) then
@@ -113,7 +115,7 @@
 	            end
 
 	            function IsBlockWorld()
-		            local cur_page = InternetLoadWorld.GetCurrentServerPage();
+		            local cur_pageH = InternetLoadWorld.GetCurrentServerPage();
 
 		            if(cur_page.player_nid and cur_page.player_nid ~= "") then
 		            	return false;
@@ -249,7 +251,6 @@
 	            	ShowLogin:loginAction(account,password,function (err, msg, data)
 							if(data['token']) then
 								ShowLogin.token = data['token'];
-								local site  = "http://localhost:8099";
 
 								ShowLogin:getUserInfo(function(err, msg, data)
 									if(data['_id']) then
@@ -258,13 +259,15 @@
 											ShowLogin.username = data['displayName'];
 											ShowLogin.userid   = data['_id'];
 
+											ShowLogin.github_token = data['github_token']; --后面用到
+											ShowLogin.login 	   = data['login']; -- github用户名 后面用到
+
 											local myPackages = Page:GetNode("myPackages");
 											myPackages:SetAttribute("href",site.."/wiki/mod/packages/packages_projects#/paracraft?userid="..data['_id']);
 											ShowLogin:changeLoginType(3);
 											syncWorldsList();
 										else
 											local clientLogin = Page:GetNode("clientLogin");
-											clientLogin:SetAttribute("href",site.."/wiki/mod/WorldShare/client_login#/?token="..ShowLogin.token);
 
 											ShowLogin:changeLoginType(2);
 										end
@@ -280,10 +283,30 @@
 	            end
 
 	            function checkGitBind()
+	            	ParaGlobal.ShellExecute("open", site.."/wiki/mod/WorldShare/client_login#/?token="..ShowLogin.token, "", "", 1);
+	            	checkGitBindAction();
+	            end
+
+	            function checkGitBindAction()
 	            	_guihelper.MessageBox(L"请确定绑定GITHUB是否成功？", function(res)
-						if(res and res == _guihelper.DialogResult.Yes) then
-							-- pressed YES
-						end
+						-- if(res and res == _guihelper.DialogResult.Yes) then
+						-- 	-- pressed YES
+						-- end
+						ShowLogin:getUserInfo(function(err, msg, data)
+							if(data['_id']) then
+								if(data['github']) then
+									ShowLogin.username = data['displayName'];
+									ShowLogin.userid   = data['_id'];
+
+									local myPackages = Page:GetNode("myPackages");
+									myPackages:SetAttribute("href",site.."/wiki/mod/packages/packages_projects#/paracraft?userid="..data['_id']);
+									ShowLogin:changeLoginType(3);
+									syncWorldsList();
+								else
+									checkGitBindAction();
+								end
+							end
+						end);
 					end, _guihelper.MessageBoxButtons.YesNo);
 	            end
 
@@ -292,20 +315,59 @@
 	            end
 
 	            function syncWorldsList()
-	            	--echo(InternetLoadWorld.DS_Func_Worlds);
 	            	local localWorlds = InternetLoadWorld.ServerPage_ds[1]['ds'];
-	            	local worldsName  = {};
+	            	--[[
+						status代码含义:
+						1:仅本地
+						2:仅网络
+						3:本地网络一致
+						4:网络更新
+						5:本地更新
+	            	]]
 
-	            	for key,value in ipairs(localWorlds) do
-	            		worldsName[#worldsName+1] = value["foldername"];
-	            	end
+	            	ShowLogin:getWorldsList(function(err, msg, data) --worldsName,
+	            		-- 处理本地网络同时存在 本地不存在 网络存在 的世界 
+	            		for kd,vd in ipairs(data) do
+	            			local isExist = false;
 
-	            	ShowLogin:syncWorldsList(worldsName,function(err, msg, data)
-	            		log(data);
+	            			for kl,vl in ipairs(localWorlds) do
+	            				if(vd["worldsName"] == vl["foldername"]) then
+	            					localWorlds[kl].revision = vd["date"];
+	            					localWorlds[kl].status   = 3; --本地网络一致
+	            					isExist = true;
+	            					break;
+	            				end
+	            			end
 
-	            		_guihelper.MessageBox(L"同步成功",function(res)
+	            			if(not isExist) then
+            					localWorlds[#localWorlds+1] = {
+            						text       = vd["worldsName"];
+            						foldername = vd["worldsName"];
+            						revision   = vd["date"];
+            						status     = 2; --仅网络
+            					};
+	            			end
+	            		end
 
-	            		end);
+	            		-- 处理 本地存在 网络不存在 的世界
+	            		for kl,vl in ipairs(localWorlds) do
+	            			local isExist = false;
+
+	            			for kd,vd in ipairs(data) do
+	            				if(vl["foldername"] == vd["worldsName"]) then
+	            					isExist = true;
+	            					break;
+	            				end
+	            			end
+
+	            			if(not isExist) then
+	            				localWorlds[kl].status = 1; --仅本地
+	            			end
+	            		end
+
+	            		_guihelper.MessageBox(L"刷新列表成功");
+	            		log(localWorlds);
+	            		Page:Refresh(0.01);
 	            	end);
 	            end
             ]]>
@@ -479,10 +541,22 @@
                                             <input type="button" style="position:relative;width:280px;height:57px;background:" name='<%=Eval("index")%>' onclick="InternetLoadWorld.OnSwitchWorld" />
                                         </div>
                                     </pe:if>
-                                    <div style="position:relative;margin-left:165px;margin-top:8px;">
+                                    <div style="position:relative;margin-left:216px;margin-top:8px;">
                                         <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) == 100%>'>
-                                            <input type="button" value='<%=L"仅\n本地" %>' style="text-singleline:false;margin-right:5px;width:51px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue"/>
-                                            <input type="button" value='<%=L"删除" %>' style="margin-right:5px;width:51px;height:46px;font-size:12px;font-weight:bold;" onclick='ShowLogin.OnClickSelectedWorld' name='<%=Eval("index")%>' class="mc_button_blue" />
+                                        	<pe:if condition='<%= GetCurWorldInfo("status",Eval("index")) == nil%>'>
+                                            	<input type="button" value='<%=L"离线" %>' style="text-singleline:false;margin-right:5px;width:51px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue"/>
+                                        	</pe:if>
+                                        	<pe:if condition='<%= GetCurWorldInfo("status",Eval("index")) == 1%>'>
+                                            	<input type="button" value='<%=L"仅\n本地" %>' style="text-singleline:false;margin-right:5px;width:51px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue"/>
+                                        	</pe:if>
+                                        	<pe:if condition='<%= GetCurWorldInfo("status",Eval("index")) == 2%>'>
+                                        		<input type="button" value='<%=L"仅\n网络" %>' style="text-singleline:false;margin-right:5px;width:51px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue"/>
+                                        	</pe:if>
+                                            <pe:if condition='<%= GetCurWorldInfo("status",Eval("index")) == 3%>'>
+                                            	<input type="button" value='<%=L"本地网\n络一致" %>' style="text-singleline:false;margin-right:5px;width:51px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue"/>
+                                            </pe:if>
+                                            <!-- <input type="button" value='<%=L"网络\n更新" %>' style="text-singleline:false;margin-right:5px;width:51px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue"/> -->
+                                            <!-- <input type="button" value='<%=L"本地\n更新" %>' style="text-singleline:false;margin-right:5px;width:51px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue"/> -->
                                             <input type="button" value='<%=L"进入" %>' style="width:51px;height:46px;font-size:12px;font-weight:bold;" onclick="InternetLoadWorld.EnterWorld" name='<%=Eval("index")%>' class="mc_button_blue" />
                                         </pe:if>
                                         <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) < 100 %>'>
@@ -494,6 +568,9 @@
                                             </pe:if>
                                         </pe:if>
                                     </div>
+                                    <pe:if condition='<%= Eval("index") == InternetLoadWorld.selected_world_index%>'>
+                                		<input type="button" value='<%=L"删除" %>' style="margin-left:160px;margin-top:8px;width:51px;height:46px;font-size:12px;font-weight:bold;" onclick='ShowLogin.OnClickSelectedWorld' name='<%=Eval("index")%>' class="mc_button_blue" />
+                                	</pe:if>
                                 </pe:if>
                                 <pe:if condition='<%= not BeHasWorldInSlot(Eval("is_empty_slot"),Eval("is_buy_slot"))%>'>
                                     <pe:if condition='<%= Eval("is_empty_slot")%>'>
@@ -520,7 +597,7 @@
                         </pe:gridview>
                         <pe:if condition="<%=ShowLogin.login_type == 3 %>">
 	                        <div>
-	                        	<input type="button" onclick='syncPackages' style="float: right;margin-left:195px;width: 140px;height: 31px;margin-top: -31px;" class="button_highlight" value="同步全部作品" />
+	                        	<input type="button" onclick='syncWorldsList' style="float: right;margin-left:195px;width: 140px;height: 31px;margin-top: -31px;" class="button_highlight" value="刷新列表" />
 	                        </div>
                         </pe:if>
                     </div>
