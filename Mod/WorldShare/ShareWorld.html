@@ -10,33 +10,29 @@
             <![CDATA[
                 WorldShareGUI = commonlib.gettable("Mod.WorldShare.WorldShareGUI");
                 WorldShareGUI:init();
+                WorldShareGUI.githubRevison = 0;
+                WorldShareGUI:compareRevision();
 
-                function useLocal()
+                function shareNow()
                     Page:CloseWindow();
 
                     if(tonumber(WorldShareGUI.currentRevison) < tonumber(WorldShareGUI.githubRevison)) then
-                        WorldShareGUI:useLocal();
+                        _guihelper.MessageBox_Plain("当前本地版本小于Github版本，是否继续上传？", function(res)
+                            if(res and res == _guihelper.DialogResult.ShareNow) then
+                                -- pressed OK
+                                _guihelper.MessageBox("开始同步--将本地大小有变化的文件上传到github"); -- 上传或更新
+                            elseif(res and res == _guihelper.DialogResult.Cancel) then
+                                _guihelper.MessageBox("Cancel");
+                            end
+                        end, _guihelper.MessageBoxButtons.ShareNow,_guihelper.MessageBoxButtons.Cancel,nil,{ShareNow = "确定分享",Cancel = "取消分享"});
                     elseif(tonumber(WorldShareGUI.currentRevison) > tonumber(WorldShareGUI.githubRevison)) then
                         _guihelper.MessageBox("开始同步--将本地大小有变化的文件上传到github"); -- 上传或更新
                     end
                 end
-
-                function useGithub()
-                    Page:CloseWindow();
-
-                    if(tonumber(WorldShareGUI.githubRevison) < tonumber(WorldShareGUI.currentRevison)) then
-                        WorldShareGUI:useGithub();
-                    elseif(tonumber(WorldShareGUI.githubRevison) > tonumber(WorldShareGUI.currentRevison)) then
-                        _guihelper.MessageBox("开始同步--将github大小有变化的文件下载到本地");-- 下载或覆盖
-                    end
-                end
-                function useOffline()
-                    Page:CloseWindow();
-                end
              ]]>
         </script>
         <div style="width:500px;height:270px;">
-            <aries:window mode="thin" width="500" height="270" style="float:left;" title='<%=L"与Github同步" %>'>
+            <aries:window mode="thin" width="500" height="270" style="float:left;" title='<%=L"分享上传世界" %>'>
                 <div style="padding:20px;font-size:18px;base-font-size:18px;color:#ffffff">
                     <div style="margin-left:80px;margin-top:40px;">
                         远程版本号：
@@ -45,18 +41,14 @@
                         </pe:if>
                         <pe:if condition="<%=WorldShareGUI.githubRevison ~= 0 %>">
                             <%=WorldShareGUI.githubRevison %>
-                            <input onclick="useGithub" class="button_highlight" style="margin-left:10px;width: 130px;height:30px;" type="button" value="使用远程版本" />
                         </pe:if>
                     </div>
                     <div style="margin-left:80px;margin-top:30px;">
                         本地版本号：<%=WorldShareGUI.currentRevison %>
-                        <pe:if condition="<%=WorldShareGUI.githubRevison == 0 %>">
-                            <input onclick="useOffline" class="button_highlight" style="margin-left:10px;width: 130px;height:30px;" type="button" value="使用本地离线版本" />
-                        </pe:if>
-                        <pe:if condition="<%=WorldShareGUI.githubRevison ~= 0 %>">
-                            <input onclick="useLocal" class="button_highlight" style="margin-left:10px;width: 130px;height:30px;" type="button" value="使用本地版本" />
-                        </pe:if>
                     </div>
+                    <pe:if condition="<%=WorldShareGUI.github ~= 0%>">
+                        <input type="button" onclick="shareNow" value="马上分享" />
+                    </pe:if>
                 </div>
             </aries:window>
         </div>

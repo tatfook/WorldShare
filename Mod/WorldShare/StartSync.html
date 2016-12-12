@@ -18,6 +18,7 @@
                         WorldShareGUI:useLocal();
                     elseif(tonumber(WorldShareGUI.currentRevison) > tonumber(WorldShareGUI.githubRevison)) then
                         _guihelper.MessageBox("开始同步--将本地大小有变化的文件上传到github"); -- 上传或更新
+                        WorldShareGUI:syncToGithub();
                     end
             	end
 
@@ -28,6 +29,7 @@
                         WorldShareGUI:useGithub();
                     elseif(tonumber(WorldShareGUI.githubRevison) > tonumber(WorldShareGUI.currentRevison)) then
                         _guihelper.MessageBox("开始同步--将github大小有变化的文件下载到本地");-- 下载或覆盖
+                        WorldShareGUI:syncToLocal();
                     end
             	end
             	function useOffline()

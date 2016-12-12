@@ -74,7 +74,7 @@ function WorldShare:init()
 
 	GameLogic.GetFilters():add_filter("SaveWorldPage.ShowSharePage",function (bEnable)
 		System.App.Commands.Call("File.MCMLWindowFrame", {
-			url = "Mod/WorldShare/ExitWorld.html",
+			url = "Mod/WorldShare/ShareWorld.html",
 			name = "SaveWorldPage.ShowSharePage",
 			isShowTitleBar = false,
 			DestroyOnClose = true,
@@ -139,6 +139,6 @@ function WorldShare:OnClickExitApp()
 	-- 	ParaGlobal.ExitApp();
 	-- end)
 
-	-- ParaEngine.GetAttributeObject():SetField("IsWindowClosingAllowed", true);
-	-- ParaGlobal.ExitApp();
+	ParaEngine.GetAttributeObject():SetField("IsWindowClosingAllowed", true);
+	ParaGlobal.ExitApp();
 end

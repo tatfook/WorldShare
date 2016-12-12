@@ -12,7 +12,8 @@
             	WorldShareGUI:init();
 
             	function replace()
-            		_guihelper.MessageBox("replace");
+                    WorldShareGUI:syncToGithub();
+                    _guihelper.MessageBox("强制同步--将本地大小有变化的文件上传到github");-- 下载或覆盖
             	end
 
             	function cancel()
