@@ -100,14 +100,14 @@ end
 
 function LocalService:download(_foldername,_path,_callback)
 	LOG.std(nil,"debug","_foldername",_foldername);
-	LOG.std(nil,"debug","_foldername",_path);
-	LOG.std(nil,"debug","_foldername",_callback);
+	LOG.std(nil,"debug","_path",_path);
+	LOG.std(nil,"debug","_callback",_callback);
 
 	local filename  = _path;
-
-	GithubService:getContent(_foldername,filename,function(data)
-		_callback(true,data);
-	end);
+	_callback(true,{});
+	-- GithubService:getContent(_foldername,filename,function(data)
+	-- 	_callback(true,data);
+	-- end);
 end
 
 function LocalService:delete(_foldername,_filename,_callback)

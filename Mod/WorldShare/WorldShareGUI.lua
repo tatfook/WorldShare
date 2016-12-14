@@ -145,6 +145,10 @@ function WorldShareGUI:useGithub()
 end
 
 function WorldShareGUI:syncToLocal()
+	-- 加载进度UI界面
+
+	
+
 	self.localFiles = LocalService:LoadFiles(self.worldDir,"",nil,1000,nil);
 
 	if (self.worldDir == "") then
@@ -165,12 +169,14 @@ function WorldShareGUI:syncToLocal()
 		-- 下载新文件
 		function downloadOne()
 			if (curDownloadIndex <= totalGithubIndex) then
+
+				LOG.std(nil,"debug","githubFiles.tree[curDownloadIndex]",githubFiles.tree[curDownloadIndex]);
+
 				if (githubFiles.tree[curDownloadIndex].needChange) then
-					LOG.std(nil,"debug","githubFiles.tree[curDownloadIndex]",githubFiles.tree[curDownloadIndex]);
 					if(githubFiles.tree[curDownloadIndex].type == "blob") then
-						LocalService:download(self.foldername, githubFiles.tree[curDownloadIndex].filename, function (bIsDownload,data)
+						LocalService:download(self.foldername, githubFiles.tree[curDownloadIndex].path, function (bIsDownload,data)
 							if (bIsDownload) then
-								self.progressText = githubFiles.tree[curDownloadIndex].filename .. ' 下载成功' .. (curDownloadIndex + 1) .. '/' .. totalGithubIndex;
+								_guihelper.MessageBox(githubFiles.tree[curDownloadIndex].path .. ' 下载成功' .. (curDownloadIndex + 1) .. '/' .. totalGithubIndex);
 								curDownloadIndex = curDownloadIndex + 1;
 							else
 								_guihelper.MessageBox(self.localFiles[curDownloadIndex].filename .. ' 下载失败，请稍后再试');
@@ -184,7 +190,7 @@ function WorldShareGUI:syncToLocal()
 				end
 
 				if (curDownloadIndex > totalGithubIndex) then
-					_guihelper.MessageBox('同步完成');
+					_guihelper.MessageBox('同步完成-D');
 				else
 					downloadOne(); --继续递归上传
 				end
@@ -224,7 +230,7 @@ function WorldShareGUI:syncToLocal()
 
 								-- 如果当前计数大于最大计数则更新
 								if (curUpdateIndex > totalLocalIndex) then      -- check whether all files have updated or not. if false, update the next one, if true, upload files.  
-									self.progressText = L'同步完成';
+									_guihelper.MessageBox(L'同步完成-A');
 									downloadOne();
 								else
 									updateOne();
@@ -235,11 +241,11 @@ function WorldShareGUI:syncToLocal()
 						end);
 					else
 						-- if file exised, and has same sha value, then contain it
-						self.progressText = githubFiles.tree[curUpdateIndex].path .. ' 文件更新完成' .. (curUpdateIndex + 1) .. '/' .. totalLocalIndex;
+						_guihelper.MessageBox(githubFiles.tree[curUpdateIndex].path .. ' 文件更新完成' .. (curUpdateIndex + 1) .. '/' .. totalLocalIndex);
 						curUpdateIndex = curUpdateIndex + 1;
 
 						if (curUpdateIndex > totalLocalIndex) then     -- check whether all files have updated or not. if false, update the next one, if true, upload files.
-							self.progressText = L'同步完成';
+							_guihelper.MessageBox(L'同步完成-B');
 							downloadOne();
 						else
 							updateOne();
@@ -264,7 +270,7 @@ function WorldShareGUI:syncToLocal()
 					curUpdateIndex = curUpdateIndex + 1;
 
 					if (curUpdateIndex > totalLocalIndex) then  --check whether all files have updated or not. if false, update the next one, if true, upload files.
-						_guihelper.MessageBox(L'同步完成');
+						_guihelper.MessageBox(L'同步完成-C');
 						downloadOne();
 					else
 						updateOne();
@@ -314,39 +320,35 @@ function WorldShareGUI:syncToGithub()
 		self.progressText = L'获取文件sha列表';
 
 		local curUpdateIndex    = 1;
-		local curDownloadIndex  = 1;
+		local curUploadIndex    = 1;
 		local totalLocalIndex   = nil;
 		local totalGithubIndex  = nil;
 		local githubFiles       = {};
 
-		-- LOG.std(nil,"debug","WorldShareGUI",curDownloadIndex);
+		-- LOG.std(nil,"debug","WorldShareGUI",curUploadIndex);
 		-- LOG.std(nil,"debug","WorldShareGUI",totalGithubIndex);
 
 		-- 上传新文件
 		function uploadOne()
-			if (curDownloadIndex <= totalGithubIndex) then
-				if (githubFiles.tree[curDownloadIndex].needChange) then
-					LOG.std(nil,"debug","githubFiles.tree[curDownloadIndex]",githubFiles.tree[curDownloadIndex]);
-					if(githubFiles.tree[curDownloadIndex].type == "blob") then
-						LocalService:download(self.foldername, githubFiles.tree[curDownloadIndex].filename, function (bIsDownload,data)
-							if (bIsDownload) then
-								self.progressText = githubFiles.tree[curDownloadIndex].filename .. ' 下载成功' .. (curDownloadIndex + 1) .. '/' .. totalGithubIndex;
-								curDownloadIndex = curDownloadIndex + 1;
-							else
-								_guihelper.MessageBox(self.localFiles[curDownloadIndex].filename .. ' 下载失败，请稍后再试');
-							end
-						end);
-					else
-						curDownloadIndex = curDownloadIndex + 1;
-					end
+			if (curUploadIndex <= totalLocalIndex) then
+				if (self.localFiles[curUploadIndex].needChange) then
+					LOG.std(nil,"debug","self.localFiles[curUploadIndex]",self.localFiles[curUploadIndex]);
+					GithubService:upload(self.foldername, self.localFiles[curUploadIndex].filename, self.localFiles[curUploadIndex].content,function (bIsDownload,data)
+						if (bIsDownload) then
+							self.progressText = self.localFiles[curUploadIndex].filename .. ' 上传成功' .. (curUploadIndex + 1) .. '/' .. totalGithubIndex;
+							curUploadIndex = curUploadIndex + 1;
+						else
+							_guihelper.MessageBox(self.localFiles[curUploadIndex].filename .. ' 上传失败，请稍后再试');
+						end
+					end);
 				else
-					curDownloadIndex = curDownloadIndex + 1;
+					curUploadIndex = curUploadIndex + 1;
 				end
 
-				if (curDownloadIndex > totalGithubIndex) then
-					_guihelper.MessageBox('同步完成');
+				if (curUploadIndex >= totalLocalIndex) then
+					_guihelper.MessageBox('同步完成-D');
 				else
-					downloadOne(); --继续递归上传
+					uploadOne(); --继续递归上传
 				end
 			end
 		end
@@ -379,14 +381,14 @@ function WorldShareGUI:syncToGithub()
 					if (githubFiles.tree[curUpdateIndex].sha ~= self.localFiles[LocalIndex].sha1) then
 						-- 更新已存在的文件
 						-- if file existed, and has different sha value, update it
-						GithubService:update(self.foldername, githubFiles.tree[curUpdateIndex].path, self.localFiles[LocalIndex].content, self.localFiles[LocalIndex].sha1, function (bIsUpdate,content)
+						GithubService:update(self.foldername, self.localFiles[LocalIndex].filename, self.localFiles[LocalIndex].content, self.localFiles[LocalIndex].sha1, function (bIsUpdate,content)
 							if (bIsUpdate) then
-								_guihelper.MessageBox(githubFiles.tree[curUpdateIndex].path .. ' 更新成功' .. (curUpdateIndex + 1) .. '/' .. totalGithubIndex);
+								_guihelper.MessageBox(self.localFiles[LocalIndex].filename .. ' 更新成功' .. (curUpdateIndex + 1) .. '/' .. totalGithubIndex);
 								curUpdateIndex = curUpdateIndex + 1;
 
 								-- 如果当前计数大于最大计数则更新
-								if (curUpdateIndex > totalLocalIndex) then      -- check whether all files have updated or not. if false, update the next one, if true, upload files.  
-									self.progressText = L'同步完成';
+								if (curUpdateIndex >= totalGithubIndex) then      -- check whether all files have updated or not. if false, update the next one, if true, upload files.  
+									_guihelper.MessageBox(L'同步完成-A');
 									uploadOne();
 								else
 									updateOne();
@@ -397,12 +399,12 @@ function WorldShareGUI:syncToGithub()
 						end);
 					else
 						-- if file exised, and has same sha value, then contain it
-						self.progressText = githubFiles.tree[curUpdateIndex].path .. ' 文件更新完成' .. (curUpdateIndex + 1) .. '/' .. totalGithubIndex;
+						_guihelper.MessageBox(githubFiles.tree[curUpdateIndex].path .. ' 文件更新完成' .. (curUpdateIndex + 1) .. '/' .. totalGithubIndex);
 						curUpdateIndex = curUpdateIndex + 1;
 
-						if (curUpdateIndex > totalLocalIndex) then     -- check whether all files have updated or not. if false, update the next one, if true, upload files.
-							self.progressText = L'同步完成';
-							downloadOne();
+						if (curUpdateIndex > totalGithubIndex) then     -- check whether all files have updated or not. if false, update the next one, if true, upload files.
+							_guihelper.MessageBox(L'同步完成-B');
+							uploadOne();
 						else
 							updateOne();
 						end
@@ -420,14 +422,14 @@ function WorldShareGUI:syncToGithub()
 
 		-- 删除Github文件
 		function deleteOne()
-			LocalService.delete(self.foldername, self.localFiles[curUpdateIndex].filename, self.localFiles[curUpdateIndex].sha1, function (bIsDelete)
+			GithubService.delete(self.foldername, githubFiles.tree[curUpdateIndex].filename, githubFiles.tree[curUpdateIndex].sha, function (bIsDelete)
 				if (bIsDelete) then
 					_guihelper.MessageBox (self.localFiles[curUpdateIndex].filename .. ' 删除成功' .. (curUpdateIndex + 1) .. '/' .. totalLocalIndex);
 					curUpdateIndex = curUpdateIndex + 1;
 
 					if (curUpdateIndex > totalLocalIndex) then  --check whether all files have updated or not. if false, update the next one, if true, upload files.
-						_guihelper.MessageBox(L'同步完成');
-						downloadOne();
+						_guihelper.MessageBox(L'同步完成-C');
+						uploadOne();
 					else
 						updateOne();
 					end

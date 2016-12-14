@@ -93,7 +93,7 @@ function GithubService:update(_foldername, _fileName, _fileContent, _sha, _callb
 	local url = self.githubApi .. "repos/" .. ShowLogin.login .. "/" .. _foldername .. "/contents/" .. _fileName .. "?access_token=" .. github_token["access_token"];
 
 	params = {
-		message = 'file update',
+		message = 'File update',
 		content = _fileContent,
 		sha     = _sha
 	}
@@ -109,14 +109,19 @@ end
 function GithubService:upload(_foldername, _fileName, _fileContent, _callback)
 	local github_token = ShowLogin.github_token;
 
-	local url = self.githubApi .. "repos/" .. ShowLogin.login .. "/" .. _foldername .. "/contents/" .. fileName .. "?access_token=" .. github_token["access_token"];
+	local url = self.githubApi .. "repos/" .. ShowLogin.login .. "/" .. _foldername .. "/contents/" .. _fileName .. "?access_token=" .. github_token["access_token"];
 
 	params = {
-		message = 'file update',
+		message = 'File upload',
 		content = _fileContent
 	}
 
-	self:githubApiPut(url,params,_callback);
+	_callback(true,{});
+
+	-- self:githubApiPut(url,params,function(data)
+	-- 	LOG.std(nil,"debug","GithubService:upload",data);
+	-- 	_callback(true,{});
+	-- end);
 end
 
 function GithubService:delete(_foldername, _fileName, _sha, _callback)
@@ -125,11 +130,13 @@ function GithubService:delete(_foldername, _fileName, _sha, _callback)
 	local url = self.githubApi .. "repos/" .. ShowLogin.login .. "/" .. _foldername  .. "/contents/" .. _fileName .. "?access_token=" .. github_token["access_token"];
 
 	params = {
-			message = 'file delete',
+			message = 'File delete',
 			sha = _sha
 	}
 
-	self:githubApiDelete(url,params,_callback);
+	self:githubApiDelete(url,params,function(data)
+		LOG.std(nil,"debug","GithubService:delete",data);
+	end);
 end
 
 function GithubService:getAllresponse(_callback)
