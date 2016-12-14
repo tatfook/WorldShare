@@ -14,8 +14,10 @@ NPL.load("(gl)script/apps/Aries/Creator/Game/World/WorldRevision.lua");
 NPL.load("(gl)Mod/WorldShare/ShowLogin.lua");
 NPL.load("(gl)Mod/WorldShare/GithubService.lua");
 NPL.load("(gl)Mod/WorldShare/LocalService.lua");
+NPL.load("(gl)Mod/WorldShare/SyncGUI.lua");
 
 local WorldShareGUI = commonlib.inherit(nil,commonlib.gettable("Mod.WorldShare.WorldShareGUI"));
+local SyncGUI       = commonlib.gettable("Mod.WorldShare.SyncGUI");
 local WorldCommon   = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 local WorldRevision = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision");
 local ShowLogin     = commonlib.gettable("Mod.WorldShare.ShowLogin");
@@ -62,8 +64,11 @@ function WorldShareGUI:OnLogin()
 end
 
 function WorldShareGUI:OnWorldLoad()
-	self:compareRevision();
-	self:StartSyncPage();
+	-- 没有登陆则直接使用离线模式
+	if(ShowLogin.login) then
+		self:compareRevision();
+		self:StartSyncPage();
+	end
 end
 
 function WorldShareGUI:OnLeaveWorld()
@@ -80,12 +85,12 @@ function WorldShareGUI:handleKeyEvent(event)
 end
 
 function WorldShareGUI:compareRevision()
-	-- self.getWorldInfo      = WorldCommon:GetWorldInfo();
-	self.worldDir          = GameLogic.GetWorldDirectory();
-	WorldRevisionCheckOut  = WorldRevision:new():init(self.worldDir);
-	self.currentRevison    = WorldRevisionCheckOut:Checkout();
+	if(ShowLogin.login) then
+		-- self.getWorldInfo      = WorldCommon:GetWorldInfo();
+		self.worldDir          = GameLogic.GetWorldDirectory();
+		WorldRevisionCheckOut  = WorldRevision:new():init(self.worldDir);
+		self.currentRevison    = WorldRevisionCheckOut:Checkout();
 
-	if(ShowLogin.login) then --如果为登陆状态 则比较版本
 		self.foldername = self.worldDir:match("worlds/DesignHouse/(%w+)/");
 
 		self.githubRevison  = 0;
@@ -146,8 +151,7 @@ end
 
 function WorldShareGUI:syncToLocal()
 	-- 加载进度UI界面
-
-	
+	SyncGUI:ctor();
 
 	self.localFiles = LocalService:LoadFiles(self.worldDir,"",nil,1000,nil);
 
@@ -155,13 +159,14 @@ function WorldShareGUI:syncToLocal()
 		_guihelper.MessageBox(L"上传失败，将使用离线模式，原因：上传目录为空");
 		return;
 	else 
-		self.progressText = L'获取文件sha列表';
-
 		local curUpdateIndex    = 1;
 		local curDownloadIndex  = 1;
 		local totalLocalIndex   = nil;
 		local totalGithubIndex  = nil;
 		local githubFiles       = {};
+		local syncGUItotal      = 0;
+		local syncGUIIndex      = 0;
+		local syncGUIFiles      = "";
 
 		-- LOG.std(nil,"debug","WorldShareGUI",curDownloadIndex);
 		-- LOG.std(nil,"debug","WorldShareGUI",totalGithubIndex);
@@ -173,11 +178,16 @@ function WorldShareGUI:syncToLocal()
 				LOG.std(nil,"debug","githubFiles.tree[curDownloadIndex]",githubFiles.tree[curDownloadIndex]);
 
 				if (githubFiles.tree[curDownloadIndex].needChange) then
+
 					if(githubFiles.tree[curDownloadIndex].type == "blob") then
 						LocalService:download(self.foldername, githubFiles.tree[curDownloadIndex].path, function (bIsDownload,data)
 							if (bIsDownload) then
 								_guihelper.MessageBox(githubFiles.tree[curDownloadIndex].path .. ' 下载成功' .. (curDownloadIndex + 1) .. '/' .. totalGithubIndex);
 								curDownloadIndex = curDownloadIndex + 1;
+								syncGUIIndex     = syncGUIIndex     + 1;
+								syncGUIFiles     = githubFiles.tree[curUpdateIndex].path;
+
+								SyncGUI:updateDataBar(syncGUIIndex, syncGUItotal, syncGUIFiles);
 							else
 								_guihelper.MessageBox(self.localFiles[curDownloadIndex].filename .. ' 下载失败，请稍后再试');
 							end
@@ -190,7 +200,7 @@ function WorldShareGUI:syncToLocal()
 				end
 
 				if (curDownloadIndex > totalGithubIndex) then
-					_guihelper.MessageBox('同步完成-D');
+					-- _guihelper.MessageBox('同步完成-D');
 				else
 					downloadOne(); --继续递归上传
 				end
@@ -207,6 +217,7 @@ function WorldShareGUI:syncToLocal()
 				-- 用Gihub的文件和本地的文件对比
 				for key,value in ipairs(githubFiles.tree) do
 					if(value.path == self.localFiles[curUpdateIndex].filename) then
+						LOG.std(nil,"debug","value.path",value.path);
 						bIsExisted  = true;
 						githubIndex = key; 
 						break;
@@ -220,32 +231,45 @@ function WorldShareGUI:syncToLocal()
 					LOG.std(nil,"debug","self.localFiles[curUpdateIndex].filename",self.localFiles[curUpdateIndex].filename);
 					LOG.std(nil,"debug","self.localFiles[curUpdateIndex].sha1",self.localFiles[curUpdateIndex].sha1);
 					LOG.std(nil,"debug","githubFiles.tree[githubIndex].sha",githubFiles.tree[githubIndex].sha);
+
 					if (self.localFiles[curUpdateIndex].sha1 ~= githubFiles.tree[githubIndex].sha) then
 						-- 更新已存在的文件
 						-- if file existed, and has different sha value, update it
-						LocalService:update(self.foldername, self.localFiles[curUpdateIndex].filename, self.localFiles[curUpdateIndex].sha1, function (bIsUpdate,content)
+						LocalService:update(self.foldername, githubFiles.tree[githubIndex].path, githubFiles.tree[githubIndex].sha, function (bIsUpdate,content)
 							if (bIsUpdate) then
-								_guihelper.MessageBox(githubFiles.tree[curUpdateIndex].path .. ' 更新成功' .. (curUpdateIndex + 1) .. '/' .. totalLocalIndex);
+								-- _guihelper.MessageBox(githubFiles.tree[curUpdateIndex].path .. ' 更新成功' .. (curUpdateIndex + 1) .. '/' .. totalLocalIndex);
 								curUpdateIndex = curUpdateIndex + 1;
+								syncGUIIndex   = syncGUIIndex   + 1;
+								syncGUIFiles   = githubFiles.tree[githubIndex].path;
+								LOG.std(nil,"debug","syncGUIIndex",syncGUIIndex);
+								LOG.std(nil,"debug","githubFiles.tree[githubIndex].path",githubFiles.tree[githubIndex].path);
+
+								SyncGUI:updateDataBar(syncGUIIndex, syncGUItotal, syncGUIFiles);
 
 								-- 如果当前计数大于最大计数则更新
 								if (curUpdateIndex > totalLocalIndex) then      -- check whether all files have updated or not. if false, update the next one, if true, upload files.  
-									_guihelper.MessageBox(L'同步完成-A');
+									-- _guihelper.MessageBox(L'同步完成-A');
 									downloadOne();
 								else
 									updateOne();
 								end
 							else
-								_guihelper.MessageBox(githubFiles.tree[curUpdateIndex].path .. ' 更新失败,请稍后再试');
+								_guihelper.MessageBox(githubFiles.tree[githubIndex].path .. ' 更新失败,请稍后再试');
 							end
 						end);
 					else
 						-- if file exised, and has same sha value, then contain it
-						_guihelper.MessageBox(githubFiles.tree[curUpdateIndex].path .. ' 文件更新完成' .. (curUpdateIndex + 1) .. '/' .. totalLocalIndex);
+						-- _guihelper.MessageBox(githubFiles.tree[curUpdateIndex].path .. ' 文件更新完成' .. (curUpdateIndex + 1) .. '/' .. totalLocalIndex);
 						curUpdateIndex = curUpdateIndex + 1;
+						syncGUIIndex   = syncGUIIndex   + 1;
+						syncGUIFiles   = githubFiles.tree[githubIndex].path;
+						LOG.std(nil,"debug","syncGUIIndex",syncGUIIndex);
+						LOG.std(nil,"debug","githubFiles.tree[githubIndex].path",githubFiles.tree[githubIndex].path);
+
+						SyncGUI:updateDataBar(syncGUIIndex,syncGUItotal, syncGUIFiles);
 
 						if (curUpdateIndex > totalLocalIndex) then     -- check whether all files have updated or not. if false, update the next one, if true, upload files.
-							_guihelper.MessageBox(L'同步完成-B');
+							-- _guihelper.MessageBox(L'同步完成-B');
 							downloadOne();
 						else
 							updateOne();
@@ -266,7 +290,7 @@ function WorldShareGUI:syncToLocal()
 		function deleteOne()
 			LocalService.delete(self.foldername, self.localFiles[curUpdateIndex].filename, self.localFiles[curUpdateIndex].sha1, function (bIsDelete)
 				if (bIsDelete) then
-					_guihelper.MessageBox (self.localFiles[curUpdateIndex].filename .. ' 删除成功' .. (curUpdateIndex + 1) .. '/' .. totalLocalIndex);
+					-- _guihelper.MessageBox (self.localFiles[curUpdateIndex].filename .. ' 删除成功' .. (curUpdateIndex + 1) .. '/' .. totalLocalIndex);
 					curUpdateIndex = curUpdateIndex + 1;
 
 					if (curUpdateIndex > totalLocalIndex) then  --check whether all files have updated or not. if false, update the next one, if true, upload files.
@@ -294,13 +318,22 @@ function WorldShareGUI:syncToLocal()
 
 				for i=1,#githubFiles.tree do
 					githubFiles.tree[i].needChange = true;
+
+					if(githubFiles.tree[i].type == "blob") then
+						syncGUItotal = syncGUItotal + 1;
+					end
+
 					i = i + 1;
 				end
 
-				self.progressText = L'获取本地文件列表成功';
+				SyncGUI:updateDataBar(syncGUIIndex,syncGUItotal);
 
 				totalLocalIndex  = #self.localFiles;
 				totalGithubIndex = #githubFiles.tree;
+
+				LOG.std(nil,"debug","totalLocalIndex",totalLocalIndex);
+				LOG.std(nil,"debug","totalGithubIndex",totalGithubIndex);
+
 				updateOne();
 			else
 				--if the repos is empty, then upload files 
@@ -311,6 +344,9 @@ function WorldShareGUI:syncToLocal()
 end
 
 function WorldShareGUI:syncToGithub()
+	-- 加载进度UI界面
+	SyncGUI:ctor();
+
 	self.localFiles = LocalService:LoadFiles(self.worldDir,"",nil,1000,nil);
 
 	if (self.worldDir == "") then
@@ -324,6 +360,9 @@ function WorldShareGUI:syncToGithub()
 		local totalLocalIndex   = nil;
 		local totalGithubIndex  = nil;
 		local githubFiles       = {};
+		local syncGUItotal      = 0;
+		local syncGUIIndex      = 0;
+		local syncGUIFiles      = "";
 
 		-- LOG.std(nil,"debug","WorldShareGUI",curUploadIndex);
 		-- LOG.std(nil,"debug","WorldShareGUI",totalGithubIndex);
@@ -331,12 +370,17 @@ function WorldShareGUI:syncToGithub()
 		-- 上传新文件
 		function uploadOne()
 			if (curUploadIndex <= totalLocalIndex) then
+				-- LOG.std(nil,"debug","self.localFiles[curUploadIndex]",self.localFiles[curUploadIndex]);
 				if (self.localFiles[curUploadIndex].needChange) then
-					LOG.std(nil,"debug","self.localFiles[curUploadIndex]",self.localFiles[curUploadIndex]);
+					
 					GithubService:upload(self.foldername, self.localFiles[curUploadIndex].filename, self.localFiles[curUploadIndex].content,function (bIsDownload,data)
 						if (bIsDownload) then
-							self.progressText = self.localFiles[curUploadIndex].filename .. ' 上传成功' .. (curUploadIndex + 1) .. '/' .. totalGithubIndex;
+							-- self.progressText = self.localFiles[curUploadIndex].filename .. ' 上传成功' .. (curUploadIndex + 1) .. '/' .. totalGithubIndex;
 							curUploadIndex = curUploadIndex + 1;
+							syncGUIIndex   = syncGUIIndex   + 1;
+							syncGUIFiles   = self.localFiles[LocalIndex].filename;
+
+							SyncGUI:updateDataBar(syncGUIIndex, syncGUItotal, syncGUIFiles);
 						else
 							_guihelper.MessageBox(self.localFiles[curUploadIndex].filename .. ' 上传失败，请稍后再试');
 						end
@@ -345,7 +389,8 @@ function WorldShareGUI:syncToGithub()
 					curUploadIndex = curUploadIndex + 1;
 				end
 
-				if (curUploadIndex >= totalLocalIndex) then
+				if (curUploadIndex > totalLocalIndex) then
+					finish();
 					_guihelper.MessageBox('同步完成-D');
 				else
 					uploadOne(); --继续递归上传
@@ -383,29 +428,39 @@ function WorldShareGUI:syncToGithub()
 						-- if file existed, and has different sha value, update it
 						GithubService:update(self.foldername, self.localFiles[LocalIndex].filename, self.localFiles[LocalIndex].content, self.localFiles[LocalIndex].sha1, function (bIsUpdate,content)
 							if (bIsUpdate) then
-								_guihelper.MessageBox(self.localFiles[LocalIndex].filename .. ' 更新成功' .. (curUpdateIndex + 1) .. '/' .. totalGithubIndex);
+								-- _guihelper.MessageBox(self.localFiles[LocalIndex].filename .. ' 更新成功' .. (curUpdateIndex + 1) .. '/' .. totalGithubIndex);
 								curUpdateIndex = curUpdateIndex + 1;
 
 								-- 如果当前计数大于最大计数则更新
-								if (curUpdateIndex >= totalGithubIndex) then      -- check whether all files have updated or not. if false, update the next one, if true, upload files.  
-									_guihelper.MessageBox(L'同步完成-A');
+								if (curUpdateIndex > totalGithubIndex) then      -- check whether all files have updated or not. if false, update the next one, if true, upload files.  
+									-- _guihelper.MessageBox(L'同步完成-A');
+									finish();
 									uploadOne();
 								else
+									syncGUIIndex   = syncGUIIndex   + 1;
+									syncGUIFiles   = self.localFiles[LocalIndex].filename;
+
+									SyncGUI:updateDataBar(syncGUIIndex, syncGUItotal, syncGUIFiles);
 									updateOne();
 								end
 							else
-								_guihelper.MessageBox(githubFiles.tree[curUpdateIndex].path .. ' 更新失败,请稍后再试');
+								-- _guihelper.MessageBox(githubFiles.tree[curUpdateIndex].path .. ' 更新失败,请稍后再试');
 							end
 						end);
 					else
 						-- if file exised, and has same sha value, then contain it
-						_guihelper.MessageBox(githubFiles.tree[curUpdateIndex].path .. ' 文件更新完成' .. (curUpdateIndex + 1) .. '/' .. totalGithubIndex);
+						-- _guihelper.MessageBox(githubFiles.tree[curUpdateIndex].path .. ' 文件更新完成' .. (curUpdateIndex + 1) .. '/' .. totalGithubIndex);
 						curUpdateIndex = curUpdateIndex + 1;
 
 						if (curUpdateIndex > totalGithubIndex) then     -- check whether all files have updated or not. if false, update the next one, if true, upload files.
-							_guihelper.MessageBox(L'同步完成-B');
+							-- _guihelper.MessageBox(L'同步完成-B');
+							finish();
 							uploadOne();
 						else
+							syncGUIIndex   = syncGUIIndex   + 1;
+							syncGUIFiles   = self.localFiles[LocalIndex].filename;
+
+							SyncGUI:updateDataBar(syncGUIIndex, syncGUItotal, syncGUIFiles);
 							updateOne();
 						end
 					end
@@ -429,6 +484,7 @@ function WorldShareGUI:syncToGithub()
 
 					if (curUpdateIndex > totalLocalIndex) then  --check whether all files have updated or not. if false, update the next one, if true, upload files.
 						_guihelper.MessageBox(L'同步完成-C');
+						finish();
 						uploadOne();
 					else
 						updateOne();
@@ -437,6 +493,21 @@ function WorldShareGUI:syncToGithub()
 					_guihelper.MessageBox('删除 ' .. self.localFiles[curUpdateIndex].filename .. ' 失败, 请稍后再试');
 				end
 			end);
+		end
+
+		function finish()
+			if(syncGUItotal == syncGUIIndex) then
+				GithubService:GetUrl({
+					url = ShowLogin.site.."/api/mod/WorldShare/models/worlds/refresh",
+					form = {
+						worldsName = self.foldername,
+						revision   = self.currentRevison
+					},
+					headers = {Authorization = "Bearer "..ShowLogin.token}
+				},function(data)
+
+				end)
+			end
 		end
 
 		-- 获取github仓文件
@@ -454,6 +525,9 @@ function WorldShareGUI:syncToGithub()
 					self.localFiles.needChange = true;
 					i = i + 1;
 				end
+
+				syncGUItotal = #self.localFiles;
+				SyncGUI:updateDataBar(syncGUIIndex,syncGUItotal);
 
 				totalLocalIndex  = #self.localFiles;
 				totalGithubIndex = #githubFiles.tree;

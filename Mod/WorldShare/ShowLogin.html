@@ -322,6 +322,14 @@
 	            		localWorlds = commonlib.copy(ShowLogin.originLocalWorlds);
 	            	end
 
+	            	LOG.std(nil,"debug","localWorlds",localWorlds);
+	            	for kl,vl in ipairs(localWorlds) do
+	            		local WorldRevisionCheckOut = WorldRevision:new():init("worlds/DesignHouse/"..vl.foldername);
+	            		localWorlds[kl].revision = WorldRevisionCheckOut:Checkout();
+	            	end
+
+	            	LOG.std(nil,"debug","localWorlds",localWorlds);
+	            	
 	            	--[[
 						status代码含义:
 						1:仅本地
@@ -338,7 +346,7 @@
 
 	            			for kl,vl in ipairs(localWorlds) do
 	            				if(vd["worldsName"] == vl["foldername"]) then
-	            					localWorlds[kl].revision = vd["date"];
+	            					localWorlds[kl].revision = vd["revision"];
 	            					localWorlds[kl].status   = 3; --本地网络一致
 	            					isExist = true;
 	            					break;
@@ -554,23 +562,23 @@
                                             <input type="button" style="position:relative;width:280px;height:57px;background:" name='<%=Eval("index")%>' onclick="InternetLoadWorld.OnSwitchWorld" />
                                         </div>
                                     </pe:if>
-                                    <div style="position:relative;margin-left:216px;margin-top:8px;">
+                                    <div style="position:relative;margin-left:221px;margin-top:8px;">
                                         <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) == 100%>'>
                                         	<pe:if condition='<%= GetCurWorldInfo("status",Eval("index")) == nil%>'>
-                                            	<input type="button" value='<%=L"离线" %>' style="text-singleline:false;margin-right:5px;width:51px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue"/>
+                                            	<input type="button" style="background:url(textures/offline_32bits.png);text-singleline:false;margin-right:5px;width:46px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue"/><!--<%=L"离线" %>-->
                                         	</pe:if>
                                         	<pe:if condition='<%= GetCurWorldInfo("status",Eval("index")) == 1%>'>
-                                            	<input type="button" value='<%=L"仅\n本地" %>' style="text-singleline:false;margin-right:5px;width:51px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue"/>
+                                            	<input type="button" style="background:url(textures/local_only_32bits.png);text-singleline:false;margin-right:5px;width:51px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue"/><!--- "仅\n本地" -->
                                         	</pe:if>
                                         	<pe:if condition='<%= GetCurWorldInfo("status",Eval("index")) == 2%>'>
-                                        		<input type="button" value='<%=L"仅\n网络" %>' style="text-singleline:false;margin-right:5px;width:51px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue"/>
+                                        		<input type="button" style="background:url(textures/github_only_32bits.png);text-singleline:false;margin-right:5px;width:51px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue"/><!--"仅\n网络" -->
                                         	</pe:if>
                                             <pe:if condition='<%= GetCurWorldInfo("status",Eval("index")) == 3%>'>
-                                            	<input type="button" value='<%=L"本地网\n络一致" %>' style="text-singleline:false;margin-right:5px;width:51px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue"/>
+                                            	<input type="button" style="background:url(textures/sync_32bits.png);text-singleline:false;margin-right:5px;width:51px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue"/><!-- "本地网\n络一致" -->
                                             </pe:if>
                                             <!-- <input type="button" value='<%=L"网络\n更新" %>' style="text-singleline:false;margin-right:5px;width:51px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue"/> -->
                                             <!-- <input type="button" value='<%=L"本地\n更新" %>' style="text-singleline:false;margin-right:5px;width:51px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue"/> -->
-                                            <input type="button" value='<%=L"进入" %>' style="width:51px;height:46px;font-size:12px;font-weight:bold;" onclick="InternetLoadWorld.EnterWorld" name='<%=Eval("index")%>' class="mc_button_blue" />
+                                            <input type="button" style="width:46px;height:46px;background:url(textures/enter_32bits.png);font-size:12px;font-weight:bold;" onclick="InternetLoadWorld.EnterWorld" name='<%=Eval("index")%>' class="mc_button_blue" /><!--进入-->
                                         </pe:if>
                                         <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) < 100 %>'>
                                             <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) >= 0 %>'>
@@ -582,7 +590,7 @@
                                         </pe:if>
                                     </div>
                                     <pe:if condition='<%= Eval("index") == InternetLoadWorld.selected_world_index%>'>
-                                		<input type="button" value='<%=L"删除" %>' style="margin-left:160px;margin-top:8px;width:51px;height:46px;font-size:12px;font-weight:bold;" onclick='deleteWorld' name='<%=Eval("index")%>' class="mc_button_blue" />
+                                		<input type="button" style="background:url(textures/delete_32bits.png);margin-left:170px;margin-top:8px;width:46px;height:46px;font-size:12px;font-weight:bold;" onclick='deleteWorld' name='<%=Eval("index")%>' class="mc_button_blue" /><!-- 删除 -->
                                 	</pe:if>
                                 </pe:if>
                                 <pe:if condition='<%= not BeHasWorldInSlot(Eval("is_empty_slot"),Eval("is_buy_slot"))%>'>

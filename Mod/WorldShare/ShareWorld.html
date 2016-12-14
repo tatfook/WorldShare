@@ -17,16 +17,13 @@
                     Page:CloseWindow();
 
                     if(tonumber(WorldShareGUI.currentRevison) < tonumber(WorldShareGUI.githubRevison)) then
-                        _guihelper.MessageBox_Plain("当前本地版本小于Github版本，是否继续上传？", function(res)
-                            if(res and res == _guihelper.DialogResult.ShareNow) then
-                                -- pressed OK
-                                _guihelper.MessageBox("开始同步--将本地大小有变化的文件上传到github"); -- 上传或更新
-                            elseif(res and res == _guihelper.DialogResult.Cancel) then
-                                _guihelper.MessageBox("Cancel");
+                        _guihelper.MessageBox("当前本地版本小于Github版本，是否继续上传？", function(res)
+                            if(res and res == 6) then
+                                WorldShareGUI:syncToGithub();
                             end
-                        end, _guihelper.MessageBoxButtons.ShareNow,_guihelper.MessageBoxButtons.Cancel,nil,{ShareNow = "确定分享",Cancel = "取消分享"});
+                        end);
                     elseif(tonumber(WorldShareGUI.currentRevison) > tonumber(WorldShareGUI.githubRevison)) then
-                        _guihelper.MessageBox("开始同步--将本地大小有变化的文件上传到github"); -- 上传或更新
+                       WorldShareGUI:syncToGithub();
                     end
                 end
              ]]>
@@ -34,7 +31,7 @@
         <div style="width:500px;height:270px;">
             <aries:window mode="thin" width="500" height="270" style="float:left;" title='<%=L"分享上传世界" %>'>
                 <div style="padding:20px;font-size:18px;base-font-size:18px;color:#ffffff">
-                    <div style="margin-left:80px;margin-top:40px;">
+                    <div style="margin-left:170px;margin-top:30px;">
                         远程版本号：
                         <pe:if condition="<%=WorldShareGUI.githubRevison == 0 %>">
                             正在获取中...
@@ -43,11 +40,11 @@
                             <%=WorldShareGUI.githubRevison %>
                         </pe:if>
                     </div>
-                    <div style="margin-left:80px;margin-top:30px;">
+                    <div style="margin-left:170px;margin-top:10px;">
                         本地版本号：<%=WorldShareGUI.currentRevison %>
                     </div>
                     <pe:if condition="<%=WorldShareGUI.github ~= 0%>">
-                        <input type="button" onclick="shareNow" value="马上分享" />
+                        <input type="button" onclick="shareNow" value="马上分享" class="button_highlight" style="width: 80px;height: 35px;margin-top:30px;margin-left:190px;"/>
                     </pe:if>
                 </div>
             </aries:window>
