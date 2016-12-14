@@ -87,25 +87,27 @@ function LocalService:update(_foldername,_path,_sha,_callback)
 	local filename  = _path;
 	local sha       = _sha;
 
-	GithubService:getContent(_foldername,filename,function(err,msg,data)
-		LOG.std(nil,"debug","LocalService:update",data);
-	end)
-
-	local filecontent = _filecontent;
-	--模拟保存文件成功
-	_callback(true);
+	GithubService:getContent(_foldername,filename,function(data)
+		if(data) then
+			NPL.FromJson(data,table);
+			local content = table["content"];
+			_callback(true,content);
+		else
+			_callback(false);
+		end
+	end)	
 end
 
 function LocalService:download(_foldername,_path,_callback)
+	LOG.std(nil,"debug","_foldername",_foldername);
+	LOG.std(nil,"debug","_foldername",_path);
+	LOG.std(nil,"debug","_foldername",_callback);
+
 	local filename  = _path;
 
-	GithubService:getContent(_foldername,filename,function(err,msg,data)
-		LOG.std(nil,"debug","LocalService:update",data);
-	end)
-
-	local filecontent = _filecontent;
-	--模拟保存文件成功
-	_callback(true);
+	GithubService:getContent(_foldername,filename,function(data)
+		_callback(true,data);
+	end);
 end
 
 function LocalService:delete(_foldername,_filename,_callback)
