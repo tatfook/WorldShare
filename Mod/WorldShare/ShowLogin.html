@@ -13,6 +13,7 @@
 	            InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld");
 	            local MainLogin   = commonlib.gettable("MyCompany.Aries.Game.MainLogin");
 	            ShowLogin         = commonlib.gettable("Mod.WorldShare.ShowLogin");
+	            WorldRevision     = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision");
 
 	            InternetLoadWorld.OnInit();
 	            ShowLogin.OnInit();
@@ -322,13 +323,17 @@
 	            		localWorlds = commonlib.copy(ShowLogin.originLocalWorlds);
 	            	end
 
-	            	LOG.std(nil,"debug","localWorlds",localWorlds);
+	            	-- LOG.std(nil,"debug","localWorlds",localWorlds);
 	            	for kl,vl in ipairs(localWorlds) do
-	            		local WorldRevisionCheckOut = WorldRevision:new():init("worlds/DesignHouse/"..vl.foldername);
-	            		localWorlds[kl].revision = WorldRevisionCheckOut:Checkout();
+	            		local WorldRevisionCheckOut = WorldRevision:new():init("worlds/DesignHouse/"..vl.foldername.."/");
+	            		-- LOG.std(nil,"debug","WorldRevisionCheckOut",WorldRevisionCheckOut);
+
+	            		localWorlds[kl].revision = WorldRevisionCheckOut:GetDiskRevision();
+	            		-- LOG.std(nil,"debug","dir","worlds/DesignHouse/"..vl.foldername);
+	            		-- LOG.std(nil,"debug","localWorlds[kl].revision",localWorlds[kl].revision);
 	            	end
 
-	            	LOG.std(nil,"debug","localWorlds",localWorlds);
+	            	-- LOG.std(nil,"debug","localWorlds",localWorlds);
 	            	
 	            	--[[
 						status代码含义:
@@ -346,8 +351,19 @@
 
 	            			for kl,vl in ipairs(localWorlds) do
 	            				if(vd["worldsName"] == vl["foldername"]) then
-	            					localWorlds[kl].revision = vd["revision"];
-	            					localWorlds[kl].status   = 3; --本地网络一致
+
+	            					-- LOG.std(nil,"debug","localVersion",vl["revision"]);
+	            					-- LOG.std(nil,"debug","networkVersion",vd["revision"]);
+
+	            					if(tonumber(vl["revision"]) == tonumber(vd["revision"])) then
+	            						localWorlds[kl].status   = 3; --本地网络一致
+	            					elseif(tonumber(vl["revision"]) < tonumber(vd["revision"])) then
+	            						localWorlds[kl].status   = 5; --本地更新
+	            					elseif(tonumber(vl["revision"]) > tonumber(vd["revision"])) then
+	            						localWorlds[kl].status   = 4; --网络更新
+	            					end
+
+	            					-- localWorlds[kl].revision = vd["revision"];
 	            					isExist = true;
 	            					break;
 	            				end
@@ -568,16 +584,20 @@
                                             	<input type="button" style="background:url(textures/offline_32bits.png);text-singleline:false;margin-right:5px;width:46px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue"/><!--<%=L"离线" %>-->
                                         	</pe:if>
                                         	<pe:if condition='<%= GetCurWorldInfo("status",Eval("index")) == 1%>'>
-                                            	<input type="button" style="background:url(textures/local_only_32bits.png);text-singleline:false;margin-right:5px;width:51px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue"/><!--- "仅\n本地" -->
+                                            	<input type="button" style="background:url(textures/local_only_32bits.png);text-singleline:false;margin-right:5px;width:46px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue"/><!--- "仅\n本地" -->
                                         	</pe:if>
                                         	<pe:if condition='<%= GetCurWorldInfo("status",Eval("index")) == 2%>'>
-                                        		<input type="button" style="background:url(textures/github_only_32bits.png);text-singleline:false;margin-right:5px;width:51px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue"/><!--"仅\n网络" -->
+                                        		<input type="button" style="background:url(textures/github_only_32bits.png);text-singleline:false;margin-right:5px;width:46px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue"/><!--"仅\n网络" -->
                                         	</pe:if>
                                             <pe:if condition='<%= GetCurWorldInfo("status",Eval("index")) == 3%>'>
-                                            	<input type="button" style="background:url(textures/sync_32bits.png);text-singleline:false;margin-right:5px;width:51px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue"/><!-- "本地网\n络一致" -->
+                                            	<input type="button" style="background:url(textures/sync_32bits.png);text-singleline:false;margin-right:5px;width:46px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue"/><!-- "本地网\n络一致" -->
                                             </pe:if>
-                                            <!-- <input type="button" value='<%=L"网络\n更新" %>' style="text-singleline:false;margin-right:5px;width:51px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue"/> -->
-                                            <!-- <input type="button" value='<%=L"本地\n更新" %>' style="text-singleline:false;margin-right:5px;width:51px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue"/> -->
+                                            <pe:if condition='<%= GetCurWorldInfo("status",Eval("index")) == 4%>'>
+                                            	<input type="button" style="background:url(textures/github_update_32bits.png);text-singleline:false;margin-right:5px;width:46px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue"/> <!--"网络\n更新" -->
+                                            </pe:if>
+                                            <pe:if condition='<%= GetCurWorldInfo("status",Eval("index")) == 5%>'>
+                                            	<input type="button" style="background:url(textures/local_update_32bits.png);text-singleline:false;margin-right:5px;width:46px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue"/> <!--L"本地\n更新" -->
+                                            </pe:if>
                                             <input type="button" style="width:46px;height:46px;background:url(textures/enter_32bits.png);font-size:12px;font-weight:bold;" onclick="InternetLoadWorld.EnterWorld" name='<%=Eval("index")%>' class="mc_button_blue" /><!--进入-->
                                         </pe:if>
                                         <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) < 100 %>'>

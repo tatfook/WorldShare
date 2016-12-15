@@ -42,12 +42,14 @@
             		<div>
             			<input type="button" onclick="deleteLocal"  class="button_highlight" style="margin-left:150px;width: 130px;height: 30px;" name="" value="只删除本地" />
                     </div>
-                    <div style="margin-top:20px;">
-            			<input type="button" onclick="deleteGithub" class="button_highlight" style="margin-left:150px;width: 130px;height: 30px;"  name="" value="只删除远程" />
-                    </div>
-                    <div style="margin-top:20px;">
-                        <input type="button" onclick="deleteAll"    class="button_highlight" style="margin-left:150px;width: 130px;height: 30px;"  name="" value="全部删除" />
-                    </div>
+                    <pe:if condition="<%=ShowLogin.login_type == 3%>">
+                        <div style="margin-top:20px;">
+                			<input type="button" onclick="deleteGithub" class="button_highlight" style="margin-left:150px;width: 130px;height: 30px;"  name="" value="只删除远程" />
+                        </div>
+                        <div style="margin-top:20px;">
+                            <input type="button" onclick="deleteAll"    class="button_highlight" style="margin-left:150px;width: 130px;height: 30px;"  name="" value="全部删除" />
+                        </div>
+                    </pe:if>
                     <div style="margin-top:20px;">
                         <input type="button" onclick="goBack"       class="button_highlight" style="margin-left:150px;width: 130px;height: 30px;"  name="" value="返回上级" />
                     </div>
