@@ -1,0 +1,43 @@
+<!-- "script/apps/Aries/Creator/Game/Login/InternetLoadWorld.html" -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>delete world sync,by big,2016/12/10</title>
+</head>
+<body>
+    <pe:mcml>
+        <script type="text/npl" refresh="false" src="ShowLogin.lua">
+            <![CDATA[
+            	ShowLogin       = commonlib.gettable("Mod.WorldShare.ShowLogin");
+                local MainLogin = commonlib.gettable("MyCompany.Aries.Game.MainLogin");
+
+            	ShowLogin:OnInit();
+
+                function confirm()
+                    local password = Page:GetValue("password");
+                    ShowLogin:deleteWorldGithub(password);
+                end
+
+                function cancel()
+                    Page:CloseWindow();
+                end
+             ]]>
+        </script>
+        <div style="width:500px;height:270px;">
+            <aries:window mode="thin" width="500" height="270" style="float:left;" title='<%=L"删除世界" %>'>
+            	<div style="padding:30px;font-size:18px;base-font-size:18px;color:#ffffff">
+
+                    <div>
+                      Github密码：<input type="text" PasswordChar="*" class="bbs_text" style="height: 30px;" name="password" value=""/>
+                    </div>
+
+                    <div style="margin-top:20px;">
+                        <input type="button" onclick="confirm" class="button_highlight" style="margin-left:150px;width: 130px;height: 30px;"  name="" value="确定" />
+                        <input type="button" onclick="cancel"  class="button_highlight" style="margin-left:150px;width: 130px;height: 30px;margin-top:10px;"  name="" value="取消" />
+                    </div>
+            	</div>
+            </aries:window>
+        </div>
+    </pe:mcml>
+</body>
+</html>

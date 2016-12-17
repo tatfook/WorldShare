@@ -83,34 +83,69 @@ function LocalService:LoadFiles(_worldDir,_curPath,_filter,_nMaxFileLevels,_nMax
 	return self.output;
 end
 
-function LocalService:update(_foldername,_path,_sha,_callback)
-	local filename  = _path;
-	local sha       = _sha;
+function LocalService:update(_foldername, _path, _callback)
+	GithubService:getContent(_foldername, _path,function(data)
+		local bashPath = "worlds/DesignHouse/" .. _foldername .. "/";
+		local file     = ParaIO.open(bashPath .. _path, "w");
+		
+		local file_infor = {};
+		NPL.FromJson(data,file_infor);
 
-	GithubService:getContent(_foldername,filename,function(data)
-		if(data) then
-			NPL.FromJson(data,table);
-			local content = table["content"];
-			_callback(true,content);
-		else
-			_callback(false);
-		end
+		local content = EncodingS.unbase64(file_infor.content);
+		file:write(content,#content);
+		file:close();
+		local returnData = {filename = _path,content = content};
+
+		_callback(true,returnData);
 	end)	
 end
 
 function LocalService:download(_foldername,_path,_callback)
-	LOG.std(nil,"debug","_foldername",_foldername);
+	-- LOG.std(nil,"debug","_foldername",_foldername);
 	LOG.std(nil,"debug","_path",_path);
-	LOG.std(nil,"debug","_callback",_callback);
+	-- LOG.std(nil,"debug","_callback",_callback);
 
-	local filename  = _path;
-	_callback(true,{});
-	-- GithubService:getContent(_foldername,filename,function(data)
-	-- 	_callback(true,data);
-	-- end);
+	GithubService:getContent(_foldername, _path,function(data)
+		-- LOG.std(nil,"debug","GithubService:getContent._path",_path);
+
+		local path = {};
+		local bashPath = "worlds/DesignHouse/" .. _foldername .. "/";
+		local folderCreate = "";
+
+		folderCreate = commonlib.copy(bashPath);
+
+		for segmentation in string.gmatch(_path,"[^/]+") do
+			path[#path+1] = segmentation;
+		end
+
+		for i=1,#path-1,1 do
+			folderCreate = folderCreate .. path[i] .. "/";
+			LOG.std(nil,"debug","folderCreate",folderCreate);
+			ParaIO.CreateDirectory(folderCreate);
+		end
+
+		local file = ParaIO.open(bashPath .. _path, "w");
+
+		local file_infor = {};
+		NPL.FromJson(data,file_infor);
+
+		-- LOG.std(nil,"debug","GithubService:getContent",file_infor);
+		-- LOG.std(nil,"debug","content",file_infor.content);
+
+		local content = EncodingS.unbase64(file_infor.content);
+		file:write(content,#content);
+		file:close();
+		local returnData = {filename = _path,content = content};
+
+		-- LOG.std(nil,"debug","EncodingS.unbase64",content);
+		_callback(true,returnData);
+	end);
 end
 
 function LocalService:delete(_foldername,_filename,_callback)
+	local bashPath = "worlds/DesignHouse/" .. _foldername .. "/";
+	-- LOG.std(nil,"debug","ParaIO.DeleteFile",bashPath .. _filename);
 
+	ParaIO.DeleteFile(bashPath .. _filename);
 	_callback(true);
 end

@@ -34,7 +34,7 @@
         <div style="width:500px;height:270px;">
             <aries:window mode="thin" width="500" height="270" style="float:left;" title='<%=L"分享上传世界" %>'>
                 <div style="padding:20px;font-size:18px;base-font-size:18px;color:#ffffff">
-                    <div style="margin-left:170px;margin-top:30px;">
+                    <div style="margin-left:140px;margin-top:30px;">
                         远程版本号：
                         <pe:if condition="<%=WorldShareGUI.firstCreate ~= 1 and WorldShareGUI.githubRevison == 0 %>">
                             正在获取中...
@@ -46,7 +46,7 @@
                             <%=WorldShareGUI.githubRevison %>
                         </pe:if>
                     </div>
-                    <div style="margin-left:170px;margin-top:10px;">
+                    <div style="margin-left:140px;margin-top:10px;">
                         本地版本号：<%=WorldShareGUI.currentRevison %>
                     </div>
                     <pe:if condition="<%=WorldShareGUI.github ~= 0%>">

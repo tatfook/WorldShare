@@ -13,16 +13,20 @@
 
             	ShowLogin:OnInit();
 
+                -- log({"ShowLogin.selectedWorldInfor",ShowLogin.selectedWorldInfor});
+
+                selectedWorldInfor = ShowLogin.selectedWorldInfor;
+
             	function deleteLocal()
                     ShowLogin:deleteWorldLocal();
                 end
 
                 function deleteGithub()
-                    _guihelper.MessageBox(L"只删除远程");
+                    ShowLogin:deleteWorldGithubLogin();
                 end
 
                 function deleteAll()
-                    _guihelper.MessageBox(L"删除全部");
+                    ShowLogin:deleteWorldAll();
                 end
 
                 function goBack()
@@ -39,17 +43,25 @@
         <div style="width:500px;height:270px;">
             <aries:window mode="thin" width="500" height="270" style="float:left;" title='<%=L"删除世界" %>'>
             	<div style="padding:30px;font-size:18px;base-font-size:18px;color:#ffffff">
-            		<div>
-            			<input type="button" onclick="deleteLocal"  class="button_highlight" style="margin-left:150px;width: 130px;height: 30px;" name="" value="只删除本地" />
-                    </div>
-                    <pe:if condition="<%=ShowLogin.login_type == 3%>">
-                        <div style="margin-top:20px;">
-                			<input type="button" onclick="deleteGithub" class="button_highlight" style="margin-left:150px;width: 130px;height: 30px;"  name="" value="只删除远程" />
+            		
+                    <pe:if condition="<%=ShowLogin.login_type == 1 or ShowLogin.login_type == 2 or selectedWorldInfor.status == 3 or selectedWorldInfor.status == 1 or selectedWorldInfor.status == 4 or selectedWorldInfor.status == 5 %>">
+                        <div>
+                			<input type="button" onclick="deleteLocal"  class="button_highlight" style="margin-left:150px;width: 130px;height: 30px;" name="" value="只删除本地" />
                         </div>
+                    </pe:if>
+
+                    <pe:if condition="<%=selectedWorldInfor.status == 3 or selectedWorldInfor.status == 2 or selectedWorldInfor.status == 4 or selectedWorldInfor.status == 5 %>">
+                        <div style="margin-top:20px;">
+                            <input type="button" onclick="deleteGithub" class="button_highlight" style="margin-left:150px;width: 130px;height: 30px;"  name="" value="只删除远程" />
+                        </div>
+                    </pe:if>
+
+                    <pe:if condition="<%=selectedWorldInfor.status == 3 or selectedWorldInfor.status == 4 or selectedWorldInfor.status == 5 %>">
                         <div style="margin-top:20px;">
                             <input type="button" onclick="deleteAll"    class="button_highlight" style="margin-left:150px;width: 130px;height: 30px;"  name="" value="全部删除" />
                         </div>
                     </pe:if>
+
                     <div style="margin-top:20px;">
                         <input type="button" onclick="goBack"       class="button_highlight" style="margin-left:150px;width: 130px;height: 30px;"  name="" value="返回上级" />
                     </div>
