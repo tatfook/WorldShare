@@ -8,3 +8,4 @@ npl_packages
 *.log
 *.txt
 Debug
+*.DS_Store
