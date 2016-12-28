@@ -15,10 +15,12 @@ NPL.load("(gl)Mod/WorldShare/WorldShareGUI.lua");
 NPL.load("(gl)Mod/WorldShare/WorldShareEntity.lua");
 NPL.load("(gl)Mod/WorldShare/WorldShareSceneContext.lua");
 NPL.load("(gl)Mod/WorldShare/ShowLogin.lua");
+NPL.load("(gl)script/ide/Encoding.lua");
 
 local WorldShareSceneContext = commonlib.gettable("Mod.WorldShare.WorldShareSceneContext");
 
-local GameLogic			= commonlib.gettable("MyCompany.Aries.Game.GameLogic");
+local GameLogic = commonlib.gettable("MyCompany.Aries.Game.GameLogic");
+local Encoding  = commonlib.gettable("commonlib.Encoding");
 
 local WorldShareItem    = commonlib.gettable("Mod.WorldShare.WorldShareItem");
 local WorldShareGUI     = commonlib.gettable("Mod.WorldShare.WorldShareGUI");

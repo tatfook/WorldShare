@@ -15,6 +15,7 @@
 	            ShowLogin         = commonlib.gettable("Mod.WorldShare.ShowLogin");
 	            WorldRevision     = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision");
 	            WorldShareGUI     = commonlib.gettable("Mod.WorldShare.WorldShareGUI");
+	            Encoding  		  = commonlib.gettable("commonlib.Encoding");
 
 	            InternetLoadWorld.OnInit();
 	            ShowLogin.OnInit();
@@ -326,7 +327,7 @@
 
 	            	-- LOG.std(nil,"debug","localWorlds",localWorlds);
 	            	for kl,vl in ipairs(localWorlds) do
-	            		local WorldRevisionCheckOut = WorldRevision:new():init("worlds/DesignHouse/"..vl.foldername.."/");
+	            		local WorldRevisionCheckOut = WorldRevision:new():init("worlds/DesignHouse/"..Encoding.Utf8ToDefault(vl.foldername).."/");
 	            		-- LOG.std(nil,"debug","WorldRevisionCheckOut",WorldRevisionCheckOut);
 
 	            		localWorlds[kl].revision = WorldRevisionCheckOut:GetDiskRevision();

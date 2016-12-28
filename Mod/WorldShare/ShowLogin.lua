@@ -124,7 +124,6 @@ function ShowLogin:deleteWorldLocal(_callback)
 	                        MainLogin:next_step();
 	                    end
 					end
-
 				else
 					_guihelper.MessageBox(L"无法删除可能您没有足够的权限"); 
 				end

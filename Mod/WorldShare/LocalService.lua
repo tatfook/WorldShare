@@ -14,7 +14,6 @@ NPL.load("(gl)script/ide/Encoding.lua");
 NPL.load("(gl)script/ide/System/Encoding/base64.lua");
 NPL.load("(gl)script/ide/System/Encoding/sha1.lua");
 NPL.load("(gl)Mod/WorldShare/GithubService.lua");
-NPL.load("(gl)script/test/TestIO.lua");
 
 local LocalService  = commonlib.gettable("Mod.WorldShare.LocalService");
 local GithubService = commonlib.gettable("Mod.WorldShare.GithubService");
@@ -47,7 +46,7 @@ function LocalService:filesFind(_result)
 					item.id = item.filename;
 					item.file_content_t = self:getFileContent(item.file_path);
 					item.file_content = EncodingS.base64(item.file_content_t);
-					item.sha1 = EncodingS.sha1("blob "..item.filesize.."\0"..item.file_content_t, "hex");
+					item.sha1 = EncodingS.sha1("blob " .. item.filesize .. "\0" .. item.file_content_t, "hex");
 					item.needChange = true;
 
 					self.output[#self.output+1] = item;

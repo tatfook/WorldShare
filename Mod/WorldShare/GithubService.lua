@@ -26,7 +26,7 @@ function GithubService:GetUrl(_params,_callback)
 end
 
 function GithubService:retry(_err, _msg, _data, _params, _callback)
-	LOG.std(nil,"debug","GithubService:retry",{_err, _data});
+	--LOG.std(nil,"debug","GithubService:retry",{_err, _data});
 
 	--失败时可直接返回的代码
 	if(_err == 422 or _err == 404 or _err == 409) then
@@ -114,14 +114,17 @@ function GithubService:githubApiDelete(_url, _params, _callback)
 end
 
 function GithubService:getFileShaList(_foldername, _callback)
-	LOG.std(nil,"debug","getFileShaList","getFileShaList")
+	_foldername = Encoding.base64(_foldername);
+	-- LOG.std(nil,"debug","getFileShaList","getFileShaList")
 	
-	local url = self.githubApi .. "repos/" .. ShowLogin.login .. "/" .. _foldername .. "/git/trees/master?recursive=1";
+	local url = self.githubApi .. "repos/" .. ShowLogin.login .. "/" .. Encoding.base64(_foldername) .. "/git/trees/master?recursive=1";
 
 	self:githubApiGet(url, _callback);
 end
 
 function GithubService:getContent(_foldername, _fileName, _callback)
+	_foldername = Encoding.base64(_foldername);
+
 	local github_token = ShowLogin.github_token;
 
 	local url = self.githubApi .. "repos/"..ShowLogin.login.."/".._foldername.."/contents/".._fileName.."?access_token=" .. github_token["access_token"];
@@ -130,6 +133,8 @@ function GithubService:getContent(_foldername, _fileName, _callback)
 end
 
 function GithubService:create(_foldername, _callback)
+	_foldername = Encoding.base64(_foldername);
+
 	local url = self.githubApi .. "user/repos";
 
 	params = '{"name": "' .. _foldername .. '"}';
@@ -138,6 +143,8 @@ function GithubService:create(_foldername, _callback)
 end
 
 function GithubService:deleteResp(_foldername, authToken, _callback)
+	_foldername = Encoding.base64(_foldername);
+
 	local github_token = ShowLogin.github_token;
 
 	LOG.std(nil,"debug","authToken",authToken);
@@ -155,6 +162,8 @@ function GithubService:deleteResp(_foldername, authToken, _callback)
 end
 
 function GithubService:update(_foldername, _fileName, _fileContent, _sha, _callback)
+	_foldername = Encoding.base64(_foldername);
+
 	local github_token = ShowLogin.github_token;
 
 	--LOG.std(nil,"debug","GithubService:update",{_foldername, _fileName, Encoding.base64(_fileContent), _sha});
@@ -171,13 +180,15 @@ function GithubService:update(_foldername, _fileName, _fileContent, _sha, _callb
 end
 
 function GithubService:upload(_foldername, _fileName, _fileContent, _callback)
+	_foldername = Encoding.base64(_foldername);
+
 	local github_token = ShowLogin.github_token;
 
 	-- LOG.std(nil,"debug","GithubService:upload",{_foldername, _fileName, _fileContent});
 
 	local url = self.githubApi .. "repos/" .. ShowLogin.login .. "/" .. _foldername .. "/contents/" .. _fileName .. "?access_token=" .. github_token["access_token"];
 
-	LOG.std(nil,"debug","GithubService:upload",url);
+	-- LOG.std(nil,"debug","GithubService:upload",url);
 
 	_fileContent = Encoding.base64(_fileContent);
 
@@ -186,12 +197,14 @@ function GithubService:upload(_foldername, _fileName, _fileContent, _callback)
 	-- _callback(true,{});
 
 	self:githubApiPut(url,params,function(data)
-		LOG.std(nil,"debug","GithubService:upload",data);
+		-- LOG.std(nil,"debug","GithubService:upload",data);
 		_callback(true,{});
 	end);
 end
 
 function GithubService:delete(_foldername, _fileName, _sha, _callback)
+	_foldername = Encoding.base64(_foldername);
+	
 	local github_token = ShowLogin.github_token;
 
 	local url = self.githubApi .. "repos/" .. ShowLogin.login .. "/" .. _foldername  .. "/contents/" .. _fileName .. "?access_token=" .. github_token["access_token"];

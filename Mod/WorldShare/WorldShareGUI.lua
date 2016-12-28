@@ -15,6 +15,8 @@ NPL.load("(gl)Mod/WorldShare/ShowLogin.lua");
 NPL.load("(gl)Mod/WorldShare/GithubService.lua");
 NPL.load("(gl)Mod/WorldShare/LocalService.lua");
 NPL.load("(gl)Mod/WorldShare/SyncGUI.lua");
+NPL.load("(gl)script/ide/Encoding.lua");
+NPL.load("(gl)script/ide/System/Encoding/base64.lua");
 
 local WorldShareGUI = commonlib.inherit(nil,commonlib.gettable("Mod.WorldShare.WorldShareGUI"));
 local SyncGUI       = commonlib.gettable("Mod.WorldShare.SyncGUI");
@@ -23,6 +25,8 @@ local WorldRevision = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevi
 local ShowLogin     = commonlib.gettable("Mod.WorldShare.ShowLogin");
 local GithubService = commonlib.gettable("Mod.WorldShare.GithubService");
 local LocalService  = commonlib.gettable("Mod.WorldShare.LocalService");
+local Encoding      = commonlib.gettable("commonlib.Encoding");
+local EncodingS     = commonlib.gettable("System.Encoding");
 
 function WorldShareGUI:ctor()
 end
@@ -86,14 +90,21 @@ end
 
 function WorldShareGUI:compareRevision()
 	if(ShowLogin.login) then
-		-- self.getWorldInfo      = WorldCommon:GetWorldInfo();
+		self.getWorldInfo      = WorldCommon:GetWorldInfo();
+		--LOG.std(nil,"debug","worldinfo",self.getWorldInfo);
+
 		self.worldDir          = GameLogic.GetWorldDirectory();
+		--LOG.std(nil,"debug","self.worldDir",self.worldDir);
+
 		WorldRevisionCheckOut  = WorldRevision:new():init(self.worldDir);
 		self.currentRevison    = WorldRevisionCheckOut:Checkout();
 
-		self.foldername = self.worldDir:match("worlds/DesignHouse/(%w+)/");
+		self.foldername = self.worldDir:match("worlds/DesignHouse/([^/]*)/");
+		self.foldername = Encoding.DefaultToUtf8(self.foldername);
+		-- LOG.std(nil,"debug","self.foldername",self.foldername);
 
 		self.localFiles = LocalService:LoadFiles(self.worldDir,"",nil,1000,nil);
+		-- LOG.std(nil,"debug","self.localFiles",self.localFiles);
 
 		local hasRevision = false;
 		for key,value in ipairs(self.localFiles) do
@@ -107,7 +118,8 @@ function WorldShareGUI:compareRevision()
 		if(hasRevision) then
 			self.githubRevison  = 0;
 
-			local contentUrl = "https://raw.githubusercontent.com/".. ShowLogin.login .."/".. self.foldername .."/master/revision.xml";
+			local contentUrl = "https://raw.githubusercontent.com/".. ShowLogin.login .."/".. EncodingS.base64(self.foldername) .."/master/revision.xml";
+			LOG.std(nil,"debug","contentUrl",contentUrl);
 
 			GithubService:githubGet(contentUrl, function(data,err)
 				if(err == 404) then
@@ -284,7 +296,7 @@ function WorldShareGUI:syncToLocal(_worldDir, _foldername, _callback)
 
 								syncGUIIndex   = syncGUIIndex   + 1;
 								-- syncGUIFiles   = githubFiles.tree[githubIndex].path;
-								LOG.std(nil,"debug","syncGUIIndex",syncGUIIndex);
+								-- LOG.std(nil,"debug","syncGUIIndex",syncGUIIndex);
 
 								if(response.filename == "revision.xml") then
 									self.githubRevison = response.content;
@@ -437,13 +449,17 @@ function WorldShareGUI:syncToGithub()
 								-- self.progressText = self.localFiles[curUploadIndex].filename .. ' 上传成功' .. (curUploadIndex + 1) .. '/' .. totalGithubIndex;
 								
 								syncGUIIndex   = syncGUIIndex   + 1;
-								LOG.std(nil,"debug","data",data);
+								-- LOG.std(nil,"debug","data",data);
 
 								--LOG.std(nil,"debug","upload---syncGUIIndex",syncGUIIndex);
 								--LOG.std(nil,"debug","upload---syncGUIFiles",syncGUIFiles);
 								SyncGUI:updateDataBar(syncGUIIndex, syncGUItotal, syncGUIFiles);
 
 								curUploadIndex = curUploadIndex + 1;
+
+								if(syncGUItotal == syncGUIIndex) then
+									finish();
+								end
 							else
 								_guihelper.MessageBox(self.localFiles[curUploadIndex].filename .. ' 上传失败，请稍后再试');
 							end
@@ -453,7 +469,9 @@ function WorldShareGUI:syncToGithub()
 					end
 
 					if (curUploadIndex > totalLocalIndex) then
-						finish();
+						if(syncGUItotal == syncGUIIndex) then
+							finish();
+						end
 						-- _guihelper.MessageBox('同步完成-D');
 					else
 						uploadOne(); --继续递归上传
@@ -577,14 +595,22 @@ function WorldShareGUI:syncToGithub()
 
 			function finish()
 				if(syncGUItotal == syncGUIIndex) then
+					LOG.std(nil,"debug","send",ShowLogin.selectedWorldInfor.tooltip)
+
+					local modDateTable = {};
+
+					for modDateEle in string.gmatch(ShowLogin.selectedWorldInfor.tooltip,"[^:]+") do
+						modDateTable[#modDateTable+1] = modDateEle;
+					end
+
 					GithubService:GetUrl({
 						url = ShowLogin.site.."/api/mod/WorldShare/models/worlds/refresh",
-						form = {
-							worldsName = self.foldername,
-							revision   = self.currentRevison
-						},
-						headers = {Authorization = "Bearer "..ShowLogin.token}
-					},function(data) end);
+						postfields = '{"modDate":"'..modDateTable[1]..'","worldsName":"'..self.foldername..'","revision":"'..self.currentRevison..'"}',
+						headers = {Authorization    = "Bearer "..ShowLogin.token,
+								   ["content-type"] = "application/json"},
+					},function(data) 
+
+					end);
 
 					self.githubRevison = self.currentRevison;
 				end
@@ -593,19 +619,48 @@ function WorldShareGUI:syncToGithub()
 			-- 获取github仓文件
 			-- get sha value of the files in github
 			GithubService:getFileShaList(self.foldername, function(data,err)
+				local hasReadme = false;
+
+				for key,value in ipairs(self.localFiles) do
+					if(value.filename == "README.md") then
+						hasReadme = true;
+						break;
+					end
+				end
+
+				if(not hasReadme) then
+					local filePath = self.worldDir .. "README.md";
+					local file = ParaIO.open(filePath, "w");
+					local content = "made by http://www.paracraft.cn/";
+
+					file:write(content,#content);
+					file:close();
+
+					--LOG.std(nil,"debug","filePath",filePath);
+
+					local readMeFiles = {
+						filename       = "README.md",
+						file_path      = Encoding.DefaultToUtf8(self.worldDir) .. "README.md",
+						file_content_t = content
+					};
+
+					--LOG.std(nil,"debug","localFiles",readMeFiles);
+
+					self.localFiles[#self.localFiles + 1] = readMeFiles;
+				end
+
 				totalLocalIndex  = #self.localFiles;
 				syncGUItotal     = #self.localFiles;
 
-				LOG.std(nil,"debug","githubFiles",githubFiles);
+				for i=1,#self.localFiles do
+					LOG.std(nil,"debug","localFiles",self.localFiles[i]);
+					self.localFiles[i].needChange = true;
+					i = i + 1;
+				end
 
 				if (err ~= 409 and err ~= 404) then --409代表已经创建过此仓
 					NPL.FromJson(data,githubFiles);
 					
-					for i=1,#self.localFiles do
-						self.localFiles.needChange = true;
-						i = i + 1;
-					end
-
 					SyncGUI:updateDataBar(syncGUIIndex,syncGUItotal);
 
 					totalGithubIndex = #githubFiles.tree;
@@ -622,7 +677,7 @@ function WorldShareGUI:syncToGithub()
 
 	if(self.firstCreate == 1) then
 		GithubService:create(self.foldername,function(data,err)
-			LOG.std(nil,"debug","GithubService:create",data);
+			-- LOG.std(nil,"debug","GithubService:create",data);
 
 			if(err == 422 or err == 201) then
 				syncNow();
