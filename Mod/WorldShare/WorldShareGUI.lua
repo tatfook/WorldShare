@@ -17,16 +17,18 @@ NPL.load("(gl)Mod/WorldShare/LocalService.lua");
 NPL.load("(gl)Mod/WorldShare/SyncGUI.lua");
 NPL.load("(gl)script/ide/Encoding.lua");
 NPL.load("(gl)script/ide/System/Encoding/base64.lua");
+NPL.load("(gl)Mod/WorldShare/EncodingGithub.lua");
 
-local WorldShareGUI = commonlib.inherit(nil,commonlib.gettable("Mod.WorldShare.WorldShareGUI"));
-local SyncGUI       = commonlib.gettable("Mod.WorldShare.SyncGUI");
-local WorldCommon   = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
-local WorldRevision = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision");
-local ShowLogin     = commonlib.gettable("Mod.WorldShare.ShowLogin");
-local GithubService = commonlib.gettable("Mod.WorldShare.GithubService");
-local LocalService  = commonlib.gettable("Mod.WorldShare.LocalService");
-local Encoding      = commonlib.gettable("commonlib.Encoding");
-local EncodingS     = commonlib.gettable("System.Encoding");
+local WorldShareGUI  = commonlib.inherit(nil,commonlib.gettable("Mod.WorldShare.WorldShareGUI"));
+local SyncGUI        = commonlib.gettable("Mod.WorldShare.SyncGUI");
+local WorldCommon    = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
+local WorldRevision  = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision");
+local ShowLogin      = commonlib.gettable("Mod.WorldShare.ShowLogin");
+local GithubService  = commonlib.gettable("Mod.WorldShare.GithubService");
+local LocalService   = commonlib.gettable("Mod.WorldShare.LocalService");
+local Encoding       = commonlib.gettable("commonlib.Encoding");
+local EncodingS      = commonlib.gettable("System.Encoding");
+local EncodingGithub = commonlib.gettable("Mod.WorldShare.EncodingGithub");
 
 function WorldShareGUI:ctor()
 end
@@ -118,7 +120,7 @@ function WorldShareGUI:compareRevision()
 		if(hasRevision) then
 			self.githubRevison  = 0;
 
-			local contentUrl = "https://raw.githubusercontent.com/".. ShowLogin.login .."/".. EncodingS.base64(self.foldername) .."/master/revision.xml";
+			local contentUrl = "https://raw.githubusercontent.com/".. ShowLogin.login .."/".. EncodingGithub.base64(self.foldername) .."/master/revision.xml";
 			LOG.std(nil,"debug","contentUrl",contentUrl);
 
 			GithubService:githubGet(contentUrl, function(data,err)

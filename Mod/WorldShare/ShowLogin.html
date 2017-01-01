@@ -346,7 +346,7 @@
 						5:本地更新
 	            	]]
 
-	            	ShowLogin:getWorldsList(function(err, msg, data) --worldsName,
+	            	ShowLogin:getWorldsList(function(data,err) --worldsName,
 	            		-- 处理本地网络同时存在 本地不存在 网络存在 的世界 
 	            		for kd,vd in ipairs(data) do
 	            			local isExist = false;

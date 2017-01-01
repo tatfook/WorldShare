@@ -230,10 +230,10 @@ function ShowLogin:deleteWorldAll()
 end
 
 function ShowLogin:getWorldsList(_callback) --_worldsName,
-	System.os.GetUrl({
+	GithubService:GetUrl({
 					  url = self.site.."/api/mod/WorldShare/models/worlds",
 					  json=true,
 					  headers = {Authorization = "Bearer "..self.token},
-					  --form = {worldsNameForm = _worldsName}
+					  form = {amount = 100}
 					  },_callback);
 end

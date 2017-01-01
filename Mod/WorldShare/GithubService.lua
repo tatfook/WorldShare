@@ -11,10 +11,12 @@ local GithubService = commonlib.gettable("Mod.WorldShare.GithubService");
 ]]
 NPL.load("(gl)Mod/WorldShare/ShowLogin.lua");
 NPL.load("(gl)script/ide/System/Encoding/base64.lua");
+NPL.load("(gl)Mod/WorldShare/EncodingGithub.lua");
 
-local GithubService = commonlib.gettable("Mod.WorldShare.GithubService");
-local ShowLogin     = commonlib.gettable("Mod.WorldShare.ShowLogin");
-local Encoding      = commonlib.gettable("System.Encoding");
+local GithubService  = commonlib.gettable("Mod.WorldShare.GithubService");
+local ShowLogin      = commonlib.gettable("Mod.WorldShare.ShowLogin");
+local Encoding       = commonlib.gettable("System.Encoding");
+local EncodingGithub = commonlib.gettable("Mod.WorldShare.EncodingGithub");
 
 GithubService.githubApi      = "https://api.github.com/";
 GithubService.githubTryTimes = 0; 
@@ -114,7 +116,7 @@ function GithubService:githubApiDelete(_url, _params, _callback)
 end
 
 function GithubService:getFileShaList(_foldername, _callback)
-	_foldername = Encoding.base64(_foldername);
+	_foldername = EncodingGithub.base64(_foldername);
 	-- LOG.std(nil,"debug","getFileShaList","getFileShaList")
 	
 	local url = self.githubApi .. "repos/" .. ShowLogin.login .. "/" .. Encoding.base64(_foldername) .. "/git/trees/master?recursive=1";
@@ -123,7 +125,7 @@ function GithubService:getFileShaList(_foldername, _callback)
 end
 
 function GithubService:getContent(_foldername, _fileName, _callback)
-	_foldername = Encoding.base64(_foldername);
+	_foldername = EncodingGithub.base64(_foldername);
 
 	local github_token = ShowLogin.github_token;
 
@@ -133,7 +135,7 @@ function GithubService:getContent(_foldername, _fileName, _callback)
 end
 
 function GithubService:create(_foldername, _callback)
-	_foldername = Encoding.base64(_foldername);
+	_foldername = EncodingGithub.base64(_foldername);
 
 	local url = self.githubApi .. "user/repos";
 
@@ -143,7 +145,7 @@ function GithubService:create(_foldername, _callback)
 end
 
 function GithubService:deleteResp(_foldername, authToken, _callback)
-	_foldername = Encoding.base64(_foldername);
+	_foldername = EncodingGithub.base64(_foldername);
 
 	local github_token = ShowLogin.github_token;
 
@@ -162,7 +164,7 @@ function GithubService:deleteResp(_foldername, authToken, _callback)
 end
 
 function GithubService:update(_foldername, _fileName, _fileContent, _sha, _callback)
-	_foldername = Encoding.base64(_foldername);
+	_foldername = EncodingGithub.base64(_foldername);
 
 	local github_token = ShowLogin.github_token;
 
@@ -180,7 +182,7 @@ function GithubService:update(_foldername, _fileName, _fileContent, _sha, _callb
 end
 
 function GithubService:upload(_foldername, _fileName, _fileContent, _callback)
-	_foldername = Encoding.base64(_foldername);
+	_foldername = EncodingGithub.base64(_foldername);
 
 	local github_token = ShowLogin.github_token;
 
@@ -203,7 +205,7 @@ function GithubService:upload(_foldername, _fileName, _fileContent, _callback)
 end
 
 function GithubService:delete(_foldername, _fileName, _sha, _callback)
-	_foldername = Encoding.base64(_foldername);
+	_foldername = EncodingGithub.base64(_foldername);
 	
 	local github_token = ShowLogin.github_token;
 
