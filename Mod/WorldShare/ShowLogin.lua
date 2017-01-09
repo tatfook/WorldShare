@@ -22,7 +22,7 @@ InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.Inter
 local Page;
 
 ShowLogin.login_type = 1;
-ShowLogin.site  = "http://localhost:8099";
+ShowLogin.site  = nil;
 
 function ShowLogin:ctor()
 end

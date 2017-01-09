@@ -19,7 +19,7 @@ local LocalService  = commonlib.gettable("Mod.WorldShare.LocalService");
 local GithubService = commonlib.gettable("Mod.WorldShare.GithubService");
 local EncodingC     = commonlib.gettable("commonlib.Encoding");
 local EncodingS     = commonlib.gettable("System.Encoding");
-local Files         = commonlib.gettable("commonlib.Files"); 
+local Files         = commonlib.gettable("commonlib.Files");
 
 --get file content by text
 function LocalService:getFileContent(_filePath)      

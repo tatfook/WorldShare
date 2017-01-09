@@ -83,12 +83,12 @@ end
 function WorldShareGUI:OnInitDesktop()
 end
 
-function WorldShareGUI:handleKeyEvent(event)
-	-- if(event.keyname == "DIK_SPACE") then
-	-- 	_guihelper.MessageBox("you pressed "..event.keyname.." from Demo GUI");
-	-- 	return true;
-	-- end
-end
+-- function WorldShareGUI:handleKeyEvent(event)
+-- 	if(event.keyname == "DIK_SPACE") then
+-- 		_guihelper.MessageBox("you pressed "..event.keyname.." from Demo GUI");
+-- 		return true;
+-- 	end
+-- end
 
 function WorldShareGUI:compareRevision()
 	if(ShowLogin.login) then
@@ -124,6 +124,8 @@ function WorldShareGUI:compareRevision()
 			LOG.std(nil,"debug","contentUrl",contentUrl);
 
 			GithubService:githubGet(contentUrl, function(data,err)
+				LOG.std(nil,"debug","githubGet",err);
+
 				if(err == 404) then
 					Page:CloseWindow();
 					self.firstCreate = 1;
@@ -131,6 +133,8 @@ function WorldShareGUI:compareRevision()
 				end
 
 				self.githubRevison = data;
+
+				-- LOG.std(nil,"debug","self.githubRevison",self.githubRevison);
 
 				if(tonumber(self.currentRevison) ~= tonumber(self.githubRevison)) then
 					Page:Refresh(0.01);
@@ -191,7 +195,7 @@ function WorldShareGUI:useGithub()
 end
 
 function WorldShareGUI:syncToLocal(_worldDir, _foldername, _callback)
-	LOG.std(nil,"debug","worldDir",_worldDir);
+	-- LOG.std(nil,"debug","worldDir",_worldDir);
 
 	-- 加载进度UI界面
 	SyncGUI:ctor();
@@ -422,7 +426,7 @@ function WorldShareGUI:syncToGithub()
 		if (self.worldDir == "") then
 			_guihelper.MessageBox(L"上传失败，将使用离线模式，原因：上传目录为空");
 			return;
-		else 
+		else
 			self.progressText = L'获取文件sha列表';
 
 			local curUpdateIndex    = 1;
@@ -450,7 +454,7 @@ function WorldShareGUI:syncToGithub()
 							if (bIsDownload) then
 								-- self.progressText = self.localFiles[curUploadIndex].filename .. ' 上传成功' .. (curUploadIndex + 1) .. '/' .. totalGithubIndex;
 								
-								syncGUIIndex   = syncGUIIndex   + 1;
+								syncGUIIndex   = syncGUIIndex + 1;
 								-- LOG.std(nil,"debug","data",data);
 
 								--LOG.std(nil,"debug","upload---syncGUIIndex",syncGUIIndex);
@@ -655,17 +659,21 @@ function WorldShareGUI:syncToGithub()
 				syncGUItotal     = #self.localFiles;
 
 				for i=1,#self.localFiles do
-					LOG.std(nil,"debug","localFiles",self.localFiles[i]);
+					-- LOG.std(nil,"debug","localFiles",self.localFiles[i]);
 					self.localFiles[i].needChange = true;
 					i = i + 1;
 				end
 
+				LOG.std(nil,"debug","err",err);
 				if (err ~= 409 and err ~= 404) then --409代表已经创建过此仓
-					NPL.FromJson(data,githubFiles);
+					githubFiles = data;
 					
+					LOG.std(nil,"debug","syncGUItotal",syncGUItotal);
 					SyncGUI:updateDataBar(syncGUIIndex,syncGUItotal);
 
 					totalGithubIndex = #githubFiles.tree;
+
+					LOG.std(nil,"debug","githubFilesErr",err .. " success!");
 					updateOne();
 				else
 					--if the repos is empty, then upload files 

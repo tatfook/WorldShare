@@ -22,7 +22,7 @@ function EncodingGithub.base64(text)
 		text = text:gsub("[%+]","---");
 		text = text:gsub("[/]" ,"----");
 
-		LOG.std(nil,"debug","text",text);
+		--LOG.std(nil,"debug","text",text);
 
 		return text;
 	else

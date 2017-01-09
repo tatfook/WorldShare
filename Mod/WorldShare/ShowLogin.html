@@ -9,9 +9,10 @@
         <script type="text/npl" refresh="false" src="InternetLoadWorld.lua">
             <![CDATA[
 	            local page        = Page;
+	            local MainLogin   = commonlib.gettable("MyCompany.Aries.Game.MainLogin");
+	            local Files       = commonlib.gettable("commonlib.Files");
 	            GameLogic         = commonlib.gettable("MyCompany.Aries.Game.GameLogic");
 	            InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld");
-	            local MainLogin   = commonlib.gettable("MyCompany.Aries.Game.MainLogin");
 	            ShowLogin         = commonlib.gettable("Mod.WorldShare.ShowLogin");
 	            WorldRevision     = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision");
 	            WorldShareGUI     = commonlib.gettable("Mod.WorldShare.WorldShareGUI");
@@ -245,13 +246,97 @@
 		            Page:Refresh(0.1);
 	            end
 
+	            function findPWDFiles()
+	            	local result = commonlib.Files.Find({}, "/", 0, 500,"*.*");
+
+	            	for key,value in ipairs(result) do
+	            		-- LOG.std(nil,"debug","findPWDFiles",value);
+	            		if(value.filename == "PWD" and value.fileattr == 128) then
+	            			return true;
+	            		end
+	            	end
+
+	            	return false;
+	            end
+
+	            function getRememberPassword()
+	            	local isRememberPwd = Page:GetNode("rememberPassword");
+
+	            	-- LOG.std(nil,"debug","getRememberPassword",PWD);
+
+	            	if(findPWDFiles()) then
+	            		local file = ParaIO.open("/PWD", "r");
+	            		local fileContent = "";
+
+	            		if(file:IsValid()) then
+							fileContent = file:GetText(0, -1);
+							file:close();
+						end
+
+						local PWD = {};
+						for value in string.gmatch(fileContent,"[^|]+") do
+							PWD[#PWD+1] = value;
+						end
+
+						Page:SetNodeValue("account", PWD[1]);
+						Page:SetNodeValue("password",Encoding.PasswordDecodeWithMac(PWD[2]));
+
+						Page:GetNode("online"):SetAttribute("selected",nil);
+						Page:GetNode("local"):SetAttribute("selected",nil);
+
+						if(PWD[3] == "online") then
+							Page:GetNode("online"):SetAttribute("selected","selected");
+						elseif(PWD[3] == "local") then
+							Page:GetNode("local"):SetAttribute("selected","selected");
+						end
+
+	            		isRememberPwd:SetAttribute("checked","checked");
+	            	else
+	            		isRememberPwd:SetAttribute("checked",nil);
+	            	end
+	            end
+
+	            getRememberPassword();
+
 	            function LoginAction()
-	            	local account  = Page:GetValue("account");
-	            	local password = Page:GetValue("password");
+	            	local account       = Page:GetValue("account");
+	            	local password      = Page:GetValue("password");
+	            	local loginServer   = Page:GetValue("loginServer");
+	            	local isRememberPwd = Page:GetValue("rememberPassword"); 
+
+	            	if(account == nil or account == "") then
+	            		_guihelper.MessageBox("账号不能为空");
+	            		return;
+	            	end
+
+	            	if(password == nil or password == "") then
+	            		_guihelper.MessageBox("密码不能为空");
+	            		return;
+	            	end
+
+	            	if(loginServer == "online") then
+	            		ShowLogin.site = "http://www.wikicraft.cn";
+	            	elseif(loginServer == "local") then
+	            		ShowLogin.site = "http://localhost:8099";
+	            	end
 
 	            	ShowLogin:loginAction(account,password,function (err, msg, data)
 							if(data['token']) then
 								ShowLogin.token = data['token'];
+
+								-- 如果记住密码则保存密码到redist根目录下
+								if(isRememberPwd) then
+									local file = ParaIO.open("/PWD", "w");
+									local encodePwd = Encoding.PasswordEncodeWithMac(password);
+									local value = account .. "|" .. encodePwd .. "|" .. loginServer;
+									file:write(value,#value);
+									file:close();
+								else
+									-- 判断文件是否存在，如果存在则删除文件
+									if(findPWDFiles()) then
+										ParaIO.DeleteFile("PWD");
+									end
+								end
 
 								ShowLogin:getUserInfo(function(err, msg, data)
 									if(data['_id']) then
@@ -263,8 +348,10 @@
 											ShowLogin.github_token = data['github_token']; --后面用到
 											ShowLogin.login 	   = data['login']; -- github用户名 后面用到
 
-											local myPackages = Page:GetNode("myPackages");
-											myPackages:SetAttribute("href",ShowLogin.site.."/wiki/mod/packages/packages_projects#/paracraft?userid="..data['_id']);
+											ShowLogin.personPageUrl = ShowLogin.site .. "/wiki/mod/worldshare/person/#?userid=" .. ShowLogin.userid;
+
+											local myWorlds = Page:GetNode("myWorlds");
+											myWorlds:SetAttribute("href",ShowLogin.site.."/wiki/mod/worldshare/person/");
 											ShowLogin:changeLoginType(3);
 											syncWorldsList();
 										else
@@ -443,6 +530,11 @@
 
 		            ShowLogin:deleteWorld();
 	            end
+
+	            function sharePersonPage()
+	            	local url = ShowLogin.site .. "/wiki/mod/worldshare/share/#?type=person&userid=" .. ShowLogin.userid;
+		            ParaGlobal.ShellExecute("open", url, "", "", 1);
+	            end
             ]]>
         </script>
         <div style="width:860px;height:470px;">
@@ -533,11 +625,21 @@
                     <pe:if condition="<%=ShowLogin.login_type == 1 %>">
 	                    <div name="login" style="float:left;base-font-size:16px;font-size:16px;margin-left:4px;margin-top:10px;width:290px;height:325px;padding:20px;color: #ffffff;">
 	                        <div style="margin-bottom:12px;">
-	                        	账号：<input type="text" class="bbs_text" style="height: 30px;" name="account" value="123@123.com"/>
+	                        	服务器：
+	                        	<select name="loginServer" style="height: 30px;width: 185px;">
+	                        		<option selected="selected" value="online" name="online">使用在线服务登录</option>
+	                        		<option value="local" name="local">使用本地服务登录</option>
+	                        	</select>
 	                        </div>
-	                        <div>
-	                        	密码：<input type="text" PasswordChar="*" class="bbs_text" style="height: 30px;" name="password" value="123456"/>
+	                        <div style="margin-bottom:12px;">
+	                        	账号：<input type="text" class="bbs_text" style="margin-left:15px; height: 30px;" name="account"/>
 	                        </div>
+	                        <div style="margin-bottom:12px;">
+	                        	密码：<input type="text" PasswordChar="*" class="bbs_text" style="margin-left:15px; height: 30px;" name="password"/>
+	                        </div>
+	                       	<div style="margin-left:150px;">
+	                       		<input type="checkbox" style="margin-top:3px;" name="rememberPassword"/>记住密码?
+	                       	</div>
 	                        <div style="margin-top:30px;margin-bottom:50px;">
 	                        	<input type="button" style="margin-left: 55px;width: 140px;height: 40px;" class="button_highlight" onclick="LoginAction" value="登陆" />
 	                        </div>
@@ -559,12 +661,12 @@
 	                    <div name="loginsuccess" style="float:left;base-font-size:16px;font-size:16px;margin-left:4px;margin-top:10px;width:290px;height:325px;padding:20px;color: #ffffff;">
 	                    	<div>你已使用<span style="color:#ff6666"><%=ShowLogin.username%></span>成功登录。</div>
 	                    	<div>我的作品网站</div>
-	                    	<div>http://www.wikicraft.cn/wiki/mod/packages/packages_projects#/paracraft?userid=<%=ShowLogin.userid%></div>
+	                    	<div><%=ShowLogin.personPageUrl %></div>
 	                    	<div>
-	                    		<input type="button" name="" style="width:58px;height:40px;margin-left: 192px;margin-top:20px;margin-bottom:20px;" class="button_highlight" value="分享" />
+	                    		<input type="button" name="" onclick="sharePersonPage()" style="width:58px;height:40px;margin-left: 192px;margin-top:20px;margin-bottom:20px;" class="button_highlight" value="分享" />
 	                    	</div>
 	                    	<div>
-	                    		<input type="button" name="myPackages" style="width: 130px;height: 31px;margin-left: 60px;margin-bottom:20px;" class="button_highlight" value="打开作品网站" />
+	                    		<input type="button" name="myWorlds" style="width: 130px;height: 31px;margin-left: 60px;margin-bottom:20px;" class="button_highlight" value="打开作品网站" />
 	                    	</div>
 	                    	<div>
 	                    		<input type="button" name="" style="width: 130px;height: 31px;margin-left: 60px;margin-bottom:20px;" onclick="logout()" class="button_highlight" value="退出登录" />

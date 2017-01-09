@@ -28,7 +28,7 @@ function GithubService:GetUrl(_params,_callback)
 end
 
 function GithubService:retry(_err, _msg, _data, _params, _callback)
-	--LOG.std(nil,"debug","GithubService:retry",{_err, _data});
+	LOG.std(nil,"debug","GithubService:retry",{_err});
 
 	--失败时可直接返回的代码
 	if(_err == 422 or _err == 404 or _err == 409) then
@@ -117,10 +117,11 @@ end
 
 function GithubService:getFileShaList(_foldername, _callback)
 	_foldername = EncodingGithub.base64(_foldername);
-	-- LOG.std(nil,"debug","getFileShaList","getFileShaList")
+	LOG.std(nil,"debug","getFileShaList",_foldername);
 	
-	local url = self.githubApi .. "repos/" .. ShowLogin.login .. "/" .. Encoding.base64(_foldername) .. "/git/trees/master?recursive=1";
+	local url = self.githubApi .. "repos/" .. ShowLogin.login .. "/" .. _foldername .. "/git/trees/master?recursive=1";
 
+	LOG.std(nil,"debug","url",url);
 	self:githubApiGet(url, _callback);
 end
 
@@ -149,7 +150,7 @@ function GithubService:deleteResp(_foldername, authToken, _callback)
 
 	local github_token = ShowLogin.github_token;
 
-	LOG.std(nil,"debug","authToken",authToken);
+	-- LOG.std(nil,"debug","authToken",authToken);
 
 	local url = self.githubApi .. "repos/" .. ShowLogin.login .. "/" .. _foldername;
 

@@ -16,6 +16,7 @@ NPL.load("(gl)Mod/WorldShare/WorldShareEntity.lua");
 NPL.load("(gl)Mod/WorldShare/WorldShareSceneContext.lua");
 NPL.load("(gl)Mod/WorldShare/ShowLogin.lua");
 NPL.load("(gl)script/ide/Encoding.lua");
+NPL.load("(gl)script/ide/Files.lua");
 
 local WorldShareSceneContext = commonlib.gettable("Mod.WorldShare.WorldShareSceneContext");
 
@@ -50,7 +51,7 @@ function WorldShare:init()
 	WorldShareEntity:init();
 	WorldShareCommand:init();
 
-	WorldShareSceneContext:ApplyToDefaultContext();
+	-- WorldShareSceneContext:ApplyToDefaultContext();
 
 	GameLogic.GetFilters():add_filter("InternetLoadWorld.ShowPage",function (bEnable, bShow)
 		System.App.Commands.Call("File.MCMLWindowFrame", {
@@ -93,11 +94,14 @@ function WorldShare:init()
 
 		return false;
 	end);
+
+	NPL.load("(gl)script/apps/WebServer/WebServer.lua");
+	WebServer:Start("script/apps/WebServer/admin","0.0.0.0",8099);
 end
 
 function WorldShare:OnInitDesktop()
-	LOG.std(nil,"debug","Share","OnInitDesktop");
-	return true;
+	-- LOG.std(nil,"debug","Share","OnInitDesktop");
+	-- return true;
 end
 
 function WorldShare:OnLogin()
@@ -105,42 +109,42 @@ end
 
 -- called when a new world is loaded. 
 function WorldShare:OnWorldLoad()
-	LOG.std(nil,"debug","Share","Mod WorldShare on world loaded");
+	-- LOG.std(nil,"debug","Share","Mod WorldShare on world loaded");
 
 	WorldShareGUI:OnWorldLoad();
 end
 
-function WorldShare:handleKeyEvent(event)
-	return WorldShareGUI:handleKeyEvent(event);
-end
+-- function WorldShare:handleKeyEvent(event)
+-- 	return WorldShareGUI:handleKeyEvent(event);
+-- end
 
-function WorldShare:OnActivateDesktop(mode)
-	local Desktop = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop");
+-- function WorldShare:OnActivateDesktop(mode)
+-- 	local Desktop = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop");
 
-	if(Desktop.mode) then
-		-- GameLogic.ADDBBS("test",L"Big进入编辑模式",4000,"0 255 0");
-	else
-		-- GameLogic.AddBBS("test",L"Big进入游戏模式",4000,"255 255 0");
-	end
+-- 	if(Desktop.mode) then
+-- 		-- GameLogic.ADDBBS("test",L"Big进入编辑模式",4000,"0 255 0");
+-- 	else
+-- 		-- GameLogic.AddBBS("test",L"Big进入游戏模式",4000,"255 255 0");
+-- 	end
 
-	return;
-end
+-- 	return;
+-- end
 
 -- called when a world is unloaded. 
-function WorldShare:OnLeaveWorld()
-	LOG.std(nil,"info","Share","Mod Share on leave world");
-	WorldShareGUI:OnLeaveWorld();
-end
+-- function WorldShare:OnLeaveWorld()
+-- 	LOG.std(nil,"info","Share","Mod Share on leave world");
+-- 	WorldShareGUI:OnLeaveWorld();
+-- end
 
 function WorldShare:OnDestroy()
 end
 
-function WorldShare:OnClickExitApp()
-	-- _guihelper.MessageBox("wanna exit?" , function()
-	-- 	ParaEngine.GetAttributeObject():SetField("IsWindowClosingAllowed", true);
-	-- 	ParaGlobal.ExitApp();
-	-- end)
+-- function WorldShare:OnClickExitApp()
+-- 	-- _guihelper.MessageBox("wanna exit?" , function()
+-- 	-- 	ParaEngine.GetAttributeObject():SetField("IsWindowClosingAllowed", true);
+-- 	-- 	ParaGlobal.ExitApp();
+-- 	-- end)
 
-	ParaEngine.GetAttributeObject():SetField("IsWindowClosingAllowed", true);
-	ParaGlobal.ExitApp();
-end
+-- 	ParaEngine.GetAttributeObject():SetField("IsWindowClosingAllowed", true);
+-- 	ParaGlobal.ExitApp();
+-- end
