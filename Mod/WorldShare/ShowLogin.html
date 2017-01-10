@@ -251,7 +251,7 @@
 
 	            	for key,value in ipairs(result) do
 	            		-- LOG.std(nil,"debug","findPWDFiles",value);
-	            		if(value.filename == "PWD" and value.fileattr == 128) then
+	            		if(value.filename == "PWD" and value.fileattr ~= 0) then
 	            			return true;
 	            		end
 	            	end
