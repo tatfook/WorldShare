@@ -146,7 +146,7 @@ function GithubService:create(_foldername, _callback)
 end
 
 function GithubService:deleteResp(_foldername, authToken, _callback)
-	_foldername = EncodingGithub.base64(_foldername);
+	local _foldername = EncodingGithub.base64(_foldername);
 
 	local github_token = ShowLogin.github_token;
 

@@ -175,8 +175,9 @@ function ShowLogin:deleteWorldGithub(_password)
 			         },
 		postfields = AuthParams
     },function(data,err)
-    	local basicAuthData = {};
-    	NPL.FromJson(data,basicAuthData);
+    	LOG.std(nil,"debug","GetUrl",data);
+    	local basicAuthData = data;
+
     	AuthToken = basicAuthData.token;
 
 	    _guihelper.MessageBox(format(L"确定删除远程世界:%s?", foldername or ""), function(res)
@@ -197,15 +198,31 @@ function ShowLogin:deleteWorldGithub(_password)
 							},
 							json    = true,
 							headers = {Authorization = "Bearer "..ShowLogin.token}
-						},function(data,err) 
+						},function(data,err)
 							-- LOG.std(nil,"debug","errrrrr",err);
 
-							InternetLoadWorld.cur_ds = self.handleCur_ds;
+							self.handleCur_ds = {};
+							local hasLocal    = false;
+							for key,value in ipairs(InternetLoadWorld.cur_ds) do
+								if(value.foldername == foldername and value.status == 3) then
+									LOG.std(nil,"debug","value.status",value.status);
+									value.status = 1;
+									hasLocal = true;
+								end
+
+								if(value.foldername ~= foldername) then
+									self.handleCur_ds[#self.handleCur_ds+1] = value;
+								end
+							end
+
+							if(not hasLocal)then
+								InternetLoadWorld.cur_ds = self.handleCur_ds;
+							end
 
 			    			Page:CloseWindow();
-				            NPL.load("(gl)script/apps/Aries/Creator/WorldCommon.lua");
 
-				            local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
+				            NPL.load("(gl)script/apps/Aries/Creator/WorldCommon.lua");
+				            local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon");
 
 				            if(not WorldCommon.GetWorldInfo()) then
 				                MainLogin.state.IsLoadMainWorldRequested = nil;
