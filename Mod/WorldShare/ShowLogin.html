@@ -387,7 +387,7 @@
 									ShowLogin.userid   = data['_id'];
 
 									ShowLogin.personPageUrl = ShowLogin.site .. "/wiki/mod/worldshare/person/#?userid=" .. ShowLogin.userid;
-									
+
 									local myWorlds = Page:GetNode("myWorlds");
 									myWorlds:SetAttribute("href",ShowLogin.site.."/wiki/mod/worldshare/person/");
 									ShowLogin:changeLoginType(3);
@@ -436,6 +436,8 @@
 	            	]]
 
 	            	ShowLogin:getWorldsList(function(data,err) --worldsName,
+	            		LOG.std(nil,"debug","ShowLogin:getWorldsList",{data,err});
+
 	            		-- 处理本地网络同时存在 本地不存在 网络存在 的世界 
 	            		for kd,vd in ipairs(data) do
 	            			local isExist = false;
