@@ -125,10 +125,9 @@ function LocalService:download(_foldername,_path,_callback)
 
 		local file = ParaIO.open(bashPath .. _path, "w");
 
-		local file_infor = {};
-		NPL.FromJson(data,file_infor);
+		local file_infor = data;
 
-		-- LOG.std(nil,"debug","GithubService:getContent",file_infor);
+		LOG.std(nil,"debug","GithubService:getContent",file_infor);
 		-- LOG.std(nil,"debug","content",file_infor.content);
 
 		local content = EncodingS.unbase64(file_infor.content);

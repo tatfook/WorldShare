@@ -94,7 +94,7 @@ function ShowLogin:deleteWorldLocal(_callback)
 					self.handleCur_ds = {};
 					local hasGithub    = false;
 					for key,value in ipairs(InternetLoadWorld.cur_ds) do
-						if(value.foldername == foldername and value.status == 3) then
+						if(value.foldername == foldername and value.status == 3 or value.status == 4 or value.status == 5) then
 							LOG.std(nil,"debug","value.status",value.status);
 							value.status = 2;
 							hasGithub = true;
@@ -204,7 +204,7 @@ function ShowLogin:deleteWorldGithub(_password)
 							self.handleCur_ds = {};
 							local hasLocal    = false;
 							for key,value in ipairs(InternetLoadWorld.cur_ds) do
-								if(value.foldername == foldername and value.status == 3) then
+								if(value.foldername == foldername and value.status == 3 or value.status == 4 or value.status == 5) then
 									LOG.std(nil,"debug","value.status",value.status);
 									value.status = 1;
 									hasLocal = true;

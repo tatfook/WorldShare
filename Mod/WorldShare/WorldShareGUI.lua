@@ -382,9 +382,11 @@ function WorldShareGUI:syncToLocal(_worldDir, _foldername, _callback)
 				if(err == 409) then
 					SyncGUI:updateDataBar(-1,-1);
 					_guihelper.MessageBox(L"Github上暂无数据");
-				else
-					NPL.FromJson(data,githubFiles);
 				end
+
+				LOG.std(nil,"debug","syncToLocal",data);
+
+				githubFiles = data;
 
 				totalLocalIndex  = #self.localFiles;
 				totalGithubIndex = #githubFiles.tree;
