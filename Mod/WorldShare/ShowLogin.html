@@ -314,16 +314,10 @@
 	            		return;
 	            	end
 
-	            	if(loginServer == "online") then
-	            		ShowLogin.site = "http://www.wikicraft.cn";
-	            	elseif(loginServer == "local") then
-	            		ShowLogin.site = "http://localhost:8099";
-	            	end
-
 	            	ShowLogin:loginAction(account,password,function (err, msg, data)
 							if(data['token']) then
 								ShowLogin.token = data['token'];
-
+								
 								-- 如果记住密码则保存密码到redist根目录下
 								if(isRememberPwd) then
 									local file = ParaIO.open("/PWD", "w");
@@ -399,6 +393,29 @@
 						end);
 					end, _guihelper.MessageBoxButtons.YesNo);
 	            end
+
+	            function setSite()
+	            	local register    = Page:GetNode("register");
+	            	local loginServer = Page:GetValue("loginServer");
+					
+	            	-- LOG.std(nil,"debug","register",register);
+
+	            	if(loginServer == "online") then
+	            		ShowLogin.site = "http://www.wikicraft.cn";
+	            	elseif(loginServer == "local") then
+	            		ShowLogin.site = "http://localhost:8099";
+	            	end
+
+	            	if(loginServer == "online") then
+	            		register:SetAttribute("href",ShowLogin.site .. "/wiki/projects");
+	            	elseif(loginServer == "local") then
+	            		register:SetAttribute("href",ShowLogin.site .. "/wiki/projects");
+	            	end
+
+	            	Page:Refresh(0.01);
+	            end
+
+	            setSite();
 
 	            function logout()
 	            	ShowLogin:changeLoginType(1);
@@ -630,7 +647,7 @@
 	                    <div name="login" style="float:left;base-font-size:16px;font-size:16px;margin-left:4px;margin-top:10px;width:290px;height:325px;padding:20px;color: #ffffff;">
 	                        <div style="margin-bottom:12px;">
 	                        	服务器：
-	                        	<select name="loginServer" style="height: 30px;width: 185px;">
+	                        	<select name="loginServer" onclick="setSite()" style="height: 30px;width: 185px;">
 	                        		<option selected="selected" value="online" name="online">使用在线服务登录</option>
 	                        		<option value="local" name="local">使用本地服务登录</option>
 	                        	</select>
@@ -649,7 +666,7 @@
 	                        </div>
 	                        <div style="text-align:left;color:#ff6666;margin-left:35px;">
 	                        	<span>还没有帐号？</span>
-	                        	<a href="http://www.wikicraft.cn/wiki/projects" style="font-size: 14px;color: #ffffff">&gt;&gt;点击注册&lt;&lt;</a>
+	                        	<a name="register" style="font-size: 14px;color: #ffffff">&gt;&gt;点击注册&lt;&lt;</a>
 	                        </div>
 	                    </div>
                     </pe:if>

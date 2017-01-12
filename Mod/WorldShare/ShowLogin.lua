@@ -22,7 +22,7 @@ InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.Inter
 local Page;
 
 ShowLogin.login_type = 1;
-ShowLogin.site  = nil;
+ShowLogin.site  = "http://www.wikicraft.cn";
 
 function ShowLogin:ctor()
 end
