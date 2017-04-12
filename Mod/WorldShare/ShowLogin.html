@@ -6,558 +6,140 @@
 </head>
 <body>
     <pe:mcml>
-        <script type="text/npl" refresh="false" src="InternetLoadWorld.lua">
+        <script type="text/npl" refresh="false">
             <![CDATA[
-	            local page        = Page;
-	            local MainLogin   = commonlib.gettable("MyCompany.Aries.Game.MainLogin");
-	            local Files       = commonlib.gettable("commonlib.Files");
-	            GameLogic         = commonlib.gettable("MyCompany.Aries.Game.GameLogic");
-	            InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld");
-	            ShowLogin         = commonlib.gettable("Mod.WorldShare.ShowLogin");
-	            WorldRevision     = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision");
-	            WorldShareGUI     = commonlib.gettable("Mod.WorldShare.WorldShareGUI");
-	            Encoding  		  = commonlib.gettable("commonlib.Encoding");
-
-	            InternetLoadWorld.OnInit();
-	            ShowLogin.OnInit();
-	            
-	            function IsMCVersion()
-		            if(System.options.mc) then
-		            	return true;
-		            else
-		           		return false;
-		            end
-	            end
-
-	            function GetWorldSize(size)
-		            local s;
-
-		            if(size and size ~= "") then
-		            	s = string.format("%sM",size);
-		            else
-		            	s = nil;
-	            	end
-
-	            	return s or "5M";
-	            end
-
-	            function GetWorldType()
-	            	return InternetLoadWorld.type_ds;
-	            end
-
-	            function CreateNewWorld()
-		            page:CloseWindow();
-
-		            NPL.load("(gl)script/apps/Aries/Creator/Game/Login/CreateNewWorld.lua");
-		            local CreateNewWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.CreateNewWorld");
-
-		            CreateNewWorld.ShowPage();
-	            end
-
-	            function GetCurWorldInfo(info_type,world_index)
-		            local index = tonumber(world_index);
-		            local selected_world = InternetLoadWorld.cur_ds[world_index]
-		            --local cur_world = InternetLoadWorld:GetCurrentWorld();
-
-		            if(selected_world) then
-			            if(info_type == "mode") then
-				            local mode = selected_world["world_mode"];
-
-				            if(mode == "edit") then
-				            	return L"创作";
-				            else
-				            	return L"参观";
-				            end
-				        else
-				            return selected_world[info_type];
-			            end
-		            end
-	            end
-
-	            function GetNetSpeed()
-	            	return "100ms";
-	            end
-
-	            function GetPeopleNumOnline()
-	            	return "????";
-	            end
-
-	            function InputSearchContent()
-		            InternetLoadWorld.isSearching = true;
-		            Page:Refresh(0.1);
-	            end
-
-	            function ClosePage()
-	                if(IsMCVersion()) then
-	                    InternetLoadWorld.ReturnLastStep();
-	                else
-	                    Page:CloseWindow();
-	                end
-	            end
-
-	            function GetDefaultValueForAddress()
-		            local s = "";
-
-		            if(IsMCVersion()) then
-		            	s = L"输入服务器地址";
-		            else
-		            	s = L"输入服务器地址或者米米号";
-		            end
-
-		            return s;
-	            end
-
-	            function LookPlayerInform()
-		            local cur_page = InternetLoadWorld.GetCurrentServerPage();
-		            local nid = cur_page.player_nid;
-
-		            if(nid) then
-		            	Map3DSystem.App.Commands.Call(Map3DSystem.options.ViewProfileCommand, nid);
-		            end
-	            end
-
-	            function IsBlockWorld()
-		            local cur_pageH = InternetLoadWorld.GetCurrentServerPage();
-
-		            if(cur_page.player_nid and cur_page.player_nid ~= "") then
-		            	return false;
-		            else
-		            	return true;
-		            end
-	            end
-
-	            function OpenBBS()
-		            NPL.load("(gl)script/apps/Aries/Creator/Game/game_options.lua");
-
-		            local options = commonlib.gettable("MyCompany.Aries.Game.GameLogic.options");
-		            local url = options.bbs_home_url;
-
-		            ParaGlobal.ShellExecute("open", url, "", "", 1);
-	            end
-
-	            function OnImportWorld()
-		            NPL.load("(gl)script/apps/Aries/Creator/Game/Login/LocalLoadWorld.lua");
-
-		            local LocalLoadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalLoadWorld");
-		            ParaGlobal.ShellExecute("open", ParaIO.GetCurDirectory(0)..LocalLoadWorld.GetWorldFolder(), "", "", 1);
-	            end
-
-	            function GetDesForWorld()
-		            local  str = ""
-		            return str;
-	            end
-
-	            function GetOnlineDes()
-		            local isOnline = System.User.isOnline;
-		            local des = L"你的状态:";
-
-		            if(isOnline) then
-		            	des = des..L"已登录";
-		            else
-		            	des = des..L"未登录";
-		            end
-
-		            return des;
-	            end
-
-	            function QQLogin()
-	            	InternetLoadWorld.QQLogin();
-	            end
-
-	            function OnChangeType(index)
-	            	InternetLoadWorld.OnChangeType(index);
-	            end
-
-	            function BeHasWorldInSlot(is_empty_slot,is_buy_slot)
-		            local value;
-
-		            if(is_empty_slot or is_buy_slot) then
-		            	value = false;
-		            else
-		            	value = true;
-		            end
-
-		            return value;
-	            end
-
-	            function OnPurchaseSaveSlot()
-		            if(System.options.mc) then
-		            	_guihelper.MessageBox(L"此功能暂未开放");
-		            else
-		            	_guihelper.MessageBox(L"你尚未开启这个存档槽. 每购买一个会员物品, 可永久获得一个存档槽.", function(res)
-				            if(res) then
-					            local WorldUploadPage = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.WorldUploadPage");
-					            System.App.Commands.GetCommand("Profile.Aries.PurchaseItemWnd"):Call({gsid = WorldUploadPage.ExtendedSlotCountGsid});
-				            end
-			            end);
-		            end
-	            end
-
-	            function OnSaveToSlot(name)
-		            local slot_id = tonumber(name);
-		            InternetLoadWorld.OnSaveToSlot(slot_id);
-	            end
-
-	            function IsSelfOnlineWorld()
-		            local cur_svr_page = InternetLoadWorld.GetCurrentServerPage() or {};
-
-		            if(InternetLoadWorld.type_index == 1 and cur_svr_page.name and cur_svr_page.name == "onlineworld") then
-		            	return true;
-		            else
-		            	return false;
-		            end
-	            end
-
-	            function IsChangingName()
-	            	return InternetLoadWorld.changedName;
-	            end
-
-	            function IsChangingQQ()
-	            	return InternetLoadWorld.changedQQ;
-	            end
-
-	            function ChangeName()
-		            InternetLoadWorld.changedName = true;
-		            Page:Refresh(0.1);
-	            end
-
-	            function SaveName()
-		            InternetLoadWorld.ChangeNickName();
-		            --changedName = false;
-		            --Page:Refresh(0.1);
-	            end
-
-	            function ChangeQQ()
-		            InternetLoadWorld.changedQQ = true;
-		            Page:Refresh(0.1);
-	            end
-
-	            function SaveQQ()
-		            InternetLoadWorld.changedQQ = false;
-		            Page:Refresh(0.1);
-	            end
-
-	            function GetUserNickName()
-	            	return System.User.NickName or L"匿名";
-	            end
-
-	            function CancelChangeName()
-		            InternetLoadWorld.changedName = false;
-		            Page:Refresh(0.1);
-	            end
-
-	            function findPWDFiles()
-	            	local result = commonlib.Files.Find({}, "/", 0, 500,"*.*");
-
-	            	for key,value in ipairs(result) do
-	            		-- LOG.std(nil,"debug","findPWDFiles",value);
-	            		if(value.filename == "PWD" and value.fileattr ~= 0) then
-	            			return true;
-	            		end
-	            	end
-
-	            	return false;
-	            end
-
-	            function getRememberPassword()
-	            	local isRememberPwd = Page:GetNode("rememberPassword");
-
-	            	-- LOG.std(nil,"debug","getRememberPassword",PWD);
-
-	            	if(findPWDFiles()) then
-	            		local file = ParaIO.open("/PWD", "r");
-	            		local fileContent = "";
-
-	            		if(file:IsValid()) then
-							fileContent = file:GetText(0, -1);
-							file:close();
-						end
-
-						local PWD = {};
-						for value in string.gmatch(fileContent,"[^|]+") do
-							PWD[#PWD+1] = value;
-						end
-
-						Page:SetNodeValue("account", PWD[1]);
-						Page:SetNodeValue("password",Encoding.PasswordDecodeWithMac(PWD[2]));
-
-						Page:GetNode("online"):SetAttribute("selected",nil);
-						Page:GetNode("local"):SetAttribute("selected",nil);
-
-						if(PWD[3] == "online") then
-							Page:GetNode("online"):SetAttribute("selected","selected");
-						elseif(PWD[3] == "local") then
-							Page:GetNode("local"):SetAttribute("selected","selected");
-						end
-
-	            		isRememberPwd:SetAttribute("checked","checked");
-	            	else
-	            		isRememberPwd:SetAttribute("checked",nil);
-	            	end
-	            end
-
-	            getRememberPassword();
-
-	            function LoginAction()
-	            	local account       = Page:GetValue("account");
-	            	local password      = Page:GetValue("password");
-	            	local loginServer   = Page:GetValue("loginServer");
-	            	local isRememberPwd = Page:GetValue("rememberPassword"); 
-
-	            	if(account == nil or account == "") then
-	            		_guihelper.MessageBox("账号不能为空");
-	            		return;
-	            	end
-
-	            	if(password == nil or password == "") then
-	            		_guihelper.MessageBox("密码不能为空");
-	            		return;
-	            	end
-
-	            	ShowLogin:loginAction(account,password,function (err, msg, data)
-							if(data['token']) then
-								ShowLogin.token = data['token'];
-								
-								-- 如果记住密码则保存密码到redist根目录下
-								if(isRememberPwd) then
-									local file = ParaIO.open("/PWD", "w");
-									local encodePwd = Encoding.PasswordEncodeWithMac(password);
-									local value = account .. "|" .. encodePwd .. "|" .. loginServer;
-									file:write(value,#value);
-									file:close();
-								else
-									-- 判断文件是否存在，如果存在则删除文件
-									if(findPWDFiles()) then
-										ParaIO.DeleteFile("PWD");
-									end
-								end
-
-								ShowLogin:getUserInfo(function(err, msg, data)
-									if(data['_id']) then
-
-										if(data['github']) then
-											ShowLogin.username = data['displayName'];
-											ShowLogin.userid   = data['_id'];
-
-											ShowLogin.github_token = data['github_token']; --后面用到
-											ShowLogin.login 	   = data['login']; -- github用户名 后面用到
-
-											ShowLogin.personPageUrl = ShowLogin.site .. "/wiki/mod/worldshare/person/#?userid=" .. ShowLogin.userid;
-
-											local myWorlds = Page:GetNode("myWorlds");
-											myWorlds:SetAttribute("href",ShowLogin.site.."/wiki/mod/worldshare/person/");
-											ShowLogin:changeLoginType(3);
-											syncWorldsList();
-										else
-											local clientLogin = Page:GetNode("clientLogin");
-
-											ShowLogin:changeLoginType(2);
-										end
-									else
-										_guihelper.MessageBox(L"用户名或者密码错误");
-									end
-								end);
-							else
-								_guihelper.MessageBox(L"用户名或者密码错误");
-							end
-						end
-	            	);
-	            end
-
-	            function checkGitBind()
-	            	ParaGlobal.ShellExecute("open", ShowLogin.site.."/wiki/mod/WorldShare/client_login#/?token="..ShowLogin.token, "", "", 1);
-	            	checkGitBindAction();
-	            end
-
-	            function checkGitBindAction()
-	            	_guihelper.MessageBox(L"请确定绑定GITHUB是否成功？", function(res)
-						-- if(res and res == _guihelper.DialogResult.Yes) then
-						-- 	-- pressed YES
-						-- end
-						ShowLogin:getUserInfo(function(err, msg, data)
-							if(data['_id']) then
-								if(data['github']) then
-									ShowLogin.username = data['displayName'];
-									ShowLogin.userid   = data['_id'];
-
-									ShowLogin.personPageUrl = ShowLogin.site .. "/wiki/mod/worldshare/person/#?userid=" .. ShowLogin.userid;
-
-									local myWorlds = Page:GetNode("myWorlds");
-									myWorlds:SetAttribute("href",ShowLogin.site.."/wiki/mod/worldshare/person/");
-									ShowLogin:changeLoginType(3);
-									syncWorldsList();
-								else
-									checkGitBindAction();
-								end
-							end
-						end);
-					end, _guihelper.MessageBoxButtons.YesNo);
-	            end
-
-	            function setSite()
-	            	local register    = Page:GetNode("register");
-	            	local loginServer = Page:GetValue("loginServer");
-					
-	            	-- LOG.std(nil,"debug","register",register);
-
-	            	if(loginServer == "online") then
-	            		ShowLogin.site = "http://www.wikicraft.cn";
-	            	elseif(loginServer == "local") then
-	            		ShowLogin.site = "http://localhost:8099";
-	            	end
-
-	            	if(loginServer == "online") then
-	            		register:SetAttribute("href",ShowLogin.site .. "/wiki/projects");
-	            	elseif(loginServer == "local") then
-	            		register:SetAttribute("href",ShowLogin.site .. "/wiki/projects");
-	            	end
-
-	            	Page:Refresh(0.01);
-	            end
-
-	            setSite();
-
-	            function logout()
-	            	ShowLogin:changeLoginType(1);
-	            end
-
-	            function syncWorldsList()
-	            	local localWorlds = InternetLoadWorld.ServerPage_ds[1]['ds'];
-
-	            	-- 防止重复数据
-	            	if(not ShowLogin.originLocalWorlds) then
-	            		ShowLogin.originLocalWorlds = commonlib.copy(localWorlds);
-	            	else
-	            		localWorlds = commonlib.copy(ShowLogin.originLocalWorlds);
-	            	end
-
-	            	-- LOG.std(nil,"debug","localWorlds",localWorlds);
-	            	for kl,vl in ipairs(localWorlds) do
-	            		local WorldRevisionCheckOut = WorldRevision:new():init("worlds/DesignHouse/"..Encoding.Utf8ToDefault(vl.foldername).."/");
-	            		-- LOG.std(nil,"debug","WorldRevisionCheckOut",WorldRevisionCheckOut);
-
-	            		localWorlds[kl].revision = WorldRevisionCheckOut:GetDiskRevision();
-	            		-- LOG.std(nil,"debug","dir","worlds/DesignHouse/"..vl.foldername);
-	            		-- LOG.std(nil,"debug","localWorlds[kl].revision",localWorlds[kl].revision);
-	            	end
-
-	            	-- LOG.std(nil,"debug","localWorlds",localWorlds);
-	            	
-	            	--[[
-						status代码含义:
-						1:仅本地
-						2:仅网络
-						3:本地网络一致
-						4:网络更新
-						5:本地更新
-	            	]]
-
-	            	ShowLogin:getWorldsList(function(data,err) --worldsName,
-	            		LOG.std(nil,"debug","ShowLogin:getWorldsList",{data,err});
-
-	            		-- 处理本地网络同时存在 本地不存在 网络存在 的世界 
-	            		for kd,vd in ipairs(data) do
-	            			local isExist = false;
-
-	            			for kl,vl in ipairs(localWorlds) do
-	            				if(vd["worldsName"] == vl["foldername"]) then
-
-	            					-- LOG.std(nil,"debug","localVersion",vl["revision"]);
-	            					-- LOG.std(nil,"debug","networkVersion",vd["revision"]);
-
-	            					if(tonumber(vl["revision"]) == tonumber(vd["revision"])) then
-	            						localWorlds[kl].status   = 3; --本地网络一致
-	            					elseif(tonumber(vl["revision"]) < tonumber(vd["revision"])) then
-	            						localWorlds[kl].status   = 5; --本地更新
-	            					elseif(tonumber(vl["revision"]) > tonumber(vd["revision"])) then
-	            						localWorlds[kl].status   = 4; --网络更新
-	            					end
-
-	            					-- localWorlds[kl].revision = vd["revision"];
-	            					isExist = true;
-	            					break;
-	            				end
-	            			end
-
-	            			if(not isExist) then
-            					localWorlds[#localWorlds+1] = {
-            						text       = vd["worldsName"];
-            						foldername = vd["worldsName"];
-            						revision   = vd["date"];
-            						status     = 2; --仅网络
-            					};
-	            			end
-	            		end
-
-	            		-- 处理 本地存在 网络不存在 的世界
-	            		for kl,vl in ipairs(localWorlds) do
-	            			local isExist = false;
-
-	            			for kd,vd in ipairs(data) do
-	            				if(vl["foldername"] == vd["worldsName"]) then
-	            					isExist = true;
-	            					break;
-	            				end
-	            			end
-
-	            			if(not isExist) then
-	            				localWorlds[kl].status = 1; --仅本地
-	            			end
-	            		end
-	            		
-	            		Page:Refresh(0.01);
-	            	end);
-	            end
-
-	            function EnterWorld(_index)
-	            	local index = tonumber(_index);
-		            ShowLogin.selectedWorldInfor = InternetLoadWorld.cur_ds[_index];
-
-		            LOG.std(nil,"debug","ShowLogin.selectedWorldInfor",ShowLogin.selectedWorldInfor);
-		            -- world_mode="edit",remotefile="local://worlds/DesignHouse/TestD",gs_nid="",force_nid=0,ws_id="",author="",}
-		            
-		            if(ShowLogin.selectedWorldInfor.status == 2) then
-		            	local worldDir = "worlds/DesignHouse/" .. ShowLogin.selectedWorldInfor.foldername .. "/";
-
-		            	ParaIO.CreateDirectory(worldDir);
-		            	WorldShareGUI:syncToLocal(worldDir,ShowLogin.selectedWorldInfor.foldername,function(_success,_revision)
-		            		if(_success) then
-		            			ShowLogin.selectedWorldInfor.status      = 3;
-		            			ShowLogin.selectedWorldInfor.server      = "local";
-		            			ShowLogin.selectedWorldInfor.is_zip      = false;
-		            			ShowLogin.selectedWorldInfor.icon        = "Texture/blocks/items/1013_Carrot.png";
-		            			ShowLogin.selectedWorldInfor.revision    = _revision;
-		            			ShowLogin.selectedWorldInfor.text 		 = ShowLogin.selectedWorldInfor.foldername;
-		            			ShowLogin.selectedWorldInfor.world_mode  = "edit";
-		            			ShowLogin.selectedWorldInfor.gs_nid      = "";
-		            			ShowLogin.selectedWorldInfor.force_nid   = 0;
-		            			ShowLogin.selectedWorldInfor.ws_id       = "";
-		            			ShowLogin.selectedWorldInfor.author      = "";
-		            			ShowLogin.selectedWorldInfor.remotefile  ="local://worlds/DesignHouse/" .. ShowLogin.selectedWorldInfor.foldername;
-
-		            			Page:Refresh(0.01);
-		            		end
-		            	end);
-		            else
-		            	InternetLoadWorld.EnterWorld(_index);
-		            end
-	            end
-
-	            function deleteWorld(_index)
-	            	Page:CloseWindow();
-
-	            	local index = tonumber(_index);
-		            ShowLogin.selectedWorldInfor = InternetLoadWorld.cur_ds[_index];
-
-		            ShowLogin:deleteWorld();
-	            end
-
-	            function sharePersonPage()
-	            	local url = ShowLogin.site .. "/wiki/mod/worldshare/share/#?type=person&userid=" .. ShowLogin.userid;
-		            ParaGlobal.ShellExecute("open", url, "", "", 1);
-	            end
+	            local MainLogin         = commonlib.gettable("MyCompany.Aries.Game.MainLogin");
+	            local GameLogic         = commonlib.gettable("MyCompany.Aries.Game.GameLogic");
+	            ShowLogin               = commonlib.gettable("Mod.WorldShare.ShowLogin");
+	            InternetLoadWorld       = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld");
+
+                InternetLoadWorld.OnInit();
+                ShowLogin.OnInit();
+
+                ShowLogin.setSite();
+                ShowLogin.getRememberPassword();
             ]]>
         </script>
+        <style type="text/mcss">
+            {
+                user_area = {
+                    float  = "left",
+                    width  = 345,
+                    height = 441,
+                    ["padding-left"]  = 25,
+                    ["padding-right"] = 30,
+                },
+                user_area_world_type = {
+                    ["margin-top"] = 20,
+                    height = 40,
+                },
+                user_area_world_type_selected = {
+                    height = 40,
+                    spacing = 20,
+                    background = "textures/world_type_selected_32bits.png",
+                    color = "#FFFFFF",
+                    ["margin-right"] = 15,
+                },
+                user_area_world_type_unselect = {
+                    height = 40,
+                    spacing = 20,
+                    background = "textures/world_type_unselect_32bits.png",
+                    color = "#FFFFFF",
+                    ["margin-right"] = 15,
+                },
+                user_login = {
+                    ["base-font-size"]   = 16,
+                    ["font-size"]        = 16,
+                    ["margin-top"]       = 10,
+                    color                = "#ffffff",
+                    ["background-color"] = "#454340",
+                    ["padding-right"]    = 20,
+                    ["padding-left"]     = 20,
+                    ["padding-top"]      = 20,
+                },
+                text_field = {
+                    background = "textures/text_field_32bits.png",
+                    border = "none",
+                },
+                login_button = {
+                    ["margin-left"] = 55,
+                    width           = 150,
+                    height          = 33,
+                    background      = "textures/login_button_32bits.png",
+                },
+                middle_line = {
+                    float  = "left",
+                    width  = 2,
+                    height = 441,
+                    ["margin-left"] = 0,
+                    ["margin-top"]  = 0,
+                    ["background-color"] = "#b7b2b2"
+                },
+                world_area = {
+                    float = "left",
+                    width  = 345,
+                    height = 441,
+                    ["padding-top"] = 20,
+                    ["padding-left"] = 30,
+                    ["padding-right"] = 20,
+                },
+                add_server_text_field = {
+                    textcolor = "#ffffff",
+                    float = "left",
+                    width = 237,
+                    height = 30,
+                    background = "Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;263 346 36 36:15 15 15 15",
+                },
+                add_server_button = {
+                    ["margin-left"] = 8,
+                    height = 30,
+                    ["min-width"] = 50,
+                },
+                share_selected_item = {
+                    ["margin-left"] = 0,
+                    ["margin-bottom"] = 10,
+                    ["padding-left"] = 5,
+                    ["padding-top"] = 5,
+                    width  = 295,
+                    height = 80,
+                    background = "textures/item_acive_32bits.png"
+                },
+                share_unselect_item = {
+                    ["margin-bottom"] = 20,
+                    ["padding-left"] = 5,
+                    ["padding-top"] = 5,
+                    width  = 295,
+                    height = 65,
+                    ["background-color"] = "#454340",
+                },
+                share_world_name = {
+                    float = "left",
+                    ["base-font-size"] = 16,
+                    ["font-size"] = 16,
+                    ["margin-top"] = 2,
+                    ["text-align"] = "left",
+                    color = "#ffffff",
+                },
+                share_world_infor = {
+                    float = "left",
+                    ["margin-left"] = 31,
+                    height = 18,
+                    ["font-size"] = 12,
+                    color = "#9e9e9e",
+                },
+                share_button = {
+                    width = 32,
+                    height = 32,
+                    ["margin-right"] = 6,
+                },
+                common_button = {
+                    height = 40,
+                    spacing = 20,
+                    ["font-weight"] = "bold",
+                    ["font-size"]   = 14,
+                },
+            }
+        </style>
         <div style="width:860px;height:470px;">
             <div style="float:left;margin-top:0px;width:160px;height:470px;" class="mc_panel">
                 <pe:if condition='<%= System.options.mc%>'>
@@ -569,16 +151,16 @@
                                         <%= GetCurrentServerPageNickName() %>
                                     </div>
                                     <div style="margin-left:45px;margin-top:10px;">
-                                        <input type="button" value="修改名称" onclick="ChangeName" style="width: 70px; height: 22px; color: #ffffff; " class="mc_light_grey_button_with_fillet" />
+                                        <input type="button" value="修改名称" onclick="ShowLogin.ChangeName()" style="width: 70px; height: 22px; color: #ffffff; " class="mc_light_grey_button_with_fillet" />
                                     </div>
                                 </pe:if>
-                                <pe:if condition='<%= IsChangingName()%>'>
+                                <pe:if condition='<%= ShowLogin.IsChangingName()%>'>
                                     <div style="margin-left:15px;margin-top:20px;">
-                                        <input type="text" name="nickname" autofocus="true" value='<%=GetUserNickName()%>' rows="1" style="margin-top:0px;margin-left:0px;width:130px;height:22px;" class="mc_text" />
+                                        <input type="text" name="nickname" autofocus="true" value='<%= ShowLogin.GetUserNickName() %>' rows="1" style="margin-top:0px;margin-left:0px;width:130px;height:22px;" class="mc_text" />
                                     </div>
                                     <div style="margin-left: 0px; margin-top: 10px;">
-                                        <input type="button" value="确定" onclick="SaveName" style="float: left; margin-left: 15px; width: 60px; height: 22px; color: #ffffff; " class="mc_light_grey_button_with_fillet" />
-                                        <input type="button" value="取消" onclick="CancelChangeName" style="float: left; margin-left: 10px; width: 60px; height: 22px; color: #ffffff; " class="mc_light_grey_button_with_fillet" />
+                                        <input type="button" value="确定" onclick="ShowLogin.SaveName()" style="float: left; margin-left: 15px; width: 60px; height: 22px; color: #ffffff; " class="mc_light_grey_button_with_fillet" />
+                                        <input type="button" value="取消" onclick="ShowLogin.CancelChangeName()" style="float: left; margin-left: 10px; width: 60px; height: 22px; color: #ffffff; " class="mc_light_grey_button_with_fillet" />
                                     </div>
                                 </pe:if>
                             </pe:if>
@@ -588,176 +170,189 @@
                         <div>
                             <pe:mc_player name="MyPlayer" miniscenegraphname="AvatarMyselfTabCharacter" style="width:256px;height:256px;" isinteractive="false" />
                         </div>
-                        <!--<input type="button" enabled="false" value="更改造型" style="position:relative;margin-top:210px;margin-left:15px;width:130px;height:34px;" class="mc_big_button"/>-->
                     </div>
                     <div style="position:relative;margin-left:0px;margin-top:340px;height:256px;">
                         <div style="margin-left:0px;margin-top:0px;height:50px;">
                             <pe:if condition='<%= System.User.isOnline%>'>
-                                <!--<pe:if condition='<%= not IsChangingName()%>'>
-                                    <div style="margin-top: 20px; text-align: center; color: #ffffff;">
-                                        <%= GetUserNickName() %>
-                                    </div>
-                                    <div style="margin-left:45px;margin-top:10px;">
-                                        <input type="button" value="修改名称" onclick="ChangeName" style="width: 70px; height: 22px; color: #ffffff; " class="mc_light_grey_button_with_fillet" />
-                                    </div>
-                                </pe:if>
-                                <pe:if condition='<%= IsChangingNam	e()%>'>
-                                    <div style="margin-left:15px;margin-top:20px;">
-                                        <input type="text" name="nickname" autofocus="true" value='<%=GetUserNickName()%>' rows="1" style="margin-top:0px;margin-left:0px;width:130px;height:22px;" class="mc_text" />
-                                    </div>
-                                    <div style="margin-left: 0px; margin-top: 10px;">
-                                        <input type="button" value="确定" onclick="SaveName" style="float: left; margin-left: 15px; width: 60px; height: 22px; color: #ffffff; " class="mc_light_grey_button_with_fillet" />
-                                        <input type="button" value="取消" onclick="CancelChangeName" style="float: left; margin-left: 10px; width: 60px; height: 22px; color: #ffffff; " class="mc_light_grey_button_with_fillet" />
-                                    </div>
-                                </pe:if>-->
                             </pe:if>
                             <pe:if condition='<%= not System.User.isOnline%>'>
-                                <!--<input type="button" value="QQ登录" style="margin-left:47px;margin-top:17px;width:60px;height:22px;font-size:14px;" onclick="QQLogin" class="mc_light_grey_button_with_fillet" />-->
                             </pe:if>
                         </div>
-                        <!--<div style="text-align:center;color:#ffffff;">
-                            <%= GetOnlineDes() %>
-                        </div>-->
                     </div>
                 </pe:if>
             </div>
             <aries:window mode="thin" width="700" height="470" style="float:left;" title='<%=L"服务器列表" %>' onclose="ClosePage">
-                <div style="float: left; margin-left: 19px; height: 30px;">
-                    <div style="position:relative;">
-                        <pe:repeat DataSource="<%=GetWorldType()%>">
-                            <pe:repeatitem style="float:left;">
-                                <pe:if condition='<%=InternetLoadWorld.type_index == Eval("index") %>'>
-                                    <input type="button" value='<%=Eval("text")%>' name='<%=Eval("index")%>' onclick="OnChangeType" style="font-weight:bold;margin-right:10px;margin-top:8px;margin-bottom:0px;color:#33ff33;font-size:14px;min-width:66px;height:25px;" class="mc_green_button_with_fillet" />
-                                </pe:if>
-                                <pe:if condition='<%=InternetLoadWorld.type_index ~= Eval("index") %>'>
-                                    <input type="button" value='<%=Eval("text")%>' name='<%=Eval("index")%>' onclick="OnChangeType" style="margin-right:10px;margin-top:8px;margin-bottom:0px;color:#ffffff;font-size:14px;min-width:66px;height:25px;" class="mc_light_grey_button_with_fillet" />
-                                </pe:if>
-                            </pe:repeatitem>
-                        </pe:repeat>
-                    </div>
-                    <div style="position:relative;margin-left: 310px; margin-top: 9px; height: 25px; background: ;">
-                        <input type="text" name="content" EmptyText='<%=GetDefaultValueForAddress() %>' rows="1" CaretColor="#FFFFFFFF" style="textcolor:#ffffff;float:left;margin-top:0px;margin-left:5px;width:285px;height:26px;background:url(Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#263 346 36 36:15 15 15 15);" />
-                        <input type="button" value='<%=L"添加" %>' class="mc_light_grey_button_with_fillet" onclick="InternetLoadWorld.OnAddSearchPage" style="margin-left:4px;margin-top:2px;height:22px;min-width:50px" />
-                    </div>
-                </div>
-                <div style="margin-left:17px;margin-top:10px;width:660px;height:345px;background-color:#333333">
+                <div style="width:700px;height:470px;">
                     <!--categories-->
                     <!-- 登陆界面 -->
-                    <pe:if condition="<%=ShowLogin.login_type == 1 %>">
-	                    <div name="login" style="float:left;base-font-size:16px;font-size:16px;margin-left:4px;margin-top:10px;width:290px;height:325px;padding:20px;color: #ffffff;">
-	                        <div style="margin-bottom:12px;">
-	                        	服务器：
-	                        	<select name="loginServer" onclick="setSite()" style="height: 30px;width: 185px;">
-	                        		<option selected="selected" value="online" name="online">使用在线服务登录</option>
-	                        		<option value="local" name="local">使用本地服务登录</option>
-	                        	</select>
-	                        </div>
-	                        <div style="margin-bottom:12px;">
-	                        	账号：<input type="text" class="bbs_text" style="margin-left:15px; height: 30px;" name="account"/>
-	                        </div>
-	                        <div style="margin-bottom:12px;">
-	                        	密码：<input type="text" PasswordChar="*" class="bbs_text" style="margin-left:15px; height: 30px;" name="password"/>
-	                        </div>
-	                       	<div style="margin-left:150px;">
-	                       		<input type="checkbox" style="margin-top:3px;" name="rememberPassword"/>记住密码?
-	                       	</div>
-	                        <div style="margin-top:30px;margin-bottom:50px;">
-	                        	<input type="button" style="margin-left: 55px;width: 140px;height: 40px;" class="button_highlight" onclick="LoginAction" value="登陆" />
-	                        </div>
-	                        <div style="text-align:left;color:#ff6666;margin-left:35px;">
-	                        	<span>还没有帐号？</span>
-	                        	<a name="register" style="font-size: 14px;color: #ffffff">&gt;&gt;点击注册&lt;&lt;</a>
-	                        </div>
-	                    </div>
-                    </pe:if>
-                    <!-- 绑定GITHUB数据源 -->
-                    <pe:if condition="<%=ShowLogin.login_type == 2 %>">
-	                    <div name="bindgithub" style="float:left;base-font-size:16px;font-size:16px;margin-left:4px;margin-top:10px;width:290px;height:325px;padding:20px;color: #ffffff;">
-	                    	<div>Paracraft网络数据由github支持。绑定github数据源后才可以进行网络保存。</div>
-	                    	<input type="button" onclick="checkGitBind" name="clientLogin" style="margin-left: 55px;width: 140px;height: 40px;margin-top: 80px;" class="button_highlight" value="数据源绑定"/>
-	                    </div>
-                    </pe:if>
-                    <!-- 登陆成功页面 -->
-                    <pe:if condition="<%=ShowLogin.login_type == 3 %>">
-	                    <div name="loginsuccess" style="float:left;base-font-size:16px;font-size:16px;margin-left:4px;margin-top:10px;width:290px;height:325px;padding:20px;color: #ffffff;">
-	                    	<div>你已使用<span style="color:#ff6666"><%=ShowLogin.username%></span>成功登录。</div>
-	                    	<div>我的作品网站</div>
-	                    	<div><%=ShowLogin.personPageUrl %></div>
-	                    	<div>
-	                    		<input type="button" name="" onclick="sharePersonPage()" style="width:58px;height:40px;margin-left: 192px;margin-top:20px;margin-bottom:20px;" class="button_highlight" value="分享" />
-	                    	</div>
-	                    	<div>
-	                    		<input type="button" name="myWorlds" style="width: 130px;height: 31px;margin-left: 60px;margin-bottom:20px;" class="button_highlight" value="打开作品网站" />
-	                    	</div>
-	                    	<div>
-	                    		<input type="button" name="" style="width: 130px;height: 31px;margin-left: 60px;margin-bottom:20px;" onclick="logout()" class="button_highlight" value="退出登录" />
-	                    	</div>
-	                    </div>
-                    </pe:if>
+                    <div class="user_area">
+                        <div class="user_area_world_type">
+                            <pe:repeat DataSource="<%=ShowLogin.GetWorldType()%>">
+                                <pe:repeatitem style="float:left;">
+                                    <pe:if condition='<%=InternetLoadWorld.type_index == Eval("index") %>'>
+                                        <input type="button" value='<%=Eval("text")%>' name='<%=Eval("index")%>' onclick="ShowLogin:OnChangeType()" class="user_area_world_type_selected" />
+                                    </pe:if>
+                                    <pe:if condition='<%=InternetLoadWorld.type_index ~= Eval("index") %>'>
+                                        <input type="button" value='<%=Eval("text")%>' name='<%=Eval("index")%>' onclick="ShowLogin:OnChangeType()" class="user_area_world_type_unselect" />
+                                    </pe:if>
+                                </pe:repeatitem>
+                            </pe:repeat>
+                        </div>
+                        <!--未登陆-->
+                        <pe:if condition="<%=ShowLogin.login_type == 1 %>">
+                            <div name="login" class="user_login">
+                                <div style="margin-bottom:12px;">
+                                    服务器：
+                                    <select name="loginServer" onclick="ShowLogin.setSite()" style="height: 30px;width: 185px;" class="text_field">
+                                        <option selected="selected" value="keepwork" name="online">使用KeepWork登录</option>
+                                        <option value="" name="local">使用本地服务登录</option>
+                                    </select>
+                                </div>
+                                <div style="margin-bottom:12px;margin-left:15px;">
+                                    账号：<input type="text" class="bbs_text text_field" style="height: 30px;" name="account"/>
+                                </div>
+                                <div style="margin-bottom:12px;margin-left:15px">
+                                    密码：<input type="text" PasswordChar="*" class="bbs_text text_field" style="height: 30px;" name="password"/>
+                                </div>
+                                <div style="text-align:right">
+                                    <input type="checkbox" style="margin-left:160px;margin-top:3px;" name="rememberPassword" />记住密码?
+                                </div>
+                                <div style="margin-top:30px;margin-bottom:15px;">
+                                    <input type="button" class="login_button" onclick="ShowLogin.LoginAction()" />
+                                </div>
+                                <div style="text-align:left;margin-left:55px;">
+                                    <span style="color:#ffffff;">还没有帐号？</span>
+                                    <a name="register" style="background:url(textures/underline_32bits.png#0 0 64 30);height:30px;width:150px;font-size: 14px;color: #fe5927;">点击注册</a>
+                                </div>
+                            </div>
+                        </pe:if>
+                        <!-- 绑定GITHUB数据源 -->
+                        <pe:if condition="<%=ShowLogin.login_type == 2 %>">
+                            <div name="bindgithub" class="user_login">
+                                <div>Paracraft网络数据由github支持。绑定github数据源后才可以进行网络保存。</div>
+                                <input type="button" onclick="ShowLogin.checkGitBind()" name="clientLogin" style="margin-left: 55px;width: 140px;height: 40px;margin-top: 80px;" class="button_highlight" value="数据源绑定" />
+                            </div>
+                        </pe:if>
+                        <!-- 登陆成功页面 -->
+                        <pe:if condition="<%=ShowLogin.login_type == 3 %>">
+                            <div name="loginsuccess" class="user_login">
+                                <div>你已使用<span style="color:#ff6666"><%=ShowLogin.username%></span>成功登录。</div>
+                                <div>我的作品网站</div>
+                                <div><%=ShowLogin.personPageUrl %></div>
+                                <div>
+                                    <input type="button" name="" onclick="ShowLogin.sharePersonPage()" style="width:58px;height:40px;margin-left: 192px;margin-top:20px;margin-bottom:20px;" class="button_highlight" value="分享" />
+                                </div>
+                                <div>
+                                    <input type="button" name="myWorlds" style="width: 130px;height: 31px;margin-left: 60px;margin-bottom:20px;" class="button_highlight" value="打开作品网站" />
+                                </div>
+                                <div>
+                                    <input type="button" name="" style="width: 130px;height: 31px;margin-left: 60px;margin-bottom:20px;" onclick="ShowLogin.logout()" class="button_highlight" value="退出登录" />
+                                </div>
+                            </div>
+                        </pe:if>
+                        <div style="margin-top:20px">
+                            <input type="button" value='<%=L"导入/导出..." %>'  onclick="ShowLogin.OnImportWorld()" class="common_button mc_light_grey_button_with_fillet" />
+                            <input type="button" value='<%=L"刷新" %>' style="margin-left:15px;" onclick="InternetLoadWorld.RefreshCurrentServerList" class="common_button mc_light_grey_button_with_fillet" />
+                        </div>
+                    </div>
                     <!--line-->
-                    <div style="float:left;width:2px;height:345px;margin-left:0px;margin-top:0px;background-color:#FFFFFF" />
+                    <div class="middle_line" />
                     <!--worlds-->
-                    <div style="float:left;margin-left:8px;margin-top:10px;height:320px;">
-                        <pe:gridview RememberScrollPos="true" style="margin-left:5px;" AllowPaging="false" VerticalScrollBarStep="59" DefaultNodeHeight="59" ItemsPerLine="1" name="gw_world_ds" DataSource='<%=InternetLoadWorld.DS_Func_Worlds%>'>
-                            <Columns>
-                                <pe:if condition='<%= BeHasWorldInSlot(Eval("is_empty_slot"),Eval("is_buy_slot"))%>'>
-                                	<!--选中的项-->
+                    <div class="world_area">
+                        <div style="height: 25px;margin-bottom:20px;">
+                            <input type="text" name="content" EmptyText='<%=ShowLogin.GetDefaultValueForAddress() %>' rows="1" CaretColor="#FFFFFFFF" class="add_server_text_field" />
+                            <input type="button" value='<%=L"添加" %>' class="add_server_button mc_light_grey_button_with_fillet" onclick="InternetLoadWorld.OnAddSearchPage"/>
+                        </div>
+                        <div style="height: 300px;width:315px;">
+                            <pe:gridview RememberScrollPos="true" AllowPaging="false" VerticalScrollBarStep="65" DefaultNodeHeight="80" ItemsPerLine="1" name="gw_world_ds" DataSource='<%=InternetLoadWorld.DS_Func_Worlds%>'>
+                                <Columns>
+                                    <!--选中的项-->
                                     <pe:if condition='<%= Eval("index") == InternetLoadWorld.selected_world_index%>'>
-                                        <div name='<%=Eval("index")%>' style="position:relative;margin-left:3px;margin-top:5px;height:54px;width:330px;" class="mc_button_green">
-                                            <div style="position:relative;margin-left:10px;margin-top:5px;base-font-size:18px;font-size:18px;text-align:left;color:#ffffff;font-weight:bold;">
-                                                <%=Eval("text") %><%=if_else(Eval("is_zip")==true, L".zip", "")%>
-                                            </div>
-                                            <div style="position:relative;margin-left:10px;margin-top:32px;font-size:12px;color:#9e9e9e">
-                                                <span style="margin-left:0px;"><%=GetCurWorldInfo("revision",Eval("index")) %></span>
-                                                <span style="margin-left:10px;"><%=GetWorldSize(Eval("size")) %></span>
-                                                <span style="margin-left:10px;"><%=Eval("author") %></span>
-                                            </div>
-                                            <!--<%=GetCurWorldInfo("mode",Eval("index")) %>-->
-                                            <pe:if condition='<%= IsSelfOnlineWorld()%>'>
-                                                <div style="position:relative;margin-left:10px;margin-top:28px;font-size:12px;color:#9e9e9e">
-                                                    <input type="button" name='<%=Eval("slot_id")%>' value="在线保存" tooltip="上传本地世界到服务器" style="width:68px;height:20px;font-size:12px;" onclick="OnSaveToSlot" class="mc_light_grey_button_with_fillet" />
-                                                    <input type="button" name='<%=Eval("slot_id")%>' value="下载本地" tooltip="将本地世界和服务器存档同步或从服务器下载世界" style="margin-left:10px;width:68px;height:20px;font-size:12px;" onclick="InternetLoadWorld.OnCopyFormSlot" class="mc_light_grey_button_with_fillet" />
-                                                    <!--<input name='<%=Eval("slot_id")%>' type="button" value="上传当前世界" style="position:relative;margin-left:100px;margin-top:12px;width:120px;height:32px;font-size:18px;font-weight:bold;color:#ffffff;shadow-quality:8;shadow-color:#80133f48;text-shadow:true;" onclick="OnSaveToSlot" class="mc_light_grey_button_with_fillet"/>-->
+                                        <div name='<%=Eval("index")%>' class="share_selected_item">
+                                            <div>
+                                                <pe:if condition='<%= ShowLogin.GetCurWorldInfo("status",Eval("index")) == 3%>'>
+                                                    <div style="float:left;width:32px;height:32px;background:url(textures/sync_32bits.png)" />
+                                                </pe:if>
+                                                <pe:if condition='<%= ShowLogin.GetCurWorldInfo("status",Eval("index")) ~= 3%>'>
+                                                    <div style="float:left;width:32px;height:32px;background:url(textures/async_32bits.png)" />
+                                                </pe:if>
+                                                <div class="share_world_name">
+                                                    <%=Eval("text") %><%=if_else(Eval("is_zip")==true, L".zip", "")%>
                                                 </div>
-                                            </pe:if>
-                                            <!-- <input type="button" tooltip='<%=L"右键删除"%>' style="position:relative;width:280px;height:57px;background:" name='<%=Eval("index")%>' onclick="InternetLoadWorld.OnClickSelectedWorld" /> -->
+                                            </div>
+                                            <div>
+                                                <div class="share_world_infor" style="position:relative;margin-top:18px;">
+                                                    <span style="margin-left:0px;"><%=ShowLogin.GetCurWorldInfo("revision",Eval("index")) %></span>
+                                                    <span style="margin-left:10px;"><%=ShowLogin.GetWorldSize(Eval("size")) %></span>
+                                                    <span style="margin-left:10px;"><%=Eval("author") %></span>
+                                                </div>
+                                                <div style="position:relative;margin-left:170px;margin-top:3px;">
+                                                    <input type="button" class="share_button" style="background:url(textures/delete_32bits.png);" onclick='ShowLogin.deleteWorldUI()' name='<%=Eval("index")%>'/><!-- 删除 -->
+                                                    <input type="button" class="share_button" style="background:url(textures/sync_now_32bits.png);" name='<%=Eval("index")%>' /><!-- 删除 -->
+                                                    <input type="button" class="share_button" style="background:url(textures/enter_32bits.png);" onclick="ShowLogin.EnterWorld()" name='<%=Eval("index")%>'/><!--进入-->
+                                                </div>
+                                            </div>
+                                            <!--<pe:if condition='<%= ShowLogin.IsSelfOnlineWorld()%>'>
+                                                <div style="position:relative;margin-left:10px;margin-top:28px;font-size:12px;color:#9e9e9e">
+                                                    <input type="button" name='<%=Eval("slot_id")%>' value="在线保存" tooltip="上传本地世界到服务器" style="width:68px;height:20px;font-size:12px;" onclick="ShowLogin.OnSaveToSlot()" class="mc_light_grey_button_with_fillet" />
+                                                    <input type="button" name='<%=Eval("slot_id")%>' value="下载本地" tooltip="将本地世界和服务器存档同步或从服务器下载世界" style="margin-left:10px;width:68px;height:20px;font-size:12px;" onclick="InternetLoadWorld.OnCopyFormSlot" class="mc_light_grey_button_with_fillet" />
+                                                </div>
+                                            </pe:if>-->
                                         </div>
                                     </pe:if>
+
                                     <!--未选中的项-->
-                                    <pe:if condition='<%= Eval("index") ~= InternetLoadWorld.selected_world_index%>'> 
-                                        <div name='<%=Eval("index")%>' style="position:relative;margin-left:3px;margin-top:5px;height:54px;width:330px;" class="mc_button_black">
-                                            <div style="position:relative;margin-left:10px;margin-top:5px;base-font-size:18px;font-size:18px;text-align:left;color:#ffffff;font-weight:bold;">
-                                                <%=Eval("text") %><%=if_else(Eval("is_zip")==true, L".zip", "")%>
+                                    <pe:if condition='<%= Eval("index") ~= InternetLoadWorld.selected_world_index%>'>
+                                        <input type="button" style="position:relative;width:297px;height:70px;background:#000000" name='<%=Eval("index")%>' onclick="InternetLoadWorld.OnSwitchWorld" />
+                                        <div name='<%=Eval("index")%>' class="share_unselect_item">
+                                            <div style="position:relative;width:200px;">
+                                                <div>
+                                                    <pe:if condition='<%= ShowLogin.GetCurWorldInfo("status",Eval("index")) == 3%>'>
+                                                        <div style="float:left;width:32px;height:32px;background:url(textures/sync_32bits.png)" />
+                                                    </pe:if>
+                                                    <pe:if condition='<%= ShowLogin.GetCurWorldInfo("status",Eval("index")) ~= 3%>'>
+                                                        <div style="float:left;width:32px;height:32px;background:url(textures/async_32bits.png)" />
+                                                    </pe:if>
+                                                    <div class="share_world_name">
+                                                        <%=Eval("text") %><%=if_else(Eval("is_zip")==true, L".zip", "")%>
+                                                    </div>
+                                                </div>
+                                                <div class="share_world_infor" style="padding-top:5px;">
+                                                    <span style="margin-left:0px;"><%=ShowLogin.GetCurWorldInfo("revision",Eval("index")) %></span>
+                                                    <span style="margin-left:10px;"><%=ShowLogin.GetWorldSize(Eval("size")) %></span>
+                                                    <span style="margin-left:10px;"><%=Eval("author") %></span>
+                                                </div>
                                             </div>
-                                            <div style="position:relative;margin-left:10px;margin-top:32px;font-size:12px;color:#9e9e9e">
-                                                <span style="margin-left:0px;"><%=GetCurWorldInfo("revision",Eval("index")) %></span>
-                                                <span style="margin-left:10px;"><%=GetWorldSize(Eval("size")) %></span>
-                                                <span style="margin-left:10px;"><%=Eval("author") %></span>
+                                            <div align="right" style="position:relative;width:30px;height:30px;margin-right:13px;margin-top:20px;">
+                                                <input type="button" class="share_button" style="background:url(textures/enter_32bits.png)" onclick="ShowLogin.EnterWorld()" name='<%=Eval("index")%>' /><!--进入-->
                                             </div>
-                                            <input type="button" style="position:relative;width:280px;height:57px;background:" name='<%=Eval("index")%>' onclick="InternetLoadWorld.OnSwitchWorld" />
                                         </div>
                                     </pe:if>
-                                    <div style="position:relative;margin-left:221px;margin-top:8px;">
+
+                                    <div display="none" style="margin-left:165px;margin-top:8px;">
+                                        <pe:if condition='<%= Eval("index") == InternetLoadWorld.selected_world_index%>'>
+                                            <input type="button" style="background:url(textures/delete_32bits.png);width:46px;height:46px;font-size:12px;font-weight:bold;" onclick='ShowLogin.deleteWorldUI()' name='<%=Eval("index")%>' class="mc_button_blue" /><!-- 删除 -->
+                                        </pe:if>
                                         <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) == 100%>'>
-                                        	<pe:if condition='<%= GetCurWorldInfo("status",Eval("index")) == nil%>'>
-                                            	<input type="button" style="background:url(textures/offline_32bits.png);text-singleline:false;margin-right:5px;width:46px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue"/><!--<%=L"离线" %>-->
-                                        	</pe:if>
-                                        	<pe:if condition='<%= GetCurWorldInfo("status",Eval("index")) == 1%>'>
-                                            	<input type="button" style="background:url(textures/local_only_32bits.png);text-singleline:false;margin-right:5px;width:46px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue"/><!--- "仅\n本地" -->
-                                        	</pe:if>
-                                        	<pe:if condition='<%= GetCurWorldInfo("status",Eval("index")) == 2%>'>
-                                        		<input type="button" style="background:url(textures/github_only_32bits.png);text-singleline:false;margin-right:5px;width:46px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue"/><!--"仅\n网络" -->
-                                        	</pe:if>
-                                            <pe:if condition='<%= GetCurWorldInfo("status",Eval("index")) == 3%>'>
-                                            	<input type="button" style="background:url(textures/sync_32bits.png);text-singleline:false;margin-right:5px;width:46px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue"/><!-- "本地网\n络一致" -->
+                                            <pe:if condition='<%= ShowLogin.GetCurWorldInfo("status",Eval("index")) == nil%>'>
+                                                <input type="button" style="background:url(textures/offline_32bits.png);text-singleline:false;margin-right:5px;width:46px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue" /><!--<%=L"离线" %>-->
                                             </pe:if>
-                                            <pe:if condition='<%= GetCurWorldInfo("status",Eval("index")) == 4%>'>
-                                            	<input type="button" style="background:url(textures/github_update_32bits.png);text-singleline:false;margin-right:5px;width:46px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue"/> <!--"网络\n更新" -->
+                                            <pe:if condition='<%= ShowLogin.GetCurWorldInfo("status",Eval("index")) == 1%>'>
+                                                <input type="button" style="background:url(textures/local_only_32bits.png);text-singleline:false;margin-right:5px;width:46px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue" /><!--- "仅\n本地" -->
                                             </pe:if>
-                                            <pe:if condition='<%= GetCurWorldInfo("status",Eval("index")) == 5%>'>
-                                            	<input type="button" style="background:url(textures/local_update_32bits.png);text-singleline:false;margin-right:5px;width:46px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue"/> <!--L"本地\n更新" -->
+                                            <pe:if condition='<%= ShowLogin.GetCurWorldInfo("status",Eval("index")) == 2%>'>
+                                                <input type="button" style="background:url(textures/github_only_32bits.png);text-singleline:false;margin-right:5px;width:46px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue" /><!--"仅\n网络" -->
                                             </pe:if>
-                                            <input type="button" style="width:46px;height:46px;background:url(textures/enter_32bits.png);font-size:12px;font-weight:bold;" onclick="EnterWorld" name='<%=Eval("index")%>' class="mc_button_blue" /><!--进入-->
+                                            <pe:if condition='<%= ShowLogin.GetCurWorldInfo("status",Eval("index")) == 3%>'>
+                                                <input type="button" style="background:url(textures/sync_32bits.png);text-singleline:false;margin-right:5px;width:46px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue" /><!-- "本地网\n络一致" -->
+                                            </pe:if>
+                                            <pe:if condition='<%= ShowLogin.GetCurWorldInfo("status",Eval("index")) == 4%>'>
+                                                <input type="button" style="background:url(textures/github_update_32bits.png);text-singleline:false;margin-right:5px;width:46px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue" /> <!--"网络\n更新" -->
+                                            </pe:if>
+                                            <pe:if condition='<%= ShowLogin.GetCurWorldInfo("status",Eval("index")) == 5%>'>
+                                                <input type="button" style="background:url(textures/local_update_32bits.png);text-singleline:false;margin-right:5px;width:46px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue" /> <!--L"本地\n更新" -->
+                                            </pe:if>
+                                            <input type="button" style="width:46px;height:46px;background:url(textures/enter_32bits.png);font-size:12px;font-weight:bold;" onclick="ShowLogin.EnterWorld()" name='<%=Eval("index")%>' class="mc_button_blue" /><!--进入-->
                                         </pe:if>
                                         <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) < 100 %>'>
                                             <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) >= 0 %>'>
@@ -768,53 +363,23 @@
                                             </pe:if>
                                         </pe:if>
                                     </div>
-                                    <pe:if condition='<%= Eval("index") == InternetLoadWorld.selected_world_index%>'>
-                                		<input type="button" style="background:url(textures/delete_32bits.png);margin-left:170px;margin-top:8px;width:46px;height:46px;font-size:12px;font-weight:bold;" onclick='deleteWorld' name='<%=Eval("index")%>' class="mc_button_blue" /><!-- 删除 -->
-                                	</pe:if>
-                                </pe:if>
-                                <pe:if condition='<%= not BeHasWorldInSlot(Eval("is_empty_slot"),Eval("is_buy_slot"))%>'>
-                                    <pe:if condition='<%= Eval("is_empty_slot")%>'>
-                                        <div name='<%=Eval("index")%>' style="margin-left:3px;margin-top:4px;height:55px;width:315px;" class="mc_button_black">
-                                            <input name='<%=Eval("slot_id")%>' type="button" value="上传当前世界" style="position:relative;margin-left:100px;margin-top:12px;width:120px;height:32px;font-size:18px;font-weight:bold;color:#ffffff;shadow-quality:8;shadow-color:#80133f48;text-shadow:true;" onclick="OnSaveToSlot" class="mc_light_grey_button_with_fillet" />
-                                        </div>
-                                    </pe:if>
-                                    <pe:if condition='<%= Eval("is_buy_slot")%>'>
-                                        <div name='<%=Eval("index")%>' style="margin-left:3px;margin-top:4px;height:55px;width:315px;" class="mc_button_black">
-                                            <input name='<%=Eval("slot_id")%>' type="button" value="购买存档槽" style="position:relative;margin-left:105px;margin-top:12px;width:108px;height:32px;font-size:18px;font-weight:bold;color:#ffffff;shadow-quality:8;shadow-color:#80133f48;text-shadow:true;" onclick="OnPurchaseSaveSlot" class="mc_light_grey_button_with_fillet" />
-                                        </div>
-                                    </pe:if>
-                                </pe:if>
-                            </Columns>
-                            <EmptyDataTemplate>
-                                <div style="margin:10px;font-weight:bold;color:#ffffff"><%=L"空" %></div>
-                                <div>
-                                    <input type="button" class="mc_light_grey_button_with_fillet" onclick="InternetLoadWorld.RefreshCurrentServerList" value='<%=L"刷新" %>' style="float:left;margin-left:10px;width:86px;height:22px;font-weight:bold;font-size:14px;" />
-                                </div>
-                            </EmptyDataTemplate>
-                            <FetchingDataTemplate>
-                                <div style="margin:10px;font-weight:bold;color:#ffffff"><%=L"正在搜索, 请稍候 ... " %></div>
-                            </FetchingDataTemplate>
-                        </pe:gridview>
-                        <!-- <pe:if condition="<%=ShowLogin.login_type == 3 %>">
-	                        <div>
-	                        	<input type="button" onclick='syncWorldsList' style="float: right;margin-left:195px;width: 140px;height: 31px;margin-top: -31px;" class="button_highlight" value="刷新列表" />
-	                        </div>
-                        </pe:if> -->
+                                </Columns>
+                                <EmptyDataTemplate>
+                                    <div style="margin:10px;font-weight:bold;color:#ffffff"><%=L"空" %></div>
+                                    <div>
+                                        <input type="button" class="mc_light_grey_button_with_fillet" onclick="InternetLoadWorld.RefreshCurrentServerList" value='<%=L"刷新" %>' style="float:left;margin-left:10px;width:86px;height:22px;font-weight:bold;font-size:14px;" />
+                                    </div>
+                                </EmptyDataTemplate>
+                                <FetchingDataTemplate>
+                                    <div style="margin:10px;font-weight:bold;color:#ffffff"><%=L"正在搜索, 请稍候 ... " %></div>
+                                </FetchingDataTemplate>
+                            </pe:gridview>
+                        </div>
+                        <div style="margin-top:7px;padding-right:15px;">
+                            <input type="button" value='<%=L"创建世界" %>' style="float:left" onclick="ShowLogin.CreateNewWorld()" class="common_button mc_light_grey_button_with_fillet" />
+                            <input type="button" value='<%=L"官方论坛" %>' align="right" style="float:right" onclick="ShowLogin.OpenBBS()" class="common_button mc_light_grey_button_with_fillet" />
+                        </div>
                     </div>
-
-                    <!--<div style="margin-left:10px;margin-top:7px;width:640px;height:25px;background:url(Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#263 346 36 36:15 15 15 15);">
-                        <input type="text" name="content" EmptyText="点击添加: 服务器URL, IP地址, 用户WIKI页" rows="1" value='<%=GetDefaultValueForAddress() %>' CaretColor="#FFFFFFFF" style="textcolor:#ffffff;float:left;margin-top:0px;margin-left:5px;width:582px;height:26px;background:;" />
-                        <input type="button" value="添加" class="mc_light_grey_button_with_fillet" onclick="InternetLoadWorld.OnAddSearchPage" style="margin-left:2px;margin-top:2px;height:22px;width:50px"/>
-                    </div>-->
-                </div>
-                <div>
-                    <div style="float:left;position:relative">
-                        <input type="button" value='<%=L"导入/导出..." %>' style="margin-left:20px;margin-top:17px;height:22px;font-weight:bold;font-size:14px;" onclick="OnImportWorld" class="mc_light_grey_button_with_fillet" />
-                        <input type="button" value='<%=L"刷新" %>' style="margin-left:10px;margin-top:17px;height:22px;font-weight:bold;font-size:14px;" onclick="InternetLoadWorld.RefreshCurrentServerList" class="mc_light_grey_button_with_fillet" />
-                    </div>
-                    <input type="button" value='<%=L"创建世界" %>' style="position:relative;spacing:10px;margin-left:330px;margin-top:12px;min-width:108px;height:32px;font-size:18px;font-weight:bold;color:#ffffff;shadow-quality:8;shadow-color:#80133f48;text-shadow:true;" onclick="CreateNewWorld" class="mc_light_grey_button_with_fillet" />
-                    <!-- <input name="" type="button" value='<%=L"进入世界" %>' onclick="InternetLoadWorld.EnterWorld" style="position:relative;margin-left:370px;margin-top:12px;width:108px;height:32px;font-size:18px;font-weight:bold;color:#ffffff;shadow-quality:8;shadow-color:#80133f48;text-shadow:true;background:url(Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#72 351 40 18:18 8 18 8)" /> -->
-                    <input type="button" value='<%=L"官方论坛" %>' align="right" style="position:relative;margin-right:40px;margin-top:17px;min-width:80px;height:22px;font-weight:bold;color:#ffffff;shadow-quality:8;shadow-color:#80133f48;text-shadow:true;font-size:14px;" onclick="OpenBBS" class="mc_blue_button_with_fillet" />
                 </div>
             </aries:window>
         </div>
