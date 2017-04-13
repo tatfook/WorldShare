@@ -16,8 +16,8 @@
                 InternetLoadWorld.OnInit();
                 ShowLogin.OnInit();
 
-                ShowLogin.setSite();
                 ShowLogin.getRememberPassword();
+                ShowLogin.setSite();
             ]]>
         </script>
         <style type="text/mcss">
@@ -56,6 +56,7 @@
                     ["padding-right"]    = 20,
                     ["padding-left"]     = 20,
                     ["padding-top"]      = 20,
+                    height               = 295,
                 },
                 text_field = {
                     background = "textures/text_field_32bits.png",
@@ -66,6 +67,15 @@
                     width           = 150,
                     height          = 33,
                     background      = "textures/login_button_32bits.png",
+                },
+                logged_common_button = {
+                    width = 130,
+                    height = 31,
+                    ["margin-left"] = 60,
+                    ["margin-bottom"] = 20,
+                    textcolor = "#ffffff",
+                    color = "#ffffff",
+                    background = "textures/logged_common_button_32bits.png",
                 },
                 middle_line = {
                     float  = "left",
@@ -146,7 +156,7 @@
                     <div style="position:relative;margin-left:0px;margin-top:0px;">
                         <div style="margin-left:0px;margin-top:0px;">
                             <pe:if condition='<%= System.User.isOnline%>'>
-                                <pe:if condition='<%= not IsChangingName()%>'>
+                                <pe:if condition='<%= ShowLogin.current_type%>'>
                                     <div style="margin-top: 20px; text-align: center; color: #ffffff;">
                                         <%= GetCurrentServerPageNickName() %>
                                     </div>
@@ -181,7 +191,7 @@
                     </div>
                 </pe:if>
             </div>
-            <aries:window mode="thin" width="700" height="470" style="float:left;" title='<%=L"服务器列表" %>' onclose="ClosePage">
+            <aries:window mode="thin" width="700" height="470" style="float:left;" title='<%=L"服务器列表" %>' onclose="ShowLogin.ClosePage()">
                 <div style="width:700px;height:470px;">
                     <!--categories-->
                     <!-- 登陆界面 -->
@@ -205,7 +215,7 @@
                                     服务器：
                                     <select name="loginServer" onclick="ShowLogin.setSite()" style="height: 30px;width: 185px;" class="text_field">
                                         <option selected="selected" value="keepwork" name="online">使用KeepWork登录</option>
-                                        <option value="" name="local">使用本地服务登录</option>
+                                        <option value="local" name="local">使用本地服务登录</option>
                                     </select>
                                 </div>
                                 <div style="margin-bottom:12px;margin-left:15px;">
@@ -235,18 +245,22 @@
                         </pe:if>
                         <!-- 登陆成功页面 -->
                         <pe:if condition="<%=ShowLogin.login_type == 3 %>">
-                            <div name="loginsuccess" class="user_login">
-                                <div>你已使用<span style="color:#ff6666"><%=ShowLogin.username%></span>成功登录。</div>
-                                <div>我的作品网站</div>
-                                <div><%=ShowLogin.personPageUrl %></div>
-                                <div>
-                                    <input type="button" name="" onclick="ShowLogin.sharePersonPage()" style="width:58px;height:40px;margin-left: 192px;margin-top:20px;margin-bottom:20px;" class="button_highlight" value="分享" />
+                            <div name="loginsuccess" class="user_login" style="width:290px;">
+                                <div style="margin-bottom:25px;">
+                                    你已使用<span style="color:#ff6666"><%=ShowLogin.username%></span>成功登录。
+                                </div>
+                                <div style="margin-bottom:13px;">
+                                    我的作品网站
+                                    <input type="button" onclick="ShowLogin.sharePersonPage()" style="width:20px;height:16px;background:url(textures/share_icon_32bits.png);margin-top:3px;margin-left:13px;" class="button_highlight" />
+                                </div>
+                                <div style="height:90px;">
+                                    <%=ShowLogin.personPageUrl %>
                                 </div>
                                 <div>
-                                    <input type="button" name="myWorlds" style="width: 130px;height: 31px;margin-left: 60px;margin-bottom:20px;" class="button_highlight" value="打开作品网站" />
+                                    <input type="button" name="myWorlds" class="logged_common_button" value="打开作品网站" />
                                 </div>
                                 <div>
-                                    <input type="button" name="" style="width: 130px;height: 31px;margin-left: 60px;margin-bottom:20px;" onclick="ShowLogin.logout()" class="button_highlight" value="退出登录" />
+                                    <input type="button" onclick="ShowLogin.logout()" class="logged_common_button" value="退出登录" />
                                 </div>
                             </div>
                         </pe:if>
@@ -259,53 +273,17 @@
                     <div class="middle_line" />
                     <!--worlds-->
                     <div class="world_area">
-                        <div style="height: 25px;margin-bottom:20px;">
+                        <div style="height: 25px;margin-bottom:25px;">
                             <input type="text" name="content" EmptyText='<%=ShowLogin.GetDefaultValueForAddress() %>' rows="1" CaretColor="#FFFFFFFF" class="add_server_text_field" />
                             <input type="button" value='<%=L"添加" %>' class="add_server_button mc_light_grey_button_with_fillet" onclick="InternetLoadWorld.OnAddSearchPage"/>
                         </div>
-                        <div style="height: 300px;width:315px;">
-                            <pe:gridview RememberScrollPos="true" AllowPaging="false" VerticalScrollBarStep="65" DefaultNodeHeight="80" ItemsPerLine="1" name="gw_world_ds" DataSource='<%=InternetLoadWorld.DS_Func_Worlds%>'>
+                        <div style="height: 308px;width:315px;">
+                            <pe:gridview RememberScrollPos="true" AllowPaging="false" VerticalScrollBarStep="30" DefaultNodeHeight="80" ItemsPerLine="1" name="gw_world_ds" DataSource='<%=InternetLoadWorld.DS_Func_Worlds%>'>
                                 <Columns>
                                     <!--选中的项-->
                                     <pe:if condition='<%= Eval("index") == InternetLoadWorld.selected_world_index%>'>
                                         <div name='<%=Eval("index")%>' class="share_selected_item">
-                                            <div>
-                                                <pe:if condition='<%= ShowLogin.GetCurWorldInfo("status",Eval("index")) == 3%>'>
-                                                    <div style="float:left;width:32px;height:32px;background:url(textures/sync_32bits.png)" />
-                                                </pe:if>
-                                                <pe:if condition='<%= ShowLogin.GetCurWorldInfo("status",Eval("index")) ~= 3%>'>
-                                                    <div style="float:left;width:32px;height:32px;background:url(textures/async_32bits.png)" />
-                                                </pe:if>
-                                                <div class="share_world_name">
-                                                    <%=Eval("text") %><%=if_else(Eval("is_zip")==true, L".zip", "")%>
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <div class="share_world_infor" style="position:relative;margin-top:18px;">
-                                                    <span style="margin-left:0px;"><%=ShowLogin.GetCurWorldInfo("revision",Eval("index")) %></span>
-                                                    <span style="margin-left:10px;"><%=ShowLogin.GetWorldSize(Eval("size")) %></span>
-                                                    <span style="margin-left:10px;"><%=Eval("author") %></span>
-                                                </div>
-                                                <div style="position:relative;margin-left:170px;margin-top:3px;">
-                                                    <input type="button" class="share_button" style="background:url(textures/delete_32bits.png);" onclick='ShowLogin.deleteWorldUI()' name='<%=Eval("index")%>'/><!-- 删除 -->
-                                                    <input type="button" class="share_button" style="background:url(textures/sync_now_32bits.png);" name='<%=Eval("index")%>' /><!-- 删除 -->
-                                                    <input type="button" class="share_button" style="background:url(textures/enter_32bits.png);" onclick="ShowLogin.EnterWorld()" name='<%=Eval("index")%>'/><!--进入-->
-                                                </div>
-                                            </div>
-                                            <!--<pe:if condition='<%= ShowLogin.IsSelfOnlineWorld()%>'>
-                                                <div style="position:relative;margin-left:10px;margin-top:28px;font-size:12px;color:#9e9e9e">
-                                                    <input type="button" name='<%=Eval("slot_id")%>' value="在线保存" tooltip="上传本地世界到服务器" style="width:68px;height:20px;font-size:12px;" onclick="ShowLogin.OnSaveToSlot()" class="mc_light_grey_button_with_fillet" />
-                                                    <input type="button" name='<%=Eval("slot_id")%>' value="下载本地" tooltip="将本地世界和服务器存档同步或从服务器下载世界" style="margin-left:10px;width:68px;height:20px;font-size:12px;" onclick="InternetLoadWorld.OnCopyFormSlot" class="mc_light_grey_button_with_fillet" />
-                                                </div>
-                                            </pe:if>-->
-                                        </div>
-                                    </pe:if>
-
-                                    <!--未选中的项-->
-                                    <pe:if condition='<%= Eval("index") ~= InternetLoadWorld.selected_world_index%>'>
-                                        <input type="button" style="position:relative;width:297px;height:70px;background:#000000" name='<%=Eval("index")%>' onclick="InternetLoadWorld.OnSwitchWorld" />
-                                        <div name='<%=Eval("index")%>' class="share_unselect_item">
-                                            <div style="position:relative;width:200px;">
+                                            <pe:if condition='<%= ShowLogin.current_type == 1%>'>
                                                 <div>
                                                     <pe:if condition='<%= ShowLogin.GetCurWorldInfo("status",Eval("index")) == 3%>'>
                                                         <div style="float:left;width:32px;height:32px;background:url(textures/sync_32bits.png)" />
@@ -317,52 +295,88 @@
                                                         <%=Eval("text") %><%=if_else(Eval("is_zip")==true, L".zip", "")%>
                                                     </div>
                                                 </div>
-                                                <div class="share_world_infor" style="padding-top:5px;">
-                                                    <span style="margin-left:0px;"><%=ShowLogin.GetCurWorldInfo("revision",Eval("index")) %></span>
-                                                    <span style="margin-left:10px;"><%=ShowLogin.GetWorldSize(Eval("size")) %></span>
-                                                    <span style="margin-left:10px;"><%=Eval("author") %></span>
+                                                <div>
+                                                    <div class="share_world_infor" style="position:relative;margin-top:18px;">
+                                                        <span style="margin-left:0px;"><%=ShowLogin.GetCurWorldInfo("revision",Eval("index")) %></span>
+                                                        <span style="margin-left:10px;"><%=ShowLogin.GetWorldSize(Eval("size")) %></span>
+                                                        <span style="margin-left:10px;"><%=Eval("author") %></span>
+                                                    </div>
+                                                    <div style="position:relative;margin-left:170px;margin-top:3px;">
+                                                        <input type="button" class="share_button" style="background:url(textures/delete_32bits.png);" onclick='ShowLogin.deleteWorldUI()' name='<%=Eval("index")%>' /><!-- 删除 -->
+                                                        <input type="button" class="share_button" style="background:url(textures/sync_now_32bits.png);" name='<%=Eval("index")%>' /><!-- 删除 -->
+                                                        <input type="button" class="share_button" style="background:url(textures/enter_32bits.png);" onclick="ShowLogin.EnterWorld()" name='<%=Eval("index")%>' /><!--进入-->
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div align="right" style="position:relative;width:30px;height:30px;margin-right:13px;margin-top:20px;">
-                                                <input type="button" class="share_button" style="background:url(textures/enter_32bits.png)" onclick="ShowLogin.EnterWorld()" name='<%=Eval("index")%>' /><!--进入-->
-                                            </div>
+                                            </pe:if>
+                                            <pe:if condition='<%= ShowLogin.current_type == 2%>'>
+                                                <div>
+                                                    <div style="margin-left:5px;">
+                                                        <div class="share_world_name">
+                                                            <%=Eval("text") %><%=if_else(Eval("is_zip")==true, L".zip", "")%>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <div class="share_world_infor" style="position:relative;margin-left:5px;margin-top:18px;">
+                                                        <span style="margin-left:0px;"><%=ShowLogin.GetCurWorldInfo("revision",Eval("index")) %></span>
+                                                        <span style="margin-left:10px;"><%=ShowLogin.GetWorldSize(Eval("size")) %></span>
+                                                        <span style="margin-left:10px;"><%=Eval("author") %></span>
+                                                    </div>
+                                                    <div style="position:relative;margin-left:250px;margin-top:3px;">
+                                                        <input type="button" class="share_button" style="background:url(textures/enter_32bits.png);" onclick="ShowLogin.EnterWorld()" name='<%=Eval("index")%>' /><!--进入-->
+                                                    </div>
+                                                </div>
+                                            </pe:if>
+                                            <!--<div style="position:relative;margin-left:10px;margin-top:28px;font-size:12px;color:#9e9e9e">
+                                                <input type="button" name='<%=Eval("slot_id")%>' value="在线保存" tooltip="上传本地世界到服务器" style="width:68px;height:20px;font-size:12px;" onclick="ShowLogin.OnSaveToSlot()" class="mc_light_grey_button_with_fillet" />
+                                                <input type="button" name='<%=Eval("slot_id")%>' value="下载本地" tooltip="将本地世界和服务器存档同步或从服务器下载世界" style="margin-left:10px;width:68px;height:20px;font-size:12px;" onclick="InternetLoadWorld.OnCopyFormSlot" class="mc_light_grey_button_with_fillet" />
+                                            </div>-->
                                         </div>
                                     </pe:if>
 
-                                    <div display="none" style="margin-left:165px;margin-top:8px;">
-                                        <pe:if condition='<%= Eval("index") == InternetLoadWorld.selected_world_index%>'>
-                                            <input type="button" style="background:url(textures/delete_32bits.png);width:46px;height:46px;font-size:12px;font-weight:bold;" onclick='ShowLogin.deleteWorldUI()' name='<%=Eval("index")%>' class="mc_button_blue" /><!-- 删除 -->
-                                        </pe:if>
-                                        <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) == 100%>'>
-                                            <pe:if condition='<%= ShowLogin.GetCurWorldInfo("status",Eval("index")) == nil%>'>
-                                                <input type="button" style="background:url(textures/offline_32bits.png);text-singleline:false;margin-right:5px;width:46px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue" /><!--<%=L"离线" %>-->
+                                    <!--未选中的项-->
+                                    <pe:if condition='<%= Eval("index") ~= InternetLoadWorld.selected_world_index%>'>
+                                        <input type="button" style="position:relative;width:297px;height:70px;background:#000000" name='<%=Eval("index")%>' onclick="InternetLoadWorld.OnSwitchWorld" />
+                                        <div name='<%=Eval("index")%>' class="share_unselect_item">
+                                            <pe:if condition='<%= ShowLogin.current_type == 1%>'>
+                                                <div style="position:relative;width:200px;">
+                                                    <div>
+                                                        <pe:if condition='<%= ShowLogin.GetCurWorldInfo("status",Eval("index")) == 3%>'>
+                                                            <div style="float:left;width:32px;height:32px;background:url(textures/sync_32bits.png)" />
+                                                        </pe:if>
+                                                        <pe:if condition='<%= ShowLogin.GetCurWorldInfo("status",Eval("index")) ~= 3%>'>
+                                                            <div style="float:left;width:32px;height:32px;background:url(textures/async_32bits.png)" />
+                                                        </pe:if>
+                                                        <div class="share_world_name">
+                                                            <%=Eval("text") %><%=if_else(Eval("is_zip")==true, L".zip", "")%>
+                                                        </div>
+                                                    </div>
+                                                    <div class="share_world_infor" style="padding-top:5px;">
+                                                        <span style="margin-left:0px;"><%=ShowLogin.GetCurWorldInfo("revision",Eval("index")) %></span>
+                                                        <span style="margin-left:10px;"><%=ShowLogin.GetWorldSize(Eval("size")) %></span>
+                                                        <span style="margin-left:10px;"><%=Eval("author") %></span>
+                                                    </div>
+                                                </div>
+                                                <div align="right" style="position:relative;width:30px;height:30px;margin-right:13px;margin-top:20px;">
+                                                    <input type="button" class="share_button" style="background:url(textures/enter_32bits.png)" onclick="ShowLogin.EnterWorld()" name='<%=Eval("index")%>' /><!--进入-->
+                                                </div>
                                             </pe:if>
-                                            <pe:if condition='<%= ShowLogin.GetCurWorldInfo("status",Eval("index")) == 1%>'>
-                                                <input type="button" style="background:url(textures/local_only_32bits.png);text-singleline:false;margin-right:5px;width:46px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue" /><!--- "仅\n本地" -->
+                                            <pe:if condition='<%= ShowLogin.current_type == 2%>'>
+                                                <div style="position:relative;width:200px;">
+                                                    <div style="margin-left:5px;">
+                                                        <div class="share_world_name">
+                                                            <%=Eval("text") %><%=if_else(Eval("is_zip")==true, L".zip", "")%>
+                                                        </div>
+                                                    </div>
+                                                    <div class="share_world_infor" style="margin-left:5px;padding-top:5px;">
+                                                        <span style="margin-left:0px;"><%=ShowLogin.GetCurWorldInfo("revision",Eval("index")) %></span>
+                                                        <span style="margin-left:10px;"><%=ShowLogin.GetWorldSize(Eval("size")) %></span>
+                                                        <span style="margin-left:10px;"><%=Eval("author") %></span>
+                                                    </div>
+                                                </div>
                                             </pe:if>
-                                            <pe:if condition='<%= ShowLogin.GetCurWorldInfo("status",Eval("index")) == 2%>'>
-                                                <input type="button" style="background:url(textures/github_only_32bits.png);text-singleline:false;margin-right:5px;width:46px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue" /><!--"仅\n网络" -->
-                                            </pe:if>
-                                            <pe:if condition='<%= ShowLogin.GetCurWorldInfo("status",Eval("index")) == 3%>'>
-                                                <input type="button" style="background:url(textures/sync_32bits.png);text-singleline:false;margin-right:5px;width:46px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue" /><!-- "本地网\n络一致" -->
-                                            </pe:if>
-                                            <pe:if condition='<%= ShowLogin.GetCurWorldInfo("status",Eval("index")) == 4%>'>
-                                                <input type="button" style="background:url(textures/github_update_32bits.png);text-singleline:false;margin-right:5px;width:46px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue" /> <!--"网络\n更新" -->
-                                            </pe:if>
-                                            <pe:if condition='<%= ShowLogin.GetCurWorldInfo("status",Eval("index")) == 5%>'>
-                                                <input type="button" style="background:url(textures/local_update_32bits.png);text-singleline:false;margin-right:5px;width:46px;height:46px;font-size:12px;font-weight:bold;" name='<%=Eval("index")%>' class="mc_button_blue" /> <!--L"本地\n更新" -->
-                                            </pe:if>
-                                            <input type="button" style="width:46px;height:46px;background:url(textures/enter_32bits.png);font-size:12px;font-weight:bold;" onclick="ShowLogin.EnterWorld()" name='<%=Eval("index")%>' class="mc_button_blue" /><!--进入-->
-                                        </pe:if>
-                                        <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) < 100 %>'>
-                                            <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) >= 0 %>'>
-                                                <input type="button" value='<%=L"下载中" %>' style="min-width:60px;height:46px;font-size:12px;font-weight:bold;" onclick="InternetLoadWorld.DownLoadWorld" name='<%=Eval("index")%>' class="mc_button_grey" />
-                                            </pe:if>
-                                            <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) < 0 %>'>
-                                                <input type="button" value='<%=L"下载" %>' style="min-width:60px;height:46px;font-size:12px;font-weight:bold;color:#333333" onclick="InternetLoadWorld.DownLoadWorld" name='<%=Eval("index")%>' class="mc_button_grey" />
-                                            </pe:if>
-                                        </pe:if>
-                                    </div>
+                                        </div>
+                                    </pe:if>
                                 </Columns>
                                 <EmptyDataTemplate>
                                     <div style="margin:10px;font-weight:bold;color:#ffffff"><%=L"空" %></div>
@@ -371,7 +385,7 @@
                                     </div>
                                 </EmptyDataTemplate>
                                 <FetchingDataTemplate>
-                                    <div style="margin:10px;font-weight:bold;color:#ffffff"><%=L"正在搜索, 请稍候 ... " %></div>
+                                    <div style="margin-top:10px;font-weight:bold;color:#ffffff"><%=L"正在搜索, 请稍候 ... " %></div>
                                 </FetchingDataTemplate>
                             </pe:gridview>
                         </div>

@@ -22,8 +22,9 @@ local InternetLoadWorld  = commonlib.gettable("MyCompany.Aries.Creator.Game.Logi
 
 local Page;
 
-ShowLogin.login_type = 1;
-ShowLogin.site  = "http://keepwork.local";
+ShowLogin.login_type   = 1;
+ShowLogin.site         = "http://keepwork.local";
+ShowLogin.current_type = 1;
 
 function ShowLogin:ctor()
 end
@@ -99,7 +100,7 @@ function ShowLogin.InputSearchContent()
 end
 
 function ShowLogin.ClosePage()
-	if(IsMCVersion()) then
+	if(ShowLogin.IsMCVersion()) then
 	    InternetLoadWorld.ReturnLastStep();
 	else
 	    Page:CloseWindow();
@@ -176,6 +177,9 @@ function ShowLogin.QQLogin()
 end
 
 function ShowLogin.OnChangeType(index)
+	echo(index);
+	echo(ShowLogin.IsSelfOnlineWorld());
+	ShowLogin.current_type = index;
 	InternetLoadWorld.OnChangeType(index);
 end
 
@@ -324,51 +328,55 @@ function ShowLogin.LoginAction()
 	end
 
 	ShowLogin.LoginActionApi(account,password,function (err, msg, data)
-			if(data['token']) then
-				ShowLogin.token = data['token'];
+			if(type(data) == "table") then
+				if(data['token']) then
+					ShowLogin.token = data['token'];
 
-				-- 如果记住密码则保存密码到redist根目录下
-				if(isRememberPwd) then
-					local file = ParaIO.open("/PWD", "w");
-					local encodePwd = Encoding.PasswordEncodeWithMac(password);
-					local value = account .. "|" .. encodePwd .. "|" .. loginServer;
-					file:write(value,#value);
-					file:close();
-				else
-					-- 判断文件是否存在，如果存在则删除文件
-					if(ShowLogin:findPWDFiles()) then
-						ParaIO.DeleteFile("PWD");
-					end
-				end
-
-				ShowLogin.getUserInfo(function(err, msg, data)
-					if(data['_id']) then
-
-						if(data['github']) then
-							ShowLogin.username = data['displayName'];
-							ShowLogin.userid   = data['_id'];
-
-							ShowLogin.github_token = data['github_token']; --后面用到
-							ShowLogin.login 	   = data['login']; -- github用户名 后面用到
-
-							ShowLogin.personPageUrl = ShowLogin.site .. "/wiki/mod/worldshare/person/#?userid=" .. ShowLogin.userid;
-
-							local myWorlds = Page:GetNode("myWorlds");
-							myWorlds:SetAttribute("href",ShowLogin.site.."/wiki/mod/worldshare/person/");
-							
-							ShowLogin.changeLoginType(3);
-							ShowLogin.syncWorldsList();
-						else
-							local clientLogin = Page:GetNode("clientLogin");
-
-							ShowLogin.changeLoginType(2);
-						end
+					-- 如果记住密码则保存密码到redist根目录下
+					if(isRememberPwd) then
+						local file = ParaIO.open("/PWD", "w");
+						local encodePwd = Encoding.PasswordEncodeWithMac(password);
+						local value = account .. "|" .. encodePwd .. "|" .. loginServer;
+						file:write(value,#value);
+						file:close();
 					else
-						_guihelper.MessageBox(L"用户名或者密码错误");
+						-- 判断文件是否存在，如果存在则删除文件
+						if(ShowLogin:findPWDFiles()) then
+							ParaIO.DeleteFile("PWD");
+						end
 					end
-				end);
+
+					ShowLogin.getUserInfo(function(err, msg, data)
+						if(data['_id']) then
+
+							if(data['github']) then
+								ShowLogin.username = data['displayName'];
+								ShowLogin.userid   = data['_id'];
+
+								ShowLogin.github_token = data['github_token']; --后面用到
+								ShowLogin.login 	   = data['login']; -- github用户名 后面用到
+
+								ShowLogin.personPageUrl = ShowLogin.site .. "/wiki/mod/worldshare/person/#?userid=" .. ShowLogin.userid;
+
+								local myWorlds = Page:GetNode("myWorlds");
+								myWorlds:SetAttribute("href",ShowLogin.site.."/wiki/mod/worldshare/person/");
+							
+								ShowLogin.changeLoginType(3);
+								ShowLogin.syncWorldsList();
+							else
+								local clientLogin = Page:GetNode("clientLogin");
+
+								ShowLogin.changeLoginType(2);
+							end
+						else
+							_guihelper.MessageBox(L"用户名或者密码错误");
+						end
+					end);
+				else
+					_guihelper.MessageBox(L"用户名或者密码错误");
+				end
 			else
-				_guihelper.MessageBox(L"用户名或者密码错误");
+				_guihelper.MessageBox(L"服务器连接失败");
 			end
 		end
 	);
@@ -407,14 +415,14 @@ end
 function ShowLogin.setSite()
 	local register    = Page:GetNode("register");
 	local loginServer = Page:GetValue("loginServer");
-	
+	echo(loginServer);
 	if(loginServer == "keepwork") then
 	    ShowLogin.site = "http://keepwork.local";
-		register:SetAttribute("href",ShowLogin.site .. "/wiki/projects");
 	elseif(loginServer == "local") then
 	    ShowLogin.site = "http://localhost:8099";
-		register:SetAttribute("href",ShowLogin.site .. "/wiki/projects");
 	end
+
+	register:SetAttribute("href",ShowLogin.site .. "/wiki/projects");
 
 	Page:Refresh(0.01);
 end
@@ -558,7 +566,9 @@ function ShowLogin.sharePersonPage()
 end
 
 function ShowLogin.LoginActionApi(_account,_password,_callback)
-	System.os.GetUrl({url = ShowLogin.site.."/api/wiki/models/user/login", json = true,form = {email=_account,password=_password}},_callback);
+	local url = ShowLogin.site.."/api/wiki/models/user/login";
+	echo(url);
+	System.os.GetUrl({url = url, json = true,form = {email=_account,password=_password}},_callback);
 end
 
 function ShowLogin.getUserInfo(_callback)
