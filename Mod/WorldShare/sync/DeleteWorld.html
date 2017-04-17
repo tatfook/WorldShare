@@ -6,27 +6,27 @@
 </head>
 <body>
     <pe:mcml>
-        <script type="text/npl" refresh="false" src="ShowLogin.lua">
+        <script type="text/npl" refresh="false" src="login.lua">
             <![CDATA[
-            	ShowLogin       = commonlib.gettable("Mod.WorldShare.ShowLogin");
+            	login       = commonlib.gettable("Mod.WorldShare.login");
                 local MainLogin = commonlib.gettable("MyCompany.Aries.Game.MainLogin");
 
-            	ShowLogin:OnInit();
+            	login:OnInit();
 
-                -- log({"ShowLogin.selectedWorldInfor",ShowLogin.selectedWorldInfor});
+                -- log({"login.selectedWorldInfor",login.selectedWorldInfor});
 
-                selectedWorldInfor = ShowLogin.selectedWorldInfor;
+                selectedWorldInfor = login.selectedWorldInfor;
 
             	function deleteLocal()
-                    ShowLogin:deleteWorldLocal();
+                    login:deleteWorldLocal();
                 end
 
                 function deleteGithub()
-                    ShowLogin:deleteWorldGithubLogin();
+                    login:deleteWorldGithubLogin();
                 end
 
                 function deleteAll()
-                    ShowLogin:deleteWorldAll();
+                    login:deleteWorldAll();
                 end
 
                 function goBack()
@@ -44,7 +44,7 @@
             <aries:window mode="thin" width="500" height="270" style="float:left;" title='<%=L"删除世界" %>'>
             	<div style="padding:30px;font-size:18px;base-font-size:18px;color:#ffffff">
             		
-                    <pe:if condition="<%=ShowLogin.login_type == 1 or ShowLogin.login_type == 2 or selectedWorldInfor.status == 3 or selectedWorldInfor.status == 1 or selectedWorldInfor.status == 4 or selectedWorldInfor.status == 5 %>">
+                    <pe:if condition="<%=login.login_type == 1 or login.login_type == 2 or selectedWorldInfor.status == 3 or selectedWorldInfor.status == 1 or selectedWorldInfor.status == 4 or selectedWorldInfor.status == 5 %>">
                         <div>
                 			<input type="button" onclick="deleteLocal"  class="button_highlight" style="margin-left:150px;width: 130px;height: 30px;" name="" value="只删除本地" />
                         </div>

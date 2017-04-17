@@ -1,44 +1,59 @@
 --[[
-Title: WorldShareGUI
+Title: SyncMain
 Author(s):  big
-Date:  2016.12.10
+Date:  2017.4.17
 Desc: 
 use the lib:
 ------------------------------------------------------------
-NPL.load("(gl)Mod/WorldShare/WorldShareGUI.lua");
-local WorldShareGUI = commonlib.gettable("Mod.WorldShare.WorldShareGUI");
+NPL.load("(gl)Mod/WorldShare/SyncMain.lua");
+local SyncMain  = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
 ------------------------------------------------------------
 ]]
+
 NPL.load("(gl)script/apps/Aries/Creator/WorldCommon.lua");
 NPL.load("(gl)script/apps/Aries/Creator/Game/World/WorldRevision.lua");
-NPL.load("(gl)Mod/WorldShare/ShowLogin.lua");
-NPL.load("(gl)Mod/WorldShare/GithubService.lua");
-NPL.load("(gl)Mod/WorldShare/LocalService.lua");
-NPL.load("(gl)Mod/WorldShare/SyncGUI.lua");
+NPL.load("(gl)Mod/WorldShare/login.lua");
+NPL.load("(gl)Mod/WorldShare/service/GithubService.lua");
+NPL.load("(gl)Mod/WorldShare/service/GitlabService.lua");
+NPL.load("(gl)Mod/WorldShare/service/LocalService.lua");
+NPL.load("(gl)Mod/WorldShare/sync/SyncGUI.lua");
 NPL.load("(gl)script/ide/Encoding.lua");
 NPL.load("(gl)script/ide/System/Encoding/base64.lua");
-NPL.load("(gl)Mod/WorldShare/EncodingGithub.lua");
+NPL.load("(gl)Mod/WorldShare/helper/EncodingGithub.lua");
 
-local WorldShareGUI  = commonlib.inherit(nil,commonlib.gettable("Mod.WorldShare.WorldShareGUI"));
 local SyncGUI        = commonlib.gettable("Mod.WorldShare.SyncGUI");
 local WorldCommon    = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 local WorldRevision  = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision");
-local ShowLogin      = commonlib.gettable("Mod.WorldShare.ShowLogin");
-local GithubService  = commonlib.gettable("Mod.WorldShare.GithubService");
-local LocalService   = commonlib.gettable("Mod.WorldShare.LocalService");
+local login          = commonlib.gettable("Mod.WorldShare.login");
+local GithubService  = commonlib.gettable("Mod.WorldShare.service.GithubService");
+local GitlabService  = commonlib.gettable("Mod.WorldShare.service.GitlabService");
+local LocalService   = commonlib.gettable("Mod.WorldShare.service.LocalService");
 local Encoding       = commonlib.gettable("commonlib.Encoding");
 local EncodingS      = commonlib.gettable("System.Encoding");
-local EncodingGithub = commonlib.gettable("Mod.WorldShare.EncodingGithub");
+local EncodingGithub = commonlib.gettable("Mod.WorldShare.helper.EncodingGithub");
 
-function WorldShareGUI:ctor()
+local SyncMain  = commonlib.inherit(nil,commonlib.gettable("Mod.WorldShare.sync.SyncMain"));
+
+local Page;
+
+function SyncMain:ctor()
 end
 
-function WorldShareGUI:init()
+function SyncMain:init()
+	LOG.std(nil, "debug", "SyncMain", "init");
+
+	-- 没有登陆则直接使用离线模式
+	if(login.token) then
+		self:compareRevision();
+		self:StartSyncPage();
+	end
+end
+
+function SyncMain:setPage()
 	Page = document:GetPageCtrl();
-	LOG.std(nil, "debug", "WorldShareGUI", "init");
 end
 
-function WorldShareGUI:StartSyncPage()	
+function SyncMain:StartSyncPage()	
 	System.App.Commands.Call("File.MCMLWindowFrame", {
 		url  = "Mod/WorldShare/StartSync.html", 
 		name = "SyncWorldShare", 
@@ -56,42 +71,23 @@ function WorldShareGUI:StartSyncPage()
 			height = 270,
 		cancelShowAnimation = true,
 	});
-
-	LOG.std(nil, "debug", "WorldShareGUI", "WorldShareGUI ShowLogin");
 end
 
-function WorldShareGUI:HideLogin()
+function SyncMain:HideLogin()
 	self.page:Close();
-	LOG.std(nil, "debug", "WorldShareGUI", "WorldShareGUI HideLogin");
 end
 
-function WorldShareGUI:OnLogin()
-	LOG.std(nil, "debug", "WorldShareGUI", "WorldShareGUI Login");
+function SyncMain:OnLogin()
 end
 
-function WorldShareGUI:OnWorldLoad()
-	-- 没有登陆则直接使用离线模式
-	if(ShowLogin.login) then
-		self:compareRevision();
-		self:StartSyncPage();
-	end
+function SyncMain:OnLeaveWorld()
 end
 
-function WorldShareGUI:OnLeaveWorld()
+function SyncMain:OnInitDesktop()
 end
 
-function WorldShareGUI:OnInitDesktop()
-end
-
--- function WorldShareGUI:handleKeyEvent(event)
--- 	if(event.keyname == "DIK_SPACE") then
--- 		_guihelper.MessageBox("you pressed "..event.keyname.." from Demo GUI");
--- 		return true;
--- 	end
--- end
-
-function WorldShareGUI:compareRevision()
-	if(ShowLogin.login) then
+function SyncMain:compareRevision()
+	if(login.login) then
 		self.getWorldInfo      = WorldCommon:GetWorldInfo();
 		--LOG.std(nil,"debug","worldinfo",self.getWorldInfo);
 
@@ -120,7 +116,7 @@ function WorldShareGUI:compareRevision()
 		if(hasRevision) then
 			self.githubRevison  = 0;
 
-			local contentUrl = "https://raw.githubusercontent.com/".. ShowLogin.login .."/".. EncodingGithub.base64(self.foldername) .."/master/revision.xml";
+			local contentUrl = "https://raw.githubusercontent.com/".. login.login .."/".. EncodingGithub.base64(self.foldername) .."/master/revision.xml";
 			LOG.std(nil,"debug","contentUrl",contentUrl);
 
 			GithubService:githubGet(contentUrl, function(data,err)
@@ -154,7 +150,7 @@ function WorldShareGUI:compareRevision()
 	end
 end
 
-function WorldShareGUI:useLocal()
+function SyncMain:useLocal()
 	System.App.Commands.Call("File.MCMLWindowFrame", {
 		url  = "Mod/WorldShare/StartSyncUseLocal.html", 
 		name = "SyncWorldShare", 
@@ -174,7 +170,7 @@ function WorldShareGUI:useLocal()
 	});
 end
 
-function WorldShareGUI:useGithub()
+function SyncMain:useGithub()
 	System.App.Commands.Call("File.MCMLWindowFrame", {
 		url  = "Mod/WorldShare/StartSyncUseGithub.html", 
 		name = "SyncWorldShare", 
@@ -194,7 +190,7 @@ function WorldShareGUI:useGithub()
 	});
 end
 
-function WorldShareGUI:syncToLocal(_worldDir, _foldername, _callback)
+function SyncMain:syncToLocal(_worldDir, _foldername, _callback)
 	-- LOG.std(nil,"debug","worldDir",_worldDir);
 
 	-- 加载进度UI界面
@@ -370,7 +366,7 @@ function WorldShareGUI:syncToLocal(_worldDir, _foldername, _callback)
 
 		function finish()
 
-			--成功是返回信息给ShowLogin
+			--成功是返回信息给login
 			if(_callback) then
 				_callback(true,self.githubRevison);
 			end
@@ -418,7 +414,7 @@ function WorldShareGUI:syncToLocal(_worldDir, _foldername, _callback)
 	end
 end
 
-function WorldShareGUI:syncToGithub()
+function SyncMain:syncToGithub()
 	-- 加载进度UI界面
 	SyncGUI:ctor();
 
@@ -603,18 +599,18 @@ function WorldShareGUI:syncToGithub()
 
 			function finish()
 				if(syncGUItotal == syncGUIIndex) then
-					LOG.std(nil,"debug","send",ShowLogin.selectedWorldInfor.tooltip)
+					LOG.std(nil,"debug","send",login.selectedWorldInfor.tooltip)
 
 					local modDateTable = {};
 
-					for modDateEle in string.gmatch(ShowLogin.selectedWorldInfor.tooltip,"[^:]+") do
+					for modDateEle in string.gmatch(login.selectedWorldInfor.tooltip,"[^:]+") do
 						modDateTable[#modDateTable+1] = modDateEle;
 					end
 
 					GithubService:GetUrl({
-						url = ShowLogin.site.."/api/mod/WorldShare/models/worlds/refresh",
+						url = login.site.."/api/mod/WorldShare/models/worlds/refresh",
 						postfields = '{"modDate":"'..modDateTable[1]..'","worldsName":"'..self.foldername..'","revision":"'..self.currentRevison..'"}',
-						headers = {Authorization    = "Bearer "..ShowLogin.token,
+						headers = {Authorization    = "Bearer "..login.token,
 								   ["content-type"] = "application/json"},
 					},function(data) 
 
@@ -701,7 +697,7 @@ function WorldShareGUI:syncToGithub()
 			end
 		end);
 	else
-		LOG.std(nil,"debug","WorldShareGUI:syncToGithub","非首次同步");
+		LOG.std(nil,"debug","SyncMain:syncToGithub","非首次同步");
 		syncNow();
 	end
 end

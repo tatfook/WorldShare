@@ -1,39 +1,122 @@
 --[[
-Title: ShowLogin
+Title: login
 Author(s):  big
 Date: 2017/4/11
 Desc: 
 use the lib:
 ------------------------------------------------------------
-NPL.load("(gl)Mod/WorldShare/ShowLogin.lua");
-local ShowLogin = commonlib.gettable("Mod.WorldShare.ShowLogin");
+NPL.load("(gl)Mod/WorldShare/login.lua");
+local login = commonlib.gettable("Mod.WorldShare.login");
 ------------------------------------------------------------
 ]]
 NPL.load("(gl)script/ide/System/os/GetUrl.lua");
 NPL.load("(gl)script/ide/System/Windows/mcml/DOM.lua");
-NPL.load("(gl)Mod/WorldShare/GithubService.lua");
+NPL.load("(gl)Mod/WorldShare/service/HttpRequest.lua");
+NPL.load("(gl)Mod/WorldShare/service/GitlabService.lua");
+NPL.load("(gl)Mod/WorldShare/service/GithubService.lua");
 
-local ShowLogin          = commonlib.inherit(nil,commonlib.gettable("Mod.WorldShare.ShowLogin"));
 local MainLogin          = commonlib.gettable("MyCompany.Aries.Game.MainLogin");
-local GithubService      = commonlib.gettable("Mod.WorldShare.GithubService");
---local Encoding           = commonlib.gettable("System.Encoding");
+local HttpRequest        = commonlib.gettable("Mod.WorldShare.service.HttpRequest");
+local GitlabService      = commonlib.gettable("Mod.WorldShare.service.GitlabService");
+local GithubService      = commonlib.gettable("Mod.WorldShare.service.GithubService");
 local Encoding  	     = commonlib.gettable("commonlib.Encoding");
 local InternetLoadWorld  = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld");
+local WorldRevision      = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision");
+local SyncMain           = commonlib.gettable("Mod.WorldShare.sync.syncMain");
+
+local login = commonlib.inherit(nil,commonlib.gettable("Mod.WorldShare.login"));
 
 local Page;
 
-ShowLogin.login_type   = 1;
-ShowLogin.site         = "http://keepwork.local";
-ShowLogin.current_type = 1;
+login.login_type   = 1;
+login.site         = "http://keepwork.local";
+login.current_type = 1;
 
-function ShowLogin:ctor()
+function login:ctor()
 end
 
-function ShowLogin.OnInit()
+function login.OnInit()
 	Page = document:GetPageCtrl();
 end
 
-function ShowLogin.IsMCVersion()
+function login.LoginAction()
+	local account       = Page:GetValue("account");
+	local password      = Page:GetValue("password");
+	local loginServer   = Page:GetValue("loginServer");
+	local isRememberPwd = Page:GetValue("rememberPassword"); 
+
+	if(account == nil or account == "") then
+	    _guihelper.MessageBox("账号不能为空");
+	    return;
+	end
+
+	if(password == nil or password == "") then
+	    _guihelper.MessageBox("密码不能为空");
+	    return;
+	end
+
+	login.LoginActionApi(account,password,function (response,err)
+			if(type(response) == "table") then
+				if(response['data']['userInfo']['_id']) then
+					login.token = response['data']['token'];
+
+					-- 如果记住密码则保存密码到redist根目录下
+					if(isRememberPwd) then
+						local file      = ParaIO.open("/PWD", "w");
+						local encodePwd = Encoding.PasswordEncodeWithMac(password);
+						local value     = account .. "|" .. encodePwd .. "|" .. loginServer .. "|" .. login.token;
+						file:write(value,#value);
+						file:close();
+					else
+						-- 判断文件是否存在，如果存在则删除文件
+						if(login.findPWDFiles()) then
+							ParaIO.DeleteFile("PWD");
+						end
+					end
+
+					local userInfo = response['data']['userInfo'];
+
+					login.username = userInfo['displayName'];
+					login.userId   = userInfo['_id'];
+
+					if(userInfo['dataSourceId'] and userInfo['dataSource'] ~= {}) then
+						local defaultDataSource;
+
+						for key,value in ipairs(userInfo['dataSource']) do
+							if(value._id == userInfo['dataSourceId']) then
+								defaultDataSource = value;
+							end
+						end
+
+						login.dataSourceToken    = defaultDataSource['dataSourceToken'];    -- 数据源Token
+						login.dataSourceUsername = defaultDataSource['dataSourceUsername']; -- 数据源用户名
+						login.dataSourceType     = defaultDataSource['type'];				-- 数据源类型
+						login.apiBaseUrl		 = defaultDataSource['apiBaseUrl']			-- 数据源api
+
+						--echo({login.dataSourceToken,login.dataSourceUsername});
+						login.personPageUrl = login.site .. "/wiki/mod/worldshare/person/#?userid=" .. userInfo._id;
+
+						local myWorlds = Page:GetNode("myWorlds");
+						myWorlds:SetAttribute("href",login.site.."/wiki/mod/worldshare/person/");
+						
+						login.changeLoginType(3);
+						login.syncWorldsList();
+					else
+						--local clientLogin = Page:GetNode("clientLogin");
+						--login.changeLoginType(2);
+						_guihelper.MessageBox(L"数据源不存在，请联系管理员");
+					end
+				else
+					_guihelper.MessageBox(L"用户名或者密码错误");
+				end
+			else
+				_guihelper.MessageBox(L"服务器连接失败");
+			end
+		end
+	);
+end
+
+function login.IsMCVersion()
 	if(System.options.mc) then
 		return true;
 	else
@@ -41,7 +124,7 @@ function ShowLogin.IsMCVersion()
 	end
 end
 
-function ShowLogin.GetWorldSize(size)
+function login.GetWorldSize(size)
 	local s;
 
 	if(size and size ~= "") then
@@ -53,11 +136,11 @@ function ShowLogin.GetWorldSize(size)
 	return s or "5M";
 end
 
-function ShowLogin.GetWorldType()
+function login.GetWorldType()
 	return InternetLoadWorld.type_ds;
 end
 
-function ShowLogin.CreateNewWorld()
+function login.CreateNewWorld()
 	Page:CloseWindow();
 
 	NPL.load("(gl)script/apps/Aries/Creator/Game/Login/CreateNewWorld.lua");
@@ -66,7 +149,7 @@ function ShowLogin.CreateNewWorld()
 	CreateNewWorld.ShowPage();
 end
 
-function ShowLogin.GetCurWorldInfo(info_type,world_index)
+function login.GetCurWorldInfo(info_type,world_index)
 	local index = tonumber(world_index);
 	local selected_world = InternetLoadWorld.cur_ds[world_index]
 	--local cur_world = InternetLoadWorld:GetCurrentWorld();
@@ -86,31 +169,31 @@ function ShowLogin.GetCurWorldInfo(info_type,world_index)
 	end
 end
 
-function ShowLogin.GetNetSpeed()
+function login.GetNetSpeed()
 	return "100ms";
 end
 
-function ShowLogin.GetPeopleNumOnline()
+function login.GetPeopleNumOnline()
 	return "????";
 end
 
-function ShowLogin.InputSearchContent()
+function login.InputSearchContent()
 	InternetLoadWorld.isSearching = true;
 	Page:Refresh(0.1);
 end
 
-function ShowLogin.ClosePage()
-	if(ShowLogin.IsMCVersion()) then
+function login.ClosePage()
+	if(login.IsMCVersion()) then
 	    InternetLoadWorld.ReturnLastStep();
 	else
 	    Page:CloseWindow();
 	end
 end
 
-function ShowLogin.GetDefaultValueForAddress()
+function login.GetDefaultValueForAddress()
 	local s = "";
 
-	if(ShowLogin.IsMCVersion()) then
+	if(login.IsMCVersion()) then
 		s = L"输入服务器地址";
 	else
 		s = L"输入服务器地址或者米米号";
@@ -119,7 +202,7 @@ function ShowLogin.GetDefaultValueForAddress()
 	return s;
 end
 
-function ShowLogin.LookPlayerInform()
+function login.LookPlayerInform()
 	local cur_page = InternetLoadWorld.GetCurrentServerPage();
 	local nid = cur_page.player_nid;
 
@@ -128,7 +211,7 @@ function ShowLogin.LookPlayerInform()
 	end
 end
 
-function ShowLogin.IsBlockWorld()
+function login.IsBlockWorld()
 	local cur_pageH = InternetLoadWorld.GetCurrentServerPage();
 
 	if(cur_page.player_nid and cur_page.player_nid ~= "") then
@@ -138,7 +221,7 @@ function ShowLogin.IsBlockWorld()
 	end
 end
 
-function ShowLogin.OpenBBS()
+function login.OpenBBS()
 	NPL.load("(gl)script/apps/Aries/Creator/Game/game_options.lua");
 
 	local options = commonlib.gettable("MyCompany.Aries.Game.GameLogic.options");
@@ -147,19 +230,19 @@ function ShowLogin.OpenBBS()
 	ParaGlobal.ShellExecute("open", url, "", "", 1);
 end
 
-function ShowLogin.OnImportWorld()
+function login.OnImportWorld()
 	NPL.load("(gl)script/apps/Aries/Creator/Game/Login/LocalLoadWorld.lua");
 
 	local LocalLoadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalLoadWorld");
 	ParaGlobal.ShellExecute("open", ParaIO.GetCurDirectory(0)..LocalLoadWorld.GetWorldFolder(), "", "", 1);
 end
 
-function ShowLogin.GetDesForWorld()
+function login.GetDesForWorld()
 	local  str = ""
 	return str;
 end
 
-function ShowLogin.GetOnlineDes()
+function login.GetOnlineDes()
 	local isOnline = System.User.isOnline;
 	local des = L"你的状态:";
 
@@ -172,18 +255,16 @@ function ShowLogin.GetOnlineDes()
 	return des;
 end
 
-function ShowLogin.QQLogin()
+function login.QQLogin()
 	InternetLoadWorld.QQLogin();
 end
 
-function ShowLogin.OnChangeType(index)
-	echo(index);
-	echo(ShowLogin.IsSelfOnlineWorld());
-	ShowLogin.current_type = index;
+function login.OnChangeType(index)
+	login.current_type = index;
 	InternetLoadWorld.OnChangeType(index);
 end
 
-function ShowLogin.BeHasWorldInSlot(is_empty_slot,is_buy_slot)
+function login.BeHasWorldInSlot(is_empty_slot,is_buy_slot)
 	local value;
 
 	if(is_empty_slot or is_buy_slot) then
@@ -195,7 +276,7 @@ function ShowLogin.BeHasWorldInSlot(is_empty_slot,is_buy_slot)
 	return value;
 end
 
-function ShowLogin.OnPurchaseSaveSlot()
+function login.OnPurchaseSaveSlot()
 	if(System.options.mc) then
 		_guihelper.MessageBox(L"此功能暂未开放");
 	else
@@ -208,12 +289,12 @@ function ShowLogin.OnPurchaseSaveSlot()
 	end
 end
 
-function ShowLogin.OnSaveToSlot(name)
+function login.OnSaveToSlot(name)
 	local slot_id = tonumber(name);
 	InternetLoadWorld.OnSaveToSlot(slot_id);
 end
 
-function ShowLogin.IsSelfOnlineWorld()
+function login.IsSelfOnlineWorld()
 	local cur_svr_page = InternetLoadWorld.GetCurrentServerPage() or {};
 
 	if(InternetLoadWorld.type_index == 1 and cur_svr_page.name and cur_svr_page.name == "onlineworld") then
@@ -223,45 +304,45 @@ function ShowLogin.IsSelfOnlineWorld()
 	end
 end
 
-function ShowLogin.IsChangingName()
+function login.IsChangingName()
 	return InternetLoadWorld.changedName;
 end
 
-function ShowLogin.IsChangingQQ()
+function login.IsChangingQQ()
 	return InternetLoadWorld.changedQQ;
 end
 
-function ShowLogin.ChangeName()
+function login.ChangeName()
 	InternetLoadWorld.changedName = true;
 	Page:Refresh(0.1);
 end
 
-function ShowLogin.SaveName()
+function login.SaveName()
 	InternetLoadWorld.ChangeNickName();
 	--changedName = false;
 	--Page:Refresh(0.1);
 end
 
-function ShowLogin.ChangeQQ()
+function login.ChangeQQ()
 	InternetLoadWorld.changedQQ = true;
 	Page:Refresh(0.1);
 end
 
-function ShowLogin.SaveQQ()
+function login.SaveQQ()
 	InternetLoadWorld.changedQQ = false;
 	Page:Refresh(0.1);
 end
 
-function ShowLogin.GetUserNickName()
+function login.GetUserNickName()
 	return System.User.NickName or L"匿名";
 end
 
-function ShowLogin.CancelChangeName()
+function login.CancelChangeName()
 	InternetLoadWorld.changedName = false;
 	Page:Refresh(0.1);
 end
 
-function ShowLogin.findPWDFiles()
+function login.findPWDFiles()
 	local result = commonlib.Files.Find({}, "/", 0, 500,"*.*");
 
 	for key,value in ipairs(result) do
@@ -274,12 +355,12 @@ function ShowLogin.findPWDFiles()
 	return false;
 end
 
-function ShowLogin.getRememberPassword()
+function login.getRememberPassword()
 	local isRememberPwd = Page:GetNode("rememberPassword");
 
 	-- LOG.std(nil,"debug","getRememberPassword",PWD);
 
-	if(ShowLogin.findPWDFiles()) then
+	if(login.findPWDFiles()) then
 	    local file = ParaIO.open("/PWD", "r");
 	    local fileContent = "";
 
@@ -296,11 +377,11 @@ function ShowLogin.getRememberPassword()
 		Page:SetNodeValue("account", PWD[1]);
 		Page:SetNodeValue("password",Encoding.PasswordDecodeWithMac(PWD[2]));
 
-		Page:GetNode("online"):SetAttribute("selected",nil);
+		Page:GetNode("keepwork"):SetAttribute("selected",nil);
 		Page:GetNode("local"):SetAttribute("selected",nil);
 
-		if(PWD[3] == "online") then
-			Page:GetNode("online"):SetAttribute("selected","selected");
+		if(PWD[3] == "keepwork") then
+			Page:GetNode("keepwork"):SetAttribute("selected","selected");
 		elseif(PWD[3] == "local") then
 			Page:GetNode("local"):SetAttribute("selected","selected");
 		end
@@ -311,146 +392,48 @@ function ShowLogin.getRememberPassword()
 	end
 end
 
-function ShowLogin.LoginAction()
-	local account       = Page:GetValue("account");
-	local password      = Page:GetValue("password");
-	local loginServer   = Page:GetValue("loginServer");
-	local isRememberPwd = Page:GetValue("rememberPassword"); 
-
-	if(account == nil or account == "") then
-	    _guihelper.MessageBox("账号不能为空");
-	    return;
-	end
-
-	if(password == nil or password == "") then
-	    _guihelper.MessageBox("密码不能为空");
-	    return;
-	end
-
-	ShowLogin.LoginActionApi(account,password,function (err, msg, data)
-			if(type(data) == "table") then
-				if(data['token']) then
-					ShowLogin.token = data['token'];
-
-					-- 如果记住密码则保存密码到redist根目录下
-					if(isRememberPwd) then
-						local file = ParaIO.open("/PWD", "w");
-						local encodePwd = Encoding.PasswordEncodeWithMac(password);
-						local value = account .. "|" .. encodePwd .. "|" .. loginServer;
-						file:write(value,#value);
-						file:close();
-					else
-						-- 判断文件是否存在，如果存在则删除文件
-						if(ShowLogin:findPWDFiles()) then
-							ParaIO.DeleteFile("PWD");
-						end
-					end
-
-					ShowLogin.getUserInfo(function(err, msg, data)
-						if(data['_id']) then
-
-							if(data['github']) then
-								ShowLogin.username = data['displayName'];
-								ShowLogin.userid   = data['_id'];
-
-								ShowLogin.github_token = data['github_token']; --后面用到
-								ShowLogin.login 	   = data['login']; -- github用户名 后面用到
-
-								ShowLogin.personPageUrl = ShowLogin.site .. "/wiki/mod/worldshare/person/#?userid=" .. ShowLogin.userid;
-
-								local myWorlds = Page:GetNode("myWorlds");
-								myWorlds:SetAttribute("href",ShowLogin.site.."/wiki/mod/worldshare/person/");
-							
-								ShowLogin.changeLoginType(3);
-								ShowLogin.syncWorldsList();
-							else
-								local clientLogin = Page:GetNode("clientLogin");
-
-								ShowLogin.changeLoginType(2);
-							end
-						else
-							_guihelper.MessageBox(L"用户名或者密码错误");
-						end
-					end);
-				else
-					_guihelper.MessageBox(L"用户名或者密码错误");
-				end
-			else
-				_guihelper.MessageBox(L"服务器连接失败");
-			end
-		end
-	);
-end
-
-function ShowLogin.checkGitBind()
-	ParaGlobal.ShellExecute("open", ShowLogin.site.."/wiki/mod/WorldShare/client_login#/?token="..ShowLogin.token, "", "", 1);
-	ShowLogin.checkGitBindAction();
-end
-
-function ShowLogin.checkGitBindAction()
-	_guihelper.MessageBox(L"请确定绑定GITHUB是否成功？", function(res)
-		-- if(res and res == _guihelper.DialogResult.Yes) then
-		-- 	-- pressed YES
-		-- end
-		ShowLogin.getUserInfo(function(err, msg, data)
-			if(data['_id']) then
-				if(data['github']) then
-					ShowLogin.username = data['displayName'];
-					ShowLogin.userid   = data['_id'];
-
-					ShowLogin.personPageUrl = ShowLogin.site .. "/wiki/mod/worldshare/person/#?userid=" .. ShowLogin.userid;
-
-					local myWorlds = Page:GetNode("myWorlds");
-					myWorlds:SetAttribute("href",ShowLogin.site.."/wiki/mod/worldshare/person/");
-					ShowLogin.changeLoginType(3);
-					ShowLogin.syncWorldsList();
-				else
-					ShowLogin.checkGitBindAction();
-				end
-			end
-		end);
-	end, _guihelper.MessageBoxButtons.YesNo);
-end
-
-function ShowLogin.setSite()
+function login.setSite()
 	local register    = Page:GetNode("register");
 	local loginServer = Page:GetValue("loginServer");
-	echo(loginServer);
+
 	if(loginServer == "keepwork") then
-	    ShowLogin.site = "http://keepwork.local";
+	    login.site = "http://keepwork.local";
 	elseif(loginServer == "local") then
-	    ShowLogin.site = "http://localhost:8099";
+	    login.site = "http://localhost:8099";
 	end
 
-	register:SetAttribute("href",ShowLogin.site .. "/wiki/projects");
+	register:SetAttribute("href",login.site .. "/wiki/home");
 
 	Page:Refresh(0.01);
 end
 
-function ShowLogin.logout()
-	ShowLogin.changeLoginType(1);
+function login.logout()
+	login.changeLoginType(1);
 end
 
-function ShowLogin.syncWorldsList()
+function login.changeRevision()
+	commonlib.TimerManager.SetTimeout(function()
+		local localWorlds = InternetLoadWorld.ServerPage_ds[1]['ds'];
+
+		for kl,vl in ipairs(localWorlds) do
+			local WorldRevisionCheckOut = WorldRevision:new():init("worlds/DesignHouse/"..Encoding.Utf8ToDefault(vl.foldername).."/");
+			localWorlds[kl].revision    = WorldRevisionCheckOut:GetDiskRevision();
+		end
+
+		Page:Refresh();
+	end, 100);
+end
+
+function login.syncWorldsList()
 	local localWorlds = InternetLoadWorld.ServerPage_ds[1]['ds'];
 
 	-- 防止重复数据
-	if(not ShowLogin.originLocalWorlds) then
-	    ShowLogin.originLocalWorlds = commonlib.copy(localWorlds);
+	if(not login.originLocalWorlds) then
+	    login.originLocalWorlds = commonlib.copy(localWorlds);
 	else
-	    localWorlds = commonlib.copy(ShowLogin.originLocalWorlds);
+	    localWorlds = commonlib.copy(login.originLocalWorlds);
 	end
-
-	-- LOG.std(nil,"debug","localWorlds",localWorlds);
-	for kl,vl in ipairs(localWorlds) do
-	    local WorldRevisionCheckOut = WorldRevision:new():init("worlds/DesignHouse/"..Encoding.Utf8ToDefault(vl.foldername).."/");
-	    -- LOG.std(nil,"debug","WorldRevisionCheckOut",WorldRevisionCheckOut);
-
-	    localWorlds[kl].revision = WorldRevisionCheckOut:GetDiskRevision();
-	    -- LOG.std(nil,"debug","dir","worlds/DesignHouse/"..vl.foldername);
-	    -- LOG.std(nil,"debug","localWorlds[kl].revision",localWorlds[kl].revision);
-	end
-	            	
+	
 	--[[
 		status代码含义:
 		1:仅本地
@@ -460,9 +443,7 @@ function ShowLogin.syncWorldsList()
 		5:本地更新
 	]]
 
-	ShowLogin.getWorldsList(function(data,err) --worldsName,
-	    LOG.std(nil,"debug","ShowLogin:getWorldsList",{data,err});
-
+	login.getWorldsList(function(data,err) --worldsName,
 	    -- 处理本地网络同时存在 本地不存在 网络存在 的世界 
 	    for kd,vd in ipairs(data) do
 	        local isExist = false;
@@ -488,7 +469,7 @@ function ShowLogin.syncWorldsList()
 	        end
 
 	        if(not isExist) then
-            	localWorlds[#localWorlds+1] = {
+            	localWorlds[#localWorlds + 1] = {
             		text       = vd["worldsName"];
             		foldername = vd["worldsName"];
             		revision   = vd["date"];
@@ -496,7 +477,7 @@ function ShowLogin.syncWorldsList()
             	};
 	        end
 	    end
-
+		
 	    -- 处理 本地存在 网络不存在 的世界
 	    for kl,vl in ipairs(localWorlds) do
 	        local isExist = false;
@@ -512,38 +493,37 @@ function ShowLogin.syncWorldsList()
 	            localWorlds[kl].status = 1; --仅本地
 	        end
 	    end
-	            		
-	    Page:Refresh(0.01);
+
+	    Page:Refresh();
 	end);
 end
 
-function ShowLogin.EnterWorld(_index)
+function login.enterWorld(_index)
 	local index = tonumber(_index);
-	ShowLogin.selectedWorldInfor = InternetLoadWorld.cur_ds[_index];
+	login.selectedWorldInfor = InternetLoadWorld.cur_ds[_index];
 
-	LOG.std(nil,"debug","ShowLogin.selectedWorldInfor",ShowLogin.selectedWorldInfor);
-	-- world_mode="edit",remotefile="local://worlds/DesignHouse/TestD",gs_nid="",force_nid=0,ws_id="",author="",}
+	--LOG.std(nil,"debug","login.selectedWorldInfor",login.selectedWorldInfor);
 
-	if(ShowLogin.selectedWorldInfor.status == 2) then
-		local worldDir = "worlds/DesignHouse/" .. ShowLogin.selectedWorldInfor.foldername .. "/";
+	if(login.selectedWorldInfor.status == 2) then
+		local worldDir = "worlds/DesignHouse/" .. login.selectedWorldInfor.foldername .. "/";
 
 		ParaIO.CreateDirectory(worldDir);
-		WorldShareGUI:syncToLocal(worldDir,ShowLogin.selectedWorldInfor.foldername,function(_success,_revision)
+		syncMain:syncToLocal(worldDir,login.selectedWorldInfor.foldername,function(_success,_revision)
 		    if(_success) then
-		        ShowLogin.selectedWorldInfor.status      = 3;
-		        ShowLogin.selectedWorldInfor.server      = "local";
-		        ShowLogin.selectedWorldInfor.is_zip      = false;
-		        ShowLogin.selectedWorldInfor.icon        = "Texture/blocks/items/1013_Carrot.png";
-		        ShowLogin.selectedWorldInfor.revision    = _revision;
-		        ShowLogin.selectedWorldInfor.text 		 = ShowLogin.selectedWorldInfor.foldername;
-		        ShowLogin.selectedWorldInfor.world_mode  = "edit";
-		        ShowLogin.selectedWorldInfor.gs_nid      = "";
-		        ShowLogin.selectedWorldInfor.force_nid   = 0;
-		        ShowLogin.selectedWorldInfor.ws_id       = "";
-		        ShowLogin.selectedWorldInfor.author      = "";
-		        ShowLogin.selectedWorldInfor.remotefile  = "local://worlds/DesignHouse/" .. ShowLogin.selectedWorldInfor.foldername;
+		        login.selectedWorldInfor.status      = 3;
+		        login.selectedWorldInfor.server      = "local";
+		        login.selectedWorldInfor.is_zip      = false;
+		        login.selectedWorldInfor.icon        = "Texture/blocks/items/1013_Carrot.png";
+		        login.selectedWorldInfor.revision    = _revision;
+		        login.selectedWorldInfor.text 		 = login.selectedWorldInfor.foldername;
+		        login.selectedWorldInfor.world_mode  = "edit";
+		        login.selectedWorldInfor.gs_nid      = "";
+		        login.selectedWorldInfor.force_nid   = 0;
+		        login.selectedWorldInfor.ws_id       = "";
+		        login.selectedWorldInfor.author      = "";
+		        login.selectedWorldInfor.remotefile  = "local://worlds/DesignHouse/" .. login.selectedWorldInfor.foldername;
 
-		        Page:Refresh(0.01);
+		        Page:Refresh();
 		    end
 		end);
 	else
@@ -551,36 +531,20 @@ function ShowLogin.EnterWorld(_index)
 	end
 end
 
-function ShowLogin.deleteWorldUI(_index)
+function login.syncNow()
+	_guihelper.MessageBox(L"同步世界");
+end
+
+function login.deleteWorldUI(_index)
 	Page:CloseWindow();
 
 	local index = tonumber(_index);
-	ShowLogin.selectedWorldInfor = InternetLoadWorld.cur_ds[_index];
+	login.selectedWorldInfor = InternetLoadWorld.cur_ds[_index];
 
-	ShowLogin.deleteWorld();
+	login.deleteWorld();
 end
 
-function ShowLogin.sharePersonPage()
-	local url = ShowLogin.site .. "/wiki/mod/worldshare/share/#?type=person&userid=" .. ShowLogin.userid;
-	ParaGlobal.ShellExecute("open", url, "", "", 1);
-end
-
-function ShowLogin.LoginActionApi(_account,_password,_callback)
-	local url = ShowLogin.site.."/api/wiki/models/user/login";
-	echo(url);
-	System.os.GetUrl({url = url, json = true,form = {email=_account,password=_password}},_callback);
-end
-
-function ShowLogin.getUserInfo(_callback)
-	System.os.GetUrl({url = ShowLogin.site.."/api/wiki/models/user/",json = true,headers = {Authorization = "Bearer ".. ShowLogin.token}},_callback);
-end
-
-function ShowLogin.changeLoginType(_type)
-	ShowLogin.login_type = _type;
-	Page:Refresh(0.01);
-end
-
-function ShowLogin.deleteWorld(_selectWorldInfor)
+function login.deleteWorld(_selectWorldInfor)
 	System.App.Commands.Call("File.MCMLWindowFrame", {
 		url  = "Mod/WorldShare/DeleteWorld.html", 
 		name = "DeleteWorld", 
@@ -600,7 +564,7 @@ function ShowLogin.deleteWorld(_selectWorldInfor)
 	});
 end
 
-function ShowLogin.deleteWorldLocal(_callback)
+function login.deleteWorldLocal(_callback)
 	local world = InternetLoadWorld:GetCurrentWorld();
 	if(not world) then
 		_guihelper.MessageBox(L"请先选择世界")
@@ -612,7 +576,6 @@ function ShowLogin.deleteWorldLocal(_callback)
 		if(res and res == _guihelper.DialogResult.Yes) then
 			if(world.RemoveLocalFile and world:RemoveLocalFile()) then
 				InternetLoadWorld.RefreshAll();
-
 			elseif(world.remotefile) then
 				-- local world, delete all files in folder and the folder itself.
 				local targetDir = world.remotefile:gsub("^local://", "");
@@ -627,7 +590,7 @@ function ShowLogin.deleteWorldLocal(_callback)
 					-- InternetLoadWorld.RefreshCurrentServerList();
 					local foldername = targetDir:match("worlds/DesignHouse/(%w+)");
 
-					ShowLogin.handleCur_ds = {};
+					login.handleCur_ds = {};
 					local hasGithub    = false;
 					for key,value in ipairs(InternetLoadWorld.cur_ds) do
 						if(value.foldername == foldername and value.status == 3 or value.status == 4 or value.status == 5) then
@@ -637,12 +600,12 @@ function ShowLogin.deleteWorldLocal(_callback)
 						end
 
 						if(value.foldername ~= foldername) then
-							ShowLogin.handleCur_ds[#ShowLogin.handleCur_ds+1] = value;
+							login.handleCur_ds[#login.handleCur_ds+1] = value;
 						end
 					end
 
 					if(not hasGithub)then
-						InternetLoadWorld.cur_ds = ShowLogin.handleCur_ds;
+						InternetLoadWorld.cur_ds = login.handleCur_ds;
 					end
 
 					-- LOG.std(nil,"debug","_callback",_callback);
@@ -668,8 +631,8 @@ function ShowLogin.deleteWorldLocal(_callback)
 	end, _guihelper.MessageBoxButtons.YesNo);
 end
 
-function ShowLogin.deleteWorldGithubLogin()
-	-- LOG.std(nil,"debug","ShowLogin.selectedWorldInfor",ShowLogin.selectedWorldInfor);
+function login.deleteWorldGithubLogin()
+	-- LOG.std(nil,"debug","login.selectedWorldInfor",login.selectedWorldInfor);
 
 	System.App.Commands.Call("File.MCMLWindowFrame", {
 		url  = "Mod/WorldShare/DeleteWorldLogin.html", 
@@ -690,12 +653,12 @@ function ShowLogin.deleteWorldGithubLogin()
 	});
 end
 
-function ShowLogin.deleteWorldGithub(_password)
-	local foldername = ShowLogin.selectedWorldInfor.foldername;
+function login.deleteWorldGithub(_password)
+	local foldername = login.selectedWorldInfor.foldername;
 
 	local AuthUrl    = "https://api.github.com/authorizations";
 	local AuthParams = '{"scopes":["delete_repo"], "note":"' .. ParaGlobal.timeGetTime() .. '"}';
-	local basicAuth  = ShowLogin.login .. ":" .. _password;
+	local basicAuth  = login.login .. ":" .. _password;
 	local AuthToken  = "";
 
 	basicAuth = Encoding.base64(basicAuth);
@@ -728,15 +691,15 @@ function ShowLogin.deleteWorldGithub(_password)
 	    			if(err == 204) then
 	    				GithubService:GetUrl({
 							method  = "DELETE",
-							url     = ShowLogin.site.."/api/mod/WorldShare/models/worlds/",
+							url     = login.site.."/api/mod/WorldShare/models/worlds/",
 							form    = {
-								worldsName = ShowLogin.selectedWorldInfor.foldername,
+								worldsName = login.selectedWorldInfor.foldername,
 							},
 							json    = true,
-							headers = {Authorization = "Bearer "..ShowLogin.token}
+							headers = {Authorization = "Bearer "..login.token}
 						},function(data,err)
 
-							ShowLogin.handleCur_ds = {};
+							login.handleCur_ds = {};
 							local hasLocal    = false;
 							for key,value in ipairs(InternetLoadWorld.cur_ds) do
 								if(value.foldername == foldername and value.status == 3 or value.status == 4 or value.status == 5) then
@@ -746,12 +709,12 @@ function ShowLogin.deleteWorldGithub(_password)
 								end
 
 								if(value.foldername ~= foldername) then
-									ShowLogin.handleCur_ds[#ShowLogin.handleCur_ds+1] = value;
+									login.handleCur_ds[#login.handleCur_ds+1] = value;
 								end
 							end
 
 							if(not hasLocal)then
-								InternetLoadWorld.cur_ds = ShowLogin.handleCur_ds;
+								InternetLoadWorld.cur_ds = login.handleCur_ds;
 							end
 
 			    			Page:CloseWindow();
@@ -775,17 +738,43 @@ function ShowLogin.deleteWorldGithub(_password)
 
 end
 
-function ShowLogin.deleteWorldAll()
-	ShowLogin.deleteWorldLocal(function()
-		ShowLogin.deleteWorldGithubLogin();
+function login.deleteWorldAll()
+	login.deleteWorldLocal(function()
+		login.deleteWorldGithubLogin();
 	end);
 end
 
-function ShowLogin.getWorldsList(_callback) --_worldsName,
-	GithubService:GetUrl({
-		url = ShowLogin.site.."/api/mod/WorldShare/models/worlds",
-		json=true,
-		headers = {Authorization = "Bearer "..ShowLogin.token},
-		form = {amount = 100}
+function login.sharePersonPage()
+	local url = login.site .. "/wiki/mod/worldshare/share/#?type=person&userid=" .. login.userid;
+	ParaGlobal.ShellExecute("open", url, "", "", 1);
+end
+
+function login.LoginActionApi(_account,_password,_callback)
+	local url = login.site .. "/api/wiki/models/user/login";
+	HttpRequest:GetUrl({
+		url  = url,
+		json = true,
+		form = {
+				email    = _account,
+				password = _password,
+		},
+	},_callback);
+end
+
+function login.getUserInfo(_callback)
+	System.os.GetUrl({url = login.site.."/api/wiki/models/user/",json = true,headers = {Authorization = "Bearer ".. login.token}},_callback);
+end
+
+function login.changeLoginType(_type)
+	login.login_type = _type;
+	Page:Refresh(0.01);
+end
+
+function login.getWorldsList(_callback) --_worldsName,
+	HttpRequest:GetUrl({
+		url  = login.site.."/api/mod/worldshare/models/worlds",
+		json = true,
+		headers = {Authorization = "Bearer "..login.token},
+		form = {amount = 100},
 	},_callback);
 end

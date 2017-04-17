@@ -1,32 +1,23 @@
 ﻿--[[
 Title: WorldShareMod
 Author(s):  Big
-Date: 2016/12/1
+Date: 2017.4.17
 Desc: 
 use the lib:
 ------------------------------------------------------------
 NPL.load("(gl)Mod/WorldShare/main.lua");
-local Share = commonlib.gettable("Mod.Share");
+local WorldShare = commonlib.gettable("Mod.WorldShare");
 ------------------------------------------------------------
 ]]
-NPL.load("(gl)Mod/WorldShare/WorldShareCommand.lua");
-NPL.load("(gl)Mod/WorldShare/WorldShareItem.lua");
-NPL.load("(gl)Mod/WorldShare/WorldShareGUI.lua");
-NPL.load("(gl)Mod/WorldShare/WorldShareEntity.lua");
-NPL.load("(gl)Mod/WorldShare/WorldShareSceneContext.lua");
-NPL.load("(gl)Mod/WorldShare/ShowLogin.lua");
+
+NPL.load("(gl)Mod/WorldShare/sync/SyncMain.lua");
+NPL.load("(gl)Mod/WorldShare/login.lua");
 NPL.load("(gl)script/ide/Encoding.lua");
 NPL.load("(gl)script/ide/Files.lua");
 
-local WorldShareSceneContext = commonlib.gettable("Mod.WorldShare.WorldShareSceneContext");
-
 local GameLogic = commonlib.gettable("MyCompany.Aries.Game.GameLogic");
 local Encoding  = commonlib.gettable("commonlib.Encoding");
-
-local WorldShareItem    = commonlib.gettable("Mod.WorldShare.WorldShareItem");
-local WorldShareGUI     = commonlib.gettable("Mod.WorldShare.WorldShareGUI");
-local WorldShareEntity  = commonlib.gettable("Mod.WorldShare.WorldShareEntity");
-local WorldShareCommand = commonlib.gettable("Mod.WorldShare.WorldShareCommand");
+local SyncMain  = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
 
 local WorldShare = commonlib.inherit(commonlib.gettable("Mod.ModBase"),commonlib.gettable("Mod.WorldShare"));
 
@@ -46,16 +37,9 @@ function WorldShare:GetDesc()
 end
 
 function WorldShare:init()
-	WorldShareItem:init();
-	WorldShareGUI:init();
-	WorldShareEntity:init();
-	WorldShareCommand:init();
-
-	-- WorldShareSceneContext:ApplyToDefaultContext();
-
 	GameLogic.GetFilters():add_filter("InternetLoadWorld.ShowPage",function (bEnable, bShow)
 		System.App.Commands.Call("File.MCMLWindowFrame", {
-			url = "Mod/WorldShare/ShowLogin.html", 
+			url = "Mod/WorldShare/login.html", 
 			name = "LoadMainWorld", 
 			isShowTitleBar = false,
 			DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
@@ -77,7 +61,7 @@ function WorldShare:init()
 
 	GameLogic.GetFilters():add_filter("SaveWorldPage.ShowSharePage",function (bEnable)
 		System.App.Commands.Call("File.MCMLWindowFrame", {
-			url = "Mod/WorldShare/ShareWorld.html",
+			url = "Mod/WorldShare/sync/ShareWorld.html",
 			name = "SaveWorldPage.ShowSharePage",
 			isShowTitleBar = false,
 			DestroyOnClose = true,
@@ -110,41 +94,8 @@ end
 -- called when a new world is loaded. 
 function WorldShare:OnWorldLoad()
 	-- LOG.std(nil,"debug","Share","Mod WorldShare on world loaded");
-
-	WorldShareGUI:OnWorldLoad();
+	SyncMain:init();
 end
-
--- function WorldShare:handleKeyEvent(event)
--- 	return WorldShareGUI:handleKeyEvent(event);
--- end
-
--- function WorldShare:OnActivateDesktop(mode)
--- 	local Desktop = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop");
-
--- 	if(Desktop.mode) then
--- 		-- GameLogic.ADDBBS("test",L"Big进入编辑模式",4000,"0 255 0");
--- 	else
--- 		-- GameLogic.AddBBS("test",L"Big进入游戏模式",4000,"255 255 0");
--- 	end
-
--- 	return;
--- end
-
--- called when a world is unloaded. 
--- function WorldShare:OnLeaveWorld()
--- 	LOG.std(nil,"info","Share","Mod Share on leave world");
--- 	WorldShareGUI:OnLeaveWorld();
--- end
 
 function WorldShare:OnDestroy()
 end
-
--- function WorldShare:OnClickExitApp()
--- 	-- _guihelper.MessageBox("wanna exit?" , function()
--- 	-- 	ParaEngine.GetAttributeObject():SetField("IsWindowClosingAllowed", true);
--- 	-- 	ParaGlobal.ExitApp();
--- 	-- end)
-
--- 	ParaEngine.GetAttributeObject():SetField("IsWindowClosingAllowed", true);
--- 	ParaGlobal.ExitApp();
--- end

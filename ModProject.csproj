@@ -40,14 +40,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Mod\WorldShare\DeleteWorld.html" />
-    <Content Include="Mod\WorldShare\DeleteWorldLogin.html" />
-    <Content Include="Mod\WorldShare\ShareWorld.html" />
-    <Content Include="Mod\WorldShare\ShowLogin.html" />
-    <Content Include="Mod\WorldShare\StartSync.html" />
-    <Content Include="Mod\WorldShare\StartSyncUseGithub.html" />
-    <Content Include="Mod\WorldShare\StartSyncUseLocal.html" />
-    <Content Include="Mod\WorldShare\SyncGUI.html" />
+    <Content Include="Mod\WorldShare\sync\DeleteWorld.html" />
+    <Content Include="Mod\WorldShare\sync\DeleteWorldLogin.html" />
+    <Content Include="Mod\WorldShare\sync\ShareWorld.html" />
+    <Content Include="Mod\WorldShare\login.html" />
+    <Content Include="Mod\WorldShare\sync\StartSync.html" />
+    <Content Include="Mod\WorldShare\sync\StartSyncUseGithub.html" />
+    <Content Include="Mod\WorldShare\sync\StartSyncUseLocal.html" />
+    <Content Include="Mod\WorldShare\sync\SyncGUI.html" />
     <Content Include="Mod\WorldShare\textures\delete_32bits.png" />
     <Content Include="Mod\WorldShare\textures\enter_32bits.png" />
     <Content Include="Mod\WorldShare\textures\github_only_32bits.png" />
@@ -60,18 +60,15 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="InstallPackages.bat" />
-    <None Include="Mod\WorldShare\EncodingGithub.lua" />
-    <None Include="Mod\WorldShare\GithubService.lua" />
-    <None Include="Mod\WorldShare\GitlabService.lua" />
-    <None Include="Mod\WorldShare\LocalService.lua" />
+    <None Include="Mod\WorldShare\helper\EncodingGithub.lua" />
+    <None Include="Mod\WorldShare\service\GithubService.lua" />
+    <None Include="Mod\WorldShare\service\GitlabService.lua" />
+    <None Include="Mod\WorldShare\service\HttpRequest.lua" />
+    <None Include="Mod\WorldShare\service\LocalService.lua" />
     <None Include="Mod\WorldShare\main.lua" />
-    <None Include="Mod\WorldShare\ShowLogin.lua" />
-    <None Include="Mod\WorldShare\SyncGUI.lua" />
-    <None Include="Mod\WorldShare\WorldShareCommand.lua" />
-    <None Include="Mod\WorldShare\WorldShareEntity.lua" />
-    <None Include="Mod\WorldShare\WorldShareGUI.lua" />
-    <None Include="Mod\WorldShare\WorldShareItem.lua" />
-    <None Include="Mod\WorldShare\WorldShareSceneContext.lua" />
+    <None Include="Mod\WorldShare\login.lua" />
+    <None Include="Mod\WorldShare\sync\SyncGUI.lua" />
+    <None Include="Mod\WorldShare\sync\SyncMain.lua" />
     <None Include="README.md" />
     <None Include="Run.bat" />
   </ItemGroup>

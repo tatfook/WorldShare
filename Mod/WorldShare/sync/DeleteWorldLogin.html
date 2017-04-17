@@ -6,16 +6,16 @@
 </head>
 <body>
     <pe:mcml>
-        <script type="text/npl" refresh="false" src="ShowLogin.lua">
+        <script type="text/npl" refresh="false" src="login.lua">
             <![CDATA[
-            	ShowLogin       = commonlib.gettable("Mod.WorldShare.ShowLogin");
+            	login       = commonlib.gettable("Mod.WorldShare.login");
                 local MainLogin = commonlib.gettable("MyCompany.Aries.Game.MainLogin");
 
-            	ShowLogin:OnInit();
+            	login:OnInit();
 
                 function confirm()
                     local password = Page:GetValue("password");
-                    ShowLogin:deleteWorldGithub(password);
+                    login:deleteWorldGithub(password);
                 end
 
                 function cancel()

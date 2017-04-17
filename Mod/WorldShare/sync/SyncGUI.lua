@@ -1,16 +1,16 @@
 --[[
 Title: SyncGUI
 Author(s):  big
-Date: 	2016.12.14
+Date: 	2017.4.17
 Desc: 
 use the lib:
 ------------------------------------------------------------
 NPL.load("(gl)Mod/WorldShare/SyncGUI.lua");
-local SyncGUI = commonlib.gettable("Mod.WorldShare.SyncGUI");
+local SyncGUI = commonlib.gettable("Mod.WorldShare.sync.SyncGUI");
 ------------------------------------------------------------
 ]]
 
-local SyncGUI = commonlib.gettable("Mod.WorldShare.SyncGUI");
+local SyncGUI = commonlib.gettable("Mod.WorldShare.sync.SyncGUI");
 
 local Page;
 
