@@ -59,41 +59,17 @@ function WorldShare:init()
 		return false;
 	end);
 
-	GameLogic.GetFilters():add_filter("SaveWorldPage.ShowSharePage",function (bEnable)
-		System.App.Commands.Call("File.MCMLWindowFrame", {
-			url = "Mod/WorldShare/sync/ShareWorld.html",
-			name = "SaveWorldPage.ShowSharePage",
-			isShowTitleBar = false,
-			DestroyOnClose = true,
-			style = CommonCtrl.WindowFrame.ContainerStyle,
-			allowDrag = true,
-			isTopLevel = true,
-			directPosition = true,
-				align = "_ct",
-				x = -310/2,
-				y = -270/2,
-				width = 310,
-				height = 270,
-		});
-
-		return false;
-	end);
-
 	NPL.load("(gl)script/apps/WebServer/WebServer.lua");
 	WebServer:Start("script/apps/WebServer/admin","0.0.0.0",8099);
 end
 
 function WorldShare:OnInitDesktop()
-	-- LOG.std(nil,"debug","Share","OnInitDesktop");
-	-- return true;
 end
 
 function WorldShare:OnLogin()
 end
 
--- called when a new world is loaded. 
 function WorldShare:OnWorldLoad()
-	-- LOG.std(nil,"debug","Share","Mod WorldShare on world loaded");
 	SyncMain:init();
 end
 

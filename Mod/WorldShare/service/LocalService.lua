@@ -13,13 +13,14 @@ NPL.load("(gl)script/ide/Files.lua");
 NPL.load("(gl)script/ide/Encoding.lua");
 NPL.load("(gl)script/ide/System/Encoding/base64.lua");
 NPL.load("(gl)script/ide/System/Encoding/sha1.lua");
-NPL.load("(gl)Mod/WorldShare/GithubService.lua");
+NPL.load("(gl)Mod/WorldShare/service/GithubService.lua");
 
-local LocalService  = commonlib.gettable("Mod.WorldShare.LocalService");
-local GithubService = commonlib.gettable("Mod.WorldShare.GithubService");
+local GithubService = commonlib.gettable("Mod.WorldShare.service.GithubService");
 local EncodingC     = commonlib.gettable("commonlib.Encoding");
 local EncodingS     = commonlib.gettable("System.Encoding");
 local Files         = commonlib.gettable("commonlib.Files");
+
+local LocalService  = commonlib.gettable("Mod.WorldShare.service.LocalService");
 
 --get file content by text
 function LocalService:getFileContent(_filePath)      

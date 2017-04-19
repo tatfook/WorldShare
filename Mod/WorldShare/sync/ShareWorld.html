@@ -6,29 +6,12 @@
 </head>
 <body>
     <pe:mcml>
-        <script type="text/npl" refresh="false" src="WorldShareGUI.lua">
+        <script type="text/npl" refresh="false">
             <![CDATA[
-                WorldShareGUI = commonlib.gettable("Mod.WorldShare.WorldShareGUI");
-                WorldShareGUI:init();
-                WorldShareGUI.githubRevison = 0;
+                SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
 
-                if(WorldShareGUI.firstCreate ~= 1) then
-                    WorldShareGUI:compareRevision();
-                end
-
-                function shareNow()
-                    Page:CloseWindow();
-
-                    if(WorldShareGUI.firstCreate ~= 1 and tonumber(WorldShareGUI.currentRevison) < tonumber(WorldShareGUI.githubRevison)) then
-                        _guihelper.MessageBox("当前本地版本小于Github版本，是否继续上传？", function(res)
-                            if(res and res == 6) then
-                                WorldShareGUI:syncToGithub();
-                            end
-                        end);
-                    elseif(tonumber(WorldShareGUI.currentRevison) > tonumber(WorldShareGUI.githubRevison)) then
-                       WorldShareGUI:syncToGithub();
-                    end
-                end
+                SyncMain.setPage();
+                SyncMain.shareWorld();
              ]]>
         </script>
         <div style="width:500px;height:270px;">
@@ -36,22 +19,21 @@
                 <div style="padding:20px;font-size:18px;base-font-size:18px;color:#ffffff">
                     <div style="margin-left:140px;margin-top:30px;">
                         远程版本号：
-                        <pe:if condition="<%=WorldShareGUI.firstCreate ~= 1 and WorldShareGUI.githubRevison == 0 %>">
+                        <pe:if condition="<%=SyncMain.firstCreate ~= 1 and SyncMain.remoteRevison == 0 %>">
                             正在获取中...
                         </pe:if>
-                        <pe:if condition="<%=WorldShareGUI.firstCreate == 1 %>">
+                        <pe:if condition="<%=SyncMain.firstCreate == 1 %>">
                             首次上传
                         </pe:if>
-                        <pe:if condition="<%=WorldShareGUI.githubRevison ~= 0 %>">
-                            <%=WorldShareGUI.githubRevison %>
+                        <pe:if condition="<%=SyncMain.remoteRevison ~= 0 %>">
+                            <%=SyncMain.remoteRevison %>
                         </pe:if>
                     </div>
                     <div style="margin-left:140px;margin-top:10px;">
-                        本地版本号：<%=WorldShareGUI.currentRevison %>
+                        本地版本号：<%=SyncMain.currentRevison %>
                     </div>
-                    <pe:if condition="<%=WorldShareGUI.github ~= 0%>">
-                        <input type="button" onclick="shareNow" value="马上分享" class="button_highlight" style="width: 80px;height: 35px;margin-top:30px;margin-left:190px;"/>
-                    </pe:if>
+
+                    <input type="button" onclick="SyncMain.shareNow()" value="马上分享" class="button_highlight" style="width: 80px;height: 35px;margin-top:30px;margin-left:190px;"/>
                 </div>
             </aries:window>
         </div>

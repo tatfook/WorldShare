@@ -10,44 +10,72 @@ local GitlabService = commonlib.gettable("Mod.WorldShare.GitlabService");
 ------------------------------------------------------------
 ]]
 
+NPL.load("(gl)Mod/WorldShare/services/HeepRequest.lua");
+NPL.load("(gl)Mod/WorldShare/login.lua");
+
 local GitlabService = commonlib.gettable("Mod.WorldShare.GitlabService");
+local HttpRequest   = commonlib.gettable("Mod.WorldShare.service.HttpRequest");
+local login		    = commonlib.gettable("Mod.WorldShare.login");
 
-local gitlabHost = "git.keepwork.com";
+GitlabService.inited = false;
 
-local GitlabService = {
-    inited      = false,
-    username    = '',   -- gitlab 用户名
-    projectId   = nil,
-    projectName = 'keepworkDataSource',
-    host        = gitlabHost,
-    apiBase     = 'http://' .. gitlabHost .. '/api/v4',
-    httpHeader  = {
-        --'Accept': 'application/vnd.github.full+json',  -- 这个必须有
-    },
-};
+function GitlabService:githubApiGet(_url, _callback)
+	local github_token = login.github_token;
+	--LOG.std(nil,"debug","url",url);
+	HttpRequest:GetUrl({
+		url     = login.apiBaseUrl .. "/" .._url,
+		json    = true,
+		headers = {
+			--Authorization  = github_token["token_type"].." "..github_token["access_token"],
+			["User-Agent"] = "npl",
+		},
+	},_callback);
+end
 
--- http请求
-function GitlabService:httpRequest(method, url, data, cb, errcb)
-    local config = {
-        method  = method,
-        url     = self.apiBase .. url,
-        headers = self.httpHeader,
-        skipAuthorization = true,  -- 跳过插件satellizer认证
-    };
+function GitlabService:githubApiPost(_url, _params, _callback)
+	local github_token = login.github_token;
 
-    if (method == "POST" or method == "PUT") then
-        config.data   = data;
-    else
-        config.params = data;
-    end
+	HttpRequest:GetUrl({
+		url       = login.apiBaseUrl .. _url,
+		headers   = {
+			--Authorization    = github_token["token_type"].." "..github_token["access_token"],
+			["User-Agent"]   = "npl",
+			["content-type"] = "application/json"
+		},
+		postfields = _params
+	},_callback);
+end
 
---    $http(config).then(function (response) {
---        //console.log(response);
---        typeof cb == 'function' && cb(response.data);
---    }).catch(function (response) {
---        console.log(response);
---        typeof errcb == 'function' && errcb(response);
---    });
+function GitlabService:githubApiPut(_url, _params, _callback)
+	local github_token = login.github_token;
+
+	HttpRequest:GetUrl({
+		method     = "PUT",
+		url        = login.apiBaseUrl .. _url,
+	  	headers    = {
+		  	--Authorization    = github_token["token_type"].." "..github_token["access_token"],
+			["User-Agent"]   = "npl",
+			["content-type"] = "application/json"
+		},
+		postfields = _params
+	},_callback);
+end
+
+function GitlabService:githubApiDelete(_url, _params, _callback)
+	local github_token = login.dataSourceToken;
+	
+	LOG.std(nil,"debug","GithubService:githubApiDelete",github_token);
+
+	HttpRequest:GetUrl({
+		method     = "DELETE",
+		url        = login.apiBaseUrl .. _url,
+	  	headers    = {
+	  		--Authorization    = github_token["token_type"].." "..github_token["access_token"],
+			["User-Agent"]   = "npl",
+			["content-type"] = "application/json"
+		},
+		postfields = _params,
+	},_callback);
 end
 
 function GitlabService:getFileUrlPrefix()
@@ -87,11 +115,13 @@ function GitlabService:listCommits(data, cb, errcb)
 end
 
 -- 写文件
-function GitlabService:writeFile(params, cb, errcb)
+function GitlabService:writeFile(_foldername,_filename,_file_content_t,_callback) --params, cb, errcb
     --params.content = Base64.encode(params.content);
+
     local url = GitlabService:getFileUrlPrefix() .. encodeURIComponent(params.path);
     params.commit_message = GitlabService:getCommitMessagePrefix() + params.path;--/*params.message ||*/ 
     params.branch         = params.branch or "master";
+
     GitlabService:httpRequest("GET", url, {path = params.path, ref = params.branch}, function (data)
         -- 已存在
         GitlabService:httpRequest("PUT", url, params, cb, errcb)
@@ -155,23 +185,7 @@ function GitlabService:uploadImage(params, cb, errcb)
 end
 
 -- 初始化
-function GitlabService:init(dataSource, cb, errcb)end
-    if (GitlabService.inited) then
-		if(cb) then
-			cb();
-		end
-
-        return;
-    end
-
-    if (not dataSource.dataSourceUsername or not dataSource.dataSourceToken or not dataSource.apiBaseUrl) then
-		if(errcb) then
-			errcb();
-		end
-
-        return;
-    end
-
+function GitlabService:init(_foldername, _callback)end
     GitlabService.type        = dataSource.type;
     GitlabService.username    = dataSource.dataSourceUsername;
     GitlabService.httpHeader["PRIVATE-TOKEN"] = dataSource.dataSourceToken;
@@ -180,9 +194,9 @@ function GitlabService:init(dataSource, cb, errcb)end
     GitlabService.host        = GitlabService.apiBase.match(/http[s]?:\/\/[^\/]+/);
     GitlabService.host        = GitlabService.host and GitlabService.host[0];
 
-    GitlabService:httpRequest("GET", "/projects", {search = GitlabService.projectName, owned = true}, function (projectList)
+    GitlabService:httpRequest("GET", "/projects", {search = _foldername, owned = true}, function (projectList)
         -- 查找项目是否存在
-        for (var i = 0; i < projectList.length; i++) do
+        for i=1,#projectList  do
             if (projectList[i].name == GitlabService.projectName) {
                 GitlabService.projectId = projectList[i].id;
                 GitlabService.inited    = true;
@@ -208,8 +222,4 @@ function GitlabService:init(dataSource, cb, errcb)end
             return;
         end, errcb)
     end, errcb);
-end
-
-function GitlabService:isInited()
-    return GitlabService.inited;
 end

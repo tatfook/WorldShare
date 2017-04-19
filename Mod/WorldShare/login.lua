@@ -14,6 +14,7 @@ NPL.load("(gl)script/ide/System/Windows/mcml/DOM.lua");
 NPL.load("(gl)Mod/WorldShare/service/HttpRequest.lua");
 NPL.load("(gl)Mod/WorldShare/service/GitlabService.lua");
 NPL.load("(gl)Mod/WorldShare/service/GithubService.lua");
+NPL.load("(gl)Mod/WorldShare/sync/SyncMain.lua");
 
 local MainLogin          = commonlib.gettable("MyCompany.Aries.Game.MainLogin");
 local HttpRequest        = commonlib.gettable("Mod.WorldShare.service.HttpRequest");
@@ -22,9 +23,9 @@ local GithubService      = commonlib.gettable("Mod.WorldShare.service.GithubServ
 local Encoding  	     = commonlib.gettable("commonlib.Encoding");
 local InternetLoadWorld  = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld");
 local WorldRevision      = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision");
-local SyncMain           = commonlib.gettable("Mod.WorldShare.sync.syncMain");
+local SyncMain			 = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
 
-local login = commonlib.inherit(nil,commonlib.gettable("Mod.WorldShare.login"));
+local login = commonlib.gettable("Mod.WorldShare.login");
 
 local Page;
 
@@ -56,8 +57,9 @@ function login.LoginAction()
 	end
 
 	login.LoginActionApi(account,password,function (response,err)
+			echo(response);
 			if(type(response) == "table") then
-				if(response['data']['userInfo']['_id']) then
+				if(response['data'] ~= nil and response['data']['userinfo']['_id']) then
 					login.token = response['data']['token'];
 
 					-- 如果记住密码则保存密码到redist根目录下
@@ -74,16 +76,16 @@ function login.LoginAction()
 						end
 					end
 
-					local userInfo = response['data']['userInfo'];
+					local userinfo = response['data']['userinfo'];
 
-					login.username = userInfo['displayName'];
-					login.userId   = userInfo['_id'];
+					login.username = userinfo['displayName'];
+					login.userId   = userinfo['_id'];
 
-					if(userInfo['dataSourceId'] and userInfo['dataSource'] ~= {}) then
+					if(userinfo['dataSourceId'] and userinfo['dataSource'] ~= {}) then
 						local defaultDataSource;
 
-						for key,value in ipairs(userInfo['dataSource']) do
-							if(value._id == userInfo['dataSourceId']) then
+						for key,value in ipairs(userinfo['dataSource']) do
+							if(value._id == userinfo['dataSourceId']) then
 								defaultDataSource = value;
 							end
 						end
@@ -92,9 +94,10 @@ function login.LoginAction()
 						login.dataSourceUsername = defaultDataSource['dataSourceUsername']; -- 数据源用户名
 						login.dataSourceType     = defaultDataSource['type'];				-- 数据源类型
 						login.apiBaseUrl		 = defaultDataSource['apiBaseUrl']			-- 数据源api
+						login.rawBaseUrl		 = defaultDataSource['rawBaseUrl']          -- 数据源raw
 
 						--echo({login.dataSourceToken,login.dataSourceUsername});
-						login.personPageUrl = login.site .. "/wiki/mod/worldshare/person/#?userid=" .. userInfo._id;
+						login.personPageUrl = login.site .. "/wiki/mod/worldshare/person/#?userid=" .. userinfo._id;
 
 						local myWorlds = Page:GetNode("myWorlds");
 						myWorlds:SetAttribute("href",login.site.."/wiki/mod/worldshare/person/");
@@ -535,213 +538,13 @@ function login.syncNow()
 	_guihelper.MessageBox(L"同步世界");
 end
 
-function login.deleteWorldUI(_index)
+function login.deleteWorld(_index)
 	Page:CloseWindow();
 
 	local index = tonumber(_index);
-	login.selectedWorldInfor = InternetLoadWorld.cur_ds[_index];
 
-	login.deleteWorld();
-end
-
-function login.deleteWorld(_selectWorldInfor)
-	System.App.Commands.Call("File.MCMLWindowFrame", {
-		url  = "Mod/WorldShare/DeleteWorld.html", 
-		name = "DeleteWorld", 
-		isShowTitleBar = false,
-		DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory / false will only hide window
-		style = CommonCtrl.WindowFrame.ContainerStyle,
-		zorder = 0,
-		allowDrag = true,
-		bShow = bShow,
-		directPosition = true,
-			align = "_ct",
-			x = -500/2,
-			y = -270/2,
-			width = 500,
-			height = 270,
-		cancelShowAnimation = true,
-	});
-end
-
-function login.deleteWorldLocal(_callback)
-	local world = InternetLoadWorld:GetCurrentWorld();
-	if(not world) then
-		_guihelper.MessageBox(L"请先选择世界")
-		return;
-	end
-
-	_guihelper.MessageBox(format(L"确定删除本地世界:%s?", world.text or ""), function(res)
-		LOG.std(nil, "info", "InternetLoadWorld", "ask to delete world %s", world.text or "");
-		if(res and res == _guihelper.DialogResult.Yes) then
-			if(world.RemoveLocalFile and world:RemoveLocalFile()) then
-				InternetLoadWorld.RefreshAll();
-			elseif(world.remotefile) then
-				-- local world, delete all files in folder and the folder itself.
-				local targetDir = world.remotefile:gsub("^local://", "");
-
-				if(GameLogic.RemoveWorldFileWatcher) then
-					-- file watcher may make folder deletion of current world directory not working. 
-					GameLogic.RemoveWorldFileWatcher();
-				end
-
-				if(commonlib.Files.DeleteFolder(targetDir)) then  
-					LOG.std(nil, "info", "LocalLoadWorld", "world dir deleted: %s ", targetDir);
-					-- InternetLoadWorld.RefreshCurrentServerList();
-					local foldername = targetDir:match("worlds/DesignHouse/(%w+)");
-
-					login.handleCur_ds = {};
-					local hasGithub    = false;
-					for key,value in ipairs(InternetLoadWorld.cur_ds) do
-						if(value.foldername == foldername and value.status == 3 or value.status == 4 or value.status == 5) then
-							LOG.std(nil,"debug","value.status",value.status);
-							value.status = 2;
-							hasGithub = true;
-						end
-
-						if(value.foldername ~= foldername) then
-							login.handleCur_ds[#login.handleCur_ds+1] = value;
-						end
-					end
-
-					if(not hasGithub)then
-						InternetLoadWorld.cur_ds = login.handleCur_ds;
-					end
-
-					-- LOG.std(nil,"debug","_callback",_callback);
-
-					if(_callback) then
-						_callback(foldername);
-					else
-						Page:CloseWindow();
-	                    NPL.load("(gl)script/apps/Aries/Creator/WorldCommon.lua");
-
-	                    local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
-
-	                    if(not WorldCommon.GetWorldInfo()) then
-	                        MainLogin.state.IsLoadMainWorldRequested = nil;
-	                        MainLogin:next_step();
-	                    end
-					end
-				else
-					_guihelper.MessageBox(L"无法删除可能您没有足够的权限"); 
-				end
-			end
-		end
-	end, _guihelper.MessageBoxButtons.YesNo);
-end
-
-function login.deleteWorldGithubLogin()
-	-- LOG.std(nil,"debug","login.selectedWorldInfor",login.selectedWorldInfor);
-
-	System.App.Commands.Call("File.MCMLWindowFrame", {
-		url  = "Mod/WorldShare/DeleteWorldLogin.html", 
-		name = "DeleteWorldLogin", 
-		isShowTitleBar = false,
-		DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory / false will only hide window
-		style = CommonCtrl.WindowFrame.ContainerStyle,
-		zorder = 0,
-		allowDrag = true,
-		bShow = bShow,
-		directPosition = true,
-			align = "_ct",
-			x = -500/2,
-			y = -270/2,
-			width = 500,
-			height = 270,
-		cancelShowAnimation = true,
-	});
-end
-
-function login.deleteWorldGithub(_password)
-	local foldername = login.selectedWorldInfor.foldername;
-
-	local AuthUrl    = "https://api.github.com/authorizations";
-	local AuthParams = '{"scopes":["delete_repo"], "note":"' .. ParaGlobal.timeGetTime() .. '"}';
-	local basicAuth  = login.login .. ":" .. _password;
-	local AuthToken  = "";
-
-	basicAuth = Encoding.base64(basicAuth);
-
-	LOG.std(nil,"debug","basicAuth",basicAuth);
-
-	GithubService:GetUrl({
-		url        = AuthUrl,
-		headers    = {
-						Authorization  = "Basic " .. basicAuth,
-						["User-Agent"]   = "npl",
-				        ["content-type"] = "application/json"
-			         },
-		postfields = AuthParams
-    },function(data,err)
-    	LOG.std(nil,"debug","GetUrl",data);
-    	local basicAuthData = data;
-
-    	AuthToken = basicAuthData.token;
-
-	    _guihelper.MessageBox(format(L"确定删除远程世界:%s?", foldername or ""), function(res)
-	    	Page:CloseWindow();
-	    	LOG.std(nil,"debug","res and res == _guihelper.DialogResult.Yes",res);
-	    	LOG.std(nil,"debug","self.deleteFolderName",foldername);
-
-	    	if(res and res == 6) then
-	    		GithubService:deleteResp(foldername, AuthToken,function(data,err)
-	    			LOG.std(nil,"debug","GithubService:deleteResp",err);
-
-	    			if(err == 204) then
-	    				GithubService:GetUrl({
-							method  = "DELETE",
-							url     = login.site.."/api/mod/WorldShare/models/worlds/",
-							form    = {
-								worldsName = login.selectedWorldInfor.foldername,
-							},
-							json    = true,
-							headers = {Authorization = "Bearer "..login.token}
-						},function(data,err)
-
-							login.handleCur_ds = {};
-							local hasLocal    = false;
-							for key,value in ipairs(InternetLoadWorld.cur_ds) do
-								if(value.foldername == foldername and value.status == 3 or value.status == 4 or value.status == 5) then
-									LOG.std(nil,"debug","value.status",value.status);
-									value.status = 1;
-									hasLocal = true;
-								end
-
-								if(value.foldername ~= foldername) then
-									login.handleCur_ds[#login.handleCur_ds+1] = value;
-								end
-							end
-
-							if(not hasLocal)then
-								InternetLoadWorld.cur_ds = login.handleCur_ds;
-							end
-
-			    			Page:CloseWindow();
-
-				            NPL.load("(gl)script/apps/Aries/Creator/WorldCommon.lua");
-				            local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon");
-
-				            if(not WorldCommon.GetWorldInfo()) then
-				                MainLogin.state.IsLoadMainWorldRequested = nil;
-				                MainLogin:next_step();
-				            end
-						end);
-			        else
-			        	_guihelper.MessageBox(L"远程删除失败");
-
-	    			end
-	    		end)
-	    	end
-	    end);
-	end)
-
-end
-
-function login.deleteWorldAll()
-	login.deleteWorldLocal(function()
-		login.deleteWorldGithubLogin();
-	end);
+	SyncMain.selectedWorldInfor = InternetLoadWorld.cur_ds[_index];
+	SyncMain.deleteWorld();
 end
 
 function login.sharePersonPage()
@@ -755,7 +558,7 @@ function login.LoginActionApi(_account,_password,_callback)
 		url  = url,
 		json = true,
 		form = {
-				email    = _account,
+				username = _account,
 				password = _password,
 		},
 	},_callback);
@@ -767,7 +570,7 @@ end
 
 function login.changeLoginType(_type)
 	login.login_type = _type;
-	Page:Refresh(0.01);
+	Page:Refresh();
 end
 
 function login.getWorldsList(_callback) --_worldsName,

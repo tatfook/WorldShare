@@ -27,7 +27,7 @@ end
 function HttpRequest:retry(_err, _msg, _data, _params, _callback)
 	--LOG.std(nil,"debug","GithubService:retry",{_err});
 
-	if(_err == 422 or _err == 404 or _err == 409) then
+	if(_err == 422 or _err == 404 or _err == 409 or _err == 401) then
 		_callback(_data,_err); -- 失败时可直接返回的代码
 		return;
 	end

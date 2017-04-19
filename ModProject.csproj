@@ -60,7 +60,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="InstallPackages.bat" />
-    <None Include="Mod\WorldShare\helper\EncodingGithub.lua" />
+    <None Include="Mod\WorldShare\helper\GitEncoding.lua" />
     <None Include="Mod\WorldShare\service\GithubService.lua" />
     <None Include="Mod\WorldShare\service\GitlabService.lua" />
     <None Include="Mod\WorldShare\service\HttpRequest.lua" />

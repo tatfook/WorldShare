@@ -8,14 +8,9 @@
     <pe:mcml>
         <script type="text/npl" refresh="false" src="SyncGUI.lua">
             <![CDATA[
-                SyncGUI = commonlib.gettable("Mod.WorldShare.SyncGUI");
+                SyncGUI = commonlib.gettable("Mod.WorldShare.sync.SyncGUI");
+
                 SyncGUI:OnInit();
-
-                function finish()
-                    Page:CloseWindow();
-                end
-
-                SyncGUI.progressbar = Page:GetNode("progressbar");
              ]]>
         </script>
         <div style="width:500px;height:270px;">
@@ -28,7 +23,7 @@
                         <pe:progressbar name="progressbar"  block_bg_autosize = "true" Minimum="0" Maximum="100" Value="0"/>
                     </div>
                     <pe:if condition="<%=SyncGUI.total ~= 0 and SyncGUI.current == SyncGUI.total %>">
-                        <input type="button" name="" onclick="finish" value="完成" class="button_highlight" style="width: 85px;height: 30px;margin-top:40px;margin-left: 180px" />
+                        <input type="button" name="" onclick="SyncGUI.finish()" value="完成" class="button_highlight" style="width: 85px;height: 30px;margin-top:40px;margin-left: 180px" />
                     </pe:if>
                 </div>
             </aries:window>

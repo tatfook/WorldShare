@@ -10,7 +10,7 @@ local SyncGUI = commonlib.gettable("Mod.WorldShare.sync.SyncGUI");
 ------------------------------------------------------------
 ]]
 
-local SyncGUI = commonlib.gettable("Mod.WorldShare.sync.SyncGUI");
+local SyncGUI = commonlib.inherit(nil,commonlib.gettable("Mod.WorldShare.sync.SyncGUI"));
 
 local Page;
 
@@ -20,7 +20,7 @@ SyncGUI.files   = "";
 
 function SyncGUI:ctor()
 	System.App.Commands.Call("File.MCMLWindowFrame", {
-		url  = "Mod/WorldShare/SyncGUI.html", 
+		url  = "Mod/WorldShare/sync/SyncGUI.html", 
 		name = "SyncWorldShare", 
 		isShowTitleBar = false,
 		DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory / false will only hide window
@@ -40,7 +40,11 @@ end
 
 function SyncGUI:OnInit()
 	Page = document:GetPageCtrl();
-	LOG.std(nil, "debug", "WorldShareGUI", "init");
+	self.progressbar = Page:GetNode("progressbar");
+end
+
+function SyncGUI.finish()
+	Page:CloseWindow();
 end
 
 function SyncGUI:updateDataBar(_current, _total, _files)

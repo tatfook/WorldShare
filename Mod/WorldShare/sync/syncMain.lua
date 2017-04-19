@@ -16,23 +16,29 @@ NPL.load("(gl)Mod/WorldShare/login.lua");
 NPL.load("(gl)Mod/WorldShare/service/GithubService.lua");
 NPL.load("(gl)Mod/WorldShare/service/GitlabService.lua");
 NPL.load("(gl)Mod/WorldShare/service/LocalService.lua");
+NPL.load("(gl)Mod/WorldShare/service/HttpRequest.lua");
 NPL.load("(gl)Mod/WorldShare/sync/SyncGUI.lua");
 NPL.load("(gl)script/ide/Encoding.lua");
 NPL.load("(gl)script/ide/System/Encoding/base64.lua");
-NPL.load("(gl)Mod/WorldShare/helper/EncodingGithub.lua");
+NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua");
 
-local SyncGUI        = commonlib.gettable("Mod.WorldShare.SyncGUI");
-local WorldCommon    = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
-local WorldRevision  = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision");
-local login          = commonlib.gettable("Mod.WorldShare.login");
-local GithubService  = commonlib.gettable("Mod.WorldShare.service.GithubService");
-local GitlabService  = commonlib.gettable("Mod.WorldShare.service.GitlabService");
-local LocalService   = commonlib.gettable("Mod.WorldShare.service.LocalService");
-local Encoding       = commonlib.gettable("commonlib.Encoding");
-local EncodingS      = commonlib.gettable("System.Encoding");
-local EncodingGithub = commonlib.gettable("Mod.WorldShare.helper.EncodingGithub");
+local SyncGUI            = commonlib.gettable("Mod.WorldShare.sync.SyncGUI");
+local WorldCommon        = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
+local MainLogin		     = commonlib.gettable("MyCompany.Aries.Game.MainLogin");
+local WorldRevision      = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision");
+local login              = commonlib.gettable("Mod.WorldShare.login");
+local GithubService      = commonlib.gettable("Mod.WorldShare.service.GithubService");
+local GitlabService      = commonlib.gettable("Mod.WorldShare.service.GitlabService");
+local LocalService       = commonlib.gettable("Mod.WorldShare.service.LocalService");
+local HttpRequest		 = commonlib.gettable("Mod.WorldShare.service.HttpRequest");
+local Encoding           = commonlib.gettable("commonlib.Encoding");
+local EncodingS          = commonlib.gettable("System.Encoding");
+local GitEncoding        = commonlib.gettable("Mod.WorldShare.helper.GitEncoding");
+local CommandManager     = commonlib.gettable("MyCompany.Aries.Game.CommandManager");
+local InternetLoadWorld  = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld");
+local SaveWorldPage      = commonlib.gettable("MyCompany.Aries.Creator.SaveWorldPage")
 
-local SyncMain  = commonlib.inherit(nil,commonlib.gettable("Mod.WorldShare.sync.SyncMain"));
+local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
 
 local Page;
 
@@ -44,19 +50,39 @@ function SyncMain:init()
 
 	-- 没有登陆则直接使用离线模式
 	if(login.token) then
-		self:compareRevision();
-		self:StartSyncPage();
+		SyncMain:compareRevision();
+		SyncMain:StartSyncPage();
 	end
+
+	GameLogic.GetFilters():add_filter("SaveWorldPage.ShowSharePage",function (bEnable)
+		System.App.Commands.Call("File.MCMLWindowFrame", {
+			url = "Mod/WorldShare/sync/ShareWorld.html",
+			name = "SaveWorldPage.ShowSharePage",
+			isShowTitleBar = false,
+			DestroyOnClose = true,
+			style = CommonCtrl.WindowFrame.ContainerStyle,
+			allowDrag = true,
+			isTopLevel = true,
+			directPosition = true,
+				align = "_ct",
+				x = -500/2,
+				y = -270/2,
+				width = 500,
+				height = 270,
+		});
+
+		return false;
+	end);
 end
 
-function SyncMain:setPage()
+function SyncMain.setPage()
 	Page = document:GetPageCtrl();
 end
 
-function SyncMain:StartSyncPage()	
+function SyncMain:StartSyncPage()
 	System.App.Commands.Call("File.MCMLWindowFrame", {
-		url  = "Mod/WorldShare/StartSync.html", 
-		name = "SyncWorldShare", 
+		url  = "Mod/WorldShare/sync/StartSync.html", 
+		name = "SyncWorldShare",
 		isShowTitleBar = false,
 		DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory / false will only hide window
 		style = CommonCtrl.WindowFrame.ContainerStyle,
@@ -73,40 +99,26 @@ function SyncMain:StartSyncPage()
 	});
 end
 
-function SyncMain:HideLogin()
-	self.page:Close();
-end
-
-function SyncMain:OnLogin()
-end
-
-function SyncMain:OnLeaveWorld()
-end
-
-function SyncMain:OnInitDesktop()
-end
-
 function SyncMain:compareRevision()
-	if(login.login) then
-		self.getWorldInfo      = WorldCommon:GetWorldInfo();
+	if(login.token) then
+		SyncMain.getWorldInfo = WorldCommon:GetWorldInfo();
+		SyncMain.worldDir     = GameLogic.GetWorldDirectory();
 		--LOG.std(nil,"debug","worldinfo",self.getWorldInfo);
-
-		self.worldDir          = GameLogic.GetWorldDirectory();
 		--LOG.std(nil,"debug","self.worldDir",self.worldDir);
+		echo(WorldRevision,true);
+		WorldRevisionCheckOut   = WorldRevision:new():init(SyncMain.worldDir);
+		SyncMain.currentRevison = WorldRevisionCheckOut:Checkout();
 
-		WorldRevisionCheckOut  = WorldRevision:new():init(self.worldDir);
-		self.currentRevison    = WorldRevisionCheckOut:Checkout();
+		SyncMain.foldername = SyncMain.worldDir:match("worlds/DesignHouse/([^/]*)/");
+		SyncMain.foldername = Encoding.DefaultToUtf8(SyncMain.foldername);
+		SyncMain.localFiles = LocalService:LoadFiles(SyncMain.worldDir,"",nil,1000,nil);
 
-		self.foldername = self.worldDir:match("worlds/DesignHouse/([^/]*)/");
-		self.foldername = Encoding.DefaultToUtf8(self.foldername);
-		-- LOG.std(nil,"debug","self.foldername",self.foldername);
-
-		self.localFiles = LocalService:LoadFiles(self.worldDir,"",nil,1000,nil);
-		-- LOG.std(nil,"debug","self.localFiles",self.localFiles);
+		--LOG.std(nil,"debug","self.foldername",self.foldername);
+		--LOG.std(nil,"debug","self.localFiles",self.localFiles);
 
 		local hasRevision = false;
-		for key,value in ipairs(self.localFiles) do
-			LOG.std(nil,"debug","filename",value.filename);
+		for key,value in ipairs(SyncMain.localFiles) do
+			--LOG.std(nil,"debug","filename",value.filename);
 			if(value.filename == "revision.xml") then
 				hasRevision = true;
 				break;
@@ -114,43 +126,306 @@ function SyncMain:compareRevision()
 		end
 
 		if(hasRevision) then
-			self.githubRevison  = 0;
+			local contentUrl;
+			if(login.dataSourceType == 'github') then
+				contentUrl = login.rawBaseUrl .. "/" .. login.dataSourceUsername .. "/" .. GitEncoding.base64(SyncMain.foldername) .. "/master/revision.xml";
+			elseif(login.dataSourceType == 'gitlab') then
+				contentUrl = login.rawBaseUrl .. "/" .. login.dataSourceUsername .. "/" .. GitEncoding.base64(SyncMain.foldername) .. "/blob/master/revision.xml";
+			end
 
-			local contentUrl = "https://raw.githubusercontent.com/".. login.login .."/".. EncodingGithub.base64(self.foldername) .."/master/revision.xml";
-			LOG.std(nil,"debug","contentUrl",contentUrl);
+			SyncMain.remoteRevison = 0;
 
-			GithubService:githubGet(contentUrl, function(data,err)
-				LOG.std(nil,"debug","githubGet",err);
+			--LOG.std(nil,"debug","contentUrl",contentUrl);
 
-				if(err == 404) then
+			HttpRequest:GetUrl(contentUrl, function(data,err)
+				--LOG.std(nil,"debug","HttpRequest",err);
+
+				if(err == 404 or err == 401) then
 					Page:CloseWindow();
-					self.firstCreate = 1;
+					SyncMain.firstCreate = 1;
 					_guihelper.MessageBox(L"Github上暂无数据，请先分享世界");
+
+					SaveWorldPage.ShowSharePage();
+					return
 				end
 
-				self.githubRevison = data;
+				SyncMain.remoteRevison = data;
 
 				-- LOG.std(nil,"debug","self.githubRevison",self.githubRevison);
 
-				if(tonumber(self.currentRevison) ~= tonumber(self.githubRevison)) then
-					Page:Refresh(0.01);
+				if(tonumber(SyncMain.currentRevison) ~= tonumber(SyncMain.remoteRevison)) then
+					Page:Refresh();
 				else
 					_guihelper.MessageBox(L"远程本地相等")
 					Page:CloseWindow();
 				end
-				
 			end);
 		else
 			commonlib.TimerManager.SetTimeout(function() 
 				Page:CloseWindow();
+
+				CommandManager:RunCommand("/save");
+				SyncMain:compareRevision();
+				SyncMain:StartSyncPage();
 			end, 500)
-			
-			_guihelper.MessageBox(L"首次请先保存一次再上传");
 		end
 	end
 end
 
-function SyncMain:useLocal()
+function SyncMain.deleteWorld()
+	System.App.Commands.Call("File.MCMLWindowFrame", {
+		url  = "Mod/WorldShare/sync/DeleteWorld.html",
+		name = "DeleteWorld", 
+		isShowTitleBar = false,
+		DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory / false will only hide window
+		style = CommonCtrl.WindowFrame.ContainerStyle,
+		zorder = 0,
+		allowDrag = true,
+		bShow = bShow,
+		directPosition = true,
+			align = "_ct",
+			x = -500/2,
+			y = -270/2,
+			width = 500,
+			height = 270,
+		cancelShowAnimation = true,
+	});
+end
+
+function SyncMain.deleteWorldLocal(_callback)
+	local world = InternetLoadWorld:GetCurrentWorld();
+
+	if(not world) then
+		_guihelper.MessageBox(L"请先选择世界");
+		return;
+	end
+
+	_guihelper.MessageBox(format(L"确定删除本地世界:%s?", world.text or ""), function(res)
+		--LOG.std(nil, "info", "InternetLoadWorld", "ask to delete world %s", world.text or "");
+
+		if(res and res == _guihelper.DialogResult.Yes) then
+			if(world.RemoveLocalFile and world:RemoveLocalFile()) then
+				InternetLoadWorld.RefreshAll();
+			elseif(world.remotefile) then
+				-- local world, delete all files in folder and the folder itself.
+				local targetDir = world.remotefile:gsub("^local://", "");
+
+				if(GameLogic.RemoveWorldFileWatcher) then
+					-- file watcher may make folder deletion of current world directory not working. 
+					GameLogic.RemoveWorldFileWatcher();
+				end
+
+				if(commonlib.Files.DeleteFolder(targetDir)) then  
+					LOG.std(nil, "info", "LocalLoadWorld", "world dir deleted: %s ", targetDir);
+					-- InternetLoadWorld.RefreshCurrentServerList();
+					local foldername = targetDir:match("worlds/DesignHouse/(%w+)");
+
+					login.handleCur_ds = {};
+					local hasGithub    = false;
+					for key,value in ipairs(InternetLoadWorld.cur_ds) do
+						if(value.foldername == foldername and value.status == 3 or value.status == 4 or value.status == 5) then
+							LOG.std(nil,"debug","value.status",value.status);
+							value.status = 2;
+							hasGithub = true;
+						end
+
+						if(value.foldername ~= foldername) then
+							login.handleCur_ds[#login.handleCur_ds+1] = value;
+						end
+					end
+
+					if(not hasGithub)then
+						InternetLoadWorld.cur_ds = login.handleCur_ds;
+					end
+
+					if(type(_callback) == 'function') then
+						_callback(foldername);
+					else
+						Page:CloseWindow();
+
+	                    if(not WorldCommon.GetWorldInfo()) then
+	                        MainLogin.state.IsLoadMainWorldRequested = nil;
+	                        MainLogin:next_step();
+	                    end
+					end
+				else
+					_guihelper.MessageBox(L"无法删除可能您没有足够的权限"); 
+				end
+			end
+		end
+	end, _guihelper.MessageBoxButtons.YesNo);
+end
+
+function SyncMain.deleteWorldGithubLogin()
+	-- LOG.std(nil,"debug","login.selectedWorldInfor",login.selectedWorldInfor);
+
+	System.App.Commands.Call("File.MCMLWindowFrame", {
+		url  = "Mod/WorldShare/DeleteWorldLogin.html", 
+		name = "DeleteWorldLogin", 
+		isShowTitleBar = false,
+		DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory / false will only hide window
+		style = CommonCtrl.WindowFrame.ContainerStyle,
+		zorder = 0,
+		allowDrag = true,
+		bShow = bShow,
+		directPosition = true,
+			align = "_ct",
+			x = -500/2,
+			y = -270/2,
+			width = 500,
+			height = 270,
+		cancelShowAnimation = true,
+	});
+end
+
+function SyncMain.deleteWorldGithub(_password)
+	local foldername = login.selectedWorldInfor.foldername;
+
+	local AuthUrl    = "https://api.github.com/authorizations";
+	local AuthParams = '{"scopes":["delete_repo"], "note":"' .. ParaGlobal.timeGetTime() .. '"}';
+	local basicAuth  = login.login .. ":" .. _password;
+	local AuthToken  = "";
+
+	basicAuth = Encoding.base64(basicAuth);
+
+	LOG.std(nil,"debug","basicAuth",basicAuth);
+
+	GithubService:GetUrl({
+		url        = AuthUrl,
+		headers    = {
+						Authorization  = "Basic " .. basicAuth,
+						["User-Agent"]   = "npl",
+				        ["content-type"] = "application/json"
+			         },
+		postfields = AuthParams
+    },function(data,err)
+    	LOG.std(nil,"debug","GetUrl",data);
+    	local basicAuthData = data;
+
+    	AuthToken = basicAuthData.token;
+
+	    _guihelper.MessageBox(format(L"确定删除远程世界:%s?", foldername or ""), function(res)
+	    	Page:CloseWindow();
+	    	LOG.std(nil,"debug","res and res == _guihelper.DialogResult.Yes",res);
+	    	LOG.std(nil,"debug","self.deleteFolderName",foldername);
+
+	    	if(res and res == 6) then
+	    		GithubService:deleteResp(foldername, AuthToken,function(data,err)
+	    			LOG.std(nil,"debug","GithubService:deleteResp",err);
+
+	    			if(err == 204) then
+	    				GithubService:GetUrl({
+							method  = "DELETE",
+							url     = login.site.."/api/mod/WorldShare/models/worlds/",
+							form    = {
+								worldsName = login.selectedWorldInfor.foldername,
+							},
+							json    = true,
+							headers = {Authorization = "Bearer "..login.token}
+						},function(data,err)
+
+							login.handleCur_ds = {};
+							local hasLocal    = false;
+							for key,value in ipairs(InternetLoadWorld.cur_ds) do
+								if(value.foldername == foldername and value.status == 3 or value.status == 4 or value.status == 5) then
+									LOG.std(nil,"debug","value.status",value.status);
+									value.status = 1;
+									hasLocal = true;
+								end
+
+								if(value.foldername ~= foldername) then
+									login.handleCur_ds[#login.handleCur_ds+1] = value;
+								end
+							end
+
+							if(not hasLocal)then
+								InternetLoadWorld.cur_ds = login.handleCur_ds;
+							end
+
+			    			Page:CloseWindow();
+
+				            NPL.load("(gl)script/apps/Aries/Creator/WorldCommon.lua");
+				            local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon");
+
+				            if(not WorldCommon.GetWorldInfo()) then
+				                MainLogin.state.IsLoadMainWorldRequested = nil;
+				                MainLogin:next_step();
+				            end
+						end);
+			        else
+			        	_guihelper.MessageBox(L"远程删除失败");
+
+	    			end
+	    		end)
+	    	end
+	    end);
+	end)
+end
+
+function SyncMain.deleteWorldAll()
+	login.deleteWorldLocal(function()
+		login.deleteWorldGithubLogin();
+	end);
+end
+
+function SyncMain.goBack()
+    Page:CloseWindow();
+
+    if(not WorldCommon.GetWorldInfo()) then
+        MainLogin.state.IsLoadMainWorldRequested = nil;
+        MainLogin:next_step();
+    end
+end
+
+function SyncMain.shareWorld()
+	SyncMain.remoteRevison = 0;
+
+    if(SyncMain.firstCreate ~= 1) then
+        SyncMain:compareRevision();
+    end
+end
+
+function SyncMain.shareNow()
+    Page:CloseWindow();
+
+    if(SyncMain.firstCreate ~= 1 and tonumber(SyncMain.currentRevison) < tonumber(SyncMain.remoteRevison)) then
+        _guihelper.MessageBox("当前本地版本小于远程版本，是否继续上传？", function(res)
+            if(res and res == 6) then
+                SyncMain:syncToDataSource();
+            end
+        end);
+    elseif(tonumber(SyncMain.currentRevison) > tonumber(SyncMain.remoteRevison)) then
+        SyncMain:syncToDataSource();
+    end
+end
+
+function SyncMain.useLocal()
+    Page:CloseWindow();
+
+    if(tonumber(SyncMain.currentRevison) < tonumber(SyncMain.githubRevison)) then
+        SyncMain:useLocal();
+    elseif(tonumber(SyncMain.currentRevison) > tonumber(SyncMain.githubRevison)) then
+        -- _guihelper.MessageBox("开始同步--将本地大小有变化的文件上传到github"); -- 上传或更新
+        SyncMain:syncToGithub();
+    end
+end
+
+function SyncMain.useGithub()
+    Page:CloseWindow();
+
+    if(tonumber(SyncMain.githubRevison) < tonumber(SyncMain.currentRevison)) then
+        SyncMain:useGithub();
+    elseif(tonumber(SyncMain.githubRevison) > tonumber(SyncMain.currentRevison)) then
+        -- _guihelper.MessageBox("开始同步--将github大小有变化的文件下载到本地");-- 下载或覆盖
+        SyncMain:syncToLocal();
+    end
+end
+
+function SyncMain.useOffline()
+    Page:CloseWindow();
+end
+
+function SyncMain:useLocalGUI()
 	System.App.Commands.Call("File.MCMLWindowFrame", {
 		url  = "Mod/WorldShare/StartSyncUseLocal.html", 
 		name = "SyncWorldShare", 
@@ -170,7 +445,7 @@ function SyncMain:useLocal()
 	});
 end
 
-function SyncMain:useGithub()
+function SyncMain:useGithubGUI()
 	System.App.Commands.Call("File.MCMLWindowFrame", {
 		url  = "Mod/WorldShare/StartSyncUseGithub.html", 
 		name = "SyncWorldShare", 
@@ -194,7 +469,7 @@ function SyncMain:syncToLocal(_worldDir, _foldername, _callback)
 	-- LOG.std(nil,"debug","worldDir",_worldDir);
 
 	-- 加载进度UI界面
-	SyncGUI:ctor();
+	local syncToLocalGUI = SyncGUI:new();
 
 	if(_worldDir) then
 		self.worldDir   = _worldDir;
@@ -220,7 +495,7 @@ function SyncMain:syncToLocal(_worldDir, _foldername, _callback)
 		-- LOG.std(nil,"debug","WorldShareGUI",totalGithubIndex);
 
 		-- 下载新文件
-		function downloadOne()
+		local function downloadOne()
 			if (curDownloadIndex <= totalGithubIndex) then
 
 				-- LOG.std(nil,"debug","githubFiles.tree[curDownloadIndex]",githubFiles.tree[curDownloadIndex]);
@@ -243,7 +518,7 @@ function SyncMain:syncToLocal(_worldDir, _foldername, _callback)
 									finish();
 								end
 
-								SyncGUI:updateDataBar(syncGUIIndex, syncGUItotal, syncGUIFiles);
+								syncToLocalGUI:updateDataBar(syncGUIIndex, syncGUItotal, syncGUIFiles);
 							else
 								_guihelper.MessageBox(self.localFiles[curDownloadIndex].filename .. ' 下载失败，请稍后再试');
 							end
@@ -267,7 +542,7 @@ function SyncMain:syncToLocal(_worldDir, _foldername, _callback)
 		end
 
 		-- 更新本地文件
-		function updateOne()
+		local function updateOne()
 			if (curUpdateIndex <= totalLocalIndex) then
 				LOG.std(nil,"debug","curUpdateIndex",curUpdateIndex);
 				local bIsExisted  = false;
@@ -328,7 +603,7 @@ function SyncMain:syncToLocal(_worldDir, _foldername, _callback)
 						LOG.std(nil,"debug","syncGUIIndex",syncGUIIndex);
 						-- LOG.std(nil,"debug","githubFiles.tree[githubIndex].path",githubFiles.tree[githubIndex].path);
 
-						SyncGUI:updateDataBar(syncGUIIndex,syncGUItotal, syncGUIFiles);
+						syncToLocalGUI:updateDataBar(syncGUIIndex,syncGUItotal, syncGUIFiles);
 
 						if (curUpdateIndex > totalLocalIndex) then     -- check whether all files have updated or not. if false, update the next one, if true, upload files.
 							-- _guihelper.MessageBox(L'同步完成-B');
@@ -348,7 +623,7 @@ function SyncMain:syncToLocal(_worldDir, _foldername, _callback)
 		end
 
 		-- 删除文件
-		function deleteOne()
+		local function deleteOne()
 			LocalService:delete(self.foldername, self.localFiles[curUpdateIndex].filename, function (bIsDelete)
 				if (bIsDelete) then
 					curUpdateIndex = curUpdateIndex + 1;
@@ -364,7 +639,7 @@ function SyncMain:syncToLocal(_worldDir, _foldername, _callback)
 			end);
 		end
 
-		function finish()
+		local function finish()
 
 			--成功是返回信息给login
 			if(_callback) then
@@ -376,7 +651,7 @@ function SyncMain:syncToLocal(_worldDir, _foldername, _callback)
 		GithubService:getFileShaList(self.foldername, function(data, err)
 			if(err ~= 404) then
 				if(err == 409) then
-					SyncGUI:updateDataBar(-1,-1);
+					syncToLocalGUI:updateDataBar(-1,-1);
 					_guihelper.MessageBox(L"Github上暂无数据");
 				end
 
@@ -397,7 +672,7 @@ function SyncMain:syncToLocal(_worldDir, _foldername, _callback)
 					i = i + 1;
 				end
 
-				SyncGUI:updateDataBar(syncGUIIndex,syncGUItotal);
+				syncToLocalGUI:updateDataBar(syncGUIIndex,syncGUItotal);
 
 				LOG.std(nil,"debug","totalLocalIndex",totalLocalIndex);
 				LOG.std(nil,"debug","totalGithubIndex",totalGithubIndex);
@@ -414,18 +689,18 @@ function SyncMain:syncToLocal(_worldDir, _foldername, _callback)
 	end
 end
 
-function SyncMain:syncToGithub()
+function SyncMain:syncToDataSource()
 	-- 加载进度UI界面
-	SyncGUI:ctor();
+	local syncToDataSourceGUI = SyncGUI:new();
 
-	function syncNow()
-		self.localFiles = LocalService:LoadFiles(self.worldDir,"",nil,1000,nil);
+	local function syncNow()
+		SyncMain.localFiles = LocalService:LoadFiles(SyncMain.worldDir,"",nil,1000,nil);
 
-		if (self.worldDir == "") then
+		if (SyncMain.worldDir == "") then
 			_guihelper.MessageBox(L"上传失败，将使用离线模式，原因：上传目录为空");
 			return;
 		else
-			self.progressText = L'获取文件sha列表';
+			SyncMain.progressText = L'获取文件sha列表';
 
 			local curUpdateIndex    = 1;
 			local curUploadIndex    = 1;
@@ -440,15 +715,15 @@ function SyncMain:syncToGithub()
 			-- LOG.std(nil,"debug","WorldShareGUI",totalGithubIndex);
 
 			-- 上传新文件
-			function uploadOne()
+			local function uploadOne()
 				if (curUploadIndex <= totalLocalIndex) then
 					-- LOG.std(nil,"debug","self.localFiles",self.localFiles[curUploadIndex].needChange);
 					-- LOG.std(nil,"debug","self.localFiles",self.localFiles[curUploadIndex]);
 
-					if (self.localFiles[curUploadIndex].needChange) then
+					if (SyncMain.localFiles[curUploadIndex].needChange) then
 
-						self.localFiles[curUploadIndex].needChange = false;
-						GithubService:upload(self.foldername, self.localFiles[curUploadIndex].filename, self.localFiles[curUploadIndex].file_content_t,function (bIsDownload,data)
+						SyncMain.localFiles[curUploadIndex].needChange = false;
+						SyncMain:uploadService(self.foldername, self.localFiles[curUploadIndex].filename, self.localFiles[curUploadIndex].file_content_t,function (bIsDownload,data)
 							if (bIsDownload) then
 								-- self.progressText = self.localFiles[curUploadIndex].filename .. ' 上传成功' .. (curUploadIndex + 1) .. '/' .. totalGithubIndex;
 								
@@ -457,7 +732,7 @@ function SyncMain:syncToGithub()
 
 								--LOG.std(nil,"debug","upload---syncGUIIndex",syncGUIIndex);
 								--LOG.std(nil,"debug","upload---syncGUIFiles",syncGUIFiles);
-								SyncGUI:updateDataBar(syncGUIIndex, syncGUItotal, syncGUIFiles);
+								syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, syncGUIFiles);
 
 								curUploadIndex = curUploadIndex + 1;
 
@@ -484,10 +759,10 @@ function SyncMain:syncToGithub()
 			end
 
 			-- 更新Github文件
-			function updateOne()
+			local function updateOne()
 				if (curUpdateIndex <= totalGithubIndex) then
-					LOG.std(nil,"debug","curUpdateIndex",curUpdateIndex);
-					LOG.std(nil,"debug","totalGithubIndex",totalGithubIndex);
+					--LOG.std(nil,"debug","curUpdateIndex",curUpdateIndex);
+					--LOG.std(nil,"debug","totalGithubIndex",totalGithubIndex);
 					local bIsExisted  = false;
 					local LocalIndex  = nil;
 
@@ -511,14 +786,14 @@ function SyncMain:syncToGithub()
 						if (githubFiles.tree[curUpdateIndex].sha ~= self.localFiles[LocalIndex].sha1) then
 							-- 更新已存在的文件
 							-- if file existed, and has different sha value, update it
-							GithubService:update(self.foldername, self.localFiles[LocalIndex].filename, self.localFiles[LocalIndex].file_content_t, githubFiles.tree[curUpdateIndex].sha, function (bIsUpdate,content)
+							SyncMain:updateService(self.foldername, self.localFiles[LocalIndex].filename, self.localFiles[LocalIndex].file_content_t, githubFiles.tree[curUpdateIndex].sha, function (bIsUpdate,content)
 								if (bIsUpdate) then
 									syncGUIIndex   = syncGUIIndex + 1;
 									syncGUIFiles   = self.localFiles[LocalIndex].filename;
 									LOG.std(nil,"debug","budeng---syncGUIIndex",syncGUIIndex);
 									LOG.std(nil,"debug","budeng---syncGUIFiles",syncGUIFiles);
 
-									SyncGUI:updateDataBar(syncGUIIndex, syncGUItotal, syncGUIFiles);
+									syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, syncGUIFiles);
 
 									curUpdateIndex = curUpdateIndex + 1;
 
@@ -543,7 +818,7 @@ function SyncMain:syncToGithub()
 							LOG.std(nil,"debug","deng---syncGUIIndex",syncGUIIndex);
 							LOG.std(nil,"debug","deng---syncGUIFiles",syncGUIFiles);
 
-							SyncGUI:updateDataBar(syncGUIIndex, syncGUItotal, syncGUIFiles);
+							syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, syncGUIFiles);
 
 							curUpdateIndex = curUpdateIndex + 1;
 
@@ -569,7 +844,7 @@ function SyncMain:syncToGithub()
 			function deleteOne()
 				if(githubFiles.tree[curUpdateIndex].type == "blob") then
 
-					GithubService:delete(self.foldername, githubFiles.tree[curUpdateIndex].path, githubFiles.tree[curUpdateIndex].sha, function (bIsDelete)
+					SyncMain:deleteService(self.foldername, githubFiles.tree[curUpdateIndex].path, githubFiles.tree[curUpdateIndex].sha, function (bIsDelete)
 						if (bIsDelete) then
 							-- _guihelper.MessageBox (self.localFiles[curUpdateIndex].filename .. ' 删除成功' .. (curUpdateIndex + 1) .. '/' .. totalLocalIndex);
 							curUpdateIndex = curUpdateIndex + 1;
@@ -597,7 +872,7 @@ function SyncMain:syncToGithub()
 				end
 			end
 
-			function finish()
+			local function finish()
 				if(syncGUItotal == syncGUIIndex) then
 					LOG.std(nil,"debug","send",login.selectedWorldInfor.tooltip)
 
@@ -622,7 +897,7 @@ function SyncMain:syncToGithub()
 
 			-- 获取github仓文件
 			-- get sha value of the files in github
-			GithubService:getFileShaList(self.foldername, function(data,err)
+			SyncMain:getFileShaListService(self.foldername, function(data,err)
 				local hasReadme = false;
 
 				for key,value in ipairs(self.localFiles) do
@@ -667,7 +942,7 @@ function SyncMain:syncToGithub()
 					githubFiles = data;
 					
 					LOG.std(nil,"debug","syncGUItotal",syncGUItotal);
-					SyncGUI:updateDataBar(syncGUIIndex,syncGUItotal);
+					syncToDataSourceGUI:updateDataBar(syncGUIIndex,syncGUItotal);
 
 					totalGithubIndex = #githubFiles.tree;
 
@@ -684,7 +959,7 @@ function SyncMain:syncToGithub()
 	------------------------------------------------------------------------
 
 	if(self.firstCreate == 1) then
-		GithubService:create(self.foldername,function(data,err)
+		SyncMain:create(self.foldername,function(data,err)
 			-- LOG.std(nil,"debug","GithubService:create",data);
 
 			if(err == 422 or err == 201) then
@@ -699,5 +974,45 @@ function SyncMain:syncToGithub()
 	else
 		LOG.std(nil,"debug","SyncMain:syncToGithub","非首次同步");
 		syncNow();
+	end
+end
+
+function SyncMain:create(_foldername,_callback)
+	if(login.dataSourceType == "github") then
+		GithubService:create(_foldername,_callback);
+	elseif(login.dataSourceType == "gitlab") then
+		GitlabService:init(_foldername,_callback);
+	end
+end
+
+function SyncMain:uploadService(_foldername,_filename,_file_content_t,_callback)
+	if(login.dataSourceType == "github") then
+		GithubService:upload(_foldername,_filename,_file_content_t,_callback);
+	elseif(login.dataSourceType == "gitlab") then
+		GitlabService:writeFile(_foldername,_filename,_file_content_t,_callback);
+	end
+end
+
+function SyncMain:updateService(_foldername, _filename, _file_content_t, _sha, _callback)
+	if(login.dataSourceType == "github") then
+		GithubService:update(_foldername, _filename, _file_content_t, _sha, _callback);
+	elseif(login.dataSourceType == "gitlab") then
+		
+	end
+end
+
+function SyncMain:deleteService(_foldername, _path, _sha, _callback)
+	if(login.dataSourceType == "github") then
+		GithubService:delete(_foldername, _path, _sha, _callback);
+	elseif(login.dataSourceType == "gitlab") then
+		
+	end
+end
+
+function SyncMain:getFileShaListService(_foldername, _callback)
+	if(login.dataSourceType == "github") then
+		GithubService:getFileShaList(_foldername, _callback);
+	elseif(login.dataSourceType == "gitlab") then
+
 	end
 end

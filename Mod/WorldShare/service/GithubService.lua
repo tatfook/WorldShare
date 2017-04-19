@@ -15,26 +15,24 @@ NPL.load("(gl)script/ide/System/Encoding/base64.lua");
 NPL.load("(gl)Mod/WorldShare/helper/EncodingGithub.lua");
 NPL.load("(gl)Mod/WorldShare/services/HeepRequest.lua");
 
-local login          = commonlib.gettable("Mod.WorldShare.login");
-local Encoding       = commonlib.gettable("System.Encoding");
-local EncodingGithub = commonlib.gettable("Mod.WorldShare.helper.EncodingGithub");
-local HttpRequest    = commonlib.gettable("Mod.WorldShare.service.HttpRequest");
+local login         = commonlib.gettable("Mod.WorldShare.login");
+local Encoding      = commonlib.gettable("System.Encoding");
+local GitEncoding   = commonlib.gettable("Mod.WorldShare.helper.GitEncoding");
+local HttpRequest   = commonlib.gettable("Mod.WorldShare.service.HttpRequest");
 
-local GithubService  = commonlib.gettable("Mod.WorldShare.service.GithubService");
-
-GithubService.githubApi      = "https://api.github.com/";
-
-function GithubService:githubGet(_url,_callback)
-	HttpRequest:GetUrl(_url, _callback);
-end
+local GithubService = commonlib.gettable("Mod.WorldShare.service.GithubService");
 
 function GithubService:githubApiGet(_url, _callback)
 	local github_token = login.github_token;
+
 	--LOG.std(nil,"debug","url",url);
-	HttpRequest:GetUrl({url = _url,
-		json = true,
-		headers = {Authorization  = github_token["token_type"].." "..github_token["access_token"],
-				["User-Agent"] = "npl"}
+	HttpRequest:GetUrl({
+		url     = login.apiBaseUrl .. "/" .. _url,
+		json    = true,
+		headers = {
+			Authorization  = github_token["token_type"].." "..github_token["access_token"],
+			["User-Agent"] = "npl",
+		},
 	},_callback);
 end
 
@@ -42,15 +40,14 @@ function GithubService:githubApiPost(_url, _params, _callback)
 	local github_token = login.github_token;
 
 	HttpRequest:GetUrl({
-		url       = _url,
+		url       = login.apiBaseUrl .. "/" .. _url,
 		headers   = {
 			Authorization    = github_token["token_type"].." "..github_token["access_token"],
 			["User-Agent"]   = "npl",
-			["content-type"] = "application/json"
+			["content-type"] = "application/json",
 		},
-		postfields = _params
-	},
-		_callback);
+		postfields = _params,
+	},_callback);
 end
 
 function GithubService:githubApiPut(_url, _params, _callback)
@@ -58,7 +55,7 @@ function GithubService:githubApiPut(_url, _params, _callback)
 
 	HttpRequest:GetUrl({
 		method     = "PUT",
-		url        = _url,
+		url        = login.apiBaseUrl .. "/" .._url,
 	  	headers    = {
 		  				 Authorization    = github_token["token_type"].." "..github_token["access_token"],
 					     ["User-Agent"]   = "npl",
@@ -71,11 +68,10 @@ end
 function GithubService:githubApiDelete(_url, _params, _callback)
 	local github_token = login.dataSourceToken;
 	
-	LOG.std(nil,"debug","GithubService:githubApiDelete",github_token);
-
+	--LOG.std(nil,"debug","GithubService:githubApiDelete",github_token);
 	HttpRequest:GetUrl({
 		method     = "DELETE",
-		url        = _url,
+		url        = login.apiBaseUrl .. "/" .._url,
 	  	headers    = {
 	  				  Authorization    = github_token["token_type"].." "..github_token["access_token"],
 					  ["User-Agent"]   = "npl",
@@ -86,29 +82,29 @@ function GithubService:githubApiDelete(_url, _params, _callback)
 end
 
 function GithubService:getFileShaList(_foldername, _callback)
-	_foldername = EncodingGithub.base64(_foldername);
+	_foldername = GitEncoding.base64(_foldername);
 	LOG.std(nil,"debug","getFileShaList",_foldername);
 	
-	local url = self.githubApi .. "repos/" .. login.login .. "/" .. _foldername .. "/git/trees/master?recursive=1";
+	local url = "repos/" .. login.login .. "/" .. _foldername .. "/git/trees/master?recursive=1";
 
 	LOG.std(nil,"debug","url",url);
 	self:githubApiGet(url, _callback);
 end
 
 function GithubService:getContent(_foldername, _fileName, _callback)
-	_foldername = EncodingGithub.base64(_foldername);
+	_foldername = GitEncoding.base64(_foldername);
 
 	local github_token = login.github_token;
 
-	local url = self.githubApi .. "repos/"..login.login.."/".._foldername.."/contents/".._fileName.."?access_token=" .. github_token["access_token"];
+	local url = "repos/"..login.login.."/".._foldername.."/contents/".._fileName.."?access_token=" .. github_token["access_token"];
 
 	self:githubApiGet(url,_callback);
 end
 
 function GithubService:create(_foldername, _callback)
-	_foldername = EncodingGithub.base64(_foldername);
+	_foldername = GitEncoding.base64(_foldername);
 
-	local url = self.githubApi .. "user/repos";
+	local url = "/user/repos";
 
 	params = '{"name": "' .. _foldername .. '"}';
 
@@ -116,13 +112,13 @@ function GithubService:create(_foldername, _callback)
 end
 
 function GithubService:deleteResp(_foldername, authToken, _callback)
-	local _foldername = EncodingGithub.base64(_foldername);
+	local _foldername = GitEncoding.base64(_foldername);
 
-	local github_token = login.github_token;
+	local github_token = login.dataSourceToken;
 
 	-- LOG.std(nil,"debug","authToken",authToken);
 
-	local url = self.githubApi .. "repos/" .. login.login .. "/" .. _foldername;
+	local url = "repos/" .. login.login .. "/" .. _foldername;
 
 	HttpRequest:GetUrl({
 		method     = "DELETE",
@@ -135,12 +131,12 @@ function GithubService:deleteResp(_foldername, authToken, _callback)
 end
 
 function GithubService:update(_foldername, _fileName, _fileContent, _sha, _callback)
-	_foldername = EncodingGithub.base64(_foldername);
+	_foldername = GitEncoding.base64(_foldername);
 
-	local github_token = login.github_token;
+	local github_token = login.dataSourceToken;
 
 	--LOG.std(nil,"debug","GithubService:update",{_foldername, _fileName, Encoding.base64(_fileContent), _sha});
-	local url = self.githubApi .. "repos/" .. login.login .. "/" .. _foldername .. "/contents/" .. _fileName .. "?access_token=" .. github_token["access_token"];
+	local url = "repos/" .. login.login .. "/" .. _foldername .. "/contents/" .. _fileName .. "?access_token=" .. github_token["access_token"];
 
 	params = '{"message":"File update","content":"' .. Encoding.base64(_fileContent) .. '","sha":"' .. _sha .. '"}';
 	
@@ -153,13 +149,13 @@ function GithubService:update(_foldername, _fileName, _fileContent, _sha, _callb
 end
 
 function GithubService:upload(_foldername, _fileName, _fileContent, _callback)
-	_foldername = EncodingGithub.base64(_foldername);
+	_foldername = GitEncoding.base64(_foldername);
 
-	local github_token = login.github_token;
+	local github_token = login.dataSourceToken;
 
 	-- LOG.std(nil,"debug","GithubService:upload",{_foldername, _fileName, _fileContent});
 
-	local url = self.githubApi .. "repos/" .. login.login .. "/" .. _foldername .. "/contents/" .. _fileName .. "?access_token=" .. github_token["access_token"];
+	local url = "repos/" .. login.dataSourceUsername .. "/" .. _foldername .. "/contents/" .. _fileName .. "?access_token=" .. github_token["access_token"];
 
 	-- LOG.std(nil,"debug","GithubService:upload",url);
 
@@ -176,11 +172,11 @@ function GithubService:upload(_foldername, _fileName, _fileContent, _callback)
 end
 
 function GithubService:delete(_foldername, _fileName, _sha, _callback)
-	_foldername = EncodingGithub.base64(_foldername);
+	_foldername = GitEncoding.base64(_foldername);
 	
-	local github_token = login.github_token;
+	local github_token = login.dataSourceToken;
 
-	local url = self.githubApi .. "repos/" .. login.login .. "/" .. _foldername  .. "/contents/" .. _fileName .. "?access_token=" .. github_token["access_token"];
+	local url = "repos/" .. login.login .. "/" .. _foldername  .. "/contents/" .. _fileName .. "?access_token=" .. github_token["access_token"];
 
 	params = '{"message":"File Delete","sha":"' .. _sha .. '"}';
 
@@ -193,9 +189,9 @@ function GithubService:delete(_foldername, _fileName, _sha, _callback)
 end
 
 function GithubService:getAllresponse(_callback)
-	local github_token = login.github_token;
+	local github_token = login.dataSourceToken;
 
-	local url = self.githubApi .. "user/repos?access_token=" .. github_token["access_token"] .. "&type=owner";
+	local url = "user/repos?access_token=" .. github_token["access_token"] .. "&type=owner";
 
     self:githubApiGet(url,_callback);
 end
