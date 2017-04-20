@@ -22,7 +22,7 @@ local HttpRequest   = commonlib.gettable("Mod.WorldShare.service.HttpRequest");
 
 local GithubService = commonlib.gettable("Mod.WorldShare.service.GithubService");
 
-function GithubService:githubApiGet(_url, _callback)
+function GithubService:apiGet(_url, _callback)
 	local github_token = login.github_token;
 
 	--LOG.std(nil,"debug","url",url);
@@ -36,7 +36,7 @@ function GithubService:githubApiGet(_url, _callback)
 	},_callback);
 end
 
-function GithubService:githubApiPost(_url, _params, _callback)
+function GithubService:apiPost(_url, _params, _callback)
 	local github_token = login.github_token;
 
 	HttpRequest:GetUrl({
@@ -50,7 +50,7 @@ function GithubService:githubApiPost(_url, _params, _callback)
 	},_callback);
 end
 
-function GithubService:githubApiPut(_url, _params, _callback)
+function GithubService:apiPut(_url, _params, _callback)
 	local github_token = login.github_token;
 
 	HttpRequest:GetUrl({
@@ -65,7 +65,7 @@ function GithubService:githubApiPut(_url, _params, _callback)
 	},_callback);
 end
 
-function GithubService:githubApiDelete(_url, _params, _callback)
+function GithubService:apiDelete(_url, _params, _callback)
 	local github_token = login.dataSourceToken;
 	
 	--LOG.std(nil,"debug","GithubService:githubApiDelete",github_token);
@@ -108,7 +108,7 @@ function GithubService:create(_foldername, _callback)
 
 	params = '{"name": "' .. _foldername .. '"}';
 
-	self:githubApiPost(url, params, _callback);
+	self:apiPost(url, params, _callback);
 end
 
 function GithubService:deleteResp(_foldername, authToken, _callback)

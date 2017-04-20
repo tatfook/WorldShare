@@ -10,58 +10,59 @@ local GitlabService = commonlib.gettable("Mod.WorldShare.GitlabService");
 ------------------------------------------------------------
 ]]
 
-NPL.load("(gl)Mod/WorldShare/services/HeepRequest.lua");
+NPL.load("(gl)Mod/WorldShare/services/HttpRequest.lua");
 NPL.load("(gl)Mod/WorldShare/login.lua");
 
-local GitlabService = commonlib.gettable("Mod.WorldShare.GitlabService");
+local GitlabService = commonlib.gettable("Mod.WorldShare.service.GitlabService");
 local HttpRequest   = commonlib.gettable("Mod.WorldShare.service.HttpRequest");
 local login		    = commonlib.gettable("Mod.WorldShare.login");
 
 GitlabService.inited = false;
 
-function GitlabService:githubApiGet(_url, _callback)
+function GitlabService:apiGet(_url, _callback)
 	local github_token = login.github_token;
 	--LOG.std(nil,"debug","url",url);
 	HttpRequest:GetUrl({
 		url     = login.apiBaseUrl .. "/" .._url,
 		json    = true,
 		headers = {
-			--Authorization  = github_token["token_type"].." "..github_token["access_token"],
-			["User-Agent"] = "npl",
+			["PRIVATE-TOKEN"] = login.dataSourceToken,
+			["User-Agent"]    = "npl",
 		},
 	},_callback);
 end
 
-function GitlabService:githubApiPost(_url, _params, _callback)
+function GitlabService:apiPost(_url, _params, _callback)
 	local github_token = login.github_token;
 
 	HttpRequest:GetUrl({
 		url       = login.apiBaseUrl .. _url,
+		json      = true,
 		headers   = {
-			--Authorization    = github_token["token_type"].." "..github_token["access_token"],
-			["User-Agent"]   = "npl",
-			["content-type"] = "application/json"
+			["PRIVATE-TOKEN"] = login.dataSourceToken,
+			["User-Agent"]    = "npl",
+			["content-type"]  = "application/json"
 		},
 		postfields = _params
 	},_callback);
 end
 
-function GitlabService:githubApiPut(_url, _params, _callback)
+function GitlabService:apiPut(_url, _params, _callback)
 	local github_token = login.github_token;
 
 	HttpRequest:GetUrl({
 		method     = "PUT",
 		url        = login.apiBaseUrl .. _url,
 	  	headers    = {
-		  	--Authorization    = github_token["token_type"].." "..github_token["access_token"],
-			["User-Agent"]   = "npl",
-			["content-type"] = "application/json"
+		  	["PRIVATE-TOKEN"] = login.dataSourceToken,
+			["User-Agent"]    = "npl",
+			["content-type"]  = "application/json"
 		},
 		postfields = _params
 	},_callback);
 end
 
-function GitlabService:githubApiDelete(_url, _params, _callback)
+function GitlabService:apiDelete(_url, _params, _callback)
 	local github_token = login.dataSourceToken;
 	
 	LOG.std(nil,"debug","GithubService:githubApiDelete",github_token);
@@ -70,9 +71,9 @@ function GitlabService:githubApiDelete(_url, _params, _callback)
 		method     = "DELETE",
 		url        = login.apiBaseUrl .. _url,
 	  	headers    = {
-	  		--Authorization    = github_token["token_type"].." "..github_token["access_token"],
-			["User-Agent"]   = "npl",
-			["content-type"] = "application/json"
+	  		["PRIVATE-TOKEN"] = login.dataSourceToken,
+			["User-Agent"]    = "npl",
+			["content-type"]  = "application/json"
 		},
 		postfields = _params,
 	},_callback);
@@ -163,7 +164,7 @@ function GitlabService:uploadImage(params, cb, errcb)
     if (content.length > 1) then
         local imgType = content[0];
         content = content[1];
-        imgType = imgType.match(/image\/([\w]+)/);
+        --imgType = imgType.match(/image\/([\w]+)/);
         imgType = imgType and imgType[1];
         if (imgType) then
             path = path .. '.' .. imgType;
@@ -185,41 +186,48 @@ function GitlabService:uploadImage(params, cb, errcb)
 end
 
 -- 初始化
-function GitlabService:init(_foldername, _callback)end
-    GitlabService.type        = dataSource.type;
-    GitlabService.username    = dataSource.dataSourceUsername;
-    GitlabService.httpHeader["PRIVATE-TOKEN"] = dataSource.dataSourceToken;
-    GitlabService.projectName = dataSource.projectName or GitlabService.projectName;
-    GitlabService.apiBase     = dataSource.apiBaseUrl;
-    GitlabService.host        = GitlabService.apiBase.match(/http[s]?:\/\/[^\/]+/);
-    GitlabService.host        = GitlabService.host and GitlabService.host[0];
+function GitlabService:init(_foldername, _callback)
+--    GitlabService.type        = dataSource.type;
+--    GitlabService.username    = dataSource.dataSourceUsername;
+--    GitlabService.httpHeader["PRIVATE-TOKEN"] = dataSource.dataSourceToken;
+--    GitlabService.projectName = dataSource.projectName or GitlabService.projectName;
+--    GitlabService.apiBase     = dataSource.apiBaseUrl;
+--    GitlabService.host        = GitlabService.apiBase.match(/http[s]?:\/\/[^\/]+/);
+--    GitlabService.host        = GitlabService.host and GitlabService.host[0];
+	_foldername = GitEncoding.base64(_foldername);
 
-    GitlabService:httpRequest("GET", "/projects", {search = _foldername, owned = true}, function (projectList)
+	local url = "/projects"; 
+
+	params = '{"name": "' .. _foldername .. '"}';
+
+	self:apiPost(url, params, _callback);
+
+    --self:githubApiGet(url, function (projectList)
         -- 查找项目是否存在
-        for i=1,#projectList  do
-            if (projectList[i].name == GitlabService.projectName) {
-                GitlabService.projectId = projectList[i].id;
-                GitlabService.inited    = true;
-
-				if(cb) then
-					cb(projectList[i]);
-				end
-
-                return;
-            }
-        end
+--        for i=1,#projectList  do
+--            if (projectList[i].name == GitlabService.projectName) {
+--                GitlabService.projectId = projectList[i].id;
+--                GitlabService.inited    = true;
+--
+--				if(cb) then
+--					cb(projectList[i]);
+--				end
+--
+--                return;
+--            }
+--        end
 
         -- 不存在则创建项目
-        GitlabService:httpRequest("POST", "/projects", {name = GitlabService.projectName, visibility = 'public',request_access_enabled = true}, function (data)
-            -- echo(data);
-            GitlabService.projectId = data.id;
-            GitlabService.inited    = true;
-
-			if(cb) then
-				cb(data);
-			end
-
-            return;
-        end, errcb)
-    end, errcb);
+--        GitlabService:httpRequest("POST", "/projects", {name = GitlabService.projectName, visibility = 'public',request_access_enabled = true}, function (data)
+--            -- echo(data);
+--            GitlabService.projectId = data.id;
+--            GitlabService.inited    = true;
+--
+--			if(cb) then
+--				cb(data);
+--			end
+--
+--            return;
+--        end, errcb)
+   -- end);
 end

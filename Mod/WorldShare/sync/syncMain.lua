@@ -21,6 +21,7 @@ NPL.load("(gl)Mod/WorldShare/sync/SyncGUI.lua");
 NPL.load("(gl)script/ide/Encoding.lua");
 NPL.load("(gl)script/ide/System/Encoding/base64.lua");
 NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua");
+NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/ShareWorldPage.lua");
 
 local SyncGUI            = commonlib.gettable("Mod.WorldShare.sync.SyncGUI");
 local WorldCommon        = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
@@ -36,7 +37,7 @@ local EncodingS          = commonlib.gettable("System.Encoding");
 local GitEncoding        = commonlib.gettable("Mod.WorldShare.helper.GitEncoding");
 local CommandManager     = commonlib.gettable("MyCompany.Aries.Game.CommandManager");
 local InternetLoadWorld  = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld");
-local SaveWorldPage      = commonlib.gettable("MyCompany.Aries.Creator.SaveWorldPage")
+local ShareWorldPage     = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.Areas.ShareWorldPage");
 
 local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
 
@@ -145,7 +146,7 @@ function SyncMain:compareRevision()
 					SyncMain.firstCreate = 1;
 					_guihelper.MessageBox(L"Github上暂无数据，请先分享世界");
 
-					SaveWorldPage.ShowSharePage();
+					ShareWorldPage.ShowPage();
 					return
 				end
 
@@ -959,8 +960,8 @@ function SyncMain:syncToDataSource()
 	------------------------------------------------------------------------
 
 	if(self.firstCreate == 1) then
-		SyncMain:create(self.foldername,function(data,err)
-			-- LOG.std(nil,"debug","GithubService:create",data);
+		SyncMain:create(self.foldername,function(data, err)
+			LOG.std(nil,"debug","SyncMain:create",data);
 
 			if(err == 422 or err == 201) then
 				syncNow();
