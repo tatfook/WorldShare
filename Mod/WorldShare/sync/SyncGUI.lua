@@ -50,13 +50,13 @@ end
 function SyncGUI:updateDataBar(_current, _total, _files)
 	local databar = Page:GetNode("databar");
 	
-	self.current  = _current;
-	self.total    = _total;
-	self.files    = _files;
+	SyncGUI.current  = _current;
+	SyncGUI.total    = _total;
+	SyncGUI.files    = _files;
 
-	SyncGUI.progressbar:SetAttribute("Maximum",self.total);
-	SyncGUI.progressbar:SetAttribute("Value",self.current);
+	SyncGUI.progressbar:SetAttribute("Maximum",SyncGUI.total);
+	SyncGUI.progressbar:SetAttribute("Value",SyncGUI.current);
 
-	Page:Refresh(0.1);
+	Page:Refresh();
 end
 

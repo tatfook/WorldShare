@@ -12,7 +12,7 @@ local GithubService = commonlib.gettable("Mod.WorldShare.service.GithubService")
 
 NPL.load("(gl)Mod/WorldShare/login.lua");
 NPL.load("(gl)script/ide/System/Encoding/base64.lua");
-NPL.load("(gl)Mod/WorldShare/helper/EncodingGithub.lua");
+NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua");
 NPL.load("(gl)Mod/WorldShare/services/HeepRequest.lua");
 
 local login         = commonlib.gettable("Mod.WorldShare.login");
@@ -165,7 +165,7 @@ function GithubService:upload(_foldername, _fileName, _fileContent, _callback)
 
 	-- _callback(true,{});
 
-	self:githubApiPut(url,params,function(data)
+	self:apiPut(url,params,function(data)
 		-- LOG.std(nil,"debug","GithubService:upload",data);
 		_callback(true,{});
 	end);

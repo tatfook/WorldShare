@@ -12,40 +12,46 @@ local HttpRequest = commonlib.gettable("Mod.WorldShare.service.HttpRequest");
 
 local HttpRequest = commonlib.gettable("Mod.WorldShare.service.HttpRequest");
 
-HttpRequest.tryTimes = 0; 
+HttpRequest.tryTimes = 0;
+HttpRequest.oldData  = nil;
 
 function HttpRequest:GetUrl(_params,_callback)
 	System.os.GetUrl(_params,function(err, msg, data)
-		if(err == 200) then
-			_callback(data,err);
+		if(err == 200 or err == 201 or err == 204) then
+			if(HttpRequest.oldData ~= data) then
+				HttpRequest.oldData = data;
+				_callback(data,err);
+			end
+			return;
 		else
-			self:retry(err, msg, data, _params, _callback);
+			HttpRequest:retry(err, msg, data, _params, _callback);
 		end
 	end);
 end
 
 function HttpRequest:retry(_err, _msg, _data, _params, _callback)
-	--LOG.std(nil,"debug","GithubService:retry",{_err});
+	LOG.std(nil,"debug","HttpRequest _err",{_err});
 
-	if(_err == 422 or _err == 404 or _err == 409 or _err == 401) then
-		_callback(_data,_err); -- 失败时可直接返回的代码
+	if(_err == 422 or _err == 404 or _err == 409 or _err == 401) then -- 失败时可直接返回的代码
+		_callback(_data,_err); 
 		return;
 	end
 
-	if(self.tryTimes >= 3) then
+	if(HttpRequest.tryTimes >= 3) then
 		_callback(_data,_err);
-		self.tryTimes = 0;
+		HttpRequest.tryTimes = 0;
 		return;
 	end
 
-	if(_err == 200 or _err == 201 or _err == 204 and _data ~= "") then
+	if(_err == 200 or _err == 201 or _err == 204) then
 		_callback(_data,_err);
-		self.tryTimes = 0;
+		HttpRequest.tryTimes = 0;
+		return
 	else
-		self.tryTimes = self.tryTimes + 1;
+		HttpRequest.tryTimes = HttpRequest.tryTimes + 1;
 		
 		commonlib.TimerManager.SetTimeout(function()
-			self:GetUrl(_params, _callback); -- 如果获取失败则递归获取数据
+			HttpRequest:GetUrl(_params, _callback); -- 如果获取失败则递归获取数据
 		end, 2100);
 	end
 end
