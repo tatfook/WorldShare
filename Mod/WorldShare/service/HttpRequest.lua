@@ -13,15 +13,11 @@ local HttpRequest = commonlib.gettable("Mod.WorldShare.service.HttpRequest");
 local HttpRequest = commonlib.gettable("Mod.WorldShare.service.HttpRequest");
 
 HttpRequest.tryTimes = 0;
-HttpRequest.oldData  = nil;
 
 function HttpRequest:GetUrl(_params,_callback)
 	System.os.GetUrl(_params,function(err, msg, data)
 		if(err == 200 or err == 201 or err == 204) then
-			if(HttpRequest.oldData ~= data) then
-				HttpRequest.oldData = data;
-				_callback(data,err);
-			end
+			_callback(data,err);
 			return;
 		else
 			HttpRequest:retry(err, msg, data, _params, _callback);

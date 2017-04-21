@@ -22,6 +22,7 @@ NPL.load("(gl)script/ide/Encoding.lua");
 NPL.load("(gl)script/ide/System/Encoding/base64.lua");
 NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua");
 NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/ShareWorldPage.lua");
+NPL.load("(gl)Mod/WorldShare/main.lua");
 
 local SyncGUI            = commonlib.gettable("Mod.WorldShare.sync.SyncGUI");
 local WorldCommon        = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
@@ -38,6 +39,7 @@ local GitEncoding        = commonlib.gettable("Mod.WorldShare.helper.GitEncoding
 local CommandManager     = commonlib.gettable("MyCompany.Aries.Game.CommandManager");
 local InternetLoadWorld  = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld");
 local ShareWorldPage     = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.Areas.ShareWorldPage");
+local WorldShare         = commonlib.gettable("Mod.WorldShare");
 
 local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
 
@@ -153,7 +155,7 @@ function SyncMain:compareRevision()
 				end
 				
 				if(type(tonumber(data)) == "number") then
-					SyncMain.remoteRevison = data;
+					SyncMain.remoteRevison = tonumber(data);
 				else
 					Page:CloseWindow();
 					SyncMain.firstCreate = true;
@@ -168,7 +170,7 @@ function SyncMain:compareRevision()
 				if(tonumber(SyncMain.currentRevison) ~= tonumber(SyncMain.remoteRevison)) then
 					Page:Refresh();
 				else
-					_guihelper.MessageBox(L"远程本地相等")
+					_guihelper.MessageBox(L"数据已同步");
 					Page:CloseWindow();
 				end
 			end);
@@ -389,18 +391,10 @@ function SyncMain.goBack()
     end
 end
 
-function SyncMain.shareWorld()
-	SyncMain.remoteRevison = 0;
-
-    if(not SyncMain.firstCreate) then
-        SyncMain:compareRevision();
-    end
-end
-
 function SyncMain.shareNow()
     Page:CloseWindow();
 
-    if(SyncMain.firstCreate ~= 1 and tonumber(SyncMain.currentRevison) < tonumber(SyncMain.remoteRevison)) then
+    if(not SyncMain.firstCreate and tonumber(SyncMain.currentRevison) < tonumber(SyncMain.remoteRevison)) then
         _guihelper.MessageBox("当前本地版本小于远程版本，是否继续上传？", function(res)
             if(res and res == 6) then
                 SyncMain:syncToDataSource();
@@ -414,20 +408,20 @@ end
 function SyncMain.useLocal()
     Page:CloseWindow();
 
-    if(tonumber(SyncMain.currentRevison) < tonumber(SyncMain.githubRevison)) then
-        SyncMain:useLocal();
-    elseif(tonumber(SyncMain.currentRevison) > tonumber(SyncMain.githubRevison)) then
+    if(tonumber(SyncMain.currentRevison) < tonumber(SyncMain.remoteRevison)) then
+        SyncMain:useLocalGUI();
+    elseif(tonumber(SyncMain.currentRevison) > tonumber(SyncMain.remoteRevison)) then
         -- _guihelper.MessageBox("开始同步--将本地大小有变化的文件上传到github"); -- 上传或更新
-        SyncMain:syncToGithub();
+        SyncMain:syncToDataSource();
     end
 end
 
-function SyncMain.useGithub()
+function SyncMain.useRemote()
     Page:CloseWindow();
 
-    if(tonumber(SyncMain.githubRevison) < tonumber(SyncMain.currentRevison)) then
-        SyncMain:useGithub();
-    elseif(tonumber(SyncMain.githubRevison) > tonumber(SyncMain.currentRevison)) then
+    if(tonumber(SyncMain.remoteRevison) < tonumber(SyncMain.currentRevison)) then
+        SyncMain:useDataSourceGUI();
+    elseif(tonumber(SyncMain.remoteRevison) > tonumber(SyncMain.currentRevison)) then
         -- _guihelper.MessageBox("开始同步--将github大小有变化的文件下载到本地");-- 下载或覆盖
         SyncMain:syncToLocal();
     end
@@ -439,7 +433,7 @@ end
 
 function SyncMain:useLocalGUI()
 	System.App.Commands.Call("File.MCMLWindowFrame", {
-		url  = "Mod/WorldShare/StartSyncUseLocal.html", 
+		url  = "Mod/WorldShare/sync/StartSyncUseLocal.html", 
 		name = "SyncWorldShare", 
 		isShowTitleBar = false,
 		DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory / false will only hide window
@@ -457,9 +451,9 @@ function SyncMain:useLocalGUI()
 	});
 end
 
-function SyncMain:useGithubGUI()
+function SyncMain:useDataSourceGUI()
 	System.App.Commands.Call("File.MCMLWindowFrame", {
-		url  = "Mod/WorldShare/StartSyncUseGithub.html", 
+		url  = "Mod/WorldShare/sync/StartSyncUseDataSource.html", 
 		name = "SyncWorldShare", 
 		isShowTitleBar = false,
 		DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory / false will only hide window
@@ -748,7 +742,10 @@ function SyncMain:syncToDataSource()
 							Authorization    = "Bearer " .. login.token,
 							["content-type"] = "application/json",
 						},
-					},function(data) end);
+					},function(data,err) 
+						echo(data);
+						echo(err);
+					end);
 
 					self.githubRevison = self.currentRevison;
 				end
@@ -761,14 +758,11 @@ function SyncMain:syncToDataSource()
 					-- LOG.std(nil,"debug","self.localFiles",self.localFiles[curUploadIndex]);
 
 					if (SyncMain.localFiles[curUploadIndex].needChange) then
-
 						SyncMain.localFiles[curUploadIndex].needChange = false;
 						SyncMain:uploadService(self.foldername, self.localFiles[curUploadIndex].filename, self.localFiles[curUploadIndex].file_content_t,function (bIsUpload, filename)
 							if (bIsUpload) then
 								syncGUIIndex = syncGUIIndex + 1;
 
-								--LOG.std(nil,"debug","upload---syncGUIIndex",syncGUIIndex);
-								--LOG.std(nil,"debug","upload---syncGUIFiles",syncGUIFiles);
 								syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, filename);
 
 								curUploadIndex = curUploadIndex + 1;
@@ -795,7 +789,7 @@ function SyncMain:syncToDataSource()
 				end
 			end
 
-			-- 更新Github文件
+			-- 更新数据源文件
 			local function updateOne()
 				if (curUpdateIndex <= totalDataSourceIndex) then
 					--LOG.std(nil,"debug","curUpdateIndex",curUpdateIndex);
@@ -803,32 +797,27 @@ function SyncMain:syncToDataSource()
 					local bIsExisted  = false;
 					local LocalIndex  = nil;
 
-					-- 用Gihub的文件和本地的文件对比
+					-- 用数据源的文件和本地的文件对比
 					for key,value in ipairs(self.localFiles) do
-						if(value.filename == dataSourceFiles.tree[curUpdateIndex].path) then
+						if(value.filename == dataSourceFiles[curUpdateIndex].path) then
 							bIsExisted  = true;
 							LocalIndex  = key; 
 							break;
 						end
 					end
 
-					-- compare the files in github with the ones in local host
 					if (bIsExisted) then
-						-- if existed
 						self.localFiles[LocalIndex].needChange = false;
-						-- LOG.std(nil,"debug","dataSourceFiles.tree[curUpdateIndex].path",dataSourceFiles.tree[curUpdateIndex].path);
-						-- LOG.std(nil,"debug","dataSourceFiles.tree[curUpdateIndex].sha",dataSourceFiles.tree[curUpdateIndex].sha);
-						-- LOG.std(nil,"debug","self.localFiles.sha1",self.localFiles[LocalIndex].sha1);
+						--LOG.std(nil,"debug","dataSourceFiles.tree[curUpdateIndex].path",dataSourceFiles.tree[curUpdateIndex].path);
+						--LOG.std(nil,"debug","dataSourceFiles[curUpdateIndex].sha",dataSourceFiles[curUpdateIndex].sha);
+						--LOG.std(nil,"debug","self.localFiles.sha1",self.localFiles[LocalIndex].sha1);
 
-						if (dataSourceFiles.tree[curUpdateIndex].sha ~= self.localFiles[LocalIndex].sha1) then
+						if (dataSourceFiles[curUpdateIndex].sha ~= self.localFiles[LocalIndex].sha1) then
 							-- 更新已存在的文件
-							-- if file existed, and has different sha value, update it
-							SyncMain:updateService(self.foldername, self.localFiles[LocalIndex].filename, self.localFiles[LocalIndex].file_content_t, dataSourceFiles.tree[curUpdateIndex].sha, function (bIsUpdate,content)
+							SyncMain:updateService(self.foldername, self.localFiles[LocalIndex].filename, self.localFiles[LocalIndex].file_content_t, dataSourceFiles[curUpdateIndex].sha, function (bIsUpdate,content)
 								if (bIsUpdate) then
-									syncGUIIndex   = syncGUIIndex + 1;
-									syncGUIFiles   = self.localFiles[LocalIndex].filename;
-									LOG.std(nil,"debug","budeng---syncGUIIndex",syncGUIIndex);
-									LOG.std(nil,"debug","budeng---syncGUIFiles",syncGUIFiles);
+									syncGUIIndex = syncGUIIndex + 1;
+									syncGUIFiles = self.localFiles[LocalIndex].filename;
 
 									syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, syncGUIFiles);
 
@@ -848,12 +837,8 @@ function SyncMain:syncToDataSource()
 							end);
 						else
 							-- if file exised, and has same sha value, then contain it
-							-- _guihelper.MessageBox(dataSourceFiles.tree[curUpdateIndex].path .. ' 文件更新完成' .. (curUpdateIndex + 1) .. '/' .. totalDataSourceIndex);
 							syncGUIIndex   = syncGUIIndex + 1;
 							syncGUIFiles   = self.localFiles[LocalIndex].filename;
-
-							LOG.std(nil,"debug","deng---syncGUIIndex",syncGUIIndex);
-							LOG.std(nil,"debug","deng---syncGUIFiles",syncGUIFiles);
 
 							syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, syncGUIFiles);
 
@@ -870,26 +855,21 @@ function SyncMain:syncToDataSource()
 						-- LOG.std(nil,"debug","delete-filename",self.localFiles[LocalIndex].filename);
 						-- LOG.std(nil,"debug","delete-sha1",self.localFiles[LocalIndex].filename);
 
-						-- 如果过github不删除存在，则删除本地的文件
-						-- if file does not exist, delete it
+						-- 如果过数据源不删除存在，则删除本地的文件
 						deleteOne();
 					end
 				end
 			end
 
-			-- 删除Github文件
+			-- 删除数据源文件
 			function deleteOne()
-				if(dataSourceFiles.tree[curUpdateIndex].type == "blob") then
-
-					SyncMain:deleteService(self.foldername, dataSourceFiles.tree[curUpdateIndex].path, dataSourceFiles.tree[curUpdateIndex].sha, function (bIsDelete)
+				if(dataSourceFiles[curUpdateIndex].type == "blob") then
+					SyncMain:deleteService(self.foldername, dataSourceFiles[curUpdateIndex].path, dataSourceFiles[curUpdateIndex].sha, function (bIsDelete)
 						if (bIsDelete) then
-							-- _guihelper.MessageBox (self.localFiles[curUpdateIndex].filename .. ' 删除成功' .. (curUpdateIndex + 1) .. '/' .. totalLocalIndex);
 							curUpdateIndex = curUpdateIndex + 1;
 
 							if (curUpdateIndex > totalDataSourceIndex) then  --check whether all files have updated or not. if false, update the next one, if true, upload files.
 								-- _guihelper.MessageBox(L'同步完成-C');
-
-								finish();
 								uploadOne();
 							else
 								updateOne();
@@ -909,8 +889,8 @@ function SyncMain:syncToDataSource()
 				end
 			end
 
-			-- 获取github仓文件
-			SyncMain:getFileShaListService(self.foldername, function(data,err)
+			-- 获取数据源仓文件
+			SyncMain:getFileShaListService(self.foldername, function(data, err)
 				local hasReadme = false;
 
 				for key,value in ipairs(self.localFiles) do
@@ -955,7 +935,7 @@ function SyncMain:syncToDataSource()
 
 					LOG.std(nil,"debug","syncGUItotal",syncGUItotal);
 
-					totalDataSourceIndex = #dataSourceFiles.tree;
+					totalDataSourceIndex = #dataSourceFiles;
 
 					LOG.std(nil,"debug","dataSourceFilesERR",err .. " success!");
 					updateOne();
@@ -985,6 +965,11 @@ function SyncMain:syncToDataSource()
 		end);
 	else
 		LOG.std(nil,"debug","SyncMain:syncToGithub","非首次同步");
+
+		if(login.dataSourceType == "gitlab") then
+			GitlabService.projectId = WorldShare:GetWorldData("gitLabProjectId");
+		end
+
 		syncToDataSourceGo();
 	end
 end
@@ -1009,7 +994,7 @@ function SyncMain:updateService(_foldername, _filename, _file_content_t, _sha, _
 	if(login.dataSourceType == "github") then
 		GithubService:update(_foldername, _filename, _file_content_t, _sha, _callback);
 	elseif(login.dataSourceType == "gitlab") then
-		
+		GitlabService:update(_filename, _file_content_t, _sha, _callback);
 	end
 end
 
@@ -1017,7 +1002,7 @@ function SyncMain:deleteService(_foldername, _path, _sha, _callback)
 	if(login.dataSourceType == "github") then
 		GithubService:delete(_foldername, _path, _sha, _callback);
 	elseif(login.dataSourceType == "gitlab") then
-		
+		GitlabService:deleteFile(_path, _sha, _callback);
 	end
 end
 

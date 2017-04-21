@@ -12,11 +12,13 @@ local GitlabService = commonlib.gettable("Mod.WorldShare.GitlabService");
 
 NPL.load("(gl)Mod/WorldShare/services/HttpRequest.lua");
 NPL.load("(gl)Mod/WorldShare/login.lua");
+NPL.load("(gl)Mod/WorldShare/main.lua");
 
 local GitlabService = commonlib.gettable("Mod.WorldShare.service.GitlabService");
 local HttpRequest   = commonlib.gettable("Mod.WorldShare.service.HttpRequest");
 local login		    = commonlib.gettable("Mod.WorldShare.login");
 local GitEncoding   = commonlib.gettable("Mod.WorldShare.helper.GitEncoding");
+local WorldShare    = commonlib.gettable("Mod.WorldShare");
 
 GitlabService.inited = false;
 
@@ -84,26 +86,16 @@ function GitlabService:getCommitMessagePrefix()
     return "keepwork commit: ";
 end
 
-function GitlabService:getCommitUrlPrefix(params)
-    params = params or {};
-    return 'http://' .. GitlabService.host .. '/' .. (params.username or GitlabService.username) .. '/' .. (params.projectName or GitlabService.projectName) .. '/' .. (params.path or '');
-end
-
-function GitlabService:getRawContentUrlPrefix(params)
-    params = params or {};
-    return 'http://' .. GitlabService.host .. '/' .. (params.username or GitlabService.username) .. '/' .. (params.projectName or GitlabService.projectName) .. '/raw/master/' .. (params.path or '');
-end
-
-function GitlabService:getContentUrlPrefix(params)
-    params = params or {};
-    return 'http://' .. GitlabService.host .. '/' .. (params.username or GitlabService.username) .. '/' .. (params.projectName or GitlabService.projectName) .. '/blob/master/' .. (params.path or '');
-end
-
 -- 获得文件列表
 function GitlabService:getTree(_foldername,_callback)
-	LOG.std(nil,"debug","getTree",GitlabService.projectId);
     local url = '/projects/' .. GitlabService.projectId .. '/repository/tree?recursive=true';
-	GitlabService:apiGet(url,_callback);
+	GitlabService:apiGet(url,function(data,err)
+		for key,value in ipairs(data) do
+			value.sha = value.id;
+		end
+
+		_callback(data,err);
+	end);
 end
 
 -- commit
@@ -126,67 +118,40 @@ function GitlabService:writeFile(_filename,_file_content_t,_callback) --params, 
 	GitlabService:apiPost(url, params, function()
 		_callback(true,_filename);
 	end);
+end
 
---    GitlabService:httpRequest("GET", url, {path = params.path, ref = params.branch}, function (data)
---        -- 已存在
---        GitlabService:httpRequest("PUT", url, params, cb, errcb)
---    end, function ()
---		GitlabService:httpRequest("POST", url, params, cb, errcb)
---    end);
+--更新文件
+function GitlabService:update(_filename, _file_content_t, _sha, _callback)
+	local url = GitlabService:getFileUrlPrefix() .. _filename;
+
+	local params = {
+		commit_message = GitlabService:getCommitMessagePrefix() .. _filename,
+		branch		   = "master",
+		content 	   = _file_content_t,
+	}
+
+	GitlabService:apiPut(url, params, function()
+		_callback(true,_filename);
+	end);
 end
 
 -- 获取文件
 function GitlabService:getContent(params, cb, errcb)
-    local url  = GitlabService:getFileUrlPrefix() .. encodeURIComponent(params.path) .. '/raw';
+    local url  = GitlabService:getFileUrlPrefix() .. params.path .. '/raw';
     params.ref = params.ref or "master";
     GitlabService:httpRequest("GET", url, params, cb, errcb);
 end
 
 -- 删除文件
-function GitlabService:deleteFile(params, cb, errcb)
-    local url = GitlabService:getFileUrlPrefix() .. encodeURIComponent(params.path);
-    params.commit_message = GitlabService:getCommitMessagePrefix() + params.path;-- /*params.message ||*/
-    params.branch         = params.branch or 'master';
-    GitlabService:httpRequest("DELETE", url, params, cb, errcb)
-end
+function GitlabService:deleteFile(_path, _sha, _callback)
+    local url = GitlabService:getFileUrlPrefix() .. _path;
 
--- 上传图片
-function GitlabService:uploadImage(params, cb, errcb)
-    --params path, content
-    local path    = params.path;
-    local content = params.content;
+	local params = {
+		commit_message = GitlabService:getCommitMessagePrefix() .. _path,
+		branch         = 'master',
+	}
 
-    if (not path) then
-		--之后修改
-        --path = 'img_' .. (new Date()).getTime();
-    end
-
-    path = 'images/' .. path;
-    --/*data:image/png;base64,iVBORw0KGgoAAAANS*/
-    content = content.split(',');
-
-    if (content.length > 1) then
-        local imgType = content[0];
-        content = content[1];
-        --imgType = imgType.match(/image\/([\w]+)/);
-        imgType = imgType and imgType[1];
-        if (imgType) then
-            path = path .. '.' .. imgType;
-        end
-    else
-        content = content[0];
-    end
-
-    -- echo(content);
-    GitlabService:writeFile({
-        path = path,
-        message  = GitlabService:getCommitMessagePrefix() .. path,
-        content  = content,
-        encoding = 'base64',
-    }, function (data)
-		--之后修改
-        --cb && cb(gitlab.getRawContentUrlPrefix() + data.file_path);
-    end, errcb);
+	GitlabService:apiDelete(_url, _params, _callback)
 end
 
 -- 初始化
@@ -198,6 +163,9 @@ function GitlabService:init(_foldername, _callback)
         for i=1,#projectList do
             if (projectList[i].name == _foldername) then
 				GitlabService.projectId = projectList[i].id;
+				WorldShare:SetWorldData("gitLabProjectId",GitlabService.projectId);
+				WorldShare:SaveWorldData();
+
                 _callback(nil,201);
 				return;
             end
@@ -211,6 +179,9 @@ function GitlabService:init(_foldername, _callback)
 			GitlabService:apiPost(url, params, function(data,err)
 				if(data.id ~= nil) then
 					GitlabService.projectId = data.id;
+					WorldShare:SetWorldData("gitLabProjectId",GitlabService.projectId);
+					WorldShare:SaveWorldData();
+
 					LOG.std(nil,"debug","GitlabService.projectId",GitlabService.projectId);
 					LOG.std(nil,"debug","err",err);
 					_callback(nil,201);

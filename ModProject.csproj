@@ -45,7 +45,7 @@
     <Content Include="Mod\WorldShare\sync\ShareWorld.html" />
     <Content Include="Mod\WorldShare\login.html" />
     <Content Include="Mod\WorldShare\sync\StartSync.html" />
-    <Content Include="Mod\WorldShare\sync\StartSyncUseGithub.html" />
+    <Content Include="Mod\WorldShare\sync\StartSyncUseDataSource.html" />
     <Content Include="Mod\WorldShare\sync\StartSyncUseLocal.html" />
     <Content Include="Mod\WorldShare\sync\SyncGUI.html" />
     <Content Include="Mod\WorldShare\textures\delete_32bits.png" />

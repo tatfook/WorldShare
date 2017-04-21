@@ -2,23 +2,22 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <title>use local sync,by big,2016/12/10</title>
+    <title>use local sync,by big,2017.4.21</title>
 </head>
 <body>
     <pe:mcml>
-        <script type="text/npl" refresh="false" src="WorldShareGUI.lua">
+        <script type="text/npl" refresh="false">
             <![CDATA[
-            	WorldShareGUI = commonlib.gettable("Mod.WorldShare.WorldShareGUI");
-            	WorldShareGUI:init();
+                SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
+                SyncMain.setPage();
 
             	function replace()
-                    WorldShareGUI:syncToGithub();
-                    -- _guihelper.MessageBox("强制同步--将本地大小有变化的文件上传到github");-- 下载或覆盖
+                    SyncMain:syncToDataSource();  -- _guihelper.MessageBox("强制同步--将本地大小有变化的文件上传到github");-- 下载或覆盖
             	end
 
             	function cancel()
             		Page:CloseWindow();
-            		WorldShareGUI:StartSyncPage();
+                    SyncMain:StartSyncPage();
             	end
 
             	function offline()
@@ -29,7 +28,7 @@
         <div style="width:500px;height:270px;">
             <aries:window mode="thin" width="500" height="270" style="float:left;" title='<%=L"与Github同步" %>'>
             	<div style="padding:40px;font-size:18px;base-font-size:18px;color:#ffffff">
-            		<div>你是否确定用本地的更低的版本<%= WorldShareGUI.currentRevison%>, 替换服务器上更高的版本<%= WorldShareGUI.githubRevison%>？</div>
+            		<div>你是否确定用本地的更低的版本<%= SyncMain.currentRevison%>, 替换服务器上更高的版本<%= SyncMain.remoteRevison%>？</div>
             		<div style="margin-top:30px;">
             			<input type="button" onclick="replace" class="button_highlight" style="margin-left:60px;width: 60px;height: 30px;margin"  name="" value="替换" />
             			<input type="button" onclick="offline" class="button_highlight" style="margin-left:20px;width: 120px;height: 30px;" name="" value="仅打开本地" />

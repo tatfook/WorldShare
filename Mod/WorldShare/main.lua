@@ -21,19 +21,19 @@ local SyncMain  = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
 
 local WorldShare = commonlib.inherit(commonlib.gettable("Mod.ModBase"),commonlib.gettable("Mod.WorldShare"));
 
+WorldShare:Property({"Name", "WorldShare"});
+
 LOG.SetLogLevel("DEBUG");
 
 function WorldShare:ctor()
 end
 
--- virtual function get mod name
 function WorldShare:GetName()
-	return "WorldShare"
+	return self.Name;
 end
 
--- virtual function get mod description 
 function WorldShare:GetDesc()
-	return "WorldShare is a plugin in paracraft"
+	return self.Desc;
 end
 
 function WorldShare:init()
