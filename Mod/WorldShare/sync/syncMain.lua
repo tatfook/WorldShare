@@ -527,6 +527,7 @@ function SyncMain:syncToDataSource()
 							modDate    = modDateTable[1],
 							worldsName = SyncMain.foldername,
 							revision   = SyncMain.currentRevison,
+							dataSourceType  = login.dataSourceType,
 							gitlabProjectId = GitlabService.projectId,
 						},
 						headers = {

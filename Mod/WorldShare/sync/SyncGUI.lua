@@ -19,6 +19,10 @@ SyncGUI.total   = 0;
 SyncGUI.files   = "";
 
 function SyncGUI:ctor()
+	SyncGUI.current = 0;
+	SyncGUI.total   = 0;
+	SyncGUI.files   = "";
+
 	System.App.Commands.Call("File.MCMLWindowFrame", {
 		url  = "Mod/WorldShare/sync/SyncGUI.html", 
 		name = "SyncWorldShare", 
