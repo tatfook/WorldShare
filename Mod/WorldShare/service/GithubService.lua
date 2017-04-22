@@ -98,7 +98,7 @@ function GithubService:getContent(_foldername, _fileName, _callback)
 
 	local url = "repos/"..login.login.."/".._foldername.."/contents/".._fileName.."?access_token=" .. github_token["access_token"];
 
-	self:githubApiGet(url,_callback);
+	self:apiGet(url,_callback);
 end
 
 function GithubService:create(_foldername, _callback)
@@ -112,21 +112,17 @@ function GithubService:create(_foldername, _callback)
 end
 
 function GithubService:deleteResp(_foldername, authToken, _callback)
-	local _foldername = GitEncoding.base64(_foldername);
+	local _foldername  = GitEncoding.base64(_foldername);
 
-	local github_token = login.dataSourceToken;
-
-	-- LOG.std(nil,"debug","authToken",authToken);
-
-	local url = "repos/" .. login.login .. "/" .. _foldername;
+	local url = "repos/" .. login.dataSourceUsername .. "/" .. _foldername;
 
 	HttpRequest:GetUrl({
-		method     = "DELETE",
-		url        = url,
-	  	headers    = {
-	  				  Authorization    = "Bearer "..authToken,
-					  ["User-Agent"]   = "npl"
-				  	 }
+		method  = "DELETE",
+		url     = url,
+	  	headers = {
+	  		Authorization  = "Bearer " .. authToken,
+			["User-Agent"] = "npl",
+		}
 	},_callback);
 end
 

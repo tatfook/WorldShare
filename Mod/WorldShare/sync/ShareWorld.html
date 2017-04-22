@@ -11,7 +11,10 @@
                 SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
 
                 SyncMain.setPage();
-                SyncMain:compareRevision();
+
+                if(not SyncMain.firstCreate) then
+                    SyncMain:compareRevision();
+                end
              ]]>
         </script>
         <div style="width:500px;height:270px;">

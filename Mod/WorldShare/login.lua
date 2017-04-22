@@ -36,6 +36,28 @@ login.current_type = 1;
 function login:ctor()
 end
 
+function login.init()
+	GameLogic.GetFilters():add_filter("SaveWorldPage.ShowSharePage",function (bEnable)
+		System.App.Commands.Call("File.MCMLWindowFrame", {
+			url = "Mod/WorldShare/sync/ShareWorld.html",
+			name = "SaveWorldPage.ShowSharePage",
+			isShowTitleBar = false,
+			DestroyOnClose = true,
+			style = CommonCtrl.WindowFrame.ContainerStyle,
+			allowDrag = true,
+			isTopLevel = true,
+			directPosition = true,
+				align = "_ct",
+				x = -500/2,
+				y = -270/2,
+				width = 500,
+				height = 270,
+		});
+
+		return false;
+	end);
+end
+
 function login.OnInit()
 	Page = document:GetPageCtrl();
 end
@@ -57,7 +79,6 @@ function login.LoginAction()
 	end
 
 	login.LoginActionApi(account,password,function (response,err)
-			echo(response);
 			if(type(response) == "table") then
 				if(response['data'] ~= nil and response['data']['userinfo']['_id']) then
 					login.token = response['data']['token'];
@@ -407,11 +428,22 @@ function login.setSite()
 
 	register:SetAttribute("href",login.site .. "/wiki/home");
 
-	Page:Refresh(0.01);
+	Page:Refresh();
 end
 
 function login.logout()
 	login.changeLoginType(1);
+
+	local localWorlds    = InternetLoadWorld.cur_ds;
+	local newLocalWorlds = {};
+
+	for key,value in ipairs(localWorlds) do
+		if(value.revision ~= "2") then
+			newLocalWorlds[#newLocalWorlds + 1] = value;
+		end
+	end
+
+	InternetLoadWorld.cur_ds = newLocalWorlds;
 end
 
 function login.changeRevision()
@@ -428,14 +460,7 @@ function login.changeRevision()
 end
 
 function login.syncWorldsList()
-	local localWorlds = InternetLoadWorld.ServerPage_ds[1]['ds'];
-
-	-- 防止重复数据
-	if(not login.originLocalWorlds) then
-	    login.originLocalWorlds = commonlib.copy(localWorlds);
-	else
-	    localWorlds = commonlib.copy(login.originLocalWorlds);
-	end
+	local localWorlds = InternetLoadWorld.cur_ds;
 	
 	--[[
 		status代码含义:
@@ -446,26 +471,29 @@ function login.syncWorldsList()
 		5:本地更新
 	]]
 
-	login.getWorldsList(function(data,err) --worldsName,
+	login.getWorldsList(function(data,err)
+		SyncMain.remoteWorldsList = data;
+
 	    -- 处理本地网络同时存在 本地不存在 网络存在 的世界 
 	    for kd,vd in ipairs(data) do
 	        local isExist = false;
 
 	        for kl,vl in ipairs(localWorlds) do
 	            if(vd["worldsName"] == vl["foldername"]) then
-
 	            	-- LOG.std(nil,"debug","localVersion",vl["revision"]);
 	            	-- LOG.std(nil,"debug","networkVersion",vd["revision"]);
 
-	            	if(tonumber(vl["revision"]) == tonumber(vd["revision"])) then
-	            		localWorlds[kl].status   = 3; --本地网络一致
-	            	elseif(tonumber(vl["revision"]) < tonumber(vd["revision"])) then
-	            		localWorlds[kl].status   = 5; --本地更新
-	            	elseif(tonumber(vl["revision"]) > tonumber(vd["revision"])) then
-	            		localWorlds[kl].status   = 4; --网络更新
-	            	end
+					if(localWorlds[kl].server) then
+						if(tonumber(vl["revision"]) == tonumber(vd["revision"])) then
+	            			localWorlds[kl].status = 3; --本地网络一致
+	            		elseif(tonumber(vl["revision"]) < tonumber(vd["revision"])) then
+	            			localWorlds[kl].status = 5; --本地更新
+	            		elseif(tonumber(vl["revision"]) > tonumber(vd["revision"])) then
+	            			localWorlds[kl].status = 4; --网络更新
+	            		end
+					end
 
-	            	-- localWorlds[kl].revision = vd["revision"];
+	            	--localWorlds[kl].revision = vd["revision"];
 	            	isExist = true;
 	            	break;
 	            end
@@ -475,7 +503,7 @@ function login.syncWorldsList()
             	localWorlds[#localWorlds + 1] = {
             		text       = vd["worldsName"];
             		foldername = vd["worldsName"];
-            		revision   = vd["date"];
+            		revision   = vd["revision"];
             		status     = 2; --仅网络
             	};
 	        end
@@ -497,34 +525,43 @@ function login.syncWorldsList()
 	        end
 	    end
 
+		LOG.std(nil,"debug","localWorlds",localWorlds);
+
 	    Page:Refresh();
 	end);
 end
 
 function login.enterWorld(_index)
 	local index = tonumber(_index);
-	login.selectedWorldInfor = InternetLoadWorld.cur_ds[_index];
+	SyncMain.selectedWorldInfor = InternetLoadWorld.cur_ds[_index];
 
 	--LOG.std(nil,"debug","login.selectedWorldInfor",login.selectedWorldInfor);
 
-	if(login.selectedWorldInfor.status == 2) then
-		local worldDir = "worlds/DesignHouse/" .. login.selectedWorldInfor.foldername .. "/";
+	if(SyncMain.selectedWorldInfor.status == 2) then
+		local foldername = SyncMain.selectedWorldInfor.foldername;
+		local worldDir = "worlds/DesignHouse/" .. foldername .. "/";
+
+		for key,value in ipairs(SyncMain.remoteWorldsList) do
+			if(value.worldsName == foldername) then
+				GitlabService.projectId = value.gitlabProjectId;
+			end
+		end
 
 		ParaIO.CreateDirectory(worldDir);
-		syncMain:syncToLocal(worldDir,login.selectedWorldInfor.foldername,function(_success,_revision)
+		SyncMain:syncToLocal(worldDir,SyncMain.selectedWorldInfor.foldername,function(_success,_revision)
 		    if(_success) then
-		        login.selectedWorldInfor.status      = 3;
-		        login.selectedWorldInfor.server      = "local";
-		        login.selectedWorldInfor.is_zip      = false;
-		        login.selectedWorldInfor.icon        = "Texture/blocks/items/1013_Carrot.png";
-		        login.selectedWorldInfor.revision    = _revision;
-		        login.selectedWorldInfor.text 		 = login.selectedWorldInfor.foldername;
-		        login.selectedWorldInfor.world_mode  = "edit";
-		        login.selectedWorldInfor.gs_nid      = "";
-		        login.selectedWorldInfor.force_nid   = 0;
-		        login.selectedWorldInfor.ws_id       = "";
-		        login.selectedWorldInfor.author      = "";
-		        login.selectedWorldInfor.remotefile  = "local://worlds/DesignHouse/" .. login.selectedWorldInfor.foldername;
+		        SyncMain.selectedWorldInfor.status      = 3;
+		        SyncMain.selectedWorldInfor.server      = "local";
+		        SyncMain.selectedWorldInfor.is_zip      = false;
+		        SyncMain.selectedWorldInfor.icon        = "Texture/blocks/items/1013_Carrot.png";
+		        SyncMain.selectedWorldInfor.revision    = _revision;
+		        SyncMain.selectedWorldInfor.text 		= foldername;
+		        SyncMain.selectedWorldInfor.world_mode  = "edit";
+		        SyncMain.selectedWorldInfor.gs_nid      = "";
+		        SyncMain.selectedWorldInfor.force_nid   = 0;
+		        SyncMain.selectedWorldInfor.ws_id       = "";
+		        SyncMain.selectedWorldInfor.author      = "";
+		        SyncMain.selectedWorldInfor.remotefile  = "local://worlds/DesignHouse/" .. foldername;
 
 		        Page:Refresh();
 		    end
@@ -534,8 +571,25 @@ function login.enterWorld(_index)
 	end
 end
 
-function login.syncNow()
-	_guihelper.MessageBox(L"同步世界");
+function login.syncNow(_index)
+	local index = tonumber(_index);
+	SyncMain.selectedWorldInfor = InternetLoadWorld.cur_ds[_index];
+
+	if(login.login_type == 3) then
+		if(SyncMain.selectedWorldInfor.status ~= nil and SyncMain.selectedWorldInfor.status ~= 2)then
+			local foldername = SyncMain.selectedWorldInfor.foldername;
+			local worldDir = "worlds/DesignHouse/" .. foldername .. "/";
+
+			SyncMain.worldName = worldDir;
+
+			SyncMain:compareRevision(worldDir);
+			SyncMain:StartSyncPage();
+		else
+			_guihelper.MessageBox(L"本地无数据，请直接登陆");
+		end
+	else
+		_guihelper.MessageBox(L"登陆后才能同步");
+	end
 end
 
 function login.deleteWorld(_index)
@@ -558,8 +612,8 @@ function login.LoginActionApi(_account,_password,_callback)
 		url  = url,
 		json = true,
 		form = {
-				username = _account,
-				password = _password,
+			username = _account,
+			password = _password,
 		},
 	},_callback);
 end

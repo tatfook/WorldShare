@@ -19,19 +19,19 @@
             <aries:window mode="thin" width="500" height="270" style="float:left;" title='<%=L"删除世界" %>'>
             	<div style="padding:30px;font-size:18px;base-font-size:18px;color:#ffffff">
             		
-                    <pe:if condition="<%=login.login_type == 1 or login.login_type == 3 or selectedWorldInfor.status == 3 or selectedWorldInfor.status == 1 or selectedWorldInfor.status == 4 or selectedWorldInfor.status == 5 %>">
+                    <pe:if condition="<%=login.login_type == 1 or login.login_type == 3 and selectedWorldInfor.status ~= nil and selectedWorldInfor.status ~= 2%>">
                         <div>
                 			<input type="button" onclick="SyncMain.deleteWorldLocal" class="button_highlight" style="margin-left:150px;width: 130px;height: 30px;" name="" value="只删除本地" />
                         </div>
                     </pe:if>
 
-                    <pe:if condition="<%=selectedWorldInfor.status == 3 or selectedWorldInfor.status == 2 or selectedWorldInfor.status == 4 or selectedWorldInfor.status == 5 %>">
+                    <pe:if condition="<%=selectedWorldInfor.status ~= nil and selectedWorldInfor.status ~= 1 %>">
                         <div style="margin-top:20px;">
-                            <input type="button" onclick="SyncMain.deleteWorldGithubLogin" class="button_highlight" style="margin-left:150px;width: 130px;height: 30px;"  name="" value="只删除远程" />
+                            <input type="button" onclick="SyncMain.deleteWorldRemote" class="button_highlight" style="margin-left:150px;width: 130px;height: 30px;"  name="" value="只删除远程" />
                         </div>
                     </pe:if>
 
-                    <pe:if condition="<%=selectedWorldInfor.status == 3 or selectedWorldInfor.status == 4 or selectedWorldInfor.status == 5 %>">
+                    <pe:if condition="<%=selectedWorldInfor.status ~= nil and selectedWorldInfor.status ~= 1 and selectedWorldInfor.status ~= 2 %>">
                         <div style="margin-top:20px;">
                             <input type="button" onclick="SyncMain.deleteWorldAll" class="button_highlight" style="margin-left:150px;width: 130px;height: 30px;"  name="" value="全部删除" />
                         </div>

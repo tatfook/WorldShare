@@ -16,7 +16,9 @@ HttpRequest.tryTimes = 0;
 
 function HttpRequest:GetUrl(_params,_callback)
 	System.os.GetUrl(_params,function(err, msg, data)
-		if(err == 200 or err == 201 or err == 204) then
+		LOG.std(nil,"debug","System ERR",{err});
+
+		if(err == 200 or err == 201 or err == 202 or err == 204) then
 			_callback(data,err);
 			return;
 		else
@@ -26,7 +28,7 @@ function HttpRequest:GetUrl(_params,_callback)
 end
 
 function HttpRequest:retry(_err, _msg, _data, _params, _callback)
-	LOG.std(nil,"debug","HttpRequest _err",{_err});
+	LOG.std(nil,"debug","HttpRequest ERR",{_err});
 
 	if(_err == 422 or _err == 404 or _err == 409 or _err == 401) then -- 失败时可直接返回的代码
 		_callback(_data,_err); 

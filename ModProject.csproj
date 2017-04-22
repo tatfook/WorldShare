@@ -41,7 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Mod\WorldShare\sync\DeleteWorld.html" />
-    <Content Include="Mod\WorldShare\sync\DeleteWorldLogin.html" />
+    <Content Include="Mod\WorldShare\sync\DeleteWorldGithub.html" />
     <Content Include="Mod\WorldShare\sync\ShareWorld.html" />
     <Content Include="Mod\WorldShare\login.html" />
     <Content Include="Mod\WorldShare\sync\StartSync.html" />

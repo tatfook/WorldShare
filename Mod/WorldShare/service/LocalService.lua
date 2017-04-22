@@ -14,11 +14,18 @@ NPL.load("(gl)script/ide/Encoding.lua");
 NPL.load("(gl)script/ide/System/Encoding/base64.lua");
 NPL.load("(gl)script/ide/System/Encoding/sha1.lua");
 NPL.load("(gl)Mod/WorldShare/service/GithubService.lua");
+NPL.load("(gl)Mod/WorldShare/login.lua");
+NPL.load("(gl)Mod/WorldShare/service/GitlabService.lua");
+NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua");
 
+local GitEncoding   = commonlib.gettable("Mod.WorldShare.helper.GitEncoding");
+local GitlabService = commonlib.gettable("Mod.WorldShare.service.GitlabService");
 local GithubService = commonlib.gettable("Mod.WorldShare.service.GithubService");
 local EncodingC     = commonlib.gettable("commonlib.Encoding");
 local EncodingS     = commonlib.gettable("System.Encoding");
 local Files         = commonlib.gettable("commonlib.Files");
+local login         = commonlib.gettable("Mod.WorldShare.login");
+
 
 local LocalService  = commonlib.gettable("Mod.WorldShare.service.LocalService");
 
@@ -84,16 +91,17 @@ function LocalService:LoadFiles(_worldDir,_curPath,_filter,_nMaxFileLevels,_nMax
 end
 
 function LocalService:update(_foldername, _path, _callback)
-	GithubService:getContent(_foldername, _path,function(data)
+	LocalService:getDataSourceContent(_foldername, _path, function(data, err)
 		local bashPath = "worlds/DesignHouse/" .. _foldername .. "/";
-		local file     = ParaIO.open(bashPath .. _path, "w");
+		local file = ParaIO.open(bashPath .. _path, "w");
 		
-		local file_infor = {};
-		NPL.FromJson(data,file_infor);
+		local file_infor = data;
 
 		local content = EncodingS.unbase64(file_infor.content);
+
 		file:write(content,#content);
 		file:close();
+
 		local returnData = {filename = _path,content = content};
 
 		_callback(true,returnData);
@@ -102,12 +110,10 @@ end
 
 function LocalService:download(_foldername,_path,_callback)
 	-- LOG.std(nil,"debug","_foldername",_foldername);
-	LOG.std(nil,"debug","_path",_path);
+	-- LOG.std(nil,"debug","_path",_path);
 	-- LOG.std(nil,"debug","_callback",_callback);
 
-	GithubService:getContent(_foldername, _path,function(data)
-		-- LOG.std(nil,"debug","GithubService:getContent._path",_path);
-
+	LocalService:getDataSourceContent(_foldername, _path, function(content, err)
 		local path = {};
 		local bashPath = "worlds/DesignHouse/" .. _foldername .. "/";
 		local folderCreate = "";
@@ -118,23 +124,33 @@ function LocalService:download(_foldername,_path,_callback)
 			path[#path+1] = segmentation;
 		end
 
-		for i=1,#path-1,1 do
+		for i = 1, #path - 1, 1 do
 			folderCreate = folderCreate .. path[i] .. "/";
-			LOG.std(nil,"debug","folderCreate",folderCreate);
+			--LOG.std(nil,"debug","folderCreate",folderCreate);
 			ParaIO.CreateDirectory(folderCreate);
 		end
 
 		local file = ParaIO.open(bashPath .. _path, "w");
 
-		local file_infor = data;
+		if(not content) then
+			LocalService:getDataSourceContentWithRaw(_foldername, _path, function(data, err)
+				content = data;
 
-		LOG.std(nil,"debug","GithubService:getContent",file_infor);
-		-- LOG.std(nil,"debug","content",file_infor.content);
+				file:write(content,#content);
+				file:close();
 
-		local content = EncodingS.unbase64(file_infor.content);
+				local returnData = {filename = _path, content = content};
+				_callback(true,returnData);
+			end);
+
+			return;
+		end
+
+		local content = EncodingS.unbase64(content);
 		file:write(content,#content);
 		file:close();
-		local returnData = {filename = _path,content = content};
+
+		local returnData = {filename = _path, content = content};
 
 		-- LOG.std(nil,"debug","EncodingS.unbase64",content);
 		_callback(true,returnData);
@@ -147,4 +163,20 @@ function LocalService:delete(_foldername,_filename,_callback)
 
 	ParaIO.DeleteFile(bashPath .. _filename);
 	_callback(true);
+end
+
+function LocalService:getDataSourceContent(_foldername, _path, _callback)
+	if(login.dataSourceType == "github") then
+		GithubService:getContent(_foldername, _path, _callback);
+	elseif(login.dataSourceType == "gitlab") then
+		GitlabService:getContent(_path, _callback);
+	end
+end
+
+function LocalService:getDataSourceContentWithRaw(_foldername, _path, _callback)
+	if(login.dataSourceType == "github") then
+		GithubService:getContentWithRaw(_foldername, _path, _callback);
+	elseif(login.dataSourceType == "gitlab") then
+		GitlabService:getContentWithRaw(_foldername, _path, _callback);
+	end
 end

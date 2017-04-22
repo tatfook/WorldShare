@@ -1,18 +1,19 @@
 --[[
 Title: EncodingGithub
 Author(s):  big
-Date:  2016.12.29
+Date:  2017.4.22
 Desc: 
 use the lib: corvent base64 and fit to github
 ------------------------------------------------------------
-NPL.load("(gl)Mod/WorldShare/EncodingGithub.lua");
-local EncodingGithub = commonlib.gettable("Mod.WorldShare.helper.EncodingGithub");
+NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua");
+local GitEncoding = commonlib.gettable("Mod.WorldShare.helper.GitEncoding");
 ------------------------------------------------------------
 ]]
 NPL.load("(gl)script/ide/System/Encoding/base64.lua");
 
-local GitEncoding = commonlib.gettable("Mod.WorldShare.helper.GitEncoding");
 local Encoding    = commonlib.gettable("System.Encoding");
+
+local GitEncoding = commonlib.gettable("Mod.WorldShare.helper.GitEncoding");
 
 -- =转成-equal  +转成-plus  /转成-slash
 function GitEncoding.base64(text)

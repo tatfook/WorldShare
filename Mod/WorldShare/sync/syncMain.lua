@@ -50,36 +50,26 @@ end
 
 function SyncMain:init()
 	LOG.std(nil, "debug", "SyncMain", "init");
+	SyncMain.worldName = nil;
 
 	-- 没有登陆则直接使用离线模式
 	if(login.token) then
 		SyncMain:compareRevision();
 		SyncMain:StartSyncPage();
 	end
-
-	GameLogic.GetFilters():add_filter("SaveWorldPage.ShowSharePage",function (bEnable)
-		System.App.Commands.Call("File.MCMLWindowFrame", {
-			url = "Mod/WorldShare/sync/ShareWorld.html",
-			name = "SaveWorldPage.ShowSharePage",
-			isShowTitleBar = false,
-			DestroyOnClose = true,
-			style = CommonCtrl.WindowFrame.ContainerStyle,
-			allowDrag = true,
-			isTopLevel = true,
-			directPosition = true,
-				align = "_ct",
-				x = -500/2,
-				y = -270/2,
-				width = 500,
-				height = 270,
-		});
-
-		return false;
-	end);
 end
 
 function SyncMain.setPage()
 	Page = document:GetPageCtrl();
+end
+
+function SyncMain.goBack()
+    Page:CloseWindow();
+
+    if(not WorldCommon.GetWorldInfo()) then
+        MainLogin.state.IsLoadMainWorldRequested = nil;
+        MainLogin:next_step();
+    end
 end
 
 function SyncMain:StartSyncPage()
@@ -102,12 +92,18 @@ function SyncMain:StartSyncPage()
 	});
 end
 
-function SyncMain:compareRevision()
+function SyncMain:compareRevision(_worldDir)
 	if(login.token) then
-		SyncMain.getWorldInfo = WorldCommon:GetWorldInfo();
-		SyncMain.worldDir     = GameLogic.GetWorldDirectory();
+		--SyncMain.getWorldInfo = WorldCommon:GetWorldInfo();
 		--LOG.std(nil,"debug","worldinfo",self.getWorldInfo);
-		--LOG.std(nil,"debug","self.worldDir",self.worldDir);
+
+		if(_worldDir) then
+			SyncMain.worldDir = _worldDir;
+		else
+			SyncMain.worldDir = GameLogic.GetWorldDirectory();
+		end
+
+		LOG.std(nil,"debug","self.worldDir",SyncMain.worldDir);
 
 		WorldRevisionCheckOut   = WorldRevision:new():init(SyncMain.worldDir);
 		SyncMain.currentRevison = WorldRevisionCheckOut:Checkout();
@@ -148,7 +144,7 @@ function SyncMain:compareRevision()
 				if(err == 404 or err == 401) then
 					Page:CloseWindow();
 					SyncMain.firstCreate = true;
-					_guihelper.MessageBox(L"数据源暂无数据，请先分享世界");
+					--_guihelper.MessageBox(L"数据源暂无数据，请先分享世界");
 
 					ShareWorldPage.ShowPage();
 					return
@@ -159,7 +155,7 @@ function SyncMain:compareRevision()
 				else
 					Page:CloseWindow();
 					SyncMain.firstCreate = true;
-					_guihelper.MessageBox(L"数据源暂无数据，请先分享世界");
+					--_guihelper.MessageBox(L"数据源暂无数据，请先分享世界");
 
 					ShareWorldPage.ShowPage();
 					return
@@ -170,7 +166,7 @@ function SyncMain:compareRevision()
 				if(tonumber(SyncMain.currentRevison) ~= tonumber(SyncMain.remoteRevison)) then
 					Page:Refresh();
 				else
-					_guihelper.MessageBox(L"数据已同步");
+					--_guihelper.MessageBox(L"数据已同步");
 					Page:CloseWindow();
 				end
 			end);
@@ -184,211 +180,6 @@ function SyncMain:compareRevision()
 			end, 500)
 		end
 	end
-end
-
-function SyncMain.deleteWorld()
-	System.App.Commands.Call("File.MCMLWindowFrame", {
-		url  = "Mod/WorldShare/sync/DeleteWorld.html",
-		name = "DeleteWorld", 
-		isShowTitleBar = false,
-		DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory / false will only hide window
-		style = CommonCtrl.WindowFrame.ContainerStyle,
-		zorder = 0,
-		allowDrag = true,
-		bShow = bShow,
-		directPosition = true,
-			align = "_ct",
-			x = -500/2,
-			y = -270/2,
-			width = 500,
-			height = 270,
-		cancelShowAnimation = true,
-	});
-end
-
-function SyncMain.deleteWorldLocal(_callback)
-	local world = InternetLoadWorld:GetCurrentWorld();
-
-	if(not world) then
-		_guihelper.MessageBox(L"请先选择世界");
-		return;
-	end
-
-	_guihelper.MessageBox(format(L"确定删除本地世界:%s?", world.text or ""), function(res)
-		--LOG.std(nil, "info", "InternetLoadWorld", "ask to delete world %s", world.text or "");
-
-		if(res and res == _guihelper.DialogResult.Yes) then
-			if(world.RemoveLocalFile and world:RemoveLocalFile()) then
-				InternetLoadWorld.RefreshAll();
-			elseif(world.remotefile) then
-				-- local world, delete all files in folder and the folder itself.
-				local targetDir = world.remotefile:gsub("^local://", "");
-
-				if(GameLogic.RemoveWorldFileWatcher) then
-					-- file watcher may make folder deletion of current world directory not working. 
-					GameLogic.RemoveWorldFileWatcher();
-				end
-
-				if(commonlib.Files.DeleteFolder(targetDir)) then  
-					LOG.std(nil, "info", "LocalLoadWorld", "world dir deleted: %s ", targetDir);
-					-- InternetLoadWorld.RefreshCurrentServerList();
-					local foldername = targetDir:match("worlds/DesignHouse/(%w+)");
-
-					login.handleCur_ds = {};
-					local hasGithub    = false;
-					for key,value in ipairs(InternetLoadWorld.cur_ds) do
-						if(value.foldername == foldername and value.status == 3 or value.status == 4 or value.status == 5) then
-							LOG.std(nil,"debug","value.status",value.status);
-							value.status = 2;
-							hasGithub = true;
-						end
-
-						if(value.foldername ~= foldername) then
-							login.handleCur_ds[#login.handleCur_ds+1] = value;
-						end
-					end
-
-					if(not hasGithub)then
-						InternetLoadWorld.cur_ds = login.handleCur_ds;
-					end
-
-					if(type(_callback) == 'function') then
-						_callback(foldername);
-					else
-						Page:CloseWindow();
-
-	                    if(not WorldCommon.GetWorldInfo()) then
-	                        MainLogin.state.IsLoadMainWorldRequested = nil;
-	                        MainLogin:next_step();
-	                    end
-					end
-				else
-					_guihelper.MessageBox(L"无法删除可能您没有足够的权限"); 
-				end
-			end
-		end
-	end, _guihelper.MessageBoxButtons.YesNo);
-end
-
-function SyncMain.deleteWorldGithubLogin()
-	-- LOG.std(nil,"debug","login.selectedWorldInfor",login.selectedWorldInfor);
-
-	System.App.Commands.Call("File.MCMLWindowFrame", {
-		url  = "Mod/WorldShare/DeleteWorldLogin.html", 
-		name = "DeleteWorldLogin", 
-		isShowTitleBar = false,
-		DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory / false will only hide window
-		style = CommonCtrl.WindowFrame.ContainerStyle,
-		zorder = 0,
-		allowDrag = true,
-		bShow = bShow,
-		directPosition = true,
-			align = "_ct",
-			x = -500/2,
-			y = -270/2,
-			width = 500,
-			height = 270,
-		cancelShowAnimation = true,
-	});
-end
-
-function SyncMain.deleteWorldGithub(_password)
-	local foldername = login.selectedWorldInfor.foldername;
-
-	local AuthUrl    = "https://api.github.com/authorizations";
-	local AuthParams = '{"scopes":["delete_repo"], "note":"' .. ParaGlobal.timeGetTime() .. '"}';
-	local basicAuth  = login.login .. ":" .. _password;
-	local AuthToken  = "";
-
-	basicAuth = Encoding.base64(basicAuth);
-
-	LOG.std(nil,"debug","basicAuth",basicAuth);
-
-	GithubService:GetUrl({
-		url        = AuthUrl,
-		headers    = {
-						Authorization  = "Basic " .. basicAuth,
-						["User-Agent"]   = "npl",
-				        ["content-type"] = "application/json"
-			         },
-		postfields = AuthParams
-    },function(data,err)
-    	LOG.std(nil,"debug","GetUrl",data);
-    	local basicAuthData = data;
-
-    	AuthToken = basicAuthData.token;
-
-	    _guihelper.MessageBox(format(L"确定删除远程世界:%s?", foldername or ""), function(res)
-	    	Page:CloseWindow();
-	    	LOG.std(nil,"debug","res and res == _guihelper.DialogResult.Yes",res);
-	    	LOG.std(nil,"debug","self.deleteFolderName",foldername);
-
-	    	if(res and res == 6) then
-	    		GithubService:deleteResp(foldername, AuthToken,function(data,err)
-	    			LOG.std(nil,"debug","GithubService:deleteResp",err);
-
-	    			if(err == 204) then
-	    				GithubService:GetUrl({
-							method  = "DELETE",
-							url     = login.site.."/api/mod/WorldShare/models/worlds/",
-							form    = {
-								worldsName = login.selectedWorldInfor.foldername,
-							},
-							json    = true,
-							headers = {Authorization = "Bearer "..login.token}
-						},function(data,err)
-
-							login.handleCur_ds = {};
-							local hasLocal    = false;
-							for key,value in ipairs(InternetLoadWorld.cur_ds) do
-								if(value.foldername == foldername and value.status == 3 or value.status == 4 or value.status == 5) then
-									LOG.std(nil,"debug","value.status",value.status);
-									value.status = 1;
-									hasLocal = true;
-								end
-
-								if(value.foldername ~= foldername) then
-									login.handleCur_ds[#login.handleCur_ds+1] = value;
-								end
-							end
-
-							if(not hasLocal)then
-								InternetLoadWorld.cur_ds = login.handleCur_ds;
-							end
-
-			    			Page:CloseWindow();
-
-				            NPL.load("(gl)script/apps/Aries/Creator/WorldCommon.lua");
-				            local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon");
-
-				            if(not WorldCommon.GetWorldInfo()) then
-				                MainLogin.state.IsLoadMainWorldRequested = nil;
-				                MainLogin:next_step();
-				            end
-						end);
-			        else
-			        	_guihelper.MessageBox(L"远程删除失败");
-
-	    			end
-	    		end)
-	    	end
-	    end);
-	end)
-end
-
-function SyncMain.deleteWorldAll()
-	login.deleteWorldLocal(function()
-		login.deleteWorldGithubLogin();
-	end);
-end
-
-function SyncMain.goBack()
-    Page:CloseWindow();
-
-    if(not WorldCommon.GetWorldInfo()) then
-        MainLogin.state.IsLoadMainWorldRequested = nil;
-        MainLogin:next_step();
-    end
 end
 
 function SyncMain.shareNow()
@@ -472,52 +263,60 @@ function SyncMain:useDataSourceGUI()
 end
 
 function SyncMain:syncToLocal(_worldDir, _foldername, _callback)
-	-- LOG.std(nil,"debug","worldDir",_worldDir);
+	--LOG.std(nil,"debug","worldDir",_worldDir);
 
 	-- 加载进度UI界面
 	local syncToLocalGUI = SyncGUI:new();
 
 	if(_worldDir) then
-		self.worldDir   = _worldDir;
-		self.foldername = _foldername;
+		SyncMain.worldDir   = _worldDir;
+		SyncMain.foldername = _foldername;
 	end
 
-	self.localFiles = LocalService:LoadFiles(self.worldDir,"",nil,1000,nil);
+	SyncMain.localFiles = LocalService:LoadFiles(SyncMain.worldDir,"",nil,1000,nil);
 
-	if (self.worldDir == "") then
+	if (SyncMain.worldDir == "") then
 		_guihelper.MessageBox(L"上传失败，将使用离线模式，原因：上传目录为空");
 		return;
-	else 
-		local curUpdateIndex       = 1;
-		local curDownloadIndex     = 1;
-		local totalLocalIndex      = nil;
-		local totalDataSourceIndex = nil;
-		local githubFiles          = {};
-		local syncGUItotal         = 0;
-		local syncGUIIndex         = 0;
-		local syncGUIFiles         = "";
+	else
+		local curUpdateIndex        = 1;
+		local curDownloadIndex      = 1;
+		local totalLocalIndex       = nil;
+		local totalDataSourceIndex  = nil;
+		local dataSourceIndex       = 0;
+		local dataSourceFiles       = {};
+		local syncGUItotal          = 0;
+		local syncGUIIndex          = 0;
+		local syncGUIFiles          = "";
 
-		-- LOG.std(nil,"debug","WorldShareGUI",curDownloadIndex);
-		-- LOG.std(nil,"debug","WorldShareGUI",totalDataSourceIndex);
+		-- LOG.std(nil,"debug","SyncMainGUI",curDownloadIndex);
+		-- LOG.std(nil,"debug","SyncMainGUI",totalDataSourceIndex);
+
+		syncToLocalGUI:updateDataBar(syncGUIIndex, syncGUItotal, L'获取文件sha列表');
+
+		local function finish()
+			--成功是返回信息给login
+			if(_callback) then
+				_callback(true,SyncMain.remoteRevison);
+			end
+		end
 
 		-- 下载新文件
 		local function downloadOne()
 			if (curDownloadIndex <= totalDataSourceIndex) then
-
 				-- LOG.std(nil,"debug","githubFiles.tree[curDownloadIndex]",githubFiles.tree[curDownloadIndex]);
 				-- LOG.std(nil,"debug","curDownloadIndex",curDownloadIndex);
 
-				if (githubFiles.tree[curDownloadIndex].needChange) then
-					if(githubFiles.tree[curDownloadIndex].type == "blob") then
+				if (dataSourceFiles[curDownloadIndex].needChange) then
+					if(dataSourceFiles[curDownloadIndex].type == "blob") then
 						-- LOG.std(nil,"debug","githubFiles.tree[curDownloadIndex].type",githubFiles.tree[curDownloadIndex].type);
-						LocalService:download(self.foldername, githubFiles.tree[curDownloadIndex].path, function (bIsDownload,response)
+						LocalService:download(SyncMain.foldername, dataSourceFiles[curDownloadIndex].path, function (bIsDownload, response)
 							if (bIsDownload) then
-
 								syncGUIIndex = syncGUIIndex + 1;
-								-- syncGUIFiles = githubFiles.tree[curDownloadIndex].path;
+								syncGUIFiles = response.filename;
 
 								if(response.filename == "revision.xml") then
-									self.githubRevison = response.content;
+									SyncMain.remoteRevison = response.content;
 								end
 
 								if(syncGUIIndex == syncGUItotal) then
@@ -526,7 +325,7 @@ function SyncMain:syncToLocal(_worldDir, _foldername, _callback)
 
 								syncToLocalGUI:updateDataBar(syncGUIIndex, syncGUItotal, syncGUIFiles);
 							else
-								_guihelper.MessageBox(self.localFiles[curDownloadIndex].filename .. ' 下载失败，请稍后再试');
+								_guihelper.MessageBox(SyncMain.localFiles[curDownloadIndex].filename .. ' 下载失败，请稍后再试');
 							end
 						end);
 					end
@@ -555,37 +354,37 @@ function SyncMain:syncToLocal(_worldDir, _foldername, _callback)
 				local githubIndex = nil;
 
 				-- 用Gihub的文件和本地的文件对比
-				for key,value in ipairs(githubFiles.tree) do
-					if(value.path == self.localFiles[curUpdateIndex].filename) then
+				for key,value in ipairs(dataSourceFiles) do
+					if(value.path == SyncMain.localFiles[curUpdateIndex].filename) then
 						LOG.std(nil,"debug","value.path",value.path);
-						bIsExisted  = true;
-						githubIndex = key; 
+						bIsExisted      = true;
+						dataSourceIndex = key; 
 						break;
 					end
 				end
 
 				-- 本地是否存在Github上的文件
 				if (bIsExisted) then
-					githubFiles.tree[githubIndex].needChange = false;
+					dataSourceFiles[dataSourceIndex].needChange = false;
 					-- LOG.std(nil,"debug","self.localFiles[curUpdateIndex].filename",self.localFiles[curUpdateIndex].filename);
 					-- LOG.std(nil,"debug","self.localFiles[curUpdateIndex].sha1",self.localFiles[curUpdateIndex].sha1);
-					-- LOG.std(nil,"debug","githubFiles.tree[githubIndex].sha",githubFiles.tree[githubIndex].sha);
+					-- LOG.std(nil,"debug","githubFiles.tree[dataSourceIndex].sha",githubFiles.tree[dataSourceIndex].sha);
 
-					if (self.localFiles[curUpdateIndex].sha1 ~= githubFiles.tree[githubIndex].sha) then
+					if (SyncMain.localFiles[curUpdateIndex].sha1 ~= dataSourceFiles[dataSourceIndex].sha) then
 						-- 更新已存在的文件
-						LocalService:update(self.foldername, githubFiles.tree[githubIndex].path, function (bIsUpdate,response)
+						LocalService:update(SyncMain.foldername, dataSourceFiles[dataSourceIndex].path, function (bIsUpdate, response)
 							if (bIsUpdate) then
 								curUpdateIndex = curUpdateIndex + 1;
-
 								syncGUIIndex   = syncGUIIndex   + 1;
-								-- syncGUIFiles   = githubFiles.tree[githubIndex].path;
+
+								-- syncGUIFiles   = githubFiles.tree[dataSourceIndex].path;
 								-- LOG.std(nil,"debug","syncGUIIndex",syncGUIIndex);
 
 								if(response.filename == "revision.xml") then
-									self.githubRevison = response.content;
+									SyncMain.remoteRevison = response.content;
 								end
 
-								SyncGUI:updateDataBar(syncGUIIndex, syncGUItotal, syncGUIFiles);
+								syncToLocalGUI:updateDataBar(syncGUIIndex, syncGUItotal, syncGUIFiles);
 
 								-- 如果当前计数大于最大计数则更新
 								if (curUpdateIndex > totalLocalIndex) then      -- check whether all files have updated or not. if false, update the next one, if true, upload files.  
@@ -595,21 +394,20 @@ function SyncMain:syncToLocal(_worldDir, _foldername, _callback)
 									updateOne();
 								end
 							else
-								_guihelper.MessageBox(githubFiles.tree[githubIndex].path .. ' 更新失败,请稍后再试');
+								_guihelper.MessageBox(dataSourceFiles[dataSourceIndex].path .. ' 更新失败,请稍后再试');
 							end
 						end);
 					else
 						-- if file exised, and has same sha value, then contain it
-						-- _guihelper.MessageBox(githubFiles.tree[curUpdateIndex].path .. ' 文件更新完成' .. (curUpdateIndex + 1) .. '/' .. totalLocalIndex);
 						curUpdateIndex = curUpdateIndex + 1;
-
 						syncGUIIndex   = syncGUIIndex   + 1;
-						-- syncGUIFiles   = githubFiles.tree[githubIndex].path;
+
+						-- syncGUIFiles   = githubFiles.tree[dataSourceIndex].path;
 
 						LOG.std(nil,"debug","syncGUIIndex",syncGUIIndex);
-						-- LOG.std(nil,"debug","githubFiles.tree[githubIndex].path",githubFiles.tree[githubIndex].path);
+						-- LOG.std(nil,"debug","githubFiles.tree[dataSourceIndex].path",githubFiles.tree[dataSourceIndex].path);
 
-						syncToLocalGUI:updateDataBar(syncGUIIndex,syncGUItotal, syncGUIFiles);
+						syncToLocalGUI:updateDataBar(syncGUIIndex, syncGUItotal, syncGUIFiles);
 
 						if (curUpdateIndex > totalLocalIndex) then     -- check whether all files have updated or not. if false, update the next one, if true, upload files.
 							-- _guihelper.MessageBox(L'同步完成-B');
@@ -630,7 +428,7 @@ function SyncMain:syncToLocal(_worldDir, _foldername, _callback)
 
 		-- 删除文件
 		local function deleteOne()
-			LocalService:delete(self.foldername, self.localFiles[curUpdateIndex].filename, function (bIsDelete)
+			LocalService:delete(SyncMain.foldername, SyncMain.localFiles[curUpdateIndex].filename, function (bIsDelete)
 				if (bIsDelete) then
 					curUpdateIndex = curUpdateIndex + 1;
 
@@ -640,45 +438,36 @@ function SyncMain:syncToLocal(_worldDir, _foldername, _callback)
 						updateOne();
 					end
 				else
-					_guihelper.MessageBox('删除 ' .. self.localFiles[curUpdateIndex].filename .. ' 失败, 请稍后再试');
+					_guihelper.MessageBox('删除 ' .. SyncMain.localFiles[curUpdateIndex].filename .. ' 失败, 请稍后再试');
 				end
 			end);
 		end
 
-		local function finish()
-
-			--成功是返回信息给login
-			if(_callback) then
-				_callback(true,self.githubRevison);
-			end
-		end
-
-		-- 获取github仓文件
-		GithubService:getFileShaList(self.foldername, function(data, err)
+		-- 获取数据源仓文件
+		SyncMain:getFileShaListService(SyncMain.foldername, function(data, err)
 			if(err ~= 404) then
 				if(err == 409) then
-					syncToLocalGUI:updateDataBar(-1,-1);
-					_guihelper.MessageBox(L"Github上暂无数据");
+					syncToLocalGUI:updateDataBar(-1, -1, L"数据源上暂无数据");
 				end
 
 				LOG.std(nil,"debug","syncToLocal",data);
 
-				githubFiles = data;
+				dataSourceFiles = data;
 
-				totalLocalIndex      = #self.localFiles;
-				totalDataSourceIndex = #githubFiles.tree;
+				totalLocalIndex      = #SyncMain.localFiles;
+				totalDataSourceIndex = #dataSourceFiles;
 
-				for i=1,#githubFiles.tree do
-					githubFiles.tree[i].needChange = true;
+				for i=1,#dataSourceFiles do
+					dataSourceFiles[i].needChange = true;
 
-					if(githubFiles.tree[i].type == "blob") then
+					if(dataSourceFiles[i].type == "blob") then
 						syncGUItotal = syncGUItotal + 1;
 					end
 
 					i = i + 1;
 				end
 
-				syncToLocalGUI:updateDataBar(syncGUIIndex,syncGUItotal);
+				syncToLocalGUI:updateDataBar(syncGUIIndex , syncGUItotal, L"开始同步");
 
 				LOG.std(nil,"debug","totalLocalIndex",totalLocalIndex);
 				LOG.std(nil,"debug","totalDataSourceIndex",totalDataSourceIndex);
@@ -689,7 +478,7 @@ function SyncMain:syncToLocal(_worldDir, _foldername, _callback)
 					downloadOne(); --如果文档文件夹为空，则直接开始下载
 				end
 			else
-				_guihelper.MessageBox(L"获取GITHUB文件失败，请稍后再试！");
+				_guihelper.MessageBox(L"获取G数据源文件失败，请稍后再试！");
 			end
 		end);
 	end
@@ -722,11 +511,12 @@ function SyncMain:syncToDataSource()
 
 			local function finish()
 				if(syncGUItotal == syncGUIIndex) then
-					LOG.std(nil,"debug","send",login.selectedWorldInfor.tooltip)
+					LOG.std(nil,"debug","SyncMain.selectedWorldInfor",SyncMain.selectedWorldInfor);
+					LOG.std(nil,"debug","send",SyncMain.selectedWorldInfor.tooltip)
 
 					local modDateTable = {};
 
-					for modDateEle in string.gmatch(login.selectedWorldInfor.tooltip,"[^:]+") do
+					for modDateEle in string.gmatch(SyncMain.selectedWorldInfor.tooltip,"[^:]+") do
 						modDateTable[#modDateTable+1] = modDateEle;
 					end
 
@@ -734,20 +524,27 @@ function SyncMain:syncToDataSource()
 						url     = login.site .. "/api/mod/worldshare/models/worlds/refresh",
 						json    = true,
 						form    = {
-									modDate    = modDateTable[1],
-									worldsName = self.foldername,
-									revision   = self.currentRevison,
+							modDate    = modDateTable[1],
+							worldsName = SyncMain.foldername,
+							revision   = SyncMain.currentRevison,
+							gitlabProjectId = GitlabService.projectId,
 						},
 						headers = {
 							Authorization    = "Bearer " .. login.token,
 							["content-type"] = "application/json",
 						},
-					},function(data,err) 
-						echo(data);
-						echo(err);
+					},function(data,err)
+						LOG.std(nil,"debug","finish",data);
+						LOG.std(nil,"debug","finish",err);
+
+						if(err == 204 and SyncMain.worldName) then
+							login.syncWorldsList();
+						end
 					end);
 
-					self.githubRevison = self.currentRevison;
+					if(SyncMain.firstCreate) then
+						SyncMain.firstCreate = false;
+					end
 				end
 			end
 
@@ -759,7 +556,7 @@ function SyncMain:syncToDataSource()
 
 					if (SyncMain.localFiles[curUploadIndex].needChange) then
 						SyncMain.localFiles[curUploadIndex].needChange = false;
-						SyncMain:uploadService(self.foldername, self.localFiles[curUploadIndex].filename, self.localFiles[curUploadIndex].file_content_t,function (bIsUpload, filename)
+						SyncMain:uploadService(SyncMain.foldername, SyncMain.localFiles[curUploadIndex].filename, SyncMain.localFiles[curUploadIndex].file_content_t,function (bIsUpload, filename)
 							if (bIsUpload) then
 								syncGUIIndex = syncGUIIndex + 1;
 
@@ -771,7 +568,7 @@ function SyncMain:syncToDataSource()
 									finish();
 								end
 							else
-								_guihelper.MessageBox(self.localFiles[curUploadIndex].filename .. ' 上传失败，请稍后再试');
+								_guihelper.MessageBox(SyncMain.localFiles[curUploadIndex].filename .. ' 上传失败，请稍后再试');
 							end
 						end);
 					else
@@ -798,7 +595,7 @@ function SyncMain:syncToDataSource()
 					local LocalIndex  = nil;
 
 					-- 用数据源的文件和本地的文件对比
-					for key,value in ipairs(self.localFiles) do
+					for key,value in ipairs(SyncMain.localFiles) do
 						if(value.filename == dataSourceFiles[curUpdateIndex].path) then
 							bIsExisted  = true;
 							LocalIndex  = key; 
@@ -807,17 +604,17 @@ function SyncMain:syncToDataSource()
 					end
 
 					if (bIsExisted) then
-						self.localFiles[LocalIndex].needChange = false;
+						SyncMain.localFiles[LocalIndex].needChange = false;
 						--LOG.std(nil,"debug","dataSourceFiles.tree[curUpdateIndex].path",dataSourceFiles.tree[curUpdateIndex].path);
 						--LOG.std(nil,"debug","dataSourceFiles[curUpdateIndex].sha",dataSourceFiles[curUpdateIndex].sha);
 						--LOG.std(nil,"debug","self.localFiles.sha1",self.localFiles[LocalIndex].sha1);
 
-						if (dataSourceFiles[curUpdateIndex].sha ~= self.localFiles[LocalIndex].sha1) then
+						if (dataSourceFiles[curUpdateIndex].sha ~= SyncMain.localFiles[LocalIndex].sha1) then
 							-- 更新已存在的文件
-							SyncMain:updateService(self.foldername, self.localFiles[LocalIndex].filename, self.localFiles[LocalIndex].file_content_t, dataSourceFiles[curUpdateIndex].sha, function (bIsUpdate,content)
+							SyncMain:updateService(SyncMain.foldername, SyncMain.localFiles[LocalIndex].filename, SyncMain.localFiles[LocalIndex].file_content_t, dataSourceFiles[curUpdateIndex].sha, function (bIsUpdate,content)
 								if (bIsUpdate) then
 									syncGUIIndex = syncGUIIndex + 1;
-									syncGUIFiles = self.localFiles[LocalIndex].filename;
+									syncGUIFiles = SyncMain.localFiles[LocalIndex].filename;
 
 									syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, syncGUIFiles);
 
@@ -838,7 +635,7 @@ function SyncMain:syncToDataSource()
 						else
 							-- if file exised, and has same sha value, then contain it
 							syncGUIIndex   = syncGUIIndex + 1;
-							syncGUIFiles   = self.localFiles[LocalIndex].filename;
+							syncGUIFiles   = SyncMain.localFiles[LocalIndex].filename;
 
 							syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, syncGUIFiles);
 
@@ -864,7 +661,7 @@ function SyncMain:syncToDataSource()
 			-- 删除数据源文件
 			function deleteOne()
 				if(dataSourceFiles[curUpdateIndex].type == "blob") then
-					SyncMain:deleteService(self.foldername, dataSourceFiles[curUpdateIndex].path, dataSourceFiles[curUpdateIndex].sha, function (bIsDelete)
+					SyncMain:deleteFileService(SyncMain.foldername, dataSourceFiles[curUpdateIndex].path, dataSourceFiles[curUpdateIndex].sha, function (bIsDelete)
 						if (bIsDelete) then
 							curUpdateIndex = curUpdateIndex + 1;
 
@@ -875,7 +672,7 @@ function SyncMain:syncToDataSource()
 								updateOne();
 							end
 						else
-							_guihelper.MessageBox('删除 ' .. self.localFiles[curUpdateIndex].filename .. ' 失败, 请稍后再试');
+							_guihelper.MessageBox('删除 ' .. SyncMain.localFiles[curUpdateIndex].filename .. ' 失败, 请稍后再试');
 						end
 					end);
 				else
@@ -890,10 +687,10 @@ function SyncMain:syncToDataSource()
 			end
 
 			-- 获取数据源仓文件
-			SyncMain:getFileShaListService(self.foldername, function(data, err)
+			SyncMain:getFileShaListService(SyncMain.foldername, function(data, err)
 				local hasReadme = false;
 
-				for key,value in ipairs(self.localFiles) do
+				for key,value in ipairs(SyncMain.localFiles) do
 					if(value.filename == "README.md") then
 						hasReadme = true;
 						break;
@@ -901,7 +698,7 @@ function SyncMain:syncToDataSource()
 				end
 
 				if(not hasReadme) then
-					local filePath = self.worldDir .. "README.md";
+					local filePath = SyncMain.worldDir .. "README.md";
 					local file = ParaIO.open(filePath, "w");
 					local content = "made by http://www.paracraft.cn/";
 
@@ -912,21 +709,21 @@ function SyncMain:syncToDataSource()
 
 					local readMeFiles = {
 						filename       = "README.md",
-						file_path      = Encoding.DefaultToUtf8(self.worldDir) .. "README.md",
+						file_path      = Encoding.DefaultToUtf8(SyncMain.worldDir) .. "README.md",
 						file_content_t = content
 					};
 
 					--LOG.std(nil,"debug","localFiles",readMeFiles);
 
-					self.localFiles[#self.localFiles + 1] = readMeFiles;
+					SyncMain.localFiles[#SyncMain.localFiles + 1] = readMeFiles;
 				end
 
-				totalLocalIndex  = #self.localFiles;
-				syncGUItotal     = #self.localFiles;
+				totalLocalIndex  = #SyncMain.localFiles;
+				syncGUItotal     = #SyncMain.localFiles;
 
-				for i=1,#self.localFiles do
+				for i=1,#SyncMain.localFiles do
 					-- LOG.std(nil,"debug","localFiles",self.localFiles[i]);
-					self.localFiles[i].needChange = true;
+					SyncMain.localFiles[i].needChange = true;
 					i = i + 1;
 				end
 
@@ -950,7 +747,7 @@ function SyncMain:syncToDataSource()
 	------------------------------------------------------------------------
 
 	if(SyncMain.firstCreate) then
-		SyncMain:create(self.foldername,function(data, err)
+		SyncMain:create(SyncMain.foldername,function(data, err)
 			--LOG.std(nil,"debug","SyncMain:create",data);
 			--LOG.std(nil,"debug","SyncMain:create",err);
 
@@ -967,11 +764,239 @@ function SyncMain:syncToDataSource()
 		LOG.std(nil,"debug","SyncMain:syncToGithub","非首次同步");
 
 		if(login.dataSourceType == "gitlab") then
-			GitlabService.projectId = WorldShare:GetWorldData("gitLabProjectId");
+			if(SyncMain.worldName) then
+				GitlabService.projectId = WorldShare:GetWorldData("gitLabProjectId", SyncMain.worldName);
+			else
+				GitlabService.projectId = WorldShare:GetWorldData("gitLabProjectId");
+			end
+			
 		end
 
 		syncToDataSourceGo();
 	end
+end
+
+function SyncMain.deleteWorld()
+	System.App.Commands.Call("File.MCMLWindowFrame", {
+		url  = "Mod/WorldShare/sync/DeleteWorld.html",
+		name = "DeleteWorld", 
+		isShowTitleBar = false,
+		DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory / false will only hide window
+		style = CommonCtrl.WindowFrame.ContainerStyle,
+		zorder = 0,
+		allowDrag = true,
+		bShow = bShow,
+		directPosition = true,
+			align = "_ct",
+			x = -500/2,
+			y = -270/2,
+			width = 500,
+			height = 270,
+		cancelShowAnimation = true,
+	});
+end
+
+function SyncMain.deleteWorldLocal(_callback)
+	local world = InternetLoadWorld:GetCurrentWorld();
+	
+	if(not world) then
+		_guihelper.MessageBox(L"请先选择世界");
+		return;
+	end
+
+	_guihelper.MessageBox(format(L"确定删除本地世界:%s?", world.text or ""), function(res)
+		if(res and res == _guihelper.DialogResult.Yes) then
+			if(world.RemoveLocalFile and world:RemoveLocalFile()) then
+				InternetLoadWorld.RefreshAll();
+			elseif(world.remotefile) then
+				local targetDir = world.remotefile:gsub("^local://", ""); -- local world, delete all files in folder and the folder itself.
+
+				if(GameLogic.RemoveWorldFileWatcher) then
+					GameLogic.RemoveWorldFileWatcher(); -- file watcher may make folder deletion of current world directory not working.
+				end
+
+				if(commonlib.Files.DeleteFolder(targetDir)) then  
+					local foldername = SyncMain.selectedWorldInfor.foldername;
+					SyncMain.handleCur_ds = {};
+
+					local hasRemote = false;
+					for key,value in ipairs(InternetLoadWorld.cur_ds) do
+						if(value.foldername == foldername and value.status == 3 or value.status == 4 or value.status == 5) then
+							value.status = 2;
+							hasRemote = true;
+							break;
+						end
+
+						if(value.foldername ~= foldername) then
+							SyncMain.handleCur_ds[#SyncMain.handleCur_ds + 1] = value;
+						end
+					end
+
+					if (not hasRemote) then
+						InternetLoadWorld.cur_ds = login.handleCur_ds;
+					end
+
+					if(type(_callback) == 'function') then
+						_callback(foldername);
+					else
+						Page:CloseWindow();
+
+	                    if(not WorldCommon.GetWorldInfo()) then
+	                        MainLogin.state.IsLoadMainWorldRequested = nil;
+	                        MainLogin:next_step();
+	                    end
+					end
+				else
+					_guihelper.MessageBox(L"无法删除可能您没有足够的权限"); 
+				end
+			end
+		end
+	end, _guihelper.MessageBoxButtons.YesNo);
+end
+
+function SyncMain.deleteWorldRemote()
+	if(login.dataSourceType == "github") then
+		SyncMain.deleteWorldGithubLogin();
+	elseif(login.dataSourceType == "gitlab") then
+		SyncMain.deleteWorldGitlab();
+	end
+end
+
+function SyncMain.deleteWorldGithubLogin()
+	System.App.Commands.Call("File.MCMLWindowFrame", {
+		url  = "Mod/WorldShare/sync/DeleteWorldGithub.html", 
+		name = "DeleteWorldLogin", 
+		isShowTitleBar = false,
+		DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory / false will only hide window
+		style = CommonCtrl.WindowFrame.ContainerStyle,
+		zorder = 0,
+		allowDrag = true,
+		bShow = bShow,
+		directPosition = true,
+			align = "_ct",
+			x = -500/2,
+			y = -270/2,
+			width = 500,
+			height = 270,
+		cancelShowAnimation = true,
+	});
+end
+
+function SyncMain.deleteWorldGithub(_password)
+	local foldername = SyncMain.selectedWorldInfor.foldername;
+
+	local AuthUrl    = "https://api.github.com/authorizations";
+	local AuthParams = {
+		scopes = {
+			"delete_repo",
+		},
+		note   = ParaGlobal.timeGetTime(),
+	};
+	local basicAuth  = login.dataSourceUsername .. ":" .. _password;
+	local AuthToken  = "";
+
+	basicAuth = Encoding.base64(basicAuth);
+
+	HttpRequest:GetUrl({
+		url     = AuthUrl,
+		json    = true,
+		headers = {
+			Authorization    = "Basic " .. basicAuth,
+			["User-Agent"]   = "npl",
+			["content-type"] = "application/json"
+		},
+		form    = AuthParams
+    },function(data,err)
+    	local basicAuthData = data;
+    	AuthToken = basicAuthData.token;
+
+	    _guihelper.MessageBox(format(L"确定删除Gihub远程世界:%s?", foldername or ""), function(res)
+	    	Page:CloseWindow();
+
+	    	if(res and res == 6) then
+	    		GithubService:deleteResp(foldername, AuthToken, function(data,err)
+	    			--LOG.std(nil,"debug","GithubService:deleteResp",err);
+	    			if(err == 204) then
+	    				SyncMain.deleteKeepworkWorldsRecord();
+	    			end
+	    		end)
+	    	end
+	    end);
+	end)
+end
+
+function SyncMain.deleteWorldGitlab()
+	local foldername = SyncMain.selectedWorldInfor.foldername;
+	
+	for key,value in ipairs(SyncMain.remoteWorldsList) do
+		if(value.worldsName == foldername) then
+			GitlabService.projectId = value.gitlabProjectId;
+		end
+	end
+
+	_guihelper.MessageBox(format(L"确定删除Gitlab远程世界:%s?", foldername or ""), function(res)
+	    Page:CloseWindow();
+
+	    if(res and res == 6) then
+	    	GitlabService:deleteResp(foldername, function(data, err)
+				if(err == 202) then
+					SyncMain.deleteKeepworkWorldsRecord();
+				end
+			end);
+	    end
+	end);
+end
+
+function SyncMain.deleteKeepworkWorldsRecord()
+	local foldername = SyncMain.selectedWorldInfor.foldername;
+
+	HttpRequest:GetUrl({
+		method  = "DELETE",
+		url     = login.site .. "/api/mod/WorldShare/models/worlds/",
+		form    = {
+			worldsName = foldername,
+		},
+		json    = true,
+		headers = {
+			Authorization = "Bearer " .. login.token,
+		},
+	},function(data, err)
+		if(err == 204) then
+			SyncMain.handleCur_ds = {};
+
+			local hasLocal = false;
+			for key,value in ipairs(InternetLoadWorld.cur_ds) do
+				if(value.foldername == foldername and value.status == 3 or value.status == 4 or value.status == 5) then
+					value.status = 1;
+					hasLocal = true;
+					break;
+				end
+
+				if(value.foldername ~= foldername) then
+					SyncMain.handleCur_ds[#SyncMain.handleCur_ds + 1] = value;
+				end
+			end
+
+			if(not hasLocal)then
+				InternetLoadWorld.cur_ds = SyncMain.handleCur_ds;
+			end
+
+			LOG.std(nil,"debug","InternetLoadWorld.cur_ds",InternetLoadWorld.cur_ds);
+
+			Page:CloseWindow();
+
+			if(not WorldCommon.GetWorldInfo()) then
+				MainLogin.state.IsLoadMainWorldRequested = nil;
+				MainLogin:next_step();
+			end
+		end
+	end);
+end
+
+function SyncMain.deleteWorldAll()
+	SyncMain.deleteWorldLocal(function()
+		SyncMain.deleteWorldRemote();
+	end);
 end
 
 function SyncMain:create(_foldername,_callback)
@@ -998,9 +1023,9 @@ function SyncMain:updateService(_foldername, _filename, _file_content_t, _sha, _
 	end
 end
 
-function SyncMain:deleteService(_foldername, _path, _sha, _callback)
+function SyncMain:deleteFileService(_foldername, _path, _sha, _callback)
 	if(login.dataSourceType == "github") then
-		GithubService:delete(_foldername, _path, _sha, _callback);
+		GithubService:deleteFile(_foldername, _path, _sha, _callback);
 	elseif(login.dataSourceType == "gitlab") then
 		GitlabService:deleteFile(_path, _sha, _callback);
 	end

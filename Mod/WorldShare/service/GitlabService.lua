@@ -5,20 +5,25 @@ Date:  2017.4.15
 Desc: 
 use the lib:
 ------------------------------------------------------------
-NPL.load("(gl)Mod/WorldShare/GitlabService.lua");
-local GitlabService = commonlib.gettable("Mod.WorldShare.GitlabService");
+NPL.load("(gl)Mod/WorldShare/service/GitlabService.lua");
+local GitlabService = commonlib.gettable("Mod.WorldShare.service.GitlabService");
 ------------------------------------------------------------
 ]]
 
-NPL.load("(gl)Mod/WorldShare/services/HttpRequest.lua");
+NPL.load("(gl)Mod/WorldShare/service/HttpRequest.lua");
 NPL.load("(gl)Mod/WorldShare/login.lua");
 NPL.load("(gl)Mod/WorldShare/main.lua");
+NPL.load("(gl)script/ide/Encoding.lua");
+NPL.load("(gl)Mod/WorldShare/SyncMain.lua");
 
-local GitlabService = commonlib.gettable("Mod.WorldShare.service.GitlabService");
 local HttpRequest   = commonlib.gettable("Mod.WorldShare.service.HttpRequest");
 local login		    = commonlib.gettable("Mod.WorldShare.login");
 local GitEncoding   = commonlib.gettable("Mod.WorldShare.helper.GitEncoding");
 local WorldShare    = commonlib.gettable("Mod.WorldShare");
+local Encoding      = commonlib.gettable("commonlib.Encoding");
+local SyncMain      = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
+
+local GitlabService = commonlib.gettable("Mod.WorldShare.service.GitlabService");
 
 GitlabService.inited = false;
 
@@ -136,10 +141,35 @@ function GitlabService:update(_filename, _file_content_t, _sha, _callback)
 end
 
 -- 获取文件
-function GitlabService:getContent(params, cb, errcb)
-    local url  = GitlabService:getFileUrlPrefix() .. params.path .. '/raw';
-    params.ref = params.ref or "master";
-    GitlabService:httpRequest("GET", url, params, cb, errcb);
+function GitlabService:getContent(_path, _callback)
+    local url  = GitlabService:getFileUrlPrefix() .. _path .. '?ref=master';
+	--LOG.std(nil,"debug","apiGet-url",url);
+	GitlabService:apiGet(url, function(data, err)
+		LOG.std(nil,"debug","apiGet-data",data);
+		LOG.std(nil,"debug","apiGet-err",err);
+
+		_callback(data.content, err);
+	end);
+end
+
+-- 获取文件
+function GitlabService:getContentWithRaw(_foldername, _path, _callback)
+	_foldername = GitEncoding.base64(_foldername);
+
+	local url  = login.rawBaseUrl .. "/" .. login.dataSourceUsername .. "/" .. _foldername .. "/raw/master/" .. _path;
+
+	HttpRequest:GetUrl({
+		url     = url,
+		json    = true,
+		headers = {
+			["PRIVATE-TOKEN"] = login.dataSourceToken,
+			["User-Agent"]    = "npl",
+		},
+	},function(data, err)
+		if(err == 200) then
+			_callback(data, err);
+		end
+	end);
 end
 
 -- 删除文件
@@ -151,7 +181,14 @@ function GitlabService:deleteFile(_path, _sha, _callback)
 		branch         = 'master',
 	}
 
-	GitlabService:apiDelete(_url, _params, _callback)
+	GitlabService:apiDelete(url, params, _callback);
+end
+
+--删除仓
+function GitlabService:deleteResp(_foldername, _callback)
+	local url = "/projects/" .. GitlabService.projectId;
+
+	GitlabService:apiDelete(url, {}, _callback);
 end
 
 -- 初始化
@@ -163,8 +200,14 @@ function GitlabService:init(_foldername, _callback)
         for i=1,#projectList do
             if (projectList[i].name == _foldername) then
 				GitlabService.projectId = projectList[i].id;
-				WorldShare:SetWorldData("gitLabProjectId",GitlabService.projectId);
-				WorldShare:SaveWorldData();
+
+				if(SyncMain.worldName) then
+					WorldShare:SetWorldData("gitLabProjectId", GitlabService.projectId, SyncMain.worldName);
+					WorldShare:SaveWorldData(SyncMain.worldName);
+				else
+					GitlabService.projectId = WorldShare:GetWorldData("gitLabProjectId");
+					WorldShare:SaveWorldData();
+				end
 
                 _callback(nil,201);
 				return;
@@ -179,8 +222,14 @@ function GitlabService:init(_foldername, _callback)
 			GitlabService:apiPost(url, params, function(data,err)
 				if(data.id ~= nil) then
 					GitlabService.projectId = data.id;
-					WorldShare:SetWorldData("gitLabProjectId",GitlabService.projectId);
-					WorldShare:SaveWorldData();
+
+					if(SyncMain.worldName) then
+						WorldShare:SetWorldData("gitLabProjectId", GitlabService.projectId, SyncMain.worldName);
+						WorldShare:SaveWorldData(SyncMain.worldName);
+					else
+						GitlabService.projectId = WorldShare:GetWorldData("gitLabProjectId");
+						WorldShare:SaveWorldData();
+					end
 
 					LOG.std(nil,"debug","GitlabService.projectId",GitlabService.projectId);
 					LOG.std(nil,"debug","err",err);
