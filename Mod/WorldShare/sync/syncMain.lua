@@ -832,11 +832,10 @@ function SyncMain:genWorldMD(worldInfor)
 
 			end
 
-			local indexPath     = username .. "/" .. username .. "/paracraft/index.md";
-			local worldFilePath = username .. "/" .. username .. "/paracraft/world_" .. worldInfor.worldsName .. ".md";
+			local indexPath     =  username .. "/paracraft/index";
+			local worldFilePath =  username .. "/paracraft/world_" .. worldInfor.worldsName;
 
 			for key,value in ipairs(data) do
-				
 				if(value.path == indexPath) then
 					hasIndex = true;
 				end
@@ -852,24 +851,32 @@ function SyncMain:genWorldMD(worldInfor)
 					local paramsText = KeepworkGen:GetContent(content);
 					local params = KeepworkGen:getCommand("worldList", paramsText);
 
+					worldList = KeepworkGen:setCommand("worldList",params);
+					SyncMain.indexFile = KeepworkGen:SetAutoGenContent("", worldList)
 
-				end)
+					SyncMain:updateService(
+						worldInfor.worldsName,
+						indexPath,
+						SyncMain.indexFile,
+						"",
+						function(data, err) end,
+						keepworkId
+					);
+				end, keepworkId)
 			else
 				local worldList = SyncMain.remoteWorldsList;
 
 				worldList = KeepworkGen:setCommand("worldList",worldList);
 				SyncMain.indexFile = KeepworkGen:SetAutoGenContent("", worldList)
 
-				LOG.std(nil,"debug","SyncMain.remoteWorldsList",SyncMain.indexFile);
-				LOG.std(nil,"debug","SyncMain.remoteWorldsList",indexPath);
+				--LOG.std(nil,"debug","SyncMain.remoteWorldsList",SyncMain.indexFile);
+				--LOG.std(nil,"debug","SyncMain.remoteWorldsList",indexPath);
 
 				SyncMain:uploadService(
 					worldInfor.worldsName,
 					indexPath,
 					SyncMain.indexFile,
-					function(aa, bb,data, err) 
-						LOG.std(nil,"debug","data",data);
-					end,
+					function(data, err) end,
 					keepworkId
 				);
 			end
@@ -938,6 +945,9 @@ function SyncMain:genWorldMD(worldInfor)
 				);
 			end
 
+			SyncMain:getUserPages(indexPath, SyncMain.indexFile, function(data, err) 
+				SyncMain:getUserPages(worldFilePath, SyncMain.worldFile, function(data, err) end)
+			end)
 		end, keepworkId);
 	end
 
@@ -948,6 +958,80 @@ function SyncMain:genWorldMD(worldInfor)
 			gen(keepworkId);
 		end);
 	end
+end
+
+function SyncMain:getUserPages(_path, _content, _callback)
+	HttpRequest:GetUrl({
+		url  = login.site.."/api/wiki/models/website_pageinfo/getByUsername",
+		json = true,
+		headers = {Authorization = "Bearer "..login.token},
+		form = {username = login.username},
+	},function(data, err)
+		LOG.std(nil,"debug","getUserPages",data);
+		local pageinfoList = data.data.pageinfoList[1];
+
+		local params = {};
+		NPL.FromJson(pageinfoList, params);
+
+		pageinfoList = params;
+
+		local hasFile   = false;
+		local fileIndex = 0;
+
+		for key,value in ipairs(pageinfoList) do
+			if(value.url == "/" .. _path) then
+				hasFile   = true;	
+				fileIndex = key;
+				break;			
+			end
+		end
+
+		LOG.std(nil,"debug","_path",_path);
+		LOG.std(nil,"debug","hasFile",hasFile);
+		LOG.std(nil,"debug","fileIndex",fileIndex);
+		LOG.std(nil,"debug","pageinfoList",pageinfoList);
+
+		if(hasFile) then
+			pageinfoList[fileIndex].timestamp = os.time() .. "000";
+			pageinfoList[fileIndex].content   = _content;
+			pageinfoList[fileIndex].isModify  = true;
+		else
+
+			LOG.std(nil,"debug","os", os.time() .. "000");
+
+			local thisInfor = {};
+
+			thisInfor.timestamp    = os.time() .. "000";
+			thisInfor.websiteName  = login.username;
+			thisInfor.userId	   = login.userId;
+			thisInfor.dataSourceId = login.dataSourceId;
+			thisInfor.isModify	   = false;
+			thisInfor.username	   = login.username;
+			thisInfor.name	       = _path;
+			thisInfor.url		   = "/" .. _path;
+			thisInfor.content      = _content;
+
+			pageinfoList[#pageinfoList + 1] = thisInfor;
+		end
+
+		LOG.std(nil,"debug","pageinfoList",pageinfoList);
+
+		pageinfoList = NPL.ToJson(pageinfoList,true);
+
+		local params = {};
+		params.dataSourceId = 1;
+		params.isExistSite  = 0;
+		params.pageinfo     = pageinfoList;
+		params.username     = login.username;
+		params.websiteName  = login.username;
+
+		HttpRequest:GetUrl({
+			url  = login.site.."/api/wiki/models/website_pageinfo/upsert",
+			json = true,
+			headers = {Authorization = "Bearer "..login.token},
+			form = params,
+		},_callback)
+	end);
 end
 
 function SyncMain.deleteWorld()

@@ -111,6 +111,7 @@ function login.LoginAction()
 							end
 						end
 
+						login.dataSourceId       = userinfo['dataSourceId'];				-- 数据源
 						login.dataSourceToken    = defaultDataSource['dataSourceToken'];    -- 数据源Token
 						login.dataSourceUsername = defaultDataSource['dataSourceUsername']; -- 数据源用户名
 						login.dataSourceType     = defaultDataSource['type'];				-- 数据源类型
