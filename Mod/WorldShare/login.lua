@@ -118,10 +118,10 @@ function login.LoginAction()
 						login.rawBaseUrl		 = defaultDataSource['rawBaseUrl']          -- 数据源raw
 
 						--echo({login.dataSourceToken,login.dataSourceUsername});
-						login.personPageUrl = login.site .. "/wiki/mod/worldshare/person/#?userid=" .. userinfo._id;
+						login.personPageUrl = login.site .. "/" .. login.username .. "/paracraft/index";--login.site .. "/wiki/mod/worldshare/person/#?userid=" .. userinfo._id;
 
 						local myWorlds = Page:GetNode("myWorlds");
-						myWorlds:SetAttribute("href",login.site.."/wiki/mod/worldshare/person/");
+						myWorlds:SetAttribute("href", login.personPageUrl);--login.site.."/wiki/mod/worldshare/person/"
 						
 						login.changeLoginType(3);
 						login.syncWorldsList();
@@ -602,7 +602,7 @@ function login.deleteWorld(_index)
 end
 
 function login.sharePersonPage()
-	local url = login.site .. "/wiki/mod/worldshare/share/#?type=person&userid=" .. login.userid;
+	local url = login.personPageUrl;--login.site .. "/wiki/mod/worldshare/share/#?type=person&userid=" .. login.userid;
 	ParaGlobal.ShellExecute("open", url, "", "", 1);
 end
 

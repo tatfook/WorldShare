@@ -23,6 +23,7 @@ NPL.load("(gl)script/ide/System/Encoding/base64.lua");
 NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua");
 NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/ShareWorldPage.lua");
 NPL.load("(gl)Mod/WorldShare/main.lua");
+NPL.load("(gl)Mod/WorldShare/helper/KeepworkGen.lua");
 
 local SyncGUI            = commonlib.gettable("Mod.WorldShare.sync.SyncGUI");
 local WorldCommon        = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
@@ -40,6 +41,7 @@ local CommandManager     = commonlib.gettable("MyCompany.Aries.Game.CommandManag
 local InternetLoadWorld  = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld");
 local ShareWorldPage     = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.Areas.ShareWorldPage");
 local WorldShare         = commonlib.gettable("Mod.WorldShare");
+local KeepworkGen        = commonlib.gettable("Mod.WorldShare.helper.KeepworkGen");
 
 local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
 
@@ -487,7 +489,7 @@ end
 function SyncMain:syncToDataSource()
 	-- 加载进度UI界面
 	local syncToDataSourceGUI = SyncGUI:new();
-
+	local test = true;
 	local function syncToDataSourceGo()
 		SyncMain.localFiles = LocalService:LoadFiles(SyncMain.worldDir,"",nil,1000,nil);
 		
@@ -515,38 +517,66 @@ function SyncMain:syncToDataSource()
 					LOG.std(nil,"debug","send",SyncMain.selectedWorldInfor.tooltip)
 
 					local modDateTable = {};
+					local readme;
 
 					for modDateEle in string.gmatch(SyncMain.selectedWorldInfor.tooltip,"[^:]+") do
 						modDateTable[#modDateTable+1] = modDateEle;
 					end
 
-					HttpRequest:GetUrl({
-						url     = login.site .. "/api/mod/worldshare/models/worlds/refresh",
-						json    = true,
-						form    = {
-							modDate    = modDateTable[1],
-							worldsName = SyncMain.foldername,
-							revision   = SyncMain.currentRevison,
-							dataSourceType  = login.dataSourceType,
-							gitlabProjectId = GitlabService.projectId,
-						},
-						headers = {
-							Authorization    = "Bearer " .. login.token,
-							["content-type"] = "application/json",
-						},
-					},function(data,err)
-						LOG.std(nil,"debug","finish",data);
-						LOG.std(nil,"debug","finish",err);
+					local hasPreview = false;
 
-						if(err == 204 and SyncMain.worldName) then
-							login.syncWorldsList();
+					for key,value in ipairs(SyncMain.localFiles) do
+						if(value.filename == "preview.jpg") then
+							hasPreview = true;
 						end
-					end);
+					end
+
+					for key,value in ipairs(SyncMain.localFiles) do
+						if(value.filename == "README.md") then
+							readme = LocalService:getFileContent(SyncMain.worldDir .. "README.md");
+							LOG.std(nil,"debug","SyncMain.worldDir",SyncMain.worldDir);
+							LOG.std(nil,"debug","readme",readme);
+						end
+					end
+
+					local params = {};
+					params.modDate		   = modDateTable[1];
+					params.worldsName      = SyncMain.foldername;
+					params.revision        = SyncMain.currentRevison;
+					params.hasPreview      = hasPreview;
+					params.dataSourceType  = login.dataSourceType;
+					params.gitlabProjectId = GitlabService.projectId;
+					params.readme          = readme;
+
+					SyncMain:genWorldMD(params);
+
+--					HttpRequest:GetUrl({
+--						url     = login.site .. "/api/mod/worldshare/models/worlds/refresh",
+--						json    = true,
+--						form    = params,
+--						headers = {
+--							Authorization    = "Bearer " .. login.token,
+--							["content-type"] = "application/json",
+--						},
+--					},function(data,err)
+--						LOG.std(nil,"debug","finish",data);
+--						LOG.std(nil,"debug","finish",err);
+--
+--						if(err == 204 and SyncMain.worldName) then
+--							SyncMain:genWorldMD(params);
+--							login.syncWorldsList();
+--						end
+--					end);
 
 					if(SyncMain.firstCreate) then
 						SyncMain.firstCreate = false;
 					end
 				end
+			end
+
+			if(test)then
+				finish();
+				return;
 			end
 
 			-- 上传新文件
@@ -745,6 +775,11 @@ function SyncMain:syncToDataSource()
 		end
 	end
 
+	if(test)then
+		syncToDataSourceGo();
+		return;
+	end
+
 	------------------------------------------------------------------------
 
 	if(SyncMain.firstCreate) then
@@ -774,6 +809,144 @@ function SyncMain:syncToDataSource()
 		end
 
 		syncToDataSourceGo();
+	end
+end
+
+function SyncMain:genWorldMD(worldInfor)
+	local function gen(keepworkId)
+		SyncMain:getFileShaListService(worldInfor.worldName, function(data, err)
+			--LOG.std(nil,"debug","genWorldMD",data);
+			local hasIndex      = false;
+			local hasWorldFile  = false;
+			local indexPath     = "";
+			local worldFilePath = "";
+			local worldUrl      = "";
+			local username      = "";
+			SyncMain.indexFile  = "";
+			SyncMain.worldFile  = "";
+
+			if(login.dataSourceType == "gitlab") then
+				username = login.dataSourceUsername:gsub("gitlab_" , "");
+				worldUrl = "http://git.keepwork.com/" .. login.dataSourceUsername .. "/keepworkdatasource/repository/archive.zip?ref=master";
+			else
+
+			end
+
+			local indexPath     = username .. "/" .. username .. "/paracraft/index.md";
+			local worldFilePath = username .. "/" .. username .. "/paracraft/world_" .. worldInfor.worldsName .. ".md";
+
+			for key,value in ipairs(data) do
+				
+				if(value.path == indexPath) then
+					hasIndex = true;
+				end
+
+				if(value.path == worldFilePath) then
+					hasWorldFile = true;
+				end
+			end
+
+			if(hasIndex) then
+				SyncMain:getDataSourceContent(worldInfor.worldsName, indexPath, function(data, err)
+					local content = Encoding.unbase64(data);
+					local paramsText = KeepworkGen:GetContent(content);
+					local params = KeepworkGen:getCommand("worldList", paramsText);
+
+
+				end)
+			else
+				local worldList = SyncMain.remoteWorldsList;
+
+				worldList = KeepworkGen:setCommand("worldList",worldList);
+				SyncMain.indexFile = KeepworkGen:SetAutoGenContent("", worldList)
+
+				LOG.std(nil,"debug","SyncMain.remoteWorldsList",SyncMain.indexFile);
+				LOG.std(nil,"debug","SyncMain.remoteWorldsList",indexPath);
+
+				SyncMain:uploadService(
+					worldInfor.worldsName,
+					indexPath,
+					SyncMain.indexFile,
+					function(aa, bb,data, err) 
+						LOG.std(nil,"debug","data",data);
+					end,
+					keepworkId
+				);
+			end
+
+			if(hasWorldFile) then
+				SyncMain:getDataSourceContent(worldInfor.worldsName, worldFilePath, function(data, err)
+					local content = Encoding.unbase64(data);
+					local paramsText = KeepworkGen:GetContent(content);
+					local params = KeepworkGen:getCommand("world3D", paramsText);
+
+					if(params.version ~= worldInfor.revision) then
+						local world3D = {
+							worldName	  = worldInfor.worldsName,
+							worldUrl	  = worldUrl,
+							logoUrl		  = "",
+							desc		  = "",
+							username	  = username,
+							visitCount    = 1,
+							favoriteCount = 1,
+							updateDate	  = worldInfor.modDate,
+							version		  = worldInfor.revision
+						}
+
+						world3D = KeepworkGen:setCommand("world3D",world3D);
+						SyncMain.worldFile = KeepworkGen:SetAutoGenContent(content, world3D);
+
+						LOG.std(nil,"debug","worldFile",SyncMain.worldFile);
+
+						SyncMain:updateService(
+							worldInfor.worldsName,
+							worldFilePath,
+							SyncMain.worldFile,
+							"",
+							function(data, err) end,
+							keepworkId
+						);
+					end
+				end, keepworkId)
+			else
+				local world3D = {
+					worldName	  = worldInfor.worldsName,
+					worldUrl	  = worldUrl,
+					logoUrl		  = "",
+					desc		  = "",
+					username	  = username,
+					visitCount    = 1,
+					favoriteCount = 1,
+					updateDate	  = worldInfor.modDate,
+					version		  = worldInfor.revision
+				}
+
+				world3D = KeepworkGen:setCommand("world3D",world3D);
+
+				SyncMain.worldFile = KeepworkGen:SetAutoGenContent("", world3D)
+				SyncMain.worldFile = SyncMain.worldFile .. "\n\r" .. worldInfor.readme;
+				SyncMain.worldFile = SyncMain.worldFile .. "\n\r" .. KeepworkGen:setCommand("comment");
+
+				LOG.std(nil,"debug","worldFile",SyncMain.worldFile);
+				
+				SyncMain:uploadService(
+					worldInfor.worldsName,
+					worldFilePath,
+					SyncMain.worldFile,
+					function(data, err) end,
+					keepworkId
+				);
+			end
+
+		end, keepworkId);
+	end
+
+	if(login.dataSourceType == "github") then
+		gen();
+	elseif(login.dataSourceType == "gitlab") then
+		GitlabService:getProjectIdByName("keepworkDataSource",function(keepworkId)
+			gen(keepworkId);
+		end);
 	end
 end
 
@@ -1008,19 +1181,27 @@ function SyncMain:create(_foldername,_callback)
 	end
 end
 
-function SyncMain:uploadService(_foldername,_filename,_file_content_t,_callback)
+function SyncMain:getDataSourceContent(_foldername, _path, _callback, _projectId)
 	if(login.dataSourceType == "github") then
-		GithubService:upload(_foldername,_filename,_file_content_t,_callback);
+		GithubService:getContent(_foldername, _path, _callback);
 	elseif(login.dataSourceType == "gitlab") then
-		GitlabService:writeFile(_filename,_file_content_t,_callback);
+		GitlabService:getContent(_path, _callback,_projectId);
 	end
 end
 
-function SyncMain:updateService(_foldername, _filename, _file_content_t, _sha, _callback)
+function SyncMain:uploadService(_foldername,_filename,_file_content_t,_callback, _projectId)
+	if(login.dataSourceType == "github") then
+		GithubService:upload(_foldername,_filename,_file_content_t,_callback);
+	elseif(login.dataSourceType == "gitlab") then
+		GitlabService:writeFile(_filename,_file_content_t,_callback, _projectId);
+	end
+end
+
+function SyncMain:updateService(_foldername, _filename, _file_content_t, _sha, _callback, _projectId)
 	if(login.dataSourceType == "github") then
 		GithubService:update(_foldername, _filename, _file_content_t, _sha, _callback);
 	elseif(login.dataSourceType == "gitlab") then
-		GitlabService:update(_filename, _file_content_t, _sha, _callback);
+		GitlabService:update(_filename, _file_content_t, _sha, _callback, _projectId);
 	end
 end
 
@@ -1032,10 +1213,10 @@ function SyncMain:deleteFileService(_foldername, _path, _sha, _callback)
 	end
 end
 
-function SyncMain:getFileShaListService(_foldername, _callback)
+function SyncMain:getFileShaListService(_foldername, _callback, _projectId)
 	if(login.dataSourceType == "github") then
 		GithubService:getFileShaList(_foldername, _callback);
 	elseif(login.dataSourceType == "gitlab") then
-		GitlabService:getTree(_foldername,_callback);
+		GitlabService:getTree(_callback, _projectId);
 	end
 end

@@ -83,8 +83,12 @@ function GitlabService:apiDelete(_url, _params, _callback)
 	},_callback);
 end
 
-function GitlabService:getFileUrlPrefix()
-    return '/projects/' .. GitlabService.projectId .. '/repository/files/';
+function GitlabService:getFileUrlPrefix(_projectId)
+	if(not _projectId) then
+		_projectId = GitlabService.projectId;
+	end
+
+    return '/projects/' .. _projectId .. '/repository/files/';
 end
 
 function GitlabService:getCommitMessagePrefix()
@@ -92,9 +96,13 @@ function GitlabService:getCommitMessagePrefix()
 end
 
 -- 获得文件列表
-function GitlabService:getTree(_foldername,_callback)
-    local url = '/projects/' .. GitlabService.projectId .. '/repository/tree?recursive=true';
-	GitlabService:apiGet(url,function(data,err)
+function GitlabService:getTree(_callback, _projectId)
+	if(not _projectId) then
+		_projectId = GitlabService.projectId;
+	end
+
+    local url = '/projects/' .. _projectId .. '/repository/tree?recursive=true';
+	GitlabService:apiGet(url,function(data, err)
 		for key,value in ipairs(data) do
 			value.sha = value.id;
 		end
@@ -111,23 +119,23 @@ function GitlabService:listCommits(data, cb, errcb)
 end
 
 -- 写文件
-function GitlabService:writeFile(_filename,_file_content_t,_callback) --params, cb, errcb
-    local url = GitlabService:getFileUrlPrefix() .. _filename;
-
+function GitlabService:writeFile(_filename, _file_content_t, _callback, _projectId) --params, cb, errcb
+    local url = GitlabService:getFileUrlPrefix(_projectId) .. _filename;
+	LOG.std(nil,"debug","GitlabService:writeFile",url);
 	local params = {
 		commit_message = GitlabService:getCommitMessagePrefix() .. _filename,
 		branch		   = "master",
 		content 	   = _file_content_t,
 	}
 
-	GitlabService:apiPost(url, params, function()
-		_callback(true,_filename);
+	GitlabService:apiPost(url, params, function(data, err)
+		_callback(true,_filename, data, err);
 	end);
 end
 
 --更新文件
-function GitlabService:update(_filename, _file_content_t, _sha, _callback)
-	local url = GitlabService:getFileUrlPrefix() .. _filename;
+function GitlabService:update(_filename, _file_content_t, _sha, _callback, _projectId)
+	local url = GitlabService:getFileUrlPrefix(_projectId) .. _filename;
 
 	local params = {
 		commit_message = GitlabService:getCommitMessagePrefix() .. _filename,
@@ -141,8 +149,8 @@ function GitlabService:update(_filename, _file_content_t, _sha, _callback)
 end
 
 -- 获取文件
-function GitlabService:getContent(_path, _callback)
-    local url  = GitlabService:getFileUrlPrefix() .. _path .. '?ref=master';
+function GitlabService:getContent(_path, _callback, _projectId)
+    local url  = GitlabService:getFileUrlPrefix(_projectId) .. _path .. '?ref=master';
 	--LOG.std(nil,"debug","apiGet-url",url);
 	GitlabService:apiGet(url, function(data, err)
 		LOG.std(nil,"debug","apiGet-data",data);
@@ -191,6 +199,20 @@ function GitlabService:deleteResp(_foldername, _callback)
 	GitlabService:apiDelete(url, {}, _callback);
 end
 
+--通过仓名获取仓ID
+function GitlabService:getProjectIdByName(_name, _callback)
+	local url   = "/projects";
+	
+	GitlabService:apiGet(url .. "?owned=true",function(projectList,err)
+		--LOG.std(nil,"debug","projectList",projectList);
+		for i=1,#projectList do
+            if (projectList[i].name == _name) then
+				_callback(projectList[i].id);
+			end
+		end
+	end);
+end
+
 -- 初始化
 function GitlabService:init(_foldername, _callback)
 	_foldername = GitEncoding.base64(_foldername);
@@ -205,7 +227,7 @@ function GitlabService:init(_foldername, _callback)
 					WorldShare:SetWorldData("gitLabProjectId", GitlabService.projectId, SyncMain.worldName);
 					WorldShare:SaveWorldData(SyncMain.worldName);
 				else
-					GitlabService.projectId = WorldShare:GetWorldData("gitLabProjectId");
+					WorldShare:SetWorldData("gitLabProjectId", GitlabService.projectId);
 					WorldShare:SaveWorldData();
 				end
 
@@ -227,7 +249,7 @@ function GitlabService:init(_foldername, _callback)
 						WorldShare:SetWorldData("gitLabProjectId", GitlabService.projectId, SyncMain.worldName);
 						WorldShare:SaveWorldData(SyncMain.worldName);
 					else
-						GitlabService.projectId = WorldShare:GetWorldData("gitLabProjectId");
+						WorldShare:SetWorldData("gitLabProjectId", GitlabService.projectId);
 						WorldShare:SaveWorldData();
 					end
 
