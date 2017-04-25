@@ -460,6 +460,8 @@ function login.setSite()
 
 	if(loginServer == "keepwork") then
 	    login.site = "http://keepwork.com";
+	elseif(loginServer == "keepworkDev") then
+	    login.site = "http://dev.keepwork.com";
 	elseif(loginServer == "local") then
 	    login.site = "http://keepwork.local";
 	end
