@@ -30,7 +30,7 @@ local login = commonlib.gettable("Mod.WorldShare.login");
 local Page;
 
 login.login_type   = 1;
-login.site         = "http://keepwork.local";
+login.site         = "http://keepwork.com";
 login.current_type = 1;
 
 function login:ctor()
@@ -422,9 +422,9 @@ function login.setSite()
 	local loginServer = Page:GetValue("loginServer");
 
 	if(loginServer == "keepwork") then
-	    login.site = "http://keepwork.local";
+	    login.site = "http://keepwork.com";
 	elseif(loginServer == "local") then
-	    login.site = "http://localhost:8099";
+	    login.site = "http://keepwork.local";
 	end
 
 	register:SetAttribute("href",login.site .. "/wiki/home");

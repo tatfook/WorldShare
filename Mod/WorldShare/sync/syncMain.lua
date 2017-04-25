@@ -489,7 +489,7 @@ end
 function SyncMain:syncToDataSource()
 	-- 加载进度UI界面
 	local syncToDataSourceGUI = SyncGUI:new();
-	local test = true;
+	local test = false;
 	local function syncToDataSourceGo()
 		SyncMain.localFiles = LocalService:LoadFiles(SyncMain.worldDir,"",nil,1000,nil);
 		
@@ -539,6 +539,11 @@ function SyncMain:syncToDataSource()
 						end
 					end
 
+					local preview = {};
+					preview[0] = {};
+					preview[0].previewUrl = login.rawBaseUrl .. "/" .. login.dataSourceUsername .. "/" .. GitEncoding.base64(SyncMain.foldername) .. "/raw/master/preview.jpg";
+					preview = NPL.ToJson(preview,true);
+
 					local params = {};
 					params.modDate		   = modDateTable[1];
 					params.worldsName      = SyncMain.foldername;
@@ -547,26 +552,29 @@ function SyncMain:syncToDataSource()
 					params.dataSourceType  = login.dataSourceType;
 					params.gitlabProjectId = GitlabService.projectId;
 					params.readme          = readme;
+					params.preview         = preview;
 
-					SyncMain:genWorldMD(params);
+					LOG.std(nil,"debug","params",params)
 
---					HttpRequest:GetUrl({
---						url     = login.site .. "/api/mod/worldshare/models/worlds/refresh",
---						json    = true,
---						form    = params,
---						headers = {
---							Authorization    = "Bearer " .. login.token,
---							["content-type"] = "application/json",
---						},
---					},function(data,err)
---						LOG.std(nil,"debug","finish",data);
---						LOG.std(nil,"debug","finish",err);
---
---						if(err == 204 and SyncMain.worldName) then
---							SyncMain:genWorldMD(params);
---							login.syncWorldsList();
---						end
---					end);
+--					SyncMain:genWorldMD(params);
+
+					HttpRequest:GetUrl({
+						url     = login.site .. "/api/mod/worldshare/models/worlds/refresh",
+						json    = true,
+						form    = params,
+						headers = {
+							Authorization    = "Bearer " .. login.token,
+							["content-type"] = "application/json",
+						},
+					},function(data,err)
+						LOG.std(nil,"debug","finish",data);
+						LOG.std(nil,"debug","finish",err);
+
+						if(err == 204 and SyncMain.worldName) then
+							SyncMain:genWorldMD(params);
+							login.syncWorldsList();
+						end
+					end);
 
 					if(SyncMain.firstCreate) then
 						SyncMain.firstCreate = false;
@@ -845,13 +853,19 @@ function SyncMain:genWorldMD(worldInfor)
 				end
 			end
 
+			LOG.std(nil,"debug","hasIndexO",hasIndex);
 			if(hasIndex) then
+				LOG.std(nil,"debug","hasIndex",hasIndex);
 				SyncMain:getDataSourceContent(worldInfor.worldsName, indexPath, function(data, err)
-					local content = Encoding.unbase64(data);
-					local paramsText = KeepworkGen:GetContent(content);
-					local params = KeepworkGen:getCommand("worldList", paramsText);
+					LOG.std(nil,"debug","getDataSourceContent",data);
+					LOG.std(nil,"debug","getDataSourceContent",err);
+					--local content = Encoding.unbase64(data);
+					--local paramsText = KeepworkGen:GetContent(content);
+					--local params = KeepworkGen:getCommand("worldList", paramsText);
 
-					worldList = KeepworkGen:setCommand("worldList",params);
+					local worldList = SyncMain.remoteWorldsList;
+
+					worldList = KeepworkGen:setCommand("worldList",worldList);
 					SyncMain.indexFile = KeepworkGen:SetAutoGenContent("", worldList)
 
 					SyncMain:updateService(
@@ -859,7 +873,10 @@ function SyncMain:genWorldMD(worldInfor)
 						indexPath,
 						SyncMain.indexFile,
 						"",
-						function(data, err) end,
+						function(data, err)
+							LOG.std(nil,"debug","updateService",data)
+							LOG.std(nil,"debug","updateService",err)
+						end,
 						keepworkId
 					);
 				end, keepworkId)
@@ -887,39 +904,39 @@ function SyncMain:genWorldMD(worldInfor)
 					local paramsText = KeepworkGen:GetContent(content);
 					local params = KeepworkGen:getCommand("world3D", paramsText);
 
-					if(params.version ~= worldInfor.revision) then
-						local world3D = {
-							worldName	  = worldInfor.worldsName,
-							worldUrl	  = worldUrl,
-							logoUrl		  = "",
-							desc		  = "",
-							username	  = username,
-							visitCount    = 1,
-							favoriteCount = 1,
-							updateDate	  = worldInfor.modDate,
-							version		  = worldInfor.revision
-						}
+					--if(params.version ~= worldInfor.revision) then
+					local world3D = {
+						worldName	  = worldInfor.worldsName,
+						worldUrl	  = worldUrl,
+						logoUrl		  = worldInfor.preview,
+						desc		  = "",
+						username	  = username,
+						visitCount    = 1,
+						favoriteCount = 1,
+						updateDate	  = worldInfor.modDate,
+						version		  = worldInfor.revision
+					}
 
-						world3D = KeepworkGen:setCommand("world3D",world3D);
-						SyncMain.worldFile = KeepworkGen:SetAutoGenContent(content, world3D);
+					world3D = KeepworkGen:setCommand("world3D",world3D);
+					SyncMain.worldFile = KeepworkGen:SetAutoGenContent(content, world3D);
 
-						LOG.std(nil,"debug","worldFile",SyncMain.worldFile);
+					LOG.std(nil,"debug","worldFile",SyncMain.worldFile);
 
-						SyncMain:updateService(
-							worldInfor.worldsName,
-							worldFilePath,
-							SyncMain.worldFile,
-							"",
-							function(data, err) end,
-							keepworkId
-						);
-					end
+					SyncMain:updateService(
+						worldInfor.worldsName,
+						worldFilePath,
+						SyncMain.worldFile,
+						"",
+						function(data, err) end,
+						keepworkId
+					);
+					--end
 				end, keepworkId)
 			else
 				local world3D = {
 					worldName	  = worldInfor.worldsName,
 					worldUrl	  = worldUrl,
-					logoUrl		  = "",
+					logoUrl		  = worldInfor.preview,
 					desc		  = "",
 					username	  = username,
 					visitCount    = 1,
