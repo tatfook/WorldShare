@@ -1019,7 +1019,7 @@ function SyncMain:getUserPages(_path, _content, _callback)
 			local thisInfor = {};
 
 			thisInfor.timestamp    = os.time() .. "000";
-			thisInfor.websiteName  = login.username;
+			thisInfor.websiteName  = "paracraft";
 			thisInfor.userId	   = login.userId;
 			thisInfor.dataSourceId = login.dataSourceId;
 			thisInfor.isModify	   = false;
@@ -1040,7 +1040,7 @@ function SyncMain:getUserPages(_path, _content, _callback)
 		params.isExistSite  = 0;
 		params.pageinfo     = pageinfoList;
 		params.username     = login.username;
-		params.websiteName  = login.username;
+		params.websiteName  = "paracraft";
 
 		HttpRequest:GetUrl({
 			url  = login.site.."/api/wiki/models/website_pageinfo/upsert",

@@ -131,6 +131,43 @@ function login.LoginAction()
 						--login.changeLoginType(2);
 						_guihelper.MessageBox(L"数据源不存在，请联系管理员");
 					end
+
+					--判断paracraf站点是否存在
+					HttpRequest:GetUrl({
+						url  = login.site.."/api/wiki/models/website/getDetailInfo",
+						json = true,
+						headers = {Authorization = "Bearer "..login.token},
+						form = {
+							username = login.username,
+							sitename = "paracraft",
+						},
+					},function(data, err) 
+						local site = data["data"];
+						if(not site.siteinfo) then
+							--创建站点
+							local siteParams = {};
+							siteParams.categoryId = 1;
+							siteParams.categoryName = "作品网站";
+							siteParams.desc = "paracraft";
+							siteParams.displayName = login.username;
+							siteParams.domain = "paracraft";
+							siteParams.logoUrl = "";
+							siteParams.name = "paracraft";
+							siteParams.styleId = 1;
+							siteParams.styleName = "WIKI样式";
+							siteParams.templateId = 1;
+							siteParams.templateName = "WIKI模板";
+							siteParams.userId = 1;
+							siteParams.username = login.username;
+
+							HttpRequest:GetUrl({
+								url  = login.site.."/api/wiki/models/website/new",
+								json = true,
+								headers = {Authorization = "Bearer "..login.token},
+								form = siteParams,
+							},function(data, err) end);
+						end
+					end);
 				else
 					_guihelper.MessageBox(L"用户名或者密码错误");
 				end
