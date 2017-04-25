@@ -142,6 +142,7 @@ function login.LoginAction()
 							sitename = "paracraft",
 						},
 					},function(data, err) 
+						LOG.std(nil,"debug","sitedata",data);
 						local site = data["data"];
 						if(not site.siteinfo) then
 							--创建站点
@@ -157,15 +158,17 @@ function login.LoginAction()
 							siteParams.styleName = "WIKI样式";
 							siteParams.templateId = 1;
 							siteParams.templateName = "WIKI模板";
-							siteParams.userId = 1;
+							siteParams.userId = login.userId;
 							siteParams.username = login.username;
 
 							HttpRequest:GetUrl({
 								url  = login.site.."/api/wiki/models/website/new",
 								json = true,
-								headers = {Authorization = "Bearer "..login.token},
+								headers = {Authorization = "Bearer " .. login.token},
 								form = siteParams,
-							},function(data, err) end);
+							},function(data, err) 
+								LOG.std(nil,"debug","new site",data);
+							end);
 						end
 					end);
 				else
@@ -444,6 +447,8 @@ function login.getRememberPassword()
 
 		if(PWD[3] == "keepwork") then
 			Page:GetNode("keepwork"):SetAttribute("selected","selected");
+		elseif(PWD[3] == "keepworkDev") then
+			Page:GetNode("keepworkDev"):SetAttribute("selected","selected");
 		elseif(PWD[3] == "local") then
 			Page:GetNode("local"):SetAttribute("selected","selected");
 		end

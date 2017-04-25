@@ -68,7 +68,8 @@ end
 function GitlabService:apiDelete(_url, _params, _callback)
 	local github_token = login.dataSourceToken;
 	
-	LOG.std(nil,"debug","GithubService:githubApiDelete",github_token);
+	LOG.std(nil,"debug","GitlabService:apiDelete",github_token);
+	LOG.std(nil,"debug","login.apiBaseUrl .. _url",login.apiBaseUrl .. _url);
 
 	HttpRequest:GetUrl({
 		method     = "DELETE",
@@ -80,7 +81,11 @@ function GitlabService:apiDelete(_url, _params, _callback)
 			["content-type"]  = "application/json"
 		},
 		form = _params,
-	},_callback);
+	},function(data ,err) 
+		LOG.std(nil,"debug","GitlabService:data",data);
+		LOG.std(nil,"debug","GitlabService:err",err);
+		_callback(data, err)
+	end);
 end
 
 function GitlabService:getFileUrlPrefix(_projectId)
