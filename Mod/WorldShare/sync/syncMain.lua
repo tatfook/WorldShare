@@ -97,7 +97,9 @@ end
 
 function SyncMain:compareRevision(_worldDir)
 	if(login.token) then
-		SyncMain.getWorldInfo = WorldCommon:GetWorldInfo();
+		if(WorldCommon:GetWorldInfo())then
+			SyncMain.getWorldInfo = WorldCommon:GetWorldInfo();
+		end
 		--LOG.std(nil,"debug","worldinfo",self.getWorldInfo);
 
 		if(_worldDir) then
@@ -919,9 +921,9 @@ function SyncMain:genWorldMD(worldInfor)
 
 			if(hasWorldFile) then
 				SyncMain:getDataSourceContent(worldInfor.worldsName, worldFilePath, function(data, err)
-					local content = Encoding.unbase64(data);
+					local content    = Encoding.unbase64(data);
 					local paramsText = KeepworkGen:GetContent(content);
-					local params = KeepworkGen:getCommand("world3D", paramsText);
+					local params     = KeepworkGen:getCommand("world3D", paramsText);
 
 					--if(params.version ~= worldInfor.revision) then
 					local world3D = {

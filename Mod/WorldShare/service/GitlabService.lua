@@ -28,8 +28,11 @@ local GitlabService = commonlib.gettable("Mod.WorldShare.service.GitlabService")
 GitlabService.inited = false;
 
 function GitlabService:apiGet(_url, _callback)
+	_url = login.apiBaseUrl .. "/" .._url
+
+	LOG.std(nil,"debug","apiGet-url_encode",_url);
 	HttpRequest:GetUrl({
-		url     = login.apiBaseUrl .. "/" .._url,
+		url     = _url,
 		json    = true,
 		headers = {
 			["PRIVATE-TOKEN"] = login.dataSourceToken,
@@ -39,8 +42,10 @@ function GitlabService:apiGet(_url, _callback)
 end
 
 function GitlabService:apiPost(_url, _params, _callback)
+	_url = login.apiBaseUrl .. "/" .._url
+
 	HttpRequest:GetUrl({
-		url       = login.apiBaseUrl .. _url,
+		url       = _url,
 		json      = true,
 		headers   = {
 			["PRIVATE-TOKEN"] = login.dataSourceToken,
@@ -52,9 +57,11 @@ function GitlabService:apiPost(_url, _params, _callback)
 end
 
 function GitlabService:apiPut(_url, _params, _callback)
+	_url = login.apiBaseUrl .. "/" .._url
+
 	HttpRequest:GetUrl({
 		method     = "PUT",
-		url        = login.apiBaseUrl .. _url,
+		url        = _url,
 		json       = true,
 	  	headers    = {
 		  	["PRIVATE-TOKEN"] = login.dataSourceToken,
@@ -66,6 +73,8 @@ function GitlabService:apiPut(_url, _params, _callback)
 end
 
 function GitlabService:apiDelete(_url, _params, _callback)
+	_url = login.apiBaseUrl .. "/" .._url
+
 	local github_token = login.dataSourceToken;
 	
 	LOG.std(nil,"debug","GitlabService:apiDelete",github_token);
@@ -73,7 +82,7 @@ function GitlabService:apiDelete(_url, _params, _callback)
 
 	HttpRequest:GetUrl({
 		method     = "DELETE",
-		url        = login.apiBaseUrl .. _url,
+		url        = _url,
 		json       = true,
 	  	headers    = {
 	  		["PRIVATE-TOKEN"] = login.dataSourceToken,
@@ -107,6 +116,7 @@ function GitlabService:getTree(_callback, _projectId)
 	end
 
     local url = '/projects/' .. _projectId .. '/repository/tree?recursive=true';
+
 	GitlabService:apiGet(url,function(data, err)
 		for key,value in ipairs(data) do
 			value.sha = value.id;
@@ -127,6 +137,7 @@ end
 function GitlabService:writeFile(_filename, _file_content_t, _callback, _projectId) --params, cb, errcb
     local url = GitlabService:getFileUrlPrefix(_projectId) .. _filename;
 	LOG.std(nil,"debug","GitlabService:writeFile",url);
+
 	local params = {
 		commit_message = GitlabService:getCommitMessagePrefix() .. _filename,
 		branch		   = "master",
@@ -169,7 +180,8 @@ end
 
 -- 获取文件
 function GitlabService:getContent(_path, _callback, _projectId)
-    local url  = GitlabService:getFileUrlPrefix(_projectId) .. _path .. '?ref=master';
+    local url = GitlabService:getFileUrlPrefix(_projectId) .. _path .. '?ref=master';
+
 	--LOG.std(nil,"debug","apiGet-url",url);
 	GitlabService:apiGet(url, function(data, err)
 		LOG.std(nil,"debug","apiGet-data",data);
@@ -201,6 +213,8 @@ end
 
 -- 删除文件
 function GitlabService:deleteFile(_path, _sha, _callback)
+	_path = GitEncoding.base64(_path);
+
     local url = GitlabService:getFileUrlPrefix() .. _path;
 
 	LOG.std(nil,"debug","deleteFile",data);

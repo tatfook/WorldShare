@@ -142,7 +142,7 @@ function login.LoginAction()
 							sitename = "paracraft",
 						},
 					},function(data, err) 
-						LOG.std(nil,"debug","sitedata",data);
+						--LOG.std(nil,"debug","sitedata",data);
 						local site = data["data"];
 						if(not site.siteinfo) then
 							--创建站点
@@ -570,7 +570,7 @@ function login.syncWorldsList()
 	        end
 	    end
 
-		LOG.std(nil,"debug","localWorlds",localWorlds);
+		--LOG.std(nil,"debug","localWorlds",localWorlds);
 
 	    Page:Refresh();
 	end);
