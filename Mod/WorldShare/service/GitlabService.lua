@@ -30,7 +30,7 @@ GitlabService.inited = false;
 function GitlabService:apiGet(_url, _callback)
 	_url = login.apiBaseUrl .. "/" .._url
 
-	LOG.std(nil,"debug","apiGet-url_encode",_url);
+	LOG.std(nil,"debug","apiGet-url",_url);
 	HttpRequest:GetUrl({
 		url     = _url,
 		json    = true,

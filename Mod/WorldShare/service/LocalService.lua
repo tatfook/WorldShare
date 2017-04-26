@@ -91,20 +91,39 @@ function LocalService:LoadFiles(_worldDir,_curPath,_filter,_nMaxFileLevels,_nMax
 end
 
 function LocalService:update(_foldername, _path, _callback)
-	LocalService:getDataSourceContent(_foldername, _path, function(data, err)
+	LocalService:getDataSourceContent(_foldername, _path, function(content, err)
 		local bashPath = "worlds/DesignHouse/" .. _foldername .. "/";
 		local file = ParaIO.open(bashPath .. _path, "w");
 		
-		local file_infor = data;
+		LOG.std(nil,"debug","LocalService:update",content);
+		if(err == 200) then
+			if(not content) then
+				LocalService:getDataSourceContentWithRaw(_foldername, _path, function(data, err)
+					if(err == 200) then
+						content = data;
 
-		local content = EncodingS.unbase64(file_infor.content);
+						file:write(content,#content);
+						file:close();
 
-		file:write(content,#content);
-		file:close();
+						local returnData = {filename = _path, content = content};
+						_callback(true,returnData);
+					else
+						_callback(false,nil);
+					end
+				end);
 
-		local returnData = {filename = _path,content = content};
+				return;
+			end
 
-		_callback(true,returnData);
+			content = EncodingS.unbase64(content);
+			file:write(content,#content);
+			file:close();
+
+			local returnData = {filename = _path,content = content};
+			_callback(true,returnData);
+		else
+			_callback(false,nil);
+		end
 	end)	
 end
 
@@ -114,47 +133,52 @@ function LocalService:download(_foldername, _path, _callback)
 	-- LOG.std(nil,"debug","_callback",_callback);
 
 	LocalService:getDataSourceContent(_foldername, _path, function(content, err)
-		local path = {};
-		local foldernameForLocal = EncodingC.Utf8ToDefault(_foldername);
-		local bashPath = "worlds/DesignHouse/" .. foldernameForLocal .. "/";
-		local folderCreate = "";
+		if(err == 200) then
+			local path = {};
+			local returnData = {};
+			local foldernameForLocal = EncodingC.Utf8ToDefault(_foldername);
+			local bashPath = "worlds/DesignHouse/" .. foldernameForLocal .. "/";
+			local folderCreate = "";
 
-		for segmentation in string.gmatch(_path,"[^/]+") do
-			path[#path+1] = segmentation;
+			for segmentation in string.gmatch(_path,"[^/]+") do
+				path[#path+1] = segmentation;
+			end
+
+			folderCreate = commonlib.copy(bashPath);
+
+			for i = 1, #path - 1, 1 do
+				folderCreate = folderCreate .. path[i] .. "/";
+				ParaIO.CreateDirectory(folderCreate);
+				--LOG.std(nil,"debug","folderCreate",folderCreate);
+			end
+
+			local file = ParaIO.open(bashPath .. _path, "w");
+
+			if(not content) then
+				LocalService:getDataSourceContentWithRaw(_foldername, _path, function(content, err)
+					if(err == 200) then
+						file:write(content,#content);
+						file:close();
+
+						returnData = {filename = _path, content = content};
+						_callback(true,returnData);
+					else
+						_callback(false,nil);
+					end
+				end);
+
+				return;
+			end
+
+			content = EncodingS.unbase64(content);
+			file:write(content,#content);
+			file:close();
+
+			returnData = {filename = _path, content = content};
+			_callback(true,returnData);
+		else
+			_callback(false,nil);
 		end
-
-		folderCreate = commonlib.copy(bashPath);
-
-		for i = 1, #path - 1, 1 do
-			folderCreate = folderCreate .. path[i] .. "/";
-			ParaIO.CreateDirectory(folderCreate);
-			--LOG.std(nil,"debug","folderCreate",folderCreate);
-		end
-
-		local file = ParaIO.open(bashPath .. _path, "w");
-
-		if(not content) then
-			LocalService:getDataSourceContentWithRaw(_foldername, _path, function(data, err)
-				content = data;
-
-				file:write(content,#content);
-				file:close();
-
-				local returnData = {filename = _path, content = content};
-				_callback(true,returnData);
-			end);
-
-			return;
-		end
-
-		local content = EncodingS.unbase64(content);
-		file:write(content,#content);
-		file:close();
-
-		local returnData = {filename = _path, content = content};
-
-		-- LOG.std(nil,"debug","EncodingS.unbase64",content);
-		_callback(true,returnData);
 	end);
 end
 
@@ -163,7 +187,7 @@ function LocalService:delete(_foldername,_filename,_callback)
 	-- LOG.std(nil,"debug","ParaIO.DeleteFile",bashPath .. _filename);
 
 	ParaIO.DeleteFile(bashPath .. _filename);
-	_callback(true);
+	_callback();
 end
 
 function LocalService:getDataSourceContent(_foldername, _path, _callback)

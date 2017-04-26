@@ -98,9 +98,9 @@ end
 function SyncMain:compareRevision(_worldDir)
 	if(login.token) then
 		if(WorldCommon:GetWorldInfo())then
-			SyncMain.getWorldInfo = WorldCommon:GetWorldInfo();
+			SyncMain.selectedWorldInfor = WorldCommon:GetWorldInfo();
 		end
-		--LOG.std(nil,"debug","worldinfo",self.getWorldInfo);
+		LOG.std(nil,"debug","worldinfo",SyncMain.selectedWorldInfor);
 
 		if(_worldDir) then
 			SyncMain.worldDir = _worldDir;
@@ -284,6 +284,14 @@ function SyncMain:syncToLocal(_worldDir, _foldername, _callback)
 		SyncMain.foldername = _foldername;
 	end
 
+	if(not GitlabService.projectId) then
+		if(SyncMain.worldName) then
+			GitlabService.projectId = WorldShare:GetWorldData("gitLabProjectId", SyncMain.worldName);
+		else
+			GitlabService.projectId = WorldShare:GetWorldData("gitLabProjectId");
+		end
+	end
+
 	SyncMain.localFiles = LocalService:LoadFiles(SyncMain.worldDir,"",nil,1000,nil);
 
 	if (SyncMain.worldDir == "") then
@@ -334,7 +342,7 @@ function SyncMain:syncToLocal(_worldDir, _foldername, _callback)
 									finish();
 								end
 
-								syncToLocalGUI:updateDataBar(syncGUIIndex, syncGUItotal, syncGUIFiles);
+								syncToLocalGUI:updateDataBar(syncGUIIndex, syncGUItotal, response.filename);
 							else
 								_guihelper.MessageBox(L'下载失败，请稍后再试');
 								syncToLocalGUI.finish();
@@ -397,7 +405,7 @@ function SyncMain:syncToLocal(_worldDir, _foldername, _callback)
 									SyncMain.remoteRevison = response.content;
 								end
 
-								syncToLocalGUI:updateDataBar(syncGUIIndex, syncGUItotal, syncGUIFiles);
+								syncToLocalGUI:updateDataBar(syncGUIIndex, syncGUItotal, response.filename);
 
 								-- 如果当前计数大于最大计数则更新
 								if (curUpdateIndex > totalLocalIndex) then      -- check whether all files have updated or not. if false, update the next one, if true, upload files.  
@@ -442,17 +450,13 @@ function SyncMain:syncToLocal(_worldDir, _foldername, _callback)
 
 		-- 删除文件
 		local function deleteOne()
-			LocalService:delete(SyncMain.foldername, SyncMain.localFiles[curUpdateIndex].filename, function (bIsDelete)
-				if (bIsDelete) then
-					curUpdateIndex = curUpdateIndex + 1;
+			LocalService:delete(SyncMain.foldername, SyncMain.localFiles[curUpdateIndex].filename, function ()
+				curUpdateIndex = curUpdateIndex + 1;
 
-					if (curUpdateIndex > totalLocalIndex) then
-						downloadOne();
-					else
-						updateOne();
-					end
+				if (curUpdateIndex > totalLocalIndex) then
+					downloadOne();
 				else
-					_guihelper.MessageBox('删除 ' .. SyncMain.localFiles[curUpdateIndex].filename .. ' 失败, 请稍后再试');
+					updateOne();
 				end
 			end);
 		end
@@ -495,6 +499,7 @@ function SyncMain:syncToLocal(_worldDir, _foldername, _callback)
 				end
 			else
 				_guihelper.MessageBox(L"获取G数据源文件失败，请稍后再试！");
+				syncToLocalGUI.finish();
 			end
 		end);
 	end
@@ -533,10 +538,15 @@ function SyncMain:syncToDataSource()
 					local modDateTable = {};
 					local readme;
 
-					for modDateEle in string.gmatch(SyncMain.selectedWorldInfor.tooltip,"[^:]+") do
-						modDateTable[#modDateTable+1] = modDateEle;
+					if(SyncMain.selectedWorldInfor.tooltip)then
+						for modDateEle in string.gmatch(SyncMain.selectedWorldInfor.tooltip,"[^:]+") do
+							modDateTable[#modDateTable+1] = modDateEle;
+							modDateTable = modDateTable[1];
+						end
+					else
+						modDateTable = os.date("%Y-%m-%d-%H-%M-%S");
 					end
-
+					
 					local hasPreview = false;
 
 					for key,value in ipairs(SyncMain.localFiles) do
@@ -559,7 +569,7 @@ function SyncMain:syncToDataSource()
 					preview = NPL.ToJson(preview,true);
 
 					local params = {};
-					params.modDate		   = modDateTable[1];
+					params.modDate		   = modDateTable;
 					params.worldsName      = SyncMain.foldername;
 					params.revision        = SyncMain.currentRevison;
 					params.hasPreview      = hasPreview;
@@ -584,7 +594,9 @@ function SyncMain:syncToDataSource()
 						LOG.std(nil,"debug","finish",data);
 						LOG.std(nil,"debug","finish",err);
 
-						if(err == 204 and SyncMain.worldName) then
+						LOG.std(nil,"debug","SyncMain.worldName",SyncMain.worldName);
+						if(err == 204) then
+							LOG.std(nil,"debug","SyncMain.worldName",SyncMain.worldName);
 							SyncMain:genWorldMD(params);
 							login.syncWorldsList();
 						end
@@ -920,6 +932,7 @@ function SyncMain:genWorldMD(worldInfor)
 			end
 
 			if(hasWorldFile) then
+				LOG.std(nil,"debug","hasWorldFile",hasWorldFile);
 				SyncMain:getDataSourceContent(worldInfor.worldsName, worldFilePath, function(data, err)
 					local content    = Encoding.unbase64(data);
 					local paramsText = KeepworkGen:GetContent(content);
@@ -948,12 +961,16 @@ function SyncMain:genWorldMD(worldInfor)
 						worldFilePath,
 						SyncMain.worldFile,
 						"",
-						function(data, err) end,
+						function(data, err)
+							LOG.std(nil,"debug","updateService-worldFile",data)
+							LOG.std(nil,"debug","updateService-worldFile",err)
+						end,
 						keepworkId
 					);
 					--end
 				end, keepworkId)
 			else
+				LOG.std(nil,"debug","hasWorldFile",hasWorldFile);
 				local world3D = {
 					worldName	  = worldInfor.worldsName,
 					worldUrl	  = worldUrl,
@@ -983,8 +1000,8 @@ function SyncMain:genWorldMD(worldInfor)
 				);
 			end
 
-			SyncMain:getUserPages(indexPath, SyncMain.indexFile, function(data, err) 
-				SyncMain:getUserPages(worldFilePath, SyncMain.worldFile, function(data, err) end)
+			SyncMain:refreshWikiPages(indexPath, SyncMain.indexFile, function(data, err) 
+				SyncMain:refreshWikiPages(worldFilePath, SyncMain.worldFile, function(data, err) end)
 			end)
 		end, keepworkId);
 	end
@@ -998,7 +1015,7 @@ function SyncMain:genWorldMD(worldInfor)
 	end
 end
 
-function SyncMain:getUserPages(_path, _content, _callback)
+function SyncMain:refreshWikiPages(_path, _content, _callback)
 	HttpRequest:GetUrl({
 		url  = login.site.."/api/wiki/models/website_pageinfo/getByUsername",
 		json = true,
@@ -1011,30 +1028,36 @@ function SyncMain:getUserPages(_path, _content, _callback)
 		local params = {};
 		NPL.FromJson(pageinfoList, params);
 
-		pageinfoList = params;
+		pageinfoList    = params;
+		newPageinfoList = {};
 
-		local hasFile   = false;
-		local fileIndex = 0;
+		local hasFile = false;
+		local hasFileContent = {};
 
 		for key,value in ipairs(pageinfoList) do
 			if(value.url == "/" .. _path) then
-				hasFile   = true;	
-				fileIndex = key;
-				break;			
+				hasFile     = true;	
+				hasFileInfo = value;
+				value       = false;
+				break;	
+			else
+				newPageinfoList[#newPageinfoList + 1] = value;
 			end
 		end
 
 		LOG.std(nil,"debug","_path",_path);
+		LOG.std(nil,"debug","_content",_content);
 		LOG.std(nil,"debug","hasFile",hasFile);
-		LOG.std(nil,"debug","fileIndex",fileIndex);
+		LOG.std(nil,"debug","hasFileContent",hasFileContent);
 		LOG.std(nil,"debug","pageinfoList",pageinfoList);
 
 		if(hasFile) then
-			pageinfoList[fileIndex].timestamp = os.time() .. "000";
-			pageinfoList[fileIndex].content   = _content;
-			pageinfoList[fileIndex].isModify  = true;
-		else
+			hasFileInfo.timestamp = os.time() .. "000";
+			hasFileInfo.content   = _content;
+			hasFileInfo.isModify  = true;
 
+			newPageinfoList[#newPageinfoList + 1] = hasFileInfo;
+		else
 			LOG.std(nil,"debug","os", os.time() .. "000");
 
 			local thisInfor = {};
@@ -1049,17 +1072,17 @@ function SyncMain:getUserPages(_path, _content, _callback)
 			thisInfor.url		   = "/" .. _path;
 			thisInfor.content      = _content;
 
-			pageinfoList[#pageinfoList + 1] = thisInfor;
+			newPageinfoList[#newPageinfoList + 1] = thisInfor;
 		end
 
-		--LOG.std(nil,"debug","pageinfoList",pageinfoList);
+		LOG.std(nil,"debug","pageinfoList",newPageinfoList);
 
-		pageinfoList = NPL.ToJson(pageinfoList,true);
+		newPageinfoList = NPL.ToJson(newPageinfoList,true);
 
 		local params = {};
 		params.dataSourceId = 1;
 		params.isExistSite  = 0;
-		params.pageinfo     = pageinfoList;
+		params.pageinfo     = newPageinfoList;
 		params.username     = login.username;
 		params.websiteName  = "paracraft";
 
