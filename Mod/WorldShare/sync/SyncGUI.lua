@@ -9,6 +9,9 @@ NPL.load("(gl)Mod/WorldShare/SyncGUI.lua");
 local SyncGUI = commonlib.gettable("Mod.WorldShare.sync.SyncGUI");
 ------------------------------------------------------------
 ]]
+NPL.load("(gl)Mod/WorldShare/SyncMain.lua");
+
+local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
 
 local SyncGUI = commonlib.inherit(nil,commonlib.gettable("Mod.WorldShare.sync.SyncGUI"));
 
@@ -22,6 +25,15 @@ function SyncGUI:ctor()
 	SyncGUI.current = 0;
 	SyncGUI.total   = 0;
 	SyncGUI.files   = "同步中，请稍后...";
+
+	SyncMain.curUpdateIndex        = 1;
+	SyncMain.curUploadIndex        = 1;
+	SyncMain.totalLocalIndex       = nil;
+	SyncMain.totalDataSourceIndex  = nil;
+	SyncMain.dataSourceFiles       = {};
+
+	SyncMain.curDownloadIndex      = 1;
+	SyncMain.dataSourceIndex       = 0;
 
 	System.App.Commands.Call("File.MCMLWindowFrame", {
 		url  = "Mod/WorldShare/sync/SyncGUI.html", 
@@ -49,6 +61,17 @@ end
 
 function SyncGUI.finish()
 	Page:CloseWindow();
+end
+
+function SyncGUI:retry()
+	if(not SyncMain.finish) then
+		_guihelper.MessageBox(L"同步尚未结束");
+		return;
+	end
+
+	SyncGUI.finish();
+	SyncMain:compareRevision();
+	SyncMain:StartSyncPage();
 end
 
 function SyncGUI:updateDataBar(_current, _total, _files)

@@ -27,6 +27,12 @@
                     <pe:if condition="<%=SyncGUI.total ~= 0 and SyncGUI.current == SyncGUI.total %>">
                         <input type="button" name="" onclick="SyncGUI.finish()" value="完成" class="button_highlight" style="width: 85px;height: 30px;margin-top:40px;margin-left: 180px" />
                     </pe:if>
+                    <pe:if condition="<%=SyncGUI.total == 0 or SyncGUI.current ~= SyncGUI.total %>">
+                        <div style="margin-top:40px;">
+                            <input type="button" name="" onclick="SyncGUI.finish()" value="取消" class="button_highlight" style="width: 85px;height: 30px;margin-left: 135px" />
+                            <input type="button" name="" onclick="SyncGUI.retry()"  value="重试" class="button_highlight" style="width: 85px;height: 30px;margin-left: 15px" />
+                        </div>
+                    </pe:if>
                 </div>
             </aries:window>
         </div>
