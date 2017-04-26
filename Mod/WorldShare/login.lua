@@ -584,7 +584,10 @@ function login.enterWorld(_index)
 
 	if(SyncMain.selectedWorldInfor.status == 2) then
 		local foldername = SyncMain.selectedWorldInfor.foldername;
+		local foldernameForLocal = Encoding.Utf8ToDefault(foldername);
+
 		local worldDir = "worlds/DesignHouse/" .. foldername .. "/";
+		local worldDirForLocal = "worlds/DesignHouse/" .. foldernameForLocal .. "/";
 
 		for key,value in ipairs(SyncMain.remoteWorldsList) do
 			if(value.worldsName == foldername) then
@@ -592,8 +595,8 @@ function login.enterWorld(_index)
 			end
 		end
 
-		ParaIO.CreateDirectory(worldDir);
-		SyncMain:syncToLocal(worldDir,SyncMain.selectedWorldInfor.foldername,function(_success,_revision)
+		ParaIO.CreateDirectory(worldDirForLocal);
+		SyncMain:syncToLocal(worldDir, SyncMain.selectedWorldInfor.foldername,function(_success,_revision)
 		    if(_success) then
 		        SyncMain.selectedWorldInfor.status      = 3;
 		        SyncMain.selectedWorldInfor.server      = "local";
@@ -606,7 +609,7 @@ function login.enterWorld(_index)
 		        SyncMain.selectedWorldInfor.force_nid   = 0;
 		        SyncMain.selectedWorldInfor.ws_id       = "";
 		        SyncMain.selectedWorldInfor.author      = "";
-		        SyncMain.selectedWorldInfor.remotefile  = "local://worlds/DesignHouse/" .. foldername;
+		        SyncMain.selectedWorldInfor.remotefile  = "local://worlds/DesignHouse/" .. foldernameForLocal;
 
 		        Page:Refresh();
 		    end
@@ -623,10 +626,12 @@ function login.syncNow(_index)
 	if(login.login_type == 3) then
 		if(SyncMain.selectedWorldInfor.status ~= nil and SyncMain.selectedWorldInfor.status ~= 2)then
 			local foldername = SyncMain.selectedWorldInfor.foldername;
+			foldername = Encoding.Utf8ToDefault(foldername);
+
 			local worldDir = "worlds/DesignHouse/" .. foldername .. "/";
 
 			SyncMain.worldName = worldDir;
-
+			LOG.std(nil,"debug","login.SyncMain.worldName",SyncMain.worldName);
 			SyncMain:compareRevision(worldDir);
 			SyncMain:StartSyncPage();
 		else

@@ -108,26 +108,27 @@ function LocalService:update(_foldername, _path, _callback)
 	end)	
 end
 
-function LocalService:download(_foldername,_path,_callback)
+function LocalService:download(_foldername, _path, _callback)
 	-- LOG.std(nil,"debug","_foldername",_foldername);
 	-- LOG.std(nil,"debug","_path",_path);
 	-- LOG.std(nil,"debug","_callback",_callback);
 
 	LocalService:getDataSourceContent(_foldername, _path, function(content, err)
 		local path = {};
-		local bashPath = "worlds/DesignHouse/" .. _foldername .. "/";
+		local foldernameForLocal = EncodingC.Utf8ToDefault(_foldername);
+		local bashPath = "worlds/DesignHouse/" .. foldernameForLocal .. "/";
 		local folderCreate = "";
-
-		folderCreate = commonlib.copy(bashPath);
 
 		for segmentation in string.gmatch(_path,"[^/]+") do
 			path[#path+1] = segmentation;
 		end
 
+		folderCreate = commonlib.copy(bashPath);
+
 		for i = 1, #path - 1, 1 do
 			folderCreate = folderCreate .. path[i] .. "/";
-			--LOG.std(nil,"debug","folderCreate",folderCreate);
 			ParaIO.CreateDirectory(folderCreate);
+			--LOG.std(nil,"debug","folderCreate",folderCreate);
 		end
 
 		local file = ParaIO.open(bashPath .. _path, "w");

@@ -52,6 +52,7 @@ end
 
 function SyncMain:init()
 	LOG.std(nil, "debug", "SyncMain", "init");
+	
 	SyncMain.worldName = nil;
 
 	-- 没有登陆则直接使用离线模式
@@ -96,7 +97,7 @@ end
 
 function SyncMain:compareRevision(_worldDir)
 	if(login.token) then
-		--SyncMain.getWorldInfo = WorldCommon:GetWorldInfo();
+		SyncMain.getWorldInfo = WorldCommon:GetWorldInfo();
 		--LOG.std(nil,"debug","worldinfo",self.getWorldInfo);
 
 		if(_worldDir) then
@@ -143,6 +144,12 @@ function SyncMain:compareRevision(_worldDir)
 				--LOG.std(nil,"debug","data",data);
 				LOG.std(nil,"debug","err",err);
 
+				if(err == 0) then
+					Page:CloseWindow();
+					_guihelper.MessageBox(L"网络错误");
+					return
+				end
+
 				if(err == 404 or err == 401) then
 					Page:CloseWindow();
 					SyncMain.firstCreate = true;
@@ -168,7 +175,7 @@ function SyncMain:compareRevision(_worldDir)
 				if(tonumber(SyncMain.currentRevison) ~= tonumber(SyncMain.remoteRevison)) then
 					Page:Refresh();
 				else
-					--_guihelper.MessageBox(L"数据已同步");
+					_guihelper.MessageBox(L"数据源已存在此作品，且版本相等");
 					Page:CloseWindow();
 				end
 			end);
@@ -278,7 +285,7 @@ function SyncMain:syncToLocal(_worldDir, _foldername, _callback)
 	SyncMain.localFiles = LocalService:LoadFiles(SyncMain.worldDir,"",nil,1000,nil);
 
 	if (SyncMain.worldDir == "") then
-		_guihelper.MessageBox(L"上传失败，将使用离线模式，原因：上传目录为空");
+		_guihelper.MessageBox(L"下载失败，原因：下载目录为空");
 		return;
 	else
 		local curUpdateIndex        = 1;
@@ -327,7 +334,9 @@ function SyncMain:syncToLocal(_worldDir, _foldername, _callback)
 
 								syncToLocalGUI:updateDataBar(syncGUIIndex, syncGUItotal, syncGUIFiles);
 							else
-								_guihelper.MessageBox(SyncMain.localFiles[curDownloadIndex].filename .. ' 下载失败，请稍后再试');
+								_guihelper.MessageBox(L'下载失败，请稍后再试');
+								syncToLocalGUI.finish();
+								
 							end
 						end);
 					end
@@ -396,7 +405,8 @@ function SyncMain:syncToLocal(_worldDir, _foldername, _callback)
 									updateOne();
 								end
 							else
-								_guihelper.MessageBox(dataSourceFiles[dataSourceIndex].path .. ' 更新失败,请稍后再试');
+								_guihelper.MessageBox(L'更新失败,请稍后再试');
+								syncToLocalGUI.finish();
 							end
 						end);
 					else
@@ -449,7 +459,9 @@ function SyncMain:syncToLocal(_worldDir, _foldername, _callback)
 		SyncMain:getFileShaListService(SyncMain.foldername, function(data, err)
 			if(err ~= 404) then
 				if(err == 409) then
-					syncToLocalGUI:updateDataBar(-1, -1, L"数据源上暂无数据");
+					_guihelper.MessageBox(L"数据源上暂无数据");
+					syncToLocalGUI.finish();
+					return;
 				end
 
 				LOG.std(nil,"debug","syncToLocal",data);
@@ -607,7 +619,9 @@ function SyncMain:syncToDataSource()
 									finish();
 								end
 							else
-								_guihelper.MessageBox(SyncMain.localFiles[curUploadIndex].filename .. ' 上传失败，请稍后再试');
+								_guihelper.MessageBox(L"更新失败");
+								syncToDataSourceGUI.finish();
+								--_guihelper.MessageBox(SyncMain.localFiles[curUploadIndex].filename .. ' 上传失败，请稍后再试');
 							end
 						end);
 					else
@@ -668,6 +682,8 @@ function SyncMain:syncToDataSource()
 										updateOne();
 									end
 								else
+									_guihelper.MessageBox(L"更新失败");
+									syncToDataSourceGUI.finish();
 									-- _guihelper.MessageBox(dataSourceFiles.tree[curUpdateIndex].path .. ' 更新失败,请稍后再试');
 								end
 							end);
@@ -711,7 +727,9 @@ function SyncMain:syncToDataSource()
 								updateOne();
 							end
 						else
-							_guihelper.MessageBox('删除 ' .. SyncMain.localFiles[curUpdateIndex].filename .. ' 失败, 请稍后再试');
+							_guihelper.MessageBox(L"更新失败");
+							syncToDataSourceGUI.finish();
+							--_guihelper.MessageBox('删除 ' .. SyncMain.localFiles[curUpdateIndex].filename .. ' 失败, 请稍后再试');
 						end
 					end);
 				else
@@ -795,11 +813,12 @@ function SyncMain:syncToDataSource()
 			--LOG.std(nil,"debug","SyncMain:create",data);
 			--LOG.std(nil,"debug","SyncMain:create",err);
 
-			if(err == 422 or err == 201) then
+			if(data == true or err == 422 or err == 201) then
 				syncToDataSourceGo();
 			else
 				--if(data.name ~= self.foldername) then
 				_guihelper.MessageBox(L"数据源创建失败");
+				syncToDataSourceGUI.finish();
 				return;
 				--end
 			end
@@ -984,7 +1003,7 @@ function SyncMain:getUserPages(_path, _content, _callback)
 		headers = {Authorization = "Bearer "..login.token},
 		form = {username = login.username},
 	},function(data, err)
-		LOG.std(nil,"debug","getUserPages",data);
+		--LOG.std(nil,"debug","getUserPages",data);
 		local pageinfoList = data.data.pageinfoList[1];
 
 		local params = {};
@@ -1031,7 +1050,7 @@ function SyncMain:getUserPages(_path, _content, _callback)
 			pageinfoList[#pageinfoList + 1] = thisInfor;
 		end
 
-		LOG.std(nil,"debug","pageinfoList",pageinfoList);
+		--LOG.std(nil,"debug","pageinfoList",pageinfoList);
 
 		pageinfoList = NPL.ToJson(pageinfoList,true);
 
@@ -1159,6 +1178,7 @@ end
 
 function SyncMain.deleteWorldGithub(_password)
 	local foldername = SyncMain.selectedWorldInfor.foldername;
+	foldername = Encoding.Utf8ToDefault(foldername);
 
 	local AuthUrl    = "https://api.github.com/authorizations";
 	local AuthParams = {

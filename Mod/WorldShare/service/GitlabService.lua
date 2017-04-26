@@ -134,7 +134,14 @@ function GitlabService:writeFile(_filename, _file_content_t, _callback, _project
 	}
 
 	GitlabService:apiPost(url, params, function(data, err)
-		_callback(true,_filename, data, err);
+		LOG.std(nil,"debug","GitlabService:writeFile",data);
+		LOG.std(nil,"debug","GitlabService:writeFile",err);
+
+		if(err == 201) then
+			_callback(true,_filename, data, err);
+		else
+			_callback(false,_filename, data, err);
+		end
 	end);
 end
 
@@ -148,8 +155,15 @@ function GitlabService:update(_filename, _file_content_t, _sha, _callback, _proj
 		content 	   = _file_content_t,
 	}
 
-	GitlabService:apiPut(url, params, function()
-		_callback(true,_filename);
+	GitlabService:apiPut(url, params, function(data, err)
+		LOG.std(nil,"debug","GitlabService:update",data);
+		LOG.std(nil,"debug","GitlabService:update",err);
+
+		if(err == 200) then
+			_callback(true,_filename, data, err);
+		else
+			_callback(false,_filename, data, err);
+		end
 	end);
 end
 
@@ -189,12 +203,17 @@ end
 function GitlabService:deleteFile(_path, _sha, _callback)
     local url = GitlabService:getFileUrlPrefix() .. _path;
 
+	LOG.std(nil,"debug","deleteFile",data);
+	LOG.std(nil,"debug","deleteFiler",err);
+
 	local params = {
 		commit_message = GitlabService:getCommitMessagePrefix() .. _path,
 		branch         = 'master',
 	}
 
-	GitlabService:apiDelete(url, params, _callback);
+	GitlabService:apiDelete(url, params, function(data, err)
+	
+	end);
 end
 
 --É¾³ý²Ö
@@ -224,31 +243,10 @@ function GitlabService:init(_foldername, _callback)
 	local url   = "/projects";
 
 	GitlabService:apiGet(url .. "?owned=true",function(projectList,err)
-        for i=1,#projectList do
-            if (projectList[i].name == _foldername) then
-				GitlabService.projectId = projectList[i].id;
-
-				if(SyncMain.worldName) then
-					WorldShare:SetWorldData("gitLabProjectId", GitlabService.projectId, SyncMain.worldName);
-					WorldShare:SaveWorldData(SyncMain.worldName);
-				else
-					WorldShare:SetWorldData("gitLabProjectId", GitlabService.projectId);
-					WorldShare:SaveWorldData();
-				end
-
-                _callback(nil,201);
-				return;
-            end
-
-			local params = {
-				name = _foldername,
-				request_access_enabled = true,
-				visibility = "public",
-			};
-
-			GitlabService:apiPost(url, params, function(data,err)
-				if(data.id ~= nil) then
-					GitlabService.projectId = data.id;
+		if(projectList) then
+			for i=1,#projectList do
+				if (projectList[i].name == _foldername) then
+					GitlabService.projectId = projectList[i].id;
 
 					if(SyncMain.worldName) then
 						WorldShare:SetWorldData("gitLabProjectId", GitlabService.projectId, SyncMain.worldName);
@@ -258,12 +256,38 @@ function GitlabService:init(_foldername, _callback)
 						WorldShare:SaveWorldData();
 					end
 
-					LOG.std(nil,"debug","GitlabService.projectId",GitlabService.projectId);
-					LOG.std(nil,"debug","err",err);
-					_callback(nil,201);
+					_callback(true,err);
 					return;
 				end
-			end);
-        end
+
+				local params = {
+					name = _foldername,
+					request_access_enabled = true,
+					visibility = "public",
+				};
+
+				GitlabService:apiPost(url, params, function(data,err)
+					if(data.id ~= nil) then
+						GitlabService.projectId = data.id;
+
+						if(SyncMain.worldName) then
+							WorldShare:SetWorldData("gitLabProjectId", GitlabService.projectId, SyncMain.worldName);
+							WorldShare:SaveWorldData(SyncMain.worldName);
+						else
+							WorldShare:SetWorldData("gitLabProjectId", GitlabService.projectId);
+							WorldShare:SaveWorldData();
+						end
+
+						LOG.std(nil,"debug","GitlabService.projectId",GitlabService.projectId);
+						LOG.std(nil,"debug","err",err);
+						_callback(true,err);
+						return;
+					end
+				end);
+			end
+		else
+			_callback(false,err);
+		end
+        
 	end);
 end
