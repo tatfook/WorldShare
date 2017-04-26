@@ -196,6 +196,7 @@ end
 function SyncMain.shareNow()
     Page:CloseWindow();
 
+	ShareWorldPage.TakeSharePageImage();
     if(not SyncMain.firstCreate and tonumber(SyncMain.currentRevison) < tonumber(SyncMain.remoteRevison)) then
         _guihelper.MessageBox("当前本地版本小于远程版本，是否继续上传？", function(res)
             if(res and res == 6) then
@@ -541,8 +542,9 @@ function SyncMain:syncToDataSource()
 					if(SyncMain.selectedWorldInfor.tooltip)then
 						for modDateEle in string.gmatch(SyncMain.selectedWorldInfor.tooltip,"[^:]+") do
 							modDateTable[#modDateTable+1] = modDateEle;
-							modDateTable = modDateTable[1];
 						end
+
+						modDateTable = modDateTable[1];
 					else
 						modDateTable = os.date("%Y-%m-%d-%H-%M-%S");
 					end
@@ -885,60 +887,107 @@ function SyncMain:genWorldMD(worldInfor)
 					hasWorldFile = true;
 				end
 			end
+			
+			local function updateTree()
+				SyncMain:refreshWikiPages(indexPath, SyncMain.indexFile, function(data, err) 
+					SyncMain:refreshWikiPages(worldFilePath, SyncMain.worldFile, function(data, err) end)
+				end)
+			end
 
-			LOG.std(nil,"debug","hasIndexO",hasIndex);
-			if(hasIndex) then
-				LOG.std(nil,"debug","hasIndex",hasIndex);
-				SyncMain:getDataSourceContent(worldInfor.worldsName, indexPath, function(data, err)
-					LOG.std(nil,"debug","getDataSourceContent",data);
-					LOG.std(nil,"debug","getDataSourceContent",err);
-					--local content = Encoding.unbase64(data);
-					--local paramsText = KeepworkGen:GetContent(content);
-					--local params = KeepworkGen:getCommand("worldList", paramsText);
+			local function updateIndexFile(_next)
+				LOG.std(nil,"debug","hasIndexO",hasIndex);
+				if(hasIndex) then
+					LOG.std(nil,"debug","hasIndex",hasIndex);
+					SyncMain:getDataSourceContent(worldInfor.worldsName, indexPath, function(data, err)
+						--LOG.std(nil,"debug","getDataSourceContent",data);
+						--LOG.std(nil,"debug","getDataSourceContent",err);
 
+						--local content = Encoding.unbase64(data);
+						--local paramsText = KeepworkGen:GetContent(content);
+						--local params = KeepworkGen:getCommand("worldList", paramsText);
+
+						local worldList = SyncMain.remoteWorldsList;
+
+						worldList = KeepworkGen:setCommand("worldList",worldList);
+						SyncMain.indexFile = KeepworkGen:SetAutoGenContent("", worldList)
+
+						LOG.std(nil,"debug","SyncMain.indexFile",SyncMain.indexFile);
+
+						SyncMain:updateService(
+							worldInfor.worldsName,
+							indexPath,
+							SyncMain.indexFile,
+							"",
+							function(isSuccess, path)
+								LOG.std(nil,"debug","updateService-indexFile",isSuccess)
+								LOG.std(nil,"debug","updateService-indexFile",path)
+								_next(updateTree);
+							end,
+							keepworkId
+						);
+					end, keepworkId)
+				else
 					local worldList = SyncMain.remoteWorldsList;
 
 					worldList = KeepworkGen:setCommand("worldList",worldList);
-					SyncMain.indexFile = KeepworkGen:SetAutoGenContent("", worldList)
+					SyncMain.indexFile = KeepworkGen:SetAutoGenContent("", worldList);
 
-					SyncMain:updateService(
+					LOG.std(nil,"debug","SyncMain.indexFile",SyncMain.indexFile);
+
+					SyncMain:uploadService(
 						worldInfor.worldsName,
 						indexPath,
 						SyncMain.indexFile,
-						"",
-						function(data, err)
-							LOG.std(nil,"debug","updateService",data)
-							LOG.std(nil,"debug","updateService",err)
+						function(data, err) 
+							_next(updateTree);
 						end,
 						keepworkId
 					);
-				end, keepworkId)
-			else
-				local worldList = SyncMain.remoteWorldsList;
-
-				worldList = KeepworkGen:setCommand("worldList",worldList);
-				SyncMain.indexFile = KeepworkGen:SetAutoGenContent("", worldList)
-
-				--LOG.std(nil,"debug","SyncMain.remoteWorldsList",SyncMain.indexFile);
-				--LOG.std(nil,"debug","SyncMain.remoteWorldsList",indexPath);
-
-				SyncMain:uploadService(
-					worldInfor.worldsName,
-					indexPath,
-					SyncMain.indexFile,
-					function(data, err) end,
-					keepworkId
-				);
+				end
 			end
+			
+			local function updateWorldFile(_next)
+				if(hasWorldFile) then
+					LOG.std(nil,"debug","hasWorldFile",hasWorldFile);
+					SyncMain:getDataSourceContent(worldInfor.worldsName, worldFilePath, function(data, err)
+						local content    = Encoding.unbase64(data);
+						local paramsText = KeepworkGen:GetContent(content);
+						local params     = KeepworkGen:getCommand("world3D", paramsText);
 
-			if(hasWorldFile) then
-				LOG.std(nil,"debug","hasWorldFile",hasWorldFile);
-				SyncMain:getDataSourceContent(worldInfor.worldsName, worldFilePath, function(data, err)
-					local content    = Encoding.unbase64(data);
-					local paramsText = KeepworkGen:GetContent(content);
-					local params     = KeepworkGen:getCommand("world3D", paramsText);
+						--if(params.version ~= worldInfor.revision) then
+						local world3D = {
+							worldName	  = worldInfor.worldsName,
+							worldUrl	  = worldUrl,
+							logoUrl		  = worldInfor.preview,
+							desc		  = "",
+							username	  = username,
+							visitCount    = 1,
+							favoriteCount = 1,
+							updateDate	  = worldInfor.modDate,
+							version		  = worldInfor.revision
+						}
 
-					--if(params.version ~= worldInfor.revision) then
+						world3D = KeepworkGen:setCommand("world3D",world3D);
+						SyncMain.worldFile = KeepworkGen:SetAutoGenContent(content, world3D);
+
+						LOG.std(nil,"debug","worldFile",SyncMain.worldFile);
+
+						SyncMain:updateService(
+							worldInfor.worldsName,
+							worldFilePath,
+							SyncMain.worldFile,
+							"",
+							function(isSuccess, path)
+								LOG.std(nil,"debug","updateService-worldFile",isSuccess)
+								LOG.std(nil,"debug","updateService-worldFile",path)
+								_next();
+							end,
+							keepworkId
+						);
+						--end
+					end, keepworkId)
+				else
+					LOG.std(nil,"debug","hasWorldFile",hasWorldFile);
 					local world3D = {
 						worldName	  = worldInfor.worldsName,
 						worldUrl	  = worldUrl,
@@ -952,57 +1001,26 @@ function SyncMain:genWorldMD(worldInfor)
 					}
 
 					world3D = KeepworkGen:setCommand("world3D",world3D);
-					SyncMain.worldFile = KeepworkGen:SetAutoGenContent(content, world3D);
+
+					SyncMain.worldFile = KeepworkGen:SetAutoGenContent("", world3D)
+					SyncMain.worldFile = SyncMain.worldFile .. "\n\r" .. worldInfor.readme;
+					SyncMain.worldFile = SyncMain.worldFile .. "\n\r" .. KeepworkGen:setCommand("comment");
 
 					LOG.std(nil,"debug","worldFile",SyncMain.worldFile);
-
-					SyncMain:updateService(
+				
+					SyncMain:uploadService(
 						worldInfor.worldsName,
 						worldFilePath,
 						SyncMain.worldFile,
-						"",
-						function(data, err)
-							LOG.std(nil,"debug","updateService-worldFile",data)
-							LOG.std(nil,"debug","updateService-worldFile",err)
+						function(data, err) 
+							_next();
 						end,
 						keepworkId
 					);
-					--end
-				end, keepworkId)
-			else
-				LOG.std(nil,"debug","hasWorldFile",hasWorldFile);
-				local world3D = {
-					worldName	  = worldInfor.worldsName,
-					worldUrl	  = worldUrl,
-					logoUrl		  = worldInfor.preview,
-					desc		  = "",
-					username	  = username,
-					visitCount    = 1,
-					favoriteCount = 1,
-					updateDate	  = worldInfor.modDate,
-					version		  = worldInfor.revision
-				}
-
-				world3D = KeepworkGen:setCommand("world3D",world3D);
-
-				SyncMain.worldFile = KeepworkGen:SetAutoGenContent("", world3D)
-				SyncMain.worldFile = SyncMain.worldFile .. "\n\r" .. worldInfor.readme;
-				SyncMain.worldFile = SyncMain.worldFile .. "\n\r" .. KeepworkGen:setCommand("comment");
-
-				LOG.std(nil,"debug","worldFile",SyncMain.worldFile);
-				
-				SyncMain:uploadService(
-					worldInfor.worldsName,
-					worldFilePath,
-					SyncMain.worldFile,
-					function(data, err) end,
-					keepworkId
-				);
+				end
 			end
 
-			SyncMain:refreshWikiPages(indexPath, SyncMain.indexFile, function(data, err) 
-				SyncMain:refreshWikiPages(worldFilePath, SyncMain.worldFile, function(data, err) end)
-			end)
+			updateIndexFile(updateWorldFile);
 		end, keepworkId);
 	end
 
@@ -1016,13 +1034,14 @@ function SyncMain:genWorldMD(worldInfor)
 end
 
 function SyncMain:refreshWikiPages(_path, _content, _callback)
+	LOG.std(nil,"debug","_content",_content);
 	HttpRequest:GetUrl({
 		url  = login.site.."/api/wiki/models/website_pageinfo/getByUsername",
 		json = true,
 		headers = {Authorization = "Bearer "..login.token},
 		form = {username = login.username},
 	},function(data, err)
-		--LOG.std(nil,"debug","getUserPages",data);
+		LOG.std(nil,"debug","getUserPages",data);
 		local pageinfoList = data.data.pageinfoList[1];
 
 		local params = {};
@@ -1038,8 +1057,6 @@ function SyncMain:refreshWikiPages(_path, _content, _callback)
 			if(value.url == "/" .. _path) then
 				hasFile     = true;	
 				hasFileInfo = value;
-				value       = false;
-				break;	
 			else
 				newPageinfoList[#newPageinfoList + 1] = value;
 			end
@@ -1075,13 +1092,13 @@ function SyncMain:refreshWikiPages(_path, _content, _callback)
 			newPageinfoList[#newPageinfoList + 1] = thisInfor;
 		end
 
-		LOG.std(nil,"debug","pageinfoList",newPageinfoList);
+		LOG.std(nil,"debug","newPageinfoList",newPageinfoList);
 
 		newPageinfoList = NPL.ToJson(newPageinfoList,true);
 
 		local params = {};
-		params.dataSourceId = 1;
-		params.isExistSite  = 0;
+		params.dataSourceId = login.dataSourceId;
+		params.isExistSite  = 1;
 		params.pageinfo     = newPageinfoList;
 		params.username     = login.username;
 		params.websiteName  = "paracraft";

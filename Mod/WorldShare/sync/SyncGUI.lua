@@ -1,4 +1,4 @@
---[[
+﻿--[[
 Title: SyncGUI
 Author(s):  big
 Date: 	2017.4.17
@@ -21,7 +21,7 @@ SyncGUI.files   = "";
 function SyncGUI:ctor()
 	SyncGUI.current = 0;
 	SyncGUI.total   = 0;
-	SyncGUI.files   = "";
+	SyncGUI.files   = "同步中，请稍后...";
 
 	System.App.Commands.Call("File.MCMLWindowFrame", {
 		url  = "Mod/WorldShare/sync/SyncGUI.html", 
@@ -56,7 +56,12 @@ function SyncGUI:updateDataBar(_current, _total, _files)
 	
 	SyncGUI.current  = _current;
 	SyncGUI.total    = _total;
-	SyncGUI.files    = _files;
+
+	if(_files)then
+		SyncGUI.files = _files;
+	else
+		SyncGUI.files = "同步中，请稍后...";
+	end
 
 	SyncGUI.progressbar:SetAttribute("Maximum",SyncGUI.total);
 	SyncGUI.progressbar:SetAttribute("Value",SyncGUI.current);

@@ -15,9 +15,11 @@
         </script>
         <div style="width:500px;height:270px;">
             <aries:window mode="thin" width="500" height="270" style="float:left;" title='<%=L"与数据源同步" %>'>
-                <div style="padding:20px;font-size:18px;base-font-size:18px;color:#ffffff;margin-top:30px;">
+                <div style="padding:20px;font-size:18px;base-font-size:18px;color:#ffffff;margin-top:20px;">
                     <div style="margin-right:20px;">
-                        同步进度：<%=SyncGUI.current%> / <%=SyncGUI.total%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%=SyncGUI.files%>
+                        同步进度：<%=SyncGUI.current%> / <%=SyncGUI.total%>
+                        <br />
+                        <%=SyncGUI.files%>
                     </div>
                     <div style="margin-top:30px;">
                         <pe:progressbar name="progressbar"  block_bg_autosize = "true" Minimum="0" Maximum="100" Value="0"/>
