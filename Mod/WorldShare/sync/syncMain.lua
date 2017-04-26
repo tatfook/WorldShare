@@ -551,82 +551,80 @@ function SyncMain:syncToDataSource()
 			LOG.std(nil,"debug","SyncMain",SyncMain.totalDataSourceIndex);
 
 			local function finish()
-				if(SyncMain.curUploadIndex == SyncMain.totalLocalIndex) then
-					LOG.std(nil,"debug","SyncMain.selectedWorldInfor",SyncMain.selectedWorldInfor);
-					LOG.std(nil,"debug","send",SyncMain.selectedWorldInfor.tooltip)
-					SyncMain.finish = true;
+				LOG.std(nil,"debug","SyncMain.selectedWorldInfor",SyncMain.selectedWorldInfor);
+				LOG.std(nil,"debug","send",SyncMain.selectedWorldInfor.tooltip)
+				SyncMain.finish = true;
 
-					local modDateTable = {};
-					local readme;
+				local modDateTable = {};
+				local readme;
 
-					if(SyncMain.selectedWorldInfor.tooltip)then
-						for modDateEle in string.gmatch(SyncMain.selectedWorldInfor.tooltip,"[^:]+") do
-							modDateTable[#modDateTable+1] = modDateEle;
-						end
-
-						modDateTable = modDateTable[1];
-					else
-						modDateTable = os.date("%Y-%m-%d-%H-%M-%S");
+				if(SyncMain.selectedWorldInfor.tooltip)then
+					for modDateEle in string.gmatch(SyncMain.selectedWorldInfor.tooltip,"[^:]+") do
+						modDateTable[#modDateTable+1] = modDateEle;
 					end
+
+					modDateTable = modDateTable[1];
+				else
+					modDateTable = os.date("%Y-%m-%d-%H-%M-%S");
+				end
 					
-					local hasPreview = false;
+				local hasPreview = false;
 
-					for key,value in ipairs(SyncMain.localFiles) do
-						if(value.filename == "preview.jpg") then
-							hasPreview = true;
-						end
+				for key,value in ipairs(SyncMain.localFiles) do
+					if(value.filename == "preview.jpg") then
+						hasPreview = true;
 					end
+				end
 
-					for key,value in ipairs(SyncMain.localFiles) do
-						if(value.filename == "README.md") then
-							readme = LocalService:getFileContent(SyncMain.worldDir .. "README.md");
-							LOG.std(nil,"debug","SyncMain.worldDir",SyncMain.worldDir);
-							LOG.std(nil,"debug","readme",readme);
-						end
+				for key,value in ipairs(SyncMain.localFiles) do
+					if(value.filename == "README.md") then
+						readme = LocalService:getFileContent(SyncMain.worldDir .. "README.md");
+						LOG.std(nil,"debug","SyncMain.worldDir",SyncMain.worldDir);
+						LOG.std(nil,"debug","readme",readme);
 					end
+				end
 
-					local preview = {};
-					preview[0] = {};
-					preview[0].previewUrl = login.rawBaseUrl .. "/" .. login.dataSourceUsername .. "/" .. GitEncoding.base64(SyncMain.foldername) .. "/raw/master/preview.jpg";
-					preview = NPL.ToJson(preview,true);
+				local preview = {};
+				preview[0] = {};
+				preview[0].previewUrl = login.rawBaseUrl .. "/" .. login.dataSourceUsername .. "/" .. GitEncoding.base64(SyncMain.foldername) .. "/raw/master/preview.jpg";
+				preview = NPL.ToJson(preview,true);
 
-					local params = {};
-					params.modDate		   = modDateTable;
-					params.worldsName      = SyncMain.foldername;
-					params.revision        = SyncMain.currentRevison;
-					params.hasPreview      = hasPreview;
-					params.dataSourceType  = login.dataSourceType;
-					params.gitlabProjectId = GitlabService.projectId;
-					params.readme          = readme;
-					params.preview         = preview;
+				local params = {};
+				params.modDate		   = modDateTable;
+				params.worldsName      = SyncMain.foldername;
+				params.revision        = SyncMain.currentRevison;
+				params.hasPreview      = hasPreview;
+				params.dataSourceType  = login.dataSourceType;
+				params.gitlabProjectId = GitlabService.projectId;
+				params.readme          = readme;
+				params.preview         = preview;
 
-					LOG.std(nil,"debug","params",params)
+				LOG.std(nil,"debug","params",params)
 
 --					SyncMain:genWorldMD(params);
 
-					HttpRequest:GetUrl({
-						url     = login.site .. "/api/mod/worldshare/models/worlds/refresh",
-						json    = true,
-						form    = params,
-						headers = {
-							Authorization    = "Bearer " .. login.token,
-							["content-type"] = "application/json",
-						},
-					},function(data,err)
-						LOG.std(nil,"debug","finish",data);
-						LOG.std(nil,"debug","finish",err);
+				HttpRequest:GetUrl({
+					url     = login.site .. "/api/mod/worldshare/models/worlds/refresh",
+					json    = true,
+					form    = params,
+					headers = {
+						Authorization    = "Bearer " .. login.token,
+						["content-type"] = "application/json",
+					},
+				},function(data,err)
+					LOG.std(nil,"debug","finish",data);
+					LOG.std(nil,"debug","finish",err);
 
+					LOG.std(nil,"debug","SyncMain.worldName",SyncMain.worldName);
+					if(err == 204) then
 						LOG.std(nil,"debug","SyncMain.worldName",SyncMain.worldName);
-						if(err == 204) then
-							LOG.std(nil,"debug","SyncMain.worldName",SyncMain.worldName);
-							SyncMain:genWorldMD(params);
-							login.syncWorldsList();
-						end
-					end);
-
-					if(SyncMain.firstCreate) then
-						SyncMain.firstCreate = false;
+						SyncMain:genWorldMD(params);
+						login.syncWorldsList();
 					end
+				end);
+
+				if(SyncMain.firstCreate) then
+					SyncMain.firstCreate = false;
 				end
 			end
 
