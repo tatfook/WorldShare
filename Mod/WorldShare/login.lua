@@ -15,7 +15,9 @@ NPL.load("(gl)Mod/WorldShare/service/HttpRequest.lua");
 NPL.load("(gl)Mod/WorldShare/service/GitlabService.lua");
 NPL.load("(gl)Mod/WorldShare/service/GithubService.lua");
 NPL.load("(gl)Mod/WorldShare/sync/SyncMain.lua");
+NPL.load("(gl)Mod/WorldShare/service/LocalService.lua");
 
+local LocalService		 = commonlib.gettable("Mod.WorldShare.service.LocalService");
 local MainLogin          = commonlib.gettable("MyCompany.Aries.Game.MainLogin");
 local HttpRequest        = commonlib.gettable("Mod.WorldShare.service.HttpRequest");
 local GitlabService      = commonlib.gettable("Mod.WorldShare.service.GitlabService");
@@ -193,7 +195,11 @@ function login.GetWorldSize(size)
 	local s;
 
 	if(size and size ~= "") then
-		s = string.format("%sM",size);
+		if(size < 1048576) then
+			s = string.format("%sKB",math.ceil(size/1024));
+		else
+			s = string.format("%sM",math.ceil(size/1024/1024));
+		end
 	else
 		s = nil;
 	end
@@ -494,6 +500,12 @@ end
 function login.changeRevision()
 	commonlib.TimerManager.SetTimeout(function()
 		local localWorlds = InternetLoadWorld.ServerPage_ds[1]['ds'];
+
+		for key,value in ipairs(localWorlds) do
+			value.filesTotal = LocalService:GetWorldFileSize(value.foldername);
+		end
+
+		--LOG.std(nil,"debug","localWorlds",localWorlds);
 
 		for kl,vl in ipairs(localWorlds) do
 			local WorldRevisionCheckOut = WorldRevision:new():init("worlds/DesignHouse/"..Encoding.Utf8ToDefault(vl.foldername).."/");

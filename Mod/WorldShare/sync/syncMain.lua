@@ -590,6 +590,8 @@ function SyncMain:syncToDataSource()
 				preview[0].previewUrl = login.rawBaseUrl .. "/" .. login.dataSourceUsername .. "/" .. GitEncoding.base64(SyncMain.foldername) .. "/raw/master/preview.jpg";
 				preview = NPL.ToJson(preview,true);
 
+				local filesTotals = LocalService:GetWorldFileSize(SyncMain.foldername);
+
 				local params = {};
 				params.modDate		   = modDateTable;
 				params.worldsName      = SyncMain.foldername;
@@ -599,6 +601,7 @@ function SyncMain:syncToDataSource()
 				params.gitlabProjectId = GitlabService.projectId;
 				params.readme          = readme;
 				params.preview         = preview;
+				params.filesTotals	   = filesTotals;
 
 				LOG.std(nil,"debug","params",params)
 
@@ -617,8 +620,8 @@ function SyncMain:syncToDataSource()
 					LOG.std(nil,"debug","finish",err);
 
 					LOG.std(nil,"debug","SyncMain.worldName",SyncMain.worldName);
-					if(err == 204) then
-						LOG.std(nil,"debug","SyncMain.worldName",SyncMain.worldName);
+					if(err == 200) then
+						params.opusId = data.msg.opusId;
 						SyncMain:genWorldMD(params);
 						login.syncWorldsList();
 					end
@@ -981,7 +984,9 @@ function SyncMain:genWorldMD(worldInfor)
 							visitCount    = 1,
 							favoriteCount = 1,
 							updateDate	  = worldInfor.modDate,
-							version		  = worldInfor.revision
+							version		  = worldInfor.revision,
+							filesTotals   = worldInfor.filesTotals,
+							opusId        = worldInfor.opusId,
 						}
 
 						world3D = KeepworkGen:setCommand("world3D",world3D);
@@ -1014,7 +1019,9 @@ function SyncMain:genWorldMD(worldInfor)
 						visitCount    = 1,
 						favoriteCount = 1,
 						updateDate	  = worldInfor.modDate,
-						version		  = worldInfor.revision
+						version		  = worldInfor.revision,
+						opusId        = worldInfor.opusId,
+						filesTotals   = worldInfor.filesTotals,
 					}
 
 					world3D = KeepworkGen:setCommand("world3D",world3D);

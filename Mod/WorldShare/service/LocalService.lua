@@ -5,8 +5,8 @@ Date:  2016.12.11
 Desc: 
 use the lib:
 ------------------------------------------------------------
-NPL.load("(gl)Mod/WorldShare/LocalService.lua");
-local LocalService = commonlib.gettable("Mod.WorldShare.LocalService");
+NPL.load("(gl)Mod/WorldShare/service/LocalService.lua");
+local LocalService = commonlib.gettable("Mod.WorldShare.service.LocalService");
 ------------------------------------------------------------
 ]]
 NPL.load("(gl)script/ide/Files.lua");
@@ -188,6 +188,19 @@ function LocalService:delete(_foldername,_filename,_callback)
 
 	ParaIO.DeleteFile(bashPath .. _filename);
 	_callback();
+end
+
+function LocalService:GetWorldFileSize(_foldername)
+	local worldDir = "worlds/DesignHouse/" .. EncodingC.Utf8ToDefault(_foldername).."/";
+	local files = LocalService:LoadFiles(worldDir,"");
+	local filesTotal = 0;
+
+	for key,value in ipairs(files) do
+		--LOG.std(nil,"debug","value.file_path",value.file_path);
+		filesTotal = filesTotal + ParaIO.GetFileSize(value.file_path);
+	end
+
+	return filesTotal;
 end
 
 function LocalService:getDataSourceContent(_foldername, _path, _callback)
