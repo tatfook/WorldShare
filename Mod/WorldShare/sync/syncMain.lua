@@ -358,7 +358,7 @@ function SyncMain:syncToLocal(_worldDir, _foldername, _callback)
 							else
 								_guihelper.MessageBox(L'下载失败，请稍后再试');
 								syncToLocalGUI.finish();
-								
+								SyncMain.finish = true;
 							end
 						end);
 					end
@@ -429,6 +429,7 @@ function SyncMain:syncToLocal(_worldDir, _foldername, _callback)
 							else
 								_guihelper.MessageBox(L'更新失败,请稍后再试');
 								syncToLocalGUI.finish();
+								SyncMain.finish = true;
 							end
 						end);
 					else
@@ -527,7 +528,7 @@ function SyncMain:syncToDataSource()
 
 	-- 加载进度UI界面
 	local syncToDataSourceGUI = SyncGUI:new();
-	local test = false;
+
 	local function syncToDataSourceGo()
 		SyncMain.localFiles = LocalService:LoadFiles(SyncMain.worldDir,"",nil,1000,nil);
 		
@@ -628,11 +629,6 @@ function SyncMain:syncToDataSource()
 				end
 			end
 
-			if(test)then
-				finish();
-				return;
-			end
-
 			-- 上传新文件
 			local function uploadOne()
 				if (SyncMain.curUploadIndex <= SyncMain.totalLocalIndex) then
@@ -655,6 +651,7 @@ function SyncMain:syncToDataSource()
 							else
 								_guihelper.MessageBox(L"更新失败");
 								syncToDataSourceGUI.finish();
+								SyncMain.finish = true;
 								--_guihelper.MessageBox(SyncMain.localFiles[SyncMain.curUploadIndex].filename .. ' 上传失败，请稍后再试');
 							end
 						end);
@@ -718,6 +715,7 @@ function SyncMain:syncToDataSource()
 								else
 									_guihelper.MessageBox(L"更新失败");
 									syncToDataSourceGUI.finish();
+									SyncMain.finish = true;
 									-- _guihelper.MessageBox(SyncMain.dataSourceFiles.tree[curUpdateSyncMain.curUpdateIndexIndex].path .. ' 更新失败,请稍后再试');
 								end
 							end);
@@ -763,6 +761,7 @@ function SyncMain:syncToDataSource()
 						else
 							_guihelper.MessageBox(L"更新失败");
 							syncToDataSourceGUI.finish();
+							SyncMain.finish = true;
 							--_guihelper.MessageBox('删除 ' .. SyncMain.localFiles[curUpdateIndex].filename .. ' 失败, 请稍后再试');
 						end
 					end);
@@ -888,7 +887,7 @@ function SyncMain:genWorldMD(worldInfor)
 
 			if(login.dataSourceType == "gitlab") then
 				username = login.dataSourceUsername:gsub("gitlab_" , "");
-				worldUrl = "http://git.keepwork.com/" .. login.dataSourceUsername .. "/keepworkdatasource/repository/archive.zip?ref=master";
+				worldUrl = "http://git.keepwork.com/" .. login.dataSourceUsername .. "/" .. GitEncoding.base64(SyncMain.foldername) .. "/repository/archive.zip?ref=master";
 			else
 
 			end
