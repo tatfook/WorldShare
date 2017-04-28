@@ -204,7 +204,7 @@ function login.GetWorldSize(size)
 		s = nil;
 	end
 
-	return s or "5M";
+	return s or "0";
 end
 
 function login.GetWorldType()
@@ -595,40 +595,44 @@ function login.enterWorld(_index)
 	--LOG.std(nil,"debug","login.selectedWorldInfor",login.selectedWorldInfor);
 
 	if(SyncMain.selectedWorldInfor.status == 2) then
-		local foldername = SyncMain.selectedWorldInfor.foldername;
-		local foldernameForLocal = Encoding.Utf8ToDefault(foldername);
-
-		local worldDir = "worlds/DesignHouse/" .. foldername .. "/";
-		local worldDirForLocal = "worlds/DesignHouse/" .. foldernameForLocal .. "/";
-
-		for key,value in ipairs(SyncMain.remoteWorldsList) do
-			if(value.worldsName == foldername) then
-				GitlabService.projectId = value.gitlabProjectId;
-			end
-		end
-
-		ParaIO.CreateDirectory(worldDirForLocal);
-		SyncMain:syncToLocal(worldDir, SyncMain.selectedWorldInfor.foldername,function(_success,_revision)
-		    if(_success) then
-		        SyncMain.selectedWorldInfor.status      = 3;
-		        SyncMain.selectedWorldInfor.server      = "local";
-		        SyncMain.selectedWorldInfor.is_zip      = false;
-		        SyncMain.selectedWorldInfor.icon        = "Texture/blocks/items/1013_Carrot.png";
-		        SyncMain.selectedWorldInfor.revision    = _revision;
-		        SyncMain.selectedWorldInfor.text 		= foldername;
-		        SyncMain.selectedWorldInfor.world_mode  = "edit";
-		        SyncMain.selectedWorldInfor.gs_nid      = "";
-		        SyncMain.selectedWorldInfor.force_nid   = 0;
-		        SyncMain.selectedWorldInfor.ws_id       = "";
-		        SyncMain.selectedWorldInfor.author      = "";
-		        SyncMain.selectedWorldInfor.remotefile  = "local://worlds/DesignHouse/" .. foldernameForLocal;
-
-		        Page:Refresh();
-		    end
-		end);
+		login.downloadWorld();
 	else
 		InternetLoadWorld.EnterWorld(_index);
 	end
+end
+
+function login.downloadWorld()
+	local foldername = SyncMain.selectedWorldInfor.foldername;
+	local foldernameForLocal = Encoding.Utf8ToDefault(foldername);
+
+	local worldDir = "worlds/DesignHouse/" .. foldername .. "/";
+	local worldDirForLocal = "worlds/DesignHouse/" .. foldernameForLocal .. "/";
+
+	for key,value in ipairs(SyncMain.remoteWorldsList) do
+		if(value.worldsName == foldername) then
+			GitlabService.projectId = value.gitlabProjectId;
+		end
+	end
+
+	ParaIO.CreateDirectory(worldDirForLocal);
+	SyncMain:syncToLocal(worldDir, SyncMain.selectedWorldInfor.foldername,function(_success,_revision)
+		if(_success) then
+		    SyncMain.selectedWorldInfor.status      = 3;
+		    SyncMain.selectedWorldInfor.server      = "local";
+		    SyncMain.selectedWorldInfor.is_zip      = false;
+		    SyncMain.selectedWorldInfor.icon        = "Texture/blocks/items/1013_Carrot.png";
+		    SyncMain.selectedWorldInfor.revision    = _revision;
+		    SyncMain.selectedWorldInfor.text 		= foldername;
+		    SyncMain.selectedWorldInfor.world_mode  = "edit";
+		    SyncMain.selectedWorldInfor.gs_nid      = "";
+		    SyncMain.selectedWorldInfor.force_nid   = 0;
+		    SyncMain.selectedWorldInfor.ws_id       = "";
+		    SyncMain.selectedWorldInfor.author      = "";
+		    SyncMain.selectedWorldInfor.remotefile  = "local://worlds/DesignHouse/" .. foldernameForLocal;
+
+		    Page:Refresh();
+		end
+	end);
 end
 
 function login.syncNow(_index)
@@ -647,7 +651,8 @@ function login.syncNow(_index)
 			SyncMain:compareRevision(worldDir);
 			SyncMain:StartSyncPage();
 		else
-			_guihelper.MessageBox(L"本地无数据，请直接登陆");
+			login.downloadWorld();
+			--_guihelper.MessageBox(L"本地无数据，请直接登陆");
 		end
 	else
 		_guihelper.MessageBox(L"登陆后才能同步");
