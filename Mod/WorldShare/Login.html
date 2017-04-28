@@ -290,7 +290,7 @@
                                                 <div>
                                                     <div class="share_world_infor" style="position:relative;margin-top:18px;">
                                                         <span style="margin-left:0px;">版本：<%=login.GetCurWorldInfo("revision",Eval("index")) %></span>
-                                                        <span style="margin-left:10px;">文件：<%=login.GetWorldSize(Eval("filesTotal")) %></span>
+                                                        <span style="margin-left:10px;">文件：<%=login.GetWorldSize(Eval("filesTotals")) %></span>
                                                     </div>
                                                     <div style="position:relative;margin-left:170px;margin-top:3px;">
                                                         <input type="button" class="share_button" style="background:url(textures/delete_32bits.png);"   onclick='login.deleteWorld()' name='<%=Eval("index")%>' /><!-- 删除 -->
@@ -310,7 +310,7 @@
                                                 <div>
                                                     <div class="share_world_infor" style="position:relative;margin-left:5px;margin-top:18px;">
                                                         <span style="margin-left:0px;">版本：<%=login.GetCurWorldInfo("revision",Eval("index")) %></span>
-                                                        <span style="margin-left:10px;">文件：<%=login.GetWorldSize(Eval("filesTotal")) %></span>
+                                                        <span style="margin-left:10px;">文件：<%=login.GetWorldSize(Eval("filesTotals")) %></span>
                                                         <span style="margin-left:10px;"><%=Eval("author") %></span>
                                                     </div>
                                                     <div style="position:relative;margin-left:250px;margin-top:3px;">
@@ -344,7 +344,7 @@
                                                     </div>
                                                     <div class="share_world_infor" style="padding-top:5px;">
                                                         <span style="margin-left:0px;">版本：<%=login.GetCurWorldInfo("revision",Eval("index")) %></span>
-                                                        <span style="margin-left:10px;">文件：<%=login.GetWorldSize(Eval("filesTotal")) %></span>
+                                                        <span style="margin-left:10px;">文件：<%=login.GetWorldSize(Eval("filesTotals")) %></span>
                                                         <span style="margin-left:10px;"><%=Eval("author") %></span>
                                                     </div>
                                                 </div>
@@ -361,7 +361,7 @@
                                                     </div>
                                                     <div class="share_world_infor" style="margin-left:5px;padding-top:5px;">
                                                         <span style="margin-left:0px;">版本：<%=login.GetCurWorldInfo("revision",Eval("index")) %></span>
-                                                        <span style="margin-left:10px;">文件：<%=login.GetWorldSize(Eval("filesTotal")) %></span>
+                                                        <span style="margin-left:10px;">文件：<%=login.GetWorldSize(Eval("filesTotals")) %></span>
                                                         <span style="margin-left:10px;"><%=Eval("author") %></span>
                                                     </div>
                                                 </div>

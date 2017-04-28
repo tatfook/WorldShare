@@ -193,6 +193,7 @@ end
 
 function login.GetWorldSize(size)
 	local s;
+	size = tonumber(size);
 
 	if(size and size ~= "") then
 		if(size < 1048576) then
@@ -498,27 +499,29 @@ function login.logout()
 end
 
 function login.changeRevision()
-	commonlib.TimerManager.SetTimeout(function()
-		local localWorlds = InternetLoadWorld.ServerPage_ds[1]['ds'];
+	if(login.login_type == 1) then
+		commonlib.TimerManager.SetTimeout(function()
+			local localWorlds = InternetLoadWorld.ServerPage_ds[1]['ds'];
 
-		for key,value in ipairs(localWorlds) do
-			value.filesTotal = LocalService:GetWorldFileSize(value.foldername);
-		end
+			for key,value in ipairs(localWorlds) do
+				value.filesTotals = LocalService:GetWorldFileSize(value.foldername);
+			end
 
-		--LOG.std(nil,"debug","localWorlds",localWorlds);
+			--LOG.std(nil,"debug","localWorlds",localWorlds);
 
-		for kl,vl in ipairs(localWorlds) do
-			local WorldRevisionCheckOut = WorldRevision:new():init("worlds/DesignHouse/"..Encoding.Utf8ToDefault(vl.foldername).."/");
-			localWorlds[kl].revision    = WorldRevisionCheckOut:GetDiskRevision();
-		end
+			for kl,vl in ipairs(localWorlds) do
+				local WorldRevisionCheckOut = WorldRevision:new():init("worlds/DesignHouse/"..Encoding.Utf8ToDefault(vl.foldername).."/");
+				localWorlds[kl].revision    = WorldRevisionCheckOut:GetDiskRevision();
+			end
 
-		Page:Refresh();
-	end, 100);
+			Page:Refresh();
+		end, 100);
+	end
 end
 
-function login.syncWorldsList()
+function login.syncWorldsList(_callback)
 	local localWorlds = InternetLoadWorld.cur_ds;
-	
+	LOG.std(nil,"debug","localWorlds-syncWorldsList",localWorlds);
 	--[[
 		status代码含义:
 		1:仅本地
@@ -530,23 +533,23 @@ function login.syncWorldsList()
 
 	login.getWorldsList(function(data,err)
 		SyncMain.remoteWorldsList = data;
-
+		
 	    -- 处理本地网络同时存在 本地不存在 网络存在 的世界 
 	    for kd,vd in ipairs(data) do
 	        local isExist = false;
 
 	        for kl,vl in ipairs(localWorlds) do
 	            if(vd["worldsName"] == vl["foldername"]) then
-	            	-- LOG.std(nil,"debug","localVersion",vl["revision"]);
-	            	-- LOG.std(nil,"debug","networkVersion",vd["revision"]);
+	            	LOG.std(nil,"debug","foldername",vl["foldername"]);
+	            	LOG.std(nil,"debug","worldsName",vd["worldsName"]);
 
 					if(localWorlds[kl].server) then
 						if(tonumber(vl["revision"]) == tonumber(vd["revision"])) then
-	            			localWorlds[kl].status = 3; --本地网络一致
+	            			localWorlds[kl].status      = 3; --本地网络一致
 	            		elseif(tonumber(vl["revision"]) < tonumber(vd["revision"])) then
-	            			localWorlds[kl].status = 5; --本地更新
+	            			localWorlds[kl].status      = 5; --本地更新
 	            		elseif(tonumber(vl["revision"]) > tonumber(vd["revision"])) then
-	            			localWorlds[kl].status = 4; --网络更新
+	            			localWorlds[kl].status      = 4; --网络更新
 	            		end
 					end
 
@@ -558,10 +561,11 @@ function login.syncWorldsList()
 
 	        if(not isExist) then
             	localWorlds[#localWorlds + 1] = {
-            		text       = vd["worldsName"];
-            		foldername = vd["worldsName"];
-            		revision   = vd["revision"];
-            		status     = 2; --仅网络
+            		text        = vd["worldsName"];
+            		foldername  = vd["worldsName"];
+            		revision    = vd["revision"];
+            		filesTotals = vd["filesTotals"];
+            		status      = 2; --仅网络
             	};
 	        end
 	    end
@@ -585,6 +589,10 @@ function login.syncWorldsList()
 		--LOG.std(nil,"debug","localWorlds",localWorlds);
 
 	    Page:Refresh();
+
+		if(_callback) then
+			_callback();
+		end
 	end);
 end
 
@@ -615,13 +623,14 @@ function login.downloadWorld()
 	end
 
 	ParaIO.CreateDirectory(worldDirForLocal);
-	SyncMain:syncToLocal(worldDir, SyncMain.selectedWorldInfor.foldername,function(_success,_revision)
-		if(_success) then
+	SyncMain:syncToLocal(worldDir, SyncMain.selectedWorldInfor.foldername,function(success, params)
+		if(success) then
 		    SyncMain.selectedWorldInfor.status      = 3;
 		    SyncMain.selectedWorldInfor.server      = "local";
 		    SyncMain.selectedWorldInfor.is_zip      = false;
 		    SyncMain.selectedWorldInfor.icon        = "Texture/blocks/items/1013_Carrot.png";
-		    SyncMain.selectedWorldInfor.revision    = _revision;
+		    SyncMain.selectedWorldInfor.revision    = params.revison;
+		    SyncMain.selectedWorldInfor.filesTotals = params.filesTotals;
 		    SyncMain.selectedWorldInfor.text 		= foldername;
 		    SyncMain.selectedWorldInfor.world_mode  = "edit";
 		    SyncMain.selectedWorldInfor.gs_nid      = "";

@@ -78,7 +78,7 @@ function GitlabService:apiDelete(_url, _params, _callback)
 	local github_token = login.dataSourceToken;
 	
 	LOG.std(nil,"debug","GitlabService:apiDelete",github_token);
-	LOG.std(nil,"debug","login.apiBaseUrl .. _url",login.apiBaseUrl .. _url);
+	LOG.std(nil,"debug","login.apiBaseUrl .. _url",_url);
 
 	HttpRequest:GetUrl({
 		method     = "DELETE",
@@ -212,27 +212,29 @@ function GitlabService:getContentWithRaw(_foldername, _path, _callback)
 end
 
 -- É¾³ýÎÄ¼þ
-function GitlabService:deleteFile(_path, _sha, _callback)
-	_path = GitEncoding.base64(_path);
-
-    local url = GitlabService:getFileUrlPrefix() .. _path;
-
-	LOG.std(nil,"debug","deleteFile",data);
-	LOG.std(nil,"debug","deleteFiler",err);
+function GitlabService:deleteFile(_path, _sha, _callback, _projectId)
+    local url = GitlabService:getFileUrlPrefix(_projectId) .. _path;
 
 	local params = {
 		commit_message = GitlabService:getCommitMessagePrefix() .. _path,
 		branch         = 'master',
 	}
 
+	LOG.std(nil,"debug","deleteFile",url);
 	GitlabService:apiDelete(url, params, function(data, err)
-	
+		LOG.std(nil,"debug","deleteFile",data);
+		LOG.std(nil,"debug","deleteFilerr",err);
+		_callback(data, err);
 	end);
 end
 
 --É¾³ý²Ö
-function GitlabService:deleteResp(_foldername, _callback)
-	local url = "/projects/" .. GitlabService.projectId;
+function GitlabService:deleteResp(_foldername, _callback, _projectId)
+	if(not _projectId) then
+		_projectId = GitlabService.projectId;
+	end
+
+	local url = "/projects/" .. _projectId;
 
 	GitlabService:apiDelete(url, {}, _callback);
 end
