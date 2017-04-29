@@ -83,6 +83,7 @@ function login.LoginAction()
 	end
 
 	login.LoginActionApi(account,password,function (response,err)
+			LOG.std(nil,"debug","response",response);
 			if(type(response) == "table") then
 				if(response['data'] ~= nil and response['data']['userinfo']['_id']) then
 					login.token = response['data']['token'];
@@ -516,18 +517,23 @@ function login.changeRevision()
 		commonlib.TimerManager.SetTimeout(function()
 			local localWorlds = InternetLoadWorld.ServerPage_ds[1]['ds'];
 
-			for key,value in ipairs(localWorlds) do
-				value.filesTotals = LocalService:GetWorldFileSize(value.foldername);
+			if(localWorlds) then
+				for key,value in ipairs(localWorlds) do
+					value.filesTotals = LocalService:GetWorldFileSize(value.foldername);
+				end
+
+				--LOG.std(nil,"debug","localWorlds",localWorlds);
+
+				for kl,vl in ipairs(localWorlds) do
+					local WorldRevisionCheckOut = WorldRevision:new():init("worlds/DesignHouse/"..Encoding.Utf8ToDefault(vl.foldername).."/");
+					localWorlds[kl].revision    = WorldRevisionCheckOut:GetDiskRevision();
+				end
+
+				Page:Refresh();
+				return;
+			else
+				login.changeRevision();
 			end
-
-			--LOG.std(nil,"debug","localWorlds",localWorlds);
-
-			for kl,vl in ipairs(localWorlds) do
-				local WorldRevisionCheckOut = WorldRevision:new():init("worlds/DesignHouse/"..Encoding.Utf8ToDefault(vl.foldername).."/");
-				localWorlds[kl].revision    = WorldRevisionCheckOut:GetDiskRevision();
-			end
-
-			Page:Refresh();
 		end, 100);
 	end
 end

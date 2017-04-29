@@ -1037,6 +1037,8 @@ function SyncMain:genWorldMD(worldInfor, _callback)
 			
 			local function updateTree(_callback)
 				SyncMain:refreshWikiPages(worldFilePath, SyncMain.worldFile, function(data, err)
+					LOG.std(nil,"debug","refreshWikiPages-data",data);
+					LOG.std(nil,"debug","refreshWikiPages-err",err);
 					if(_callback) then
 						_callback();
 					end
@@ -1155,13 +1157,17 @@ end
 function SyncMain:refreshWikiPages(_path, _content, _callback)
 	LOG.std(nil,"debug","_content",_content);
 	HttpRequest:GetUrl({
-		url  = login.site.."/api/wiki/models/website_pageinfo/getByUsername",
+		url  = login.site.."/api/wiki/models/website_pageinfo/get",
 		json = true,
 		headers = {Authorization = "Bearer "..login.token},
-		form = {username = login.username},
+		form = {
+			username     = login.username,
+			websiteName  = "paracraft",
+			dataSourceId = login.dataSourceId,
+		},
 	},function(data, err)
 		LOG.std(nil,"debug","getUserPages",data);
-		local pageinfoList = data.data.pageinfoList[1];
+		local pageinfoList = data.data.pageinfo;
 
 		local params = {};
 		NPL.FromJson(pageinfoList, params);
@@ -1170,7 +1176,6 @@ function SyncMain:refreshWikiPages(_path, _content, _callback)
 		newPageinfoList = {};
 
 		local hasFile = false;
-		local hasFileContent = {};
 
 		for key,value in ipairs(pageinfoList) do
 			if(value.url == "/" .. _path) then
@@ -1184,7 +1189,6 @@ function SyncMain:refreshWikiPages(_path, _content, _callback)
 		LOG.std(nil,"debug","_path",_path);
 		LOG.std(nil,"debug","_content",_content);
 		LOG.std(nil,"debug","hasFile",hasFile);
-		LOG.std(nil,"debug","hasFileContent",hasFileContent);
 		LOG.std(nil,"debug","pageinfoList",pageinfoList);
 
 		if(hasFile) then
