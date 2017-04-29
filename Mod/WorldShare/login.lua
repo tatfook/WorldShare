@@ -82,6 +82,8 @@ function login.LoginAction()
 	    return;
 	end
 
+	_guihelper.MessageBox(L"正在登陆，请稍后...");
+
 	login.LoginActionApi(account,password,function (response,err)
 			LOG.std(nil,"debug","response",response);
 			if(type(response) == "table") then

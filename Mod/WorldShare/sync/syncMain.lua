@@ -409,7 +409,7 @@ function SyncMain:syncToLocal(_worldDir, _foldername, _callback)
 
 				-- 本地是否存在Github上的文件
 				if (bIsExisted) then
-					SyncMain.dataSourceFiles[dataSourceIndex].needChange = false;
+					SyncMain.dataSourceFiles[SyncMain.dataSourceIndex].needChange = false;
 					-- LOG.std(nil,"debug","self.localFiles[SyncMain.curUpdateIndex ].filename",self.localFiles[SyncMain.curUpdateIndex ].filename);
 					-- LOG.std(nil,"debug","self.localFiles[SyncMain.curUpdateIndex ].sha1",self.localFiles[SyncMain.curUpdateIndex ].sha1);
 					-- LOG.std(nil,"debug","githubFiles.tree[SyncMain.dataSourceIndex].sha",githubFiles.tree[SyncMain.dataSourceIndex].sha);
