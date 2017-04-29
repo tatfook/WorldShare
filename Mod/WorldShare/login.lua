@@ -16,7 +16,9 @@ NPL.load("(gl)Mod/WorldShare/service/GitlabService.lua");
 NPL.load("(gl)Mod/WorldShare/service/GithubService.lua");
 NPL.load("(gl)Mod/WorldShare/sync/SyncMain.lua");
 NPL.load("(gl)Mod/WorldShare/service/LocalService.lua");
+NPL.load("(gl)Mod/WorldShare/sync/SyncGUI.lua");
 
+local SyncGUI			 = commonlib.gettable("Mod.WorldShare.sync.SyncGUI");
 local LocalService		 = commonlib.gettable("Mod.WorldShare.service.LocalService");
 local MainLogin          = commonlib.gettable("MyCompany.Aries.Game.MainLogin");
 local HttpRequest        = commonlib.gettable("Mod.WorldShare.service.HttpRequest");
@@ -113,6 +115,11 @@ function login.LoginAction()
 							end
 						end
 
+						if(not defaultDataSource) then
+							_guihelper.MessageBox(L"默认数据源不存在");
+							return
+						end
+
 						login.dataSourceId       = userinfo['dataSourceId'];				-- 数据源
 						login.dataSourceToken    = defaultDataSource['dataSourceToken'];    -- 数据源Token
 						login.dataSourceUsername = defaultDataSource['dataSourceUsername']; -- 数据源用户名
@@ -132,6 +139,7 @@ function login.LoginAction()
 						--local clientLogin = Page:GetNode("clientLogin");
 						--login.changeLoginType(2);
 						_guihelper.MessageBox(L"数据源不存在，请联系管理员");
+						return;
 					end
 
 					--判断paracraf站点是否存在
@@ -255,6 +263,11 @@ function login.InputSearchContent()
 end
 
 function login.ClosePage()
+	if(SyncGUI.isStart) then
+		_guihelper.MessageBox(L"世界同步中，请等待同步完成后再返回");
+		return;
+	end
+
 	if(login.IsMCVersion()) then
 	    InternetLoadWorld.ReturnLastStep();
 	else

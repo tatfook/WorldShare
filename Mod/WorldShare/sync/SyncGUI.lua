@@ -5,7 +5,7 @@ Date: 	2017.4.17
 Desc: 
 use the lib:
 ------------------------------------------------------------
-NPL.load("(gl)Mod/WorldShare/SyncGUI.lua");
+NPL.load("(gl)Mod/WorldShare/sync/SyncGUI.lua");
 local SyncGUI = commonlib.gettable("Mod.WorldShare.sync.SyncGUI");
 ------------------------------------------------------------
 ]]
@@ -20,11 +20,13 @@ local Page;
 SyncGUI.current = 0;
 SyncGUI.total   = 0;
 SyncGUI.files   = "";
+SyncGUI.isStart = false;
 
 function SyncGUI:ctor()
 	SyncGUI.current = 0;
 	SyncGUI.total   = 0;
 	SyncGUI.files   = "同步中，请稍后...";
+	SyncGUI.isStart = true;
 
 	SyncMain.curUpdateIndex        = 1;
 	SyncMain.curUploadIndex        = 1;
@@ -60,6 +62,7 @@ function SyncGUI:OnInit()
 end
 
 function SyncGUI.finish()
+	SyncGUI.isStart = false;
 	Page:CloseWindow();
 end
 

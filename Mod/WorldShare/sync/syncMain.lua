@@ -77,10 +77,13 @@ function SyncMain.goBack()
 end
 
 function SyncMain.closePage()
+	SyncGUI.isStart = false;
 	Page:CloseWindow();
 end
 
 function SyncMain:StartSyncPage()
+	SyncGUI.isStart = true;
+
 	System.App.Commands.Call("File.MCMLWindowFrame", {
 		url  = "Mod/WorldShare/sync/StartSync.html", 
 		name = "SyncWorldShare",
