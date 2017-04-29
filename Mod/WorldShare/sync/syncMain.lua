@@ -611,7 +611,7 @@ function SyncMain:syncToDataSource()
 				params.hasPreview      = hasPreview;
 				params.dataSourceType  = login.dataSourceType;
 				params.gitlabProjectId = GitlabService.projectId;
-				params.readme          = readme;
+				params.readme          = readme; --EncodingS.base64(readme);
 				params.preview         = preview;
 				params.filesTotals	   = filesTotals;
 

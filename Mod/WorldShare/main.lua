@@ -45,7 +45,7 @@ function WorldShare:init()
 			DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
 			style = CommonCtrl.WindowFrame.ContainerStyle,
 			zorder = 0,
-			allowDrag = false,
+			allowDrag = true,
 			bShow = bShow,
 			directPosition = true,
 				align = "_ct",
