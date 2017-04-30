@@ -333,6 +333,18 @@ function SyncMain:syncToLocal(_worldDir, _foldername, _callback)
 		local function finish()
 			SyncMain.finish = true;
 
+			syncToLocalGUI:updateDataBar(syncGUIIndex, syncGUItotal, "同步完成");
+			local localWorlds = InternetLoadWorld.cur_ds;
+
+			for key, value in ipairs(localWorlds) do
+				if(SyncMain.foldername == value["foldername"]) then
+					LOG.std(nil,"debug","SyncMain.foldername",SyncMain.foldername);
+					localWorlds[key].status   = 3;
+					localWorlds[key].revision = SyncMain.remoteRevison;
+					login.refreshPage();
+				end
+			end
+
 			--成功是返回信息给login
 			if(_callback) then
 				local params = {};
@@ -414,7 +426,7 @@ function SyncMain:syncToLocal(_worldDir, _foldername, _callback)
 					-- LOG.std(nil,"debug","self.localFiles[SyncMain.curUpdateIndex ].sha1",self.localFiles[SyncMain.curUpdateIndex ].sha1);
 					-- LOG.std(nil,"debug","githubFiles.tree[SyncMain.dataSourceIndex].sha",githubFiles.tree[SyncMain.dataSourceIndex].sha);
 
-					if (SyncMain.localFiles[SyncMain.curUpdateIndex ].sha1 ~= SyncMain.dataSourceFiles[SyncMain.dataSourceIndex].sha) then
+					if (SyncMain.localFiles[SyncMain.curUpdateIndex].sha1 ~= SyncMain.dataSourceFiles[SyncMain.dataSourceIndex].sha) then
 						-- 更新已存在的文件
 						LocalService:update(SyncMain.foldername, SyncMain.dataSourceFiles[SyncMain.dataSourceIndex].path, function (bIsUpdate, response)
 							if (bIsUpdate) then

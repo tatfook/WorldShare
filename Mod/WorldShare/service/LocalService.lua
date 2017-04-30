@@ -92,7 +92,9 @@ end
 
 function LocalService:update(_foldername, _path, _callback)
 	LocalService:getDataSourceContent(_foldername, _path, function(content, err)
-		local bashPath = "worlds/DesignHouse/" .. _foldername .. "/";
+		local foldernameForLocal = EncodingC.Utf8ToDefault(_foldername);
+		local bashPath = "worlds/DesignHouse/" .. foldernameForLocal .. "/";
+
 		local file = ParaIO.open(bashPath .. _path, "w");
 		
 		LOG.std(nil,"debug","LocalService:update",content);

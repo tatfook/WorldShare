@@ -66,6 +66,10 @@ function login.OnInit()
 	Page = document:GetPageCtrl();
 end
 
+function login.refreshPage()
+	Page:Refresh();
+end
+
 function login.LoginAction()
 	local account       = Page:GetValue("account");
 	local password      = Page:GetValue("password");
