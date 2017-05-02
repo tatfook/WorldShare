@@ -17,6 +17,7 @@ NPL.load("(gl)Mod/WorldShare/service/GithubService.lua");
 NPL.load("(gl)Mod/WorldShare/sync/SyncMain.lua");
 NPL.load("(gl)Mod/WorldShare/service/LocalService.lua");
 NPL.load("(gl)Mod/WorldShare/sync/SyncGUI.lua");
+NPL.load("(gl)script/apps/Aries/Creator/Game/Login/RemoteServerList.lua");
 
 local SyncGUI			 = commonlib.gettable("Mod.WorldShare.sync.SyncGUI");
 local LocalService		 = commonlib.gettable("Mod.WorldShare.service.LocalService");
@@ -28,10 +29,12 @@ local Encoding  	     = commonlib.gettable("commonlib.Encoding");
 local InternetLoadWorld  = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld");
 local WorldRevision      = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision");
 local SyncMain			 = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
+local RemoteServerList   = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.RemoteServerList");
 
 local login = commonlib.gettable("Mod.WorldShare.login");
 
 local Page;
+local InforPage;
 
 login.login_type   = 1;
 login.site         = "http://keepwork.com";
@@ -62,12 +65,38 @@ function login.init()
 	end);
 end
 
+function login.InforInit()
+	InforPage = document:GetPageCtrl();
+end
+
+function login.closeLoginInofor()
+	InforPage:CloseWindow();
+end
+
 function login.OnInit()
 	Page = document:GetPageCtrl();
 end
 
 function login.refreshPage()
 	Page:Refresh();
+end
+
+function login.showLoginInfo()
+	System.App.Commands.Call("File.MCMLWindowFrame", {
+		url = "Mod/WorldShare/loginInfor.html",
+		name = "login.loginInfor",
+		isShowTitleBar = false,
+		DestroyOnClose = true,
+		style = CommonCtrl.WindowFrame.ContainerStyle,
+		allowDrag = true,
+		isTopLevel = true,
+		directPosition = true,
+			align = "_ct",
+			x = -300/2,
+			y = -150/2,
+			width = 500,
+			height = 270,
+	});
 end
 
 function login.LoginAction()
@@ -86,7 +115,7 @@ function login.LoginAction()
 	    return;
 	end
 
-	_guihelper.MessageBox(L"正在登陆，请稍后...");
+	login.showLoginInfo();
 
 	login.LoginActionApi(account,password,function (response,err)
 			LOG.std(nil,"debug","response",response);
@@ -142,6 +171,10 @@ function login.LoginAction()
 						
 						login.changeLoginType(3);
 						login.syncWorldsList();
+
+						commonlib.TimerManager.SetTimeout(function()
+							login.closeLoginInofor();
+						end,1000);
 					else
 						--local clientLogin = Page:GetNode("clientLogin");
 						--login.changeLoginType(2);
@@ -518,30 +551,65 @@ function login.logout()
 	InternetLoadWorld.cur_ds = newLocalWorlds;
 end
 
-function login.changeRevision()
+function login.RefreshCurrentServerList()
 	if(login.login_type == 1) then
-		commonlib.TimerManager.SetTimeout(function()
-			local localWorlds = InternetLoadWorld.ServerPage_ds[1]['ds'];
-
-			if(localWorlds) then
-				for key,value in ipairs(localWorlds) do
-					value.filesTotals = LocalService:GetWorldFileSize(value.foldername);
-				end
-
-				--LOG.std(nil,"debug","localWorlds",localWorlds);
-
-				for kl,vl in ipairs(localWorlds) do
-					local WorldRevisionCheckOut = WorldRevision:new():init("worlds/DesignHouse/"..Encoding.Utf8ToDefault(vl.foldername).."/");
-					localWorlds[kl].revision    = WorldRevisionCheckOut:GetDiskRevision();
-				end
-
-				Page:Refresh();
-				return;
-			else
-				login.changeRevision();
-			end
-		end, 100);
+		login.getLocalWorldList(function()
+			login.changeRevision();
+		end);
+	elseif(login.login_type == 3) then
+		login.getLocalWorldList(function()
+			login.changeRevision(function()
+				login.syncWorldsList();
+			end);
+		end);
 	end
+end
+
+function login.getLocalWorldList(_callback)
+	local ServerPage = InternetLoadWorld.GetCurrentServerPage();
+	
+	RemoteServerList:new():Init("local", "localworld", function(bSucceed, serverlist)
+		if(not serverlist:IsValid()) then
+			BroadcastHelper.PushLabel({id="userworlddownload", label = L"无法下载服务器列表, 请检查网络连接", max_duration=10000, color = "255 0 0", scaling=1.1, bold=true, shadow=true,});
+		end
+
+		ServerPage.ds = serverlist.worlds or {};
+		InternetLoadWorld.OnChangeServerPage();
+
+		if(_callback) then
+			_callback();
+		end
+
+	end);
+end
+
+function login.changeRevision(_callback)
+	commonlib.TimerManager.SetTimeout(function()
+		local localWorlds = InternetLoadWorld.ServerPage_ds[1]['ds'];
+
+		if(localWorlds) then
+			for key,value in ipairs(localWorlds) do
+				value.filesTotals = LocalService:GetWorldFileSize(value.foldername);
+			end
+
+			--LOG.std(nil,"debug","localWorlds",localWorlds);
+
+			for kl,vl in ipairs(localWorlds) do
+				local WorldRevisionCheckOut = WorldRevision:new():init("worlds/DesignHouse/"..Encoding.Utf8ToDefault(vl.foldername).."/");
+				localWorlds[kl].revision    = WorldRevisionCheckOut:GetDiskRevision();
+			end
+
+			Page:Refresh();
+
+			if(_callback) then
+				_callback();
+			end
+
+			return;
+		else
+			login.changeRevision();
+		end
+	end, 30);
 end
 
 function login.syncWorldsList(_callback)
@@ -558,23 +626,23 @@ function login.syncWorldsList(_callback)
 
 	login.getWorldsList(function(data,err)
 		SyncMain.remoteWorldsList = data;
-		
+		LOG.std(nil,"debug","remoteWorldsList-syncWorldsList",SyncMain.remoteWorldsList);
 	    -- 处理本地网络同时存在 本地不存在 网络存在 的世界 
-	    for kd,vd in ipairs(data) do
+	    for keyDistance,valueDistance in ipairs(SyncMain.remoteWorldsList) do
 	        local isExist = false;
 
-	        for kl,vl in ipairs(localWorlds) do
-	            if(vd["worldsName"] == vl["foldername"]) then
-	            	LOG.std(nil,"debug","foldername",vl["foldername"]);
-	            	LOG.std(nil,"debug","worldsName",vd["worldsName"]);
+	        for keyLocal,valueLocal in ipairs(localWorlds) do
+	            if(valueDistance["worldsName"] == valueLocal["foldername"]) then
+	            	LOG.std(nil,"debug","foldername",valueLocal["foldername"]);
+	            	LOG.std(nil,"debug","worldsName",valueDistance["worldsName"]);
 
-					if(localWorlds[kl].server) then
-						if(tonumber(vl["revision"]) == tonumber(vd["revision"])) then
-	            			localWorlds[kl].status      = 3; --本地网络一致
-	            		elseif(tonumber(vl["revision"]) < tonumber(vd["revision"])) then
-	            			localWorlds[kl].status      = 5; --本地更新
+					if(localWorlds[keyLocal].server) then
+						if(tonumber(valueLocal["revision"]) == tonumber(valueDistance["revision"])) then
+	            			localWorlds[keyLocal].status = 3; --本地网络一致
+	            		elseif(tonumber(valueLocal["revision"]) < tonumber(valueDistance["revision"])) then
+	            			localWorlds[keyLocal].status = 5; --本地更新
 	            		elseif(tonumber(vl["revision"]) > tonumber(vd["revision"])) then
-	            			localWorlds[kl].status      = 4; --网络更新
+	            			localWorlds[keyLocal].status = 4; --网络更新
 	            		end
 					end
 
@@ -586,28 +654,28 @@ function login.syncWorldsList(_callback)
 
 	        if(not isExist) then
             	localWorlds[#localWorlds + 1] = {
-            		text        = vd["worldsName"];
-            		foldername  = vd["worldsName"];
-            		revision    = vd["revision"];
-            		filesTotals = vd["filesTotals"];
+            		text        = valueDistance["worldsName"];
+            		foldername  = valueDistance["worldsName"];
+            		revision    = valueDistance["revision"];
+            		filesTotals = valueDistance["filesTotals"];
             		status      = 2; --仅网络
             	};
 	        end
 	    end
 		
 	    -- 处理 本地存在 网络不存在 的世界
-	    for kl,vl in ipairs(localWorlds) do
+	    for keyLocal,valueLocal in ipairs(localWorlds) do
 	        local isExist = false;
 
-	        for kd,vd in ipairs(data) do
-	            if(vl["foldername"] == vd["worldsName"]) then
+	        for keyDistance,valueDistance in ipairs(SyncMain.remoteWorldsList) do
+	            if(valueLocal["foldername"] == valueDistance["worldsName"]) then
 	            	isExist = true;
 	            	break;
 	            end
 	        end
 
 	        if(not isExist) then
-	            localWorlds[kl].status = 1; --仅本地
+	            localWorlds[keyLocal].status = 1; --仅本地
 	        end
 	    end
 
@@ -625,7 +693,7 @@ function login.enterWorld(_index)
 	local index = tonumber(_index);
 	SyncMain.selectedWorldInfor = InternetLoadWorld.cur_ds[_index];
 
-	--LOG.std(nil,"debug","login.selectedWorldInfor",login.selectedWorldInfor);
+	LOG.std(nil,"debug","SyncMain.selectedWorldInfor",SyncMain.selectedWorldInfor);
 
 	if(SyncMain.selectedWorldInfor.status == 2) then
 		login.downloadWorld();
@@ -670,9 +738,11 @@ function login.downloadWorld()
 end
 
 function login.syncNow(_index)
+	LOG.std(nil,"debug","syncNow",_index);
 	local index = tonumber(_index);
 	SyncMain.selectedWorldInfor = InternetLoadWorld.cur_ds[_index];
 
+	LOG.std(nil,"debug","SyncMain.selectedWorldInfor",SyncMain.selectedWorldInfor);
 	if(login.login_type == 3) then
 		if(SyncMain.selectedWorldInfor.status ~= nil and SyncMain.selectedWorldInfor.status ~= 2)then
 			local foldername = SyncMain.selectedWorldInfor.foldername;

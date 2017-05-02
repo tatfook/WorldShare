@@ -301,11 +301,15 @@ function SyncMain:syncToLocal(_worldDir, _foldername, _callback)
 	end
 
 	if(not GitlabService.projectId) then
+		LOG.std(nil,"debug","SyncMain.worldName",SyncMain.worldName);
+		LOG.std(nil,"debug","GitlabService.projectId",GitlabService.projectId);
 		if(SyncMain.worldName) then
 			GitlabService.projectId = WorldShare:GetWorldData("gitLabProjectId", SyncMain.worldName);
 		else
 			GitlabService.projectId = WorldShare:GetWorldData("gitLabProjectId");
 		end
+		LOG.std(nil,"debug","GitlabService.projectId",GitlabService.projectId);
+		return;
 	end
 
 	SyncMain.localFiles = LocalService:LoadFiles(SyncMain.worldDir,"",nil,1000,nil);
