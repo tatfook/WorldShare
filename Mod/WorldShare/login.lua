@@ -69,8 +69,10 @@ function login.InforInit()
 	InforPage = document:GetPageCtrl();
 end
 
-function login.closeLoginInofor()
-	InforPage:CloseWindow();
+function login.closeLoginInfor()
+	commonlib.TimerManager.SetTimeout(function()
+		InforPage:CloseWindow();
+	end,1000);
 end
 
 function login.OnInit()
@@ -172,12 +174,11 @@ function login.LoginAction()
 						login.changeLoginType(3);
 						login.syncWorldsList();
 
-						commonlib.TimerManager.SetTimeout(function()
-							login.closeLoginInofor();
-						end,1000);
+						login.closeLoginInfor();
 					else
 						--local clientLogin = Page:GetNode("clientLogin");
 						--login.changeLoginType(2);
+						login.closeLoginInfor();
 						_guihelper.MessageBox(L"数据源不存在，请联系管理员");
 						return;
 					end
@@ -222,9 +223,11 @@ function login.LoginAction()
 						end
 					end);
 				else
+					login.closeLoginInfor();
 					_guihelper.MessageBox(L"用户名或者密码错误");
 				end
 			else
+				login.closeLoginInfor();
 				_guihelper.MessageBox(L"服务器连接失败");
 			end
 		end
@@ -709,13 +712,8 @@ function login.downloadWorld()
 	local worldDir = "worlds/DesignHouse/" .. foldername .. "/";
 	local worldDirForLocal = "worlds/DesignHouse/" .. foldernameForLocal .. "/";
 
-	for key,value in ipairs(SyncMain.remoteWorldsList) do
-		if(value.worldsName == foldername) then
-			GitlabService.projectId = value.gitlabProjectId;
-		end
-	end
-
 	ParaIO.CreateDirectory(worldDirForLocal);
+
 	SyncMain:syncToLocal(worldDir, SyncMain.selectedWorldInfor.foldername,function(success, params)
 		if(success) then
 		    SyncMain.selectedWorldInfor.status      = 3;

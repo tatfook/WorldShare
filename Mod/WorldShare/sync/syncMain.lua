@@ -300,16 +300,8 @@ function SyncMain:syncToLocal(_worldDir, _foldername, _callback)
 		SyncMain.foldername = _foldername;
 	end
 
-	if(not GitlabService.projectId) then
-		LOG.std(nil,"debug","SyncMain.worldName",SyncMain.worldName);
-		LOG.std(nil,"debug","GitlabService.projectId",GitlabService.projectId);
-		if(SyncMain.worldName) then
-			GitlabService.projectId = WorldShare:GetWorldData("gitLabProjectId", SyncMain.worldName);
-		else
-			GitlabService.projectId = WorldShare:GetWorldData("gitLabProjectId");
-		end
-		LOG.std(nil,"debug","GitlabService.projectId",GitlabService.projectId);
-		return;
+	if(login.dataSourceType == "gitlab") then
+		SyncMain:setGitlabProjectId(SyncMain.foldername);
 	end
 
 	SyncMain.localFiles = LocalService:LoadFiles(SyncMain.worldDir,"",nil,1000,nil);
@@ -903,15 +895,18 @@ function SyncMain:syncToDataSource()
 		LOG.std(nil,"debug","SyncMain:syncToGithub","非首次同步");
 
 		if(login.dataSourceType == "gitlab") then
-			if(SyncMain.worldName) then
-				GitlabService.projectId = WorldShare:GetWorldData("gitLabProjectId", SyncMain.worldName);
-			else
-				GitlabService.projectId = WorldShare:GetWorldData("gitLabProjectId");
-			end
-			
+			SyncMain:setGitlabProjectId(SyncMain.foldername);
 		end
 
 		syncToDataSourceGo();
+	end
+end
+
+function SyncMain:setGitlabProjectId(_foldername)
+	for key,value in ipairs(SyncMain.remoteWorldsList) do
+		if(value.worldsName == _foldername) then
+			GitlabService.projectId = value.gitlabProjectId;
+		end
 	end
 end
 
@@ -1423,11 +1418,7 @@ end
 function SyncMain.deleteWorldGitlab()
 	local foldername = SyncMain.selectedWorldInfor.foldername;
 	
-	for key,value in ipairs(SyncMain.remoteWorldsList) do
-		if(value.worldsName == foldername) then
-			GitlabService.projectId = value.gitlabProjectId;
-		end
-	end
+	SyncMain:setGitlabProjectId(foldername);
 
 	_guihelper.MessageBox(format(L"确定删除Gitlab远程世界:%s?", foldername or ""), function(res)
 	    Page:CloseWindow();
