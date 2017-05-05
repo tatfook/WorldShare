@@ -49,14 +49,6 @@
     <Content Include="Mod\WorldShare\sync\StartSyncUseDataSource.html" />
     <Content Include="Mod\WorldShare\sync\StartSyncUseLocal.html" />
     <Content Include="Mod\WorldShare\sync\SyncGUI.html" />
-    <Content Include="Mod\WorldShare\textures\delete_32bits.png" />
-    <Content Include="Mod\WorldShare\textures\enter_32bits.png" />
-    <Content Include="Mod\WorldShare\textures\github_only_32bits.png" />
-    <Content Include="Mod\WorldShare\textures\github_update_32bits.png" />
-    <Content Include="Mod\WorldShare\textures\local_only_32bits.png" />
-    <Content Include="Mod\WorldShare\textures\local_update_32bits.png" />
-    <Content Include="Mod\WorldShare\textures\offline_32bits.png" />
-    <Content Include="Mod\WorldShare\textures\sync_32bits.png" />
     <Content Include="script/**" />
   </ItemGroup>
   <ItemGroup>

@@ -26,6 +26,9 @@ local SyncMain      = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
 local GitlabService = commonlib.gettable("Mod.WorldShare.service.GitlabService");
 
 GitlabService.inited = false;
+GitlabService.tree = {};
+GitlabService.newTree = {};
+GitlabService.blob = {};
 
 function GitlabService:apiGet(_url, _callback)
 	_url = login.apiBaseUrl .. "/" .._url
@@ -38,7 +41,11 @@ function GitlabService:apiGet(_url, _callback)
 			["PRIVATE-TOKEN"] = login.dataSourceToken,
 			["User-Agent"]    = "npl",
 		},
-	},_callback);
+	},function(data ,err) 
+		LOG.std(nil,"debug","GitlabService:apiGet-data",data);
+		LOG.std(nil,"debug","GitlabService:apiGet-err",err);
+		_callback(data, err)
+	end);
 end
 
 function GitlabService:apiPost(_url, _params, _callback)
@@ -53,7 +60,11 @@ function GitlabService:apiPost(_url, _params, _callback)
 			["content-type"]  = "application/json"
 		},
 		form = _params,
-	},_callback);
+	},function(data ,err) 
+		LOG.std(nil,"debug","GitlabService:apiPost-data",data);
+		LOG.std(nil,"debug","GitlabService:apiPost-err",err);
+		_callback(data, err)
+	end);
 end
 
 function GitlabService:apiPut(_url, _params, _callback)
@@ -69,7 +80,11 @@ function GitlabService:apiPut(_url, _params, _callback)
 			["content-type"]  = "application/json"
 		},
 		form = _params
-	},_callback);
+	},function(data ,err) 
+		LOG.std(nil,"debug","GitlabService:apiPut-data",data);
+		LOG.std(nil,"debug","GitlabService:apiPut-err",err);
+		_callback(data, err)
+	end);
 end
 
 function GitlabService:apiDelete(_url, _params, _callback)
@@ -77,8 +92,8 @@ function GitlabService:apiDelete(_url, _params, _callback)
 
 	local github_token = login.dataSourceToken;
 	
-	LOG.std(nil,"debug","GitlabService:apiDelete",github_token);
-	LOG.std(nil,"debug","login.apiBaseUrl .. _url",_url);
+	LOG.std(nil,"debug","GitlabService:apiDelete-token",github_token);
+	LOG.std(nil,"debug","GitlabService:apiDelete-_url",_url);
 
 	HttpRequest:GetUrl({
 		method     = "DELETE",
@@ -91,8 +106,8 @@ function GitlabService:apiDelete(_url, _params, _callback)
 		},
 		form = _params,
 	},function(data ,err) 
-		LOG.std(nil,"debug","GitlabService:data",data);
-		LOG.std(nil,"debug","GitlabService:err",err);
+		LOG.std(nil,"debug","GitlabService:apiDelete-data",data);
+		LOG.std(nil,"debug","GitlabService:apiDelete-err",err);
 		_callback(data, err)
 	end);
 end
@@ -115,14 +130,99 @@ function GitlabService:getTree(_callback, _projectId)
 		_projectId = GitlabService.projectId;
 	end
 
-    local url = '/projects/' .. _projectId .. '/repository/tree?recursive=true';
+    local url = '/projects/' .. _projectId .. '/repository/tree';
 
-	GitlabService:apiGet(url,function(data, err)
+	GitlabService.blob = {};
+	GitlabService.tree = {};
+
+	GitlabService:apiGet(url, function(data, err)
+		if(err == 404) then
+			_callback(data, err);
+		else
+			LOG.std(nil,"debug","GitlabService:getTree-data",data);
+			for key,value in ipairs(data) do
+				if(value.type == "tree") then
+					GitlabService.tree[#GitlabService.tree + 1] = value;
+				end
+
+				if(value.type == "blob") then
+					GitlabService.blob[#GitlabService.blob + 1] = value;
+				end
+			end
+
+			local fetchTimes = 0;
+			LOG.std(nil,"debug","GitlabService.tree",GitlabService.tree);
+			LOG.std(nil,"debug","GitlabService.blob",GitlabService.blob);
+
+			local function getSubTree()
+				for key,value in ipairs(GitlabService.tree) do
+					GitlabService:getSubTree(function(subTree,subFolderName)
+						for checkKey,checkValue in ipairs(GitlabService.tree) do
+							if(checkValue.path == subFolderName) then
+								if(not checkValue.alreadyGet) then
+									checkValue.alreadyGet = true;
+								else
+									return;
+								end
+							end
+						end
+
+						fetchTimes = fetchTimes + 1;
+
+						for subKey,subValue in ipairs(subTree) do
+							GitlabService.newTree[#GitlabService.newTree + 1] = subValue;
+						end
+
+						if(#GitlabService.tree == fetchTimes)then
+							fetchTimes = 0;
+							GitlabService.tree = commonlib.copy(GitlabService.newTree);
+							GitlabService.newTree = {};
+
+							if(#GitlabService.tree == 0) then
+								local returnTree = {};
+								local revision = {};
+								for cbKey,cbValue in ipairs(GitlabService.blob) do
+									cbValue.sha = cbValue.id;
+
+									if(cbValue.path ~= "revision.xml") then
+										returnTree[#returnTree + 1] = cbValue;
+									else
+										revision = cbValue;
+									end
+								end
+
+								returnTree[#returnTree + 1] = revision;
+
+								_callback(returnTree);
+							else
+								getSubTree();
+							end
+						end
+					end, value.path);
+				end
+			end
+
+			getSubTree();
+		end
+	end);
+end
+
+function GitlabService:getSubTree(_callback, _path)
+	local url = '/projects/' .. GitlabService.projectId .. '/repository/tree' .. "?path=" .. _path;
+
+	local tree = {};
+	GitlabService:apiGet(url, function(data, err)
 		for key,value in ipairs(data) do
-			value.sha = value.id;
+			if(value.type == "tree") then
+				tree[#tree + 1] = value;
+			end
+
+			if(value.type == "blob") then
+				GitlabService.blob[#GitlabService.blob + 1] = value;
+			end
 		end
 
-		_callback(data,err);
+		_callback(tree, _path);
 	end);
 end
 
@@ -149,9 +249,9 @@ function GitlabService:writeFile(_filename, _file_content_t, _callback, _project
 		LOG.std(nil,"debug","GitlabService:writeFile",err);
 
 		if(err == 201) then
-			_callback(true,_filename, data, err);
+			_callback(true, _filename, data, err);
 		else
-			_callback(false,_filename, data, err);
+			_callback(false, _filename, data, err);
 		end
 	end);
 end
@@ -171,9 +271,9 @@ function GitlabService:update(_filename, _file_content_t, _sha, _callback, _proj
 		LOG.std(nil,"debug","GitlabService:update",err);
 
 		if(err == 200) then
-			_callback(true,_filename, data, err);
+			_callback(true, _filename, data, err);
 		else
-			_callback(false,_filename, data, err);
+			_callback(false, _filename, data, err);
 		end
 	end);
 end
@@ -263,15 +363,6 @@ function GitlabService:init(_foldername, _callback)
 			for i=1,#projectList do
 				if (projectList[i].name == _foldername) then
 					GitlabService.projectId = projectList[i].id;
-
-					if(SyncMain.worldName) then
-						WorldShare:SetWorldData("gitLabProjectId", GitlabService.projectId, SyncMain.worldName);
-						WorldShare:SaveWorldData(SyncMain.worldName);
-					else
-						WorldShare:SetWorldData("gitLabProjectId", GitlabService.projectId);
-						WorldShare:SaveWorldData();
-					end
-
 					_callback(true,err);
 					return;
 				end
@@ -285,17 +376,9 @@ function GitlabService:init(_foldername, _callback)
 				GitlabService:apiPost(url, params, function(data,err)
 					if(data.id ~= nil) then
 						GitlabService.projectId = data.id;
-
-						if(SyncMain.worldName) then
-							WorldShare:SetWorldData("gitLabProjectId", GitlabService.projectId, SyncMain.worldName);
-							WorldShare:SaveWorldData(SyncMain.worldName);
-						else
-							WorldShare:SetWorldData("gitLabProjectId", GitlabService.projectId);
-							WorldShare:SaveWorldData();
-						end
-
 						LOG.std(nil,"debug","GitlabService.projectId",GitlabService.projectId);
 						LOG.std(nil,"debug","err",err);
+
 						_callback(true,err);
 						return;
 					end
@@ -304,6 +387,5 @@ function GitlabService:init(_foldername, _callback)
 		else
 			_callback(false,err);
 		end
-        
 	end);
 end

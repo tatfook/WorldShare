@@ -502,7 +502,7 @@ function SyncMain:syncToLocal(_worldDir, _foldername, _callback)
 					return;
 				end
 
-				LOG.std(nil,"debug","syncToLocal",data);
+				LOG.std(nil,"debug","SyncMain:getFileShaListService-data",data);
 
 				SyncMain.dataSourceFiles = data;
 
@@ -567,8 +567,8 @@ function SyncMain:syncToDataSource()
 
 			syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, L'获取文件sha列表');
 
-			LOG.std(nil,"debug","SyncMain",SyncMain.curUploadIndex);
-			LOG.std(nil,"debug","SyncMain",SyncMain.totalDataSourceIndex);
+			LOG.std(nil,"debug","SyncMain.curUploadIndex",SyncMain.curUploadIndex);
+			LOG.std(nil,"debug","SyncMain.totalDataSourceIndex",SyncMain.totalDataSourceIndex);
 
 			local function finish()
 				LOG.std(nil,"debug","SyncMain.selectedWorldInfor",SyncMain.selectedWorldInfor);
@@ -666,40 +666,40 @@ function SyncMain:syncToDataSource()
 
 			-- 上传新文件
 			local function uploadOne()
-				if (SyncMain.curUploadIndex <= SyncMain.totalLocalIndex) then
-					-- LOG.std(nil,"debug","self.localFiles",self.localFiles[SyncMain.curUploadIndex].needChange);
-					-- LOG.std(nil,"debug","self.localFiles",self.localFiles[SyncMain.curUploadIndex]);
+				LOG.std(nil,"debug","uploadOne-status",SyncMain.curUploadIndex);
+				LOG.std(nil,"debug","uploadOne-status",SyncMain.totalLocalIndex);
 
-					if (SyncMain.localFiles[SyncMain.curUploadIndex].needChange) then
-						SyncMain.localFiles[SyncMain.curUploadIndex].needChange = false;
-						SyncMain:uploadService(SyncMain.foldername, SyncMain.localFiles[SyncMain.curUploadIndex].filename, SyncMain.localFiles[SyncMain.curUploadIndex].file_content_t,function (bIsUpload, filename)
-							if (bIsUpload) then
-								syncGUIIndex = syncGUIIndex + 1;
+				if (SyncMain.localFiles[SyncMain.curUploadIndex].needChange) then
+					SyncMain.localFiles[SyncMain.curUploadIndex].needChange = false;
+					SyncMain:uploadService(SyncMain.foldername, SyncMain.localFiles[SyncMain.curUploadIndex].filename, SyncMain.localFiles[SyncMain.curUploadIndex].file_content_t,function (bIsUpload, filename)
+						if (bIsUpload) then
+							syncGUIIndex = syncGUIIndex + 1;
+							syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, filename);
 
-								syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, filename);
-
-								SyncMain.curUploadIndex = SyncMain.curUploadIndex + 1;
-
-								if(syncGUItotal == syncGUIIndex) then
-									finish();
-								end
+							if (SyncMain.curUploadIndex == SyncMain.totalLocalIndex) then
+								LOG.std(nil,"debug","SyncMain.localFiles",SyncMain.localFiles);
+								finish();
 							else
-								_guihelper.MessageBox(L"更新失败");
-								syncToDataSourceGUI.finish();
-								SyncMain.finish = true;
-								--_guihelper.MessageBox(SyncMain.localFiles[SyncMain.curUploadIndex].filename .. ' 上传失败，请稍后再试');
+								SyncMain.curUploadIndex = SyncMain.curUploadIndex + 1;
+								uploadOne(); --继续递归上传
 							end
-						end);
+						else
+							--_guihelper.MessageBox(L"上传失败");
+							--syncGUIIndex = syncGUIIndex + 1;
+							--syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, filename);
+
+							--syncToDataSourceGUI.finish();
+							--SyncMain.finish = true;
+						end
+					end);
+				else
+--					syncGUIIndex = syncGUIIndex + 1;
+--					syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, SyncMain.localFiles[SyncMain.curUploadIndex].filename);
+
+					if (SyncMain.curUploadIndex == SyncMain.totalLocalIndex) then
+						finish();
 					else
 						SyncMain.curUploadIndex = SyncMain.curUploadIndex + 1;
-					end
-
-					if (SyncMain.curUploadIndex > SyncMain.totalLocalIndex) then
-						if(syncGUItotal == syncGUIIndex) then
-							finish();
-						end
-						-- _guihelper.MessageBox('同步完成-D');
-					else
 						uploadOne(); --继续递归上传
 					end
 				end
@@ -707,20 +707,24 @@ function SyncMain:syncToDataSource()
 
 			-- 更新数据源文件
 			local function updateOne()
-				if (SyncMain.curUpdateIndex <= SyncMain.totalDataSourceIndex) then
-					--LOG.std(nil,"debug","SyncMain.curUpdateIndex",SyncMain.curUpdateIndex);
-					--LOG.std(nil,"debug","SyncMain.totalDataSourceIndex",SyncMain.totalDataSourceIndex);
-					local bIsExisted  = false;
-					local LocalIndex  = nil;
+				LOG.std(nil,"debug","updateOne-status",SyncMain.curUpdateIndex);
+				LOG.std(nil,"debug","updateOne-status",SyncMain.totalDataSourceIndex);
 
+				local bIsExisted  = false;
+				local LocalIndex  = nil;
+				local curGitFiles = SyncMain.dataSourceFiles[SyncMain.curUpdateIndex];
+
+				if(curGitFiles.type == "blob") then
 					-- 用数据源的文件和本地的文件对比
 					for key,value in ipairs(SyncMain.localFiles) do
-						if(value.filename == SyncMain.dataSourceFiles[SyncMain.curUpdateIndex].path) then
+						if(value.filename == curGitFiles.path) then
 							bIsExisted  = true;
 							LocalIndex  = key; 
 							break;
 						end
 					end
+
+					LOG.std(nil,"debug","dataSourceFiles",curGitFiles.path);
 
 					if (bIsExisted) then
 						SyncMain.localFiles[LocalIndex].needChange = false;
@@ -728,45 +732,44 @@ function SyncMain:syncToDataSource()
 						--LOG.std(nil,"debug","SyncMain.dataSourceFiles[SyncMain.curUpdateIndex].sha",SyncMain.dataSourceFiles[SyncMain.curUpdateIndex].sha);
 						--LOG.std(nil,"debug","self.localFiles.sha1",self.localFiles[LocalIndex].sha1);
 
-						if (SyncMain.dataSourceFiles[SyncMain.curUpdateIndex].sha ~= SyncMain.localFiles[LocalIndex].sha1) then
+						if (curGitFiles.sha ~= SyncMain.localFiles[LocalIndex].sha1) then
 							-- 更新已存在的文件
-							SyncMain:updateService(SyncMain.foldername, SyncMain.localFiles[LocalIndex].filename, SyncMain.localFiles[LocalIndex].file_content_t, SyncMain.dataSourceFiles[SyncMain.curUpdateIndex].sha, function (bIsUpdate,content)
+							SyncMain:updateService(SyncMain.foldername, SyncMain.localFiles[LocalIndex].filename, SyncMain.localFiles[LocalIndex].file_content_t, curGitFiles.sha, function (bIsUpdate, filename)
 								if (bIsUpdate) then
 									syncGUIIndex = syncGUIIndex + 1;
-									syncGUIFiles = SyncMain.localFiles[LocalIndex].filename;
+									syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, filename);
 
-									syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, syncGUIFiles);
-
-									SyncMain.curUpdateIndex = SyncMain.curUpdateIndex + 1;
-
-									-- 如果当前计数大于最大计数则更新
-									if (SyncMain.curUpdateIndex > SyncMain.totalDataSourceIndex) then
-										-- _guihelper.MessageBox(L'同步完成-A');
-										finish();
+									if (SyncMain.curUpdateIndex == SyncMain.totalDataSourceIndex) then
+										for key,value in ipairs(SyncMain.localFiles) do
+											LOG.std(nil,"debug","filename",value.filename);
+											LOG.std(nil,"debug","needChange",value.needChange);
+										end
+										
 										uploadOne();
 									else
+										SyncMain.curUpdateIndex = SyncMain.curUpdateIndex + 1; -- 如果不等最大计数则更新
 										updateOne();
 									end
 								else
 									_guihelper.MessageBox(L"更新失败");
-									syncToDataSourceGUI.finish();
-									SyncMain.finish = true;
-									-- _guihelper.MessageBox(SyncMain.dataSourceFiles.tree[curUpdateSyncMain.curUpdateIndexIndex].path .. ' 更新失败,请稍后再试');
+									syncGUIIndex = syncGUIIndex + 1;
+									syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, filename);
+									--syncToDataSourceGUI.finish();
+									--SyncMain.finish = true;
 								end
 							end);
 						else
-							-- if file exised, and has same sha value, then contain it
-							syncGUIIndex   = syncGUIIndex + 1;
-							syncGUIFiles   = SyncMain.localFiles[LocalIndex].filename;
+							syncGUIIndex = syncGUIIndex + 1;
+							syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, SyncMain.localFiles[LocalIndex].filename);
 
-							syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, syncGUIFiles);
-
-							SyncMain.curUpdateIndex = SyncMain.curUpdateIndex + 1;
-
-							if (SyncMain.curUpdateIndex > SyncMain.totalDataSourceIndex) then     -- check whether all files have updated or not. if false, update the next one, if true, upload files.
-								-- _guihelper.MessageBox(L'同步完成-B');
+							if (SyncMain.curUpdateIndex == SyncMain.totalDataSourceIndex) then
+								for key,value in ipairs(SyncMain.localFiles) do
+									LOG.std(nil,"debug","filename",value.filename);
+									LOG.std(nil,"debug","needChange",value.needChange);
+								end
 								uploadOne();
 							else
+								SyncMain.curUpdateIndex = SyncMain.curUpdateIndex + 1;
 								updateOne();
 							end
 						end
@@ -777,35 +780,40 @@ function SyncMain:syncToDataSource()
 						-- 如果过数据源不删除存在，则删除本地的文件
 						deleteOne();
 					end
+				else
+					if (SyncMain.curUpdateIndex == SyncMain.totalDataSourceIndex) then
+						uploadOne();
+					else
+						SyncMain.curUpdateIndex = SyncMain.curUpdateIndex + 1;
+						updateOne();
+					end
 				end
 			end
 
 			-- 删除数据源文件
 			function deleteOne()
+				LOG.std(nil,"debug","deleteOne-status");
 				if(SyncMain.dataSourceFiles[SyncMain.curUpdateIndex].type == "blob") then
 					SyncMain:deleteFileService(SyncMain.foldername, SyncMain.dataSourceFiles[SyncMain.curUpdateIndex].path, SyncMain.dataSourceFiles[SyncMain.curUpdateIndex].sha, function (bIsDelete)
 						if (bIsDelete) then
 							SyncMain.curUpdateIndex = SyncMain.curUpdateIndex + 1;
 
 							if (SyncMain.curUpdateIndex > SyncMain.totalDataSourceIndex) then  --check whether all files have updated or not. if false, update the next one, if true, upload files.
-								-- _guihelper.MessageBox(L'同步完成-C');
 								uploadOne();
 							else
 								updateOne();
 							end
 						else
-							_guihelper.MessageBox(L"更新失败");
-							syncToDataSourceGUI.finish();
-							SyncMain.finish = true;
-							--_guihelper.MessageBox('删除 ' .. SyncMain.localFiles[curUpdateIndex].filename .. ' 失败, 请稍后再试');
+							_guihelper.MessageBox(L"删除失败");
+							--syncToDataSourceGUI.finish();
+							--SyncMain.finish = true;
 						end
 					end);
 				else
-					SyncMain.curUpdateIndex = SyncMain.curUpdateIndex + 1;
-
-					if (SyncMain.curUpdateIndex > SyncMain.totalDataSourceIndex) then  --check whether all files have updated or not. if false, update the next one, if true, upload files.
+					if (SyncMain.curUpdateIndex == SyncMain.totalDataSourceIndex) then  --check whether all files have updated or not. if false, update the next one, if true, upload files.
 						uploadOne();
 					else
+						SyncMain.curUpdateIndex = SyncMain.curUpdateIndex + 1;
 						updateOne();
 					end
 				end
@@ -813,6 +821,9 @@ function SyncMain:syncToDataSource()
 
 			-- 获取数据源仓文件
 			SyncMain:getFileShaListService(SyncMain.foldername, function(data, err)
+				LOG.std(nil,"debug","SyncMain:getFileShaListService-data",data);
+				LOG.std(nil,"debug","SyncMain:getFileShaListService-err",err);
+
 				local hasReadme = false;
 
 				for key,value in ipairs(SyncMain.localFiles) do
@@ -843,8 +854,8 @@ function SyncMain:syncToDataSource()
 					SyncMain.localFiles[#SyncMain.localFiles + 1] = readMeFiles;
 				end
 
-				SyncMain.totalLocalIndex  = #SyncMain.localFiles;
-				syncGUItotal     = #SyncMain.localFiles;
+				SyncMain.totalLocalIndex = #SyncMain.localFiles;
+				syncGUItotal = #SyncMain.localFiles;
 
 				for i=1,#SyncMain.localFiles do
 					-- LOG.std(nil,"debug","localFiles",self.localFiles[i]);
@@ -854,12 +865,8 @@ function SyncMain:syncToDataSource()
 
 				if (err ~= 409 and err ~= 404) then --409代表已经创建过此仓
 					SyncMain.dataSourceFiles = data;
-
-					LOG.std(nil,"debug","syncGUItotal",syncGUItotal);
-
 					SyncMain.totalDataSourceIndex = #SyncMain.dataSourceFiles;
 
-					LOG.std(nil,"debug","SyncMain.dataSourceFiles",err .. " success!");
 					updateOne();
 				else
 					--if the repos is empty, then upload files 
@@ -867,11 +874,6 @@ function SyncMain:syncToDataSource()
 				end
 			end);
 		end
-	end
-
-	if(test)then
-		syncToDataSourceGo();
-		return;
 	end
 
 	------------------------------------------------------------------------
@@ -1177,7 +1179,7 @@ function SyncMain:refreshWikiPages(_path, _content, _callback)
 			dataSourceId = login.dataSourceId,
 		},
 	},function(data, err)
-		LOG.std(nil,"debug","getUserPages",data);
+		--LOG.std(nil,"debug","getUserPages",data);
 		local pageinfoList = data.data.pageinfo;
 
 		local params = {};
@@ -1197,10 +1199,10 @@ function SyncMain:refreshWikiPages(_path, _content, _callback)
 			end
 		end
 
-		LOG.std(nil,"debug","_path",_path);
-		LOG.std(nil,"debug","_content",_content);
-		LOG.std(nil,"debug","hasFile",hasFile);
-		LOG.std(nil,"debug","pageinfoList",pageinfoList);
+		--LOG.std(nil,"debug","_path",_path);
+		--LOG.std(nil,"debug","_content",_content);
+		--LOG.std(nil,"debug","hasFile",hasFile);
+		--LOG.std(nil,"debug","pageinfoList",pageinfoList);
 
 		if(hasFile) then
 			hasFileInfo.timestamp = os.time() .. "000";

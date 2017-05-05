@@ -75,19 +75,46 @@ function LocalService:LoadFiles(_worldDir,_curPath,_filter,_nMaxFileLevels,_nMax
 	nMaxFileLevels = _nMaxFileLevels or 0;
 	nMaxFilesNum   = _nMaxFilesNum or 500;
 
-	self.output   = {};
-	self.path     = _worldDir.._curPath;
-	self.worldDir = _worldDir;
+	LocalService.output   = {};
+	LocalService.path     = _worldDir.._curPath;
+	LocalService.worldDir = _worldDir;
 
 	if(_curPath ~= "") then
-		self.curPath = _curPath.."/";
+		LocalService.curPath = _curPath.."/";
 	end
 
-	local result = Files.Find({}, self.path, 0, nMaxFilesNum, filter);
+	local result = Files.Find({}, LocalService.path, 0, nMaxFilesNum, filter);
 
-	self:filesFind(result);
+	LocalService:filesFind(result);
 
-	return self.output;
+	local revision;
+	local hasRevision;
+
+	for key, value in ipairs(LocalService.output) do
+		--LOG.std(nil,"debug","LocalService:LoadFiles-LocalService.output",value.filename);
+		if(value.filename == "revision.xml") then
+			revision    = value;
+			hasRevision = true;
+		end
+	end
+
+	--LOG.std(nil,"debug","LocalService:LoadFiles-revision",revision);
+	--LOG.std(nil,"debug","LocalService:LoadFiles-hasRevision",hasRevision);
+
+	local sortOutPut = {};
+
+	if(hasRevision) then
+		for key, value in ipairs(LocalService.output) do
+			--LOG.std(nil, "debug", "LocalService:LoadFiles-LocalService.output", value.filename);
+			if(value.filename ~= "revision.xml") then
+				sortOutPut[#sortOutPut + 1] = value;
+			end
+		end
+
+		sortOutPut[#sortOutPut + 1] = revision;
+	end
+
+	return sortOutPut;
 end
 
 function LocalService:update(_foldername, _path, _callback)

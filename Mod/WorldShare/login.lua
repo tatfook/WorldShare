@@ -644,7 +644,7 @@ function login.syncWorldsList(_callback)
 	            			localWorlds[keyLocal].status = 3; --本地网络一致
 	            		elseif(tonumber(valueLocal["revision"]) < tonumber(valueDistance["revision"])) then
 	            			localWorlds[keyLocal].status = 5; --本地更新
-	            		elseif(tonumber(vl["revision"]) > tonumber(vd["revision"])) then
+	            		elseif(tonumber(valueLocal["revision"]) > tonumber(valueDistance["revision"])) then
 	            			localWorlds[keyLocal].status = 4; --网络更新
 	            		end
 					end

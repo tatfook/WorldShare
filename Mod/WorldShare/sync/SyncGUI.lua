@@ -92,6 +92,6 @@ function SyncGUI:updateDataBar(_current, _total, _files)
 	SyncGUI.progressbar:SetAttribute("Maximum",SyncGUI.total);
 	SyncGUI.progressbar:SetAttribute("Value",SyncGUI.current);
 
-	Page:Refresh();
+	Page:Refresh(0.01);
 end
 
