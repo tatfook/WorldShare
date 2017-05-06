@@ -142,7 +142,9 @@ function SyncMain:compareRevision(_worldDir)
 			if(login.dataSourceType == 'github') then
 				contentUrl = login.rawBaseUrl .. "/" .. login.dataSourceUsername .. "/" .. GitEncoding.base64(SyncMain.foldername) .. "/master/revision.xml";
 			elseif(login.dataSourceType == 'gitlab') then
-				contentUrl = login.rawBaseUrl .. "/" .. login.dataSourceUsername .. "/" .. GitEncoding.base64(SyncMain.foldername) .. "/raw/master/revision.xml";
+				local commitId = SyncMain:getGitlabCommitId(SyncMain.foldername);
+				contentUrl = login.rawBaseUrl .. "/" .. login.dataSourceUsername .. "/" .. GitEncoding.base64(SyncMain.foldername) .. "/raw/" .. commitId .. "/revision.xml";
+				LOG.std("SyncMain","debug","contentUrl",contentUrl);
 			end
 
 			SyncMain.remoteRevison = 0;
@@ -304,8 +306,6 @@ function SyncMain:syncToLocal(_worldDir, _foldername, _callback)
 		SyncMain:setGitlabProjectId(SyncMain.foldername);
 	end
 
-	SyncMain.localFiles = LocalService:LoadFiles(SyncMain.worldDir,"",nil,1000,nil);
-
 	if (SyncMain.worldDir == "") then
 		_guihelper.MessageBox(L"下载失败，原因：下载目录为空");
 		return;
@@ -314,12 +314,11 @@ function SyncMain:syncToLocal(_worldDir, _foldername, _callback)
 		SyncMain.curDownloadIndex      = 1;
 		SyncMain.totalLocalIndex       = nil;
 		SyncMain.totalDataSourceIndex  = nil;
-		SyncMain.dataSourceIndex       = 0;
 		SyncMain.dataSourceFiles       = {};
 
-		local syncGUItotal          = 0;
-		local syncGUIIndex          = 0;
-		local syncGUIFiles          = "";
+		local syncGUItotal = 0;
+		local syncGUIIndex = 0;
+		local syncGUIFiles = "";
 
 		-- LOG.std(nil,"debug","SyncMainGUI",SyncMain.curDownloadIndex);
 		-- LOG.std(nil,"debug","SyncMainGUI",SyncMain.totalDataSourceIndex);
@@ -353,141 +352,121 @@ function SyncMain:syncToLocal(_worldDir, _foldername, _callback)
 
 		-- 下载新文件
 		local function downloadOne()
-			if (SyncMain.curDownloadIndex <= SyncMain.totalDataSourceIndex) then
-				-- LOG.std(nil,"debug","githubFiles.tree[SyncMain.curDownloadIndex]",githubFiles.tree[SyncMain.curDownloadIndex]);
-				-- LOG.std(nil,"debug","SyncMain.curDownloadIndex",SyncMain.curDownloadIndex);
+			-- LOG.std(nil,"debug","githubFiles.tree[SyncMain.curDownloadIndex]",githubFiles.tree[SyncMain.curDownloadIndex]);
+			-- LOG.std(nil,"debug","SyncMain.curDownloadIndex",SyncMain.curDownloadIndex);
 
-				if (SyncMain.dataSourceFiles[SyncMain.curDownloadIndex].needChange) then
-					if(SyncMain.dataSourceFiles[SyncMain.curDownloadIndex].type == "blob") then
-						-- LOG.std(nil,"debug","githubFiles.tree[SyncMain.curDownloadIndex].type",githubFiles.tree[SyncMain.curDownloadIndex].type);
-						LocalService:download(SyncMain.foldername, SyncMain.dataSourceFiles[SyncMain.curDownloadIndex].path, function (bIsDownload, response)
-							if (bIsDownload) then
-								syncGUIIndex = syncGUIIndex + 1;
-								syncGUIFiles = response.filename;
+			if (SyncMain.dataSourceFiles[SyncMain.curDownloadIndex].needChange) then
+				if(SyncMain.dataSourceFiles[SyncMain.curDownloadIndex].type == "blob") then
+					-- LOG.std(nil,"debug","githubFiles.tree[SyncMain.curDownloadIndex].type",githubFiles.tree[SyncMain.curDownloadIndex].type);
+					LocalService:download(SyncMain.foldername, SyncMain.dataSourceFiles[SyncMain.curDownloadIndex].path, function (bIsDownload, response)
+						if (bIsDownload) then
+							syncGUIIndex = syncGUIIndex + 1;
+							syncToLocalGUI:updateDataBar(syncGUIIndex, syncGUItotal, response.filename);
 
-								if(response.filename == "revision.xml") then
-									SyncMain.remoteRevison = response.content;
-								end
-
-								if(syncGUIIndex == syncGUItotal) then
-									finish();
-								end
-
-								syncToLocalGUI:updateDataBar(syncGUIIndex, syncGUItotal, response.filename);
-							else
-								_guihelper.MessageBox(L'下载失败，请稍后再试');
-								syncToLocalGUI.finish();
-								SyncMain.finish = true;
+							if(response.filename == "revision.xml") then
+								SyncMain.remoteRevison = response.content;
 							end
-						end);
-					end
 
-					SyncMain.curDownloadIndex = SyncMain.curDownloadIndex + 1;
-				else
-					SyncMain.curDownloadIndex = SyncMain.curDownloadIndex + 1;
+							if(SyncMain.curDownloadIndex == SyncMain.totalDataSourceIndex) then
+								finish();
+							else
+								SyncMain.curDownloadIndex = SyncMain.curDownloadIndex + 1;
+								downloadOne();
+							end
+						else
+							_guihelper.MessageBox(L'下载失败，请稍后再试');
+							--syncToLocalGUI.finish();
+							--SyncMain.finish = true;
+						end
+					end);
 				end
+			else
+				syncGUIIndex = syncGUIIndex + 1;
+				syncToLocalGUI:updateDataBar(syncGUIIndex, syncGUItotal, SyncMain.dataSourceFiles[SyncMain.curDownloadIndex].path);
 
-				if (SyncMain.curDownloadIndex > SyncMain.totalDataSourceIndex) then
-					-- 同步完成
-					if(syncGUIIndex == syncGUItotal) then
-						finish();
-					end
+				if(SyncMain.curDownloadIndex == SyncMain.totalDataSourceIndex) then
+					finish();
 				else
-					downloadOne(); --继续递归上传
+					SyncMain.curDownloadIndex = SyncMain.curDownloadIndex + 1;
+					downloadOne();
 				end
 			end
 		end
 
 		-- 更新本地文件
 		local function updateOne()
-			if (SyncMain.curUpdateIndex <= SyncMain.totalLocalIndex) then
-				LOG.std(nil,"debug","SyncMain.curUpdateIndex ",SyncMain.curUpdateIndex);
-				local bIsExisted  = false;
-				local githubIndex = nil;
+			LOG.std(nil,"debug","SyncMain.curUpdateIndex ",SyncMain.curUpdateIndex);
+			local bIsExisted      = false;
+			local dataSourceIndex = nil;
 
-				-- 用Gihub的文件和本地的文件对比
-				for key,value in ipairs(SyncMain.dataSourceFiles) do
-					if(value.path == SyncMain.localFiles[SyncMain.curUpdateIndex].filename) then
-						LOG.std(nil,"debug","value.path",value.path);
-						bIsExisted = true;
-						SyncMain.dataSourceIndex = key; 
-						break;
-					end
+			-- 用数据源的文件和本地的文件对比
+			for key, value in ipairs(SyncMain.dataSourceFiles) do
+				if(value.path == SyncMain.localFiles[SyncMain.curUpdateIndex].filename) then
+					LOG.std(nil,"debug","value.path",value.path);
+					bIsExisted = true;
+					dataSourceIndex = key; 
+					break;
 				end
+			end
 
-				-- 本地是否存在Github上的文件
-				if (bIsExisted) then
-					SyncMain.dataSourceFiles[SyncMain.dataSourceIndex].needChange = false;
-					-- LOG.std(nil,"debug","self.localFiles[SyncMain.curUpdateIndex ].filename",self.localFiles[SyncMain.curUpdateIndex ].filename);
-					-- LOG.std(nil,"debug","self.localFiles[SyncMain.curUpdateIndex ].sha1",self.localFiles[SyncMain.curUpdateIndex ].sha1);
-					-- LOG.std(nil,"debug","githubFiles.tree[SyncMain.dataSourceIndex].sha",githubFiles.tree[SyncMain.dataSourceIndex].sha);
+			-- 本地是否存在数据源上的文件
+			if (bIsExisted) then
+				SyncMain.dataSourceFiles[dataSourceIndex].needChange = false;
+				-- LOG.std(nil,"debug","self.localFiles[SyncMain.curUpdateIndex ].filename",self.localFiles[SyncMain.curUpdateIndex ].filename);
+				-- LOG.std(nil,"debug","self.localFiles[SyncMain.curUpdateIndex ].sha1",self.localFiles[SyncMain.curUpdateIndex ].sha1);
+				-- LOG.std(nil,"debug","githubFiles.tree[dataSourceIndex].sha",githubFiles.tree[dataSourceIndex].sha);
 
-					if (SyncMain.localFiles[SyncMain.curUpdateIndex].sha1 ~= SyncMain.dataSourceFiles[SyncMain.dataSourceIndex].sha) then
-						-- 更新已存在的文件
-						LocalService:update(SyncMain.foldername, SyncMain.dataSourceFiles[SyncMain.dataSourceIndex].path, function (bIsUpdate, response)
-							if (bIsUpdate) then
-								SyncMain.curUpdateIndex = SyncMain.curUpdateIndex + 1;
-								syncGUIIndex   = syncGUIIndex   + 1;
-
-								-- syncGUIFiles   = githubFiles.tree[SyncMain.dataSourceIndex].path;
-								-- LOG.std(nil,"debug","syncGUIIndex",syncGUIIndex);
-
-								if(response.filename == "revision.xml") then
-									SyncMain.remoteRevison = response.content;
-								end
-
-								syncToLocalGUI:updateDataBar(syncGUIIndex, syncGUItotal, response.filename);
-
-								-- 如果当前计数大于最大计数则更新
-								if (SyncMain.curUpdateIndex > SyncMain.totalLocalIndex) then      -- check whether all files have updated or not. if false, update the next one, if true, upload files.  
-									-- _guihelper.MessageBox(L'同步完成-A');
-									downloadOne();
-								else
-									updateOne();
-								end
-							else
-								_guihelper.MessageBox(L'更新失败,请稍后再试');
-								syncToLocalGUI.finish();
-								SyncMain.finish = true;
+				if (SyncMain.localFiles[SyncMain.curUpdateIndex].sha1 ~= SyncMain.dataSourceFiles[dataSourceIndex].sha) then
+					-- 更新已存在的文件
+					LocalService:update(SyncMain.foldername, SyncMain.dataSourceFiles[dataSourceIndex].path, function (bIsUpdate, response)
+						if (bIsUpdate) then
+							if(response.filename == "revision.xml") then
+								SyncMain.remoteRevison = response.content;
 							end
-						end);
-					else
-						-- if file exised, and has same sha value, then contain it
-						SyncMain.curUpdateIndex = SyncMain.curUpdateIndex + 1;
-						syncGUIIndex   = syncGUIIndex   + 1;
 
-						-- syncGUIFiles   = githubFiles.tree[SyncMain.dataSourceIndex].path;
+							syncGUIIndex = syncGUIInde + 1;
+							syncToLocalGUI:updateDataBar(syncGUIIndex, syncGUItotal, response.filename);
 
-						LOG.std(nil,"debug","syncGUIIndex",syncGUIIndex);
-						-- LOG.std(nil,"debug","githubFiles.tree[SyncMain.dataSourceIndex].path",githubFiles.tree[SyncMain.dataSourceIndex].path);
-
-						syncToLocalGUI:updateDataBar(syncGUIIndex, syncGUItotal, syncGUIFiles);
-
-						if (SyncMain.curUpdateIndex > SyncMain.totalLocalIndex) then     -- check whether all files have updated or not. if false, update the next one, if true, upload files.
-							-- _guihelper.MessageBox(L'同步完成-B');
-							downloadOne();
+							-- 如果当前计数大于最大计数则更新
+							if (SyncMain.curUpdateIndex == SyncMain.totalLocalIndex) then      -- check whether all files have updated or not. if false, update the next one, if true, upload files.  
+								downloadOne();
+							else
+								SyncMain.curUpdateIndex = SyncMain.curUpdateIndex + 1;
+								updateOne();
+							end
 						else
-							updateOne();
+							_guihelper.MessageBox(L'更新失败,请稍后再试');
+							--syncToLocalGUI.finish();
+							--SyncMain.finish = true;
 						end
-					end
+					end);
 				else
-					LOG.std(nil,"debug","delete-filename",SyncMain.localFiles[SyncMain.curUpdateIndex].filename);
-					LOG.std(nil,"debug","delete-sha1",SyncMain.localFiles[SyncMain.curUpdateIndex].sha1);
+					syncGUIIndex = syncGUIIndex + 1;
+					syncToLocalGUI:updateDataBar(syncGUIIndex, syncGUItotal, SyncMain.dataSourceFiles[dataSourceIndex].path);
 
-					-- 如果过github不删除存在，则删除本地的文件
-					deleteOne();
+					if (SyncMain.curUpdateIndex == SyncMain.totalLocalIndex) then
+						downloadOne();
+					else
+						SyncMain.curUpdateIndex = SyncMain.curUpdateIndex + 1;
+						updateOne();
+					end
 				end
+			else
+				LOG.std(nil,"debug","delete-filename",SyncMain.localFiles[SyncMain.curUpdateIndex].filename);
+				LOG.std(nil,"debug","delete-sha1",SyncMain.localFiles[SyncMain.curUpdateIndex].sha1);
+
+				-- 如果过github不删除存在，则删除本地的文件
+				deleteOne();
 			end
 		end
 
 		-- 删除文件
 		local function deleteOne()
-			LocalService:delete(SyncMain.foldername, SyncMain.localFiles[SyncMain.curUpdateIndex].filename, function ()
-				SyncMain.curUpdateIndex = SyncMain.curUpdateIndex + 1;
-
-				if (SyncMain.curUpdateIndex > SyncMain.totalLocalIndex) then
+			LocalService:delete(SyncMain.foldername, SyncMain.localFiles[SyncMain.curUpdateIndex].filename, function (data, err)
+				if (SyncMain.curUpdateIndex == SyncMain.totalLocalIndex) then
 					downloadOne();
 				else
+					SyncMain.curUpdateIndex = SyncMain.curUpdateIndex + 1;
 					updateOne();
 				end
 			end);
@@ -504,19 +483,18 @@ function SyncMain:syncToLocal(_worldDir, _foldername, _callback)
 
 				LOG.std(nil,"debug","SyncMain:getFileShaListService-data",data);
 
+				SyncMain.localFiles      = LocalService:LoadFiles(SyncMain.worldDir,"",nil,1000,nil);
 				SyncMain.dataSourceFiles = data;
 
 				SyncMain.totalLocalIndex      = #SyncMain.localFiles;
 				SyncMain.totalDataSourceIndex = #SyncMain.dataSourceFiles;
 
-				for i=1,#SyncMain.dataSourceFiles do
-					SyncMain.dataSourceFiles[i].needChange = true;
+				for key,value in ipairs(SyncMain.dataSourceFiles) do
+					value.needChange = true;
 
-					if(SyncMain.dataSourceFiles[i].type == "blob") then
+					if(value.type == "blob") then
 						syncGUItotal = syncGUItotal + 1;
 					end
-
-					i = i + 1;
 				end
 
 				syncToLocalGUI:updateDataBar(syncGUIIndex , syncGUItotal, L"开始同步");
@@ -572,96 +550,121 @@ function SyncMain:syncToDataSource()
 
 			local function finish()
 				LOG.std(nil,"debug","SyncMain.selectedWorldInfor",SyncMain.selectedWorldInfor);
-				LOG.std(nil,"debug","send",SyncMain.selectedWorldInfor.tooltip)
-				SyncMain.finish = true;
+				LOG.std(nil,"debug","send",SyncMain.selectedWorldInfor.tooltip);
 
-				local modDateTable = {};
-				local readme;
+				SyncMain:getCommits(function(data, err)
+					LOG.std(nil,"debug","data",data);
+					LOG.std(nil,"debug","err",err);
+    
+					if(data) then
+						local lastCommits = data[1];
+						lastCommitFile = lastCommits.title:gsub("keepwork commit: ","");
+						lastCommitSha  = "";
+        
+						if(lastCommitFile == "revision.xml") then
+							lastCommitSha = lastCommits.id;
 
-				if(SyncMain.selectedWorldInfor.tooltip)then
-					for modDateEle in string.gmatch(SyncMain.selectedWorldInfor.tooltip,"[^:]+") do
-						modDateTable[#modDateTable+1] = modDateEle;
-					end
+							SyncMain.finish = true;
 
-					modDateTable = modDateTable[1];
-				else
-					modDateTable = os.date("%Y-%m-%d-%H-%M-%S");
-				end
+							local modDateTable = {};
+							local readme;
+
+							if(SyncMain.selectedWorldInfor.tooltip)then
+								for modDateEle in string.gmatch(SyncMain.selectedWorldInfor.tooltip,"[^:]+") do
+									modDateTable[#modDateTable+1] = modDateEle;
+								end
+
+								modDateTable = modDateTable[1];
+							else
+								modDateTable = os.date("%Y-%m-%d-%H-%M-%S");
+							end
 					
-				local hasPreview = false;
+							local hasPreview = false;
 
-				for key,value in ipairs(SyncMain.localFiles) do
-					if(value.filename == "preview.jpg") then
-						hasPreview = true;
-					end
-				end
+							for key,value in ipairs(SyncMain.localFiles) do
+								if(value.filename == "preview.jpg") then
+									hasPreview = true;
+								end
+							end
 
-				for key,value in ipairs(SyncMain.localFiles) do
-					if(value.filename == "README.md") then
-						readme = LocalService:getFileContent(SyncMain.worldDir .. "README.md");
-						readme = Encoding.DefaultToUtf8(readme);
-						LOG.std(nil,"debug","SyncMain.worldDir",SyncMain.worldDir);
-						LOG.std(nil,"debug","readme",readme);
-					end
-				end
+							for key,value in ipairs(SyncMain.localFiles) do
+								if(value.filename == "README.md") then
+									readme = LocalService:getFileContent(SyncMain.worldDir .. "README.md");
+									readme = Encoding.DefaultToUtf8(readme);
+									LOG.std(nil,"debug","SyncMain.worldDir",SyncMain.worldDir);
+									LOG.std(nil,"debug","readme",readme);
+								end
+							end
 
-				local preview = {};
-				preview[0] = {};
-				preview[0].previewUrl = login.rawBaseUrl .. "/" .. login.dataSourceUsername .. "/" .. GitEncoding.base64(SyncMain.foldername) .. "/raw/master/preview.jpg";
-				preview = NPL.ToJson(preview,true);
+							local preview = {};
+							preview[0] = {};
+							preview[0].previewUrl = login.rawBaseUrl .. "/" .. login.dataSourceUsername .. "/" .. GitEncoding.base64(SyncMain.foldername) .. "/raw/master/preview.jpg";
+							preview = NPL.ToJson(preview,true);
 
-				local filesTotals = LocalService:GetWorldFileSize(SyncMain.foldername);
+							local filesTotals = LocalService:GetWorldFileSize(SyncMain.foldername);
 
-				local params = {};
-				params.modDate		   = modDateTable;
-				params.worldsName      = SyncMain.foldername;
-				params.revision        = SyncMain.currentRevison;
-				params.hasPreview      = hasPreview;
-				params.dataSourceType  = login.dataSourceType;
-				params.gitlabProjectId = GitlabService.projectId;
-				params.readme          = readme; --EncodingS.base64(readme);
-				params.preview         = preview;
-				params.filesTotals	   = filesTotals;
+							local params = {};
+							params.modDate		   = modDateTable;
+							params.worldsName      = SyncMain.foldername;
+							params.revision        = SyncMain.currentRevison;
+							params.hasPreview      = hasPreview;
+							params.dataSourceType  = login.dataSourceType;
+							params.gitlabProjectId = GitlabService.projectId;
+							params.readme          = readme; --EncodingS.base64(readme);
+							params.preview         = preview;
+							params.filesTotals	   = filesTotals;
+							params.commitId		   = lastCommitSha;
 
-				LOG.std(nil,"debug","params",params);
+							LOG.std(nil,"debug","params",params);
 
---					SyncMain:genWorldMD(params);
+							-- SyncMain:genWorldMD(params);
 
-				HttpRequest:GetUrl({
-					url     = login.site .. "/api/mod/worldshare/models/worlds/refresh",
-					json    = true,
-					form    = params,
-					headers = {
-						Authorization    = "Bearer " .. login.token,
-						["content-type"] = "application/json",
-					},
-				},function(data, err)
-					LOG.std(nil,"debug","finish",data);
-					LOG.std(nil,"debug","finish",err);
-
-					LOG.std(nil,"debug","SyncMain.worldName", SyncMain.worldName);
-					if(err == 200) then
-						params.opusId = data.msg.opusId;
-
-						SyncMain:genWorldMD(params, function()
 							HttpRequest:GetUrl({
-								url  = login.site .. "/api/mod/worldshare/models/worlds",
-								json = true,
-								headers = {Authorization = "Bearer "..login.token},
-								form = {amount = 100},
-							},function(worldList, err)
-								LOG.std(nil,"debug","worldList-data",worldList);
-								SyncMain:genIndexMD(worldList);
-							end);
-						end);
+								url     = login.site .. "/api/mod/worldshare/models/worlds/refresh",
+								json    = true,
+								form    = params,
+								headers = {
+									Authorization    = "Bearer " .. login.token,
+									["content-type"] = "application/json",
+								},
+							},function(data, err)
+								LOG.std(nil,"debug","finish",data);
+								LOG.std(nil,"debug","finish",err);
 
-						login.syncWorldsList();
+								LOG.std(nil,"debug","SyncMain.worldName", SyncMain.worldName);
+								if(err == 200) then
+									params.opusId = data.msg.opusId;
+
+									SyncMain:genWorldMD(params, function()
+										HttpRequest:GetUrl({
+											url  = login.site .. "/api/mod/worldshare/models/worlds",
+											json = true,
+											headers = {Authorization = "Bearer "..login.token},
+											form = {amount = 100},
+										},function(worldList, err)
+											LOG.std(nil,"debug","worldList-data",worldList);
+											SyncMain:genIndexMD(worldList);
+										end);
+									end);
+
+									login.syncWorldsList();
+								end
+							end);
+
+							if(SyncMain.firstCreate) then
+								SyncMain.firstCreate = false;
+							end
+						else
+							_guihelper.MessageBox(L"上传失败");
+						end
+        
+						LOG.std(nil,"debug","lastCommits",lastCommits);
+						LOG.std(nil,"debug","lastCommitFile",lastCommitFile);
+						LOG.std(nil,"debug","lastCommitSha",lastCommitSha);
+					else
+						_guihelper.MessageBox(L"上传失败");
 					end
 				end);
-
-				if(SyncMain.firstCreate) then
-					SyncMain.firstCreate = false;
-				end
 			end
 
 			-- 上传新文件
@@ -908,6 +911,14 @@ function SyncMain:setGitlabProjectId(_foldername)
 	for key,value in ipairs(SyncMain.remoteWorldsList) do
 		if(value.worldsName == _foldername) then
 			GitlabService.projectId = value.gitlabProjectId;
+		end
+	end
+end
+
+function SyncMain:getGitlabCommitId(_foldername)
+	for key,value in ipairs(SyncMain.remoteWorldsList) do
+		if(value.worldsName == _foldername) then
+			return value.commitId;
 		end
 	end
 end
@@ -1558,5 +1569,13 @@ function SyncMain:getFileShaListService(_foldername, _callback, _projectId)
 		GithubService:getFileShaList(_foldername, _callback);
 	elseif(login.dataSourceType == "gitlab") then
 		GitlabService:getTree(_callback, _projectId);
+	end
+end
+
+function SyncMain:getCommits(_callback, _projectId)
+	if(login.dataSourceType == "github") then
+		GithubService:getCommits(_foldername, _callback);
+	elseif(login.dataSourceType == "gitlab") then
+		GitlabService:listCommits(_callback, _projectId);
 	end
 end

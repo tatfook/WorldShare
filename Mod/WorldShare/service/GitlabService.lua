@@ -227,10 +227,13 @@ function GitlabService:getSubTree(_callback, _path)
 end
 
 -- commit
-function GitlabService:listCommits(data, cb, errcb)
-    --data.ref_name = data.ref_name || 'master';
-    local url = '/projects/' .. GitlabService.projectId .. '/repository/commits';
-    GitlabService:httpRequest('GET', url, data, cb, errcb);
+function GitlabService:listCommits(_callback, _projectId)
+	if(not _projectId) then
+		_projectId = GitlabService.projectId;
+	end
+
+    local url = '/projects/' .. _projectId .. '/repository/commits';
+    GitlabService:apiGet(url, _callback);
 end
 
 -- Ð´ÎÄ¼þ
