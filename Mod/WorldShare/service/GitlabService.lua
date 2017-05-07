@@ -124,13 +124,17 @@ function GitlabService:getCommitMessagePrefix()
     return "keepwork commit: ";
 end
 
--- »ñµÃÎÄ¼şÁĞ±í
-function GitlabService:getTree(_callback, _projectId)
+-- è·å¾—æ–‡ä»¶åˆ—è¡¨
+function GitlabService:getTree(_callback, _projectId, _commitId)
 	if(not _projectId) then
 		_projectId = GitlabService.projectId;
 	end
 
-    local url = '/projects/' .. _projectId .. '/repository/tree';
+	local url = '/projects/' .. _projectId .. '/repository/tree';
+	
+	if(_commitId) then
+		url .. "?ref=" .. _commitId;
+	end
 
 	GitlabService.blob = {};
 	GitlabService.tree = {};
@@ -156,7 +160,7 @@ function GitlabService:getTree(_callback, _projectId)
 
 			local function getSubTree()
 				for key,value in ipairs(GitlabService.tree) do
-					GitlabService:getSubTree(function(subTree,subFolderName)
+					GitlabService:getSubTree(function(subTree, subFolderName ,_commitId)
 						for checkKey,checkValue in ipairs(GitlabService.tree) do
 							if(checkValue.path == subFolderName) then
 								if(not checkValue.alreadyGet) then
@@ -207,9 +211,13 @@ function GitlabService:getTree(_callback, _projectId)
 	end);
 end
 
-function GitlabService:getSubTree(_callback, _path)
+function GitlabService:getSubTree(_callback, _path, _commitId)
 	local url = '/projects/' .. GitlabService.projectId .. '/repository/tree' .. "?path=" .. _path;
-
+	
+	if(_commitId) then
+		url .. "&ref=" .. _commitId;
+	end
+	
 	local tree = {};
 	GitlabService:apiGet(url, function(data, err)
 		for key,value in ipairs(data) do
@@ -236,7 +244,7 @@ function GitlabService:listCommits(_callback, _projectId)
     GitlabService:apiGet(url, _callback);
 end
 
--- Ğ´ÎÄ¼ş
+-- å†™æ–‡ä»¶
 function GitlabService:writeFile(_filename, _file_content_t, _callback, _projectId) --params, cb, errcb
     local url = GitlabService:getFileUrlPrefix(_projectId) .. _filename;
 	LOG.std(nil,"debug","GitlabService:writeFile",url);
@@ -259,7 +267,7 @@ function GitlabService:writeFile(_filename, _file_content_t, _callback, _project
 	end);
 end
 
---¸üĞÂÎÄ¼ş
+--æ›´æ–°æ–‡ä»¶
 function GitlabService:update(_filename, _file_content_t, _sha, _callback, _projectId)
 	local url = GitlabService:getFileUrlPrefix(_projectId) .. _filename;
 
@@ -281,7 +289,7 @@ function GitlabService:update(_filename, _file_content_t, _sha, _callback, _proj
 	end);
 end
 
--- »ñÈ¡ÎÄ¼ş
+-- è·å–æ–‡ä»¶
 function GitlabService:getContent(_path, _callback, _projectId)
     local url = GitlabService:getFileUrlPrefix(_projectId) .. _path .. '?ref=master';
 
@@ -294,7 +302,7 @@ function GitlabService:getContent(_path, _callback, _projectId)
 	end);
 end
 
--- »ñÈ¡ÎÄ¼ş
+-- è·å–æ–‡ä»¶
 function GitlabService:getContentWithRaw(_foldername, _path, _callback)
 	_foldername = GitEncoding.base64(_foldername);
 
@@ -314,7 +322,7 @@ function GitlabService:getContentWithRaw(_foldername, _path, _callback)
 	end);
 end
 
--- É¾³ıÎÄ¼ş
+-- åˆ é™¤æ–‡ä»¶
 function GitlabService:deleteFile(_path, _sha, _callback, _projectId)
     local url = GitlabService:getFileUrlPrefix(_projectId) .. _path;
 
@@ -331,7 +339,7 @@ function GitlabService:deleteFile(_path, _sha, _callback, _projectId)
 	end);
 end
 
---É¾³ı²Ö
+--åˆ é™¤ä»“
 function GitlabService:deleteResp(_foldername, _callback, _projectId)
 	if(not _projectId) then
 		_projectId = GitlabService.projectId;
@@ -342,7 +350,7 @@ function GitlabService:deleteResp(_foldername, _callback, _projectId)
 	GitlabService:apiDelete(url, {}, _callback);
 end
 
---Í¨¹ı²ÖÃû»ñÈ¡²ÖID
+--é€šè¿‡ä»“åè·å–ä»“ID
 function GitlabService:getProjectIdByName(_name, _callback)
 	local url   = "/projects";
 	
@@ -356,7 +364,7 @@ function GitlabService:getProjectIdByName(_name, _callback)
 	end);
 end
 
--- ³õÊ¼»¯
+-- åˆå§‹åŒ–
 function GitlabService:init(_foldername, _callback)
 	_foldername = GitEncoding.base64(_foldername);
 	local url   = "/projects";
