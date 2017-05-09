@@ -9,12 +9,11 @@
         <script type="text/npl" refresh="false">
             <![CDATA[
                 SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
-
-                SyncMain.setPage();
+                SyncMain.setComparePage();
              ]]>
         </script>
         <div style="width:500px;height:270px;">
-            <aries:window mode="thin" width="500" height="270" style="float:left;" title='<%=L"与数据源同步" %>' onclose="SyncMain.closePage()">
+            <aries:window mode="thin" width="500" height="270" style="float:left;" title='<%=L"与数据源同步" %>' onclose="SyncMain.closeComparePage">
             	<div style="padding:20px;font-size:18px;base-font-size:18px;color:#ffffff">
             		<div style="margin-left:80px;margin-top:40px;">
                 		远程版本号：

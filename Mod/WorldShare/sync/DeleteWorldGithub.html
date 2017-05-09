@@ -8,17 +8,17 @@
     <pe:mcml>
         <script type="text/npl" refresh="false">
             <![CDATA[
-            	login       = commonlib.gettable("Mod.WorldShare.login");
-                
-            	login:OnInit();
-
+                SyncMain  = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
+            
+                SyncMain.setDeletePage();
+            
                 function confirm()
-                    local password = Page:GetValue("password");
-                    login:deleteWorldGithub(password);
+                    local password = SyncMain.DeletePage:GetValue("password");
+                    SyncMain:deleteWorldGithub(password);
                 end
-
+                
                 function cancel()
-                    Page:CloseWindow();
+                    SyncMain.DeletePage:CloseWindow();
                 end
              ]]>
         </script>

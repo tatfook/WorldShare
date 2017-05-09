@@ -9,8 +9,7 @@
         <script type="text/npl" refresh="false">
             <![CDATA[
                 SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
-
-                SyncMain.setPage();
+                SyncMain.setComparePage();
 
                 if(not SyncMain.firstCreate) then
                     SyncMain:compareRevision();
@@ -18,7 +17,7 @@
              ]]>
         </script>
         <div style="width:500px;height:270px;">
-            <aries:window mode="thin" width="500" height="270" style="float:left;" title='<%=L"分享上传世界" %>' onclose="SyncMain.closePage()">
+            <aries:window mode="thin" width="500" height="270" style="float:left;" title='<%=L"分享上传世界" %>' onclose="SyncMain.closeComparePage">
                 <div style="padding:20px;font-size:18px;base-font-size:18px;color:#ffffff">
                     <div style="margin-left:140px;margin-top:30px;">
                         远程版本号：

@@ -9,19 +9,19 @@
         <script type="text/npl" refresh="false">
             <![CDATA[
                 SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
-                SyncMain.setPage();
+                SyncMain.setComparePage();
 
             	function replace()
                     SyncMain:syncToDataSource();  -- _guihelper.MessageBox("强制同步--将本地大小有变化的文件上传到github");-- 下载或覆盖
             	end
 
             	function cancel()
-            		Page:CloseWindow();
+                    SyncMain.ComparePage:CloseWindow();
                     SyncMain:StartSyncPage();
             	end
 
             	function offline()
-            		Page:CloseWindow();
+                    SyncMain.ComparePage:CloseWindow();
             	end
              ]]>
         </script>

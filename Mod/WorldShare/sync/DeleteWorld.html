@@ -8,10 +8,10 @@
     <pe:mcml>
         <script type="text/npl" refresh="false">
             <![CDATA[
-                SyncMain  = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
                 login     = commonlib.gettable("Mod.WorldShare.login");
+                SyncMain  = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
                 
-                SyncMain.setPage();
+                SyncMain.setDeletePage();
                 selectedWorldInfor = SyncMain.selectedWorldInfor;
              ]]>
         </script>
@@ -38,7 +38,7 @@
                     </pe:if>
 
                     <div style="margin-top:20px;">
-                        <input type="button" onclick="SyncMain.goBack" class="button_highlight" style="margin-left:150px;width: 130px;height: 30px;"  name="" value="返回上级" />
+                        <input type="button" onclick="SyncMain.DeleteToLogin" class="button_highlight" style="margin-left:150px;width: 130px;height: 30px;"  name="" value="返回上级" />
                     </div>
             	</div>
             </aries:window>

@@ -17,6 +17,7 @@ NPL.load("(gl)Mod/WorldShare/service/GithubService.lua");
 NPL.load("(gl)Mod/WorldShare/login.lua");
 NPL.load("(gl)Mod/WorldShare/service/GitlabService.lua");
 NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua");
+NPL.load("(gl)Mod/WorldShare/SyncMain.lua");
 
 local GitEncoding   = commonlib.gettable("Mod.WorldShare.helper.GitEncoding");
 local GitlabService = commonlib.gettable("Mod.WorldShare.service.GitlabService");
@@ -25,7 +26,7 @@ local EncodingC     = commonlib.gettable("commonlib.Encoding");
 local EncodingS     = commonlib.gettable("System.Encoding");
 local Files         = commonlib.gettable("commonlib.Files");
 local login         = commonlib.gettable("Mod.WorldShare.login");
-
+local SyncMain      = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
 
 local LocalService  = commonlib.gettable("Mod.WorldShare.service.LocalService");
 
@@ -119,8 +120,8 @@ end
 
 function LocalService:update(_foldername, _path, _callback)
 	LocalService:getDataSourceContent(_foldername, _path, function(content, err)
-		local foldernameForLocal = EncodingC.Utf8ToDefault(_foldername);
-		local bashPath = "worlds/DesignHouse/" .. foldernameForLocal .. "/";
+		--local foldernameForLocal = EncodingC.Utf8ToDefault(_foldername);
+		local bashPath = "worlds/DesignHouse/" .. SyncMain.foldername.default .. "/";
 
 		local file = ParaIO.open(bashPath .. _path, "w");
 		
@@ -165,8 +166,8 @@ function LocalService:download(_foldername, _path, _callback)
 		if(err == 200) then
 			local path = {};
 			local returnData = {};
-			local foldernameForLocal = EncodingC.Utf8ToDefault(_foldername);
-			local bashPath = "worlds/DesignHouse/" .. foldernameForLocal .. "/";
+
+			local bashPath = "worlds/DesignHouse/" .. SyncMain.foldername.default .. "/";
 			local folderCreate = "";
 
 			for segmentation in string.gmatch(_path,"[^/]+") do
@@ -211,16 +212,16 @@ function LocalService:download(_foldername, _path, _callback)
 	end);
 end
 
-function LocalService:delete(_foldername,_filename,_callback)
-	local bashPath = "worlds/DesignHouse/" .. _foldername .. "/";
+function LocalService:delete(_foldername, _filename, _callback)
+	local bashPath = "worlds/DesignHouse/" .. SyncMain.foldername.default .. "/";
 	-- LOG.std(nil,"debug","ParaIO.DeleteFile",bashPath .. _filename);
 
 	ParaIO.DeleteFile(bashPath .. _filename);
 	_callback();
 end
 
-function LocalService:GetWorldFileSize(_foldername)
-	local worldDir = "worlds/DesignHouse/" .. EncodingC.Utf8ToDefault(_foldername).."/";
+function LocalService:GetWorldFileSize(_foldername) --default encoding
+	local worldDir = "worlds/DesignHouse/" .. _foldername .."/";
 	local files = LocalService:LoadFiles(worldDir,"");
 	local filesTotal = 0;
 
@@ -230,6 +231,18 @@ function LocalService:GetWorldFileSize(_foldername)
 	end
 
 	return filesTotal;
+end
+
+function LocalService:GetZipWorldSize(_zipname)
+	local zipWorldDir = "worlds/DesignHouse/" .. _zipname;
+end
+
+function LocalService:GetTag(_foldername)
+	local filePath  = "worlds/DesignHouse/" .. _foldername .. "/tag.xml";
+
+	local tag = ParaXML.LuaXML_ParseFile(filePath);
+	tag = tag[1][1]['attr'];
+	return tag;
 end
 
 function LocalService:getDataSourceContent(_foldername, _path, _callback)

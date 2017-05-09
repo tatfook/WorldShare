@@ -125,7 +125,7 @@ function GitlabService:getCommitMessagePrefix()
 end
 
 -- 获得文件列表
-function GitlabService:getTree(_callback, _projectId, _commitId)
+function GitlabService:getTree(_callback, _commitId, _projectId)
 	if(not _projectId) then
 		_projectId = GitlabService.projectId;
 	end
@@ -133,8 +133,10 @@ function GitlabService:getTree(_callback, _projectId, _commitId)
 	local url = '/projects/' .. _projectId .. '/repository/tree';
 	
 	if(_commitId) then
-		url .. "?ref=" .. _commitId;
+		url = url .. "?ref=" .. _commitId;
 	end
+
+	LOG.std(nil,"debug","GitlabService:getTree-url",url);
 
 	GitlabService.blob = {};
 	GitlabService.tree = {};
@@ -215,7 +217,7 @@ function GitlabService:getSubTree(_callback, _path, _commitId)
 	local url = '/projects/' .. GitlabService.projectId .. '/repository/tree' .. "?path=" .. _path;
 	
 	if(_commitId) then
-		url .. "&ref=" .. _commitId;
+		url = url .. "&ref=" .. _commitId;
 	end
 	
 	local tree = {};

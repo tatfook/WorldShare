@@ -15,7 +15,7 @@ local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
 
 local SyncGUI = commonlib.inherit(nil,commonlib.gettable("Mod.WorldShare.sync.SyncGUI"));
 
-local Page;
+local SyncPage;
 
 SyncGUI.current = 0;
 SyncGUI.total   = 0;
@@ -57,13 +57,13 @@ function SyncGUI:ctor()
 end
 
 function SyncGUI:OnInit()
-	Page = document:GetPageCtrl();
-	self.progressbar = Page:GetNode("progressbar");
+	SyncPage = document:GetPageCtrl();
+	self.progressbar = SyncPage:GetNode("progressbar");
 end
 
 function SyncGUI.finish()
 	SyncGUI.isStart = false;
-	Page:CloseWindow();
+	SyncPage:CloseWindow();
 end
 
 function SyncGUI:retry()
@@ -78,7 +78,7 @@ function SyncGUI:retry()
 end
 
 function SyncGUI:updateDataBar(_current, _total, _files)
-	local databar = Page:GetNode("databar");
+	local databar = SyncPage:GetNode("databar");
 	
 	SyncGUI.current  = _current;
 	SyncGUI.total    = _total;
@@ -92,6 +92,6 @@ function SyncGUI:updateDataBar(_current, _total, _files)
 	SyncGUI.progressbar:SetAttribute("Maximum",SyncGUI.total);
 	SyncGUI.progressbar:SetAttribute("Value",SyncGUI.current);
 
-	Page:Refresh(0.01);
+	SyncPage:Refresh(0.01);
 end
 
