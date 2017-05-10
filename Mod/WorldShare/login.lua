@@ -18,7 +18,9 @@ NPL.load("(gl)Mod/WorldShare/sync/SyncMain.lua");
 NPL.load("(gl)Mod/WorldShare/service/LocalService.lua");
 NPL.load("(gl)Mod/WorldShare/sync/SyncGUI.lua");
 NPL.load("(gl)script/apps/Aries/Creator/Game/Login/RemoteServerList.lua");
+NPL.load("(gl)Mod/WorldShare/main.lua");
 
+local WorldShare         = commonlib.gettable("Mod.WorldShare");
 local SyncGUI			 = commonlib.gettable("Mod.WorldShare.sync.SyncGUI");
 local LocalService		 = commonlib.gettable("Mod.WorldShare.service.LocalService");
 local MainLogin          = commonlib.gettable("MyCompany.Aries.Game.MainLogin");
@@ -249,17 +251,54 @@ function login.GetWorldSize(size)
 	local s;
 	size = tonumber(size);
 
-	if(size and size ~= "") then
-		if(size < 1048576) then
-			s = string.format("%sKB",math.ceil(size/1024));
-		else
-			s = string.format("%sM",math.ceil(size/1024/1024));
+	function GetPreciseDecimal(nNum, n)
+		if type(nNum) ~= "number" then
+			return nNum;
 		end
+    
+		n = n or 0;
+		n = math.floor(n)
+		local fmt = '%.' .. n .. 'f'
+		local nRet = tonumber(string.format(fmt, nNum))
+
+		return nRet;
+	end
+
+	if(size and size ~= "") then
+		s = GetPreciseDecimal(size/1024/1024, 2) .. "M";
 	else
 		s = nil;
 	end
 
 	return s or "0";
+end
+
+function login.formatDatetime(_datetime)
+	--LOG.std(nil,"debug","_datetime",_datetime);
+	
+	if(_datetime) then
+		local n = 1;
+		local formatDatetime = "";
+		for value in string.gmatch(_datetime,"[^-]+") do
+			--LOG.std(nil,"debug","formatDatetime",value);
+
+			if(n == 3) then
+				formatDatetime = formatDatetime .. value .. " ";
+			elseif(n < 3) then
+				formatDatetime = formatDatetime .. value .. "-";
+			elseif(n == 5) then
+				formatDatetime = formatDatetime .. value;
+			elseif(n < 5) then
+				formatDatetime = formatDatetime .. value .. ":"
+			end
+
+			n = n + 1;
+		end
+
+		return formatDatetime;
+	end
+
+	return _datetime;
 end
 
 function login.GetWorldType()
@@ -298,16 +337,7 @@ end
 function login.OnSwitchWorld(index)
 	InternetLoadWorld.OnSwitchWorld(index);
 
-	local selected_world = InternetLoadWorld.cur_ds[index];
-
-	if(selected_world) then
-		if(not selected_world.is_zip) then
-
-		else
-			
-		end
-	end
-	LOG.std(nil,"debug","selected_world",selected_world);
+	--local selected_world = InternetLoadWorld.cur_ds[index];
 end
 
 function login.GetNetSpeed()
@@ -613,28 +643,40 @@ function login.changeRevision(_callback)
 
 			for key,value in ipairs(localWorlds) do
 				if(not value.is_zip) then
+					value.modifyTime = value.revision;
+
 					local foldername = {};
 					foldername.utf8    = value.foldername;
 					foldername.default = Encoding.Utf8ToDefault(value.foldername);
 
 					local WorldRevisionCheckOut = WorldRevision:new():init("worlds/DesignHouse/" .. foldername.default .. "/");
-					value.revision   = WorldRevisionCheckOut:GetDiskRevision();
+					value.revision = WorldRevisionCheckOut:GetDiskRevision();
 
 --					local worldSize = WorldShare:GetWorldData("worldSize", foldername.utf8);
 					local tag = LocalService:GetTag(foldername.default);
 					--LOG.std(nil,"debug","tag",tag);
 
 					if(tag.size) then
-						value.filesTotals = tag.size;
+						value.size = tag.size;
 					else
-						value.filesTotals = 0;
+						value.size = 0;
 					end
 				else
-					value.revision = 0;
-					value.filesTotals = 0;
-					--LOG.std(nil,"debug","text",value.text);
+					value.modifyTime = value.revision;
+
+					local zipWorldDir = {};
+					zipWorldDir.default = value.remotefile:gsub("local://","");
+					zipWorldDir.utf8 = Encoding.Utf8ToDefault(zipWorldDir.default);
+
+					local zipFoldername = {};
+					zipFoldername.default = zipWorldDir.default:gsub("worlds/DesignHouse/","");
+					zipFoldername.utf8    = Encoding.Utf8ToDefault(zipFoldername.default);
+
+					LOG.std(nil,"debug","zipWorldDir.default",zipWorldDir.default);
+
+					value.revision = LocalService:GetZipRevision(zipWorldDir.default);
+					value.size = LocalService:GetZipWorldSize(zipWorldDir.default);
 				end
-				--LocalService:GetWorldFileSize(foldername.default);
 			end
 
 			login.LoginPage:Refresh();
@@ -695,7 +737,8 @@ function login.syncWorldsList(_callback)
             		text        = valueDistance["worldsName"];
             		foldername  = valueDistance["worldsName"];
             		revision    = valueDistance["revision"];
-            		filesTotals = valueDistance["filesTotals"];
+            		size        = valueDistance["filesTotals"];
+					modifyTime  = valueDistance["modDate"];
             		status      = 2; --仅网络
             	};
 	        end

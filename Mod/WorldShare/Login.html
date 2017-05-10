@@ -35,14 +35,14 @@
                 user_area_world_type_selected = {
                     height = 40,
                     spacing = 20,
-                    background = "textures/world_type_selected_32bits.png",
+                    background = "textures/worldshare_32bits.png;194 128 120 40:8 8 8 8",
                     color = "#FFFFFF",
                     ["margin-right"] = 15,
                 },
                 user_area_world_type_unselect = {
                     height = 40,
                     spacing = 20,
-                    background = "textures/world_type_unselect_32bits.png",
+                    background = "textures/worldshare_32bits.png;324 128 120 40:8 8 8 8",
                     color = "#FFFFFF",
                     ["margin-right"] = 15,
                 },
@@ -58,14 +58,16 @@
                     height               = 295,
                 },
                 text_field = {
-                    background = "textures/text_field_32bits.png",
+                    background = "textures/worldshare_32bits.png;20 78 250 40:8 8 8 8",
                     border = "none",
                 },
                 login_button = {
                     ["margin-left"] = 55,
                     width           = 150,
                     height          = 33,
-                    background      = "textures/login_button_32bits.png",
+                    textcolor = "#ffffff",
+                    color = "#ffffff",
+                    background      = "textures/worldshare_32bits.png;250 20 220 48:8 8 8 8",
                 },
                 logged_common_button = {
                     width = 130,
@@ -74,7 +76,7 @@
                     ["margin-bottom"] = 20,
                     textcolor = "#ffffff",
                     color = "#ffffff",
-                    background = "textures/logged_common_button_32bits.png",
+                    background = "textures/worldshare_32bits.png;20 20 220 48:8 8 8 8",
                 },
                 middle_line = {
                     float  = "left",
@@ -111,7 +113,7 @@
                     ["padding-top"] = 5,
                     width  = 295,
                     height = 80,
-                    background = "textures/item_acive_32bits.png"
+                    background = "textures/worldshare_32bits.png;20 188 100 100:8 8 8 8"
                 },
                 share_unselect_item = {
                     ["margin-bottom"] = 20,
@@ -230,11 +232,11 @@
                                     <input type="checkbox" style="margin-left:160px;margin-top:3px;" name="rememberPassword" />记住密码?
                                 </div>
                                 <div style="margin-top:30px;margin-bottom:15px;">
-                                    <input type="button" class="login_button" onclick="login.LoginAction()" />
+                                    <input type="button" class="login_button" onclick="login.LoginAction()" value="登   录"/>
                                 </div>
                                 <div style="text-align:left;margin-left:55px;">
                                     <span style="color:#ffffff;">还没有帐号？</span>
-                                    <a name="register" style="background:url(textures/underline_32bits.png#0 0 64 30);height:30px;width:150px;font-size: 14px;color: #fe5927;">点击注册</a>
+                                    <a name="register" style="background:url(textures/worldshare_32bits.png#399 76 64 30:0 0 0 0);height:30px;width:150px;font-size: 14px;color: #fe5927;">点击注册</a>
                                 </div>
                             </div>
                         </pe:if>
@@ -245,7 +247,7 @@
                                 </div>
                                 <div style="margin-bottom:13px;">
                                     我的作品网站
-                                    <input type="button" onclick="login.sharePersonPage()" style="width:20px;height:16px;background:url(textures/share_icon_32bits.png);margin-top:3px;margin-left:13px;" class="button_highlight" />
+                                    <input type="button" onclick="login.sharePersonPage()" style="width:20px;height:16px;background:url(textures/worldshare_32bits.png#280 81 25 20:0 0 0 0);margin-top:3px;margin-left:13px;" class="button_highlight" />
                                 </div>
                                 <div style="height:90px;">
                                     <%=login.personPageUrl %>
@@ -280,10 +282,10 @@
                                             <pe:if condition='<%= login.current_type == 1%>'>
                                                 <div>
                                                     <pe:if condition='<%= not login.GetCurWorldInfo("is_zip", Eval("index")) and  login.GetCurWorldInfo("status",Eval("index")) == 3%>'>
-                                                        <div style="float:left;width:32px;height:32px;background:url(textures/sync_32bits.png)" />
+                                                        <div style="float:left;width:32px;height:32px;background:url(textures/worldshare_32bits.png#315 81 32 32:0 0 0 0)" />
                                                     </pe:if>
                                                     <pe:if condition='<%= not login.GetCurWorldInfo("is_zip", Eval("index")) and  login.GetCurWorldInfo("status",Eval("index")) ~= 3%>'>
-                                                        <div style="float:left;width:32px;height:32px;background:url(textures/async_32bits.png)" />
+                                                        <div style="float:left;width:32px;height:32px;background:url(textures/worldshare_32bits.png#357 81 32 32:0 0 0 0)" />
                                                     </pe:if>
                                                     <pe:if condition='<%= login.GetCurWorldInfo("is_zip", Eval("index"))%>'>
                                                         <div style="float:left;width:32px;height:32px;background:#fff" />
@@ -293,19 +295,24 @@
                                                     </div>
                                                 </div>
                                                 <div>
-                                                    <div class="share_world_infor" style="position:relative;margin-top:18px;">
-                                                        <span style="margin-left:0px;">版本：<%=login.GetCurWorldInfo("revision",Eval("index")) %></span>
-                                                        <span style="margin-left:10px;">文件：<%=login.GetWorldSize(Eval("filesTotals")) %></span>
+                                                    <div class="share_world_infor" style="position:relative;margin-top:2px;">
+                                                        <div>
+                                                            <span style="margin-left:0px;">V<%=login.GetCurWorldInfo("revision",Eval("index")) %></span>
+                                                            <span style="margin-left:10px;"><%=login.GetWorldSize(Eval("size")) %></span>
+                                                        </div>
+                                                        <div>
+                                                            <span style="margin-left:0px;"><%=login.formatDatetime(login.GetCurWorldInfo("modifyTime",Eval("index"))) %></span>
+                                                        </div>
                                                     </div>
                                                     <div style="position:relative;margin-left:170px;margin-top:3px;">
                                                         <pe:if condition='<%= login.GetCurWorldInfo("is_zip", Eval("index"))%>'>
                                                             <div class="share_button" style="float:left"/>
                                                         </pe:if>
-                                                        <input type="button" class="share_button" style="background:url(textures/delete_32bits.png);"   onclick='login.deleteWorld()'  name='<%=Eval("index")%>' /><!-- 删除 -->
+                                                        <input type="button" class="share_button" style="background:url(textures/worldshare_32bits.png#78 130 48 48:6 6 6 6)"   onclick='login.deleteWorld()'  name='<%=Eval("index")%>' /><!-- 删除 -->
                                                         <pe:if condition="<%= not login.GetCurWorldInfo('is_zip', Eval('index'))%>">
-                                                            <input type="button" class="share_button" style="background:url(textures/sync_now_32bits.png);" onclick="login.syncNow()"  name='<%=Eval("index")%>' /><!-- 手动同步 -->
+                                                            <input type="button" class="share_button" style="background:url(textures/worldshare_32bits.png#136 130 48 48:6 6 6 6)" onclick="login.syncNow()"  name='<%=Eval("index")%>' /><!-- 手动同步 -->
                                                         </pe:if>
-                                                        <input type="button" class="share_button" style="background:url(textures/enter_32bits.png);"    onclick="login.enterWorld()"   name='<%=Eval("index")%>' /><!-- 进入 -->
+                                                        <input type="button" class="share_button" style="background:url(textures/worldshare_32bits.png#20 130 48 48:6 6 6 6)"    onclick="login.enterWorld()"   name='<%=Eval("index")%>' /><!-- 进入 -->
                                                     </div>
                                                 </div>
                                             </pe:if>
@@ -319,12 +326,12 @@
                                                 </div>
                                                 <div>
                                                     <div class="share_world_infor" style="position:relative;margin-left:5px;margin-top:18px;">
-                                                        <span style="margin-left:0px;">版本：<%=login.GetCurWorldInfo("revision",Eval("index")) %></span>
-                                                        <span style="margin-left:10px;">文件：<%=login.GetWorldSize(Eval("filesTotals")) %></span>
+                                                        <span style="margin-left:0px;">V<%=login.GetCurWorldInfo("revision",Eval("index")) %></span>
+                                                        <span style="margin-left:10px;"><%=login.GetWorldSize(Eval("size")) %></span>
                                                         <span style="margin-left:10px;"><%=Eval("author") %></span>
                                                     </div>
                                                     <div style="position:relative;margin-left:250px;margin-top:3px;">
-                                                        <input type="button" class="share_button" style="background:url(textures/enter_32bits.png);" onclick="login.enterWorld()" name='<%=Eval("index")%>' /><!--进入-->
+                                                        <input type="button" class="share_button" style="background:url(textures/worldshare_32bits.png#20 130 48 48:6 6 6 6)" onclick="login.enterWorld()" name='<%=Eval("index")%>' /><!--进入-->
                                                     </div>
                                                 </div>
                                             </pe:if>
@@ -343,10 +350,10 @@
                                                 <div style="position:relative;width:200px;">
                                                     <div>
                                                         <pe:if condition='<%= not login.GetCurWorldInfo("is_zip", Eval("index")) and  login.GetCurWorldInfo("status",Eval("index")) == 3%>'>
-                                                            <div style="float:left;width:32px;height:32px;background:url(textures/sync_32bits.png)" />
+                                                            <div style="float:left;width:32px;height:32px;background:url(textures/worldshare_32bits.png#315 81 32 32:0 0 0 0)" />
                                                         </pe:if>
                                                         <pe:if condition='<%= not login.GetCurWorldInfo("is_zip", Eval("index")) and  login.GetCurWorldInfo("status",Eval("index")) ~= 3%>'>
-                                                            <div style="float:left;width:32px;height:32px;background:url(textures/async_32bits.png)" />
+                                                            <div style="float:left;width:32px;height:32px;background:url(textures/worldshare_32bits.png#357 81 32 32:0 0 0 0)" />
                                                         </pe:if>
                                                         <pe:if condition='<%= login.GetCurWorldInfo("is_zip", Eval("index"))%>'>
                                                             <div style="float:left;width:32px;height:32px;background:#fff"/>
@@ -356,13 +363,13 @@
                                                         </div>
                                                     </div>
                                                     <div class="share_world_infor" style="padding-top:5px;">
-                                                        <span style="margin-left:0px;">版本：<%=login.GetCurWorldInfo("revision",Eval("index")) %></span>
-                                                        <span style="margin-left:10px;">文件：<%=login.GetWorldSize(Eval("filesTotals")) %></span>
-                                                        <!--<span style="margin-left:10px;"><%=Eval("author") %></span>-->
+                                                        <span style="margin-left:0px;"><%=login.formatDatetime(login.GetCurWorldInfo("modifyTime",Eval("index"))) %></span>
+                                                        <span style="margin-left:10px;">V<%=login.GetCurWorldInfo("revision",Eval("index")) %></span>
+                                                        <span style="margin-left:10px;"><%=login.GetWorldSize(Eval("size")) %></span>
                                                     </div>
                                                 </div>
                                                 <div align="right" style="position:relative;width:30px;height:30px;margin-right:13px;margin-top:20px;">
-                                                    <input type="button" class="share_button" style="background:url(textures/enter_32bits.png)" onclick="login.enterWorld()" name='<%=Eval("index")%>' /><!--进入-->
+                                                    <input type="button" class="share_button" style="background:url(textures/worldshare_32bits.png#20 130 48 48:6 6 6 6)" onclick="login.enterWorld()" name='<%=Eval("index")%>' /><!--进入-->
                                                 </div>
                                             </pe:if>
                                             <pe:if condition='<%= login.current_type == 2%>'>
@@ -373,9 +380,9 @@
                                                         </div>
                                                     </div>
                                                     <div class="share_world_infor" style="margin-left:5px;padding-top:5px;">
-                                                        <span style="margin-left:0px;">版本：<%=login.GetCurWorldInfo("revision",Eval("index")) %></span>
-                                                        <span style="margin-left:10px;">文件：<%=login.GetWorldSize(Eval("filesTotals")) %></span>
-                                                        <!--<span style="margin-left:10px;"><%=Eval("author") %></span>-->
+                                                        <span style="margin-left:0px;">V<%=login.GetCurWorldInfo("revision",Eval("index")) %></span>
+                                                        <span style="margin-left:10px;"><%=login.GetWorldSize(Eval("size")) %></span>
+                                                        <span style="margin-left:10px;"><%=Eval("author") %></span>
                                                     </div>
                                                 </div>
                                             </pe:if>

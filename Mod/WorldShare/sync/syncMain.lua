@@ -114,19 +114,10 @@ function SyncMain:compareRevision(_LoginStatus)
 	if(login.token) then
 		LOG.std(nil,"debug","_LoginStatus",_LoginStatus);
 		if(not _LoginStatus) then
-			SyncMain.selectedWorldInfor = WorldCommon:GetWorldInfo();
-			LOG.std(nil,"debug","worldinfo",SyncMain.selectedWorldInfor);
+			LOG.std(nil,"debug","selectedWorldInfor",SyncMain.selectedWorldInfor);
 
-			if(not SyncMain.selectedWorldInfor.foldername) then
-				_guihelper.MessageBox(L"不能同步ZIP文件");
-
-				commonlib.TimerManager.SetTimeout(function()
-					if(SyncMain.ComparePage)then
-						SyncMain.closeComparePage();
-					end
-				end,100);
-				return;
-			end
+			SyncMain.tagInfor = WorldCommon.GetWorldInfo();
+			LOG.std(nil,"debug","SyncMain.tagInfor",SyncMain.tagInfor);
 
 			SyncMain.worldDir.default = GameLogic.GetWorldDirectory();
 			SyncMain.worldDir.utf8    = Encoding.DefaultToUtf8(SyncMain.worldDir.default);
@@ -138,6 +129,17 @@ function SyncMain:compareRevision(_LoginStatus)
 			LOG.std(nil,"debug","SyncMain.foldername.default",SyncMain.foldername.default)
 			SyncMain.foldername.utf8    = SyncMain.worldDir.utf8:match("worlds/DesignHouse/([^/]*)/");
 			LOG.std(nil,"debug","SyncMain.foldername.utf8",SyncMain.foldername.utf8)
+
+			if(SyncMain.selectedWorldInfor.is_zip) then
+				_guihelper.MessageBox(L"不能同步ZIP文件");
+
+				commonlib.TimerManager.SetTimeout(function()
+					if(SyncMain.ComparePage)then
+						SyncMain.closeComparePage();
+					end
+				end,100);
+				return;
+			end
 		end
 
 		WorldRevisionCheckOut   = WorldRevision:new():init(SyncMain.worldDir.default);
@@ -621,7 +623,7 @@ function SyncMain:syncToDataSource()
 							preview[0].previewUrl = login.rawBaseUrl .. "/" .. login.dataSourceUsername .. "/" .. GitEncoding.base64(SyncMain.foldername.utf8) .. "/raw/master/preview.jpg";
 							preview = NPL.ToJson(preview,true);
 
-							local filesTotals = LocalService:GetWorldFileSize(SyncMain.foldername.default);
+							local filesTotals = SyncMain.selectedWorldInfor.size;
 
 							local params = {};
 							params.modDate		   = modDateTable;

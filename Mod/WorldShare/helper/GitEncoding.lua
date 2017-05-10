@@ -26,11 +26,13 @@ function GitEncoding.base64(text)
 			text = text:gsub("[=]"  , "-equal");
 			text = text:gsub("[%+]" , "-plus");
 			text = text:gsub("[/]"  , "-slash");
+
+			text = "world_base64_" .. text;
 		else
 			text = "world_" .. text;
 		end
 
-		--LOG.std(nil,"debug","text",text);
+		LOG.std(nil,"debug","text",text);
 
 		return text;
 	else
@@ -40,16 +42,19 @@ end
 
 function GitEncoding.unbase64(text)
 	if(text) then
-		local notLetter = string.find(text,"world_");
+		local notLetter = string.find(text,"world_base64_");
 
 		if(notLetter) then
+			text = text:gsub("world_base64_","");
+
 			text = text:gsub("[-equal]" , "=");
 			text = text:gsub("[-plus]"  , "+");
 			text = text:gsub("[-slash]" , "/");
 
 			return Encoding.unbase64(text);
-
 		else
+			text = text:gsub("world_","");
+
 			return text;
 		end
 	else

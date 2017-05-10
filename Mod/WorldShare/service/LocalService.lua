@@ -220,21 +220,29 @@ function LocalService:delete(_foldername, _filename, _callback)
 	_callback();
 end
 
-function LocalService:GetWorldFileSize(_foldername) --default encoding
-	local worldDir = "worlds/DesignHouse/" .. _foldername .."/";
-	local files = LocalService:LoadFiles(worldDir,"");
-	local filesTotal = 0;
-
-	for key,value in ipairs(files) do
-		--LOG.std(nil,"debug","value.file_path",value.file_path);
-		filesTotal = filesTotal + ParaIO.GetFileSize(value.file_path);
-	end
-
-	return filesTotal;
+function LocalService:GetZipWorldSize(_zipWorldDir)
+	return ParaIO.GetFileSize(_zipWorldDir);
 end
 
-function LocalService:GetZipWorldSize(_zipname)
-	local zipWorldDir = "worlds/DesignHouse/" .. _zipname;
+function LocalService:GetZipRevision(_zipWorldDir)
+	local zipParentDir = _zipWorldDir:gsub("[^/\\]+$", "");
+
+	ParaAsset.OpenArchive(_zipWorldDir, true);	
+	local output = {};
+
+	Files.Find(output, "", 0, 500, ":revision.xml", _zipWorldDir);
+
+	LOG.std(nil,"debug","output[1].filename",zipParentDir .. output[1].filename);
+	local file = ParaIO.open(zipParentDir .. output[1].filename, "r");
+	local binData;
+
+	if(file:IsValid()) then
+		binData = file:GetText(0, -1);
+		LOG.std(nil,"debug","binData",binData);
+		file:close();
+	end
+	
+	return binData;
 end
 
 function LocalService:GetTag(_foldername)
