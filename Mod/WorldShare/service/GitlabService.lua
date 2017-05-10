@@ -162,7 +162,7 @@ function GitlabService:getTree(_callback, _commitId, _projectId)
 
 			local function getSubTree()
 				for key,value in ipairs(GitlabService.tree) do
-					GitlabService:getSubTree(function(subTree, subFolderName ,_commitId)
+					GitlabService:getSubTree(function(subTree, subFolderName, _commitId, _projectId)
 						for checkKey,checkValue in ipairs(GitlabService.tree) do
 							if(checkValue.path == subFolderName) then
 								if(not checkValue.alreadyGet) then
@@ -204,7 +204,7 @@ function GitlabService:getTree(_callback, _commitId, _projectId)
 								getSubTree();
 							end
 						end
-					end, value.path);
+					end, value.path, _commitId, _projectId);
 				end
 			end
 
@@ -213,8 +213,12 @@ function GitlabService:getTree(_callback, _commitId, _projectId)
 	end);
 end
 
-function GitlabService:getSubTree(_callback, _path, _commitId)
-	local url = '/projects/' .. GitlabService.projectId .. '/repository/tree' .. "?path=" .. _path;
+function GitlabService:getSubTree(_callback, _path, _commitId, _projectId)
+	if(not _projectId) then
+		_projectId = GitlabService.projectId;
+	end
+
+	local url = '/projects/' .. _projectId .. '/repository/tree' .. "?path=" .. _path;
 	
 	if(_commitId) then
 		url = url .. "&ref=" .. _commitId;
@@ -232,7 +236,7 @@ function GitlabService:getSubTree(_callback, _path, _commitId)
 			end
 		end
 
-		_callback(tree, _path);
+		_callback(tree, _path, _commitId, _projectId);
 	end);
 end
 

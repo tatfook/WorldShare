@@ -114,8 +114,6 @@ function SyncMain:compareRevision(_LoginStatus)
 	if(login.token) then
 		LOG.std(nil,"debug","_LoginStatus",_LoginStatus);
 		if(not _LoginStatus) then
-			LOG.std(nil,"debug","selectedWorldInfor",SyncMain.selectedWorldInfor);
-
 			SyncMain.tagInfor = WorldCommon.GetWorldInfo();
 			LOG.std(nil,"debug","SyncMain.tagInfor",SyncMain.tagInfor);
 
@@ -129,6 +127,16 @@ function SyncMain:compareRevision(_LoginStatus)
 			LOG.std(nil,"debug","SyncMain.foldername.default",SyncMain.foldername.default)
 			SyncMain.foldername.utf8    = SyncMain.worldDir.utf8:match("worlds/DesignHouse/([^/]*)/");
 			LOG.std(nil,"debug","SyncMain.foldername.utf8",SyncMain.foldername.utf8)
+
+			LOG.std(nil,"debug","selectedWorldInfor",SyncMain.selectedWorldInfor);
+			if(not SyncMain.selectedWorldInfor) then
+				login.RefreshCurrentServerList();
+				for key,value in ipairs(InternetLoadWorld.cur_ds) do
+					if(value.foldername == SyncMain.foldername.utf8)then
+						SyncMain.selectedWorldInfor = value;
+					end
+				end
+			end
 
 			if(SyncMain.selectedWorldInfor.is_zip) then
 				_guihelper.MessageBox(L"不能同步ZIP文件");
@@ -661,7 +669,7 @@ function SyncMain:syncToDataSource()
 											url  = login.site .. "/api/mod/worldshare/models/worlds",
 											json = true,
 											headers = {Authorization = "Bearer "..login.token},
-											form = {amount = 100},
+											form = {amount = 10000},
 										},function(worldList, err)
 											LOG.std(nil,"debug","worldList-data",worldList);
 											SyncMain:genIndexMD(worldList);
@@ -860,7 +868,7 @@ function SyncMain:syncToDataSource()
 				if(not hasReadme) then
 					local filePath = SyncMain.worldDir.default .. "README.md";
 					local file = ParaIO.open(filePath, "w");
-					local content = KeepworkGen.readmeDefault;
+					local content = Encoding.Utf8ToDefault(KeepworkGen.readmeDefault);
 
 					file:write(content,#content);
 					file:close();
@@ -959,7 +967,7 @@ function SyncMain:genIndexMD(_worldList, _callback)
 
 			end
 
-			local indexPath = username .. "/paracraft/index";
+			local indexPath = username .. "/paracraft/index.md";
 
 			for key,value in ipairs(data) do
 				if(value.path == indexPath) then
@@ -967,13 +975,13 @@ function SyncMain:genIndexMD(_worldList, _callback)
 				end
 			end
 
-			local function updateTree(_callback)
-				SyncMain:refreshWikiPages(indexPath, SyncMain.indexFile, function(data, err)
-					if(_callback) then
-						_callback();
-					end
-				end);
-			end
+--			local function updateTree(_callback)
+--				SyncMain:refreshWikiPages(indexPath, SyncMain.indexFile, function(data, err)
+--					if(_callback) then
+--						_callback();
+--					end
+--				end);
+--			end
 
 			local function updateIndexFile()
 				LOG.std(nil,"debug","hasIndexO",hasIndex);
@@ -1009,7 +1017,9 @@ function SyncMain:genIndexMD(_worldList, _callback)
 							function(isSuccess, path)
 								LOG.std(nil,"debug","updateService-indexFile",isSuccess)
 								LOG.std(nil,"debug","updateService-indexFile",path)
-								updateTree(_callback);
+								if(_callback) then
+									_callback();
+								end
 							end,
 							keepworkId
 						);
@@ -1035,7 +1045,9 @@ function SyncMain:genIndexMD(_worldList, _callback)
 						indexPath,
 						SyncMain.indexFile,
 						function(data, err) 
-							updateTree(_callback);
+							if(_callback) then
+								_callback();
+							end
 						end,
 						keepworkId
 					);
@@ -1043,7 +1055,7 @@ function SyncMain:genIndexMD(_worldList, _callback)
 			end
 
 			updateIndexFile();
-		end, keepworkId);
+		end, nil, keepworkId);
 	end
 	
 	if(login.dataSourceType == "github") then
@@ -1067,12 +1079,12 @@ function SyncMain:genWorldMD(worldInfor, _callback)
 
 			if(login.dataSourceType == "gitlab") then
 				username = login.dataSourceUsername:gsub("gitlab_" , "");
-				worldUrl = "http://git.keepwork.com/" .. login.dataSourceUsername .. "/" .. GitEncoding.base64(SyncMain.foldername) .. "/repository/archive.zip?ref=master";
+				worldUrl = "http://git.keepwork.com/" .. login.dataSourceUsername .. "/" .. GitEncoding.base64(SyncMain.foldername.utf8) .. "/repository/archive.zip?ref=master";
 			else
 
 			end
 
-			local worldFilePath =  username .. "/paracraft/world_" .. worldInfor.worldsName;
+			local worldFilePath =  username .. "/paracraft/world_" .. worldInfor.worldsName .. ".md";
 
 			for key,value in ipairs(data) do
 				if(value.path == worldFilePath) then
@@ -1080,15 +1092,15 @@ function SyncMain:genWorldMD(worldInfor, _callback)
 				end
 			end
 			
-			local function updateTree(_callback)
-				SyncMain:refreshWikiPages(worldFilePath, SyncMain.worldFile, function(data, err)
-					LOG.std(nil,"debug","refreshWikiPages-data",data);
-					LOG.std(nil,"debug","refreshWikiPages-err",err);
-					if(_callback) then
-						_callback();
-					end
-				end);
-			end
+--			local function updateTree(_callback)
+--				SyncMain:refreshWikiPages(worldFilePath, SyncMain.worldFile, function(data, err)
+--					LOG.std(nil,"debug","refreshWikiPages-data",data);
+--					LOG.std(nil,"debug","refreshWikiPages-err",err);
+--					if(_callback) then
+--						_callback();
+--					end
+--				end);
+--			end
 
 			local function updateWorldFile()
 				if(hasWorldFile) then
@@ -1126,7 +1138,9 @@ function SyncMain:genWorldMD(worldInfor, _callback)
 							function(isSuccess, path)
 								LOG.std(nil,"debug","updateService-worldFile",isSuccess)
 								LOG.std(nil,"debug","updateService-worldFile",path)
-								updateTree(_callback);
+								if(_callback) then
+									_callback();
+								end
 							end,
 							keepworkId
 						);
@@ -1160,8 +1174,10 @@ function SyncMain:genWorldMD(worldInfor, _callback)
 						"keepworkDataSource",
 						worldFilePath,
 						SyncMain.worldFile,
-						function(data, err) 
-							updateTree(_callback);
+						function(data, err)
+							if(_callback) then
+								_callback();
+							end
 						end,
 						keepworkId
 					);
@@ -1176,6 +1192,7 @@ function SyncMain:genWorldMD(worldInfor, _callback)
 		gen();
 	elseif(login.dataSourceType == "gitlab") then
 		GitlabService:getProjectIdByName("keepworkDataSource",function(keepworkId)
+			
 			gen(keepworkId);
 		end);
 	end
@@ -1199,86 +1216,86 @@ function SyncMain:deleteWorldMD(_path, _callback)
 	end
 end
 
-function SyncMain:refreshWikiPages(_path, _content, _callback)
-	LOG.std(nil,"debug","_content",_content);
-	HttpRequest:GetUrl({
-		url  = login.site.."/api/wiki/models/website_pageinfo/get",
-		json = true,
-		headers = {Authorization = "Bearer "..login.token},
-		form = {
-			username     = login.username,
-			websiteName  = "paracraft",
-			dataSourceId = login.dataSourceId,
-		},
-	},function(data, err)
-		--LOG.std(nil,"debug","getUserPages",data);
-		local pageinfoList = data.data.pageinfo;
-
-		local params = {};
-		NPL.FromJson(pageinfoList, params);
-
-		pageinfoList    = params;
-		newPageinfoList = {};
-
-		local hasFile = false;
-
-		for key,value in ipairs(pageinfoList) do
-			if(value.url == "/" .. _path) then
-				hasFile     = true;	
-				hasFileInfo = value;
-			else
-				newPageinfoList[#newPageinfoList + 1] = value;
-			end
-		end
-
-		--LOG.std(nil,"debug","_path",_path);
-		--LOG.std(nil,"debug","_content",_content);
-		--LOG.std(nil,"debug","hasFile",hasFile);
-		--LOG.std(nil,"debug","pageinfoList",pageinfoList);
-
-		if(hasFile) then
-			hasFileInfo.timestamp = os.time() .. "000";
-			hasFileInfo.content   = _content;
-			hasFileInfo.isModify  = true;
-
-			newPageinfoList[#newPageinfoList + 1] = hasFileInfo;
-		else
-			LOG.std(nil,"debug","os", os.time() .. "000");
-
-			local thisInfor = {};
-
-			thisInfor.timestamp    = os.time() .. "000";
-			thisInfor.websiteName  = "paracraft";
-			thisInfor.userId	   = login.userId;
-			thisInfor.dataSourceId = login.dataSourceId;
-			thisInfor.isModify	   = false;
-			thisInfor.username	   = login.username;
-			thisInfor.name	       = _path;
-			thisInfor.url		   = "/" .. _path;
-			thisInfor.content      = _content;
-
-			newPageinfoList[#newPageinfoList + 1] = thisInfor;
-		end
-
-		LOG.std(nil,"debug","newPageinfoList",newPageinfoList);
-
-		newPageinfoList = NPL.ToJson(newPageinfoList,true);
-
-		local params = {};
-		params.dataSourceId = login.dataSourceId;
-		params.isExistSite  = 1;
-		params.pageinfo     = newPageinfoList;
-		params.username     = login.username;
-		params.websiteName  = "paracraft";
-
-		HttpRequest:GetUrl({
-			url  = login.site.."/api/wiki/models/website_pageinfo/upsert",
-			json = true,
-			headers = {Authorization = "Bearer "..login.token},
-			form = params,
-		},_callback)
-	end);
-end
+--function SyncMain:refreshWikiPages(_path, _content, _callback)
+--	LOG.std(nil,"debug","_content",_content);
+--	HttpRequest:GetUrl({
+--		url  = login.site.."/api/wiki/models/website_pageinfo/get",
+--		json = true,
+--		headers = {Authorization = "Bearer "..login.token},
+--		form = {
+--			username     = login.username,
+--			websiteName  = "paracraft",
+--			dataSourceId = login.dataSourceId,
+--		},
+--	},function(data, err)
+--		--LOG.std(nil,"debug","getUserPages",data);
+--		local pageinfoList = data.data.pageinfo;
+--
+--		local params = {};
+--		NPL.FromJson(pageinfoList, params);
+--
+--		pageinfoList    = params;
+--		newPageinfoList = {};
+--
+--		local hasFile = false;
+--
+--		for key,value in ipairs(pageinfoList) do
+--			if(value.url == "/" .. _path) then
+--				hasFile     = true;	
+--				hasFileInfo = value;
+--			else
+--				newPageinfoList[#newPageinfoList + 1] = value;
+--			end
+--		end
+--
+--		--LOG.std(nil,"debug","_path",_path);
+--		--LOG.std(nil,"debug","_content",_content);
+--		--LOG.std(nil,"debug","hasFile",hasFile);
+--		--LOG.std(nil,"debug","pageinfoList",pageinfoList);
+--
+--		if(hasFile) then
+--			hasFileInfo.timestamp = os.time() .. "000";
+--			hasFileInfo.content   = _content;
+--			hasFileInfo.isModify  = true;
+--
+--			newPageinfoList[#newPageinfoList + 1] = hasFileInfo;
+--		else
+--			LOG.std(nil,"debug","os", os.time() .. "000");
+--
+--			local thisInfor = {};
+--
+--			thisInfor.timestamp    = os.time() .. "000";
+--			thisInfor.websiteName  = "paracraft";
+--			thisInfor.userId	   = login.userId;
+--			thisInfor.dataSourceId = login.dataSourceId;
+--			thisInfor.isModify	   = false;
+--			thisInfor.username	   = login.username;
+--			thisInfor.name	       = _path;
+--			thisInfor.url		   = "/" .. _path;
+--			thisInfor.content      = _content;
+--
+--			newPageinfoList[#newPageinfoList + 1] = thisInfor;
+--		end
+--
+--		LOG.std(nil,"debug","newPageinfoList",newPageinfoList);
+--
+--		newPageinfoList = NPL.ToJson(newPageinfoList,true);
+--
+--		local params = {};
+--		params.dataSourceId = login.dataSourceId;
+--		params.isExistSite  = 1;
+--		params.pageinfo     = newPageinfoList;
+--		params.username     = login.username;
+--		params.websiteName  = "paracraft";
+--
+--		HttpRequest:GetUrl({
+--			url  = login.site.."/api/wiki/models/website_pageinfo/upsert",
+--			json = true,
+--			headers = {Authorization = "Bearer "..login.token},
+--			form = params,
+--		},_callback)
+--	end);
+--end
 
 function SyncMain.deleteWorld()
 	System.App.Commands.Call("File.MCMLWindowFrame", {
