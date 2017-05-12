@@ -19,6 +19,7 @@ local ShareWorld     = commonlib.inherit(nil,commonlib.gettable("Mod.WorldShare.
 local SyncMain       = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
 local login          = commonlib.gettable("Mod.WorldShare.login");
 
+
 function ShareWorld:ctor()
 
 end
@@ -37,7 +38,7 @@ function ShareWorld.snapshot()
 end
 
 function ShareWorld.getWorldUrl()
-	local url = login.site .. "/" .. login.username .. "/paracraft/" .. SyncMain.foldername.utf8;
+	local url = login.site .. "/" .. login.username .. "/paracraft/" .. commonlib.Encoding.url_encode("world_" .. SyncMain.foldername.utf8);
 	return url;
 end
 

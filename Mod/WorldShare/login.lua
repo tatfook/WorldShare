@@ -274,7 +274,7 @@ function login.GetWorldSize(size)
 end
 
 function login.formatStatus(_status)
-	LOG.std(nil, "debug", "_status", _status);
+	--LOG.std(nil, "debug", "_status", _status);
 	if(_status == 1) then
 		return L"仅本地";
 	elseif(_status == 2) then

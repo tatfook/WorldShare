@@ -1,4 +1,4 @@
---[[
+﻿--[[
 Title: LocalService
 Author(s):  big
 Date:  2016.12.11
@@ -18,9 +18,9 @@ NPL.load("(gl)Mod/WorldShare/login.lua");
 NPL.load("(gl)Mod/WorldShare/service/GitlabService.lua");
 NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua");
 NPL.load("(gl)Mod/WorldShare/sync/SyncMain.lua");
-NPL.load("(gl)script/apps/Aries/Creator/Game/API/FileDownloader.lua");
+NPL.load("(gl)Mod/WorldShare/service/FileDownloader.lua");
 
-local FileDownloader = commonlib.gettable("MyCompany.Aries.Creator.Game.API.FileDownloader");
+local FileDownloader = commonlib.inherit(nil, commonlib.gettable("Mod.WorldShare.service.FileDownloader"));
 local GitEncoding    = commonlib.gettable("Mod.WorldShare.helper.GitEncoding");
 local GitlabService  = commonlib.gettable("Mod.WorldShare.service.GitlabService");
 local GithubService  = commonlib.gettable("Mod.WorldShare.service.GithubService");
@@ -289,7 +289,7 @@ function LocalService:downloadZip(_foldername, _commitId, _callback)
 		else
 			_callback(false,nil);
 		end
-	end);
+	end, "access plus 5 mins", true);
 end
 
 function LocalService:FileDownloader(_foldername, _path, _callback)
@@ -308,7 +308,7 @@ function LocalService:FileDownloader(_foldername, _path, _callback)
 	LOG.std(nil,"debug","FileDownloader-url",url);
 	LOG.std(nil,"debug","FileDownloader-downloadDir",downloadDir);
 
-	local Files = FileDownloader:new():Init(nil, url, downloadDir, function(bSuccess, downloadPath)
+	local Files = FileDownloader:new():Init(_path, url, downloadDir, function(bSuccess, downloadPath)
 		LOG.std(nil,"debug","FileDownloader-downloadPath",downloadPath);
 
 		local content = LocalService:getFileContent(downloadPath);
@@ -319,7 +319,7 @@ function LocalService:FileDownloader(_foldername, _path, _callback)
 		else
 			return _callback(bSuccess,nil);
 		end
-	end);
+	end,"access plus 5 mins",true);
 end
 
 function LocalService:delete(_foldername, _filename, _callback)

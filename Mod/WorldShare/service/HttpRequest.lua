@@ -1,4 +1,4 @@
---[[
+ï»¿--[[
 Title: HttpRequest
 Author(s):  big
 Date:  2017.4.17
@@ -30,7 +30,7 @@ end
 function HttpRequest:retry(_err, _msg, _data, _params, _callback)
 	LOG.std(nil,"debug","HttpRequest ERR",{_err});
 
-	if(_err == 422 or _err == 404 or _err == 409 or _err == 401) then -- Ê§°ÜÊ±¿ÉÖ±½Ó·µ»ØµÄ´úÂë
+	if(_err == 422 or _err == 404 or _err == 409 or _err == 401) then -- å¤±è´¥æ—¶å¯ç›´æ¥è¿”å›çš„ä»£ç 
 		_callback(_data,_err); 
 		return;
 	end
@@ -49,7 +49,7 @@ function HttpRequest:retry(_err, _msg, _data, _params, _callback)
 		HttpRequest.tryTimes = HttpRequest.tryTimes + 1;
 		
 		commonlib.TimerManager.SetTimeout(function()
-			HttpRequest:GetUrl(_params, _callback); -- Èç¹û»ñÈ¡Ê§°ÜÔòµİ¹é»ñÈ¡Êı¾İ
+			HttpRequest:GetUrl(_params, _callback); -- å¦‚æœè·å–å¤±è´¥åˆ™é€’å½’è·å–æ•°æ®
 		end, 2100);
 	end
 end

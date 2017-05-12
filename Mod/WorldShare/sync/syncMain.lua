@@ -360,6 +360,7 @@ function SyncMain:syncToLocal(_callback)
 		return;
 	end
 
+	SyncMain.localSync = {};
 	SyncMain.finish = false;
 
 	-- 加载进度UI界面
@@ -390,7 +391,7 @@ function SyncMain:syncToLocal(_callback)
 
 		syncToLocalGUI:updateDataBar(syncGUIIndex, syncGUItotal, L'获取文件sha列表');
 
-		local function finish()
+		function SyncMain.localSync.finish()
 			SyncMain.finish = true;
 
 			syncToLocalGUI:updateDataBar(syncGUIIndex, syncGUItotal, "同步完成");
@@ -416,7 +417,7 @@ function SyncMain:syncToLocal(_callback)
 		end
 
 		-- 下载新文件
-		local function downloadOne()
+		function SyncMain.localSync.downloadOne()
 			-- LOG.std(nil,"debug","githubFiles.tree[SyncMain.curDownloadIndex]",githubFiles.tree[SyncMain.curDownloadIndex]);
 			-- LOG.std(nil,"debug","SyncMain.curDownloadIndex",SyncMain.curDownloadIndex);
 
@@ -433,10 +434,10 @@ function SyncMain:syncToLocal(_callback)
 							end
 
 							if(SyncMain.curDownloadIndex == SyncMain.totalDataSourceIndex) then
-								finish();
+								SyncMain.localSync.finish();
 							else
 								SyncMain.curDownloadIndex = SyncMain.curDownloadIndex + 1;
-								downloadOne();
+								SyncMain.localSync.downloadOne();
 							end
 						else
 							_guihelper.MessageBox(L'下载失败，请稍后再试');
@@ -447,16 +448,28 @@ function SyncMain:syncToLocal(_callback)
 				end
 			else
 				if(SyncMain.curDownloadIndex == SyncMain.totalDataSourceIndex) then
-					finish();
+					SyncMain.localSync.finish();
 				else
 					SyncMain.curDownloadIndex = SyncMain.curDownloadIndex + 1;
-					downloadOne();
+					SyncMain.localSync.downloadOne();
 				end
 			end
 		end
 
+		-- 删除文件
+		function SyncMain.localSync.deleteOne()
+			LocalService:delete(SyncMain.foldername.utf8, SyncMain.localFiles[SyncMain.curUpdateIndex].filename, function (data, err)
+				if (SyncMain.curUpdateIndex == SyncMain.totalLocalIndex) then
+					SyncMain.localSync.downloadOne();
+				else
+					SyncMain.curUpdateIndex = SyncMain.curUpdateIndex + 1;
+					SyncMain.localSync.updateOne();
+				end
+			end);
+		end
+
 		-- 更新本地文件
-		local function updateOne()
+		function SyncMain.localSync.updateOne()
 			LOG.std(nil,"debug","SyncMain.curUpdateIndex ",SyncMain.curUpdateIndex);
 			local bIsExisted      = false;
 			local dataSourceIndex = nil;
@@ -490,10 +503,10 @@ function SyncMain:syncToLocal(_callback)
 							syncToLocalGUI:updateDataBar(syncGUIIndex, syncGUItotal, response.filename);
 
 							if (SyncMain.curUpdateIndex == SyncMain.totalLocalIndex) then
-								downloadOne();
+								SyncMain.localSync.downloadOne();
 							else
 								SyncMain.curUpdateIndex = SyncMain.curUpdateIndex + 1;
-								updateOne();
+								SyncMain.localSync.updateOne();
 							end
 						else
 							_guihelper.MessageBox(L'更新失败,请稍后再试');
@@ -506,10 +519,10 @@ function SyncMain:syncToLocal(_callback)
 					syncToLocalGUI:updateDataBar(syncGUIIndex, syncGUItotal, SyncMain.dataSourceFiles[dataSourceIndex].path);
 
 					if (SyncMain.curUpdateIndex == SyncMain.totalLocalIndex) then
-						downloadOne();
+						SyncMain.localSync.downloadOne();
 					else
 						SyncMain.curUpdateIndex = SyncMain.curUpdateIndex + 1;
-						updateOne();
+						SyncMain.localSync.updateOne();
 					end
 				end
 			else
@@ -517,20 +530,8 @@ function SyncMain:syncToLocal(_callback)
 				LOG.std(nil,"debug","delete-sha1",SyncMain.localFiles[SyncMain.curUpdateIndex].sha1);
 
 				-- 如果过github不删除存在，则删除本地的文件
-				deleteOne();
+				SyncMain.localSync.deleteOne();
 			end
-		end
-
-		-- 删除文件
-		local function deleteOne()
-			LocalService:delete(SyncMain.foldername.utf8, SyncMain.localFiles[SyncMain.curUpdateIndex].filename, function (data, err)
-				if (SyncMain.curUpdateIndex == SyncMain.totalLocalIndex) then
-					downloadOne();
-				else
-					SyncMain.curUpdateIndex = SyncMain.curUpdateIndex + 1;
-					updateOne();
-				end
-			end);
 		end
 
 		-- 获取数据源仓文件
@@ -564,14 +565,14 @@ function SyncMain:syncToLocal(_callback)
 				LOG.std(nil,"debug","SyncMain.totalDataSourceIndex",SyncMain.totalDataSourceIndex);
 
 				if (SyncMain.totalLocalIndex ~= 0) then
-					updateOne();
+					SyncMain.localSync.updateOne();
 				else
 					--downloadOne(); --如果文档文件夹为空，则直接开始下载
 					LocalService:downloadZip(SyncMain.foldername.utf8, SyncMain.commitId ,function(bSuccess, remoteRevison)
 						if(bSuccess) then
 							SyncMain.remoteRevison = remoteRevison;
 							syncGUIIndex = syncGUItotal;
-							finish();
+							SyncMain.localSync.finish();
 						else
 							_guihelper.MessageBox(L'下载失败，请稍后再试');
 						end
@@ -590,7 +591,7 @@ function SyncMain:syncToDataSource()
 		_guihelper.MessageBox(L"同步尚未结束");
 		return;
 	end
-
+	SyncMain.remoteSync = {};
 	SyncMain.finish = false;
 
 	-- 加载进度UI界面
@@ -616,7 +617,7 @@ function SyncMain:syncToDataSource()
 			LOG.std(nil,"debug","SyncMain.curUploadIndex",SyncMain.curUploadIndex);
 			LOG.std(nil,"debug","SyncMain.totalDataSourceIndex",SyncMain.totalDataSourceIndex);
 
-			local function finish()
+			function SyncMain.remoteSync.finish()
 				LOG.std(nil,"debug","SyncMain.selectedWorldInfor",SyncMain.selectedWorldInfor);
 				LOG.std(nil,"debug","send",SyncMain.selectedWorldInfor.tooltip);
 
@@ -736,7 +737,7 @@ function SyncMain:syncToDataSource()
 			end
 
 			-- 上传新文件
-			local function uploadOne()
+			function SyncMain.remoteSync.uploadOne()
 				LOG.std(nil,"debug","uploadOne-status",SyncMain.curUploadIndex);
 				LOG.std(nil,"debug","uploadOne-status",SyncMain.totalLocalIndex);
 
@@ -749,10 +750,10 @@ function SyncMain:syncToDataSource()
 
 							if (SyncMain.curUploadIndex == SyncMain.totalLocalIndex) then
 								LOG.std(nil,"debug","SyncMain.localFiles",SyncMain.localFiles);
-								finish();
+								SyncMain.remoteSync.finish();
 							else
 								SyncMain.curUploadIndex = SyncMain.curUploadIndex + 1;
-								uploadOne(); --继续递归上传
+								SyncMain.remoteSync.uploadOne(); --继续递归上传
 							end
 						else
 							--_guihelper.MessageBox(L"上传失败");
@@ -768,16 +769,45 @@ function SyncMain:syncToDataSource()
 --					syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, SyncMain.localFiles[SyncMain.curUploadIndex].filename);
 
 					if (SyncMain.curUploadIndex == SyncMain.totalLocalIndex) then
-						finish();
+						SyncMain.remoteSync.finish();
 					else
 						SyncMain.curUploadIndex = SyncMain.curUploadIndex + 1;
-						uploadOne(); --继续递归上传
+						SyncMain.remoteSync.uploadOne(); --继续递归上传
+					end
+				end
+			end
+
+			-- 删除数据源文件
+			function SyncMain.remoteSync.deleteOne()
+				LOG.std(nil,"debug","deleteOne-status");
+				if(SyncMain.dataSourceFiles[SyncMain.curUpdateIndex].type == "blob") then
+					SyncMain:deleteFileService(SyncMain.foldername.utf8, SyncMain.dataSourceFiles[SyncMain.curUpdateIndex].path, SyncMain.dataSourceFiles[SyncMain.curUpdateIndex].sha, function (bIsDelete)
+						if (bIsDelete) then
+							SyncMain.curUpdateIndex = SyncMain.curUpdateIndex + 1;
+
+							if (SyncMain.curUpdateIndex > SyncMain.totalDataSourceIndex) then  --check whether all files have updated or not. if false, update the next one, if true, upload files.
+								SyncMain.remoteSync.uploadOne();
+							else
+								SyncMain.remoteSync.updateOne();
+							end
+						else
+							_guihelper.MessageBox(L"删除失败");
+							--syncToDataSourceGUI.finish();
+							--SyncMain.finish = true;
+						end
+					end);
+				else
+					if (SyncMain.curUpdateIndex == SyncMain.totalDataSourceIndex) then  --check whether all files have updated or not. if false, update the next one, if true, upload files.
+						SyncMain.remoteSync.uploadOne();
+					else
+						SyncMain.curUpdateIndex = SyncMain.curUpdateIndex + 1;
+						SyncMain.remoteSync.updateOne();
 					end
 				end
 			end
 
 			-- 更新数据源文件
-			local function updateOne()
+			function SyncMain.remoteSync.updateOne()
 				LOG.std(nil,"debug","updateOne-status",SyncMain.curUpdateIndex);
 				LOG.std(nil,"debug","updateOne-status",SyncMain.totalDataSourceIndex);
 
@@ -816,10 +846,10 @@ function SyncMain:syncToDataSource()
 											LOG.std(nil,"debug","needChange",value.needChange);
 										end
 										
-										uploadOne();
+										SyncMain.remoteSync.uploadOne();
 									else
 										SyncMain.curUpdateIndex = SyncMain.curUpdateIndex + 1; -- 如果不等最大计数则更新
-										updateOne();
+										SyncMain.remoteSync.updateOne();
 									end
 								else
 									_guihelper.MessageBox(L"更新失败");
@@ -838,10 +868,10 @@ function SyncMain:syncToDataSource()
 									LOG.std(nil,"debug","filename",value.filename);
 									LOG.std(nil,"debug","needChange",value.needChange);
 								end
-								uploadOne();
+								SyncMain.remoteSync.uploadOne();
 							else
 								SyncMain.curUpdateIndex = SyncMain.curUpdateIndex + 1;
-								updateOne();
+								SyncMain.remoteSync.updateOne();
 							end
 						end
 					else
@@ -849,43 +879,14 @@ function SyncMain:syncToDataSource()
 						-- LOG.std(nil,"debug","delete-sha1",self.localFiles[LocalIndex].filename);
 
 						-- 如果过数据源不删除存在，则删除本地的文件
-						deleteOne();
+						SyncMain.remoteSync.deleteOne();
 					end
 				else
 					if (SyncMain.curUpdateIndex == SyncMain.totalDataSourceIndex) then
-						uploadOne();
+						SyncMain.remoteSync.uploadOne();
 					else
 						SyncMain.curUpdateIndex = SyncMain.curUpdateIndex + 1;
-						updateOne();
-					end
-				end
-			end
-
-			-- 删除数据源文件
-			function deleteOne()
-				LOG.std(nil,"debug","deleteOne-status");
-				if(SyncMain.dataSourceFiles[SyncMain.curUpdateIndex].type == "blob") then
-					SyncMain:deleteFileService(SyncMain.foldername.utf8, SyncMain.dataSourceFiles[SyncMain.curUpdateIndex].path, SyncMain.dataSourceFiles[SyncMain.curUpdateIndex].sha, function (bIsDelete)
-						if (bIsDelete) then
-							SyncMain.curUpdateIndex = SyncMain.curUpdateIndex + 1;
-
-							if (SyncMain.curUpdateIndex > SyncMain.totalDataSourceIndex) then  --check whether all files have updated or not. if false, update the next one, if true, upload files.
-								uploadOne();
-							else
-								updateOne();
-							end
-						else
-							_guihelper.MessageBox(L"删除失败");
-							--syncToDataSourceGUI.finish();
-							--SyncMain.finish = true;
-						end
-					end);
-				else
-					if (SyncMain.curUpdateIndex == SyncMain.totalDataSourceIndex) then  --check whether all files have updated or not. if false, update the next one, if true, upload files.
-						uploadOne();
-					else
-						SyncMain.curUpdateIndex = SyncMain.curUpdateIndex + 1;
-						updateOne();
+						SyncMain.remoteSync.updateOne();
 					end
 				end
 			end
@@ -939,9 +940,9 @@ function SyncMain:syncToDataSource()
 					SyncMain.dataSourceFiles = data;
 					SyncMain.totalDataSourceIndex = #SyncMain.dataSourceFiles;
 
-					updateOne();
+					SyncMain.remoteSync.updateOne();
 				else
-					uploadOne();
+					SyncMain.remoteSync.uploadOne();
 				end
 			end, SyncMain.commitId);
 		end
