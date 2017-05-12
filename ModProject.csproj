@@ -61,6 +61,7 @@
     <None Include="Mod\WorldShare\service\LocalService.lua" />
     <None Include="Mod\WorldShare\main.lua" />
     <None Include="Mod\WorldShare\login.lua" />
+    <None Include="Mod\WorldShare\sync\ShareWorld.lua" />
     <None Include="Mod\WorldShare\sync\SyncGUI.lua" />
     <None Include="Mod\WorldShare\sync\SyncMain.lua" />
     <None Include="README.md" />

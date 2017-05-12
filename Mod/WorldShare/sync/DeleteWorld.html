@@ -16,30 +16,24 @@
              ]]>
         </script>
         <div style="width:500px;height:270px;">
-            <aries:window mode="thin" width="500" height="270" style="float:left;" title='<%=L"删除世界" %>'>
-            	<div style="padding:30px;font-size:18px;base-font-size:18px;color:#ffffff">
-            		
-                    <pe:if condition="<%=login.login_type == 1 or login.login_type == 3 and selectedWorldInfor.status ~= nil and selectedWorldInfor.status ~= 2%>">
-                        <div>
-                			<input type="button" onclick="SyncMain.deleteWorldLocal" class="button_highlight" style="margin-left:150px;width: 130px;height: 30px;" name="" value="只删除本地" />
-                        </div>
-                    </pe:if>
-
-                    <pe:if condition="<%=selectedWorldInfor.status ~= nil and selectedWorldInfor.status ~= 1 %>">
-                        <div style="margin-top:20px;">
-                            <input type="button" onclick="SyncMain.deleteWorldRemote" class="button_highlight" style="margin-left:150px;width: 130px;height: 30px;"  name="" value="只删除远程" />
-                        </div>
-                    </pe:if>
-
-                    <pe:if condition="<%=selectedWorldInfor.status ~= nil and selectedWorldInfor.status ~= 1 and selectedWorldInfor.status ~= 2 %>">
-                        <div style="margin-top:20px;">
-                            <input type="button" onclick="SyncMain.deleteWorldAll" class="button_highlight" style="margin-left:150px;width: 130px;height: 30px;"  name="" value="全部删除" />
-                        </div>
-                    </pe:if>
-
-                    <div style="margin-top:20px;">
-                        <input type="button" onclick="SyncMain.DeleteToLogin" class="button_highlight" style="margin-left:150px;width: 130px;height: 30px;"  name="" value="返回上级" />
+            <aries:window mode="thin" width="500" height="270" style="float:left;" title='<%=L"删除世界" %>' onclose="SyncMain.closeDeletePage">
+            	<div style="font-size:18px;base-font-size:18px;color:#ffffff;padding:30px;">
+                    <div style="margin-top:30px;">
+                        你确定要删除：<%= SyncMain.selectedWorldInfor.foldername %>世界么？请选择
                     </div>
+                    <br />
+                    <div style="margin-top:30px;">
+                        <pe:if condition="<%=login.login_type == 1 or login.login_type == 3 and selectedWorldInfor.status ~= nil and selectedWorldInfor.status ~= 2%>">
+                            <input type="button" onclick="SyncMain.deleteWorldLocal" class="button_highlight" style="float:left;width: 130px;height: 30px;" name="" value="只删除本地" />
+                        </pe:if>
+                        <pe:if condition="<%=selectedWorldInfor.status ~= nil and selectedWorldInfor.status ~= 1 %>">
+                            <input type="button" onclick="SyncMain.deleteWorldRemote" class="button_highlight" style="float:left;margin-left:10px;width: 130px;height: 30px;" name="" value="只删除远程" />
+                        </pe:if>
+                        <pe:if condition="<%=selectedWorldInfor.status ~= nil and selectedWorldInfor.status ~= 1 and selectedWorldInfor.status ~= 2 %>">
+                            <input type="button" onclick="SyncMain.deleteWorldAll" class="button_highlight" style="float:left;margin-left:10px;width: 130px;height: 30px;" name="" value="全部删除" />
+                        </pe:if>
+                    </div>
+                    
             	</div>
             </aries:window>
         </div>

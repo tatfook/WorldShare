@@ -12,7 +12,6 @@ local GitEncoding = commonlib.gettable("Mod.WorldShare.helper.GitEncoding");
 NPL.load("(gl)script/ide/System/Encoding/base64.lua");
 
 local Encoding    = commonlib.gettable("System.Encoding");
-
 local GitEncoding = commonlib.gettable("Mod.WorldShare.helper.GitEncoding");
 
 -- =转成-equal  +转成-plus  /转成-slash

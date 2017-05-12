@@ -24,7 +24,9 @@ NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua");
 NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/ShareWorldPage.lua");
 NPL.load("(gl)Mod/WorldShare/main.lua");
 NPL.load("(gl)Mod/WorldShare/helper/KeepworkGen.lua");
+NPL.load("(gl)Mod/WorldShare/sync/ShareWorld.lua");
 
+local ShareWorld		 = commonlib.gettable("Mod.WorldShare.sync.ShareWorld");
 local SyncGUI            = commonlib.gettable("Mod.WorldShare.sync.SyncGUI");
 local WorldCommon        = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 local MainLogin		     = commonlib.gettable("MyCompany.Aries.Game.MainLogin");
@@ -73,22 +75,22 @@ function SyncMain.setDeletePage()
 	SyncMain.DeletePage  = document:GetPageCtrl();
 end
 
-function SyncMain.DeleteToLogin()
+function SyncMain.closeDeletePage()
     SyncMain.DeletePage:CloseWindow();
 
-    if(not WorldCommon.GetWorldInfo()) then
-        MainLogin.state.IsLoadMainWorldRequested = nil;
-        MainLogin:next_step();
-    end
+--    if(not WorldCommon.GetWorldInfo()) then
+--        MainLogin.state.IsLoadMainWorldRequested = nil;
+--        MainLogin:next_step();
+--    end
 end
 
 function SyncMain.closeComparePage()
-	SyncGUI.isStart = false;
+	SyncMain.isStart = false;
 	SyncMain.ComparePage:CloseWindow();
 end
 
 function SyncMain:StartSyncPage()
-	SyncGUI.isStart = true;
+	SyncMain.isStart = true;
 
 	System.App.Commands.Call("File.MCMLWindowFrame", {
 		url  = "Mod/WorldShare/sync/StartSync.html", 
@@ -127,15 +129,14 @@ function SyncMain:compareRevision(_LoginStatus)
 			SyncMain.foldername.utf8    = SyncMain.worldDir.utf8:match("worlds/DesignHouse/([^/]*)/");
 			LOG.std(nil,"debug","SyncMain.foldername.utf8",SyncMain.foldername.utf8)
 
-			LOG.std(nil,"debug","selectedWorldInfor",SyncMain.selectedWorldInfor);
-			if(not SyncMain.selectedWorldInfor) then
-				login.RefreshCurrentServerList();
-				for key,value in ipairs(InternetLoadWorld.cur_ds) do
-					if(value.foldername == SyncMain.foldername.utf8)then
-						SyncMain.selectedWorldInfor = value;
-					end
+			LOG.std(nil,"debug","selectedWorldInfor-old",SyncMain.selectedWorldInfor);
+			login.RefreshCurrentServerList();
+			for key,value in ipairs(InternetLoadWorld.cur_ds) do
+				if(value.foldername == SyncMain.foldername.utf8)then
+					SyncMain.selectedWorldInfor = value;
 				end
 			end
+			LOG.std(nil,"debug","selectedWorldInfor-new",SyncMain.selectedWorldInfor);
 
 			if(SyncMain.selectedWorldInfor.is_zip) then
 				_guihelper.MessageBox(L"不能同步ZIP文件");
@@ -192,9 +193,13 @@ function SyncMain:compareRevision(_LoginStatus)
 				--LOG.std(nil,"debug","err",err);
 
 				SyncMain.remoteRevison  = tonumber(data);
+				if(not SyncMain.remoteRevison) then
+					SyncMain.remoteRevison = 0;
+				end
+
 				SyncMain.currentRevison = tonumber(SyncMain.currentRevison);
-				--LOG.std(nil,"debug","SyncMain.remoteRevison",SyncMain.remoteRevison);
-				--LOG.std(nil,"debug","SyncMain.currentRevison",SyncMain.currentRevison);
+				LOG.std(nil,"debug","SyncMain.remoteRevison",SyncMain.remoteRevison);
+				LOG.std(nil,"debug","SyncMain.currentRevison",SyncMain.currentRevison);
 
 				if(err == 0) then
 					SyncMain.ComparePage:CloseWindow();
@@ -208,7 +213,10 @@ function SyncMain:compareRevision(_LoginStatus)
 					end
 					
 					SyncMain.firstCreate = true;
-					ShareWorldPage.ShowPage();
+
+					if(not login.enterStatus) then
+						ShareWorldPage.ShowPage();
+					end
 				end
 				
 				if(not SyncMain.ShareStatus) then
@@ -246,12 +254,18 @@ function SyncMain:compareRevision(_LoginStatus)
 				SyncMain.ShareStatus = false;
 			end);
 		else
-			commonlib.TimerManager.SetTimeout(function() 
-				SyncMain.ComparePage:CloseWindow();
+			if(not _LoginStatus) then
+				commonlib.TimerManager.SetTimeout(function() 
+					if(SyncMain.ComparePage) then
+						SyncMain.ComparePage:CloseWindow();
+					end
 
-				CommandManager:RunCommand("/save");
-				SyncMain:compareRevision();
-			end, 500)
+					CommandManager:RunCommand("/save");
+					SyncMain:compareRevision();
+				end, 500)
+			else
+				_guihelper.MessageBox(L"沒有版本信息");
+			end
 		end
 	end
 end
@@ -259,14 +273,17 @@ end
 function SyncMain.shareNow()
     SyncMain.ComparePage:CloseWindow();
 
+	LOG.std(nil,"debug","SyncMain.currentRevision", SyncMain.currentRevison);
+	LOG.std(nil,"debug","SyncMain.remoteRevison", SyncMain.remoteRevison);
+
 	ShareWorldPage.TakeSharePageImage();
-    if(not SyncMain.firstCreate and tonumber(SyncMain.currentRevison) < tonumber(SyncMain.remoteRevison)) then
+    if(not SyncMain.firstCreate and SyncMain.currentRevison < SyncMain.remoteRevison) then
         _guihelper.MessageBox("当前本地版本小于远程版本，是否继续上传？", function(res)
             if(res and res == 6) then
                 SyncMain:syncToDataSource();
             end
         end);
-    elseif(tonumber(SyncMain.currentRevison) > tonumber(SyncMain.remoteRevison)) then
+    elseif(SyncMain.currentRevison > SyncMain.remoteRevison) then
         SyncMain:syncToDataSource();
     end
 end
@@ -392,7 +409,7 @@ function SyncMain:syncToLocal(_callback)
 			if(_callback) then
 				local params = {};
 				params.revison     = SyncMain.remoteRevison;
-				params.filesTotals = LocalService:GetWorldFileSize(SyncMain.foldername.utf8);
+				-- params.filesTotals = LocalService:GetWorldFileSize(SyncMain.foldername.utf8);
 
 				_callback(true,params);
 			end
@@ -429,9 +446,6 @@ function SyncMain:syncToLocal(_callback)
 					end);
 				end
 			else
-				syncGUIIndex = syncGUIIndex + 1;
-				syncToLocalGUI:updateDataBar(syncGUIIndex, syncGUItotal, SyncMain.dataSourceFiles[SyncMain.curDownloadIndex].path);
-
 				if(SyncMain.curDownloadIndex == SyncMain.totalDataSourceIndex) then
 					finish();
 				else
@@ -552,10 +566,19 @@ function SyncMain:syncToLocal(_callback)
 				if (SyncMain.totalLocalIndex ~= 0) then
 					updateOne();
 				else
-					downloadOne(); --如果文档文件夹为空，则直接开始下载
+					--downloadOne(); --如果文档文件夹为空，则直接开始下载
+					LocalService:downloadZip(SyncMain.foldername.utf8, SyncMain.commitId ,function(bSuccess, remoteRevison)
+						if(bSuccess) then
+							SyncMain.remoteRevison = remoteRevison;
+							syncGUIIndex = syncGUItotal;
+							finish();
+						else
+							_guihelper.MessageBox(L'下载失败，请稍后再试');
+						end
+					end);
 				end
 			else
-				_guihelper.MessageBox(L"获取G数据源文件失败，请稍后再试！");
+				_guihelper.MessageBox(L"获取数据源文件失败，请稍后再试！");
 				syncToLocalGUI.finish();
 			end
 		end, SyncMain.commitId);
@@ -977,13 +1000,7 @@ function SyncMain:genIndexMD(_worldList, _callback)
 			local indexPath     = "";
 			SyncMain.indexFile  = "";
 
-			if(login.dataSourceType == "gitlab") then
-				username = login.dataSourceUsername:gsub("gitlab_" , "");
-			else
-
-			end
-
-			local indexPath = username .. "/paracraft/index.md";
+			local indexPath = login.username .. "/paracraft/index.md";
 
 			for key,value in ipairs(data) do
 				if(value.path == indexPath) then
@@ -1094,13 +1111,12 @@ function SyncMain:genWorldMD(worldInfor, _callback)
 			SyncMain.worldFile  = "";
 
 			if(login.dataSourceType == "gitlab") then
-				username = login.dataSourceUsername:gsub("gitlab_" , "");
 				worldUrl = "http://git.keepwork.com/" .. login.dataSourceUsername .. "/" .. GitEncoding.base64(SyncMain.foldername.utf8) .. "/repository/archive.zip?ref=master";
 			else
 
 			end
 
-			local worldFilePath =  username .. "/paracraft/world_" .. worldInfor.worldsName .. ".md";
+			local worldFilePath =  login.username .. "/paracraft/world_" .. worldInfor.worldsName .. ".md";
 
 			for key,value in ipairs(data) do
 				if(value.path == worldFilePath) then

@@ -282,13 +282,13 @@
                                         <div name='<%=Eval("index")%>' class="share_selected_item">
                                             <pe:if condition='<%= login.current_type == 1%>'>
                                                 <div>
-                                                    <pe:if condition='<%= not login.GetCurWorldInfo("is_zip", Eval("index")) and  login.GetCurWorldInfo("status",Eval("index")) == 3%>'>
+                                                    <pe:if condition='<%= login.login_type == 3 and not login.GetCurWorldInfo("is_zip", Eval("index")) and  login.GetCurWorldInfo("status",Eval("index")) == 3%>'>
                                                         <div style="float:left;width:32px;height:32px;background:url(textures/worldshare_32bits.png#315 81 32 32:0 0 0 0)" tooltip='<%= login.formatStatus(login.GetCurWorldInfo("status",Eval("index")))%>'/>
                                                     </pe:if>
-                                                    <pe:if condition='<%= not login.GetCurWorldInfo("is_zip", Eval("index")) and  login.GetCurWorldInfo("status",Eval("index")) ~= 3%>'>
+                                                    <pe:if condition='<%= login.login_type == 3 and not login.GetCurWorldInfo("is_zip", Eval("index")) and  login.GetCurWorldInfo("status",Eval("index")) ~= 3%>'>
                                                         <div style="float:left;width:32px;height:32px;background:url(textures/worldshare_32bits.png#357 81 32 32:0 0 0 0)" tooltip='<%= login.formatStatus(login.GetCurWorldInfo("status",Eval("index")))%>'/>
                                                     </pe:if>
-                                                    <pe:if condition='<%= login.GetCurWorldInfo("is_zip", Eval("index"))%>'>
+                                                    <pe:if condition='<%= login.login_type == 1 or login.GetCurWorldInfo("is_zip", Eval("index"))%>'>
                                                         <div style="float:left;width:32px;height:32px;background:#fff" />
                                                     </pe:if>
                                                     <div class="share_world_name">
@@ -306,11 +306,11 @@
                                                         </div>
                                                     </div>
                                                     <div style="position:relative;margin-left:170px;margin-top:3px;">
-                                                        <pe:if condition='<%= login.GetCurWorldInfo("is_zip", Eval("index"))%>'>
+                                                        <pe:if condition='<%= login.login_type == 1 or login.GetCurWorldInfo("is_zip", Eval("index"))%>'>
                                                             <div class="share_button" style="float:left"/>
                                                         </pe:if>
                                                         <input type="button" class="share_button" style="background:url(textures/worldshare_32bits.png#78 130 48 48)"   onclick='login.deleteWorld()' tooltip="删除" name='<%=Eval("index")%>' /><!-- 删除 -->
-                                                        <pe:if condition="<%= not login.GetCurWorldInfo('is_zip', Eval('index'))%>">
+                                                        <pe:if condition="<%= login.login_type == 3 and not login.GetCurWorldInfo('is_zip', Eval('index'))%>">
                                                             <input type="button" class="share_button" style="background:url(textures/worldshare_32bits.png#136 130 48 48)" onclick="login.syncNow()" tooltip="同步" name='<%=Eval("index")%>' /><!-- 手动同步 -->
                                                         </pe:if>
                                                         <input type="button" class="share_button" style="background:url(textures/worldshare_32bits.png#20 130 48 48)"    onclick="login.enterWorld()" tooltip="进入" name='<%=Eval("index")%>' /><!-- 进入 -->
@@ -350,13 +350,13 @@
                                             <pe:if condition='<%= login.current_type == 1%>'>
                                                 <div style="position:relative;width:200px;">
                                                     <div>
-                                                        <pe:if condition='<%= not login.GetCurWorldInfo("is_zip", Eval("index")) and  login.GetCurWorldInfo("status",Eval("index")) == 3%>'>
+                                                        <pe:if condition='<%= login.login_type == 3 and not login.GetCurWorldInfo("is_zip", Eval("index")) and  login.GetCurWorldInfo("status",Eval("index")) == 3%>'>
                                                             <div style="float:left;width:32px;height:32px;background:url(textures/worldshare_32bits.png#315 81 32 32:0 0 0 0)" tooltip='<%= login.formatStatus(login.GetCurWorldInfo("status",Eval("index")))%>'/>
                                                         </pe:if>
-                                                        <pe:if condition='<%= not login.GetCurWorldInfo("is_zip", Eval("index")) and  login.GetCurWorldInfo("status",Eval("index")) ~= 3%>'>
+                                                        <pe:if condition='<%= login.login_type == 3 and not login.GetCurWorldInfo("is_zip", Eval("index")) and  login.GetCurWorldInfo("status",Eval("index")) ~= 3%>'>
                                                             <div style="float:left;width:32px;height:32px;background:url(textures/worldshare_32bits.png#357 81 32 32:0 0 0 0)" tooltip='<%= login.formatStatus(login.GetCurWorldInfo("status",Eval("index")))%>'/>
                                                         </pe:if>
-                                                        <pe:if condition='<%= login.GetCurWorldInfo("is_zip", Eval("index"))%>'>
+                                                        <pe:if condition='<%= login.login_type == 1 or login.GetCurWorldInfo("is_zip", Eval("index"))%>'>
                                                             <div style="float:left;width:32px;height:32px;background:#fff"/>
                                                         </pe:if>
                                                         <div class="share_world_name">

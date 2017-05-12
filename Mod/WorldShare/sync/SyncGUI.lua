@@ -12,8 +12,7 @@ local SyncGUI = commonlib.gettable("Mod.WorldShare.sync.SyncGUI");
 NPL.load("(gl)Mod/WorldShare/sync/SyncMain.lua");
 
 local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
-
-local SyncGUI = commonlib.inherit(nil,commonlib.gettable("Mod.WorldShare.sync.SyncGUI"));
+local SyncGUI  = commonlib.inherit(nil,commonlib.gettable("Mod.WorldShare.sync.SyncGUI"));
 
 local SyncPage;
 

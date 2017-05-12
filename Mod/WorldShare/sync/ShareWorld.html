@@ -8,12 +8,14 @@
     <pe:mcml>
         <script type="text/npl" refresh="false">
             <![CDATA[
-                SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
-                login    = commonlib.gettable("Mod.WorldShare.login");
+                SyncMain   = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
+                login      = commonlib.gettable("Mod.WorldShare.login");
+                ShareWorld = commonlib.gettable("Mod.WorldShare.sync.ShareWorld");
                 
                 SyncMain.setComparePage();
                 SyncMain.ShareStatus = true;    
-
+                ShareWorld:init();
+                
                 if(login.login_type == 1)then
                     _guihelper.MessageBox(L"登陆后才能同步");
                     
@@ -29,32 +31,45 @@
              ]]>
         </script>
         <div style="width:500px;height:270px;">
-            <aries:window mode="thin" width="500" height="270" style="float:left;" title='<%=L"分享世界" %>' onclose="SyncMain.closeComparePage">
+            <aries:window mode="thin" width="500" height="400" style="float:left;" title='<%=L"分享世界" %>' onclose="SyncMain.closeComparePage">
                 <div style="padding:20px;font-size:18px;base-font-size:18px;color:#ffffff">
-                    <img name="ShareWorldImage" zorder="1" width="10" height="10" />
-                    <div>世界名字 </div>
-                    <div>大小 </div>
-                    <input type="button" value="重新截图" />
-                    <div>世界地址</div>
-                    <input type="button" value="打开" />
-
-                    <div style="margin-left:140px;margin-top:30px;">
-                        远程版本号：
-                        <pe:if condition="<%=not SyncMain.firstCreate and SyncMain.remoteRevison == 0 %>">
-                            正在获取中...
-                        </pe:if>
-                        <pe:if condition="<%=SyncMain.firstCreate %>">
-                            首次上传
-                        </pe:if>
-                        <pe:if condition="<%=SyncMain.remoteRevison ~= 0 %>">
-                            <%=SyncMain.remoteRevison %>
-                        </pe:if>
+                    <div>
+                        <div style="float:left">
+                            <img name="ShareWorldImage" zorder="1" width="240" height="160" />
+                        </div>
+                        <div style="float:right;padding-left:28px;">
+                            <div><%= SyncMain.foldername.utf8%></div>
+                            <div>大小：<%= login.GetWorldSize(SyncMain.selectedWorldInfor.size)%></div>
+                            <input type="button" width="140" height="40" style="margin-top:45px;background:url(textures/worldshare_32bits.png#20 20 220 48:8 8 8 8);base-font-size:18px;color:#ffffff;textcolor:#ffffff" value="重新截图" onclick="ShareWorld.snapshot()" />
+                        </div>
                     </div>
-                    <div style="margin-left:140px;margin-top:10px;">
-                        本地版本号：<%=SyncMain.currentRevison %>
+                    
+                    <div style="margin-top:15px;">
+                       <div style="base-font-size:14px;font-size:14px;float:left"><%= ShareWorld.getWorldUrl()%></div>
+                       <input type="button" width="61" height="25" style="margin-left:5px;background:url(textures/worldshare_32bits.png#20 20 220 48:8 8 8 8);float:left;color:#ffffff;textcolor:#ffffff" value="打开" onclick="ShareWorld.openWorldWebPage()" />
                     </div>
-
-                    <input type="button" onclick="SyncMain.shareNow()" value="上传并分享" class="button_highlight" style="width: 80px;height: 35px;margin-top:30px;margin-left:190px;"/>
+                    
+                    <div style="margin-top:10px;base-font-size:15px;font-size:15px;" width="240">
+                        <div>
+                            远程版本号：
+                            <pe:if condition="<%=not SyncMain.firstCreate and SyncMain.remoteRevison == 0 %>">
+                                正在获取中...
+                            </pe:if>
+                            <pe:if condition="<%=SyncMain.firstCreate %>">
+                                首次上传
+                            </pe:if>
+                            <pe:if condition="<%=SyncMain.remoteRevison ~= 0 %>">
+                                <%=SyncMain.remoteRevison %>
+                            </pe:if>
+                        </div>
+                        <div style="margin-top:5px;">
+                            本地版本号：<%=SyncMain.currentRevison %>
+                        </div>
+                    </div>
+                    <hr />
+                    <div>
+                        <input type="button" onclick="SyncMain.shareNow()" value="上传并分享" class="button_highlight" width="175" height="50" align="right" style="float:right;background:url(textures/worldshare_32bits.png#20 20 220 48:8 8 8 8);margin-right:18px;margin-top:18px;" />
+                    </div>
                 </div>
             </aries:window>
         </div>

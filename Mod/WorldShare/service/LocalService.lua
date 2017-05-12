@@ -18,17 +18,19 @@ NPL.load("(gl)Mod/WorldShare/login.lua");
 NPL.load("(gl)Mod/WorldShare/service/GitlabService.lua");
 NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua");
 NPL.load("(gl)Mod/WorldShare/sync/SyncMain.lua");
+NPL.load("(gl)script/apps/Aries/Creator/Game/API/FileDownloader.lua");
 
-local GitEncoding   = commonlib.gettable("Mod.WorldShare.helper.GitEncoding");
-local GitlabService = commonlib.gettable("Mod.WorldShare.service.GitlabService");
-local GithubService = commonlib.gettable("Mod.WorldShare.service.GithubService");
-local EncodingC     = commonlib.gettable("commonlib.Encoding");
-local EncodingS     = commonlib.gettable("System.Encoding");
-local Files         = commonlib.gettable("commonlib.Files");
-local login         = commonlib.gettable("Mod.WorldShare.login");
-local SyncMain      = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
+local FileDownloader = commonlib.gettable("MyCompany.Aries.Creator.Game.API.FileDownloader");
+local GitEncoding    = commonlib.gettable("Mod.WorldShare.helper.GitEncoding");
+local GitlabService  = commonlib.gettable("Mod.WorldShare.service.GitlabService");
+local GithubService  = commonlib.gettable("Mod.WorldShare.service.GithubService");
+local EncodingC      = commonlib.gettable("commonlib.Encoding");
+local EncodingS      = commonlib.gettable("System.Encoding");
+local Files          = commonlib.gettable("commonlib.Files");
+local login          = commonlib.gettable("Mod.WorldShare.login");
+local SyncMain       = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
 
-local LocalService  = commonlib.gettable("Mod.WorldShare.service.LocalService");
+local LocalService   = commonlib.gettable("Mod.WorldShare.service.LocalService");
 
 --get file content by text
 function LocalService:getFileContent(_filePath)      
@@ -119,42 +121,43 @@ function LocalService:LoadFiles(_worldDir,_curPath,_filter,_nMaxFileLevels,_nMax
 end
 
 function LocalService:update(_foldername, _path, _callback)
-	LocalService:getDataSourceContent(_foldername, _path, function(content, err)
-		--local foldernameForLocal = EncodingC.Utf8ToDefault(_foldername);
-		local bashPath = "worlds/DesignHouse/" .. SyncMain.foldername.default .. "/";
-
-		local file = ParaIO.open(bashPath .. _path, "w");
-		
-		LOG.std(nil,"debug","LocalService:update",content);
-		if(err == 200) then
-			if(not content) then
-				LocalService:getDataSourceContentWithRaw(_foldername, _path, function(data, err)
-					if(err == 200) then
-						content = data;
-
-						file:write(content,#content);
-						file:close();
-
-						local returnData = {filename = _path, content = content};
-						_callback(true,returnData);
-					else
-						_callback(false,nil);
-					end
-				end);
-
-				return;
-			end
-
-			content = EncodingS.unbase64(content);
-			file:write(content,#content);
-			file:close();
-
-			local returnData = {filename = _path,content = content};
-			_callback(true,returnData);
-		else
-			_callback(false,nil);
-		end
-	end)	
+	LocalService:FileDownloader(_foldername, _path, _callback);
+--	LocalService:getDataSourceContent(_foldername, _path, function(content, err)
+--		local foldernameForLocal = EncodingC.Utf8ToDefault(_foldername);
+--		local bashPath = "worlds/DesignHouse/" .. SyncMain.foldername.default .. "/";
+--
+--		local file = ParaIO.open(bashPath .. _path, "w");
+--		
+--		LOG.std(nil,"debug","LocalService:update",content);
+--		if(err == 200) then
+--			if(not content) then
+--				LocalService:getDataSourceContentWithRaw(_foldername, _path, function(data, err)
+--					if(err == 200) then
+--						content = data;
+--						
+--						file:write(content,#content);
+--						file:close();
+--
+--						local returnData = {filename = _path, content = content};
+--						_callback(true,returnData);
+--					else
+--						_callback(false,nil);
+--					end
+--				end);
+--
+--				return;
+--			end
+--
+--			content = EncodingS.unbase64(content);
+--			file:write(content,#content);
+--			file:close();
+--
+--			local returnData = {filename = _path,content = content};
+--			_callback(true,returnData);
+--		else
+--			_callback(false,nil);
+--		end
+--	end)
 end
 
 function LocalService:download(_foldername, _path, _callback)
@@ -162,63 +165,161 @@ function LocalService:download(_foldername, _path, _callback)
 	-- LOG.std(nil,"debug","_path",_path);
 	-- LOG.std(nil,"debug","_callback",_callback);
 
-	LocalService:getDataSourceContent(_foldername, _path, function(content, err)
-		if(err == 200) then
-			local path = {};
-			local returnData = {};
+	LocalService:FileDownloader(_foldername, _path, _callback);
+--	LocalService:getDataSourceContent(_foldername, _path, function(content, err)
+--		if(err == 200) then
+--			local path = {};
+--			local returnData = {};
+--
+--			local bashPath = "worlds/DesignHouse/" .. SyncMain.foldername.default .. "/";
+--			local folderCreate = "";
+--
+--			for segmentation in string.gmatch(_path,"[^/]+") do
+--				path[#path+1] = segmentation;
+--			end
+--
+--			folderCreate = commonlib.copy(bashPath);
+--
+--			for i = 1, #path - 1, 1 do
+--				folderCreate = folderCreate .. path[i] .. "/";
+--				ParaIO.CreateDirectory(folderCreate);
+--				--LOG.std(nil,"debug","folderCreate",folderCreate);
+--			end
+--
+--			local file = ParaIO.open(bashPath .. _path, "w");
+--
+--			if(not content) then
+--				LocalService:getDataSourceContentWithRaw(_foldername, _path, function(content, err)
+--					if(err == 200) then
+--						file:write(content,#content);
+--						file:close();
+--
+--						returnData = {filename = _path, content = content};
+--						_callback(true,returnData);
+--					else
+--						_callback(false,nil);
+--					end
+--				end);
+--
+--				return;
+--			end
+--
+--			content = EncodingS.unbase64(content);
+--			file:write(content,#content);
+--			file:close();
+--
+--			returnData = {filename = _path, content = content};
+--			_callback(true,returnData);
+--		else
+--			_callback(false,nil);
+--		end
+--	end);
+end
 
-			local bashPath = "worlds/DesignHouse/" .. SyncMain.foldername.default .. "/";
-			local folderCreate = "";
+function LocalService:downloadZip(_foldername, _commitId, _callback)
+	local foldername = GitEncoding.base64(SyncMain.foldername.utf8);
+	local url = "http://git.keepwork.com/" .. login.dataSourceUsername .. "/" .. foldername .. "/repository/archive.zip?ref=" .. SyncMain.commitId;
 
-			for segmentation in string.gmatch(_path,"[^/]+") do
-				path[#path+1] = segmentation;
-			end
+	local Files = FileDownloader:new():Init(nil, url, "temp/archive.zip", function(bSuccess, downloadPath)
+		if(bSuccess) then
+			local remoteRevison;
 
-			folderCreate = commonlib.copy(bashPath);
+			if(ParaAsset.OpenArchive(downloadPath, true)) then
+				local zipParentDir = downloadPath:gsub("[^/\\]+$", "");
 
-			for i = 1, #path - 1, 1 do
-				folderCreate = folderCreate .. path[i] .. "/";
-				ParaIO.CreateDirectory(folderCreate);
-				--LOG.std(nil,"debug","folderCreate",folderCreate);
-			end
+				LOG.std(nil,"debug","zipParentDir",zipParentDir);
 
-			local file = ParaIO.open(bashPath .. _path, "w");
+				local filesOut = {};
+				commonlib.Files.Find(filesOut, "", 0, 10000, ":.", downloadPath); -- ":.", any regular expression after : is supported. `.` match to all strings. 
 
-			if(not content) then
-				LocalService:getDataSourceContentWithRaw(_foldername, _path, function(content, err)
-					if(err == 200) then
-						file:write(content,#content);
-						file:close();
+				LOG.std(nil,"debug","filesOut", filesOut);
 
-						returnData = {filename = _path, content = content};
-						_callback(true,returnData);
+				local bashPath = "worlds/DesignHouse/" .. SyncMain.foldername.default .. "/";
+				local folderCreate = "";
+				local rootFolder = filesOut[1].filename;
+
+				--LOG.std(nil,"debug","rootFolder",rootFolder);
+
+				for _, item in ipairs(filesOut) do
+					if(item.filesize > 0) then
+						local file = ParaIO.open(zipParentDir .. item.filename, "r")
+						if(file:IsValid()) then
+							local binData = file:GetText(0, -1);
+							local pathArray = {};
+							local path =  commonlib.copy(item.filename);
+
+							path = path:sub(#rootFolder,#path);
+
+							--LOG.std(nil,"debug","path",path);
+
+							if(path == "/revision.xml") then
+								remoteRevison = binData;
+							end
+
+							for segmentation in string.gmatch(path,"[^/]+") do
+								if(segmentation ~= rootFolder) then
+									pathArray[#pathArray + 1] = segmentation;
+								end
+							end
+
+							folderCreate = commonlib.copy(bashPath);
+
+							for i = 1, #pathArray - 1, 1 do
+								folderCreate = folderCreate .. pathArray[i] .. "/";
+								ParaIO.CreateDirectory(folderCreate);
+								--LOG.std(nil,"debug","folderCreate",folderCreate);
+							end
+
+							local writeFile = ParaIO.open(bashPath .. path, "w");
+
+							writeFile:write(binData,#binData);
+							writeFile:close();
+
+							file:close();
+						end
 					else
-						_callback(false,nil);
+						-- this is a folder
 					end
-				end);
+				end
 
-				return;
+				ParaAsset.CloseArchive(downloadPath);
 			end
 
-			content = EncodingS.unbase64(content);
-			file:write(content,#content);
-			file:close();
-
-			returnData = {filename = _path, content = content};
-			_callback(true,returnData);
+			_callback(true,remoteRevison);
 		else
 			_callback(false,nil);
 		end
 	end);
 end
 
-function LocalService:downloadZip(_foldername, _commitId)
-	local foldername = GitEncoding.base64(_foldername);
-	local url = "http://git.keepwork.com/" .. login.dataSourceUsername .. "/" .. foldername .. "/repository/archive.zip?ref=" .. _commitId;
+function LocalService:FileDownloader(_foldername, _path, _callback)
+	local foldername = GitEncoding.base64(SyncMain.foldername.utf8);
 
-	HttpRequest.GetUrl(url,function(data, err)
-		LOG.std(nil,"debug","downloadZip-data" , data);
-	end)
+	LOG.std(nil,"debug","FileDownloader","FileDownloader");
+	local url = "";
+	local downloadDir = "";
+
+	if(login.dataSourceType == "github") then
+	elseif(login.dataSourceType == "gitlab") then
+		url = login.rawBaseUrl .. "/" .. login.dataSourceUsername .. "/" .. foldername .. "/raw/" .. SyncMain.commitId .. "/" .. _path;
+		downloadDir = SyncMain.worldDir.default .. _path;
+	end
+
+	LOG.std(nil,"debug","FileDownloader-url",url);
+	LOG.std(nil,"debug","FileDownloader-downloadDir",downloadDir);
+
+	local Files = FileDownloader:new():Init(nil, url, downloadDir, function(bSuccess, downloadPath)
+		LOG.std(nil,"debug","FileDownloader-downloadPath",downloadPath);
+
+		local content = LocalService:getFileContent(downloadPath);
+
+		if(bSuccess) then
+			local returnData = {filename = _path, content = content};
+			return _callback(bSuccess,returnData);
+		else
+			return _callback(bSuccess,nil);
+		end
+	end);
 end
 
 function LocalService:delete(_foldername, _filename, _callback)

@@ -61,9 +61,9 @@ function login.OnInit()
 			directPosition = true,
 				align = "_ct",
 				x = -500/2,
-				y = -270/2,
+				y = -400/2,
 				width = 500,
-				height = 270,
+				height = 400,
 		});
 
 		return false;
@@ -596,7 +596,7 @@ function login.setSite()
 	elseif(loginServer == "keepworkDev") then
 	    login.site = "http://dev.keepwork.com";
 	elseif(loginServer == "local") then
-	    login.site = "http://keepwork.local";
+	    login.site = "http://127.0.0.1:8099";
 	end
 
 	register:SetAttribute("href",login.site .. "/wiki/home");
@@ -606,17 +606,7 @@ end
 
 function login.logout()
 	login.changeLoginType(1);
-
-	local localWorlds    = InternetLoadWorld.cur_ds;
-	local newLocalWorlds = {};
-
-	for key,value in ipairs(localWorlds) do
-		if(value.revision ~= "2") then
-			newLocalWorlds[#newLocalWorlds + 1] = value;
-		end
-	end
-
-	InternetLoadWorld.cur_ds = newLocalWorlds;
+	login:RefreshCurrentServerList();
 end
 
 function login.RefreshCurrentServerList()
@@ -809,7 +799,7 @@ function login.downloadWorld()
 	SyncMain.worldDir.default = "worlds/DesignHouse/" .. SyncMain.foldername.default .. "/";
 
 	SyncMain.commitId = SyncMain:getGitlabCommitId(SyncMain.foldername.utf8);
-
+	LOG.std(nil,"debug","SyncMain.commitId",SyncMain.commitId);
 	ParaIO.CreateDirectory(SyncMain.worldDir.default);
 
 	SyncMain:syncToLocal(function(success, params)
@@ -863,11 +853,18 @@ function login.syncNow(_index)
 end
 
 function login.deleteWorld(_index)
-	login.LoginPage:CloseWindow();
+	--login.LoginPage:CloseWindow();
 
 	local index = tonumber(_index);
-
 	SyncMain.selectedWorldInfor = InternetLoadWorld.cur_ds[_index];
+
+	if(SyncMain.tagInfor) then
+		if(SyncMain.tagInfor.name == SyncMain.selectedWorldInfor.foldername) then
+			_guihelper.MessageBox(L"不能刪除正在编辑的世界");
+			return;
+		end
+	end
+
 	SyncMain.deleteWorld();
 end
 
