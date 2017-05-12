@@ -5,7 +5,7 @@ Date:  2017.4.17
 Desc: 
 use the lib:
 ------------------------------------------------------------
-NPL.load("(gl)Mod/WorldShare/SyncMain.lua");
+NPL.load("(gl)Mod/WorldShare/sync.SyncMain.lua");
 local SyncMain  = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
 ------------------------------------------------------------
 ]]
@@ -62,7 +62,6 @@ function SyncMain:init()
 	-- 没有登陆则直接使用离线模式
 	if(login.token) then
 		SyncMain:compareRevision();
-		SyncMain:StartSyncPage();
 	end
 end
 
@@ -190,7 +189,12 @@ function SyncMain:compareRevision(_LoginStatus)
 			HttpRequest:GetUrl(contentUrl, function(data,err)
 				--LOG.std(nil,"debug","contentUrl",contentUrl);
 				--LOG.std(nil,"debug","data",data);
-				LOG.std(nil,"debug","err",err);
+				--LOG.std(nil,"debug","err",err);
+
+				SyncMain.remoteRevison  = tonumber(data);
+				SyncMain.currentRevison = tonumber(SyncMain.currentRevison);
+				--LOG.std(nil,"debug","SyncMain.remoteRevison",SyncMain.remoteRevison);
+				--LOG.std(nil,"debug","SyncMain.currentRevison",SyncMain.currentRevison);
 
 				if(err == 0) then
 					SyncMain.ComparePage:CloseWindow();
@@ -199,33 +203,47 @@ function SyncMain:compareRevision(_LoginStatus)
 				end
 
 				if(err == 404 or err == 401) then
-					SyncMain.ComparePage:CloseWindow();
+					if(SyncMain.ComparePage) then
+						SyncMain.ComparePage:CloseWindow();
+					end
+					
 					SyncMain.firstCreate = true;
-					--_guihelper.MessageBox(L"数据源暂无数据，请先分享世界");
-
 					ShareWorldPage.ShowPage();
-					return
 				end
 				
-				if(type(tonumber(data)) == "number") then
-					SyncMain.remoteRevison = tonumber(data);
-				else
-					SyncMain.ComparePage:CloseWindow();
-					SyncMain.firstCreate = true;
-					--_guihelper.MessageBox(L"数据源暂无数据，请先分享世界");
+				if(not SyncMain.ShareStatus) then
+					if(type(SyncMain.remoteRevison) == "number") then
 
-					ShareWorldPage.ShowPage();
-					return
+						if(login.enterStatus) then
+							if(SyncMain.currentRevison < SyncMain.remoteRevison) then
+								SyncMain:StartSyncPage();
+							end
+						else
+							SyncMain:StartSyncPage();
+						end
+					else
+						SyncMain.ComparePage:CloseWindow();
+						SyncMain.firstCreate = true;
+						return
+					end
 				end
 
-				-- LOG.std(nil,"debug","self.githubRevison",self.githubRevison);
-
-				if(tonumber(SyncMain.currentRevison) ~= tonumber(SyncMain.remoteRevison)) then
-					SyncMain.ComparePage:Refresh();
+				if(SyncMain.currentRevison ~= SyncMain.remoteRevison) then
+					if(SyncMain.ComparePage) then
+						SyncMain.ComparePage:Refresh();
+					end
 				else
-					_guihelper.MessageBox(L"数据源已存在此作品，且版本相等");
-					SyncMain.ComparePage:CloseWindow();
+					if(not login.enterStatus) then
+						_guihelper.MessageBox(L"数据源已存在此作品，且版本相等");
+					end
+
+					if(SyncMain.ComparePage) then
+						SyncMain.ComparePage:CloseWindow();
+					end
 				end
+
+				login.enterStatus = false;
+				SyncMain.ShareStatus = false;
 			end);
 		else
 			commonlib.TimerManager.SetTimeout(function() 
@@ -233,7 +251,6 @@ function SyncMain:compareRevision(_LoginStatus)
 
 				CommandManager:RunCommand("/save");
 				SyncMain:compareRevision();
-				SyncMain:StartSyncPage();
 			end, 500)
 		end
 	end
@@ -455,11 +472,10 @@ function SyncMain:syncToLocal(_callback)
 								SyncMain.remoteRevison = response.content;
 							end
 
-							syncGUIIndex = syncGUIInde + 1;
+							syncGUIIndex = syncGUIIndex + 1;
 							syncToLocalGUI:updateDataBar(syncGUIIndex, syncGUItotal, response.filename);
 
-							-- 如果当前计数大于最大计数则更新
-							if (SyncMain.curUpdateIndex == SyncMain.totalLocalIndex) then      -- check whether all files have updated or not. if false, update the next one, if true, upload files.  
+							if (SyncMain.curUpdateIndex == SyncMain.totalLocalIndex) then
 								downloadOne();
 							else
 								SyncMain.curUpdateIndex = SyncMain.curUpdateIndex + 1;

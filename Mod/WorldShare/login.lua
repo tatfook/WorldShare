@@ -273,6 +273,23 @@ function login.GetWorldSize(size)
 	return s or "0";
 end
 
+function login.formatStatus(_status)
+	LOG.std(nil, "debug", "_status", _status);
+	if(_status == 1) then
+		return L"仅本地";
+	elseif(_status == 2) then
+		return L"仅网络";
+	elseif(_status == 3) then
+		return L"本地网络一致";
+	elseif(_status == 4) then
+		return L"网络更新";
+	elseif(_status == 5) then
+		return L"本地更新";
+	else
+		return L"未登录";
+	end
+end
+
 function login.formatDatetime(_datetime)
 	--LOG.std(nil,"debug","_datetime",_datetime);
 	
@@ -780,6 +797,7 @@ function login.enterWorld(_index)
 		login.downloadWorld();
 	else
 		InternetLoadWorld.EnterWorld(_index);
+		login.enterStatus = true;
 	end
 end
 
@@ -835,7 +853,6 @@ function login.syncNow(_index)
 
 			LOG.std(nil,"debug","SyncMain.worldDir.default",SyncMain.worldDir.default);
 			SyncMain:compareRevision(true);
-			SyncMain:StartSyncPage();
 		else
 			login.downloadWorld();
 			--_guihelper.MessageBox(L"本地无数据，请直接登陆");

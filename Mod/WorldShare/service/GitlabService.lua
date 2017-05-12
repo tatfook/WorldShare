@@ -14,7 +14,7 @@ NPL.load("(gl)Mod/WorldShare/service/HttpRequest.lua");
 NPL.load("(gl)Mod/WorldShare/login.lua");
 NPL.load("(gl)Mod/WorldShare/main.lua");
 NPL.load("(gl)script/ide/Encoding.lua");
-NPL.load("(gl)Mod/WorldShare/SyncMain.lua");
+NPL.load("(gl)Mod/WorldShare/sync/SyncMain.lua");
 
 local HttpRequest   = commonlib.gettable("Mod.WorldShare.service.HttpRequest");
 local login		    = commonlib.gettable("Mod.WorldShare.login");

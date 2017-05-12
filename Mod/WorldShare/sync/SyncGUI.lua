@@ -9,7 +9,7 @@ NPL.load("(gl)Mod/WorldShare/sync/SyncGUI.lua");
 local SyncGUI = commonlib.gettable("Mod.WorldShare.sync.SyncGUI");
 ------------------------------------------------------------
 ]]
-NPL.load("(gl)Mod/WorldShare/SyncMain.lua");
+NPL.load("(gl)Mod/WorldShare/sync/SyncMain.lua");
 
 local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
 

@@ -17,7 +17,7 @@ NPL.load("(gl)Mod/WorldShare/service/GithubService.lua");
 NPL.load("(gl)Mod/WorldShare/login.lua");
 NPL.load("(gl)Mod/WorldShare/service/GitlabService.lua");
 NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua");
-NPL.load("(gl)Mod/WorldShare/SyncMain.lua");
+NPL.load("(gl)Mod/WorldShare/sync/SyncMain.lua");
 
 local GitEncoding   = commonlib.gettable("Mod.WorldShare.helper.GitEncoding");
 local GitlabService = commonlib.gettable("Mod.WorldShare.service.GitlabService");
@@ -210,6 +210,15 @@ function LocalService:download(_foldername, _path, _callback)
 			_callback(false,nil);
 		end
 	end);
+end
+
+function LocalService:downloadZip(_foldername, _commitId)
+	local foldername = GitEncoding.base64(_foldername);
+	local url = "http://git.keepwork.com/" .. login.dataSourceUsername .. "/" .. foldername .. "/repository/archive.zip?ref=" .. _commitId;
+
+	HttpRequest.GetUrl(url,function(data, err)
+		LOG.std(nil,"debug","downloadZip-data" , data);
+	end)
 end
 
 function LocalService:delete(_foldername, _filename, _callback)

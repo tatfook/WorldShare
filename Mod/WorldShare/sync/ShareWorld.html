@@ -9,7 +9,19 @@
         <script type="text/npl" refresh="false">
             <![CDATA[
                 SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
+                login    = commonlib.gettable("Mod.WorldShare.login");
+                
                 SyncMain.setComparePage();
+                SyncMain.ShareStatus = true;    
+
+                if(login.login_type == 1)then
+                    _guihelper.MessageBox(L"登陆后才能同步");
+                    
+                    commonlib.TimerManager.SetTimeout(function()
+                         SyncMain.closeComparePage();
+                    end,100);
+                    return;
+                end
 
                 if(not SyncMain.firstCreate) then
                     SyncMain:compareRevision();
@@ -17,8 +29,15 @@
              ]]>
         </script>
         <div style="width:500px;height:270px;">
-            <aries:window mode="thin" width="500" height="270" style="float:left;" title='<%=L"分享上传世界" %>' onclose="SyncMain.closeComparePage">
+            <aries:window mode="thin" width="500" height="270" style="float:left;" title='<%=L"分享世界" %>' onclose="SyncMain.closeComparePage">
                 <div style="padding:20px;font-size:18px;base-font-size:18px;color:#ffffff">
+                    <img name="ShareWorldImage" zorder="1" width="10" height="10" />
+                    <div>世界名字 </div>
+                    <div>大小 </div>
+                    <input type="button" value="重新截图" />
+                    <div>世界地址</div>
+                    <input type="button" value="打开" />
+
                     <div style="margin-left:140px;margin-top:30px;">
                         远程版本号：
                         <pe:if condition="<%=not SyncMain.firstCreate and SyncMain.remoteRevison == 0 %>">
@@ -35,7 +54,7 @@
                         本地版本号：<%=SyncMain.currentRevison %>
                     </div>
 
-                    <input type="button" onclick="SyncMain.shareNow()" value="马上分享" class="button_highlight" style="width: 80px;height: 35px;margin-top:30px;margin-left:190px;"/>
+                    <input type="button" onclick="SyncMain.shareNow()" value="上传并分享" class="button_highlight" style="width: 80px;height: 35px;margin-top:30px;margin-left:190px;"/>
                 </div>
             </aries:window>
         </div>
