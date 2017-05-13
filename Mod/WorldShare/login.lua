@@ -595,6 +595,8 @@ function login.setSite()
 	    login.site = "http://keepwork.com";
 	elseif(loginServer == "keepworkDev") then
 	    login.site = "http://dev.keepwork.com";
+	elseif(loginServer == "keepworkTest") then
+		login.site = "http://test.keepwork.com";
 	elseif(loginServer == "local") then
 	    login.site = "http://127.0.0.1:8099";
 	end

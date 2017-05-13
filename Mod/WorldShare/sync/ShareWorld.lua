@@ -38,6 +38,10 @@ function ShareWorld.snapshot()
 end
 
 function ShareWorld.getWorldUrl()
+	if(login.login_type == 1) then
+		return "";
+	end
+
 	local url = login.site .. "/" .. login.username .. "/paracraft/" .. commonlib.Encoding.url_encode("world_" .. SyncMain.foldername.utf8);
 	return url;
 end

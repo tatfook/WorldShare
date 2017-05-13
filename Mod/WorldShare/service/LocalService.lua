@@ -294,7 +294,7 @@ end
 
 function LocalService:FileDownloader(_foldername, _path, _callback)
 	local foldername = GitEncoding.base64(SyncMain.foldername.utf8);
-
+	
 	LOG.std(nil,"debug","FileDownloader","FileDownloader");
 	local url = "";
 	local downloadDir = "";

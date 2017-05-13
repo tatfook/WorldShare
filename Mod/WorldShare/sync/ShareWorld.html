@@ -14,7 +14,6 @@
                 
                 SyncMain.setComparePage();
                 SyncMain.ShareStatus = true;    
-                ShareWorld:init();
                 
                 if(login.login_type == 1)then
                     _guihelper.MessageBox(L"登陆后才能同步");
@@ -24,6 +23,8 @@
                     end,100);
                     return;
                 end
+
+                ShareWorld:init();
 
                 if(not SyncMain.firstCreate) then
                     SyncMain:compareRevision();
