@@ -14,7 +14,7 @@ NPL.load("(gl)script/ide/Encoding.lua");
 NPL.load("(gl)script/ide/System/Encoding/base64.lua");
 NPL.load("(gl)script/ide/System/Encoding/sha1.lua");
 NPL.load("(gl)Mod/WorldShare/service/GithubService.lua");
-NPL.load("(gl)Mod/WorldShare/login.lua");
+NPL.load("(gl)Mod/WorldShare/login/loginMain.lua");
 NPL.load("(gl)Mod/WorldShare/service/GitlabService.lua");
 NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua");
 NPL.load("(gl)Mod/WorldShare/sync/SyncMain.lua");
@@ -27,7 +27,7 @@ local GithubService  = commonlib.gettable("Mod.WorldShare.service.GithubService"
 local EncodingC      = commonlib.gettable("commonlib.Encoding");
 local EncodingS      = commonlib.gettable("System.Encoding");
 local Files          = commonlib.gettable("commonlib.Files");
-local login          = commonlib.gettable("Mod.WorldShare.login");
+local loginMain      = commonlib.gettable("Mod.WorldShare.login.loginMain");
 local SyncMain       = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
 
 local LocalService   = commonlib.gettable("Mod.WorldShare.service.LocalService");
@@ -217,8 +217,8 @@ function LocalService:download(_foldername, _path, _callback)
 end
 
 function LocalService:downloadZip(_foldername, _commitId, _callback)
-	local foldername = GitEncoding.base64(SyncMain.foldername.utf8);
-	local url = "http://git.keepwork.com/" .. login.dataSourceUsername .. "/" .. foldername .. "/repository/archive.zip?ref=" .. SyncMain.commitId;
+	local foldername = GitEncoding.base32(SyncMain.foldername.utf8);
+	local url = "http://git.keepwork.com/" .. loginMain.dataSourceUsername .. "/" .. foldername .. "/repository/archive.zip?ref=" .. SyncMain.commitId;
 
 	local Files = FileDownloader:new():Init(nil, url, "temp/archive.zip", function(bSuccess, downloadPath)
 		if(bSuccess) then
@@ -293,15 +293,15 @@ function LocalService:downloadZip(_foldername, _commitId, _callback)
 end
 
 function LocalService:FileDownloader(_foldername, _path, _callback)
-	local foldername = GitEncoding.base64(SyncMain.foldername.utf8);
+	local foldername = GitEncoding.base32(SyncMain.foldername.utf8);
 	
 	LOG.std(nil,"debug","FileDownloader","FileDownloader");
 	local url = "";
 	local downloadDir = "";
 
-	if(login.dataSourceType == "github") then
-	elseif(login.dataSourceType == "gitlab") then
-		url = login.rawBaseUrl .. "/" .. login.dataSourceUsername .. "/" .. foldername .. "/raw/" .. SyncMain.commitId .. "/" .. _path;
+	if(loginMain.dataSourceType == "github") then
+	elseif(loginMain.dataSourceType == "gitlab") then
+		url = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. foldername .. "/raw/" .. SyncMain.commitId .. "/" .. _path;
 		downloadDir = SyncMain.worldDir.default .. _path;
 	end
 
@@ -365,17 +365,17 @@ function LocalService:GetTag(_foldername)
 end
 
 function LocalService:getDataSourceContent(_foldername, _path, _callback)
-	if(login.dataSourceType == "github") then
+	if(loginMain.dataSourceType == "github") then
 		GithubService:getContent(_foldername, _path, _callback);
-	elseif(login.dataSourceType == "gitlab") then
+	elseif(loginMain.dataSourceType == "gitlab") then
 		GitlabService:getContent(_path, _callback);
 	end
 end
 
 function LocalService:getDataSourceContentWithRaw(_foldername, _path, _callback)
-	if(login.dataSourceType == "github") then
+	if(loginMain.dataSourceType == "github") then
 		GithubService:getContentWithRaw(_foldername, _path, _callback);
-	elseif(login.dataSourceType == "gitlab") then
+	elseif(loginMain.dataSourceType == "gitlab") then
 		GitlabService:getContentWithRaw(_foldername, _path, _callback);
 	end
 end

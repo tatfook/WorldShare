@@ -172,14 +172,14 @@ function SyncMain:compareRevision(_LoginStatus, _callback)
 		if(hasRevision) then
 			local contentUrl;
 			if(loginMain.dataSourceType == 'github') then
-				contentUrl = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. GitEncoding.base64(SyncMain.foldername.utf8) .. "/master/revision.xml";
+				contentUrl = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. GitEncoding.base32(SyncMain.foldername.utf8) .. "/master/revision.xml";
 			elseif(loginMain.dataSourceType == 'gitlab') then
 				SyncMain.commitId = SyncMain:getGitlabCommitId(SyncMain.foldername.utf8);
 
 				if(SyncMain.commitId) then
-					contentUrl = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. GitEncoding.base64(SyncMain.foldername.utf8) .. "/raw/" .. SyncMain.commitId .. "/revision.xml";
+					contentUrl = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. GitEncoding.base32(SyncMain.foldername.utf8) .. "/raw/" .. SyncMain.commitId .. "/revision.xml";
 				else
-					contentUrl = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. GitEncoding.base64(SyncMain.foldername.utf8) .. "/raw/master/revision.xml";
+					contentUrl = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. GitEncoding.base32(SyncMain.foldername.utf8) .. "/raw/master/revision.xml";
 				end
 				
 				LOG.std("SyncMain","debug","contentUrl",contentUrl);
@@ -642,7 +642,7 @@ function SyncMain:syncToDataSource()
 
 							local preview = {};
 							preview[0] = {};
-							preview[0].previewUrl = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. GitEncoding.base64(SyncMain.foldername.utf8) .. "/raw/master/preview.jpg";
+							preview[0].previewUrl = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. GitEncoding.base32(SyncMain.foldername.utf8) .. "/raw/master/preview.jpg";
 							preview = NPL.ToJson(preview,true);
 
 							local filesTotals = SyncMain.selectedWorldInfor.size;
@@ -678,19 +678,22 @@ function SyncMain:syncToDataSource()
 								if(err == 200) then
 									params.opusId = data.msg.opusId;
 
+									local requestParams = {
+										url  = loginMain.site .. "/api/mod/worldshare/models/worlds",
+										json = true,
+										headers = {Authorization = "Bearer "..loginMain.token},
+										form = {amount = 10000},
+									}
+
+									LOG.std(nil,"debug","requestParams",requestParams);
+
 									SyncMain:genWorldMD(params, function()
-										HttpRequest:GetUrl({
-											url  = loginMain.site .. "/api/mod/worldshare/models/worlds",
-											json = true,
-											headers = {Authorization = "Bearer "..loginMain.token},
-											form = {amount = 10000},
-										},function(worldList, err)
+										HttpRequest:GetUrl(requestParams,function(worldList, err)
 											LOG.std(nil,"debug","worldList-data",worldList);
 											SyncMain:genIndexMD(worldList);
+											loginMain.RefreshCurrentServerList();
 										end);
 									end);
-
-									loginMain.syncWorldsList();
 								end
 							end);
 
@@ -968,7 +971,7 @@ end
 
 function SyncMain:genIndexMD(_worldList, _callback)
 	local function gen(keepworkId)
-		SyncMain:getFileShaListService("keepworkDataSource", function(data, err)
+		SyncMain:getFileShaListService("keepwork_datasource", function(data, err)
 			LOG.std(nil,"debug","genIndexMD",data);
 
 			local hasIndex      = false;
@@ -995,7 +998,7 @@ function SyncMain:genIndexMD(_worldList, _callback)
 				LOG.std(nil,"debug","hasIndexO",hasIndex);
 				if(hasIndex) then
 					LOG.std(nil,"debug","hasIndex",hasIndex);
-					SyncMain:getDataSourceContent("keepworkDataSource", indexPath, function(data, err)
+					SyncMain:getDataSourceContent("keepwork_datasource", indexPath, function(data, err)
 						--LOG.std(nil,"debug","getDataSourceContent",data);
 						--LOG.std(nil,"debug","getDataSourceContent",err);
 
@@ -1018,7 +1021,7 @@ function SyncMain:genIndexMD(_worldList, _callback)
 						LOG.std(nil,"debug","SyncMain.indexFile",SyncMain.indexFile);
 
 						SyncMain:updateService(
-							"keepworkDataSource",
+							"keepwork_datasource",
 							indexPath,
 							SyncMain.indexFile,
 							"",
@@ -1049,7 +1052,7 @@ function SyncMain:genIndexMD(_worldList, _callback)
 					LOG.std(nil,"debug","SyncMain.indexFile",SyncMain.indexFile);
 
 					SyncMain:uploadService(
-						"keepworkDataSource",
+						"keepwork_datasource",
 						indexPath,
 						SyncMain.indexFile,
 						function(data, err) 
@@ -1069,7 +1072,7 @@ function SyncMain:genIndexMD(_worldList, _callback)
 	if(loginMain.dataSourceType == "github") then
 		gen();
 	elseif(loginMain.dataSourceType == "gitlab") then
-		GitlabService:getProjectIdByName("keepworkDataSource",function(keepworkId)
+		GitlabService:getProjectIdByName("keepwork_datasource",function(keepworkId)
 			gen(keepworkId);
 		end);
 	end
@@ -1077,7 +1080,7 @@ end
 
 function SyncMain:genWorldMD(worldInfor, _callback)
 	local function gen(keepworkId)
-		SyncMain:getFileShaListService("keepworkDataSource", function(data, err)
+		SyncMain:getFileShaListService("keepwork_datasource", function(data, err)
 			LOG.std(nil,"debug","genWorldMD",data);
 			local hasWorldFile  = false;
 			local worldFilePath = "";
@@ -1086,7 +1089,7 @@ function SyncMain:genWorldMD(worldInfor, _callback)
 			SyncMain.worldFile  = "";
 
 			if(loginMain.dataSourceType == "gitlab") then
-				worldUrl = "http://git.keepwork.com/" .. loginMain.dataSourceUsername .. "/" .. GitEncoding.base64(SyncMain.foldername.utf8) .. "/repository/archive.zip?ref=master";
+				worldUrl = "http://git.keepwork.com/" .. loginMain.dataSourceUsername .. "/" .. GitEncoding.base32(SyncMain.foldername.utf8) .. "/repository/archive.zip?ref=master";
 			else
 
 			end
@@ -1098,21 +1101,11 @@ function SyncMain:genWorldMD(worldInfor, _callback)
 					hasWorldFile = true;
 				end
 			end
-			
---			local function updateTree(_callback)
---				SyncMain:refreshWikiPages(worldFilePath, SyncMain.worldFile, function(data, err)
---					LOG.std(nil,"debug","refreshWikiPages-data",data);
---					LOG.std(nil,"debug","refreshWikiPages-err",err);
---					if(_callback) then
---						_callback();
---					end
---				end);
---			end
 
 			local function updateWorldFile()
 				if(hasWorldFile) then
 					LOG.std(nil,"debug","hasWorldFile",hasWorldFile);
-					SyncMain:getDataSourceContent("keepworkDataSource", worldFilePath, function(data, err)
+					SyncMain:getDataSourceContent("keepwork_datasource", worldFilePath, function(data, err)
 						local content    = Encoding.unbase64(data);
 						local paramsText = KeepworkGen:GetContent(content);
 						local params     = KeepworkGen:getCommand("world3D", paramsText);
@@ -1138,7 +1131,7 @@ function SyncMain:genWorldMD(worldInfor, _callback)
 						LOG.std(nil,"debug","worldFile",SyncMain.worldFile);
 
 						SyncMain:updateService(
-							"keepworkDataSource",
+							"keepwork_datasource",
 							worldFilePath,
 							SyncMain.worldFile,
 							"",
@@ -1178,7 +1171,7 @@ function SyncMain:genWorldMD(worldInfor, _callback)
 					LOG.std(nil,"debug","worldFile",SyncMain.worldFile);
 				
 					SyncMain:uploadService(
-						"keepworkDataSource",
+						"keepwork_datasource",
 						worldFilePath,
 						SyncMain.worldFile,
 						function(data, err)
@@ -1198,8 +1191,7 @@ function SyncMain:genWorldMD(worldInfor, _callback)
 	if(loginMain.dataSourceType == "github") then
 		gen();
 	elseif(loginMain.dataSourceType == "gitlab") then
-		GitlabService:getProjectIdByName("keepworkDataSource",function(keepworkId)
-			
+		GitlabService:getProjectIdByName("keepwork_datasource",function(keepworkId)
 			gen(keepworkId);
 		end);
 	end
@@ -1209,7 +1201,7 @@ function SyncMain:deleteWorldMD(_path, _callback)
 	local function deleteFile(keepworkId)
 		local path = loginMain.username ..  "/paracraft/world_" ..   _path;
 		LOG.std(nil,"debug","path",path);
-		SyncMain:deleteFileService("keepworkDataSource", path, "", function(data, err)
+		SyncMain:deleteFileService("keepwork_datasource", path, "", function(data, err)
 			_callback();
 		end, keepworkId)
 	end
@@ -1217,7 +1209,7 @@ function SyncMain:deleteWorldMD(_path, _callback)
 	if(loginMain.dataSourceType == "github") then
 		deleteFile();
 	elseif(loginMain.dataSourceType == "gitlab") then
-		GitlabService:getProjectIdByName("keepworkDataSource",function(keepworkId)
+		GitlabService:getProjectIdByName("keepwork_datasource",function(keepworkId)
 			deleteFile(keepworkId);
 		end);
 	end
@@ -1516,26 +1508,7 @@ function SyncMain.deleteKeepworkWorldsRecord()
 		LOG.std(nil,"debug","deleteKeepworkWorldsRecord",err)
 
 		if(err == 204) then
-			SyncMain.handleCur_ds = {};
-
-			local hasLocal = false;
-			for key,value in ipairs(InternetLoadWorld.cur_ds) do
-				if(value.foldername == foldername and value.status == 3 or value.status == 4 or value.status == 5) then
-					value.status = 1;
-					hasLocal = true;
-					break;
-				end
-
-				if(value.foldername ~= foldername) then
-					SyncMain.handleCur_ds[#SyncMain.handleCur_ds + 1] = value;
-				end
-			end
-
-			if(not hasLocal)then
-				InternetLoadWorld.cur_ds = SyncMain.handleCur_ds;
-			end
-
-			LOG.std(nil,"debug","InternetLoadWorld.cur_ds",InternetLoadWorld.cur_ds);
+			loginMain.RefreshCurrentServerList();
 
 			SyncMain.DeletePage:CloseWindow();
 

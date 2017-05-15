@@ -82,7 +82,7 @@ function GithubService:apiDelete(_url, _params, _callback)
 end
 
 function GithubService:getFileShaList(_foldername, _callback)
-	_foldername = GitEncoding.base64(_foldername);
+	_foldername = GitEncoding.base32(_foldername);
 	LOG.std(nil,"debug","getFileShaList",_foldername);
 	
 	local url = "repos/" .. login.login .. "/" .. _foldername .. "/git/trees/master?recursive=1";
@@ -92,7 +92,7 @@ function GithubService:getFileShaList(_foldername, _callback)
 end
 
 function GithubService:getContent(_foldername, _fileName, _callback)
-	_foldername = GitEncoding.base64(_foldername);
+	_foldername = GitEncoding.base32(_foldername);
 
 	local github_token = login.github_token;
 
@@ -102,7 +102,7 @@ function GithubService:getContent(_foldername, _fileName, _callback)
 end
 
 function GithubService:create(_foldername, _callback)
-	_foldername = GitEncoding.base64(_foldername);
+	_foldername = GitEncoding.base32(_foldername);
 
 	local url = "/user/repos";
 
@@ -112,7 +112,7 @@ function GithubService:create(_foldername, _callback)
 end
 
 function GithubService:deleteResp(_foldername, authToken, _callback)
-	local _foldername  = GitEncoding.base64(_foldername);
+	local _foldername  = GitEncoding.base32(_foldername);
 
 	local url = "repos/" .. login.dataSourceUsername .. "/" .. _foldername;
 
@@ -127,7 +127,7 @@ function GithubService:deleteResp(_foldername, authToken, _callback)
 end
 
 function GithubService:update(_foldername, _fileName, _fileContent, _sha, _callback)
-	_foldername = GitEncoding.base64(_foldername);
+	_foldername = GitEncoding.base32(_foldername);
 
 	local github_token = login.dataSourceToken;
 
@@ -145,7 +145,7 @@ function GithubService:update(_foldername, _fileName, _fileContent, _sha, _callb
 end
 
 function GithubService:upload(_foldername, _fileName, _fileContent, _callback)
-	_foldername = GitEncoding.base64(_foldername);
+	_foldername = GitEncoding.base32(_foldername);
 
 	local github_token = login.dataSourceToken;
 
@@ -168,7 +168,7 @@ function GithubService:upload(_foldername, _fileName, _fileContent, _callback)
 end
 
 function GithubService:delete(_foldername, _fileName, _sha, _callback)
-	_foldername = GitEncoding.base64(_foldername);
+	_foldername = GitEncoding.base32(_foldername);
 	
 	local github_token = login.dataSourceToken;
 

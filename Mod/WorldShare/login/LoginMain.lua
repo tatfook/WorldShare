@@ -108,6 +108,7 @@ function loginMain.showLoginInfo()
 		style = CommonCtrl.WindowFrame.ContainerStyle,
 		allowDrag = true,
 		isTopLevel = true,
+		zorder = 1,
 		directPosition = true,
 			align = "_ct",
 			x = -300/2,
@@ -140,6 +141,7 @@ function loginMain.LoginAction(_page, _callback)
 	local password      = _page:GetValue("password");
 	local loginServer   = _page:GetValue("loginServer");
 	local isRememberPwd = _page:GetValue("rememberPassword"); 
+	local autoLogin     = _page:GetValue("autoLogin"); 
 
 	if(account == nil or account == "") then
 	    _guihelper.MessageBox(L"账号不能为空");
@@ -163,7 +165,15 @@ function loginMain.LoginAction(_page, _callback)
 					if(isRememberPwd) then
 						local file      = ParaIO.open("/PWD", "w");
 						local encodePwd = Encoding.PasswordEncodeWithMac(password);
-						local value     = account .. "|" .. encodePwd .. "|" .. loginServer .. "|" .. loginMain.token;
+						
+						local value;
+
+						if(autoLogin) then
+							value = account .. "|" .. encodePwd .. "|" .. loginServer .. "|" .. loginMain.token .. "|" .. "true";
+						else
+							value = account .. "|" .. encodePwd .. "|" .. loginServer .. "|" .. loginMain.token .. "|" .. "false";
+						end
+
 						file:write(value,#value);
 						file:close();
 					else
@@ -623,13 +633,22 @@ function loginMain.getRememberPassword()
 				page:GetNode("keepwork"):SetAttribute("selected","selected");
 			elseif(PWD[3] == "keepworkDev") then
 				page:GetNode("keepworkDev"):SetAttribute("selected","selected");
+			elseif(PWD[3] == "keepworkTest") then
+				page:GetNode("keepworkTest"):SetAttribute("selected","selected");
 			elseif(PWD[3] == "local") then
 				page:GetNode("local"):SetAttribute("selected","selected");
 			end
 
 			page:GetNode("rememberPassword"):SetAttribute("checked","checked");
+
+			if(PWD[5] and PWD[5] == "true") then
+				page:GetNode("autoLogin"):SetAttribute("checked","checked");
+			elseif(not PWD[5] or PWD[5] == "false") then
+				page:GetNode("autoLogin"):SetAttribute("checked",nil);
+			end
 		else
 			page:GetNode("rememberPassword"):SetAttribute("checked",nil);
+			page:GetNode("autoLogin"):SetAttribute("checked",nil);
 		end
 	end
 
@@ -663,12 +682,33 @@ function loginMain.setSite()
 	elseif(loginServer == "keepworkTest") then
 		loginMain.site = "http://test.keepwork.com";
 	elseif(loginServer == "local") then
-	    loginMain.site = "http://127.0.0.1:8099";
+	    loginMain.site = "http://localhost:8099";
 	end
+
+	echo(loginMain.site);
 
 	register:SetAttribute("href",loginMain.site .. "/wiki/home");
 
 	loginMain.LoginPage:Refresh();
+end
+
+function loginMain.autoLoginAction()
+	local autoLogin
+
+	if(loginMain.LoginPage) then
+		autoLogin = loginMain.LoginPage:GetValue("autoLogin");
+
+		if(autoLogin) then
+			loginMain.LoginActionMain();
+		end
+	end
+
+	if(loginMain.ModalPage) then
+		autoLogin = loginMain.ModalPage:GetValue("autoLogin");
+		if(autoLogin) then
+			loginMain.LoginActionMain();
+		end
+	end
 end
 
 function loginMain.logout()
@@ -941,6 +981,9 @@ end
 
 function loginMain.LoginActionApi(_account,_password,_callback)
 	local url = loginMain.site .. "/api/wiki/models/user/login";
+
+	echo(url);
+
 	HttpRequest:GetUrl({
 		url  = url,
 		json = true,
@@ -968,7 +1011,7 @@ function loginMain.getWorldsList(_callback)
 		form = {amount = 100},
 	};
 
-	--echo(params.url);
+	echo(params.url);
 
 	HttpRequest:GetUrl(params,_callback);
 end

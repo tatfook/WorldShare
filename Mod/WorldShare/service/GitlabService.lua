@@ -310,7 +310,7 @@ end
 
 -- 获取文件
 function GitlabService:getContentWithRaw(_foldername, _path, _callback)
-	_foldername = GitEncoding.base64(_foldername);
+	_foldername = GitEncoding.base32(_foldername);
 
 	local url  = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. _foldername .. "/raw/master/" .. _path;
 
@@ -372,7 +372,7 @@ end
 
 -- 初始化
 function GitlabService:init(_foldername, _callback)
-	_foldername = GitEncoding.base64(_foldername);
+	_foldername = GitEncoding.base32(_foldername);
 	local url   = "/projects";
 
 	GitlabService:apiGet(url .. "?owned=true",function(projectList,err)
