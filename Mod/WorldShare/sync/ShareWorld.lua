@@ -92,7 +92,7 @@ function ShareWorld.shareNow()
                 SyncMain:syncToDataSource();
             end
         end);
-    elseif(ShareWorld.CompareResult == "localBigger") then
+    elseif(ShareWorld.CompareResult == "localBigger" or ShareWorld.CompareResult == "justLocal") then
         SyncMain:syncToDataSource();
 	elseif(ShareWorld.CompareResult == "equal") then
 		_guihelper.MessageBox(L"版本相等，无需同步");
