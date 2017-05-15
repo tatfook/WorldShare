@@ -20,7 +20,11 @@ NPL.load("(gl)Mod/WorldShare/sync/SyncGUI.lua");
 NPL.load("(gl)script/apps/Aries/Creator/Game/Login/RemoteServerList.lua");
 NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/ShareWorldPage.lua");
 NPL.load("(gl)Mod/WorldShare/main.lua");
+NPL.load("(gl)script/apps/Aries/Creator/Game/Login/LocalLoadWorld.lua");
+NPL.load("(gl)script/apps/Aries/Creator/Game/Login/CreateNewWorld.lua");
 
+local CreateNewWorld	 = commonlib.gettable("MyCompany.Aries.Game.MainLogin.CreateNewWorld");
+local LocalLoadWorld	 = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalLoadWorld");
 local WorldShare         = commonlib.gettable("Mod.WorldShare");
 local SyncGUI			 = commonlib.gettable("Mod.WorldShare.sync.SyncGUI");
 local LocalService		 = commonlib.gettable("Mod.WorldShare.service.LocalService");
@@ -208,6 +212,7 @@ function loginMain.LoginAction(_page, _callback)
 						loginMain.dataSourceType     = defaultDataSource['type'];				-- 数据源类型
 						loginMain.apiBaseUrl		 = defaultDataSource['apiBaseUrl']			-- 数据源api
 						loginMain.rawBaseUrl		 = defaultDataSource['rawBaseUrl']          -- 数据源raw
+						loginMain.keepWorkDataSource = defaultDataSource['projectName']			-- keepwork仓名
 
 						--echo({loginMain.dataSourceToken,loginMain.dataSourceUsername});
 						loginMain.personPageUrl = loginMain.site .. "/" .. loginMain.username .. "/paracraft/index";--loginMain.site .. "/wiki/mod/worldshare/person/#?userid=" .. userinfo._id;
@@ -381,10 +386,6 @@ end
 
 function loginMain.CreateNewWorld()
 	loginMain.LoginPage:CloseWindow();
-
-	NPL.load("(gl)script/apps/Aries/Creator/Game/Login/CreateNewWorld.lua");
-	local CreateNewWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.CreateNewWorld");
-
 	CreateNewWorld.ShowPage();
 end
 
@@ -481,9 +482,6 @@ function loginMain.OpenBBS()
 end
 
 function loginMain.OnImportWorld()
-	NPL.load("(gl)script/apps/Aries/Creator/Game/Login/LocalLoadWorld.lua");
-
-	local LocalLoadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalLoadWorld");
 	ParaGlobal.ShellExecute("open", ParaIO.GetCurDirectory(0)..LocalLoadWorld.GetWorldFolder(), "", "", 1);
 end
 

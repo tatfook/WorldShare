@@ -43,6 +43,7 @@
     <Content Include="Mod\WorldShare\login\LoginInfor.html" />
     <Content Include="Mod\WorldShare\login\LoginMain.html" />
     <Content Include="Mod\WorldShare\login\LoginModal.html" />
+    <Content Include="Mod\WorldShare\sync\BeyondVolume.html" />
     <Content Include="Mod\WorldShare\sync\DeleteWorld.html" />
     <Content Include="Mod\WorldShare\sync\DeleteWorldGithub.html" />
     <Content Include="Mod\WorldShare\sync\ShareWorld.html" />

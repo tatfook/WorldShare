@@ -1,0 +1,39 @@
+﻿<!-- "script/apps/Aries/Creator/Game/Login/InternetLoadWorld.html" -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>beyond volume,by big,2017.5.15</title>
+</head>
+<body>
+    <pe:mcml>
+        <script type="text/npl" refresh="false">
+            <![CDATA[
+            loginMain = commonlib.gettable("Mod.WorldShare.login.loginMain");
+            SyncMain  = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
+
+            SyncMain.setBeyondPage();
+            selectedWorldInfor = SyncMain.selectedWorldInfor;
+            maxWorldSize = 15;
+            maxWorldSizeVIP = 50;
+            ]]>
+        </script>
+        <div style="width:500px;height:270px;">
+            <aries:window mode="thin" width="500" height="270" style="float:left;" title='<%=L"删除世界" %>' onclose="SyncMain.closeBeyondPage">
+                <div style="font-size:16px;base-font-size:16px;color:#ffffff;padding:30px;">
+                    <div style="margin-top:30px;">
+                        <%= SyncMain.getBeyondMsg() %>
+                        <br />
+                        是否现在清理？
+                    </div>
+                    <br />
+                    <div style="margin-top:30px;">
+                        <input type="button" onclick="SyncMain.openWorldFolder" class="button_highlight" style="float:left;width: 130px;height: 30px;" name="" value="是" />
+                        <input type="button" onclick="SyncMain.closeBeyondPage" class="button_highlight" style="float:left;margin-left:10px;width: 130px;height: 30px;" name="" value="否" />
+                        <input type="button" onclick="SyncMain.closeBeyondPage" class="button_highlight" style="float:left;margin-left:10px;width: 130px;height: 30px;" name="" value="取消" />
+                    </div>
+                </div>
+            </aries:window>
+        </div>
+    </pe:mcml>
+</body>
+</html>

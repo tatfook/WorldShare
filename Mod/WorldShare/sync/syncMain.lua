@@ -25,7 +25,9 @@ NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/ShareWorldPage.lua");
 NPL.load("(gl)Mod/WorldShare/main.lua");
 NPL.load("(gl)Mod/WorldShare/helper/KeepworkGen.lua");
 NPL.load("(gl)Mod/WorldShare/sync/ShareWorld.lua");
+NPL.load("(gl)script/apps/Aries/Creator/Game/Login/LocalLoadWorld.lua");
 
+local LocalLoadWorld	 = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalLoadWorld");
 local ShareWorld		 = commonlib.gettable("Mod.WorldShare.sync.ShareWorld");
 local SyncGUI            = commonlib.gettable("Mod.WorldShare.sync.SyncGUI");
 local WorldCommon        = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
@@ -47,8 +49,9 @@ local KeepworkGen        = commonlib.gettable("Mod.WorldShare.helper.KeepworkGen
 
 local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
 
-SyncMain.SyncPage = nil;
+SyncMain.SyncPage    = nil;
 SyncMain.DeletePage  = nil;
+SyncMain.BeyondPage  = nil;
 SyncMain.finish      = true;
 SyncMain.worldDir    = {};
 SyncMain.foldername  = {};
@@ -72,7 +75,11 @@ function SyncMain.setSyncPage()
 end
 
 function SyncMain.setDeletePage()
-	SyncMain.DeletePage  = document:GetPageCtrl();
+	SyncMain.DeletePage = document:GetPageCtrl();
+end
+
+function SyncMain.setBeyondPage()
+	SyncMain.BeyondPage = document:GetPageCtrl();
 end
 
 function SyncMain.closeDeletePage()
@@ -87,6 +94,10 @@ end
 function SyncMain.closeSyncPage()
 	SyncMain.isStart = false;
 	SyncMain.SyncPage:CloseWindow();
+end
+
+function SyncMain.closeBeyondPage()
+	SyncMain.BeyondPage:CloseWindow();
 end
 
 function SyncMain:StartSyncPage()
@@ -559,6 +570,10 @@ function SyncMain:syncToLocal(_callback)
 end
 
 function SyncMain:syncToDataSource()
+	if(SyncMain:checkWorldSize()) then
+		return;
+	end
+
 	if(not SyncMain.finish) then
 		--_guihelper.MessageBox(L"同步尚未结束");
 		--return;
@@ -953,6 +968,58 @@ function SyncMain:syncToDataSource()
 	end
 end
 
+function SyncMain:showBeyondVolume()
+	System.App.Commands.Call("File.MCMLWindowFrame", {
+		url  = "Mod/WorldShare/sync/BeyondVolume.html", 
+		name = "BeyondVolume", 
+		isShowTitleBar = false,
+		DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory / false will only hide window
+		style = CommonCtrl.WindowFrame.ContainerStyle,
+		zorder = 0,
+		allowDrag = true,
+		bShow = bShow,
+		directPosition = true,
+			align = "_ct",
+			x = -500/2,
+			y = -270/2,
+			width = 500,
+			height = 270,
+		cancelShowAnimation = true,
+	});
+end
+
+function SyncMain.getBeyondMsg()
+	local str = format("世界" .. SyncMain.foldername.utf8 .. "文件总大小超过了%dMB, 请清理不必要的文件后才能上传。(VIP用户最大可上传%dMB)", 15, 50);
+
+	return str;
+end
+
+function SyncMain.openWorldFolder()
+	SyncMain.closeBeyondPage();
+	local path = ParaIO.GetCurDirectory(0) .. LocalLoadWorld.GetWorldFolder() .. "/" .. SyncMain.foldername.default;
+	ParaGlobal.ShellExecute("open", path, "", "", 1);
+end
+
+function SyncMain:checkWorldSize()
+	local files = commonlib.Files.Find({}, SyncMain.worldDir.default, 5, 5000, function(item)
+		return true;
+	end);
+
+	local filesTotal = 0;
+	for key, value in ipairs(files) do
+		filesTotal = filesTotal + tonumber(value.filesize);
+	end
+	
+	local maxSize = 15 * 1024 * 1024 * 1024;
+
+	if(filesTotal > maxSize) then
+		SyncMain:showBeyondVolume();
+		return true;
+	else
+		return false;
+	end
+end
+
 function SyncMain:setGitlabProjectId(_foldername)
 	for key,value in ipairs(SyncMain.remoteWorldsList) do
 		if(value.worldsName == _foldername) then
@@ -985,14 +1052,6 @@ function SyncMain:genIndexMD(_worldList, _callback)
 					hasIndex = true;
 				end
 			end
-
---			local function updateTree(_callback)
---				SyncMain:refreshWikiPages(indexPath, SyncMain.indexFile, function(data, err)
---					if(_callback) then
---						_callback();
---					end
---				end);
---			end
 
 			local function updateIndexFile()
 				LOG.std(nil,"debug","hasIndexO",hasIndex);
@@ -1080,7 +1139,7 @@ end
 
 function SyncMain:genWorldMD(worldInfor, _callback)
 	local function gen(keepworkId)
-		SyncMain:getFileShaListService("keepwork_datasource", function(data, err)
+		SyncMain:getFileShaListService(loginMain.keepWorkDataSource, function(data, err)
 			LOG.std(nil,"debug","genWorldMD",data);
 			local hasWorldFile  = false;
 			local worldFilePath = "";
@@ -1105,7 +1164,7 @@ function SyncMain:genWorldMD(worldInfor, _callback)
 			local function updateWorldFile()
 				if(hasWorldFile) then
 					LOG.std(nil,"debug","hasWorldFile",hasWorldFile);
-					SyncMain:getDataSourceContent("keepwork_datasource", worldFilePath, function(data, err)
+					SyncMain:getDataSourceContent(loginMain.keepWorkDataSource, worldFilePath, function(data, err)
 						local content    = Encoding.unbase64(data);
 						local paramsText = KeepworkGen:GetContent(content);
 						local params     = KeepworkGen:getCommand("world3D", paramsText);
@@ -1131,7 +1190,7 @@ function SyncMain:genWorldMD(worldInfor, _callback)
 						LOG.std(nil,"debug","worldFile",SyncMain.worldFile);
 
 						SyncMain:updateService(
-							"keepwork_datasource",
+							loginMain.keepWorkDataSource,
 							worldFilePath,
 							SyncMain.worldFile,
 							"",
@@ -1171,7 +1230,7 @@ function SyncMain:genWorldMD(worldInfor, _callback)
 					LOG.std(nil,"debug","worldFile",SyncMain.worldFile);
 				
 					SyncMain:uploadService(
-						"keepwork_datasource",
+						loginMain.keepWorkDataSource,
 						worldFilePath,
 						SyncMain.worldFile,
 						function(data, err)
@@ -1191,7 +1250,7 @@ function SyncMain:genWorldMD(worldInfor, _callback)
 	if(loginMain.dataSourceType == "github") then
 		gen();
 	elseif(loginMain.dataSourceType == "gitlab") then
-		GitlabService:getProjectIdByName("keepwork_datasource",function(keepworkId)
+		GitlabService:getProjectIdByName(loginMain.keepWorkDataSource,function(keepworkId)
 			gen(keepworkId);
 		end);
 	end
@@ -1201,7 +1260,7 @@ function SyncMain:deleteWorldMD(_path, _callback)
 	local function deleteFile(keepworkId)
 		local path = loginMain.username ..  "/paracraft/world_" ..   _path;
 		LOG.std(nil,"debug","path",path);
-		SyncMain:deleteFileService("keepwork_datasource", path, "", function(data, err)
+		SyncMain:deleteFileService(loginMain.keepWorkDataSource, path, "", function(data, err)
 			_callback();
 		end, keepworkId)
 	end
@@ -1209,92 +1268,11 @@ function SyncMain:deleteWorldMD(_path, _callback)
 	if(loginMain.dataSourceType == "github") then
 		deleteFile();
 	elseif(loginMain.dataSourceType == "gitlab") then
-		GitlabService:getProjectIdByName("keepwork_datasource",function(keepworkId)
+		GitlabService:getProjectIdByName(loginMain.keepWorkDataSource,function(keepworkId)
 			deleteFile(keepworkId);
 		end);
 	end
 end
-
---function SyncMain:refreshWikiPages(_path, _content, _callback)
---	LOG.std(nil,"debug","_content",_content);
---	HttpRequest:GetUrl({
---		url  = login.site.."/api/wiki/models/website_pageinfo/get",
---		json = true,
---		headers = {Authorization = "Bearer "..login.token},
---		form = {
---			username     = login.username,
---			websiteName  = "paracraft",
---			dataSourceId = login.dataSourceId,
---		},
---	},function(data, err)
---		--LOG.std(nil,"debug","getUserPages",data);
---		local pageinfoList = data.data.pageinfo;
---
---		local params = {};
---		NPL.FromJson(pageinfoList, params);
---
---		pageinfoList    = params;
---		newPageinfoList = {};
---
---		local hasFile = false;
---
---		for key,value in ipairs(pageinfoList) do
---			if(value.url == "/" .. _path) then
---				hasFile     = true;	
---				hasFileInfo = value;
---			else
---				newPageinfoList[#newPageinfoList + 1] = value;
---			end
---		end
---
---		--LOG.std(nil,"debug","_path",_path);
---		--LOG.std(nil,"debug","_content",_content);
---		--LOG.std(nil,"debug","hasFile",hasFile);
---		--LOG.std(nil,"debug","pageinfoList",pageinfoList);
---
---		if(hasFile) then
---			hasFileInfo.timestamp = os.time() .. "000";
---			hasFileInfo.content   = _content;
---			hasFileInfo.isModify  = true;
---
---			newPageinfoList[#newPageinfoList + 1] = hasFileInfo;
---		else
---			LOG.std(nil,"debug","os", os.time() .. "000");
---
---			local thisInfor = {};
---
---			thisInfor.timestamp    = os.time() .. "000";
---			thisInfor.websiteName  = "paracraft";
---			thisInfor.userId	   = login.userId;
---			thisInfor.dataSourceId = login.dataSourceId;
---			thisInfor.isModify	   = false;
---			thisInfor.username	   = login.username;
---			thisInfor.name	       = _path;
---			thisInfor.url		   = "/" .. _path;
---			thisInfor.content      = _content;
---
---			newPageinfoList[#newPageinfoList + 1] = thisInfor;
---		end
---
---		LOG.std(nil,"debug","newPageinfoList",newPageinfoList);
---
---		newPageinfoList = NPL.ToJson(newPageinfoList,true);
---
---		local params = {};
---		params.dataSourceId = login.dataSourceId;
---		params.isExistSite  = 1;
---		params.pageinfo     = newPageinfoList;
---		params.username     = login.username;
---		params.websiteName  = "paracraft";
---
---		HttpRequest:GetUrl({
---			url  = login.site.."/api/wiki/models/website_pageinfo/upsert",
---			json = true,
---			headers = {Authorization = "Bearer "..login.token},
---			form = params,
---		},_callback)
---	end);
---end
 
 function SyncMain.deleteWorld()
 	System.App.Commands.Call("File.MCMLWindowFrame", {
