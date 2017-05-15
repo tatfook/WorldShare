@@ -37,25 +37,11 @@ function WorldShare:GetDesc()
 end
 
 function WorldShare:init()
+	-- replace load world page
 	GameLogic.GetFilters():add_filter("InternetLoadWorld.ShowPage",function (bEnable, bShow)
-		System.App.Commands.Call("File.MCMLWindowFrame", {
-			url = "Mod/WorldShare/login/LoginMain.html", 
-			name = "LoadMainWorld", 
-			isShowTitleBar = false,
-			DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
-			style = CommonCtrl.WindowFrame.ContainerStyle,
-			zorder = 0,
-			allowDrag = true,
-			bShow = bShow,
-			directPosition = true,
-				align = "_ct",
-				x = -860/2,
-				y = -470/2,
-				width = 860,
-				height = 470,
-			cancelShowAnimation = true,
-		});
-
+		NPL.load("(gl)Mod/WorldShare/login/loginMain.lua");
+		local loginMain = commonlib.gettable("Mod.WorldShare.login.loginMain");
+		loginMain.ShowPage()
 		return false;
 	end);
 
@@ -69,8 +55,17 @@ function WorldShare:init()
 		end
 	end);
 
-	NPL.load("(gl)script/apps/WebServer/WebServer.lua");
-	WebServer:Start("script/apps/WebServer/admin","0.0.0.0",8095);
+	-- replace share world page
+	GameLogic.GetFilters():add_filter("SaveWorldPage.ShowSharePage",function (bEnable)
+		NPL.load("(gl)Mod/WorldShare/sync/ShareWorld.lua");
+		local ShareWorld = commonlib.gettable("Mod.WorldShare.sync.ShareWorld");
+		ShareWorld.ShowPage()
+		return false;
+	end);
+
+	-- TODO: why this? LiXizhi
+	--	NPL.load("(gl)script/apps/WebServer/WebServer.lua");
+	--	WebServer:Start("script/apps/WebServer/admin","0.0.0.0",8095);
 end
 
 function WorldShare:OnInitDesktop()

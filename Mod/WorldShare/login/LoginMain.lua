@@ -7,6 +7,7 @@ use the lib:
 ------------------------------------------------------------
 NPL.load("(gl)Mod/WorldShare/login/loginMain.lua");
 local loginMain = commonlib.gettable("Mod.WorldShare.login.loginMain");
+loginMain.ShowPage()
 ------------------------------------------------------------
 ]]
 NPL.load("(gl)script/ide/System/os/GetUrl.lua");
@@ -51,26 +52,27 @@ end
 function loginMain.init()
 end
 
-function loginMain.OnInit()
-	GameLogic.GetFilters():add_filter("SaveWorldPage.ShowSharePage",function (bEnable)
-		System.App.Commands.Call("File.MCMLWindowFrame", {
-			url = "Mod/WorldShare/sync/ShareWorld.html",
-			name = "SaveWorldPage.ShowSharePage",
+function loginMain.ShowPage()
+	System.App.Commands.Call("File.MCMLWindowFrame", {
+			url = "Mod/WorldShare/login/LoginMain.html", 
+			name = "LoadMainWorld", 
 			isShowTitleBar = false,
-			DestroyOnClose = true,
+			DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
 			style = CommonCtrl.WindowFrame.ContainerStyle,
+			zorder = 0,
 			allowDrag = true,
-			isTopLevel = true,
+			bShow = bShow,
 			directPosition = true,
 				align = "_ct",
-				x = -500/2,
-				y = -400/2,
-				width = 500,
-				height = 400,
+				x = -860/2,
+				y = -470/2,
+				width = 860,
+				height = 470,
+			cancelShowAnimation = true,
 		});
+end
 
-		return false;
-	end);
+function loginMain.OnInit()
 end
 
 function loginMain.setLoginPage()
@@ -641,9 +643,9 @@ function loginMain.getRememberPassword()
 
 			page:GetNode("rememberPassword"):SetAttribute("checked","checked");
 
-			if(PWD[5] and PWD[5] == "true") then
+			if(not PWD[5] or PWD[5] == "true") then
 				page:GetNode("autoLogin"):SetAttribute("checked","checked");
-			elseif(not PWD[5] or PWD[5] == "false") then
+			else
 				page:GetNode("autoLogin"):SetAttribute("checked",nil);
 			end
 		else
