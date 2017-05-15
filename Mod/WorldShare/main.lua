@@ -23,7 +23,7 @@ local WorldShare = commonlib.inherit(commonlib.gettable("Mod.ModBase"),commonlib
 
 WorldShare:Property({"Name", "WorldShare"});
 
-LOG.SetLogLevel("DEBUG");
+-- LOG.SetLogLevel("DEBUG");
 
 function WorldShare:ctor()
 end
@@ -57,6 +57,16 @@ function WorldShare:init()
 		});
 
 		return false;
+	end);
+
+	-- replace the exit world dialog
+	GameLogic.GetFilters():add_filter("ShowExitDialog",function (dialog)
+		if(dialog and dialog.callback) then
+			NPL.load("(gl)Mod/WorldShare/login/WorldExitDialog.lua");
+			local WorldExitDialog = commonlib.gettable("Mod.WorldShare.login.WorldExitDialog");
+			WorldExitDialog.ShowPage(dialog.callback);
+			return nil;
+		end
 	end);
 
 	NPL.load("(gl)script/apps/WebServer/WebServer.lua");
