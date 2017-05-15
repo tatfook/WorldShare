@@ -43,6 +43,7 @@
     <Content Include="Mod\WorldShare\login\LoginInfor.html" />
     <Content Include="Mod\WorldShare\login\LoginMain.html" />
     <Content Include="Mod\WorldShare\login\LoginModal.html" />
+    <Content Include="Mod\WorldShare\login\WorldExitDialog.html" />
     <Content Include="Mod\WorldShare\sync\BeyondVolume.html" />
     <Content Include="Mod\WorldShare\sync\DeleteWorld.html" />
     <Content Include="Mod\WorldShare\sync\DeleteWorldGithub.html" />
@@ -58,6 +59,7 @@
     <None Include="Mod\WorldShare\helper\GitEncoding.lua" />
     <None Include="Mod\WorldShare\helper\KeepworkGen.lua" />
     <None Include="Mod\WorldShare\login\LoginMain.lua" />
+    <None Include="Mod\WorldShare\login\WorldExitDialog.lua" />
     <None Include="Mod\WorldShare\service\FileDownloader.lua" />
     <None Include="Mod\WorldShare\service\GithubService.lua" />
     <None Include="Mod\WorldShare\service\GitlabService.lua" />

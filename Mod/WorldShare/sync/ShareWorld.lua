@@ -7,6 +7,7 @@ use the lib:
 ------------------------------------------------------------
 NPL.load("(gl)Mod/WorldShare/sync/ShareWorld.lua");
 local ShareWorld = commonlib.gettable("Mod.WorldShare.sync.ShareWorld");
+ShareWorld.ShowPage()
 -------------------------------------------------------
 ]]
 
@@ -23,6 +24,24 @@ ShareWorld.SharePage = nil
 
 function ShareWorld:ctor()
 
+end
+
+function ShareWorld.ShowPage()
+	System.App.Commands.Call("File.MCMLWindowFrame", {
+		url = "Mod/WorldShare/sync/ShareWorld.html",
+		name = "SaveWorldPage.ShowSharePage",
+		isShowTitleBar = false,
+		DestroyOnClose = true,
+		style = CommonCtrl.WindowFrame.ContainerStyle,
+		allowDrag = true,
+		isTopLevel = true,
+		directPosition = true,
+			align = "_ct",
+			x = -500/2,
+			y = -400/2,
+			width = 500,
+			height = 400,
+	});
 end
 
 function ShareWorld:init()
