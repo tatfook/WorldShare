@@ -11,13 +11,13 @@ local GitlabService = commonlib.gettable("Mod.WorldShare.service.GitlabService")
 ]]
 
 NPL.load("(gl)Mod/WorldShare/service/HttpRequest.lua");
-NPL.load("(gl)Mod/WorldShare/login.lua");
+NPL.load("(gl)Mod/WorldShare/login/loginMain.lua");
 NPL.load("(gl)Mod/WorldShare/main.lua");
 NPL.load("(gl)script/ide/Encoding.lua");
 NPL.load("(gl)Mod/WorldShare/sync/SyncMain.lua");
 
 local HttpRequest   = commonlib.gettable("Mod.WorldShare.service.HttpRequest");
-local login		    = commonlib.gettable("Mod.WorldShare.login");
+local loginMain     = commonlib.gettable("Mod.WorldShare.login.loginMain");
 local GitEncoding   = commonlib.gettable("Mod.WorldShare.helper.GitEncoding");
 local WorldShare    = commonlib.gettable("Mod.WorldShare");
 local Encoding      = commonlib.gettable("commonlib.Encoding");
@@ -31,14 +31,14 @@ GitlabService.newTree = {};
 GitlabService.blob = {};
 
 function GitlabService:apiGet(_url, _callback)
-	_url = login.apiBaseUrl .. "/" .._url
+	_url = loginMain.apiBaseUrl .. "/" .._url
 
 	LOG.std(nil,"debug","apiGet-url",_url);
 	HttpRequest:GetUrl({
 		url     = _url,
 		json    = true,
 		headers = {
-			["PRIVATE-TOKEN"] = login.dataSourceToken,
+			["PRIVATE-TOKEN"] = loginMain.dataSourceToken,
 			["User-Agent"]    = "npl",
 		},
 	},function(data ,err) 
@@ -49,13 +49,13 @@ function GitlabService:apiGet(_url, _callback)
 end
 
 function GitlabService:apiPost(_url, _params, _callback)
-	_url = login.apiBaseUrl .. "/" .._url
+	_url = loginMain.apiBaseUrl .. "/" .._url
 
 	HttpRequest:GetUrl({
 		url       = _url,
 		json      = true,
 		headers   = {
-			["PRIVATE-TOKEN"] = login.dataSourceToken,
+			["PRIVATE-TOKEN"] = loginMain.dataSourceToken,
 			["User-Agent"]    = "npl",
 			["content-type"]  = "application/json"
 		},
@@ -68,14 +68,14 @@ function GitlabService:apiPost(_url, _params, _callback)
 end
 
 function GitlabService:apiPut(_url, _params, _callback)
-	_url = login.apiBaseUrl .. "/" .._url
+	_url = loginMain.apiBaseUrl .. "/" .._url
 
 	HttpRequest:GetUrl({
 		method     = "PUT",
 		url        = _url,
 		json       = true,
 	  	headers    = {
-		  	["PRIVATE-TOKEN"] = login.dataSourceToken,
+		  	["PRIVATE-TOKEN"] = loginMain.dataSourceToken,
 			["User-Agent"]    = "npl",
 			["content-type"]  = "application/json"
 		},
@@ -88,9 +88,9 @@ function GitlabService:apiPut(_url, _params, _callback)
 end
 
 function GitlabService:apiDelete(_url, _params, _callback)
-	_url = login.apiBaseUrl .. "/" .._url
+	_url = loginMain.apiBaseUrl .. "/" .._url
 
-	local github_token = login.dataSourceToken;
+	local github_token = loginMain.dataSourceToken;
 	
 	LOG.std(nil,"debug","GitlabService:apiDelete-token",github_token);
 	LOG.std(nil,"debug","GitlabService:apiDelete-_url",_url);
@@ -100,7 +100,7 @@ function GitlabService:apiDelete(_url, _params, _callback)
 		url        = _url,
 		json       = true,
 	  	headers    = {
-	  		["PRIVATE-TOKEN"] = login.dataSourceToken,
+	  		["PRIVATE-TOKEN"] = loginMain.dataSourceToken,
 			["User-Agent"]    = "npl",
 			["content-type"]  = "application/json"
 		},
@@ -312,13 +312,13 @@ end
 function GitlabService:getContentWithRaw(_foldername, _path, _callback)
 	_foldername = GitEncoding.base64(_foldername);
 
-	local url  = login.rawBaseUrl .. "/" .. login.dataSourceUsername .. "/" .. _foldername .. "/raw/master/" .. _path;
+	local url  = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. _foldername .. "/raw/master/" .. _path;
 
 	HttpRequest:GetUrl({
 		url     = url,
 		json    = true,
 		headers = {
-			["PRIVATE-TOKEN"] = login.dataSourceToken,
+			["PRIVATE-TOKEN"] = loginMain.dataSourceToken,
 			["User-Agent"]    = "npl",
 		},
 	},function(data, err)

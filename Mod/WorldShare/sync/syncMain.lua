@@ -12,7 +12,7 @@ local SyncMain  = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
 
 NPL.load("(gl)script/apps/Aries/Creator/WorldCommon.lua");
 NPL.load("(gl)script/apps/Aries/Creator/Game/World/WorldRevision.lua");
-NPL.load("(gl)Mod/WorldShare/login.lua");
+NPL.load("(gl)Mod/WorldShare/login/LoginMain.lua");
 NPL.load("(gl)Mod/WorldShare/service/GithubService.lua");
 NPL.load("(gl)Mod/WorldShare/service/GitlabService.lua");
 NPL.load("(gl)Mod/WorldShare/service/LocalService.lua");
@@ -31,7 +31,7 @@ local SyncGUI            = commonlib.gettable("Mod.WorldShare.sync.SyncGUI");
 local WorldCommon        = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 local MainLogin		     = commonlib.gettable("MyCompany.Aries.Game.MainLogin");
 local WorldRevision      = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision");
-local login              = commonlib.gettable("Mod.WorldShare.login");
+local loginMain          = commonlib.gettable("Mod.WorldShare.login.loginMain");
 local GithubService      = commonlib.gettable("Mod.WorldShare.service.GithubService");
 local GitlabService      = commonlib.gettable("Mod.WorldShare.service.GitlabService");
 local LocalService       = commonlib.gettable("Mod.WorldShare.service.LocalService");
@@ -47,7 +47,7 @@ local KeepworkGen        = commonlib.gettable("Mod.WorldShare.helper.KeepworkGen
 
 local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
 
-SyncMain.ComparePage = nil;
+SyncMain.SyncPage = nil;
 SyncMain.DeletePage  = nil;
 SyncMain.finish      = true;
 SyncMain.worldDir    = {};
@@ -62,13 +62,13 @@ function SyncMain:init()
 	SyncMain.worldName = nil;
 
 	-- 没有登陆则直接使用离线模式
-	if(login.token) then
-		SyncMain:compareRevision();
+	if(loginMain.token) then
+		SyncMain.syncCompare();
 	end
 end
 
-function SyncMain.setComparePage()
-	SyncMain.ComparePage = document:GetPageCtrl();
+function SyncMain.setSyncPage()
+	SyncMain.SyncPage = document:GetPageCtrl();
 end
 
 function SyncMain.setDeletePage()
@@ -84,9 +84,9 @@ function SyncMain.closeDeletePage()
 --    end
 end
 
-function SyncMain.closeComparePage()
+function SyncMain.closeSyncPage()
 	SyncMain.isStart = false;
-	SyncMain.ComparePage:CloseWindow();
+	SyncMain.SyncPage:CloseWindow();
 end
 
 function SyncMain:StartSyncPage()
@@ -111,8 +111,10 @@ function SyncMain:StartSyncPage()
 	});
 end
 
-function SyncMain:compareRevision(_LoginStatus)
-	if(login.token) then
+function SyncMain:compareRevision(_LoginStatus, _callback)
+	SyncMain.compareFinish = false;
+
+	if(loginMain.token) then
 		LOG.std(nil,"debug","_LoginStatus",_LoginStatus);
 		if(not _LoginStatus) then
 			SyncMain.tagInfor = WorldCommon.GetWorldInfo();
@@ -130,7 +132,7 @@ function SyncMain:compareRevision(_LoginStatus)
 			LOG.std(nil,"debug","SyncMain.foldername.utf8",SyncMain.foldername.utf8)
 
 			LOG.std(nil,"debug","selectedWorldInfor-old",SyncMain.selectedWorldInfor);
-			login.RefreshCurrentServerList();
+			loginMain.RefreshCurrentServerList();
 			for key,value in ipairs(InternetLoadWorld.cur_ds) do
 				if(value.foldername == SyncMain.foldername.utf8)then
 					SyncMain.selectedWorldInfor = value;
@@ -142,8 +144,8 @@ function SyncMain:compareRevision(_LoginStatus)
 				_guihelper.MessageBox(L"不能同步ZIP文件");
 
 				commonlib.TimerManager.SetTimeout(function()
-					if(SyncMain.ComparePage)then
-						SyncMain.closeComparePage();
+					if(SyncMain.SyncPage)then
+						SyncMain.closeSyncPage();
 					end
 				end,100);
 				return;
@@ -169,15 +171,15 @@ function SyncMain:compareRevision(_LoginStatus)
 
 		if(hasRevision) then
 			local contentUrl;
-			if(login.dataSourceType == 'github') then
-				contentUrl = login.rawBaseUrl .. "/" .. login.dataSourceUsername .. "/" .. GitEncoding.base64(SyncMain.foldername.utf8) .. "/master/revision.xml";
-			elseif(login.dataSourceType == 'gitlab') then
+			if(loginMain.dataSourceType == 'github') then
+				contentUrl = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. GitEncoding.base64(SyncMain.foldername.utf8) .. "/master/revision.xml";
+			elseif(loginMain.dataSourceType == 'gitlab') then
 				SyncMain.commitId = SyncMain:getGitlabCommitId(SyncMain.foldername.utf8);
 
 				if(SyncMain.commitId) then
-					contentUrl = login.rawBaseUrl .. "/" .. login.dataSourceUsername .. "/" .. GitEncoding.base64(SyncMain.foldername.utf8) .. "/raw/" .. SyncMain.commitId .. "/revision.xml";
+					contentUrl = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. GitEncoding.base64(SyncMain.foldername.utf8) .. "/raw/" .. SyncMain.commitId .. "/revision.xml";
 				else
-					contentUrl = login.rawBaseUrl .. "/" .. login.dataSourceUsername .. "/" .. GitEncoding.base64(SyncMain.foldername.utf8) .. "/raw/master/revision.xml";
+					contentUrl = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. GitEncoding.base64(SyncMain.foldername.utf8) .. "/raw/master/revision.xml";
 				end
 				
 				LOG.std("SyncMain","debug","contentUrl",contentUrl);
@@ -192,104 +194,74 @@ function SyncMain:compareRevision(_LoginStatus)
 				--LOG.std(nil,"debug","data",data);
 				--LOG.std(nil,"debug","err",err);
 
-				SyncMain.remoteRevison  = tonumber(data);
+				SyncMain.remoteRevison = tonumber(data);
 				if(not SyncMain.remoteRevison) then
 					SyncMain.remoteRevison = 0;
 				end
+
+				--SyncMain.isFetchRemoteRevision = true;
 
 				SyncMain.currentRevison = tonumber(SyncMain.currentRevison);
 				LOG.std(nil,"debug","SyncMain.remoteRevison",SyncMain.remoteRevison);
 				LOG.std(nil,"debug","SyncMain.currentRevison",SyncMain.currentRevison);
 
 				if(err == 0) then
-					SyncMain.ComparePage:CloseWindow();
 					_guihelper.MessageBox(L"网络错误");
+					_callback(false);
 					return
-				end
-
-				if(err == 404 or err == 401) then
-					if(SyncMain.ComparePage) then
-						SyncMain.ComparePage:CloseWindow();
-					end
-					
-					SyncMain.firstCreate = true;
-
-					if(not login.enterStatus) then
-						ShareWorldPage.ShowPage();
-					end
-				end
-				
-				if(not SyncMain.ShareStatus) then
-					if(type(SyncMain.remoteRevison) == "number") then
-
-						if(login.enterStatus) then
-							if(SyncMain.currentRevison < SyncMain.remoteRevison) then
-								SyncMain:StartSyncPage();
-							end
-						else
-							SyncMain:StartSyncPage();
-						end
-					else
-						SyncMain.ComparePage:CloseWindow();
-						SyncMain.firstCreate = true;
-						return
-					end
-				end
-
-				if(SyncMain.currentRevison ~= SyncMain.remoteRevison) then
-					if(SyncMain.ComparePage) then
-						SyncMain.ComparePage:Refresh();
-					end
 				else
-					if(not login.enterStatus) then
-						_guihelper.MessageBox(L"数据源已存在此作品，且版本相等");
+					local result;
+
+					if(SyncMain.currentRevison < SyncMain.remoteRevison) then
+						result = "remoteBigger"
+					elseif(SyncMain.remoteRevison == 0) then
+						result = "justLocal";
+					elseif(SyncMain.currentRevison > SyncMain.remoteRevison) then
+						result = "localBigger";
+					elseif(SyncMain.currentRevison == SyncMain.remoteRevison) then
+						result = "equal";
 					end
 
-					if(SyncMain.ComparePage) then
-						SyncMain.ComparePage:CloseWindow();
-					end
+					SyncMain.compareFinish = true;
+
+					_callback(result);
 				end
-
-				login.enterStatus = false;
-				SyncMain.ShareStatus = false;
 			end);
 		else
 			if(not _LoginStatus) then
-				commonlib.TimerManager.SetTimeout(function() 
-					if(SyncMain.ComparePage) then
-						SyncMain.ComparePage:CloseWindow();
-					end
-
-					CommandManager:RunCommand("/save");
-					SyncMain:compareRevision();
-				end, 500)
+				CommandManager:RunCommand("/save");
+				SyncMain:compareRevision(_LoginStatus,_callback());
 			else
-				_guihelper.MessageBox(L"沒有版本信息");
+				_guihelper.MessageBox(L"本地世界沒有版本信息");
+				return;
 			end
 		end
 	end
 end
 
-function SyncMain.shareNow()
-    SyncMain.ComparePage:CloseWindow();
+function SyncMain.syncCompare(_LoginStatus)
+	SyncMain:compareRevision(_LoginStatus, function(result)
+		--echo(result);
+		--echo(_LoginStatus);
 
-	LOG.std(nil,"debug","SyncMain.currentRevision", SyncMain.currentRevison);
-	LOG.std(nil,"debug","SyncMain.remoteRevison", SyncMain.remoteRevison);
-
-	ShareWorldPage.TakeSharePageImage();
-    if(not SyncMain.firstCreate and SyncMain.currentRevison < SyncMain.remoteRevison) then
-        _guihelper.MessageBox("当前本地版本小于远程版本，是否继续上传？", function(res)
-            if(res and res == 6) then
-                SyncMain:syncToDataSource();
-            end
-        end);
-    elseif(SyncMain.currentRevison > SyncMain.remoteRevison) then
-        SyncMain:syncToDataSource();
-    end
+		if(_LoginStatus) then
+			if(result == "justLocal") then
+				SyncMain.syncToDataSource();
+			elseif(result ~= "equal") then
+				SyncMain:StartSyncPage();
+			else
+				_guihelper.MessageBox(L"数据源已存在此作品，且版本相等");
+			end
+		else
+			if(result == "remoteBigger") then
+				SyncMain:StartSyncPage();
+			end
+		end
+	end);
 end
 
 function SyncMain.useLocal()
-    SyncMain.ComparePage:CloseWindow();
+    SyncMain.SyncPage:CloseWindow();
 
     if(tonumber(SyncMain.currentRevison) < tonumber(SyncMain.remoteRevison)) then
         SyncMain:useLocalGUI();
@@ -300,7 +272,7 @@ function SyncMain.useLocal()
 end
 
 function SyncMain.useRemote()
-    SyncMain.ComparePage:CloseWindow();
+    SyncMain.SyncPage:CloseWindow();
 
     if(tonumber(SyncMain.remoteRevison) < tonumber(SyncMain.currentRevison)) then
         SyncMain:useDataSourceGUI();
@@ -356,8 +328,8 @@ end
 
 function SyncMain:syncToLocal(_callback)
 	if(not SyncMain.finish) then
-		_guihelper.MessageBox(L"同步尚未结束");
-		return;
+		--_guihelper.MessageBox(L"同步尚未结束");
+		--return;
 	end
 
 	SyncMain.localSync = {};
@@ -368,7 +340,7 @@ function SyncMain:syncToLocal(_callback)
 
 	--LOG.std(nil,"debug","worldDir",_worldDir);
 
-	if(login.dataSourceType == "gitlab") then
+	if(loginMain.dataSourceType == "gitlab") then
 		SyncMain:setGitlabProjectId(SyncMain.foldername.utf8);
 	end
 
@@ -402,7 +374,7 @@ function SyncMain:syncToLocal(_callback)
 					LOG.std(nil,"debug","SyncMain.foldername",SyncMain.foldername.utf8);
 					localWorlds[key].status   = 3;
 					localWorlds[key].revision = SyncMain.remoteRevison;
-					login.refreshPage();
+					loginMain.refreshPage();
 				end
 			end
 
@@ -588,8 +560,8 @@ end
 
 function SyncMain:syncToDataSource()
 	if(not SyncMain.finish) then
-		_guihelper.MessageBox(L"同步尚未结束");
-		return;
+		--_guihelper.MessageBox(L"同步尚未结束");
+		--return;
 	end
 	SyncMain.remoteSync = {};
 	SyncMain.finish = false;
@@ -620,6 +592,8 @@ function SyncMain:syncToDataSource()
 			function SyncMain.remoteSync.finish()
 				LOG.std(nil,"debug","SyncMain.selectedWorldInfor",SyncMain.selectedWorldInfor);
 				LOG.std(nil,"debug","send",SyncMain.selectedWorldInfor.tooltip);
+
+				syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, L'同步完成');
 
 				SyncMain:getCommits(function(data, err)
 					LOG.std(nil,"debug","data",data);
@@ -668,7 +642,7 @@ function SyncMain:syncToDataSource()
 
 							local preview = {};
 							preview[0] = {};
-							preview[0].previewUrl = login.rawBaseUrl .. "/" .. login.dataSourceUsername .. "/" .. GitEncoding.base64(SyncMain.foldername.utf8) .. "/raw/master/preview.jpg";
+							preview[0].previewUrl = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. GitEncoding.base64(SyncMain.foldername.utf8) .. "/raw/master/preview.jpg";
 							preview = NPL.ToJson(preview,true);
 
 							local filesTotals = SyncMain.selectedWorldInfor.size;
@@ -678,7 +652,7 @@ function SyncMain:syncToDataSource()
 							params.worldsName      = SyncMain.foldername.utf8;
 							params.revision        = SyncMain.currentRevison;
 							params.hasPreview      = hasPreview;
-							params.dataSourceType  = login.dataSourceType;
+							params.dataSourceType  = loginMain.dataSourceType;
 							params.gitlabProjectId = GitlabService.projectId;
 							params.readme          = readme; --EncodingS.base64(readme);
 							params.preview         = preview;
@@ -690,11 +664,11 @@ function SyncMain:syncToDataSource()
 							-- SyncMain:genWorldMD(params);
 
 							HttpRequest:GetUrl({
-								url     = login.site .. "/api/mod/worldshare/models/worlds/refresh",
+								url     = loginMain.site .. "/api/mod/worldshare/models/worlds/refresh",
 								json    = true,
 								form    = params,
 								headers = {
-									Authorization    = "Bearer " .. login.token,
+									Authorization    = "Bearer " .. loginMain.token,
 									["content-type"] = "application/json",
 								},
 							},function(data, err)
@@ -706,9 +680,9 @@ function SyncMain:syncToDataSource()
 
 									SyncMain:genWorldMD(params, function()
 										HttpRequest:GetUrl({
-											url  = login.site .. "/api/mod/worldshare/models/worlds",
+											url  = loginMain.site .. "/api/mod/worldshare/models/worlds",
 											json = true,
-											headers = {Authorization = "Bearer "..login.token},
+											headers = {Authorization = "Bearer "..loginMain.token},
 											form = {amount = 10000},
 										},function(worldList, err)
 											LOG.std(nil,"debug","worldList-data",worldList);
@@ -716,7 +690,7 @@ function SyncMain:syncToDataSource()
 										end);
 									end);
 
-									login.syncWorldsList();
+									loginMain.syncWorldsList();
 								end
 							end);
 
@@ -950,7 +924,7 @@ function SyncMain:syncToDataSource()
 
 	------------------------------------------------------------------------
 
-	if(SyncMain.firstCreate) then
+	if(SyncMain.remoteRevison == 0) then
 		SyncMain:create(SyncMain.foldername.utf8,function(data, err)
 			--LOG.std(nil,"debug","SyncMain:create",data);
 			--LOG.std(nil,"debug","SyncMain:create",err);
@@ -968,7 +942,7 @@ function SyncMain:syncToDataSource()
 	else
 		LOG.std(nil,"debug","SyncMain:syncToGithub","非首次同步");
 
-		if(login.dataSourceType == "gitlab") then
+		if(loginMain.dataSourceType == "gitlab") then
 			SyncMain:setGitlabProjectId(SyncMain.foldername.utf8);
 		end
 
@@ -1001,7 +975,7 @@ function SyncMain:genIndexMD(_worldList, _callback)
 			local indexPath     = "";
 			SyncMain.indexFile  = "";
 
-			local indexPath = login.username .. "/paracraft/index.md";
+			local indexPath = loginMain.username .. "/paracraft/index.md";
 
 			for key,value in ipairs(data) do
 				if(value.path == indexPath) then
@@ -1092,9 +1066,9 @@ function SyncMain:genIndexMD(_worldList, _callback)
 		end, nil, keepworkId);
 	end
 	
-	if(login.dataSourceType == "github") then
+	if(loginMain.dataSourceType == "github") then
 		gen();
-	elseif(login.dataSourceType == "gitlab") then
+	elseif(loginMain.dataSourceType == "gitlab") then
 		GitlabService:getProjectIdByName("keepworkDataSource",function(keepworkId)
 			gen(keepworkId);
 		end);
@@ -1111,13 +1085,13 @@ function SyncMain:genWorldMD(worldInfor, _callback)
 			local username      = "";
 			SyncMain.worldFile  = "";
 
-			if(login.dataSourceType == "gitlab") then
-				worldUrl = "http://git.keepwork.com/" .. login.dataSourceUsername .. "/" .. GitEncoding.base64(SyncMain.foldername.utf8) .. "/repository/archive.zip?ref=master";
+			if(loginMain.dataSourceType == "gitlab") then
+				worldUrl = "http://git.keepwork.com/" .. loginMain.dataSourceUsername .. "/" .. GitEncoding.base64(SyncMain.foldername.utf8) .. "/repository/archive.zip?ref=master";
 			else
 
 			end
 
-			local worldFilePath =  login.username .. "/paracraft/world_" .. worldInfor.worldsName .. ".md";
+			local worldFilePath =  loginMain.username .. "/paracraft/world_" .. worldInfor.worldsName .. ".md";
 
 			for key,value in ipairs(data) do
 				if(value.path == worldFilePath) then
@@ -1221,9 +1195,9 @@ function SyncMain:genWorldMD(worldInfor, _callback)
 		end, nil, keepworkId);
 	end
 
-	if(login.dataSourceType == "github") then
+	if(loginMain.dataSourceType == "github") then
 		gen();
-	elseif(login.dataSourceType == "gitlab") then
+	elseif(loginMain.dataSourceType == "gitlab") then
 		GitlabService:getProjectIdByName("keepworkDataSource",function(keepworkId)
 			
 			gen(keepworkId);
@@ -1233,16 +1207,16 @@ end
 
 function SyncMain:deleteWorldMD(_path, _callback)
 	local function deleteFile(keepworkId)
-		local path = login.username ..  "/paracraft/world_" ..   _path;
+		local path = loginMain.username ..  "/paracraft/world_" ..   _path;
 		LOG.std(nil,"debug","path",path);
 		SyncMain:deleteFileService("keepworkDataSource", path, "", function(data, err)
 			_callback();
 		end, keepworkId)
 	end
 
-	if(login.dataSourceType == "github") then
+	if(loginMain.dataSourceType == "github") then
 		deleteFile();
-	elseif(login.dataSourceType == "gitlab") then
+	elseif(loginMain.dataSourceType == "gitlab") then
 		GitlabService:getProjectIdByName("keepworkDataSource",function(keepworkId)
 			deleteFile(keepworkId);
 		end);
@@ -1338,6 +1312,7 @@ function SyncMain.deleteWorld()
 		DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory / false will only hide window
 		style = CommonCtrl.WindowFrame.ContainerStyle,
 		zorder = 0,
+		isTopLevel = true,
 		allowDrag = true,
 		bShow = bShow,
 		directPosition = true,
@@ -1407,8 +1382,8 @@ function SyncMain.deleteWorldLocal(_callback)
 						InternetLoadWorld.cur_ds = newLocalWorlds;
 						LOG.std(nil,"debug","localWorlds-deleteWorldLocal",localWorlds);
 
-						if(login.login_type == 3) then
-							login.syncWorldsList();
+						if(loginMain.login_type == 3) then
+							loginMain.syncWorldsList();
 						end
 
 	                    if(not WorldCommon.GetWorldInfo()) then
@@ -1425,9 +1400,9 @@ function SyncMain.deleteWorldLocal(_callback)
 end
 
 function SyncMain.deleteWorldRemote()
-	if(login.dataSourceType == "github") then
+	if(loginMain.dataSourceType == "github") then
 		SyncMain.deleteWorldGithubLogin();
-	elseif(login.dataSourceType == "gitlab") then
+	elseif(loginMain.dataSourceType == "gitlab") then
 		SyncMain.deleteWorldGitlab();
 	end
 end
@@ -1463,7 +1438,7 @@ function SyncMain.deleteWorldGithub(_password)
 		},
 		note   = ParaGlobal.timeGetTime(),
 	};
-	local basicAuth  = login.dataSourceUsername .. ":" .. _password;
+	local basicAuth  = loginMain.dataSourceUsername .. ":" .. _password;
 	local AuthToken  = "";
 
 	basicAuth = Encoding.base64(basicAuth);
@@ -1528,11 +1503,11 @@ end
 
 function SyncMain.deleteKeepworkWorldsRecord()
 	local foldername = SyncMain.selectedWorldInfor.foldername;
-	local url = login.site .. "/api/mod/worldshare/models/worlds";
+	local url = loginMain.site .. "/api/mod/worldshare/models/worlds";
 
 	LOG.std(nil,"debug","deleteKeepworkWorldsRecord",url);
 	LOG.std(nil,"debug","deleteKeepworkWorldsRecord",foldername);
-	LOG.std(nil,"debug","deleteKeepworkWorldsRecord",login.token);
+	LOG.std(nil,"debug","deleteKeepworkWorldsRecord",loginMain.token);
 
 	HttpRequest:GetUrl({
 		method  = "DELETE",
@@ -1542,7 +1517,7 @@ function SyncMain.deleteKeepworkWorldsRecord()
 		},
 		json    = true,
 		headers = {
-			Authorization = "Bearer " .. login.token,
+			Authorization = "Bearer " .. loginMain.token,
 		},
 	},function(data, err)
 		LOG.std(nil,"debug","deleteKeepworkWorldsRecord",data)
@@ -1579,9 +1554,9 @@ function SyncMain.deleteKeepworkWorldsRecord()
 
 			SyncMain:deleteWorldMD(foldername,function()
 				HttpRequest:GetUrl({
-					url  = login.site.."/api/mod/worldshare/models/worlds",
+					url  = loginMain.site.."/api/mod/worldshare/models/worlds",
 					json = true,
-					headers = {Authorization = "Bearer "..login.token},
+					headers = {Authorization = "Bearer "..loginMain.token},
 					form = {amount = 100},
 				},function(worldList, err)
 					LOG.std(nil,"debug","worldList-data",worldList);
@@ -1599,57 +1574,57 @@ function SyncMain.deleteWorldAll()
 end
 
 function SyncMain:create(_foldername,_callback)
-	if(login.dataSourceType == "github") then
+	if(loginMain.dataSourceType == "github") then
 		GithubService:create(_foldername,_callback);
-	elseif(login.dataSourceType == "gitlab") then
+	elseif(loginMain.dataSourceType == "gitlab") then
 		GitlabService:init(_foldername,_callback);
 	end
 end
 
 function SyncMain:getDataSourceContent(_foldername, _path, _callback, _projectId)
-	if(login.dataSourceType == "github") then
+	if(loginMain.dataSourceType == "github") then
 		GithubService:getContent(_foldername, _path, _callback);
-	elseif(login.dataSourceType == "gitlab") then
+	elseif(loginMain.dataSourceType == "gitlab") then
 		GitlabService:getContent(_path, _callback,_projectId);
 	end
 end
 
 function SyncMain:uploadService(_foldername,_filename,_file_content_t,_callback, _projectId)
-	if(login.dataSourceType == "github") then
+	if(loginMain.dataSourceType == "github") then
 		GithubService:upload(_foldername,_filename,_file_content_t,_callback);
-	elseif(login.dataSourceType == "gitlab") then
+	elseif(loginMain.dataSourceType == "gitlab") then
 		GitlabService:writeFile(_filename,_file_content_t,_callback, _projectId);
 	end
 end
 
 function SyncMain:updateService(_foldername, _filename, _file_content_t, _sha, _callback, _projectId)
-	if(login.dataSourceType == "github") then
+	if(loginMain.dataSourceType == "github") then
 		GithubService:update(_foldername, _filename, _file_content_t, _sha, _callback);
-	elseif(login.dataSourceType == "gitlab") then
+	elseif(loginMain.dataSourceType == "gitlab") then
 		GitlabService:update(_filename, _file_content_t, _sha, _callback, _projectId);
 	end
 end
 
 function SyncMain:deleteFileService(_foldername, _path, _sha, _callback, _projectId)
-	if(login.dataSourceType == "github") then
+	if(loginMain.dataSourceType == "github") then
 		GithubService:deleteFile(_foldername, _path, _sha, _callback);
-	elseif(login.dataSourceType == "gitlab") then
+	elseif(loginMain.dataSourceType == "gitlab") then
 		GitlabService:deleteFile(_path, _sha, _callback, _projectId);
 	end
 end
 
 function SyncMain:getFileShaListService(_foldername, _callback, _commitId, _projectId)
-	if(login.dataSourceType == "github") then
+	if(loginMain.dataSourceType == "github") then
 		GithubService:getFileShaList(_foldername, _callback);
-	elseif(login.dataSourceType == "gitlab") then
+	elseif(loginMain.dataSourceType == "gitlab") then
 		GitlabService:getTree(_callback, _commitId, _projectId);
 	end
 end
 
 function SyncMain:getCommits(_callback, _projectId)
-	if(login.dataSourceType == "github") then
+	if(loginMain.dataSourceType == "github") then
 		GithubService:getCommits(_foldername, _callback);
-	elseif(login.dataSourceType == "gitlab") then
+	elseif(loginMain.dataSourceType == "gitlab") then
 		GitlabService:listCommits(_callback, _projectId);
 	end
 end

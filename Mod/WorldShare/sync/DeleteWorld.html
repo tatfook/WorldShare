@@ -8,7 +8,7 @@
     <pe:mcml>
         <script type="text/npl" refresh="false">
             <![CDATA[
-                login     = commonlib.gettable("Mod.WorldShare.login");
+                loginMain = commonlib.gettable("Mod.WorldShare.login.loginMain");
                 SyncMain  = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
                 
                 SyncMain.setDeletePage();
@@ -23,7 +23,7 @@
                     </div>
                     <br />
                     <div style="margin-top:30px;">
-                        <pe:if condition="<%=login.login_type == 1 or login.login_type == 3 and selectedWorldInfor.status ~= nil and selectedWorldInfor.status ~= 2%>">
+                        <pe:if condition="<%=loginMain.login_type == 1 or loginMain.login_type == 3 and selectedWorldInfor.status ~= nil and selectedWorldInfor.status ~= 2%>">
                             <input type="button" onclick="SyncMain.deleteWorldLocal" class="button_highlight" style="float:left;width: 130px;height: 30px;" name="" value="只删除本地" />
                         </pe:if>
                         <pe:if condition="<%=selectedWorldInfor.status ~= nil and selectedWorldInfor.status ~= 1 %>">

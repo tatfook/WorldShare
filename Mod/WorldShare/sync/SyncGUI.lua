@@ -57,7 +57,7 @@ end
 
 function SyncGUI:OnInit()
 	SyncPage = document:GetPageCtrl();
-	self.progressbar = SyncPage:GetNode("progressbar");
+	SyncGUI.progressbar = SyncPage:GetNode("progressbar");
 end
 
 function SyncGUI.finish()
@@ -87,6 +87,11 @@ function SyncGUI:updateDataBar(_current, _total, _files)
 	else
 		SyncGUI.files = "同步中，请稍后...";
 	end
+
+	echo("SyncGUI.total");
+	echo(SyncGUI.total);
+	echo("SyncGUI.current");
+	echo(SyncGUI.current);
 
 	SyncGUI.progressbar:SetAttribute("Maximum",SyncGUI.total);
 	SyncGUI.progressbar:SetAttribute("Value",SyncGUI.current);

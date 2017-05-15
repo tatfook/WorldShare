@@ -40,11 +40,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Mod\WorldShare\loginInfor.html" />
+    <Content Include="Mod\WorldShare\login\LoginInfor.html" />
+    <Content Include="Mod\WorldShare\login\LoginMain.html" />
+    <Content Include="Mod\WorldShare\login\LoginModal.html" />
     <Content Include="Mod\WorldShare\sync\DeleteWorld.html" />
     <Content Include="Mod\WorldShare\sync\DeleteWorldGithub.html" />
     <Content Include="Mod\WorldShare\sync\ShareWorld.html" />
-    <Content Include="Mod\WorldShare\login.html" />
     <Content Include="Mod\WorldShare\sync\StartSync.html" />
     <Content Include="Mod\WorldShare\sync\StartSyncUseDataSource.html" />
     <Content Include="Mod\WorldShare\sync\StartSyncUseLocal.html" />
@@ -55,13 +56,13 @@
     <None Include="InstallPackages.bat" />
     <None Include="Mod\WorldShare\helper\GitEncoding.lua" />
     <None Include="Mod\WorldShare\helper\KeepworkGen.lua" />
+    <None Include="Mod\WorldShare\login\LoginMain.lua" />
     <None Include="Mod\WorldShare\service\FileDownloader.lua" />
     <None Include="Mod\WorldShare\service\GithubService.lua" />
     <None Include="Mod\WorldShare\service\GitlabService.lua" />
     <None Include="Mod\WorldShare\service\HttpRequest.lua" />
     <None Include="Mod\WorldShare\service\LocalService.lua" />
     <None Include="Mod\WorldShare\main.lua" />
-    <None Include="Mod\WorldShare\login.lua" />
     <None Include="Mod\WorldShare\sync\ShareWorld.lua" />
     <None Include="Mod\WorldShare\sync\SyncGUI.lua" />
     <None Include="Mod\WorldShare\sync\SyncMain.lua" />

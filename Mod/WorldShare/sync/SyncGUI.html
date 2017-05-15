@@ -16,17 +16,31 @@
         <div style="width:500px;height:270px;">
             <aries:window mode="thin" width="500" height="270" style="float:left;" title='<%=L"与数据源同步" %>'>
                 <div style="padding:20px;font-size:18px;base-font-size:18px;color:#ffffff;margin-top:20px;">
-                    <div style="margin-right:20px;">
-                        同步进度：<%=SyncGUI.current%> / <%=SyncGUI.total%>
-                        <!--<span style="margin-left:5px">size</span>-->
-                        <br />
-                        <%=SyncGUI.files%>
-                    </div>
+                    <pe:if condition="<%=SyncGUI.total == 0 or SyncGUI.current ~= SyncGUI.total %>">
+                        <div style="margin-right:20px;">
+                            同步进度：<%=SyncGUI.current%> / <%=SyncGUI.total%>
+                            <!--<span style="margin-left:5px">size</span>-->
+                            <br />
+                            <%=SyncGUI.files%>
+                        </div>
+                    </pe:if>
+                    <pe:if condition="<%=SyncGUI.total ~= 0 and SyncGUI.current == SyncGUI.total %>">
+                        <div style="margin-right:20px">
+                            恭喜！世界已经同步完毕！
+                            <br />
+                            你可以通过下面页面分享给他人
+                            <br />
+                            http:// .... 
+                            <input type="button" value="复制" />
+                            <input type="button" value="打开"/>
+                        </div>
+                    </pe:if>
+
                     <div style="margin-top:30px;">
                         <pe:progressbar name="progressbar"  block_bg_autosize = "true" Minimum="0" Maximum="100" Value="0"/>
                     </div>
                     <pe:if condition="<%=SyncGUI.total ~= 0 and SyncGUI.current == SyncGUI.total %>">
-                        <input type="button" name="" onclick="SyncGUI.finish()" value="完成" class="button_highlight" style="width: 85px;height: 30px;margin-top:40px;margin-left: 180px" />
+                        <input type="button" name="" onclick="SyncGUI.finish()" value="关闭" class="button_highlight" style="width: 85px;height: 30px;margin-top:40px;margin-left: 180px" />
                     </pe:if>
                     <pe:if condition="<%=SyncGUI.total == 0 or SyncGUI.current ~= SyncGUI.total %>">
                         <div style="margin-top:40px;">

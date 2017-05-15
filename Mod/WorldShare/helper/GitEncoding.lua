@@ -9,9 +9,12 @@ NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua");
 local GitEncoding = commonlib.gettable("Mod.WorldShare.helper.GitEncoding");
 ------------------------------------------------------------
 ]]
-NPL.load("(gl)script/ide/System/Encoding/base64.lua");
 
-local Encoding    = commonlib.gettable("System.Encoding");
+--NPL.load("(gl)script/ide/System/Encoding/base64.lua");
+NPL.load("(gl)script/ide/System/Encoding/basexx.lua");
+
+--local Encoding    = commonlib.gettable("System.Encoding");
+local Encoding    = commonlib.gettable("System.Encoding.basexx");
 local GitEncoding = commonlib.gettable("Mod.WorldShare.helper.GitEncoding");
 
 -- =转成-equal  +转成-plus  /转成-slash
@@ -20,7 +23,7 @@ function GitEncoding.base64(text)
 		local notLetter = string.find(text,"%A%A");
 
 		if(notLetter) then
-			text = Encoding.base64(text);
+			text = Encoding.to_base32(text);
 
 			text = text:gsub("[=]"  , "-equal");
 			text = text:gsub("[%+]" , "-plus");
@@ -50,7 +53,7 @@ function GitEncoding.unbase64(text)
 			text = text:gsub("[-plus]"  , "+");
 			text = text:gsub("[-slash]" , "/");
 
-			return Encoding.unbase64(text);
+			return Encoding.from_base32(text);
 		else
 			text = text:gsub("world_","");
 

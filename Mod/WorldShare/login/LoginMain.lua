@@ -5,8 +5,8 @@ Date: 2017/4/11
 Desc: 
 use the lib:
 ------------------------------------------------------------
-NPL.load("(gl)Mod/WorldShare/login.lua");
-local login = commonlib.gettable("Mod.WorldShare.login");
+NPL.load("(gl)Mod/WorldShare/login/loginMain.lua");
+local loginMain = commonlib.gettable("Mod.WorldShare.login.loginMain");
 ------------------------------------------------------------
 ]]
 NPL.load("(gl)script/ide/System/os/GetUrl.lua");
@@ -18,6 +18,7 @@ NPL.load("(gl)Mod/WorldShare/sync/SyncMain.lua");
 NPL.load("(gl)Mod/WorldShare/service/LocalService.lua");
 NPL.load("(gl)Mod/WorldShare/sync/SyncGUI.lua");
 NPL.load("(gl)script/apps/Aries/Creator/Game/Login/RemoteServerList.lua");
+NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/ShareWorldPage.lua");
 NPL.load("(gl)Mod/WorldShare/main.lua");
 
 local WorldShare         = commonlib.gettable("Mod.WorldShare");
@@ -32,23 +33,25 @@ local InternetLoadWorld  = commonlib.gettable("MyCompany.Aries.Creator.Game.Logi
 local WorldRevision      = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision");
 local SyncMain			 = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
 local RemoteServerList   = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.RemoteServerList");
+local ShareWorldPage     = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.Areas.ShareWorldPage");
 
-local login = commonlib.gettable("Mod.WorldShare.login");
+local loginMain = commonlib.gettable("Mod.WorldShare.login.loginMain");
 
-login.LoginPage = nil;
-login.InforPage = nil;
+loginMain.LoginPage = nil;
+loginMain.InforPage = nil;
+loginMain.ModalPage = nil;
 
-login.login_type   = 1;
-login.site         = "http://keepwork.com";
-login.current_type = 1;
+loginMain.login_type   = 1;
+loginMain.site         = "http://keepwork.com";
+loginMain.current_type = 1;
 
-function login:ctor()
+function loginMain:ctor()
 end
 
-function login.init()
+function loginMain.init()
 end
 
-function login.OnInit()
+function loginMain.OnInit()
 	GameLogic.GetFilters():add_filter("SaveWorldPage.ShowSharePage",function (bEnable)
 		System.App.Commands.Call("File.MCMLWindowFrame", {
 			url = "Mod/WorldShare/sync/ShareWorld.html",
@@ -70,28 +73,36 @@ function login.OnInit()
 	end);
 end
 
-function login.setLoginPage()
-	login.LoginPage = document:GetPageCtrl();
+function loginMain.setLoginPage()
+	loginMain.LoginPage = document:GetPageCtrl();
 end
 
-function login.setInforPage()
-	login.InforPage = document:GetPageCtrl();
+function loginMain.setInforPage()
+	loginMain.InforPage = document:GetPageCtrl();
 end
 
-function login.closeLoginInfor()
+function loginMain.setModalPage()
+	loginMain.ModalPage = document:GetPageCtrl();
+end
+
+function loginMain.closeLoginInfor()
 	commonlib.TimerManager.SetTimeout(function()
-		login.InforPage:CloseWindow();
+		loginMain.InforPage:CloseWindow();
 	end,1000);
 end
 
-function login.refreshPage()
-	login.LoginPage:Refresh();
+function loginMain.closeModalPage()
+	loginMain.ModalPage:CloseWindow();
 end
 
-function login.showLoginInfo()
+function loginMain.refreshPage()
+	loginMain.LoginPage:Refresh();
+end
+
+function loginMain.showLoginInfo()
 	System.App.Commands.Call("File.MCMLWindowFrame", {
-		url = "Mod/WorldShare/loginInfor.html",
-		name = "login.loginInfor",
+		url = "Mod/WorldShare/login/loginInfor.html",
+		name = "loginMain.loginInfor",
 		isShowTitleBar = false,
 		DestroyOnClose = true,
 		style = CommonCtrl.WindowFrame.ContainerStyle,
@@ -106,11 +117,29 @@ function login.showLoginInfo()
 	});
 end
 
-function login.LoginAction()
-	local account       = login.LoginPage:GetValue("account");
-	local password      = login.LoginPage:GetValue("password");
-	local loginServer   = login.LoginPage:GetValue("loginServer");
-	local isRememberPwd = login.LoginPage:GetValue("rememberPassword"); 
+function loginMain.showLoginModal()
+	System.App.Commands.Call("File.MCMLWindowFrame", {
+		url = "Mod/WorldShare/login/LoginModal.html",
+		name = "loginMain.LoginModal",
+		isShowTitleBar = false,
+		DestroyOnClose = true,
+		style = CommonCtrl.WindowFrame.ContainerStyle,
+		allowDrag = true,
+		isTopLevel = true,
+		directPosition = true,
+			align = "_ct",
+			x = -320/2,
+			y = -350/2,
+			width = 320,
+			height = 350,
+	});
+end
+
+function loginMain.LoginAction(_page, _callback)
+	local account       = _page:GetValue("account");
+	local password      = _page:GetValue("password");
+	local loginServer   = _page:GetValue("loginServer");
+	local isRememberPwd = _page:GetValue("rememberPassword"); 
 
 	if(account == nil or account == "") then
 	    _guihelper.MessageBox(L"账号不能为空");
@@ -122,32 +151,32 @@ function login.LoginAction()
 	    return;
 	end
 
-	login.showLoginInfo();
+	loginMain.showLoginInfo();
 
-	login.LoginActionApi(account,password,function (response,err)
+	loginMain.LoginActionApi(account,password,function (response,err)
 			LOG.std(nil,"debug","response",response);
 			if(type(response) == "table") then
 				if(response['data'] ~= nil and response['data']['userinfo']['_id']) then
-					login.token = response['data']['token'];
+					loginMain.token = response['data']['token'];
 
 					-- 如果记住密码则保存密码到redist根目录下
 					if(isRememberPwd) then
 						local file      = ParaIO.open("/PWD", "w");
 						local encodePwd = Encoding.PasswordEncodeWithMac(password);
-						local value     = account .. "|" .. encodePwd .. "|" .. loginServer .. "|" .. login.token;
+						local value     = account .. "|" .. encodePwd .. "|" .. loginServer .. "|" .. loginMain.token;
 						file:write(value,#value);
 						file:close();
 					else
 						-- 判断文件是否存在，如果存在则删除文件
-						if(login.findPWDFiles()) then
+						if(loginMain.findPWDFiles()) then
 							ParaIO.DeleteFile("PWD");
 						end
 					end
 
 					local userinfo = response['data']['userinfo'];
 
-					login.username = userinfo['displayName'];
-					login.userId   = userinfo['_id'];
+					loginMain.username = userinfo['displayName'];
+					loginMain.userId   = userinfo['_id'];
 
 					if(userinfo['dataSourceId'] and userinfo['dataSource'] ~= {}) then
 						local defaultDataSource;
@@ -163,38 +192,44 @@ function login.LoginAction()
 							return
 						end
 
-						login.dataSourceId       = userinfo['dataSourceId'];				-- 数据源
-						login.dataSourceToken    = defaultDataSource['dataSourceToken'];    -- 数据源Token
-						login.dataSourceUsername = defaultDataSource['dataSourceUsername']; -- 数据源用户名
-						login.dataSourceType     = defaultDataSource['type'];				-- 数据源类型
-						login.apiBaseUrl		 = defaultDataSource['apiBaseUrl']			-- 数据源api
-						login.rawBaseUrl		 = defaultDataSource['rawBaseUrl']          -- 数据源raw
+						loginMain.dataSourceId       = userinfo['dataSourceId'];				-- 数据源
+						loginMain.dataSourceToken    = defaultDataSource['dataSourceToken'];    -- 数据源Token
+						loginMain.dataSourceUsername = defaultDataSource['dataSourceUsername']; -- 数据源用户名
+						loginMain.dataSourceType     = defaultDataSource['type'];				-- 数据源类型
+						loginMain.apiBaseUrl		 = defaultDataSource['apiBaseUrl']			-- 数据源api
+						loginMain.rawBaseUrl		 = defaultDataSource['rawBaseUrl']          -- 数据源raw
 
-						--echo({login.dataSourceToken,login.dataSourceUsername});
-						login.personPageUrl = login.site .. "/" .. login.username .. "/paracraft/index";--login.site .. "/wiki/mod/worldshare/person/#?userid=" .. userinfo._id;
+						--echo({loginMain.dataSourceToken,loginMain.dataSourceUsername});
+						loginMain.personPageUrl = loginMain.site .. "/" .. loginMain.username .. "/paracraft/index";--loginMain.site .. "/wiki/mod/worldshare/person/#?userid=" .. userinfo._id;
 
-						--local myWorlds = login.LoginPage:GetNode("myWorlds");
-						--myWorlds:SetAttribute("href", login.personPageUrl);--login.site.."/wiki/mod/worldshare/person/"
+						--local myWorlds = loginMain.LoginPage:GetNode("myWorlds");
+						--myWorlds:SetAttribute("href", loginMain.personPageUrl);--loginMain.site.."/wiki/mod/worldshare/person/"
 						
-						login.changeLoginType(3);
-						login.syncWorldsList();
+						loginMain.changeLoginType(3);
+						loginMain.syncWorldsList(function()
+							if(loginMain.ModalPage) then
+								loginMain.closeModalPage();
+								_callback();
+							end
+						
+						end);
 
-						login.closeLoginInfor();
+						loginMain.closeLoginInfor();
 					else
 						--local clientLogin = Page:GetNode("clientLogin");
-						--login.changeLoginType(2);
-						login.closeLoginInfor();
+						--loginMain.changeLoginType(2);
+						loginMain.closeLoginInfor();
 						_guihelper.MessageBox(L"数据源不存在，请联系管理员");
 						return;
 					end
 
 					--判断paracraf站点是否存在
 					HttpRequest:GetUrl({
-						url  = login.site.."/api/wiki/models/website/getDetailInfo",
+						url  = loginMain.site.."/api/wiki/models/website/getDetailInfo",
 						json = true,
-						headers = {Authorization = "Bearer "..login.token},
+						headers = {Authorization = "Bearer "..loginMain.token},
 						form = {
-							username = login.username,
+							username = loginMain.username,
 							sitename = "paracraft",
 						},
 					},function(data, err) 
@@ -205,8 +240,8 @@ function login.LoginAction()
 							local siteParams = {};
 							siteParams.categoryId = 1;
 							siteParams.categoryName = "作品网站";
-							siteParams.desc = "paracraft";
-							siteParams.displayName = login.username;
+							siteParams.desc = "paracraft作品集";
+							siteParams.displayName = loginMain.username;
 							siteParams.domain = "paracraft";
 							siteParams.logoUrl = "";
 							siteParams.name = "paracraft";
@@ -214,13 +249,13 @@ function login.LoginAction()
 							siteParams.styleName = "WIKI样式";
 							siteParams.templateId = 1;
 							siteParams.templateName = "WIKI模板";
-							siteParams.userId = login.userId;
-							siteParams.username = login.username;
+							siteParams.userId = loginMain.userId;
+							siteParams.username = loginMain.username;
 
 							HttpRequest:GetUrl({
-								url  = login.site.."/api/wiki/models/website/new",
+								url  = loginMain.site.."/api/wiki/models/website/new",
 								json = true,
-								headers = {Authorization = "Bearer " .. login.token},
+								headers = {Authorization = "Bearer " .. loginMain.token},
 								form = siteParams,
 							},function(data, err) 
 								LOG.std(nil,"debug","new site",data);
@@ -228,18 +263,30 @@ function login.LoginAction()
 						end
 					end);
 				else
-					login.closeLoginInfor();
+					loginMain.closeLoginInfor();
 					_guihelper.MessageBox(L"用户名或者密码错误");
 				end
 			else
-				login.closeLoginInfor();
+				loginMain.closeLoginInfor();
 				_guihelper.MessageBox(L"服务器连接失败");
 			end
 		end
 	);
 end
 
-function login.IsMCVersion()
+function loginMain.LoginActionModal()
+	loginMain.LoginAction(loginMain.ModalPage, function()
+		_guihelper.MessageBox(L"登陆成功");
+
+		ShareWorldPage.ShowPage();
+	end);
+end
+
+function loginMain.LoginActionMain()
+	loginMain.LoginAction(loginMain.LoginPage);
+end
+
+function loginMain.IsMCVersion()
 	if(System.options.mc) then
 		return true;
 	else
@@ -247,7 +294,7 @@ function login.IsMCVersion()
 	end
 end
 
-function login.GetWorldSize(size)
+function loginMain.GetWorldSize(size)
 	local s;
 	size = tonumber(size);
 
@@ -273,14 +320,14 @@ function login.GetWorldSize(size)
 	return s or "0";
 end
 
-function login.formatStatus(_status)
+function loginMain.formatStatus(_status)
 	--LOG.std(nil, "debug", "_status", _status);
 	if(_status == 1) then
 		return L"仅本地";
 	elseif(_status == 2) then
 		return L"仅网络";
 	elseif(_status == 3) then
-		return L"本地网络一致";
+		return L"本地版本与远程数据源一致";
 	elseif(_status == 4) then
 		return L"网络更新";
 	elseif(_status == 5) then
@@ -290,7 +337,7 @@ function login.formatStatus(_status)
 	end
 end
 
-function login.formatDatetime(_datetime)
+function loginMain.formatDatetime(_datetime)
 	--LOG.std(nil,"debug","_datetime",_datetime);
 	
 	if(_datetime) then
@@ -318,12 +365,12 @@ function login.formatDatetime(_datetime)
 	return _datetime;
 end
 
-function login.GetWorldType()
+function loginMain.GetWorldType()
 	return InternetLoadWorld.type_ds;
 end
 
-function login.CreateNewWorld()
-	login.LoginPage:CloseWindow();
+function loginMain.CreateNewWorld()
+	loginMain.LoginPage:CloseWindow();
 
 	NPL.load("(gl)script/apps/Aries/Creator/Game/Login/CreateNewWorld.lua");
 	local CreateNewWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.CreateNewWorld");
@@ -331,7 +378,7 @@ function login.CreateNewWorld()
 	CreateNewWorld.ShowPage();
 end
 
-function login.GetCurWorldInfo(info_type,world_index)
+function loginMain.GetCurWorldInfo(info_type,world_index)
 	local index = tonumber(world_index);
 	local selected_world = InternetLoadWorld.cur_ds[world_index]
 	--local cur_world = InternetLoadWorld:GetCurrentWorld();
@@ -351,42 +398,42 @@ function login.GetCurWorldInfo(info_type,world_index)
 	end
 end
 
-function login.OnSwitchWorld(index)
+function loginMain.OnSwitchWorld(index)
 	InternetLoadWorld.OnSwitchWorld(index);
 
 	--local selected_world = InternetLoadWorld.cur_ds[index];
 end
 
-function login.GetNetSpeed()
+function loginMain.GetNetSpeed()
 	return "100ms";
 end
 
-function login.GetPeopleNumOnline()
+function loginMain.GetPeopleNumOnline()
 	return "????";
 end
 
-function login.InputSearchContent()
+function loginMain.InputSearchContent()
 	InternetLoadWorld.isSearching = true;
-	login.LoginPage:Refresh(0.1);
+	loginMain.LoginPage:Refresh(0.1);
 end
 
-function login.ClosePage()
+function loginMain.ClosePage()
 	if(SyncGUI.isStart) then
 		_guihelper.MessageBox(L"世界同步中，请等待同步完成后再返回");
 		return;
 	end
 
-	if(login.IsMCVersion()) then
+	if(loginMain.IsMCVersion()) then
 	    InternetLoadWorld.ReturnLastStep();
 	else
-	    login.LoginPage:CloseWindow();
+	    loginMain.LoginPage:CloseWindow();
 	end
 end
 
-function login.GetDefaultValueForAddress()
+function loginMain.GetDefaultValueForAddress()
 	local s = "";
 
-	if(login.IsMCVersion()) then
+	if(loginMain.IsMCVersion()) then
 		s = L"输入服务器地址";
 	else
 		s = L"输入服务器地址或者米米号";
@@ -395,7 +442,7 @@ function login.GetDefaultValueForAddress()
 	return s;
 end
 
-function login.LookPlayerInform()
+function loginMain.LookPlayerInform()
 	local cur_page = InternetLoadWorld.GetCurrentServerPage();
 	local nid = cur_page.player_nid;
 
@@ -404,7 +451,7 @@ function login.LookPlayerInform()
 	end
 end
 
-function login.IsBlockWorld()
+function loginMain.IsBlockWorld()
 	local cur_pageH = InternetLoadWorld.GetCurrentServerPage();
 
 	if(cur_page.player_nid and cur_page.player_nid ~= "") then
@@ -414,7 +461,7 @@ function login.IsBlockWorld()
 	end
 end
 
-function login.OpenBBS()
+function loginMain.OpenBBS()
 	NPL.load("(gl)script/apps/Aries/Creator/Game/game_options.lua");
 
 	local options = commonlib.gettable("MyCompany.Aries.Game.GameLogic.options");
@@ -423,19 +470,19 @@ function login.OpenBBS()
 	ParaGlobal.ShellExecute("open", url, "", "", 1);
 end
 
-function login.OnImportWorld()
+function loginMain.OnImportWorld()
 	NPL.load("(gl)script/apps/Aries/Creator/Game/Login/LocalLoadWorld.lua");
 
 	local LocalLoadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalLoadWorld");
 	ParaGlobal.ShellExecute("open", ParaIO.GetCurDirectory(0)..LocalLoadWorld.GetWorldFolder(), "", "", 1);
 end
 
-function login.GetDesForWorld()
+function loginMain.GetDesForWorld()
 	local  str = ""
 	return str;
 end
 
-function login.GetOnlineDes()
+function loginMain.GetOnlineDes()
 	local isOnline = System.User.isOnline;
 	local des = L"你的状态:";
 
@@ -448,16 +495,16 @@ function login.GetOnlineDes()
 	return des;
 end
 
-function login.QQLogin()
+function loginMain.QQLogin()
 	InternetLoadWorld.QQLogin();
 end
 
-function login.OnChangeType(index)
-	login.current_type = index;
+function loginMain.OnChangeType(index)
+	loginMain.current_type = index;
 	InternetLoadWorld.OnChangeType(index);
 end
 
-function login.BeHasWorldInSlot(is_empty_slot,is_buy_slot)
+function loginMain.BeHasWorldInSlot(is_empty_slot,is_buy_slot)
 	local value;
 
 	if(is_empty_slot or is_buy_slot) then
@@ -469,7 +516,7 @@ function login.BeHasWorldInSlot(is_empty_slot,is_buy_slot)
 	return value;
 end
 
-function login.OnPurchaseSaveSlot()
+function loginMain.OnPurchaseSaveSlot()
 	if(System.options.mc) then
 		_guihelper.MessageBox(L"此功能暂未开放");
 	else
@@ -482,12 +529,12 @@ function login.OnPurchaseSaveSlot()
 	end
 end
 
-function login.OnSaveToSlot(name)
+function loginMain.OnSaveToSlot(name)
 	local slot_id = tonumber(name);
 	InternetLoadWorld.OnSaveToSlot(slot_id);
 end
 
-function login.IsSelfOnlineWorld()
+function loginMain.IsSelfOnlineWorld()
 	local cur_svr_page = InternetLoadWorld.GetCurrentServerPage() or {};
 
 	if(InternetLoadWorld.type_index == 1 and cur_svr_page.name and cur_svr_page.name == "onlineworld") then
@@ -497,45 +544,45 @@ function login.IsSelfOnlineWorld()
 	end
 end
 
-function login.IsChangingName()
+function loginMain.IsChangingName()
 	return InternetLoadWorld.changedName;
 end
 
-function login.IsChangingQQ()
+function loginMain.IsChangingQQ()
 	return InternetLoadWorld.changedQQ;
 end
 
-function login.ChangeName()
+function loginMain.ChangeName()
 	InternetLoadWorld.changedName = true;
-	login.LoginPage:Refresh(0.1);
+	loginMain.LoginPage:Refresh(0.1);
 end
 
-function login.SaveName()
+function loginMain.SaveName()
 	InternetLoadWorld.ChangeNickName();
 	--changedName = false;
 	--Page:Refresh(0.1);
 end
 
-function login.ChangeQQ()
+function loginMain.ChangeQQ()
 	InternetLoadWorld.changedQQ = true;
-	login.LoginPage:Refresh(0.1);
+	loginMain.LoginPage:Refresh(0.1);
 end
 
-function login.SaveQQ()
+function loginMain.SaveQQ()
 	InternetLoadWorld.changedQQ = false;
-	login.LoginPage:Refresh(0.1);
+	loginMain.LoginPage:Refresh(0.1);
 end
 
-function login.GetUserNickName()
+function loginMain.GetUserNickName()
 	return System.User.NickName or L"匿名";
 end
 
-function login.CancelChangeName()
+function loginMain.CancelChangeName()
 	InternetLoadWorld.changedName = false;
-	login.LoginPage:Refresh(0.1);
+	loginMain.LoginPage:Refresh(0.1);
 end
 
-function login.findPWDFiles()
+function loginMain.findPWDFiles()
 	local result = commonlib.Files.Find({}, "/", 0, 500,"*.*");
 
 	for key,value in ipairs(result) do
@@ -548,84 +595,102 @@ function login.findPWDFiles()
 	return false;
 end
 
-function login.getRememberPassword()
-	local isRememberPwd = login.LoginPage:GetNode("rememberPassword");
-
+function loginMain.getRememberPassword()
 	-- LOG.std(nil,"debug","getRememberPassword",PWD);
 
-	if(login.findPWDFiles()) then
-	    local file = ParaIO.open("/PWD", "r");
-	    local fileContent = "";
+	local function setNodeValue(page)
+		if(loginMain.findPWDFiles()) then
+			local file = ParaIO.open("/PWD", "r");
+			local fileContent = "";
 
-	    if(file:IsValid()) then
-			fileContent = file:GetText(0, -1);
-			file:close();
+			if(file:IsValid()) then
+				fileContent = file:GetText(0, -1);
+				file:close();
+			end
+
+			local PWD = {};
+			for value in string.gmatch(fileContent,"[^|]+") do
+				PWD[#PWD+1] = value;
+			end
+
+			page:SetNodeValue("account", PWD[1]);
+			page:SetNodeValue("password",Encoding.PasswordDecodeWithMac(PWD[2]));
+
+			page:GetNode("keepwork"):SetAttribute("selected",nil);
+			page:GetNode("local"):SetAttribute("selected",nil);
+
+			if(PWD[3] == "keepwork") then
+				page:GetNode("keepwork"):SetAttribute("selected","selected");
+			elseif(PWD[3] == "keepworkDev") then
+				page:GetNode("keepworkDev"):SetAttribute("selected","selected");
+			elseif(PWD[3] == "local") then
+				page:GetNode("local"):SetAttribute("selected","selected");
+			end
+
+			page:GetNode("rememberPassword"):SetAttribute("checked","checked");
+		else
+			page:GetNode("rememberPassword"):SetAttribute("checked",nil);
 		end
+	end
 
-		local PWD = {};
-		for value in string.gmatch(fileContent,"[^|]+") do
-			PWD[#PWD+1] = value;
-		end
+	if(loginMain.LoginPage) then
+		setNodeValue(loginMain.LoginPage);
+	end
 
-		login.LoginPage:SetNodeValue("account", PWD[1]);
-		login.LoginPage:SetNodeValue("password",Encoding.PasswordDecodeWithMac(PWD[2]));
-
-		login.LoginPage:GetNode("keepwork"):SetAttribute("selected",nil);
-		login.LoginPage:GetNode("local"):SetAttribute("selected",nil);
-
-		if(PWD[3] == "keepwork") then
-			login.LoginPage:GetNode("keepwork"):SetAttribute("selected","selected");
-		elseif(PWD[3] == "keepworkDev") then
-			login.LoginPage:GetNode("keepworkDev"):SetAttribute("selected","selected");
-		elseif(PWD[3] == "local") then
-			login.LoginPage:GetNode("local"):SetAttribute("selected","selected");
-		end
-
-	    isRememberPwd:SetAttribute("checked","checked");
-	else
-	    isRememberPwd:SetAttribute("checked",nil);
+	if(loginMain.ModalPage) then
+		setNodeValue(loginMain.ModalPage);
 	end
 end
 
-function login.setSite()
-	local register    = login.LoginPage:GetNode("register");
-	local loginServer = login.LoginPage:GetValue("loginServer");
+function loginMain.setSite()
+	local register;
+	local loginServer;
+
+	if(loginMain.LoginPage) then
+		register    = loginMain.LoginPage:GetNode("register");
+		loginServer = loginMain.LoginPage:GetValue("loginServer");
+	end
+
+	if(loginMain.ModalPage) then
+		register    = loginMain.ModalPage:GetNode("register");
+		loginServer = loginMain.ModalPage:GetValue("loginServer");
+	end
 
 	if(loginServer == "keepwork") then
-	    login.site = "http://keepwork.com";
+	    loginMain.site = "http://keepwork.com";
 	elseif(loginServer == "keepworkDev") then
-	    login.site = "http://dev.keepwork.com";
+	    loginMain.site = "http://dev.keepwork.com";
 	elseif(loginServer == "keepworkTest") then
-		login.site = "http://test.keepwork.com";
+		loginMain.site = "http://test.keepwork.com";
 	elseif(loginServer == "local") then
-	    login.site = "http://127.0.0.1:8099";
+	    loginMain.site = "http://127.0.0.1:8099";
 	end
 
-	register:SetAttribute("href",login.site .. "/wiki/home");
+	register:SetAttribute("href",loginMain.site .. "/wiki/home");
 
-	login.LoginPage:Refresh();
+	loginMain.LoginPage:Refresh();
 end
 
-function login.logout()
-	login.changeLoginType(1);
-	login:RefreshCurrentServerList();
+function loginMain.logout()
+	loginMain.changeLoginType(1);
+	loginMain:RefreshCurrentServerList();
 end
 
-function login.RefreshCurrentServerList()
-	if(login.login_type == 1) then
-		login.getLocalWorldList(function()
-			login.changeRevision();
+function loginMain.RefreshCurrentServerList()
+	if(loginMain.login_type == 1) then
+		loginMain.getLocalWorldList(function()
+			loginMain.changeRevision();
 		end);
-	elseif(login.login_type == 3) then
-		login.getLocalWorldList(function()
-			login.changeRevision(function()
-				login.syncWorldsList();
+	elseif(loginMain.login_type == 3) then
+		loginMain.getLocalWorldList(function()
+			loginMain.changeRevision(function()
+				loginMain.syncWorldsList();
 			end);
 		end);
 	end
 end
 
-function login.getLocalWorldList(_callback)
+function loginMain.getLocalWorldList(_callback)
 	local ServerPage = InternetLoadWorld.GetCurrentServerPage();
 	
 	RemoteServerList:new():Init("local", "localworld", function(bSucceed, serverlist)
@@ -643,7 +708,7 @@ function login.getLocalWorldList(_callback)
 	end);
 end
 
-function login.changeRevision(_callback)
+function loginMain.changeRevision(_callback)
 	commonlib.TimerManager.SetTimeout(function()
 		local localWorlds = InternetLoadWorld.ServerPage_ds[1]['ds'];
 
@@ -688,7 +753,7 @@ function login.changeRevision(_callback)
 				end
 			end
 
-			login.LoginPage:Refresh();
+			loginMain.LoginPage:Refresh();
 
 			if(_callback) then
 				_callback();
@@ -696,12 +761,12 @@ function login.changeRevision(_callback)
 
 			return;
 		else
-			login.changeRevision();
+			loginMain.changeRevision();
 		end
 	end, 30);
 end
 
-function login.syncWorldsList(_callback)
+function loginMain.syncWorldsList(_callback)
 	local localWorlds = InternetLoadWorld.cur_ds;
 	LOG.std(nil,"debug","localWorlds-syncWorldsList",localWorlds);
 	--[[
@@ -713,7 +778,7 @@ function login.syncWorldsList(_callback)
 		5:本地更新
 	]]
 
-	login.getWorldsList(function(data,err)
+	loginMain.getWorldsList(function(data,err)
 		SyncMain.remoteWorldsList = data;
 		LOG.std(nil,"debug","remoteWorldsList-syncWorldsList",SyncMain.remoteWorldsList);
 	    -- 处理本地网络同时存在 本地不存在 网络存在 的世界 
@@ -722,8 +787,8 @@ function login.syncWorldsList(_callback)
 
 	        for keyLocal,valueLocal in ipairs(localWorlds) do
 	            if(valueDistance["worldsName"] == valueLocal["foldername"]) then
-	            	LOG.std(nil,"debug","foldername",valueLocal["foldername"]);
-	            	LOG.std(nil,"debug","worldsName",valueDistance["worldsName"]);
+	            	--LOG.std(nil,"debug","foldername",valueLocal["foldername"]);
+	            	--LOG.std(nil,"debug","worldsName",valueDistance["worldsName"]);
 
 					if(localWorlds[keyLocal].server) then
 						if(tonumber(valueLocal["revision"]) == tonumber(valueDistance["revision"])) then
@@ -771,7 +836,7 @@ function login.syncWorldsList(_callback)
 
 		--LOG.std(nil,"debug","localWorlds",localWorlds);
 
-	    login.LoginPage:Refresh();
+	    loginMain.LoginPage:Refresh();
 
 		if(_callback) then
 			_callback();
@@ -779,21 +844,20 @@ function login.syncWorldsList(_callback)
 	end);
 end
 
-function login.enterWorld(_index)
+function loginMain.enterWorld(_index)
 	local index = tonumber(_index);
 	SyncMain.selectedWorldInfor = InternetLoadWorld.cur_ds[_index];
 
 	LOG.std(nil,"debug","SyncMain.selectedWorldInfor",SyncMain.selectedWorldInfor);
 
 	if(SyncMain.selectedWorldInfor.status == 2) then
-		login.downloadWorld();
+		loginMain.downloadWorld();
 	else
 		InternetLoadWorld.EnterWorld(_index);
-		login.enterStatus = true;
 	end
 end
 
-function login.downloadWorld()
+function loginMain.downloadWorld()
 	SyncMain.foldername.utf8 = SyncMain.selectedWorldInfor.foldername;
 	SyncMain.foldername.default = Encoding.Utf8ToDefault(SyncMain.foldername.utf8);
 
@@ -820,19 +884,19 @@ function login.downloadWorld()
 		    SyncMain.selectedWorldInfor.author      = "";
 		    SyncMain.selectedWorldInfor.remotefile  = "local://worlds/DesignHouse/" .. SyncMain.foldername.default;
 
-		    login.LoginPage:Refresh();
+		    loginMain.LoginPage:Refresh();
 		end
 	end);
 end
 
-function login.syncNow(_index)
+function loginMain.syncNow(_index)
 	local index = tonumber(_index);
 	SyncMain.selectedWorldInfor = InternetLoadWorld.cur_ds[_index];
 
 	LOG.std(nil,"debug","SyncMain.selectedWorldInfor",SyncMain.selectedWorldInfor);
-	if(login.login_type == 3) then
+	if(loginMain.login_type == 3) then
 		if(SyncMain.selectedWorldInfor.status ~= nil and SyncMain.selectedWorldInfor.status ~= 2)then
-			if(not SyncMain.selectedWorldInfor.foldername)then
+			if(SyncMain.selectedWorldInfor.is_zip)then
 				_guihelper.MessageBox(L"不能同步ZIP文件");
 				return;
 			end
@@ -844,9 +908,9 @@ function login.syncNow(_index)
 			SyncMain.worldDir.default = "worlds/DesignHouse/" .. SyncMain.foldername.default .. "/";
 
 			LOG.std(nil,"debug","SyncMain.worldDir.default",SyncMain.worldDir.default);
-			SyncMain:compareRevision(true);
+			SyncMain.syncCompare(true);
 		else
-			login.downloadWorld();
+			loginMain.downloadWorld();
 			--_guihelper.MessageBox(L"本地无数据，请直接登陆");
 		end
 	else
@@ -854,8 +918,8 @@ function login.syncNow(_index)
 	end
 end
 
-function login.deleteWorld(_index)
-	--login.LoginPage:CloseWindow();
+function loginMain.deleteWorld(_index)
+	--loginMain.LoginPage:CloseWindow();
 
 	local index = tonumber(_index);
 	SyncMain.selectedWorldInfor = InternetLoadWorld.cur_ds[_index];
@@ -870,13 +934,13 @@ function login.deleteWorld(_index)
 	SyncMain.deleteWorld();
 end
 
-function login.sharePersonPage()
-	local url = login.personPageUrl;--login.site .. "/wiki/mod/worldshare/share/#?type=person&userid=" .. login.userid;
+function loginMain.sharePersonPage()
+	local url = loginMain.personPageUrl;--loginMain.site .. "/wiki/mod/worldshare/share/#?type=person&userid=" .. login.userid;
 	ParaGlobal.ShellExecute("open", url, "", "", 1);
 end
 
-function login.LoginActionApi(_account,_password,_callback)
-	local url = login.site .. "/api/wiki/models/user/login";
+function loginMain.LoginActionApi(_account,_password,_callback)
+	local url = loginMain.site .. "/api/wiki/models/user/login";
 	HttpRequest:GetUrl({
 		url  = url,
 		json = true,
@@ -887,20 +951,20 @@ function login.LoginActionApi(_account,_password,_callback)
 	},_callback);
 end
 
-function login.getUserInfo(_callback)
-	System.os.GetUrl({url = login.site.."/api/wiki/models/user/",json = true,headers = {Authorization = "Bearer ".. login.token}},_callback);
+function loginMain.getUserInfo(_callback)
+	System.os.GetUrl({url = loginMain.site.."/api/wiki/models/user/",json = true,headers = {Authorization = "Bearer ".. loginMain.token}},_callback);
 end
 
-function login.changeLoginType(_type)
-	login.login_type = _type;
-	login.LoginPage:Refresh();
+function loginMain.changeLoginType(_type)
+	loginMain.login_type = _type;
+	loginMain.LoginPage:Refresh();
 end
 
-function login.getWorldsList(_callback) --_worldsName,
+function loginMain.getWorldsList(_callback) --_worldsName,
 	HttpRequest:GetUrl({
-		url  = login.site.."/api/mod/worldshare/models/worlds",
+		url  = loginMain.site.."/api/mod/worldshare/models/worlds",
 		json = true,
-		headers = {Authorization = "Bearer " .. login.token},
+		headers = {Authorization = "Bearer " .. loginMain.token},
 		form = {amount = 100},
 	},_callback);
 end

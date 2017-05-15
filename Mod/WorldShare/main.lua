@@ -11,7 +11,7 @@ local WorldShare = commonlib.gettable("Mod.WorldShare");
 ]]
 
 NPL.load("(gl)Mod/WorldShare/sync/SyncMain.lua");
-NPL.load("(gl)Mod/WorldShare/login.lua");
+NPL.load("(gl)Mod/WorldShare/login/LoginMain.lua");
 NPL.load("(gl)script/ide/Encoding.lua");
 NPL.load("(gl)script/ide/Files.lua");
 
@@ -39,7 +39,7 @@ end
 function WorldShare:init()
 	GameLogic.GetFilters():add_filter("InternetLoadWorld.ShowPage",function (bEnable, bShow)
 		System.App.Commands.Call("File.MCMLWindowFrame", {
-			url = "Mod/WorldShare/login.html", 
+			url = "Mod/WorldShare/login/LoginMain.html", 
 			name = "LoadMainWorld", 
 			isShowTitleBar = false,
 			DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
