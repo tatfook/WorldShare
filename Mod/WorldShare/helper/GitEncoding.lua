@@ -18,7 +18,7 @@ local Encoding    = commonlib.gettable("System.Encoding.basexx");
 local GitEncoding = commonlib.gettable("Mod.WorldShare.helper.GitEncoding");
 
 -- =转成-equal  +转成-plus  /转成-slash
-function GitEncoding.base64(text)
+function GitEncoding.base32(text)
 	if(text) then
 		local notLetter = string.find(text,"%A%A");
 
@@ -29,7 +29,7 @@ function GitEncoding.base64(text)
 			text = text:gsub("[%+]" , "-plus");
 			text = text:gsub("[/]"  , "-slash");
 
-			text = "world_base64_" .. text;
+			text = "world_base32_" .. text;
 		else
 			text = "world_" .. text;
 		end
@@ -42,12 +42,12 @@ function GitEncoding.base64(text)
 	end
 end
 
-function GitEncoding.unbase64(text)
+function GitEncoding.unbase32(text)
 	if(text) then
-		local notLetter = string.find(text,"world_base64_");
+		local notLetter = string.find(text,"world_base32_");
 
 		if(notLetter) then
-			text = text:gsub("world_base64_","");
+			text = text:gsub("world_base32_","");
 
 			text = text:gsub("[-equal]" , "=");
 			text = text:gsub("[-plus]"  , "+");
