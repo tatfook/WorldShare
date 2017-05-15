@@ -8,11 +8,24 @@
     <pe:mcml>
         <script type="text/npl" refresh="false" src="SyncGUI.lua">
             <![CDATA[
-                SyncGUI = commonlib.gettable("Mod.WorldShare.sync.SyncGUI");
+                SyncGUI    = commonlib.gettable("Mod.WorldShare.sync.SyncGUI");
+                ShareWorld = commonlib.gettable("Mod.WorldShare.sync.ShareWorld");
 
                 SyncGUI:OnInit();
              ]]>
         </script>
+        <style type="text/mcss">
+            {
+                 common_button = {
+                    height = 30,
+                    ["margin-left"] = 5,
+                    spacing = 20,
+                    ["font-weight"] = "bold",
+                    ["font-size"]   = 13,
+                    },
+                }
+            }
+        </style>
         <div style="width:500px;height:270px;">
             <aries:window mode="thin" width="500" height="270" style="float:left;" title='<%=L"与数据源同步" %>'>
                 <div style="padding:20px;font-size:18px;base-font-size:18px;color:#ffffff;margin-top:20px;">
@@ -25,14 +38,16 @@
                         </div>
                     </pe:if>
                     <pe:if condition="<%=SyncGUI.total ~= 0 and SyncGUI.current == SyncGUI.total %>">
-                        <div style="margin-right:20px">
+                        <div style="margin-right:20px;font-size:13px;base-font-size:13px;">
                             恭喜！世界已经同步完毕！
                             <br />
                             你可以通过下面页面分享给他人
                             <br />
-                            http:// .... 
-                            <input type="button" value="复制" />
-                            <input type="button" value="打开"/>
+                            <div>
+                                <%= ShareWorld.getWorldUrl()%>
+                                <input type="button" class="common_button mc_light_grey_button_with_fillet" value="复制" onclick="SyncGUI.copy()"/>
+                                <input type="button" class="common_button mc_light_grey_button_with_fillet" value="打开" onclick="ShareWorld.openWorldWebPage()" />
+                            </div>
                         </div>
                     </pe:if>
 

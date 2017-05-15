@@ -253,7 +253,7 @@ function loginMain.LoginAction(_page, _callback)
 							siteParams.username = loginMain.username;
 
 							HttpRequest:GetUrl({
-								url  = loginMain.site.."/api/wiki/models/website/new",
+								url  = loginMain.site .. "/api/wiki/models/website/new",
 								json = true,
 								headers = {Authorization = "Bearer " .. loginMain.token},
 								form = siteParams,
@@ -746,7 +746,7 @@ function loginMain.changeRevision(_callback)
 					zipFoldername.default = zipWorldDir.default:gsub("worlds/DesignHouse/","");
 					zipFoldername.utf8    = Encoding.Utf8ToDefault(zipFoldername.default);
 
-					LOG.std(nil,"debug","zipWorldDir.default",zipWorldDir.default);
+					--LOG.std(nil,"debug","zipWorldDir.default",zipWorldDir.default);
 
 					value.revision = LocalService:GetZipRevision(zipWorldDir.default);
 					value.size = LocalService:GetZipWorldSize(zipWorldDir.default);
@@ -960,11 +960,15 @@ function loginMain.changeLoginType(_type)
 	loginMain.LoginPage:Refresh();
 end
 
-function loginMain.getWorldsList(_callback) --_worldsName,
-	HttpRequest:GetUrl({
-		url  = loginMain.site.."/api/mod/worldshare/models/worlds",
+function loginMain.getWorldsList(_callback)
+	local params = {
+		url  = loginMain.site .. "/api/mod/worldshare/models/worlds",
 		json = true,
 		headers = {Authorization = "Bearer " .. loginMain.token},
 		form = {amount = 100},
-	},_callback);
+	};
+
+	--echo(params.url);
+
+	HttpRequest:GetUrl(params,_callback);
 end

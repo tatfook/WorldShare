@@ -342,16 +342,17 @@ function LocalService:GetZipRevision(_zipWorldDir)
 
 	Files.Find(output, "", 0, 500, ":revision.xml", _zipWorldDir);
 
-	LOG.std(nil,"debug","output[1].filename",zipParentDir .. output[1].filename);
+	--LOG.std(nil,"debug","output[1].filename",zipParentDir .. output[1].filename);
 	local file = ParaIO.open(zipParentDir .. output[1].filename, "r");
 	local binData;
 
 	if(file:IsValid()) then
 		binData = file:GetText(0, -1);
-		LOG.std(nil,"debug","binData",binData);
+		--LOG.std(nil,"debug","binData",binData);
 		file:close();
 	end
 	
+	ParaAsset.CloseArchive(_zipWorldDir);
 	return binData;
 end
 

@@ -11,8 +11,9 @@ local SyncGUI = commonlib.gettable("Mod.WorldShare.sync.SyncGUI");
 ]]
 NPL.load("(gl)Mod/WorldShare/sync/SyncMain.lua");
 
-local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
-local SyncGUI  = commonlib.inherit(nil,commonlib.gettable("Mod.WorldShare.sync.SyncGUI"));
+local SyncMain   = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
+local SyncGUI    = commonlib.inherit(nil,commonlib.gettable("Mod.WorldShare.sync.SyncGUI"));
+local ShareWorld = commonlib.gettable("Mod.WorldShare.sync.ShareWorld");
 
 local SyncPage;
 
@@ -97,5 +98,9 @@ function SyncGUI:updateDataBar(_current, _total, _files)
 	SyncGUI.progressbar:SetAttribute("Value",SyncGUI.current);
 
 	SyncPage:Refresh(0.01);
+end
+
+function SyncGUI.copy()
+	ParaMisc.CopyTextToClipboard(ShareWorld.getWorldUrl(true));
 end
 

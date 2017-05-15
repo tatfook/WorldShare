@@ -91,7 +91,7 @@ function FileDownloader:Start(src, dest, callbackFunc, cachePolicy)
 
 	local BroadcastHelper = commonlib.gettable("CommonCtrl.BroadcastHelper");
 
-	echo(BroadcastHelper,true);
+	--echo(BroadcastHelper,true);
 
 	local label_id = src or "userworlddownload";
 	if(self.text ~= "official_texture_package") then

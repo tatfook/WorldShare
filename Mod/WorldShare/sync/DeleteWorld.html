@@ -19,7 +19,12 @@
             <aries:window mode="thin" width="500" height="270" style="float:left;" title='<%=L"删除世界" %>' onclose="SyncMain.closeDeletePage">
             	<div style="font-size:18px;base-font-size:18px;color:#ffffff;padding:30px;">
                     <div style="margin-top:30px;">
-                        你确定要删除：<%= SyncMain.selectedWorldInfor.foldername %>世界么？请选择
+                        <pe:if condition="<%= selectedWorldInfor.is_zip %>">
+                            你确定要删除：<%= selectedWorldInfor.text .. '.zip' %>世界么？请选择
+                        </pe:if>
+                        <pe:if condition="<%= not selectedWorldInfor.is_zip %>">
+                            你确定要删除：<%= selectedWorldInfor.foldername %>世界么？请选择
+                        </pe:if>
                     </div>
                     <br />
                     <div style="margin-top:30px;">

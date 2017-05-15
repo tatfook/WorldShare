@@ -1326,77 +1326,69 @@ function SyncMain.deleteWorld()
 end
 
 function SyncMain.deleteWorldLocal(_callback)
-	local world = InternetLoadWorld:GetCurrentWorld();
-	
-	if(not world) then
+	--local world      = InternetLoadWorld:GetCurrentWorld();
+	local foldername = SyncMain.selectedWorldInfor.foldername;
+
+	--LOG.std(nil,"debug","world",world);
+	--LOG.std(nil,"debug","SyncMain.selectedWorldInfor",SyncMain.selectedWorldInfor);
+
+	if(not SyncMain.selectedWorldInfor) then
 		_guihelper.MessageBox(L"请先选择世界");
 		return;
 	end
 
-	_guihelper.MessageBox(format(L"确定删除本地世界:%s?", world.text or ""), function(res)
-		if(res and res == _guihelper.DialogResult.Yes) then
-			if(world.RemoveLocalFile and world:RemoveLocalFile()) then
-				InternetLoadWorld.RefreshAll();
-			elseif(world.remotefile) then
-				local targetDir = world.remotefile:gsub("^local://", ""); -- local world, delete all files in folder and the folder itself.
+	local function deleteNow()
+		if(SyncMain.selectedWorldInfor.RemoveLocalFile and SyncMain.selectedWorldInfor:RemoveLocalFile()) then
+			InternetLoadWorld.RefreshAll();
+		elseif(SyncMain.selectedWorldInfor.remotefile) then
+			local targetDir = SyncMain.selectedWorldInfor.remotefile:gsub("^local://", ""); -- local world, delete all files in folder and the folder itself.
 
+			LOG.std(nil,"debug","SyncMain.deleteWorldLocal",targetDir);
+			
+			if(SyncMain.selectedWorldInfor.is_zip) then
+
+				if(ParaIO.DeleteFile(targetDir)) then
+					if(type(_callback) == 'function') then
+						_callback(foldername);
+					end
+				else
+					_guihelper.MessageBox(L"无法删除可能您没有足够的权限"); 
+				end
+			else
 				if(GameLogic.RemoveWorldFileWatcher) then
 					GameLogic.RemoveWorldFileWatcher(); -- file watcher may make folder deletion of current world directory not working.
 				end
 
 				if(commonlib.Files.DeleteFolder(targetDir)) then  
-					local foldername = SyncMain.selectedWorldInfor.foldername;
-					SyncMain.handleCur_ds = {};
-
-					local hasRemote = false;
-					for key,value in ipairs(InternetLoadWorld.cur_ds) do
-						if(value.foldername == foldername and value.status == 3 or value.status == 4 or value.status == 5) then
-							value.status = 2;
-							hasRemote = true;
-							break;
-						end
-
-						if(value.foldername ~= foldername) then
-							SyncMain.handleCur_ds[#SyncMain.handleCur_ds + 1] = value;
-						end
-					end
-
-					if (not hasRemote) then
-						InternetLoadWorld.cur_ds = SyncMain.handleCur_ds;
-					end
-
 					if(type(_callback) == 'function') then
 						_callback(foldername);
-					else
-						SyncMain.DeletePage:CloseWindow();
-
-						local localWorlds = InternetLoadWorld.cur_ds;
-						local newLocalWorlds = {};
-
-						for key,value in ipairs(localWorlds) do
-							if(value.foldername ~= foldername) then
-								newLocalWorlds[#newLocalWorlds + 1] = value;
-							end
-						end
-
-						InternetLoadWorld.cur_ds = newLocalWorlds;
-						LOG.std(nil,"debug","localWorlds-deleteWorldLocal",localWorlds);
-
-						if(loginMain.login_type == 3) then
-							loginMain.syncWorldsList();
-						end
-
-	                    if(not WorldCommon.GetWorldInfo()) then
-	                        MainLogin.state.IsLoadMainWorldRequested = nil;
-	                        MainLogin:next_step();
-	                    end
 					end
 				else
 					_guihelper.MessageBox(L"无法删除可能您没有足够的权限"); 
 				end
 			end
+
+			SyncMain.DeletePage:CloseWindow();
+			loginMain.RefreshCurrentServerList();
+
+			if(not WorldCommon.GetWorldInfo()) then
+				MainLogin.state.IsLoadMainWorldRequested = nil;
+				MainLogin:next_step();
+			end
 		end
-	end, _guihelper.MessageBoxButtons.YesNo);
+	end
+
+	if(SyncMain.selectedWorldInfor.status == nil or SyncMain.selectedWorldInfor.status == 1) then
+		deleteNow();
+	else
+		_guihelper.MessageBox(format(L"确定删除本地世界:%s?", SyncMain.selectedWorldInfor.text or ""), function(res)
+			if(res and res == _guihelper.DialogResult.Yes) then
+				deleteNow();
+			end
+		end, _guihelper.MessageBoxButtons.YesNo);
+	end
+
+	
 end
 
 function SyncMain.deleteWorldRemote()
