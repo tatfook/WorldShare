@@ -704,7 +704,7 @@ function SyncMain:syncToDataSource()
 
 									SyncMain:genWorldMD(params, function()
 										HttpRequest:GetUrl(requestParams,function(worldList, err)
-											LOG.std(nil,"debug","worldList-data",worldList);
+											LOG.std(nil,"debug","genWorldIndex-worldList-data",worldList);
 											SyncMain:genIndexMD(worldList);
 											loginMain.RefreshCurrentServerList();
 										end);
@@ -1038,7 +1038,7 @@ end
 
 function SyncMain:genIndexMD(_worldList, _callback)
 	local function gen(keepworkId)
-		SyncMain:getFileShaListService("keepwork_datasource", function(data, err)
+		SyncMain:getFileShaListService(loginMain.keepWorkDataSource, function(data, err)
 			LOG.std(nil,"debug","genIndexMD",data);
 
 			local hasIndex      = false;
@@ -1057,7 +1057,7 @@ function SyncMain:genIndexMD(_worldList, _callback)
 				LOG.std(nil,"debug","hasIndexO",hasIndex);
 				if(hasIndex) then
 					LOG.std(nil,"debug","hasIndex",hasIndex);
-					SyncMain:getDataSourceContent("keepwork_datasource", indexPath, function(data, err)
+					SyncMain:getDataSourceContent(loginMain.keepWorkDataSource, indexPath, function(data, err)
 						--LOG.std(nil,"debug","getDataSourceContent",data);
 						--LOG.std(nil,"debug","getDataSourceContent",err);
 
@@ -1080,7 +1080,7 @@ function SyncMain:genIndexMD(_worldList, _callback)
 						LOG.std(nil,"debug","SyncMain.indexFile",SyncMain.indexFile);
 
 						SyncMain:updateService(
-							"keepwork_datasource",
+							loginMain.keepWorkDataSource,
 							indexPath,
 							SyncMain.indexFile,
 							"",
@@ -1111,7 +1111,7 @@ function SyncMain:genIndexMD(_worldList, _callback)
 					LOG.std(nil,"debug","SyncMain.indexFile",SyncMain.indexFile);
 
 					SyncMain:uploadService(
-						"keepwork_datasource",
+						loginMain.keepWorkDataSource,
 						indexPath,
 						SyncMain.indexFile,
 						function(data, err) 
@@ -1131,7 +1131,7 @@ function SyncMain:genIndexMD(_worldList, _callback)
 	if(loginMain.dataSourceType == "github") then
 		gen();
 	elseif(loginMain.dataSourceType == "gitlab") then
-		GitlabService:getProjectIdByName("keepwork_datasource",function(keepworkId)
+		GitlabService:getProjectIdByName(loginMain.keepWorkDataSource,function(keepworkId)
 			gen(keepworkId);
 		end);
 	end

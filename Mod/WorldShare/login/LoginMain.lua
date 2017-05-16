@@ -232,6 +232,18 @@ function loginMain.LoginAction(_page, _callback)
 						end);
 
 						loginMain.closeLoginInfor();
+
+						local requestParams = {
+							url  = loginMain.site .. "/api/mod/worldshare/models/worlds",
+							json = true,
+							headers = {Authorization = "Bearer "..loginMain.token},
+							form = {amount = 10000},
+						}
+
+						HttpRequest:GetUrl(requestParams,function(worldList, err)
+							--LOG.std(nil,"debug","genWorldIndex-worldList-data",worldList);
+							SyncMain:genIndexMD(_worldList)
+						end);
 					else
 						--local clientLogin = Page:GetNode("clientLogin");
 						--loginMain.changeLoginType(2);
