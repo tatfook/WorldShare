@@ -169,7 +169,7 @@ function SyncMain:compareRevision(_LoginStatus, _callback)
 		SyncMain.localFiles = LocalService:LoadFiles(SyncMain.worldDir.default,"",nil,1000,nil);
 
 		--LOG.std(nil,"debug","self.foldername",self.foldername);
-		--LOG.std(nil,"debug","SyncMain.localFiles",SyncMain.localFiles);
+		LOG.std(nil,"debug","SyncMain.localFiles",SyncMain.localFiles);
 
 		local hasRevision = false;
 		for key,value in ipairs(SyncMain.localFiles) do
@@ -1010,7 +1010,9 @@ function SyncMain:checkWorldSize()
 		filesTotal = filesTotal + tonumber(value.filesize);
 	end
 	
-	local maxSize = 15 * 1024 * 1024 * 1024;
+	local maxSize = 15 * 1024 * 1024;
+
+	LOG.std(nil,"debug","worldSize",filesTotal);
 
 	if(filesTotal > maxSize) then
 		SyncMain:showBeyondVolume();
@@ -1093,7 +1095,7 @@ function SyncMain:genIndexMD(_worldList, _callback)
 							end,
 							keepworkId
 						);
-					end, nil, keepworkId)
+					end, keepworkId)
 				else
 					local worldList;
 
@@ -1132,6 +1134,8 @@ function SyncMain:genIndexMD(_worldList, _callback)
 		gen();
 	elseif(loginMain.dataSourceType == "gitlab") then
 		GitlabService:getProjectIdByName(loginMain.keepWorkDataSource,function(keepworkId)
+			echo("keepworkId");
+			echo(keepworkId);
 			gen(keepworkId);
 		end);
 	end
@@ -1532,7 +1536,7 @@ function SyncMain:getDataSourceContent(_foldername, _path, _callback, _projectId
 	end
 end
 
-function SyncMain:uploadService(_foldername,_filename,_file_content_t,_callback, _projectId)
+function SyncMain:uploadService(_foldername, _filename, _file_content_t, _callback, _projectId)
 	if(loginMain.dataSourceType == "github") then
 		GithubService:upload(_foldername,_filename,_file_content_t,_callback);
 	elseif(loginMain.dataSourceType == "gitlab") then

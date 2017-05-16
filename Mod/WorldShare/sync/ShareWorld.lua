@@ -16,9 +16,10 @@ NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/ShareWorldPage.lua");
 NPL.load("(gl)Mod/WorldShare/login/loginMain.lua");
 
 local ShareWorldPage = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.Areas.ShareWorldPage");
-local ShareWorld     = commonlib.inherit(nil,commonlib.gettable("Mod.WorldShare.sync.ShareWorld"));
 local SyncMain       = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
 local loginMain		 = commonlib.gettable("Mod.WorldShare.login.loginMain");
+
+local ShareWorld     = commonlib.inherit(nil,commonlib.gettable("Mod.WorldShare.sync.ShareWorld"));
 
 ShareWorld.SharePage = nil
 

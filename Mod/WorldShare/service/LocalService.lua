@@ -56,7 +56,7 @@ function LocalService:filesFind(_result)
 					item.filename = EncodingC.DefaultToUtf8(string.gsub(item.file_path, self.worldDir..'/', '', 1));
 					item.id = item.filename;
 					item.file_content_t = self:getFileContent(item.file_path);
-					item.file_content = EncodingS.base64(item.file_content_t);
+					--item.file_content = EncodingS.base64(item.file_content_t);
 					item.sha1 = EncodingS.sha1("blob " .. item.filesize .. "\0" .. item.file_content_t, "hex");
 					item.needChange = true;
 

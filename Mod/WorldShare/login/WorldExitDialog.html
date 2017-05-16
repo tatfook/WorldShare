@@ -9,7 +9,8 @@
 <script type="text/npl" src="WorldExitDialog.lua" refresh="false">
 <![CDATA[
 local WorldExitDialog = commonlib.gettable("Mod.WorldShare.login.WorldExitDialog");
-local SyncMain  = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
+local SyncMain        = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
+
 WorldExitDialog:OnInit()
 
 function GetCurWorldName()
@@ -42,13 +43,17 @@ end
 function OnOpenWorldDir()
     GameLogic.RunCommand("/menu file.openworlddir");
 end
+
+function snapshot()
+    WorldExitDialog.snapshot();
+end
 ]]>
 </script>
 <aries:window mode="thin" width="500" height="320" title='<%=L"退出世界" %>' onclose="OnClickCancel">
     <div style="padding:20px;color:#ffffff">
         <div>
             <div style="float:left">
-                <img name="ShareWorldImage" zorder="1" width="240" height="160" />
+                <img name="ShareWorldImage" zorder="1" width="240" height="160" onclick="snapshot()" tooltip="重新截图"/>
             </div>
             <div style="float:right;padding-left:28px;">
                 <div style="" tooltip='<%=L"点击打开所在目录"%>' onclick="OnOpenWorldDir">
@@ -59,6 +64,7 @@ end
                     <input type="button" tooltip='<%=L"点击备份并查看历史版本"%>' value='<%=format(L"版本:%d", GameLogic.options:GetRevision())%>' style="font-size:11px;height:20px;color:#ffffff;" class="mc_blue_button_with_fillet" onclick="OnClickRevision" />
                 </div>
                 <input type="button" class="button" style="margin-top:45px;min-width:100px;height:25px;" value='<%=L"分享世界" %>' onclick="OnClickShareWorld()" />
+                <input type="button" class="button" style="margin-top:5px;min-width:100px;height:25px;" value='<%=L"重新截图" %>' onclick="snapshot()" />
             </div>
         </div>
         <div style="margin-top:15px;base-font-size:15px;font-size:15px;">

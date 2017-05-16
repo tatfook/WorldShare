@@ -228,7 +228,6 @@ function loginMain.LoginAction(_page, _callback)
 								loginMain.closeModalPage();
 								_callback();
 							end
-						
 						end);
 
 						loginMain.closeLoginInfor();

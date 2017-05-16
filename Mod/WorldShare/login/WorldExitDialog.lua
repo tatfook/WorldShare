@@ -10,7 +10,10 @@ local WorldExitDialog = commonlib.gettable("Mod.WorldShare.login.WorldExitDialog
 WorldExitDialog.ShowPage();
 ------------------------------------------------------------
 ]]
+NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/ShareWorldPage.lua");
+
 local WorldExitDialog = commonlib.gettable("Mod.WorldShare.login.WorldExitDialog");
+local ShareWorldPage  = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.Areas.ShareWorldPage");
 
 -- @param callback: function(res) end. 
 function WorldExitDialog.ShowPage(callback)
@@ -49,5 +52,20 @@ function WorldExitDialog.OnDialogResult(res)
 	end
 	if(WorldExitDialog.callback) then
 		WorldExitDialog.callback(res);
+	end
+end
+
+function WorldExitDialog.snapshot()
+	ShareWorldPage.TakeSharePageImage();
+	WorldExitDialog.UpdateImage(true)
+end
+
+function WorldExitDialog.UpdateImage(bRefreshAsset)
+	if(WorldExitDialog.page) then
+		local filepath = ShareWorldPage.GetPreviewImagePath();
+		WorldExitDialog.page:SetUIValue("ShareWorldImage", filepath);
+		if(bRefreshAsset) then
+			ParaAsset.LoadTexture("",filepath,1):UnloadAsset();
+		end
 	end
 end
