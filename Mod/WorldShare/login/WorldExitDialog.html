@@ -61,10 +61,13 @@ end
                     <input type="button" value='...' style="margin-left:3px;font-size:11px;height:20px;color:#ffffff;" class="mc_button_blue" />
                 </div>
                 <div style="margin-top:5px;">
-                    <input type="button" tooltip='<%=L"点击备份并查看历史版本"%>' value='<%=format(L"版本:%d", GameLogic.options:GetRevision())%>' style="font-size:11px;height:20px;color:#ffffff;" class="mc_blue_button_with_fillet" onclick="OnClickRevision" />
+                    <input type="button" style="font-size:11px;height:20px;color:#ffffff;" class="mc_blue_button_with_fillet" value='<%=L"重新截图" %>' onclick="snapshot()" />
+                    <input type="button" tooltip='<%=L"点击备份并查看历史版本"%>' value='<%=format(L"版本:%d", GameLogic.options:GetRevision())%>' style="margin-left:5px;font-size:11px;height:20px;color:#ffffff;" class="mc_blue_button_with_fillet" onclick="OnClickRevision" />
                 </div>
+                
+                
                 <input type="button" class="button" style="margin-top:45px;min-width:100px;height:25px;" value='<%=L"分享世界" %>' onclick="OnClickShareWorld()" />
-                <input type="button" class="button" style="margin-top:5px;min-width:100px;height:25px;" value='<%=L"重新截图" %>' onclick="snapshot()" />
+                
             </div>
         </div>
         <div style="margin-top:15px;base-font-size:15px;font-size:15px;">
