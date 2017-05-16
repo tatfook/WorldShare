@@ -341,7 +341,12 @@ function GitlabService:deleteFile(_path, _sha, _callback, _projectId)
 	GitlabService:apiDelete(url, params, function(data, err)
 		LOG.std(nil,"debug","deleteFile",data);
 		LOG.std(nil,"debug","deleteFilerr",err);
-		_callback(data, err);
+
+		if(err == 204) then
+			_callback(true);
+		else
+			_callback(false);
+		end
 	end);
 end
 

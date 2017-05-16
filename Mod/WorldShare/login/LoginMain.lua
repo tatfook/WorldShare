@@ -764,7 +764,7 @@ function loginMain.changeRevision(_callback)
 		local localWorlds = InternetLoadWorld.ServerPage_ds[1]['ds'];
 
 		if(localWorlds) then
-			LOG.std(nil,"debug","localWorlds",localWorlds);
+			--LOG.std(nil,"debug","localWorlds",localWorlds);
 
 			for key,value in ipairs(localWorlds) do
 				if(not value.is_zip) then
