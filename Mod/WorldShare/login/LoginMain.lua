@@ -84,6 +84,9 @@ function loginMain.setLoginPage()
 end
 
 function loginMain.setInforPage()
+	if(loginMain.InforPage) then
+		loginMain.InforPage:CloseWindow();
+	end
 	loginMain.InforPage = document:GetPageCtrl();
 end
 
@@ -91,10 +94,13 @@ function loginMain.setModalPage()
 	loginMain.ModalPage = document:GetPageCtrl();
 end
 
-function loginMain.closeLoginInfor()
-	commonlib.TimerManager.SetTimeout(function()
-		loginMain.InforPage:CloseWindow();
-	end,1000);
+function loginMain.closeLoginInfo(delayTimeMs)
+	commonlib.TimerManager.SetTimeout(function()  
+		if(loginMain.InforPage) then
+			loginMain.InforPage:CloseWindow();
+			loginMain.InforPage = nil;
+		end
+	end, delayTimeMs or 500)
 end
 
 function loginMain.closeModalPage()
@@ -112,7 +118,7 @@ function loginMain.showLoginInfo()
 		isShowTitleBar = false,
 		DestroyOnClose = true,
 		style = CommonCtrl.WindowFrame.ContainerStyle,
-		allowDrag = true,
+		allowDrag = false,
 		isTopLevel = true,
 		zorder = 1,
 		directPosition = true,
@@ -223,7 +229,7 @@ function loginMain.LoginAction(_page, _callback)
 						--myWorlds:SetAttribute("href", loginMain.personPageUrl);--loginMain.site.."/wiki/mod/worldshare/person/"
 						
 						loginMain.changeLoginType(3);
-						loginMain.closeLoginInfor();
+						loginMain.closeLoginInfo();
 						loginMain.syncWorldsList();
 
 						if(loginMain.ModalPage) then
@@ -248,7 +254,7 @@ function loginMain.LoginAction(_page, _callback)
 					else
 						--local clientLogin = Page:GetNode("clientLogin");
 						--loginMain.changeLoginType(2);
-						loginMain.closeLoginInfor();
+						loginMain.closeLoginInfo();
 						_guihelper.MessageBox(L"数据源不存在，请联系管理员");
 						return;
 					end
@@ -293,11 +299,11 @@ function loginMain.LoginAction(_page, _callback)
 						end
 					end);
 				else
-					loginMain.closeLoginInfor();
+					loginMain.closeLoginInfo();
 					_guihelper.MessageBox(L"用户名或者密码错误");
 				end
 			else
-				loginMain.closeLoginInfor();
+				loginMain.closeLoginInfo();
 				_guihelper.MessageBox(L"服务器连接失败");
 			end
 		end
@@ -806,6 +812,13 @@ function loginMain.autoLoginAction()
 	end
 end
 
+
+function loginMain.IsSignedIn()
+	-- TODO: for big, what is the right way to do it?
+	return loginMain.token ~= nil;
+end
+
+-- TODO: for big, we should loginMain.token = nil ?
 function loginMain.logout()
 	loginMain.changeLoginType(1);
 	loginMain:RefreshCurrentServerList();

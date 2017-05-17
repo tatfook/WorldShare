@@ -263,7 +263,7 @@
                                 </div>
                             </div>
                         </pe:if>
-                        <div style="margin-top:20px">
+                        <div style="margin-top:30px">
                             <input type="button" value='<%=L"导入/导出..." %>'  onclick="loginMain.OnImportWorld()" class="common_button mc_light_grey_button_with_fillet" />
                             <input type="button" value='<%=L"刷新" %>' style="margin-left:15px;" onclick="loginMain.RefreshCurrentServerList()" class="common_button mc_light_grey_button_with_fillet" />
                         </div>
@@ -273,8 +273,8 @@
                     <!--worlds-->
                     <div class="world_area">
                         <div style="height: 25px;margin-bottom:25px;">
-                            <input type="text" name="content" EmptyText='<%=loginMain.GetDefaultValueForAddress() %>' rows="1" CaretColor="#FFFFFFFF" class="add_server_text_field" />
-                            <input type="button" value='<%=L"添加" %>' class="add_server_button mc_light_grey_button_with_fillet" onclick="InternetLoadWorld.OnAddSearchPage"/>
+                            <input type="text" name="content" spacing="4" EmptyText='<%=loginMain.GetDefaultValueForAddress() %>' rows="1" CaretColor="#FFFFFFFF" class="add_server_text_field" />
+                            <input type="button" value='<%=L"打开" %>' class="add_server_button mc_light_grey_button_with_fillet" onclick="InternetLoadWorld.OnAddSearchPage"/>
                         </div>
                         <div style="height: 308px;width:315px;">
                             <pe:gridview RememberScrollPos="true" AllowPaging="false" VerticalScrollBarStep="30" DefaultNodeHeight="80" ItemsPerLine="1" name="gw_world_ds" DataSource='<%=InternetLoadWorld.DS_Func_Worlds%>'>
@@ -412,9 +412,9 @@
                                 </FetchingDataTemplate>
                             </pe:gridview>
                         </div>
-                        <div style="margin-top:7px;padding-right:15px;">
-                            <input type="button" value='<%=L"创建世界" %>' style="float:left" onclick="loginMain.CreateNewWorld()" class="common_button mc_light_grey_button_with_fillet" />
-                            <input type="button" value='<%=L"官方论坛" %>' align="right" style="float:right" onclick="loginMain.OpenBBS()" class="common_button mc_light_grey_button_with_fillet" />
+                        <div style="margin-top:17px;padding-right:15px;">
+                            <input type="button" value='<%=L"创建世界" %>' style="float:left;min-width:120px" onclick="loginMain.CreateNewWorld()" class="common_button mc_light_grey_button_with_fillet" />
+                            <input type="button" value='<%=L"官网" %>' align="right" style="float:right;" onclick="loginMain.OpenBBS()" class="common_button mc_light_grey_button_with_fillet" />
                         </div>
                     </div>
                 </div>
