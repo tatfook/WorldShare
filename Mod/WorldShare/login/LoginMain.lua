@@ -361,7 +361,7 @@ function loginMain.formatStatus(_status)
 	elseif(_status == 5) then
 		return L"本地更新";
 	else
-		return L"未登录";
+		return L"获取状态中";
 	end
 end
 

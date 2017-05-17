@@ -243,9 +243,11 @@ function SyncMain:compareRevision(_LoginStatus, _callback)
 		else
 			if(not _LoginStatus) then
 				CommandManager:RunCommand("/save");
-				SyncMain:compareRevision(_LoginStatus,_callback());
+				SyncMain.compareFinish = true;
+				_callback("tryAgain");
 			else
 				_guihelper.MessageBox(L"本地世界沒有版本信息");
+				SyncMain.compareFinish = true;
 				return;
 			end
 		end
@@ -268,6 +270,11 @@ function SyncMain.syncCompare(_LoginStatus)
 		else
 			if(result == "remoteBigger") then
 				SyncMain:StartSyncPage();
+			elseif(result == "tryAgain") then
+				commonlib.TimerManager.SetTimeout(function()
+					CommandManager:RunCommand("/save");
+					SyncMain.syncCompare();
+				end,1000)
 			end
 		end
 	end);
@@ -597,6 +604,9 @@ function SyncMain:syncToDataSource()
 			SyncMain.totalDataSourceIndex  = nil;
 			SyncMain.dataSourceFiles       = {};
 
+			SyncMain.revisionUpload = false;
+			SyncMain.revisionUpdate = false;
+
 			local syncGUItotal = 0;
 			local syncGUIIndex = 0;
 			local syncGUIFiles = "";
@@ -607,6 +617,9 @@ function SyncMain:syncToDataSource()
 			LOG.std(nil,"debug","SyncMain.totalDataSourceIndex",SyncMain.totalDataSourceIndex);
 
 			function SyncMain.remoteSync.revision(_callback)
+				LOG.std(nil,"debug","SyncMain.revisionUpload",SyncMain.revisionUpload);
+				LOG.std(nil,"debug","SyncMain.revisionUpdate",SyncMain.revisionUpdate);
+
 				if(SyncMain.revisionUpload) then
 					SyncMain:uploadService(SyncMain.foldername.utf8, "revision.xml", SyncMain.revisionContent, function (bIsUpload, filename)
 						if (bIsUpload) then
@@ -615,7 +628,7 @@ function SyncMain:syncToDataSource()
 
 							_callback();
 						else
-							_guihelper.MessageBox(L"上传失败");
+							_guihelper.MessageBox(L"revision上传失败");
 							syncGUIIndex = syncGUIIndex + 1;
 							syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, filename);
 						end
@@ -630,14 +643,13 @@ function SyncMain:syncToDataSource()
 
 							_callback();
 						else
-							_guihelper.MessageBox(L"更新失败");
+							_guihelper.MessageBox(L"revision更新失败");
 							syncGUIIndex = syncGUIIndex + 1;
 							syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, filename);
 						end
 					end);
 				end
 			end
-
 
 			function SyncMain.remoteSync.finish()
 				LOG.std(nil,"debug","SyncMain.selectedWorldInfor",SyncMain.selectedWorldInfor);
@@ -649,12 +661,12 @@ function SyncMain:syncToDataSource()
 					SyncMain:getCommits(function(data, err)
 						LOG.std(nil,"debug","data",data);
 						LOG.std(nil,"debug","err",err);
-    
+
 						if(data) then
 							local lastCommits = data[1];
 							lastCommitFile = lastCommits.title:gsub("keepwork commit: ","");
 							lastCommitSha  = "";
-        
+
 							if(lastCommitFile == "revision.xml") then
 								lastCommitSha = lastCommits.id;
 
@@ -754,7 +766,7 @@ function SyncMain:syncToDataSource()
 							else
 								_guihelper.MessageBox(L"上传失败");
 							end
-        
+
 							LOG.std(nil,"debug","lastCommits",lastCommits);
 							LOG.std(nil,"debug","lastCommitFile",lastCommitFile);
 							LOG.std(nil,"debug","lastCommitSha",lastCommitSha);
@@ -771,11 +783,11 @@ function SyncMain:syncToDataSource()
 				LOG.std(nil,"debug","SyncMain.totalLocalIndex",SyncMain.totalLocalIndex);
 
 				if(SyncMain.localFiles[SyncMain.curUploadIndex].filename == "revision.xml" and SyncMain.localFiles[SyncMain.curUploadIndex].needChange) then
+					LOG.std(nil,"debug","findRevision");
 					SyncMain.revisionUpload  = true;
 					SyncMain.revisionContent = SyncMain.localFiles[SyncMain.curUploadIndex].file_content_t;
 
 					if (SyncMain.curUploadIndex == SyncMain.totalLocalIndex) then
-						LOG.std(nil,"debug","SyncMain.localFiles",SyncMain.localFiles);
 						SyncMain.remoteSync.finish();
 					else
 						SyncMain.curUploadIndex = SyncMain.curUploadIndex + 1;
@@ -790,7 +802,7 @@ function SyncMain:syncToDataSource()
 					SyncMain:uploadService(SyncMain.foldername.utf8, SyncMain.localFiles[SyncMain.curUploadIndex].filename, SyncMain.localFiles[SyncMain.curUploadIndex].file_content_t,function (bIsUpload, filename)
 						if (bIsUpload) then
 							syncGUIIndex = syncGUIIndex + 1;
-							syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, filename);
+							syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, filename .. "上传完成");
 
 							if (SyncMain.curUploadIndex == SyncMain.totalLocalIndex) then
 								LOG.std(nil,"debug","SyncMain.localFiles",SyncMain.localFiles);
@@ -870,6 +882,7 @@ function SyncMain:syncToDataSource()
 					end
 
 					if(bIsExisted and SyncMain.localFiles[LocalIndex].filename == "revision.xml") then
+						LOG.std(nil,"debug","findUpdateRevision");
 						SyncMain.revisionUpdate  = true;
 						SyncMain.revisionContent = SyncMain.localFiles[LocalIndex].file_content_t;
 						SyncMain.revisionSha1    = SyncMain.localFiles[LocalIndex].sha1
@@ -885,26 +898,28 @@ function SyncMain:syncToDataSource()
 						return;
 					end
 
+					syncGUIIndex = syncGUIIndex + 1;
+					syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, SyncMain.localFiles[LocalIndex].filename .. "比对中");
+
 					LOG.std(nil,"debug","dataSourceFiles",curGitFiles.path);
 
 					if (bIsExisted) then
 						SyncMain.localFiles[LocalIndex].needChange = false;
-						--LOG.std(nil,"debug","SyncMain.dataSourceFiles.tree[SyncMain.curUpdateIndex].path",SyncMain.dataSourceFiles.tree[SyncMain.curUpdateIndex].path);
-						--LOG.std(nil,"debug","SyncMain.dataSourceFiles[SyncMain.curUpdateIndex].sha",SyncMain.dataSourceFiles[SyncMain.curUpdateIndex].sha);
-						--LOG.std(nil,"debug","self.localFiles.sha1",self.localFiles[LocalIndex].sha1);
+						LOG.std(nil,"debug","curGitFiles.sha",curGitFiles.sha);
+						LOG.std(nil,"debug","SyncMain.localFiles[LocalIndex].sha1",SyncMain.localFiles[LocalIndex].sha1);
 
 						if (curGitFiles.sha ~= SyncMain.localFiles[LocalIndex].sha1) then
+							syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, SyncMain.localFiles[LocalIndex].filename .. "上传中");
 							-- 更新已存在的文件
 							SyncMain:updateService(SyncMain.foldername.utf8, SyncMain.localFiles[LocalIndex].filename, SyncMain.localFiles[LocalIndex].file_content_t, curGitFiles.sha, function (bIsUpdate, filename)
 								if (bIsUpdate) then
-									syncGUIIndex = syncGUIIndex + 1;
-									syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, filename);
+									syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, filename .. "上传完成");
 
 									if (SyncMain.curUpdateIndex == SyncMain.totalDataSourceIndex) then
-										for key,value in ipairs(SyncMain.localFiles) do
-											LOG.std(nil,"debug","filename",value.filename);
-											LOG.std(nil,"debug","needChange",value.needChange);
-										end
+--										for key,value in ipairs(SyncMain.localFiles) do
+--											LOG.std(nil,"debug","filename",value.filename);
+--											LOG.std(nil,"debug","needChange",value.needChange);
+--										end
 										
 										SyncMain.remoteSync.uploadOne();
 									else
@@ -920,8 +935,7 @@ function SyncMain:syncToDataSource()
 								end
 							end);
 						else
-							syncGUIIndex = syncGUIIndex + 1;
-							syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, SyncMain.localFiles[LocalIndex].filename);
+							syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, SyncMain.localFiles[LocalIndex].filename .. "版本一致，跳过");
 
 							if (SyncMain.curUpdateIndex == SyncMain.totalDataSourceIndex) then
 								for key,value in ipairs(SyncMain.localFiles) do

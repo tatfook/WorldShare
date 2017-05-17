@@ -72,7 +72,10 @@ function ShareWorld.shareCompare()
 	end
 
 	SyncMain:compareRevision(nil, function(result)
-		if(result) then
+		if(result and result == "tryAgain") then
+			echo("---OKOKOKOOKOK----")
+			ShareWorld.shareCompare();
+		elseif(result) then
 			ShareWorld.CompareResult = result;
 			ShareWorld.SharePage:Refresh();
 			ShareWorld:init();

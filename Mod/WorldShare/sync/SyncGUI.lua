@@ -68,13 +68,14 @@ end
 
 function SyncGUI:retry()
 	if(not SyncMain.finish) then
-		_guihelper.MessageBox(L"同步尚未结束");
-		return;
+		--_guihelper.MessageBox(L"同步尚未结束");
+		--return;
 	end
 
 	SyncGUI.finish();
-	SyncMain:compareRevision();
-	SyncMain:StartSyncPage();
+	--SyncMain:compareRevision();
+	--SyncMain:StartSyncPage();
+	SyncMain.syncCompare(true)
 end
 
 function SyncGUI:updateDataBar(_current, _total, _files)
