@@ -26,7 +26,7 @@
                         <div style="float:right;padding-left:28px;">
                             <div><%= SyncMain.foldername.utf8%></div>
                             <div>大小：<%= loginMain.GetWorldSize(ShareWorld.getWorldSize())%></div>
-                            <input type="button" width="140" height="40" style="margin-top:45px;background:url(textures/worldshare_32bits.png#20 20 220 48:8 8 8 8);base-font-size:18px;color:#ffffff;textcolor:#ffffff" value="重新截图" onclick="ShareWorld.snapshot()" />
+                            <input type="button" style="font-size:11px;height:20px;color:#ffffff;" value="重新截图" class="mc_blue_button_with_fillet" onclick="ShareWorld.snapshot()" />
                         </div>
                     </div>
                     
@@ -46,7 +46,7 @@
                     <hr />
                     <div>
                         <pe:if condition="<%= SyncMain.compareFinish%>">
-                            <input type="button" onclick="ShareWorld.shareNow()" value="上传并分享" class="button_highlight" width="175" height="50" align="right" style="float:right;background:url(textures/worldshare_32bits.png#20 20 220 48:8 8 8 8);margin-right:18px;margin-top:13px;" />
+                            <input type="button" onclick="ShareWorld.shareNow()" value="上传并分享" class="mc_big_button" width="175" height="50" align="right" style="float:right;margin-right:18px;margin-top:13px;" />
                         </pe:if>
                     </div>
                 </div>
