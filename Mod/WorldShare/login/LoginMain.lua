@@ -609,7 +609,6 @@ function loginMain.findPWDFiles()
 	local result = commonlib.Files.Find({}, "/", 0, 500,"*.*");
 
 	for key,value in ipairs(result) do
-	    -- LOG.std(nil,"debug","findPWDFiles",value);
 	    if(value.filename == "PWD" and value.fileattr ~= 0) then
 	        return true;
 	    end
@@ -640,6 +639,8 @@ function loginMain.getRememberPassword()
 			page:SetNodeValue("password",Encoding.PasswordDecodeWithMac(PWD[2]));
 
 			page:GetNode("keepwork"):SetAttribute("selected",nil);
+			page:GetNode("keepworkDev"):SetAttribute("selected",nil);
+			page:GetNode("keepworkTest"):SetAttribute("selected",nil);
 			page:GetNode("local"):SetAttribute("selected",nil);
 
 			if(PWD[3] == "keepwork") then
@@ -698,12 +699,91 @@ function loginMain.setSite()
 	    loginMain.site = "http://localhost:8099";
 	end
 
-	echo(loginMain.site);
-
 	register:SetAttribute("href",loginMain.site .. "/wiki/home");
+end
+
+function loginMain.setRememberAuto()
+	local function setRememberAuto(page)
+		local account       = page:GetValue("account");
+		local password      = page:GetValue("password");
+		local loginServer   = page:GetValue("loginServer");
+
+		local auto = page:GetValue("autoLogin");
+
+		if(auto) then
+			page:GetNode("autoLogin"):SetAttribute("checked","checked");
+			page:GetNode("rememberPassword"):SetAttribute("checked","checked");
+			page:SetNodeValue("account", account);
+			page:SetNodeValue("password", password);
+
+			page:Refresh(0.01);
+		else
+			local file = ParaIO.open("/PWD", "r");
+			local binData = file:GetText(0, -1);
+			file:close();
+
+			--echo(binData);
+
+			if(#binData == 0) then
+				ParaIO.DeleteFile("PWD");
+			else
+				local newStr = ""
+				local settingData = {};
+				for value in string.gmatch(binData,"[^|]+") do
+					settingData[#settingData + 1] = value;
+				end
+
+				newStr = newStr .. settingData[1] .. "|";
+				newStr = newStr .. settingData[2] .. "|";
+				newStr = newStr .. settingData[3] .. "|";
+				newStr = newStr .. settingData[4] .. "|";
+				newStr = newStr .. "false";
+
+				local file = ParaIO.open("/PWD", "w");
+				file:write(newStr,#newStr);
+			
+				file:close();
+			end
+		end
+	end
 
 	if(loginMain.LoginPage) then
-		loginMain.LoginPage:Refresh();
+		setRememberAuto(loginMain.LoginPage);
+	end
+
+	if(loginMain.ModalPage) then
+		setRememberAuto(loginMain.ModalPage);
+	end
+end
+
+function loginMain.setAutoRemember()
+	local function setAutoRemember(page)
+		local account       = page:GetValue("account");
+		local password      = page:GetValue("password");
+		local loginServer   = page:GetValue("loginServer");
+
+		local remember = page:GetValue("rememberPassword");
+
+		if(not remember) then
+			page:GetNode("rememberPassword"):SetAttribute("checked",nil);
+			page:GetNode("autoLogin"):SetAttribute("checked",nil);
+			page:SetNodeValue("account", account);
+			page:SetNodeValue("password", password);
+
+			page:Refresh(0.01);
+
+			if(loginMain.findPWDFiles()) then
+				ParaIO.DeleteFile("PWD");
+			end
+		end
+	end
+
+	if(loginMain.LoginPage) then
+		setAutoRemember(loginMain.LoginPage);
+	end
+
+	if(loginMain.ModalPage) then
+		setAutoRemember(loginMain.ModalPage);
 	end
 end
 
