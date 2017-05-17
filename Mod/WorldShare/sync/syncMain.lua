@@ -1113,6 +1113,10 @@ function SyncMain:setGitlabProjectId(_foldername)
 end
 
 function SyncMain:getGitlabCommitId(_foldername)
+	if(not SyncMain.remoteWorldsList) then
+		SyncMain.remoteWorldsList = {};
+	end
+
 	for key,value in ipairs(SyncMain.remoteWorldsList) do
 		if(value.worldsName == _foldername) then
 			return value.commitId;

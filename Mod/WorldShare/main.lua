@@ -17,6 +17,7 @@ NPL.load("(gl)script/ide/Files.lua");
 
 local GameLogic  = commonlib.gettable("MyCompany.Aries.Game.GameLogic");
 local Encoding   = commonlib.gettable("commonlib.Encoding");
+local loginMain  = commonlib.gettable("Mod.WorldShare.login.loginMain");
 local SyncMain   = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
 
 local WorldShare = commonlib.inherit(commonlib.gettable("Mod.ModBase"),commonlib.gettable("Mod.WorldShare"));

@@ -7,12 +7,17 @@
     <pe:mcml>
         <script type="text/npl" refresh="false">
             <![CDATA[
-            loginMain = commonlib.gettable("Mod.WorldShare.login.loginMain");
-
-            loginMain.setModalPage();
-            loginMain.setSite();
-            loginMain.getRememberPassword();
-            loginMain.setSite();
+                NPL.load("(gl)script/apps/Aries/Creator/Game/Login/InternetLoadWorld.lua");
+                
+                loginMain = commonlib.gettable("Mod.WorldShare.login.loginMain");
+                InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld");
+                
+                InternetLoadWorld.OnInit();
+                loginMain.OnInit();
+                loginMain.setModalPage();
+                loginMain.setSite();
+                loginMain.getRememberPassword();
+                loginMain.setSite();
             ]]>
         </script>
         <style type="text/mcss">

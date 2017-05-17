@@ -14,10 +14,12 @@ ShareWorld.ShowPage()
 NPL.load("(gl)Mod/WorldShare/sync/ShareWorld.lua");
 NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/ShareWorldPage.lua");
 NPL.load("(gl)Mod/WorldShare/login/loginMain.lua");
+NPL.load("(gl)script/apps/Aries/Creator/WorldCommon.lua");
 
 local ShareWorldPage = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.Areas.ShareWorldPage");
 local SyncMain       = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
 local loginMain		 = commonlib.gettable("Mod.WorldShare.login.loginMain");
+local WorldCommon    = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 
 local ShareWorld     = commonlib.inherit(nil,commonlib.gettable("Mod.WorldShare.sync.ShareWorld"));
 
@@ -28,6 +30,15 @@ function ShareWorld:ctor()
 end
 
 function ShareWorld.ShowPage()
+	if(loginMain.login_type == 1) then
+		loginMain.showLoginModalImp();
+		return;
+	end
+
+	ShareWorld.ShowPageImp();
+end
+
+function ShareWorld.ShowPageImp()
 	System.App.Commands.Call("File.MCMLWindowFrame", {
 		url = "Mod/WorldShare/sync/ShareWorld.html",
 		name = "SaveWorldPage.ShowSharePage",
@@ -61,19 +72,16 @@ function ShareWorld.closeSharePage()
 	ShareWorld.SharePage:CloseWindow();
 end
 
+function ShareWorld.getWorldSize()
+	SyncMain.tagInfor = WorldCommon.GetWorldInfo();
+	LOG.std(nil,"debug","SyncMain.tagInfor",SyncMain.tagInfor);
+
+	return SyncMain.tagInfor.size;
+end
+
 function ShareWorld.shareCompare()
-	if(loginMain.login_type == 1)then                  
-		commonlib.TimerManager.SetTimeout(function()
-			ShareWorld.closeSharePage();
-		end,100);
-
-		loginMain.showLoginModal();
-		return;
-	end
-
 	SyncMain:compareRevision(nil, function(result)
 		if(result and result == "tryAgain") then
-			echo("---OKOKOKOOKOK----")
 			ShareWorld.shareCompare();
 		elseif(result) then
 			ShareWorld.CompareResult = result;

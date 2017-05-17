@@ -14,9 +14,6 @@
 
                 ShareWorld.setSharePage();
                 ShareWorld.shareCompare();
-
-                echo("SyncMain.compareFinish");
-                echo(SyncMain.isFetchRemoteRevision);
              ]]>
         </script>
         <div style="width:500px;height:270px;">
@@ -28,7 +25,7 @@
                         </div>
                         <div style="float:right;padding-left:28px;">
                             <div><%= SyncMain.foldername.utf8%></div>
-                            <div>大小：<%= loginMain.GetWorldSize(SyncMain.selectedWorldInfor.size)%></div>
+                            <div>大小：<%= loginMain.GetWorldSize(ShareWorld.getWorldSize())%></div>
                             <input type="button" width="140" height="40" style="margin-top:45px;background:url(textures/worldshare_32bits.png#20 20 220 48:8 8 8 8);base-font-size:18px;color:#ffffff;textcolor:#ffffff" value="重新截图" onclick="ShareWorld.snapshot()" />
                         </div>
                     </div>

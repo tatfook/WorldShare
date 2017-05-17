@@ -73,7 +73,7 @@ function loginMain.ShowPage()
 				width = 860,
 				height = 470,
 			cancelShowAnimation = true,
-		});
+	});
 end
 
 function loginMain.OnInit()
@@ -124,7 +124,7 @@ function loginMain.showLoginInfo()
 	});
 end
 
-function loginMain.showLoginModal()
+function loginMain.showLoginModalImp()
 	System.App.Commands.Call("File.MCMLWindowFrame", {
 		url = "Mod/WorldShare/login/LoginModal.html",
 		name = "loginMain.LoginModal",
@@ -223,14 +223,16 @@ function loginMain.LoginAction(_page, _callback)
 						--myWorlds:SetAttribute("href", loginMain.personPageUrl);--loginMain.site.."/wiki/mod/worldshare/person/"
 						
 						loginMain.changeLoginType(3);
-						loginMain.syncWorldsList(function()
-							if(loginMain.ModalPage) then
-								loginMain.closeModalPage();
-								_callback();
-							end
-						end);
-
 						loginMain.closeLoginInfor();
+						loginMain.syncWorldsList();
+
+						if(loginMain.ModalPage) then
+							loginMain.closeModalPage();
+						end
+
+						if(_callback) then
+							_callback();
+						end
 
 						local requestParams = {
 							url  = loginMain.site .. "/api/mod/worldshare/models/worlds",
@@ -241,7 +243,7 @@ function loginMain.LoginAction(_page, _callback)
 
 						HttpRequest:GetUrl(requestParams,function(worldList, err)
 							--LOG.std(nil,"debug","genWorldIndex-worldList-data",worldList);
-							SyncMain:genIndexMD(_worldList)
+							SyncMain:genIndexMD(_worldList);
 						end);
 					else
 						--local clientLogin = Page:GetNode("clientLogin");
@@ -700,7 +702,9 @@ function loginMain.setSite()
 
 	register:SetAttribute("href",loginMain.site .. "/wiki/home");
 
-	loginMain.LoginPage:Refresh();
+	if(loginMain.LoginPage) then
+		loginMain.LoginPage:Refresh();
+	end
 end
 
 function loginMain.autoLoginAction()
@@ -755,7 +759,6 @@ function loginMain.getLocalWorldList(_callback)
 		if(_callback) then
 			_callback();
 		end
-
 	end);
 end
 
@@ -804,7 +807,9 @@ function loginMain.changeRevision(_callback)
 				end
 			end
 
-			loginMain.LoginPage:Refresh();
+			if(loginMain.LoginPage) then
+				loginMain.LoginPage:Refresh();
+			end
 
 			if(_callback) then
 				_callback();
@@ -819,6 +824,11 @@ end
 
 function loginMain.syncWorldsList(_callback)
 	local localWorlds = InternetLoadWorld.cur_ds;
+
+	if(not localWorlds) then
+		localWorlds = {};
+	end
+
 	LOG.std(nil,"debug","localWorlds-syncWorldsList",localWorlds);
 	--[[
 		status代码含义:
@@ -887,7 +897,9 @@ function loginMain.syncWorldsList(_callback)
 
 		--LOG.std(nil,"debug","localWorlds",localWorlds);
 
-	    loginMain.LoginPage:Refresh();
+		if(loginMain.LoginPage) then
+			loginMain.LoginPage:Refresh();
+		end
 
 		if(_callback) then
 			_callback();
@@ -1011,7 +1023,10 @@ end
 
 function loginMain.changeLoginType(_type)
 	loginMain.login_type = _type;
-	loginMain.LoginPage:Refresh();
+
+	if(loginMain.LoginPage) then
+		loginMain.LoginPage:Refresh();
+	end
 end
 
 function loginMain.getWorldsList(_callback)
