@@ -65,7 +65,7 @@ function SyncMain:init()
 	SyncMain.worldName = nil;
 
 	-- 没有登陆则直接使用离线模式
-	if(loginMain.token) then
+	if(loginMain.token and loginMain.current_type == 1) then
 		SyncMain.syncCompare();
 	end
 end
@@ -783,7 +783,7 @@ function SyncMain:syncToDataSource()
 				LOG.std(nil,"debug","SyncMain.totalLocalIndex",SyncMain.totalLocalIndex);
 
 				if(SyncMain.localFiles[SyncMain.curUploadIndex].filename == "revision.xml" and SyncMain.localFiles[SyncMain.curUploadIndex].needChange) then
-					LOG.std(nil,"debug","findRevision");
+					--LOG.std(nil,"debug","findRevision");
 					SyncMain.revisionUpload  = true;
 					SyncMain.revisionContent = SyncMain.localFiles[SyncMain.curUploadIndex].file_content_t;
 
@@ -797,12 +797,14 @@ function SyncMain:syncToDataSource()
 					return;
 				end
 
+				--LOG.std(nil,"debug","SyncMain.localFiles[SyncMain.curUploadIndex]", SyncMain.localFiles[SyncMain.curUploadIndex]);
+
 				if (SyncMain.localFiles[SyncMain.curUploadIndex].needChange) then
 					SyncMain.localFiles[SyncMain.curUploadIndex].needChange = false;
 					SyncMain:uploadService(SyncMain.foldername.utf8, SyncMain.localFiles[SyncMain.curUploadIndex].filename, SyncMain.localFiles[SyncMain.curUploadIndex].file_content_t,function (bIsUpload, filename)
 						if (bIsUpload) then
 							syncGUIIndex = syncGUIIndex + 1;
-							syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, filename .. "上传完成");
+							syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, filename .. " （" .. loginMain.GetWorldSize(SyncMain.localFiles[SyncMain.curUploadIndex].filesize, "KB") .. "） " .. "上传完成");
 
 							if (SyncMain.curUploadIndex == SyncMain.totalLocalIndex) then
 								LOG.std(nil,"debug","SyncMain.localFiles",SyncMain.localFiles);

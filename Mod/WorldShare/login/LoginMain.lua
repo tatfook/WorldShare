@@ -330,7 +330,7 @@ function loginMain.IsMCVersion()
 	end
 end
 
-function loginMain.GetWorldSize(size)
+function loginMain.GetWorldSize(size, unit)
 	local s;
 	size = tonumber(size);
 
@@ -348,7 +348,11 @@ function loginMain.GetWorldSize(size)
 	end
 
 	if(size and size ~= "") then
-		s = GetPreciseDecimal(size/1024/1024, 2) .. "M";
+		if(not unit) then
+			s = GetPreciseDecimal(size/1024/1024, 2) .. "M";
+		elseif(unit == "KB") then
+			s = GetPreciseDecimal(size/1024, 2) .. "KB";
+		end
 	else
 		s = nil;
 	end
@@ -794,34 +798,36 @@ function loginMain.setAutoRemember()
 end
 
 function loginMain.autoLoginAction()
-	local autoLogin
 
-	if(loginMain.LoginPage) then
-		autoLogin = loginMain.LoginPage:GetValue("autoLogin");
+	local function autoLoginAction(_page)
+		if(not loginMain.IsSignedIn()) then
+			local autoLogin = _page:GetValue("autoLogin");
 
-		if(autoLogin) then
-			loginMain.LoginActionMain();
+			if(autoLogin) then
+				loginMain.LoginActionMain();
+			end
 		end
 	end
 
+	if(loginMain.LoginPage) then
+		autoLoginAction(loginMain.LoginPage);
+	end
+
 	if(loginMain.ModalPage) then
-		autoLogin = loginMain.ModalPage:GetValue("autoLogin");
-		if(autoLogin) then
-			loginMain.LoginActionMain();
-		end
+		autoLoginAction(loginMain.ModalPage);
 	end
 end
 
 
 function loginMain.IsSignedIn()
-	-- TODO: for big, what is the right way to do it?
 	return loginMain.token ~= nil;
 end
 
--- TODO: for big, we should loginMain.token = nil ?
 function loginMain.logout()
-	loginMain.changeLoginType(1);
-	loginMain:RefreshCurrentServerList();
+	if(loginMain.IsSignedIn()) then
+		loginMain.changeLoginType(1);
+		loginMain:RefreshCurrentServerList();
+	end
 end
 
 function loginMain.RefreshCurrentServerList()
