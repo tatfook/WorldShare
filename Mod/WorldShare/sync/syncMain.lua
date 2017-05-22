@@ -262,10 +262,8 @@ function SyncMain.syncCompare(_LoginStatus)
 		if(_LoginStatus) then
 			if(result == "justLocal") then
 				SyncMain.syncToDataSource();
-			elseif(result ~= "equal") then
-				SyncMain:StartSyncPage();
 			else
-				_guihelper.MessageBox(L"数据源已存在此作品，且版本相等");
+				SyncMain:StartSyncPage();
 			end
 		else
 			if(result == "remoteBigger") then
@@ -887,7 +885,7 @@ function SyncMain:syncToDataSource()
 						LOG.std(nil,"debug","findUpdateRevision");
 						SyncMain.revisionUpdate  = true;
 						SyncMain.revisionContent = SyncMain.localFiles[LocalIndex].file_content_t;
-						SyncMain.revisionSha1    = SyncMain.localFiles[LocalIndex].sha1
+						SyncMain.revisionSha1    = SyncMain.localFiles[LocalIndex].sha1;
 						SyncMain.localFiles[LocalIndex].needChange = false;
 
 						if (SyncMain.curUpdateIndex == SyncMain.totalDataSourceIndex) then
@@ -973,11 +971,15 @@ function SyncMain:syncToDataSource()
 				LOG.std(nil,"debug","SyncMain:getFileShaListService-err",err);
 
 				local hasReadme = false;
+				local hasGitAttribute = false;
 
 				for key,value in ipairs(SyncMain.localFiles) do
 					if(value.filename == "README.md") then
 						hasReadme = true;
-						break;
+					end
+
+					if(value.filename == ".gitattribute") then
+						hasGitAttribute = true;
 					end
 				end
 
@@ -993,14 +995,37 @@ function SyncMain:syncToDataSource()
 
 					local readMeFiles = {
 						filename       = "README.md",
-						file_path      = SyncMain.worldDir.utf8 .. "README.md",
-						file_content_t = content
+						file_path      = filePath,
+						file_content_t = content,
 					};
 
 					--LOG.std(nil,"debug","localFiles",readMeFiles);
-					local revision = SyncMain.localFiles[#SyncMain.localFiles];
+					local otherFile = commonlib.copy(SyncMain.localFiles[#SyncMain.localFiles]);
 					SyncMain.localFiles[#SyncMain.localFiles] = readMeFiles;
-					SyncMain.localFiles[#SyncMain.localFiles + 1] = revision;
+					SyncMain.localFiles[#SyncMain.localFiles + 1] = otherFile;
+				end
+
+				if(not hasGitAttribute) then
+					local filePath = SyncMain.worldDir.default .. ".gitattribute";
+					local file = ParaIO.open(filePath, "w");
+					local content = LocalService.gitAttribute;
+
+					file:write(content,#content);
+					file:close();
+
+					local gitAttributeFiles = {
+						filename       = ".gitattribute",
+						file_path      = filePath,
+						file_content_t = content,
+					};
+
+					local tableLength = #SyncMain.localFiles;
+
+					for i = tableLength, 1 do
+						SyncMain.localFiles[tableLength + 1] = SyncMain.localFiles[tableLength];
+					end
+
+					SyncMain.localFiles[1] = gitAttributeFiles;
 				end
 
 				SyncMain.totalLocalIndex = #SyncMain.localFiles;

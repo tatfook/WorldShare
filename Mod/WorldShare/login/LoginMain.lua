@@ -369,9 +369,9 @@ function loginMain.formatStatus(_status)
 	elseif(_status == 3) then
 		return L"本地版本与远程数据源一致";
 	elseif(_status == 4) then
-		return L"网络更新";
+		return L"远程版本更加新";
 	elseif(_status == 5) then
-		return L"本地更新";
+		return L"本地版本更加新";
 	else
 		return L"获取状态中";
 	end

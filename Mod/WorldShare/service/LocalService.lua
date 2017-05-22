@@ -32,6 +32,8 @@ local SyncMain       = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
 
 local LocalService   = commonlib.gettable("Mod.WorldShare.service.LocalService");
 
+LocalService.gitAttribute = "* binary";
+
 --get file content by text
 function LocalService:getFileContent(_filePath)      
 	local file = ParaIO.open(_filePath, "r");
@@ -90,34 +92,31 @@ function LocalService:LoadFiles(_worldDir,_curPath,_filter,_nMaxFileLevels,_nMax
 
 	LocalService:filesFind(result);
 
-	local revision;
-	local hasRevision;
+	local gitAttribute;
+	local hasGitAttribute = false;
 
 	for key, value in ipairs(LocalService.output) do
 		--LOG.std(nil,"debug","LocalService:LoadFiles-LocalService.output",value.filename);
-		if(value.filename == "revision.xml") then
-			revision    = value;
-			hasRevision = true;
+		if(value.filename == ".gitattribute") then
+			gitAttribute     = value;
+			hasGitAttribute  = true;
 		end
 	end
 
-	--LOG.std(nil,"debug","LocalService:LoadFiles-revision",revision);
-	--LOG.std(nil,"debug","LocalService:LoadFiles-hasRevision",hasRevision);
+	--LOG.std(nil,"debug","LocalService:LoadFiles-gitAttribute",gitAttribute);
+	--LOG.std(nil,"debug","LocalService:LoadFiles-hasGitAttribute",hasGitAttribute);
 
-	local sortOutPut = {};
+	if(hasGitAttribute) then
+		local tableLength = #LocalService.output;
 
-	if(hasRevision) then
-		for key, value in ipairs(LocalService.output) do
-			--LOG.std(nil, "debug", "LocalService:LoadFiles-LocalService.output", value.filename);
-			if(value.filename ~= "revision.xml") then
-				sortOutPut[#sortOutPut + 1] = value;
-			end
+		for i = tableLength, 1 do
+			LocalService.output[i + 1] = LocalService.output[i];
 		end
 
-		sortOutPut[#sortOutPut + 1] = revision;
+		LocalService.output[1] = gitAttribute;
 	end
-
-	return sortOutPut;
+	
+	return LocalService.output;
 end
 
 function LocalService:update(_foldername, _path, _callback)
