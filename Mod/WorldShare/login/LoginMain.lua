@@ -369,9 +369,9 @@ function loginMain.formatStatus(_status)
 	elseif(_status == 3) then
 		return L"本地版本与远程数据源一致";
 	elseif(_status == 4) then
-		return L"远程版本更加新";
-	elseif(_status == 5) then
 		return L"本地版本更加新";
+	elseif(_status == 5) then
+		return L"远程版本更加新";
 	else
 		return L"获取状态中";
 	end
@@ -953,10 +953,10 @@ function loginMain.syncWorldsList(_callback)
 					if(localWorlds[keyLocal].server) then
 						if(tonumber(valueLocal["revision"]) == tonumber(valueDistance["revision"])) then
 	            			localWorlds[keyLocal].status = 3; --本地网络一致
+						elseif(tonumber(valueLocal["revision"]) > tonumber(valueDistance["revision"])) then
+	            			localWorlds[keyLocal].status = 4; --网络更新
 	            		elseif(tonumber(valueLocal["revision"]) < tonumber(valueDistance["revision"])) then
 	            			localWorlds[keyLocal].status = 5; --本地更新
-	            		elseif(tonumber(valueLocal["revision"]) > tonumber(valueDistance["revision"])) then
-	            			localWorlds[keyLocal].status = 4; --网络更新
 	            		end
 					end
 
@@ -997,7 +997,7 @@ function loginMain.syncWorldsList(_callback)
 		--LOG.std(nil,"debug","localWorlds",localWorlds);
 
 		if(loginMain.LoginPage) then
-			loginMain.LoginPage:Refresh();
+			loginMain.LoginPage:Refresh(0.01);
 		end
 
 		if(_callback) then

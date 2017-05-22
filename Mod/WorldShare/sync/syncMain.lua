@@ -168,7 +168,7 @@ function SyncMain:compareRevision(_LoginStatus, _callback)
 
 		SyncMain.localFiles = LocalService:LoadFiles(SyncMain.worldDir.default,"",nil,1000,nil);
 
-		--LOG.std(nil,"debug","self.foldername",self.foldername);
+		--LOG.std(nil,"debug","SyncMain.localFiles",SyncMain.localFiles);
 		for _,value in ipairs(SyncMain.localFiles) do
 			LOG.std(nil,"debug","SyncMain.localFiles",value.filename);
 		end
@@ -871,7 +871,7 @@ function SyncMain:syncToDataSource()
 				local LocalIndex  = nil;
 				local curGitFiles = SyncMain.dataSourceFiles[SyncMain.curUpdateIndex];
 
-				if(curGitFiles.type == "blob") then
+				if(curGitFiles.type == "blob" and curGitFiles.path ~= ".gitattributes") then
 					-- 用数据源的文件和本地的文件对比
 					for key,value in ipairs(SyncMain.localFiles) do
 						if(value.filename == curGitFiles.path) then
@@ -898,12 +898,14 @@ function SyncMain:syncToDataSource()
 						return;
 					end
 
-					syncGUIIndex = syncGUIIndex + 1;
-					syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, SyncMain.localFiles[LocalIndex].filename .. "比对中");
-
-					LOG.std(nil,"debug","dataSourceFiles",curGitFiles.path);
+					--LOG.std(nil, "debug", "LocalIndex", LocalIndex);
+					--LOG.std(nil, "debug", "SyncMain.localFiles[LocalIndex]", SyncMain.localFiles[LocalIndex]);
+					--LOG.std(nil,"debug","dataSourceFiles",curGitFiles.path);
 
 					if (bIsExisted) then
+						syncGUIIndex = syncGUIIndex + 1;
+						syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, SyncMain.localFiles[LocalIndex].filename .. "比对中");
+
 						SyncMain.localFiles[LocalIndex].needChange = false;
 						LOG.std(nil,"debug","curGitFiles.sha",curGitFiles.sha);
 						LOG.std(nil,"debug","SyncMain.localFiles[LocalIndex].sha1",SyncMain.localFiles[LocalIndex].sha1);
@@ -971,15 +973,11 @@ function SyncMain:syncToDataSource()
 				LOG.std(nil,"debug","SyncMain:getFileShaListService-err",err);
 
 				local hasReadme = false;
-				local hasGitAttribute = false;
+				local hasGitAttribute = ParaIO.DoesFileExist(SyncMain.worldDir.default .. ".gitattributes");
 
 				for key,value in ipairs(SyncMain.localFiles) do
 					if(value.filename == "README.md") then
 						hasReadme = true;
-					end
-
-					if(value.filename == ".gitattribute") then
-						hasGitAttribute = true;
 					end
 				end
 
@@ -1006,17 +1004,16 @@ function SyncMain:syncToDataSource()
 				end
 
 				if(not hasGitAttribute) then
-					local filePath = SyncMain.worldDir.default .. ".gitattribute";
+					local filePath = SyncMain.worldDir.default .. ".gitattributes";
 					local file = ParaIO.open(filePath, "w");
-					local content = LocalService.gitAttribute;
 
-					file:write(content,#content);
+					file:write(LocalService.gitAttribute,#LocalService.gitAttribute);
 					file:close();
 
-					local gitAttributeFiles = {
-						filename       = ".gitattribute",
+					local gitAttributeFile = {
+						filename       = ".gitattributes",
 						file_path      = filePath,
-						file_content_t = content,
+						file_content_t = LocalService.gitAttribute,
 					};
 
 					local tableLength = #SyncMain.localFiles;
@@ -1025,8 +1022,10 @@ function SyncMain:syncToDataSource()
 						SyncMain.localFiles[tableLength + 1] = SyncMain.localFiles[tableLength];
 					end
 
-					SyncMain.localFiles[1] = gitAttributeFiles;
+					SyncMain.localFiles[1] = gitAttributeFile;
 				end
+				
+				echo(SyncMain.localFiles);
 
 				SyncMain.totalLocalIndex = #SyncMain.localFiles;
 				syncGUItotal = #SyncMain.localFiles;

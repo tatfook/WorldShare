@@ -303,11 +303,11 @@
                                                     <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index")) and  loginMain.GetCurWorldInfo("status",Eval("index")) == 3%>'>
                                                         <div class="status" style="background:url(textures/worldshare_32bits.png#20 104 16 16)" tooltip='<%= loginMain.formatStatus(loginMain.GetCurWorldInfo("status",Eval("index")))%>' />
                                                     </pe:if>
-                                                    <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index")) and  loginMain.GetCurWorldInfo("status",Eval("index")) == 5%>'>
+                                                    <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index")) and  loginMain.GetCurWorldInfo("status",Eval("index")) == 4%>'>
                                                         <div class="status" style="background:url(textures/worldshare_32bits.png#46 104 16 16)" tooltip='<%= loginMain.formatStatus(loginMain.GetCurWorldInfo("status",Eval("index")))%>' />
                                                     </pe:if>
-                                                    <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index")) and  loginMain.GetCurWorldInfo("status",Eval("index")) == 4%>'>
-                                                        <div class="status" style="background:url(textures/worldshare_32bits.png#46 124 16 16)" tooltip='<%= loginMain.formatStatus(loginMain.GetCurWorldInfo("status",Eval("index")))%>' />
+                                                    <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index")) and  loginMain.GetCurWorldInfo("status",Eval("index")) == 5%>'>
+                                                        <div class="status" style="background:url(textures/worldshare_32bits.png#124 104 16 16)" tooltip='<%= loginMain.formatStatus(loginMain.GetCurWorldInfo("status",Eval("index")))%>' />
                                                     </pe:if>
                                                     <pe:if condition='<%= loginMain.login_type == 1 or loginMain.GetCurWorldInfo("is_zip", Eval("index"))%>'>
                                                         <div style="float:left;width:9px;height:32px;background:#fff" />
@@ -398,11 +398,11 @@
                                                         <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index")) and  loginMain.GetCurWorldInfo("status",Eval("index")) == 3%>'>
                                                             <div class="status" style="background:url(textures/worldshare_32bits.png#20 104 16 16)" tooltip='<%= loginMain.formatStatus(loginMain.GetCurWorldInfo("status",Eval("index")))%>'/>
                                                         </pe:if>
-                                                        <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index")) and  loginMain.GetCurWorldInfo("status",Eval("index")) == 5%>'>
+                                                        <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index")) and  loginMain.GetCurWorldInfo("status",Eval("index")) == 4%>'>
                                                             <div class="status" style="background:url(textures/worldshare_32bits.png#46 104 16 16)" tooltip='<%= loginMain.formatStatus(loginMain.GetCurWorldInfo("status",Eval("index")))%>'/>
                                                         </pe:if>
-                                                        <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index")) and  loginMain.GetCurWorldInfo("status",Eval("index")) == 4%>'>
-                                                            <div class="status" style="background:url(textures/worldshare_32bits.png#46 124 16 16)" tooltip='<%= loginMain.formatStatus(loginMain.GetCurWorldInfo("status",Eval("index")))%>' />
+                                                        <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index")) and  loginMain.GetCurWorldInfo("status",Eval("index")) == 5%>'>
+                                                            <div class="status" style="background:url(textures/worldshare_32bits.png#124 104 16 16)" tooltip='<%= loginMain.formatStatus(loginMain.GetCurWorldInfo("status",Eval("index")))%>' />
                                                         </pe:if>
                                                         <pe:if condition='<%= loginMain.login_type == 1 or loginMain.GetCurWorldInfo("is_zip", Eval("index"))%>'>
                                                             <div style="float:left;width:9px;height:32px;background:#fff"/>

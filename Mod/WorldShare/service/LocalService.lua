@@ -32,7 +32,7 @@ local SyncMain       = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
 
 local LocalService   = commonlib.gettable("Mod.WorldShare.service.LocalService");
 
-LocalService.gitAttribute = "* binary";
+LocalService.gitAttribute = "*.* binary";
 
 --get file content by text
 function LocalService:getFileContent(_filePath)      
@@ -75,17 +75,17 @@ function LocalService:filesFind(_result)
 	end
 end
 
-function LocalService:LoadFiles(_worldDir,_curPath,_filter,_nMaxFileLevels,_nMaxFilesNum)
+function LocalService:LoadFiles(_worldDir, _curPath, _filter, _nMaxFileLevels, _nMaxFilesNum)
 	filter 		   = _filter or "*.*";
 	nMaxFileLevels = _nMaxFileLevels or 0;
 	nMaxFilesNum   = _nMaxFilesNum or 500;
 
 	LocalService.output   = {};
-	LocalService.path     = _worldDir.._curPath;
+	LocalService.path     = _worldDir .. _curPath;
 	LocalService.worldDir = _worldDir;
 
 	if(_curPath ~= "") then
-		LocalService.curPath = _curPath.."/";
+		LocalService.curPath = _curPath .. "/";
 	end
 
 	local result = Files.Find({}, LocalService.path, 0, nMaxFilesNum, filter);
@@ -97,7 +97,7 @@ function LocalService:LoadFiles(_worldDir,_curPath,_filter,_nMaxFileLevels,_nMax
 
 	for key, value in ipairs(LocalService.output) do
 		--LOG.std(nil,"debug","LocalService:LoadFiles-LocalService.output",value.filename);
-		if(value.filename == ".gitattribute") then
+		if(value.filename == ".gitattributes") then
 			gitAttribute     = value;
 			hasGitAttribute  = true;
 		end
