@@ -831,14 +831,20 @@ function loginMain.logout()
 end
 
 function loginMain.RefreshCurrentServerList()
+	loginMain.refreshing = true;
+
 	if(loginMain.login_type == 1) then
 		loginMain.getLocalWorldList(function()
-			loginMain.changeRevision();
+			loginMain.changeRevision(function()
+				loginMain.refreshing = false;
+			end);
 		end);
 	elseif(loginMain.login_type == 3) then
 		loginMain.getLocalWorldList(function()
 			loginMain.changeRevision(function()
-				loginMain.syncWorldsList();
+				loginMain.syncWorldsList(function()
+					loginMain.refreshing = false;
+				end);
 			end);
 		end);
 	end
