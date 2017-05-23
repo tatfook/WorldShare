@@ -283,7 +283,7 @@ function SyncMain.useLocal()
 
     if(tonumber(SyncMain.currentRevison) < tonumber(SyncMain.remoteRevison)) then
         SyncMain:useLocalGUI();
-    elseif(tonumber(SyncMain.currentRevison) > tonumber(SyncMain.remoteRevison)) then
+    elseif(tonumber(SyncMain.currentRevison) >= tonumber(SyncMain.remoteRevison)) then
         -- _guihelper.MessageBox("开始同步--将本地大小有变化的文件上传到github"); -- 上传或更新
         SyncMain:syncToDataSource();
     end
@@ -900,7 +900,7 @@ function SyncMain:syncToDataSource()
 
 					--LOG.std(nil, "debug", "LocalIndex", LocalIndex);
 					--LOG.std(nil, "debug", "SyncMain.localFiles[LocalIndex]", SyncMain.localFiles[LocalIndex]);
-					--LOG.std(nil,"debug","dataSourceFiles",curGitFiles.path);
+					LOG.std(nil,"debug","dataSourceFiles",curGitFiles.path);
 
 					if (bIsExisted) then
 						syncGUIIndex = syncGUIIndex + 1;
@@ -973,7 +973,6 @@ function SyncMain:syncToDataSource()
 				LOG.std(nil,"debug","SyncMain:getFileShaListService-err",err);
 
 				local hasReadme = false;
-				local hasGitAttribute = ParaIO.DoesFileExist(SyncMain.worldDir.default .. ".gitattributes");
 
 				for key,value in ipairs(SyncMain.localFiles) do
 					if(value.filename == "README.md") then
@@ -1002,30 +1001,6 @@ function SyncMain:syncToDataSource()
 					SyncMain.localFiles[#SyncMain.localFiles] = readMeFiles;
 					SyncMain.localFiles[#SyncMain.localFiles + 1] = otherFile;
 				end
-
-				if(not hasGitAttribute) then
-					local filePath = SyncMain.worldDir.default .. ".gitattributes";
-					local file = ParaIO.open(filePath, "w");
-
-					file:write(LocalService.gitAttribute,#LocalService.gitAttribute);
-					file:close();
-
-					local gitAttributeFile = {
-						filename       = ".gitattributes",
-						file_path      = filePath,
-						file_content_t = LocalService.gitAttribute,
-					};
-
-					local tableLength = #SyncMain.localFiles;
-
-					for i = tableLength, 1 do
-						SyncMain.localFiles[tableLength + 1] = SyncMain.localFiles[tableLength];
-					end
-
-					SyncMain.localFiles[1] = gitAttributeFile;
-				end
-				
-				echo(SyncMain.localFiles);
 
 				SyncMain.totalLocalIndex = #SyncMain.localFiles;
 				syncGUItotal = #SyncMain.localFiles;

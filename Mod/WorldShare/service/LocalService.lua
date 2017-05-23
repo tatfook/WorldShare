@@ -89,32 +89,33 @@ function LocalService:LoadFiles(_worldDir, _curPath, _filter, _nMaxFileLevels, _
 	end
 
 	local result = Files.Find({}, LocalService.path, 0, nMaxFilesNum, filter);
+	local convertLineEnding = {[".xml"] = true, [".txt"] = true, [".md"] = true, [".bmax"] = true};
+
+	for key, value in ipairs(result) do
+		--LOG.std(nil,"debug","LocalService:LoadFiles-value",value);
+		local sExt = value.filename:match("%.[^&.]+$");
+		if(convertLineEnding[sExt]) then
+			LOG.std(nil, "debug", "sExt", value.filename);
+			local newData = "";
+
+			local file = ParaIO.open(_worldDir .. value.filename, "r");
+			if(file:IsValid()) then
+				local binData = file:GetText(0, -1);
+				newData = binData:gsub("\r\n","\n");
+				echo(value.filename);
+				echo(#newData);
+				file:close();
+			end
+
+			local file = ParaIO.open(_worldDir .. value.filename, "w");
+			file:write(newData,#newData);
+			file:close();
+
+			value.filesize = #newData;
+		end
+	end
 
 	LocalService:filesFind(result);
-
-	local gitAttribute;
-	local hasGitAttribute = false;
-
-	for key, value in ipairs(LocalService.output) do
-		--LOG.std(nil,"debug","LocalService:LoadFiles-LocalService.output",value.filename);
-		if(value.filename == ".gitattributes") then
-			gitAttribute     = value;
-			hasGitAttribute  = true;
-		end
-	end
-
-	--LOG.std(nil,"debug","LocalService:LoadFiles-gitAttribute",gitAttribute);
-	--LOG.std(nil,"debug","LocalService:LoadFiles-hasGitAttribute",hasGitAttribute);
-
-	if(hasGitAttribute) then
-		local tableLength = #LocalService.output;
-
-		for i = tableLength, 1 do
-			LocalService.output[i + 1] = LocalService.output[i];
-		end
-
-		LocalService.output[1] = gitAttribute;
-	end
 	
 	return LocalService.output;
 end

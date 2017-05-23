@@ -3,7 +3,7 @@ Title: EncodingGithub
 Author(s):  big
 Date:  2017.4.22
 Desc: 
-use the lib: corvent base64 and fit to github
+use the lib: corvent base32 and fit to github or gitlab
 ------------------------------------------------------------
 NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua");
 local GitEncoding = commonlib.gettable("Mod.WorldShare.helper.GitEncoding");
