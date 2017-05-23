@@ -33,9 +33,9 @@ function ShareWorld.ShowPage()
 	if(loginMain.login_type == 1) then
 		loginMain.showLoginModalImp();
 		return;
+	elseif(loginMain.login_type == 3) then
+		ShareWorld.shareCompare();
 	end
-
-	ShareWorld.ShowPageImp();
 end
 
 function ShareWorld.ShowPageImp()
@@ -83,7 +83,10 @@ function ShareWorld.shareCompare()
 	SyncMain:compareRevision(nil, function(result)
 		if(result and result == "tryAgain") then
 			ShareWorld.shareCompare();
+		elseif(result == "zip") then
+			return;
 		elseif(result) then
+			ShareWorld.ShowPageImp();
 			ShareWorld.CompareResult = result;
 			ShareWorld.SharePage:Refresh();
 			ShareWorld:init();
@@ -104,10 +107,8 @@ function ShareWorld.shareNow()
                 SyncMain:syncToDataSource();
             end
         end);
-    elseif(ShareWorld.CompareResult == "localBigger" or ShareWorld.CompareResult == "justLocal") then
+    elseif(ShareWorld.CompareResult == "localBigger" or ShareWorld.CompareResult == "justLocal" or ShareWorld.CompareResult == "equal") then
         SyncMain:syncToDataSource();
-	elseif(ShareWorld.CompareResult == "equal") then
-		_guihelper.MessageBox(L"版本相等，无需同步");
 	end
 end
 

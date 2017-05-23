@@ -247,10 +247,7 @@ function loginMain.LoginAction(_page, _callback)
 							form = {amount = 10000},
 						}
 
-						HttpRequest:GetUrl(requestParams,function(worldList, err)
-							--LOG.std(nil,"debug","genWorldIndex-worldList-data",worldList);
-							SyncMain:genIndexMD(_worldList);
-						end);
+						SyncMain:genIndexMD();
 					else
 						--local clientLogin = Page:GetNode("clientLogin");
 						--loginMain.changeLoginType(2);

@@ -41,7 +41,7 @@ function HttpRequest:retry(_err, _msg, _data, _params, _callback)
 		return;
 	end
 
-	if(_err == 200 or _err == 201 or _err == 204) then
+	if(_err == 200 or _err == 201 or _err == 204) then -- 成功时可直接返回的代码
 		_callback(_data,_err);
 		HttpRequest.tryTimes = 0;
 		return

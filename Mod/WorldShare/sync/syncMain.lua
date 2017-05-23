@@ -144,23 +144,20 @@ function SyncMain:compareRevision(_LoginStatus, _callback)
 
 			LOG.std(nil,"debug","selectedWorldInfor-old",SyncMain.selectedWorldInfor);
 			loginMain.RefreshCurrentServerList();
-			for key,value in ipairs(InternetLoadWorld.cur_ds) do
+
+			if(SyncMain.selectedWorldInfor and SyncMain.selectedWorldInfor.is_zip) then
+				_guihelper.MessageBox(L"不能同步ZIP文件");
+				_callback("zip");
+				return;
+			end
+
+			for _, value in ipairs(InternetLoadWorld.cur_ds) do
 				if(value.foldername == SyncMain.foldername.utf8)then
 					SyncMain.selectedWorldInfor = value;
 				end
 			end
+
 			LOG.std(nil,"debug","selectedWorldInfor-new",SyncMain.selectedWorldInfor);
-
-			if(SyncMain.selectedWorldInfor.is_zip) then
-				_guihelper.MessageBox(L"不能同步ZIP文件");
-
-				commonlib.TimerManager.SetTimeout(function()
-					if(SyncMain.SyncPage)then
-						SyncMain.closeSyncPage();
-					end
-				end,100);
-				return;
-			end
 		end
 
 		WorldRevisionCheckOut   = WorldRevision:new():init(SyncMain.worldDir.default);
@@ -696,8 +693,8 @@ function SyncMain:syncToDataSource()
 										readme = LocalService:getFileContent(SyncMain.worldDir.default .. "README.md");
 										readme = Encoding.DefaultToUtf8(readme);
 
-										LOG.std(nil,"debug","SyncMain.worldDir.default",SyncMain.worldDir.default);
-										LOG.std(nil,"debug","readme",readme);
+										--LOG.std(nil,"debug","SyncMain.worldDir.default",SyncMain.worldDir.default);
+										--LOG.std(nil,"debug","readme",readme);
 									end
 								end
 
@@ -715,7 +712,7 @@ function SyncMain:syncToDataSource()
 								params.hasPreview      = hasPreview;
 								params.dataSourceType  = loginMain.dataSourceType;
 								params.gitlabProjectId = GitlabService.projectId;
-								params.readme          = readme; --EncodingS.base64(readme);
+								params.readme          = readme;
 								params.preview         = preview;
 								params.filesTotals	   = filesTotals;
 								params.commitId		   = lastCommitSha;
@@ -749,11 +746,7 @@ function SyncMain:syncToDataSource()
 										LOG.std(nil,"debug","requestParams",requestParams);
 
 										SyncMain:genWorldMD(params, function()
-											HttpRequest:GetUrl(requestParams,function(worldList, err)
-												LOG.std(nil,"debug","genWorldIndex-worldList-data",worldList);
-												SyncMain:genIndexMD(worldList);
-												loginMain.RefreshCurrentServerList();
-											end);
+											loginMain.RefreshCurrentServerList();
 										end);
 									end
 								end);
@@ -1125,104 +1118,36 @@ function SyncMain:getGitlabCommitId(_foldername)
 	end
 end
 
-function SyncMain:genIndexMD(_worldList, _callback)
+function SyncMain:genIndexMD(_callback)
 	local function gen(keepworkId)
-		SyncMain:getFileShaListService(loginMain.keepWorkDataSource, function(data, err)
-			LOG.std(nil,"debug","genIndexMD",data);
+		local contentUrl = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. loginMain.keepWorkDataSource .. "/raw/master/" .. loginMain.username .. "/paracraft/index.md";
 
-			local hasIndex      = false;
-			local indexPath     = "";
-			SyncMain.indexFile  = "";
+		HttpRequest:GetUrl(contentUrl, function(data, err)
+			if(err == 404) then
+				local indexPath = loginMain.username .. "/paracraft/index.md";
 
-			local indexPath = loginMain.username .. "/paracraft/index.md";
+				local worldList = KeepworkGen:setCommand("worldList", {userid = loginMain.userId});
+				SyncMain.indexFile = KeepworkGen:SetAutoGenContent("", worldList);
 
-			for key,value in ipairs(data) do
-				if(value.path == indexPath) then
-					hasIndex = true;
-				end
-			end
-
-			local function updateIndexFile()
-				LOG.std(nil,"debug","hasIndexO",hasIndex);
-				if(hasIndex) then
-					LOG.std(nil,"debug","hasIndex",hasIndex);
-					SyncMain:getDataSourceContent(loginMain.keepWorkDataSource, indexPath, function(data, err)
-						--LOG.std(nil,"debug","getDataSourceContent",data);
-						--LOG.std(nil,"debug","getDataSourceContent",err);
-
-						--local content = Encoding.unbase64(data);
-						--local paramsText = KeepworkGen:GetContent(content);
-						--local params = KeepworkGen:getCommand("worldList", paramsText);
-						local worldList;
-
-						if(_worldList)then
-							LOG.std(nil,"debug","_worldListA")
-							worldList = _worldList;
-						else
-							LOG.std(nil,"debug","_worldListB")
-							worldList = SyncMain.remoteWorldsList;
+				SyncMain:uploadService(
+					loginMain.keepWorkDataSource,
+					indexPath,
+					SyncMain.indexFile,
+					function(data, err) 
+						if(_callback) then
+							_callback();
 						end
-
-						worldList = KeepworkGen:setCommand("worldList",worldList);
-						SyncMain.indexFile = KeepworkGen:SetAutoGenContent("", worldList)
-
-						LOG.std(nil,"debug","SyncMain.indexFile",SyncMain.indexFile);
-
-						SyncMain:updateService(
-							loginMain.keepWorkDataSource,
-							indexPath,
-							SyncMain.indexFile,
-							"",
-							function(isSuccess, path)
-								LOG.std(nil,"debug","updateService-indexFile",isSuccess)
-								LOG.std(nil,"debug","updateService-indexFile",path)
-								if(_callback) then
-									_callback();
-								end
-							end,
-							keepworkId
-						);
-					end, keepworkId)
-				else
-					local worldList;
-
-					if(_worldList)then
-						LOG.std(nil,"debug","_worldListA")
-						worldList = _worldList;
-					else
-						LOG.std(nil,"debug","_worldListB")
-						worldList = SyncMain.remoteWorldsList;
-					end
-
-					worldList = KeepworkGen:setCommand("worldList",worldList);
-					SyncMain.indexFile = KeepworkGen:SetAutoGenContent("", worldList);
-
-					LOG.std(nil,"debug","SyncMain.indexFile",SyncMain.indexFile);
-
-					SyncMain:uploadService(
-						loginMain.keepWorkDataSource,
-						indexPath,
-						SyncMain.indexFile,
-						function(data, err) 
-							if(_callback) then
-								_callback();
-							end
-						end,
-						keepworkId
-					);
-				end
+					end,
+					keepworkId
+				);
 			end
-
-			updateIndexFile();
-		end, nil, keepworkId);
+		end);
 	end
 	
 	if(loginMain.dataSourceType == "github") then
-		gen();
+		--gen();
 	elseif(loginMain.dataSourceType == "gitlab") then
 		GitlabService:getProjectIdByName(loginMain.keepWorkDataSource,function(keepworkId)
-			echo("keepworkId");
-			echo(keepworkId);
 			gen(keepworkId);
 		end);
 	end
@@ -1230,116 +1155,92 @@ end
 
 function SyncMain:genWorldMD(worldInfor, _callback)
 	local function gen(keepworkId)
-		SyncMain:getFileShaListService(loginMain.keepWorkDataSource, function(data, err)
-			LOG.std(nil,"debug","genWorldMD",data);
-			local hasWorldFile  = false;
-			local worldFilePath = "";
-			local worldUrl      = "";
-			local username      = "";
-			SyncMain.worldFile  = "";
+		local contentUrl = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. loginMain.keepWorkDataSource .. "/raw/master/" .. loginMain.username .. "/paracraft/world_" .. worldInfor.worldsName .. ".md";
 
-			if(loginMain.dataSourceType == "gitlab") then
-				worldUrl = "http://git.keepwork.com/" .. loginMain.dataSourceUsername .. "/" .. GitEncoding.base32(SyncMain.foldername.utf8) .. "/repository/archive.zip?ref=master";
-			else
+		local worldUrl = "";
+		if(loginMain.dataSourceType == "gitlab") then
+			worldUrl = "http://git.keepwork.com/" .. loginMain.dataSourceUsername .. "/" .. GitEncoding.base32(SyncMain.foldername.utf8) .. "/repository/archive.zip?ref=" .. worldInfor.commitId;
+		end
 
+		local worldFilePath =  loginMain.username .. "/paracraft/world_" .. worldInfor.worldsName .. ".md";
+
+		HttpRequest:GetUrl(contentUrl, function(data, err)
+			if(err == 404) then
+				local world3D = {
+					worldName	  = worldInfor.worldsName,
+					worldUrl	  = worldUrl,
+					logoUrl		  = worldInfor.preview,
+					desc		  = "",
+					username	  = username,
+					visitCount    = 1,
+					favoriteCount = 1,
+					updateDate	  = worldInfor.modDate,
+					version		  = worldInfor.revision,
+					opusId        = worldInfor.opusId,
+					filesTotals   = worldInfor.filesTotals,
+				}
+
+				world3D = KeepworkGen:setCommand("world3D",world3D);
+
+				SyncMain.worldFile = KeepworkGen:SetAutoGenContent(worldInfor.readme, world3D)
+				SyncMain.worldFile = SyncMain.worldFile .. "\r\n" .. KeepworkGen:setCommand("comment");
+
+				--LOG.std(nil,"debug","worldFile",SyncMain.worldFile);
+
+				SyncMain:uploadService(
+					loginMain.keepWorkDataSource,
+					worldFilePath,
+					SyncMain.worldFile,
+					function(data, err)
+						if(_callback) then
+							_callback();
+						end
+					end,
+					keepworkId
+				);
+			elseif(err == 200 or err == 304) then
+				--local paramsText = KeepworkGen:GetContent(content);
+				--local params     = KeepworkGen:getCommand("world3D", paramsText);
+
+				local world3D = {
+					worldName	  = worldInfor.worldsName,
+					worldUrl	  = worldUrl,
+					logoUrl		  = worldInfor.preview,
+					desc		  = "",
+					username	  = username,
+					visitCount    = 1,
+					favoriteCount = 1,
+					updateDate	  = worldInfor.modDate,
+					version		  = worldInfor.revision,
+					filesTotals   = worldInfor.filesTotals,
+					opusId        = worldInfor.opusId,
+				}
+
+				world3D = KeepworkGen:setCommand("world3D",world3D);
+				SyncMain.worldFile = KeepworkGen:SetAutoGenContent(data, world3D);
+
+				--LOG.std(nil,"debug","worldFile",SyncMain.worldFile);
+
+				SyncMain:updateService(
+					loginMain.keepWorkDataSource,
+					worldFilePath,
+					SyncMain.worldFile,
+					"",
+					function(isSuccess, path)
+						LOG.std(nil,"debug","updateService-worldFile",isSuccess)
+						LOG.std(nil,"debug","updateService-worldFile",path)
+						if(_callback) then
+							_callback();
+						end
+					end,
+					keepworkId
+				);
 			end
-
-			local worldFilePath =  loginMain.username .. "/paracraft/world_" .. worldInfor.worldsName .. ".md";
-
-			for key,value in ipairs(data) do
-				if(value.path == worldFilePath) then
-					hasWorldFile = true;
-				end
-			end
-
-			local function updateWorldFile()
-				if(hasWorldFile) then
-					LOG.std(nil,"debug","hasWorldFile",hasWorldFile);
-					SyncMain:getDataSourceContent(loginMain.keepWorkDataSource, worldFilePath, function(data, err)
-						local content    = Encoding.unbase64(data);
-						local paramsText = KeepworkGen:GetContent(content);
-						local params     = KeepworkGen:getCommand("world3D", paramsText);
-
-						--if(params.version ~= worldInfor.revision) then
-						local world3D = {
-							worldName	  = worldInfor.worldsName,
-							worldUrl	  = worldUrl,
-							logoUrl		  = worldInfor.preview,
-							desc		  = "",
-							username	  = username,
-							visitCount    = 1,
-							favoriteCount = 1,
-							updateDate	  = worldInfor.modDate,
-							version		  = worldInfor.revision,
-							filesTotals   = worldInfor.filesTotals,
-							opusId        = worldInfor.opusId,
-						}
-
-						world3D = KeepworkGen:setCommand("world3D",world3D);
-						SyncMain.worldFile = KeepworkGen:SetAutoGenContent(content, world3D);
-
-						LOG.std(nil,"debug","worldFile",SyncMain.worldFile);
-
-						SyncMain:updateService(
-							loginMain.keepWorkDataSource,
-							worldFilePath,
-							SyncMain.worldFile,
-							"",
-							function(isSuccess, path)
-								LOG.std(nil,"debug","updateService-worldFile",isSuccess)
-								LOG.std(nil,"debug","updateService-worldFile",path)
-								if(_callback) then
-									_callback();
-								end
-							end,
-							keepworkId
-						);
-						--end
-					end, keepworkId)
-				else
-					LOG.std(nil,"debug","hasWorldFile",hasWorldFile);
-					local world3D = {
-						worldName	  = worldInfor.worldsName,
-						worldUrl	  = worldUrl,
-						logoUrl		  = worldInfor.preview,
-						desc		  = "",
-						username	  = username,
-						visitCount    = 1,
-						favoriteCount = 1,
-						updateDate	  = worldInfor.modDate,
-						version		  = worldInfor.revision,
-						opusId        = worldInfor.opusId,
-						filesTotals   = worldInfor.filesTotals,
-					}
-
-					world3D = KeepworkGen:setCommand("world3D",world3D);
-
-					SyncMain.worldFile = KeepworkGen:SetAutoGenContent("", world3D)
-					SyncMain.worldFile = SyncMain.worldFile .. "\n\r" .. worldInfor.readme;
-					SyncMain.worldFile = SyncMain.worldFile .. "\n\r" .. KeepworkGen:setCommand("comment");
-
-					LOG.std(nil,"debug","worldFile",SyncMain.worldFile);
-				
-					SyncMain:uploadService(
-						loginMain.keepWorkDataSource,
-						worldFilePath,
-						SyncMain.worldFile,
-						function(data, err)
-							if(_callback) then
-								_callback();
-							end
-						end,
-						keepworkId
-					);
-				end
-			end
-
-			updateWorldFile();
-		end, nil, keepworkId);
+		end);
 	end
 
 	if(loginMain.dataSourceType == "github") then
-		gen();
+		--gen();
 	elseif(loginMain.dataSourceType == "gitlab") then
 		GitlabService:getProjectIdByName(loginMain.keepWorkDataSource,function(keepworkId)
 			gen(keepworkId);
@@ -1349,10 +1250,13 @@ end
 
 function SyncMain:deleteWorldMD(_path, _callback)
 	local function deleteFile(keepworkId)
-		local path = loginMain.username ..  "/paracraft/world_" ..   _path;
+		local path = loginMain.username ..  "/paracraft/world_" .. _path .. ".md";
+
 		LOG.std(nil,"debug","path",path);
 		SyncMain:deleteFileService(loginMain.keepWorkDataSource, path, "", function(data, err)
-			_callback();
+			if(_callback) then
+				_callback();
+			end
 		end, keepworkId)
 	end
 
@@ -1577,14 +1481,7 @@ function SyncMain.deleteKeepworkWorldsRecord()
 		LOG.std(nil,"debug","deleteKeepworkWorldsRecord",err)
 
 		if(err == 204) then
-			loginMain.RefreshCurrentServerList();
-
 			SyncMain.DeletePage:CloseWindow();
-
-			if(not WorldCommon.GetWorldInfo()) then
-				MainLogin.state.IsLoadMainWorldRequested = nil;
-				MainLogin:next_step();
-			end
 
 			SyncMain:deleteWorldMD(foldername,function()
 				HttpRequest:GetUrl({
@@ -1592,10 +1489,9 @@ function SyncMain.deleteKeepworkWorldsRecord()
 					json = true,
 					headers = {Authorization = "Bearer "..loginMain.token},
 					form = {amount = 100},
-				},function(worldList, err)
-					LOG.std(nil,"debug","worldList-data",worldList);
-					SyncMain:genIndexMD(worldList);
-				end);
+				});
+
+				loginMain.RefreshCurrentServerList();
 			end)
 		end
 	end);
