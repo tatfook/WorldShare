@@ -240,7 +240,14 @@ function loginMain.LoginAction(_page, _callback)
 						},function(data, err)
 							LOG.std(nil,"debug","sitedata",data);
 							local site = data["data"];
-							if(site and not site.siteinfo) then
+							
+							if(not site) then
+								loginMain.closeLoginInfo();
+								_guihelper.MessageBox(L"检查站点失败");
+								return;
+							end
+
+							if(not site.siteinfo) then
 								--创建站点
 								local siteParams = {};
 								siteParams.categoryId = 1;
@@ -265,10 +272,6 @@ function loginMain.LoginAction(_page, _callback)
 								},function(data, err)
 									LOG.std(nil,"debug","new site",data);
 								end);
-							else
-								loginMain.closeLoginInfo();
-								_guihelper.MessageBox(L"检查站点失败");
-								return;
 							end
 
 							loginMain.changeLoginType(3);
