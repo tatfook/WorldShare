@@ -89,21 +89,19 @@ function LocalService:LoadFiles(_worldDir, _curPath, _filter, _nMaxFileLevels, _
 	end
 
 	local result = Files.Find({}, LocalService.path, 0, nMaxFilesNum, filter);
-	local convertLineEnding = {[".xml"] = true, [".txt"] = true, [".md"] = true, [".bmax"] = true};
+	local convertLineEnding = {[".xml"] = true, [".txt"] = true, [".md"] = true};
 
 	for key, value in ipairs(result) do
 		--LOG.std(nil,"debug","LocalService:LoadFiles-value",value);
 		local sExt = value.filename:match("%.[^&.]+$");
 		if(convertLineEnding[sExt]) then
-			LOG.std(nil, "debug", "sExt", value.filename);
+			--LOG.std(nil, "debug", "sExt", value.filename);
 			local newData = "";
 
 			local file = ParaIO.open(_worldDir .. value.filename, "r");
 			if(file:IsValid()) then
 				local binData = file:GetText(0, -1);
 				newData = binData:gsub("\r\n","\n");
-				echo(value.filename);
-				echo(#newData);
 				file:close();
 			end
 
@@ -227,12 +225,12 @@ function LocalService:downloadZip(_foldername, _commitId, _callback)
 			if(ParaAsset.OpenArchive(downloadPath, true)) then
 				local zipParentDir = downloadPath:gsub("[^/\\]+$", "");
 
-				LOG.std(nil,"debug","zipParentDir",zipParentDir);
+				--LOG.std(nil,"debug","zipParentDir",zipParentDir);
 
 				local filesOut = {};
 				commonlib.Files.Find(filesOut, "", 0, 10000, ":.", downloadPath); -- ":.", any regular expression after : is supported. `.` match to all strings. 
 
-				LOG.std(nil,"debug","filesOut", filesOut);
+				--LOG.std(nil,"debug","filesOut", filesOut);
 
 				local bashPath = "worlds/DesignHouse/" .. SyncMain.foldername.default .. "/";
 				local folderCreate = "";
@@ -295,7 +293,7 @@ end
 function LocalService:FileDownloader(_foldername, _path, _callback)
 	local foldername = GitEncoding.base32(SyncMain.foldername.utf8);
 	
-	LOG.std(nil,"debug","FileDownloader","FileDownloader");
+	--LOG.std(nil,"debug","FileDownloader","FileDownloader");
 	local url = "";
 	local downloadDir = "";
 
@@ -305,11 +303,11 @@ function LocalService:FileDownloader(_foldername, _path, _callback)
 		downloadDir = SyncMain.worldDir.default .. _path;
 	end
 
-	LOG.std(nil,"debug","FileDownloader-url",url);
-	LOG.std(nil,"debug","FileDownloader-downloadDir",downloadDir);
+	--LOG.std(nil,"debug","FileDownloader-url",url);
+	--LOG.std(nil,"debug","FileDownloader-downloadDir",downloadDir);
 
 	local Files = FileDownloader:new():Init(_path, url, downloadDir, function(bSuccess, downloadPath)
-		LOG.std(nil,"debug","FileDownloader-downloadPath",downloadPath);
+		--LOG.std(nil,"debug","FileDownloader-downloadPath",downloadPath);
 
 		local content = LocalService:getFileContent(downloadPath);
 

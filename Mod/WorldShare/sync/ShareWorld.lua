@@ -74,7 +74,7 @@ end
 
 function ShareWorld.getWorldSize()
 	SyncMain.tagInfor = WorldCommon.GetWorldInfo();
-	LOG.std(nil,"debug","SyncMain.tagInfor",SyncMain.tagInfor);
+	--LOG.std(nil,"debug","SyncMain.tagInfor",SyncMain.tagInfor);
 
 	return SyncMain.tagInfor.size;
 end
@@ -99,7 +99,7 @@ end
 function ShareWorld.shareNow()
 	ShareWorld.SharePage:CloseWindow();
 
-	LOG.std(nil,"debug","ShareWorld.CompareResult", ShareWorld.CompareResult);
+	--LOG.std(nil,"debug","ShareWorld.CompareResult", ShareWorld.CompareResult);
 
     if(ShareWorld.CompareResult == "remoteBigger") then
         _guihelper.MessageBox("当前本地版本小于远程版本，是否继续上传？", function(res)

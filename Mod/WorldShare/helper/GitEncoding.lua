@@ -34,7 +34,7 @@ function GitEncoding.base32(text)
 			text = "world_" .. text;
 		end
 
-		LOG.std(nil,"debug","text",text);
+		--LOG.std(nil,"debug","text",text);
 
 		return text;
 	else

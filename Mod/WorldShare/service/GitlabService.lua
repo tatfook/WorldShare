@@ -33,7 +33,7 @@ GitlabService.blob = {};
 function GitlabService:apiGet(_url, _callback)
 	_url = loginMain.apiBaseUrl .. "/" .._url
 
-	LOG.std(nil,"debug","apiGet-url",_url);
+	--LOG.std(nil,"debug","apiGet-url",_url);
 	HttpRequest:GetUrl({
 		url     = _url,
 		json    = true,
@@ -42,8 +42,8 @@ function GitlabService:apiGet(_url, _callback)
 			["User-Agent"]    = "npl",
 		},
 	},function(data ,err) 
-		LOG.std(nil,"debug","GitlabService:apiGet-data",data);
-		LOG.std(nil,"debug","GitlabService:apiGet-err",err);
+		--LOG.std(nil,"debug","GitlabService:apiGet-data",data);
+		--LOG.std(nil,"debug","GitlabService:apiGet-err",err);
 		_callback(data, err)
 	end);
 end
@@ -61,8 +61,8 @@ function GitlabService:apiPost(_url, _params, _callback)
 		},
 		form = _params,
 	},function(data ,err) 
-		LOG.std(nil,"debug","GitlabService:apiPost-data",data);
-		LOG.std(nil,"debug","GitlabService:apiPost-err",err);
+		--LOG.std(nil,"debug","GitlabService:apiPost-data",data);
+		--LOG.std(nil,"debug","GitlabService:apiPost-err",err);
 		_callback(data, err)
 	end);
 end
@@ -81,8 +81,8 @@ function GitlabService:apiPut(_url, _params, _callback)
 		},
 		form = _params
 	},function(data ,err) 
-		LOG.std(nil,"debug","GitlabService:apiPut-data",data);
-		LOG.std(nil,"debug","GitlabService:apiPut-err",err);
+		--LOG.std(nil,"debug","GitlabService:apiPut-data",data);
+		--LOG.std(nil,"debug","GitlabService:apiPut-err",err);
 		_callback(data, err)
 	end);
 end
@@ -92,8 +92,8 @@ function GitlabService:apiDelete(_url, _params, _callback)
 
 	local github_token = loginMain.dataSourceToken;
 	
-	LOG.std(nil,"debug","GitlabService:apiDelete-token",github_token);
-	LOG.std(nil,"debug","GitlabService:apiDelete-_url",_url);
+	--LOG.std(nil,"debug","GitlabService:apiDelete-token",github_token);
+	--LOG.std(nil,"debug","GitlabService:apiDelete-_url",_url);
 
 	HttpRequest:GetUrl({
 		method     = "DELETE",
@@ -106,8 +106,8 @@ function GitlabService:apiDelete(_url, _params, _callback)
 		},
 		form = _params,
 	},function(data ,err) 
-		LOG.std(nil,"debug","GitlabService:apiDelete-data",data);
-		LOG.std(nil,"debug","GitlabService:apiDelete-err",err);
+		--LOG.std(nil,"debug","GitlabService:apiDelete-data",data);
+		--LOG.std(nil,"debug","GitlabService:apiDelete-err",err);
 		_callback(data, err)
 	end);
 end
@@ -136,7 +136,7 @@ function GitlabService:getTree(_callback, _commitId, _projectId)
 		url = url .. "?ref=" .. _commitId;
 	end
 
-	LOG.std(nil,"debug","GitlabService:getTree-url",url);
+	--LOG.std(nil,"debug","GitlabService:getTree-url",url);
 
 	GitlabService.blob = {};
 	GitlabService.tree = {};
@@ -145,7 +145,7 @@ function GitlabService:getTree(_callback, _commitId, _projectId)
 		if(err == 404) then
 			_callback(data, err);
 		else
-			LOG.std(nil,"debug","GitlabService:getTree-data",data);
+			--LOG.std(nil,"debug","GitlabService:getTree-data",data);
 			for key,value in ipairs(data) do
 				if(value.type == "tree") then
 					GitlabService.tree[#GitlabService.tree + 1] = value;
@@ -157,8 +157,8 @@ function GitlabService:getTree(_callback, _commitId, _projectId)
 			end
 
 			local fetchTimes = 0;
-			LOG.std(nil,"debug","GitlabService.tree",GitlabService.tree);
-			LOG.std(nil,"debug","GitlabService.blob",GitlabService.blob);
+			--LOG.std(nil,"debug","GitlabService.tree",GitlabService.tree);
+			--LOG.std(nil,"debug","GitlabService.blob",GitlabService.blob);
 
 			local function getSubTree()
 				for key,value in ipairs(GitlabService.tree) do
@@ -253,7 +253,7 @@ end
 -- 写文件
 function GitlabService:writeFile(_filename, _file_content_t, _callback, _projectId) --params, cb, errcb
     local url = GitlabService:getFileUrlPrefix(_projectId) .. _filename;
-	LOG.std(nil,"debug","GitlabService:writeFile",url);
+	--LOG.std(nil,"debug","GitlabService:writeFile",url);
 
 	local params = {
 		commit_message = GitlabService:getCommitMessagePrefix() .. _filename,
@@ -262,8 +262,8 @@ function GitlabService:writeFile(_filename, _file_content_t, _callback, _project
 	}
 
 	GitlabService:apiPost(url, params, function(data, err)
-		LOG.std(nil,"debug","GitlabService:writeFile",data);
-		LOG.std(nil,"debug","GitlabService:writeFile",err);
+		--LOG.std(nil,"debug","GitlabService:writeFile",data);
+		--LOG.std(nil,"debug","GitlabService:writeFile",err);
 
 		if(err == 201) then
 			_callback(true, _filename, data, err);
@@ -284,8 +284,8 @@ function GitlabService:update(_filename, _file_content_t, _sha, _callback, _proj
 	}
 
 	GitlabService:apiPut(url, params, function(data, err)
-		LOG.std(nil,"debug","GitlabService:update",data);
-		LOG.std(nil,"debug","GitlabService:update",err);
+		--LOG.std(nil,"debug","GitlabService:update",data);
+		--LOG.std(nil,"debug","GitlabService:update",err);
 
 		if(err == 200) then
 			_callback(true, _filename, data, err);
@@ -301,8 +301,8 @@ function GitlabService:getContent(_path, _callback, _projectId)
 
 	--LOG.std(nil,"debug","apiGet-url",url);
 	GitlabService:apiGet(url, function(data, err)
-		LOG.std(nil,"debug","apiGet-data",data);
-		LOG.std(nil,"debug","apiGet-err",err);
+		--LOG.std(nil,"debug","apiGet-data",data);
+		--LOG.std(nil,"debug","apiGet-err",err);
 
 		_callback(data.content, err);
 	end);
@@ -337,10 +337,10 @@ function GitlabService:deleteFile(_path, _sha, _callback, _projectId)
 		branch         = 'master',
 	}
 
-	LOG.std(nil,"debug","deleteFile",url);
+	--LOG.std(nil,"debug","deleteFile",url);
 	GitlabService:apiDelete(url, params, function(data, err)
-		LOG.std(nil,"debug","deleteFile",data);
-		LOG.std(nil,"debug","deleteFilerr",err);
+		--LOG.std(nil,"debug","deleteFile",data);
+		--LOG.std(nil,"debug","deleteFilerr",err);
 
 		if(err == 204) then
 			_callback(true);
@@ -398,8 +398,8 @@ function GitlabService:init(_foldername, _callback)
 				GitlabService:apiPost(url, params, function(data,err)
 					if(data.id ~= nil) then
 						GitlabService.projectId = data.id;
-						LOG.std(nil,"debug","GitlabService.projectId",GitlabService.projectId);
-						LOG.std(nil,"debug","err",err);
+						--LOG.std(nil,"debug","GitlabService.projectId",GitlabService.projectId);
+						--LOG.std(nil,"debug","err",err);
 
 						_callback(true,err);
 						return;

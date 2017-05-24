@@ -55,7 +55,7 @@ end
 -- delete cache file if any from temp/WebCache folder
 function FileDownloader:DeleteCacheFile()
 	if(self.cached_filepath) then
-		LOG.std(nil, "info", "FileDownloader", "DeleteCacheFile %s", self.cached_filepath);
+		--LOG.std(nil, "info", "FileDownloader", "DeleteCacheFile %s", self.cached_filepath);
 		ParaIO.DeleteFile(self.cached_filepath);
 		self.cached_filepath = nil;
 	end
@@ -107,14 +107,14 @@ function FileDownloader:Start(src, dest, callbackFunc, cachePolicy)
 						self:DeleteCacheFile();
 					end
 					--  download complete
-					LOG.std(nil, "info", "FileDownloader", "successfully downloaded file from %s to %s", src, dest);
+					--LOG.std(nil, "info", "FileDownloader", "successfully downloaded file from %s to %s", src, dest);
 					OnSucceeded(dest);
 				else
-					LOG.std(nil, "info", "FileDownloader", "failed copy file from %s to %s", src, dest);
+					--LOG.std(nil, "info", "FileDownloader", "failed copy file from %s to %s", src, dest);
 					OnFail(L"无法复制文件到指定目录");
 				end	
 			else
-				LOG.std(nil, "info", "FileDownloader", "successfully downloaded file to %s", entry.payload.cached_filepath);
+				--LOG.std(nil, "info", "FileDownloader", "successfully downloaded file to %s", entry.payload.cached_filepath);
 				OnSucceeded(entry.payload.cached_filepath);
 			end
 		end,

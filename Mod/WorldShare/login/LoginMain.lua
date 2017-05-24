@@ -168,7 +168,7 @@ function loginMain.LoginAction(_page, _callback)
 	loginMain.showLoginInfo();
 
 	loginMain.LoginActionApi(account,password,function (response,err)
-			LOG.std(nil,"debug","response",response);
+			--LOG.std(nil,"debug","response",response);
 			if(type(response) == "table") then
 				if(response['data'] ~= nil and response['data']['userinfo']['_id']) then
 					loginMain.token = response['data']['token'];
@@ -238,7 +238,7 @@ function loginMain.LoginAction(_page, _callback)
 								sitename = "paracraft",
 							},
 						},function(data, err)
-							LOG.std(nil,"debug","sitedata",data);
+							--LOG.std(nil,"debug","sitedata",data);
 							local site = data["data"];
 							
 							if(not site) then
@@ -270,7 +270,7 @@ function loginMain.LoginAction(_page, _callback)
 									headers = {Authorization = "Bearer " .. loginMain.token},
 									form = siteParams,
 								},function(data, err)
-									LOG.std(nil,"debug","new site",data);
+									--LOG.std(nil,"debug","new site",data);
 								end);
 							end
 
@@ -938,7 +938,7 @@ function loginMain.syncWorldsList(_callback)
 		localWorlds = {};
 	end
 
-	LOG.std(nil,"debug","localWorlds-syncWorldsList",localWorlds);
+	--LOG.std(nil,"debug","localWorlds-syncWorldsList",localWorlds);
 	--[[
 		status代码含义:
 		1:仅本地
@@ -948,9 +948,9 @@ function loginMain.syncWorldsList(_callback)
 		5:本地更新
 	]]
 
-	loginMain.getWorldsList(function(data,err)
-		SyncMain.remoteWorldsList = data;
-		LOG.std(nil,"debug","remoteWorldsList-syncWorldsList",SyncMain.remoteWorldsList);
+	loginMain.getWorldsList(function(response, err)
+		SyncMain.remoteWorldsList = response.data;
+		--LOG.std(nil,"debug","remoteWorldsList-syncWorldsList",SyncMain.remoteWorldsList);
 	    -- 处理本地网络同时存在 本地不存在 网络存在 的世界 
 	    for keyDistance,valueDistance in ipairs(SyncMain.remoteWorldsList) do
 	        local isExist = false;
@@ -1020,7 +1020,7 @@ function loginMain.enterWorld(_index)
 	local index = tonumber(_index);
 	SyncMain.selectedWorldInfor = InternetLoadWorld.cur_ds[_index];
 
-	LOG.std(nil,"debug","SyncMain.selectedWorldInfor",SyncMain.selectedWorldInfor);
+	--LOG.std(nil,"debug","SyncMain.selectedWorldInfor",SyncMain.selectedWorldInfor);
 
 	if(SyncMain.selectedWorldInfor.status == 2) then
 		loginMain.downloadWorld();
@@ -1037,7 +1037,7 @@ function loginMain.downloadWorld()
 	SyncMain.worldDir.default = "worlds/DesignHouse/" .. SyncMain.foldername.default .. "/";
 
 	SyncMain.commitId = SyncMain:getGitlabCommitId(SyncMain.foldername.utf8);
-	LOG.std(nil,"debug","SyncMain.commitId",SyncMain.commitId);
+	--LOG.std(nil,"debug","SyncMain.commitId",SyncMain.commitId);
 	ParaIO.CreateDirectory(SyncMain.worldDir.default);
 
 	SyncMain:syncToLocal(function(success, params)
@@ -1065,7 +1065,7 @@ function loginMain.syncNow(_index)
 	local index = tonumber(_index);
 	SyncMain.selectedWorldInfor = InternetLoadWorld.cur_ds[_index];
 
-	LOG.std(nil,"debug","SyncMain.selectedWorldInfor",SyncMain.selectedWorldInfor);
+	--LOG.std(nil,"debug","SyncMain.selectedWorldInfor",SyncMain.selectedWorldInfor);
 	if(loginMain.login_type == 3) then
 		if(SyncMain.selectedWorldInfor.status ~= nil and SyncMain.selectedWorldInfor.status ~= 2)then
 			if(SyncMain.selectedWorldInfor.is_zip)then
@@ -1079,7 +1079,7 @@ function loginMain.syncNow(_index)
 			SyncMain.worldDir.utf8 = "worlds/DesignHouse/" .. SyncMain.foldername.utf8 .. "/";
 			SyncMain.worldDir.default = "worlds/DesignHouse/" .. SyncMain.foldername.default .. "/";
 
-			LOG.std(nil,"debug","SyncMain.worldDir.default",SyncMain.worldDir.default);
+			--LOG.std(nil,"debug","SyncMain.worldDir.default",SyncMain.worldDir.default);
 			SyncMain.syncCompare(true);
 		else
 			loginMain.downloadWorld();
@@ -1114,8 +1114,6 @@ end
 function loginMain.LoginActionApi(_account,_password,_callback)
 	local url = loginMain.site .. "/api/wiki/models/user/login";
 
-	echo(url);
-
 	HttpRequest:GetUrl({
 		url  = url,
 		json = true,
@@ -1145,8 +1143,6 @@ function loginMain.getWorldsList(_callback)
 		headers = {Authorization = "Bearer " .. loginMain.token},
 		form = {amount = 100},
 	};
-
-	echo(params.url);
 
 	HttpRequest:GetUrl(params,_callback);
 end

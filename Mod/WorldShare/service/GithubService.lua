@@ -83,11 +83,11 @@ end
 
 function GithubService:getFileShaList(_foldername, _callback)
 	_foldername = GitEncoding.base32(_foldername);
-	LOG.std(nil,"debug","getFileShaList",_foldername);
+	--LOG.std(nil,"debug","getFileShaList",_foldername);
 	
 	local url = "repos/" .. login.login .. "/" .. _foldername .. "/git/trees/master?recursive=1";
 
-	LOG.std(nil,"debug","url",url);
+	--LOG.std(nil,"debug","url",url);
 	self:githubApiGet(url, _callback);
 end
 
@@ -139,7 +139,7 @@ function GithubService:update(_foldername, _fileName, _fileContent, _sha, _callb
 	--_callback(true,{});
 
 	self:githubApiPut(url,params,function(data)
-		LOG.std(nil,"debug","GithubService:update",data);
+		--LOG.std(nil,"debug","GithubService:update",data);
 		_callback(true,{});
 	end);
 end
@@ -179,7 +179,7 @@ function GithubService:delete(_foldername, _fileName, _sha, _callback)
 	-- _callback(true,{});
 	
 	self:githubApiDelete(url,params,function(data)
-		LOG.std(nil,"debug","GithubService:delete",data);
+		--LOG.std(nil,"debug","GithubService:delete",data);
 		_callback(true,{});
 	end);
 end

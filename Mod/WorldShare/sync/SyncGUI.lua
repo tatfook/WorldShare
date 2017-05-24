@@ -90,10 +90,7 @@ function SyncGUI:updateDataBar(_current, _total, _files)
 		SyncGUI.files = "同步中，请稍后...";
 	end
 
-	echo("SyncGUI.total");
-	echo(SyncGUI.total);
-	echo("SyncGUI.current");
-	echo(SyncGUI.current);
+	LOG.std("SyncGUI", "debug", "NumbersGUI", "Totals : %s , Current : %s, Status : %s", SyncGUI.total , SyncGUI.current, SyncGUI.files);
 
 	SyncGUI.progressbar:SetAttribute("Maximum",SyncGUI.total);
 	SyncGUI.progressbar:SetAttribute("Value",SyncGUI.current);
