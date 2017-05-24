@@ -46,20 +46,28 @@ end
 
 function LocalService:filesFind(_result)
 	if(type(_result) == "table") then
+		local convertLineEnding = {[".xml"] = true, [".txt"] = true, [".md"] = true, [".bmax"] = true};
+
 		for i = 1, #_result do
 			local item = _result[i];
 
 			if(not string.match(item.filename, '/')) then
 				if(item.filesize ~= 0) then
-					-- path = string.gsub(path, 'MyWorld/', 'MyWorld', 1);
 					item.file_path = self.path..'/'..item.filename;
-
-					-- string.gsub(path..item.filename, '//', '/', 1);
 					item.filename = EncodingC.DefaultToUtf8(string.gsub(item.file_path, self.worldDir..'/', '', 1));
 					item.id = item.filename;
-					item.file_content_t = self:getFileContent(item.file_path);
-					--item.file_content = EncodingS.base64(item.file_content_t);
-					item.sha1 = EncodingS.sha1("blob " .. item.filesize .. "\0" .. item.file_content_t, "hex");
+
+					local sExt = item.filename:match("%.[^&.]+$");
+
+					if(convertLineEnding[sExt]) then
+						item.file_content_t = self:getFileContent(item.file_path):gsub("\r\n","\n");
+						item.filesize = #item.file_content_t;
+						item.sha1 = EncodingS.sha1("blob " .. item.filesize .. "\0" .. item.file_content_t, "hex");
+					else
+						item.file_content_t = self:getFileContent(item.file_path);
+						item.sha1 = EncodingS.sha1("blob " .. item.filesize .. "\0" .. item.file_content_t, "hex");
+					end
+
 					item.needChange = true;
 
 					self.output[#self.output+1] = item;
@@ -90,18 +98,6 @@ function LocalService:LoadFiles(_worldDir, _curPath, _filter, _nMaxFileLevels, _
 
 	local result = Files.Find({}, LocalService.path, 0, nMaxFilesNum, filter);
 	LocalService:filesFind(result);
-
-	local convertLineEnding = {[".xml"] = true, [".txt"] = true, [".md"] = true, [".bmax"] = true};
-
-	for key, value in ipairs(LocalService.output) do
-		local sExt = value.filename:match("%.[^&.]+$");
-		if(convertLineEnding[sExt]) then
-			--LOG.std(nil, "debug", "sExt", value.filename);
-			value.file_content_t = value.file_content_t:gsub("\r\n","\n");
-			value.filesize = #value.file_content_t;
-			value.sha1 = EncodingS.sha1("blob " .. value.filesize .. "\0" .. value.file_content_t, "hex");
-		end
-	end
 
 	return LocalService.output;
 end
