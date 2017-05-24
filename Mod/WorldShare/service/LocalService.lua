@@ -89,10 +89,11 @@ function LocalService:LoadFiles(_worldDir, _curPath, _filter, _nMaxFileLevels, _
 	end
 
 	local result = Files.Find({}, LocalService.path, 0, nMaxFilesNum, filter);
+	LocalService:filesFind(result);
+
 	local convertLineEnding = {[".xml"] = true, [".txt"] = true, [".md"] = true};
 
-	for key, value in ipairs(result) do
-		--LOG.std(nil,"debug","LocalService:LoadFiles-value",value);
+	for _, value in ipairs(LocalService.output) do
 		local sExt = value.filename:match("%.[^&.]+$");
 		if(convertLineEnding[sExt]) then
 			--LOG.std(nil, "debug", "sExt", value.filename);
@@ -113,8 +114,6 @@ function LocalService:LoadFiles(_worldDir, _curPath, _filter, _nMaxFileLevels, _
 		end
 	end
 
-	LocalService:filesFind(result);
-	
 	return LocalService.output;
 end
 

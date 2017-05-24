@@ -863,7 +863,7 @@ function SyncMain:syncToDataSource()
 				local LocalIndex  = nil;
 				local curGitFiles = SyncMain.dataSourceFiles[SyncMain.curUpdateIndex];
 
-				if(curGitFiles.type == "blob" and curGitFiles.path ~= ".gitattributes") then
+				if(curGitFiles.type == "blob") then
 					-- 用数据源的文件和本地的文件对比
 					for key,value in ipairs(SyncMain.localFiles) do
 						if(value.filename == curGitFiles.path) then
@@ -902,7 +902,7 @@ function SyncMain:syncToDataSource()
 						LOG.std("SyncMain", "debug", "FilesShaToDSUP", "File : %s, DSSha : %s , LCSha : %s", curGitFiles.path, curGitFiles.sha, SyncMain.localFiles[LocalIndex].sha1);
 
 						if (curGitFiles.sha ~= SyncMain.localFiles[LocalIndex].sha1) then
-							syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, SyncMain.localFiles[LocalIndex].filename .. "上传中");
+							syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, SyncMain.localFiles[LocalIndex].filename .. "更新中");
 							-- 更新已存在的文件
 							SyncMain:updateService(SyncMain.foldername.utf8, SyncMain.localFiles[LocalIndex].filename, SyncMain.localFiles[LocalIndex].file_content_t, curGitFiles.sha, function (bIsUpdate, filename)
 								if (bIsUpdate) then
