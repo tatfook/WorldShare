@@ -227,27 +227,71 @@ function loginMain.LoginAction(_page, _callback)
 
 						--local myWorlds = loginMain.LoginPage:GetNode("myWorlds");
 						--myWorlds:SetAttribute("href", loginMain.personPageUrl);--loginMain.site.."/wiki/mod/worldshare/person/"
-						
-						loginMain.changeLoginType(3);
-						loginMain.closeLoginInfo();
-						loginMain.syncWorldsList();
 
-						if(loginMain.ModalPage) then
-							loginMain.closeModalPage();
-						end
-
-						if(_callback) then
-							_callback();
-						end
-
-						local requestParams = {
-							url  = loginMain.site .. "/api/mod/worldshare/models/worlds",
+						--判断paracraf站点是否存在，不存在则创建
+						HttpRequest:GetUrl({
+							url  = loginMain.site.."/api/wiki/models/website/getDetailInfo",
 							json = true,
 							headers = {Authorization = "Bearer "..loginMain.token},
-							form = {amount = 10000},
-						}
+							form = {
+								username = loginMain.username,
+								sitename = "paracraft",
+							},
+						},function(data, err)
+							LOG.std(nil,"debug","sitedata",data);
+							local site = data["data"];
+							if(site and not site.siteinfo) then
+								--创建站点
+								local siteParams = {};
+								siteParams.categoryId = 1;
+								siteParams.categoryName = "作品网站";
+								siteParams.desc = "paracraft作品集";
+								siteParams.displayName = loginMain.username;
+								siteParams.domain = "paracraft";
+								siteParams.logoUrl = "";
+								siteParams.name = "paracraft";
+								siteParams.styleId = 1;
+								siteParams.styleName = "WIKI样式";
+								siteParams.templateId = 1;
+								siteParams.templateName = "WIKI模板";
+								siteParams.userId = loginMain.userId;
+								siteParams.username = loginMain.username;
 
-						SyncMain:genIndexMD();
+								HttpRequest:GetUrl({
+									url  = loginMain.site .. "/api/wiki/models/website/new",
+									json = true,
+									headers = {Authorization = "Bearer " .. loginMain.token},
+									form = siteParams,
+								},function(data, err)
+									LOG.std(nil,"debug","new site",data);
+								end);
+							else
+								loginMain.closeLoginInfo();
+								_guihelper.MessageBox(L"检查站点失败");
+								return;
+							end
+
+							loginMain.changeLoginType(3);
+							loginMain.closeLoginInfo();
+							loginMain.syncWorldsList();
+
+							if(loginMain.ModalPage) then
+								loginMain.closeModalPage();
+							end
+
+							if(_callback) then
+								_callback();
+							end
+
+							local requestParams = {
+								url  = loginMain.site .. "/api/mod/worldshare/models/worlds",
+								json = true,
+								headers = {Authorization = "Bearer "..loginMain.token},
+								form = {amount = 10000},
+							}
+
+							SyncMain:genIndexMD();
+						end);
 					else
 						--local clientLogin = Page:GetNode("clientLogin");
 						--loginMain.changeLoginType(2);
@@ -255,46 +299,6 @@ function loginMain.LoginAction(_page, _callback)
 						_guihelper.MessageBox(L"数据源不存在，请联系管理员");
 						return;
 					end
-
-					--判断paracraf站点是否存在
-					HttpRequest:GetUrl({
-						url  = loginMain.site.."/api/wiki/models/website/getDetailInfo",
-						json = true,
-						headers = {Authorization = "Bearer "..loginMain.token},
-						form = {
-							username = loginMain.username,
-							sitename = "paracraft",
-						},
-					},function(data, err) 
-						--LOG.std(nil,"debug","sitedata",data);
-						local site = data["data"];
-						if(not site.siteinfo) then
-							--创建站点
-							local siteParams = {};
-							siteParams.categoryId = 1;
-							siteParams.categoryName = "作品网站";
-							siteParams.desc = "paracraft作品集";
-							siteParams.displayName = loginMain.username;
-							siteParams.domain = "paracraft";
-							siteParams.logoUrl = "";
-							siteParams.name = "paracraft";
-							siteParams.styleId = 1;
-							siteParams.styleName = "WIKI样式";
-							siteParams.templateId = 1;
-							siteParams.templateName = "WIKI模板";
-							siteParams.userId = loginMain.userId;
-							siteParams.username = loginMain.username;
-
-							HttpRequest:GetUrl({
-								url  = loginMain.site .. "/api/wiki/models/website/new",
-								json = true,
-								headers = {Authorization = "Bearer " .. loginMain.token},
-								form = siteParams,
-							},function(data, err) 
-								LOG.std(nil,"debug","new site",data);
-							end);
-						end
-					end);
 				else
 					loginMain.closeLoginInfo();
 					_guihelper.MessageBox(L"用户名或者密码错误");
