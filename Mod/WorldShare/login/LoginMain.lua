@@ -714,6 +714,14 @@ function loginMain.setSite()
 	end
 
 	register:SetAttribute("href",loginMain.site .. "/wiki/home");
+
+	if(loginMain.LoginPage) then
+		loginMain.LoginPage:Refresh(0.01);
+	end
+
+	if(loginMain.ModalPage) then
+		loginMain.ModalPage:Refresh(0.01);
+	end
 end
 
 function loginMain.setRememberAuto()

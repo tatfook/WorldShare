@@ -91,26 +91,15 @@ function LocalService:LoadFiles(_worldDir, _curPath, _filter, _nMaxFileLevels, _
 	local result = Files.Find({}, LocalService.path, 0, nMaxFilesNum, filter);
 	LocalService:filesFind(result);
 
-	local convertLineEnding = {[".xml"] = true, [".txt"] = true, [".md"] = true};
+	local convertLineEnding = {[".xml"] = true, [".txt"] = true, [".md"] = true, [".bmax"] = true};
 
-	for _, value in ipairs(LocalService.output) do
+	for key, value in ipairs(LocalService.output) do
 		local sExt = value.filename:match("%.[^&.]+$");
 		if(convertLineEnding[sExt]) then
 			--LOG.std(nil, "debug", "sExt", value.filename);
-			local newData = "";
-
-			local file = ParaIO.open(_worldDir .. value.filename, "r");
-			if(file:IsValid()) then
-				local binData = file:GetText(0, -1);
-				newData = binData:gsub("\r\n","\n");
-				file:close();
-			end
-
-			local file = ParaIO.open(_worldDir .. value.filename, "w");
-			file:write(newData,#newData);
-			file:close();
-
-			value.filesize = #newData;
+			value.file_content_t = value.file_content_t:gsub("\r\n","\n");
+			value.filesize = #value.file_content_t;
+			value.sha1 = EncodingS.sha1("blob " .. value.filesize .. "\0" .. value.file_content_t, "hex");
 		end
 	end
 
