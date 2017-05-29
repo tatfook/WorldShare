@@ -55,7 +55,7 @@
                         <pe:progressbar name="progressbar"  block_bg_autosize = "true" Minimum="0" Maximum="100" Value="0"/>
                     </div>
                     <pe:if condition="<%=SyncGUI.total ~= 0 and SyncGUI.current == SyncGUI.total %>">
-                        <input type="button" name="" onclick="SyncGUI.finish()" value="关闭" class="button_highlight" style="width: 85px;height: 30px;margin-top:40px;margin-left: 180px" />
+                        <input type="button" name="" onclick="SyncGUI.closeWindow()" value="关闭" class="button_highlight" style="width: 85px;height: 30px;margin-top:40px;margin-left: 180px" />
                     </pe:if>
                     <pe:if condition="<%=SyncGUI.total == 0 or SyncGUI.current ~= SyncGUI.total %>">
                         <div style="margin-top:40px;">

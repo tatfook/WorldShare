@@ -61,21 +61,35 @@ function SyncGUI:OnInit()
 	SyncGUI.progressbar = SyncPage:GetNode("progressbar");
 end
 
-function SyncGUI.finish()
-	SyncGUI.isStart = false;
+function SyncGUI.closeWindow()
 	SyncPage:CloseWindow();
 end
 
-function SyncGUI:retry()
-	if(not SyncMain.finish) then
-		--_guihelper.MessageBox(L"同步尚未结束");
-		--return;
+function SyncGUI.finish()
+	SyncMain.finish = true;
+	SyncGUI.isStart = false;
+
+	SyncGUI.files = "正在等待上次同步完成，请稍后...";
+	SyncPage:Refresh(0.01);
+
+	local function checkFinish()
+		commonlib.TimerManager.SetTimeout(function()
+			if(SyncMain.isFetching) then
+				SyncGUI.files = "正在等待上次同步完成，请稍后...";
+				SyncPage:Refresh(0.01);
+				checkFinish();
+			else
+				SyncPage:CloseWindow();
+			end
+		end,100);
 	end
 
+	checkFinish();
+end
+
+function SyncGUI:retry()
 	SyncGUI.finish();
-	--SyncMain:compareRevision();
-	--SyncMain:StartSyncPage();
-	SyncMain.syncCompare(true)
+	SyncMain.syncCompare(true);
 end
 
 function SyncGUI:updateDataBar(_current, _total, _files)

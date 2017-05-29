@@ -59,18 +59,23 @@ function LocalService:filesFind(_result)
 
 					local sExt = item.filename:match("%.[^&.]+$");
 
-					if(convertLineEnding[sExt]) then
-						item.file_content_t = self:getFileContent(item.file_path):gsub("\r\n","\n");
-						item.filesize = #item.file_content_t;
-						item.sha1 = EncodingS.sha1("blob " .. item.filesize .. "\0" .. item.file_content_t, "hex");
+					--echo(sExt);
+					if(sExt == ".bak") then
+						item = false;
 					else
-						item.file_content_t = self:getFileContent(item.file_path);
-						item.sha1 = EncodingS.sha1("blob " .. item.filesize .. "\0" .. item.file_content_t, "hex");
+						if(convertLineEnding[sExt]) then
+							item.file_content_t = self:getFileContent(item.file_path):gsub("\r\n","\n");
+							item.filesize = #item.file_content_t;
+							item.sha1 = EncodingS.sha1("blob " .. item.filesize .. "\0" .. item.file_content_t, "hex");
+						else
+							item.file_content_t = self:getFileContent(item.file_path);
+							item.sha1 = EncodingS.sha1("blob " .. item.filesize .. "\0" .. item.file_content_t, "hex");
+						end
+
+						item.needChange = true;
+
+						self.output[#self.output+1] = item;
 					end
-
-					item.needChange = true;
-
-					self.output[#self.output+1] = item;
 				else
 					self.path = self.path ..'/'.. item.filename;
 					local result = Files.Find({}, self.path, 0, nMaxFilesNum, filter);

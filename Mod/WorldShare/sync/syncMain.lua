@@ -281,7 +281,6 @@ function SyncMain.useLocal()
     if(tonumber(SyncMain.currentRevison) < tonumber(SyncMain.remoteRevison)) then
         SyncMain:useLocalGUI();
     elseif(tonumber(SyncMain.currentRevison) >= tonumber(SyncMain.remoteRevison)) then
-        -- _guihelper.MessageBox("开始同步--将本地大小有变化的文件上传到github"); -- 上传或更新
         SyncMain:syncToDataSource();
     end
 end
@@ -291,8 +290,7 @@ function SyncMain.useRemote()
 
     if(tonumber(SyncMain.remoteRevison) < tonumber(SyncMain.currentRevison)) then
         SyncMain:useDataSourceGUI();
-    elseif(tonumber(SyncMain.remoteRevison) > tonumber(SyncMain.currentRevison)) then
-        -- _guihelper.MessageBox("开始同步--将github大小有变化的文件下载到本地");-- 下载或覆盖
+    elseif(tonumber(SyncMain.remoteRevison) >= tonumber(SyncMain.currentRevison)) then
         SyncMain:syncToLocal();
     end
 end
@@ -373,6 +371,8 @@ function SyncMain:syncToLocal(_callback)
 		local syncGUIIndex = 0;
 		local syncGUIFiles = "";
 
+		SyncMain.finish = false;
+
 		-- LOG.std(nil,"debug","SyncMainGUI",SyncMain.curDownloadIndex);
 		-- LOG.std(nil,"debug","SyncMainGUI",SyncMain.totalDataSourceIndex);
 
@@ -401,16 +401,24 @@ function SyncMain:syncToLocal(_callback)
 
 				_callback(true,params);
 			end
+
+			SyncMain.finish = true;
 		end
 
 		-- 下载新文件
 		function SyncMain.localSync.downloadOne()
-			-- LOG.std(nil,"debug","githubFiles.tree[SyncMain.curDownloadIndex]",githubFiles.tree[SyncMain.curDownloadIndex]);
-			-- LOG.std(nil,"debug","SyncMain.curDownloadIndex",SyncMain.curDownloadIndex);
+			LOG.std("SyncMain","debug","NumbersToLCDL","totals : %s , current : %s", SyncMain.totalDataSourceIndex, SyncMain.curDownloadIndex);
+
+			if(SyncMain.finish) then
+				LOG.std("SyncMain","debug", "强制中断");
+				return;
+			end
 
 			if (SyncMain.dataSourceFiles[SyncMain.curDownloadIndex].needChange) then
 				if(SyncMain.dataSourceFiles[SyncMain.curDownloadIndex].type == "blob") then
 					-- LOG.std(nil,"debug","githubFiles.tree[SyncMain.curDownloadIndex].type",githubFiles.tree[SyncMain.curDownloadIndex].type);
+
+					SyncMain.isFetching = true;
 					LocalService:download(SyncMain.foldername.utf8, SyncMain.dataSourceFiles[SyncMain.curDownloadIndex].path, function (bIsDownload, response)
 						if (bIsDownload) then
 							syncGUIIndex = syncGUIIndex + 1;
@@ -431,6 +439,8 @@ function SyncMain:syncToLocal(_callback)
 							--syncToLocalGUI.finish();
 							--SyncMain.finish = true;
 						end
+
+						SyncMain.isFetching = false;
 					end);
 				end
 			else
@@ -445,6 +455,11 @@ function SyncMain:syncToLocal(_callback)
 
 		-- 删除文件
 		function SyncMain.localSync.deleteOne()
+			if(SyncMain.finish) then
+				LOG.std("SyncMain","debug", "强制中断");
+				return;
+			end
+
 			LocalService:delete(SyncMain.foldername.utf8, SyncMain.localFiles[SyncMain.curUpdateIndex].filename, function (data, err)
 				if (SyncMain.curUpdateIndex == SyncMain.totalLocalIndex) then
 					SyncMain.localSync.downloadOne();
@@ -457,7 +472,13 @@ function SyncMain:syncToLocal(_callback)
 
 		-- 更新本地文件
 		function SyncMain.localSync.updateOne()
-			--LOG.std(nil,"debug","SyncMain.curUpdateIndex ",SyncMain.curUpdateIndex);
+			LOG.std("SyncMain","debug","NumbersToLCUD","totals : %s , current : %s", SyncMain.totalLocalIndex, SyncMain.curUpdateIndex);
+
+			if(SyncMain.finish) then
+				LOG.std("SyncMain","debug", "强制中断");
+				return;
+			end
+
 			local bIsExisted      = false;
 			local dataSourceIndex = nil;
 
@@ -474,12 +495,12 @@ function SyncMain:syncToLocal(_callback)
 			-- 本地是否存在数据源上的文件
 			if (bIsExisted) then
 				SyncMain.dataSourceFiles[dataSourceIndex].needChange = false;
-				-- LOG.std(nil,"debug","self.localFiles[SyncMain.curUpdateIndex ].filename",self.localFiles[SyncMain.curUpdateIndex ].filename);
-				-- LOG.std(nil,"debug","self.localFiles[SyncMain.curUpdateIndex ].sha1",self.localFiles[SyncMain.curUpdateIndex ].sha1);
-				-- LOG.std(nil,"debug","githubFiles.tree[dataSourceIndex].sha",githubFiles.tree[dataSourceIndex].sha);
+				LOG.std("SyncMain", "debug", "FilesShaToLCUP", "File : %s, DSSha : %s , LCSha : %s", SyncMain.dataSourceFiles[dataSourceIndex].path, SyncMain.dataSourceFiles[dataSourceIndex].sha, SyncMain.localFiles[SyncMain.curUpdateIndex].sha1);
 
 				if (SyncMain.localFiles[SyncMain.curUpdateIndex].sha1 ~= SyncMain.dataSourceFiles[dataSourceIndex].sha) then
 					-- 更新已存在的文件
+
+					SyncMain.isFetching = true;
 					LocalService:update(SyncMain.foldername.utf8, SyncMain.dataSourceFiles[dataSourceIndex].path, function (bIsUpdate, response)
 						if (bIsUpdate) then
 							if(response.filename == "revision.xml") then
@@ -500,6 +521,8 @@ function SyncMain:syncToLocal(_callback)
 							--syncToLocalGUI.finish();
 							--SyncMain.finish = true;
 						end
+
+						SyncMain.isFetching = false;
 					end);
 				else
 					syncGUIIndex = syncGUIIndex + 1;
@@ -577,13 +600,7 @@ function SyncMain:syncToDataSource()
 	if(SyncMain:checkWorldSize()) then
 		return;
 	end
-
-	if(not SyncMain.finish) then
-		--_guihelper.MessageBox(L"同步尚未结束");
-		--return;
-	end
 	SyncMain.remoteSync = {};
-	SyncMain.finish = false;
 
 	-- 加载进度UI界面
 	local syncToDataSourceGUI = SyncGUI:new();
@@ -605,6 +622,8 @@ function SyncMain:syncToDataSource()
 			local syncGUItotal = 0;
 			local syncGUIIndex = 0;
 			local syncGUIFiles = "";
+
+			SyncMain.finish = false;
 
 			syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, L'获取文件sha列表');
 
@@ -746,6 +765,7 @@ function SyncMain:syncToDataSource()
 										--LOG.std(nil,"debug","requestParams",requestParams);
 
 										SyncMain:genWorldMD(params, function()
+											SyncMain.finish = true;
 											loginMain.RefreshCurrentServerList();
 										end);
 									end
@@ -772,6 +792,11 @@ function SyncMain:syncToDataSource()
 			function SyncMain.remoteSync.uploadOne()
 				LOG.std("SyncMain", "debug", "NumbersToDSUD", "totals : %s , current : %s", SyncMain.totalLocalIndex, SyncMain.curUploadIndex);
 
+				if(SyncMain.finish) then
+					LOG.std("SyncMain","debug", "强制中断");
+					return;
+				end
+
 				if(SyncMain.localFiles[SyncMain.curUploadIndex].filename == "revision.xml" and SyncMain.localFiles[SyncMain.curUploadIndex].needChange) then
 					--LOG.std(nil,"debug","findRevision");
 					SyncMain.revisionUpload  = true;
@@ -790,8 +815,10 @@ function SyncMain:syncToDataSource()
 				--LOG.std(nil,"debug","SyncMain.localFiles[SyncMain.curUploadIndex]", SyncMain.localFiles[SyncMain.curUploadIndex]);
 
 				if (SyncMain.localFiles[SyncMain.curUploadIndex].needChange) then
-					LOG.std("SyncMain", "debug", "FilesShaToDSUD", "File : %s, 上传中", SyncMain.localFiles[SyncMain.curUploadIndex].filename);
 					SyncMain.localFiles[SyncMain.curUploadIndex].needChange = false;
+					SyncMain.isFetching = true;
+
+					LOG.std("SyncMain", "debug", "FilesShaToDSUD", "File : %s, 上传中", SyncMain.localFiles[SyncMain.curUploadIndex].filename);
 					SyncMain:uploadService(SyncMain.foldername.utf8, SyncMain.localFiles[SyncMain.curUploadIndex].filename, SyncMain.localFiles[SyncMain.curUploadIndex].file_content_t,function (bIsUpload, filename)
 						if (bIsUpload) then
 							LOG.std("SyncMain", "debug", "FilesShaToDSUD", "File : %s, 上传完成", SyncMain.localFiles[SyncMain.curUploadIndex].filename);
@@ -815,6 +842,8 @@ function SyncMain:syncToDataSource()
 							--syncToDataSourceGUI.finish();
 							--SyncMain.finish = true;
 						end
+
+						SyncMain.isFetching = false;
 					end);
 				else
 					LOG.std("SyncMain", "debug", "FilesShaToDSUD", "File : %s, 已更新，跳过", SyncMain.localFiles[SyncMain.curUploadIndex].filename);
@@ -830,8 +859,14 @@ function SyncMain:syncToDataSource()
 
 			-- 删除数据源文件
 			function SyncMain.remoteSync.deleteOne()
+				if(SyncMain.finish) then
+					LOG.std("SyncMain","debug", "强制中断");
+					return;
+				end
+
 				--LOG.std(nil,"debug","deleteOne-status");
 				if(SyncMain.dataSourceFiles[SyncMain.curUpdateIndex].type == "blob") then
+					SyncMain.isFetching = true;
 					SyncMain:deleteFileService(SyncMain.foldername.utf8, SyncMain.dataSourceFiles[SyncMain.curUpdateIndex].path, SyncMain.dataSourceFiles[SyncMain.curUpdateIndex].sha, function (bIsDelete)
 						if (bIsDelete) then
 							SyncMain.curUpdateIndex = SyncMain.curUpdateIndex + 1;
@@ -846,6 +881,8 @@ function SyncMain:syncToDataSource()
 							--syncToDataSourceGUI.finish();
 							--SyncMain.finish = true;
 						end
+
+						SyncMain.isFetching = false;
 					end);
 				else
 					if (SyncMain.curUpdateIndex == SyncMain.totalDataSourceIndex) then  --check whether all files have updated or not. if false, update the next one, if true, upload files.
@@ -860,6 +897,11 @@ function SyncMain:syncToDataSource()
 			-- 更新数据源文件
 			function SyncMain.remoteSync.updateOne()
 				LOG.std("SyncMain", "debug", "NumbersToDSUP", "totals : %s , current : %s", SyncMain.totalDataSourceIndex, SyncMain.curUpdateIndex);
+
+				if(SyncMain.finish) then
+					LOG.std("SyncMain","debug", "强制中断");
+					return;
+				end
 
 				local bIsExisted  = false;
 				local LocalIndex  = nil;
@@ -900,6 +942,7 @@ function SyncMain:syncToDataSource()
 					syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, SyncMain.localFiles[LocalIndex].filename .. "比对中");
 
 					SyncMain.localFiles[LocalIndex].needChange = false;
+					SyncMain.isFetching = true;
 					LOG.std("SyncMain", "debug", "FilesShaToDSUP", "File : %s, DSSha : %s , LCSha : %s", curGitFiles.path, curGitFiles.sha, SyncMain.localFiles[LocalIndex].sha1);
 
 					if (curGitFiles.sha ~= SyncMain.localFiles[LocalIndex].sha1) then
@@ -927,6 +970,8 @@ function SyncMain:syncToDataSource()
 								--syncToDataSourceGUI.finish();
 								--SyncMain.finish = true;
 							end
+
+							SyncMain.isFetching = false;
 						end);
 					else
 						syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, SyncMain.localFiles[LocalIndex].filename .. "版本一致，跳过");
@@ -1000,7 +1045,9 @@ function SyncMain:syncToDataSource()
 					SyncMain.dataSourceFiles = data;
 					SyncMain.totalDataSourceIndex = #SyncMain.dataSourceFiles;
 
-					SyncMain.remoteSync.updateOne();
+					if(SyncMain.totalDataSourceIndex ~= 0)then
+						SyncMain.remoteSync.updateOne();
+					end
 				else
 					SyncMain.remoteSync.uploadOne();
 				end

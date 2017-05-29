@@ -25,10 +25,12 @@ local SyncMain      = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
 
 local GitlabService = commonlib.gettable("Mod.WorldShare.service.GitlabService");
 
-GitlabService.inited = false;
-GitlabService.tree = {};
+GitlabService.inited  = false;
+GitlabService.tree    = {};
 GitlabService.newTree = {};
-GitlabService.blob = {};
+GitlabService.blob    = {};
+GitlabService.getTreePage     = 1;
+GitlabService.getTreePer_page = 100;
 
 function GitlabService:apiGet(_url, _callback)
 	_url = loginMain.apiBaseUrl .. "/" .._url
@@ -130,7 +132,7 @@ function GitlabService:getTree(_callback, _commitId, _projectId)
 		_projectId = GitlabService.projectId;
 	end
 
-	local url = '/projects/' .. _projectId .. '/repository/tree';
+	local url = '/projects/' .. _projectId .. '/repository/tree?';
 	
 	if(_commitId) then
 		url = url .. "?ref=" .. _commitId;
@@ -141,7 +143,7 @@ function GitlabService:getTree(_callback, _commitId, _projectId)
 	GitlabService.blob = {};
 	GitlabService.tree = {};
 
-	GitlabService:apiGet(url, function(data, err)
+	GitlabService:getTreeApi(url, function(data, err)
 		--LOG.std(nil,"debug","GitlabService:getTree-data",data);
 		--LOG.std(nil,"debug","GitlabService:getTree-err",err);
 
@@ -205,6 +207,8 @@ function GitlabService:getTree(_callback, _commitId, _projectId)
 						cbValue.sha = cbValue.id;
 					end
 
+					--echo(GitlabService.blob);
+
 					if(_callback) then
 						_callback(GitlabService.blob);
 					end
@@ -228,7 +232,7 @@ function GitlabService:getSubTree(_callback, _path, _commitId, _projectId)
 	end
 	
 	local tree = {};
-	GitlabService:apiGet(url, function(data, err)
+	GitlabService:getTreeApi(url, function(data, err)
 		for key,value in ipairs(data) do
 			if(value.type == "tree") then
 				tree[#tree + 1] = value;
@@ -243,6 +247,42 @@ function GitlabService:getSubTree(_callback, _path, _commitId, _projectId)
 			_callback(tree, _path, _commitId, _projectId);
 		end
 	end);
+end
+
+function GitlabService:getTreeApi(_url, _callback)
+	local url = _url .. "&page=" .. GitlabService.getTreePage .. "&per_page=" .. GitlabService.getTreePer_page;
+	--echo(url);
+
+	GitlabService:apiGet(url, function(data, err)
+		--echo(data);
+		
+		if(#data == 0)then
+			GitlabService.getTreePage = 1;
+
+			if(GitlabService.tmpTree) then
+				if(_callback) then
+					_callback(GitlabService.tmpTree, err);
+				end
+			else
+				if(_callback) then
+					_callback(data, err);
+				end
+			end
+
+			GitlabService.tmpTree = nil;
+		else
+			if(GitlabService.tmpTree) then
+				for _, value in ipairs(data) do
+					GitlabService.tmpTree[#GitlabService.tmpTree + 1] = value;
+				end
+			else
+				GitlabService.tmpTree = data;
+			end
+
+			GitlabService.getTreePage = GitlabService.getTreePage + 1;
+			GitlabService:getTreeApi(_url, _callback);
+		end
+	end)
 end
 
 -- commit
