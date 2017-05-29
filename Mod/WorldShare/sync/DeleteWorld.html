@@ -19,15 +19,21 @@
             <aries:window mode="thin" width="500" height="270" style="float:left;" title='<%=L"删除世界" %>' onclose="SyncMain.closeDeletePage">
             	<div style="font-size:18px;base-font-size:18px;color:#ffffff;padding:30px;">
                     <div style="margin-top:30px;">
-                        <pe:if condition="<%= selectedWorldInfor.is_zip %>">
+                        <pe:if condition="<%= selectedWorldInfor.server == 'self' %>">
                             你确定要删除：<%= selectedWorldInfor.text .. '.zip' %>世界么？请选择
                         </pe:if>
-                        <pe:if condition="<%= not selectedWorldInfor.is_zip %>">
+                        <pe:if condition="<%= selectedWorldInfor.server == 'local' and selectedWorldInfor.is_zip %>">
+                            你确定要删除：<%= selectedWorldInfor.text .. '.zip' %>世界么？请选择
+                        </pe:if>
+                        <pe:if condition="<%= selectedWorldInfor.server == 'local' and not selectedWorldInfor.is_zip %>">
                             你确定要删除：<%= selectedWorldInfor.foldername %>世界么？请选择
                         </pe:if>
                     </div>
                     <br />
                     <div style="margin-top:30px;">
+                        <pe:if condition="<%= selectedWorldInfor.server == 'self' %>">
+                            <input type="button" onclick="SyncMain.deleteServerWorld" class="button_highlight" style="float:left;width: 130px;height: 30px;" name="" value="删除世界" />
+                        </pe:if>
                         <pe:if condition="<%=loginMain.login_type == 1 or loginMain.login_type == 3 and selectedWorldInfor.status ~= nil and selectedWorldInfor.status ~= 2%>">
                             <input type="button" onclick="SyncMain.deleteWorldLocal" class="button_highlight" style="float:left;width: 130px;height: 30px;" name="" value="只删除本地" />
                         </pe:if>

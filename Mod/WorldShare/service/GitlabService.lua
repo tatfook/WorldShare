@@ -60,7 +60,7 @@ function GitlabService:apiPost(_url, _params, _callback)
 			["content-type"]  = "application/json"
 		},
 		form = _params,
-	},function(data ,err) 
+	},function(data ,err)
 		--LOG.std(nil,"debug","GitlabService:apiPost-data",data);
 		--LOG.std(nil,"debug","GitlabService:apiPost-err",err);
 		_callback(data, err)
@@ -142,10 +142,14 @@ function GitlabService:getTree(_callback, _commitId, _projectId)
 	GitlabService.tree = {};
 
 	GitlabService:apiGet(url, function(data, err)
+		--LOG.std(nil,"debug","GitlabService:getTree-data",data);
+		--LOG.std(nil,"debug","GitlabService:getTree-err",err);
+
 		if(err == 404) then
-			_callback(data, err);
+			if(_callback) then
+				_callback(data, err);
+			end
 		else
-			--LOG.std(nil,"debug","GitlabService:getTree-data",data);
 			for key,value in ipairs(data) do
 				if(value.type == "tree") then
 					GitlabService.tree[#GitlabService.tree + 1] = value;
@@ -161,50 +165,49 @@ function GitlabService:getTree(_callback, _commitId, _projectId)
 			--LOG.std(nil,"debug","GitlabService.blob",GitlabService.blob);
 
 			local function getSubTree()
-				for key,value in ipairs(GitlabService.tree) do
-					GitlabService:getSubTree(function(subTree, subFolderName, _commitId, _projectId)
-						for checkKey,checkValue in ipairs(GitlabService.tree) do
-							if(checkValue.path == subFolderName) then
-								if(not checkValue.alreadyGet) then
-									checkValue.alreadyGet = true;
-								else
-									return;
-								end
-							end
-						end
+				if(#GitlabService.tree ~= 0) then
+					--echo("不等");
+					for key, value in ipairs(GitlabService.tree) do
+						GitlabService:getSubTree(function(subTree, subFolderName, _commitId, _projectId)
+							--echo(subTree);
+							--echo(subFolderName);
+							--echo(_commitId);
+							--echo(_projectId);
 
-						fetchTimes = fetchTimes + 1;
-
-						for subKey,subValue in ipairs(subTree) do
-							GitlabService.newTree[#GitlabService.newTree + 1] = subValue;
-						end
-
-						if(#GitlabService.tree == fetchTimes)then
-							fetchTimes = 0;
-							GitlabService.tree = commonlib.copy(GitlabService.newTree);
-							GitlabService.newTree = {};
-
-							if(#GitlabService.tree == 0) then
-								local returnTree = {};
-								local revision = {};
-								for cbKey,cbValue in ipairs(GitlabService.blob) do
-									cbValue.sha = cbValue.id;
-
-									if(cbValue.path ~= "revision.xml") then
-										returnTree[#returnTree + 1] = cbValue;
+							for checkKey, checkValue in ipairs(GitlabService.tree) do
+								if(checkValue.path == subFolderName) then
+									if(not checkValue.alreadyGet) then
+										checkValue.alreadyGet = true;
 									else
-										revision = cbValue;
+										return;
 									end
 								end
+							end
 
-								returnTree[#returnTree + 1] = revision;
+							fetchTimes = fetchTimes + 1;
 
-								_callback(returnTree);
-							else
+							for subKey, subValue in ipairs(subTree) do
+								GitlabService.newTree[#GitlabService.newTree + 1] = subValue;
+							end
+
+							if(#GitlabService.tree == fetchTimes)then
+								fetchTimes = 0;
+								GitlabService.tree = commonlib.copy(GitlabService.newTree);
+								GitlabService.newTree = {};
+
 								getSubTree();
 							end
-						end
-					end, value.path, _commitId, _projectId);
+						end, value.path, _commitId, _projectId);
+					end
+				elseif(#GitlabService.tree == 0) then
+					--echo("等");
+					for cbKey,cbValue in ipairs(GitlabService.blob) do
+						cbValue.sha = cbValue.id;
+					end
+
+					if(_callback) then
+						_callback(GitlabService.blob);
+					end
 				end
 			end
 
@@ -236,7 +239,9 @@ function GitlabService:getSubTree(_callback, _path, _commitId, _projectId)
 			end
 		end
 
-		_callback(tree, _path, _commitId, _projectId);
+		if(_callback) then
+			_callback(tree, _path, _commitId, _projectId);
+		end
 	end);
 end
 
@@ -268,7 +273,8 @@ function GitlabService:writeFile(_filename, _file_content_t, _callback, _project
 		if(err == 201) then
 			_callback(true, _filename, data, err);
 		else
-			_callback(false, _filename, data, err);
+			GitlabService:update(_filename, _file_content_t, _sha, _callback, _projectId)
+			--_callback(false, _filename, data, err);
 		end
 	end);
 end
@@ -380,32 +386,38 @@ function GitlabService:init(_foldername, _callback)
 	_foldername = GitEncoding.base32(_foldername);
 	local url   = "/projects";
 
-	GitlabService:apiGet(url .. "?owned=true",function(projectList,err)
+	GitlabService:apiGet(url .. "?owned=true",function(projectList, err)
 		if(projectList) then
 			for i=1,#projectList do
 				if (projectList[i].name == _foldername) then
 					GitlabService.projectId = projectList[i].id;
-					_callback(true,err);
+
+					if(_callback) then
+						_callback(true, "exist");
+					end
+
 					return;
 				end
-
-				local params = {
-					name = _foldername,
-					request_access_enabled = true,
-					visibility = "public",
-				};
-
-				GitlabService:apiPost(url, params, function(data,err)
-					if(data.id ~= nil) then
-						GitlabService.projectId = data.id;
-						--LOG.std(nil,"debug","GitlabService.projectId",GitlabService.projectId);
-						--LOG.std(nil,"debug","err",err);
-
-						_callback(true,err);
-						return;
-					end
-				end);
 			end
+
+			local params = {
+				name = _foldername,
+				request_access_enabled = true,
+				visibility = "public",
+			};
+
+			GitlabService:apiPost(url, params, function(data,err)
+				if(data.id ~= nil) then
+					GitlabService.projectId = data.id;
+					--LOG.std(nil,"debug","GitlabService.projectId",GitlabService.projectId);
+					--LOG.std(nil,"debug","err",err);
+					if(_callback) then
+						_callback(true, "create");
+					end
+					
+					return;
+				end
+			end);
 		else
 			_callback(false,err);
 		end

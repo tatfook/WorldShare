@@ -324,18 +324,22 @@ function LocalService:GetZipRevision(_zipWorldDir)
 
 	Files.Find(output, "", 0, 500, ":revision.xml", _zipWorldDir);
 
-	--LOG.std(nil,"debug","output[1].filename",zipParentDir .. output[1].filename);
-	local file = ParaIO.open(zipParentDir .. output[1].filename, "r");
-	local binData;
+	if(#output ~= 0) then
+		--LOG.std(nil,"debug","output[1].filename",zipParentDir .. output[1].filename);
+		local file = ParaIO.open(zipParentDir .. output[1].filename, "r");
+		local binData;
 
-	if(file:IsValid()) then
-		binData = file:GetText(0, -1);
-		--LOG.std(nil,"debug","binData",binData);
-		file:close();
-	end
+		if(file:IsValid()) then
+			binData = file:GetText(0, -1);
+			--LOG.std(nil,"debug","binData",binData);
+			file:close();
+		end
 	
-	ParaAsset.CloseArchive(_zipWorldDir);
-	return binData;
+		ParaAsset.CloseArchive(_zipWorldDir);
+		return binData;
+	else
+		return 0;
+	end
 end
 
 function LocalService:GetTag(_foldername)

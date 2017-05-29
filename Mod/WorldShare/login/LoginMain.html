@@ -214,10 +214,10 @@
                             <pe:repeat DataSource="<%=loginMain.GetWorldType()%>">
                                 <pe:repeatitem style="float:left;">
                                     <pe:if condition='<%=InternetLoadWorld.type_index == Eval("index") %>'>
-                                        <input type="button" value='<%=Eval("text")%>' name='<%=Eval("index")%>' onclick="loginMain: OnChangeType()" class="user_area_world_type_selected" />
+                                        <input type="button" value='<%=Eval("text")%>' name='<%=Eval("index")%>' onclick="loginMain:OnChangeType()" class="user_area_world_type_selected" />
                                     </pe:if>
                                     <pe:if condition='<%=InternetLoadWorld.type_index ~= Eval("index") %>'>
-                                        <input type="button" value='<%=Eval("text")%>' name='<%=Eval("index")%>' onclick="loginMain: OnChangeType()" class="user_area_world_type_unselect" />
+                                        <input type="button" value='<%=Eval("text")%>' name='<%=Eval("index")%>' onclick="loginMain:OnChangeType()" class="user_area_world_type_unselect" />
                                     </pe:if>
                                 </pe:repeatitem>
                             </pe:repeat>
@@ -363,7 +363,10 @@
                                                             <span style="margin-left:10px;"><%=Eval("author") %></span>
                                                         </div>
                                                         <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) == 100%>'>
-                                                            <input type="button" value='<%=L"进入" %>' style="margin-left:225px;min-width:60px;height:46px;font-size:12px;font-weight:bold;" onclick="loginMain.enterWorld()" name='<%=Eval("index")%>' class="mc_button_blue" />
+                                                            <div style="margin-left:208px;margin-top:10px;">
+                                                                <input type="button" class="share_button" style="background:url(textures/worldshare_32bits.png#78 46 48 48)" onclick='loginMain.deleteWorld()' tooltip="删除" name='<%=Eval("index")%>' /><!-- 删除 -->
+                                                                <input type="button" class="share_button" style="background:url(textures/worldshare_32bits.png#20 46 48 48)" onclick="loginMain.enterWorld()" tooltip="进入" name='<%=Eval("index")%>' /><!-- 进入 -->
+                                                            </div>
                                                         </pe:if>
                                                         <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) < 100 %>'>
                                                             <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) >= 0 %>'>
@@ -425,7 +428,7 @@
                                                         </div>
                                                     </div>
                                                     <div align="right" style="position:relative;width:30px;height:30px;margin-right:13px;margin-top:20px;">
-                                                        <input type="button" class="share_button" style="background:url(textures/worldshare_32bits.png#20 130 48 48:6 6 6 6)" onclick="loginMain.enterWorld()" name='<%=Eval("index")%>' /><!--进入-->
+                                                        <input type="button" class="share_button" style="background:url(textures/worldshare_32bits.png#20 46 48 48)" onclick="loginMain.enterWorld()" name='<%=Eval("index")%>' /><!--进入-->
                                                     </div>
                                                 </pe:if>
                                                 <pe:if condition='<%= loginMain.current_type == 2%>'>
@@ -441,6 +444,11 @@
                                                             <span style="margin-left:10px;"><%=Eval("author") %></span>
                                                         </div>
                                                     </div>
+                                                    <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) == 100%>'>
+                                                        <div style="position:relative;margin-left:246px;margin-top: 20px;">
+                                                            <input type="button" class="share_button" style="background:url(textures/worldshare_32bits.png#20 46 48 48)" onclick="loginMain.enterWorld()" tooltip="进入" name='<%=Eval("index")%>' /><!-- 进入 -->
+                                                        </div>
+                                                    </pe:if>
                                                 </pe:if>
                                             </div>
                                         </pe:if>

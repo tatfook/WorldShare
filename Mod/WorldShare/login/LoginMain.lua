@@ -648,22 +648,27 @@ function loginMain.getRememberPassword()
 			for value in string.gmatch(fileContent,"[^|]+") do
 				PWD[#PWD+1] = value;
 			end
+			
+			if(PWD[1]) then
+				page:SetNodeValue("account", PWD[1]);
+			end
 
-			page:SetNodeValue("account", PWD[1]);
-			page:SetNodeValue("password",Encoding.PasswordDecodeWithMac(PWD[2]));
+			if(PWD[2]) then
+				page:SetNodeValue("password",Encoding.PasswordDecodeWithMac(PWD[2]));
+			end
 
 			page:GetNode("keepwork"):SetAttribute("selected",nil);
 			page:GetNode("keepworkDev"):SetAttribute("selected",nil);
 			page:GetNode("keepworkTest"):SetAttribute("selected",nil);
 			page:GetNode("local"):SetAttribute("selected",nil);
 
-			if(PWD[3] == "keepwork") then
+			if(PWD[3] and PWD[3] == "keepwork") then
 				page:GetNode("keepwork"):SetAttribute("selected","selected");
-			elseif(PWD[3] == "keepworkDev") then
+			elseif(PWD[3] and PWD[3] == "keepworkDev") then
 				page:GetNode("keepworkDev"):SetAttribute("selected","selected");
-			elseif(PWD[3] == "keepworkTest") then
+			elseif(PWD[3] and PWD[3] == "keepworkTest") then
 				page:GetNode("keepworkTest"):SetAttribute("selected","selected");
-			elseif(PWD[3] == "local") then
+			elseif(PWD[3] and PWD[3] == "local") then
 				page:GetNode("local"):SetAttribute("selected","selected");
 			end
 
@@ -845,13 +850,13 @@ end
 function loginMain.RefreshCurrentServerList()
 	loginMain.refreshing = true;
 
-	if(loginMain.login_type == 1) then
+	if(loginMain.current_type == 1 and loginMain.login_type == 1) then
 		loginMain.getLocalWorldList(function()
 			loginMain.changeRevision(function()
 				loginMain.refreshing = false;
 			end);
 		end);
-	elseif(loginMain.login_type == 3) then
+	elseif(loginMain.current_type == 1 and loginMain.login_type == 3) then
 		loginMain.getLocalWorldList(function()
 			loginMain.changeRevision(function()
 				loginMain.syncWorldsList(function()
@@ -859,6 +864,16 @@ function loginMain.RefreshCurrentServerList()
 				end);
 			end);
 		end);
+	end
+
+	if(loginMain.current_type == 2) then
+		local ServerPage = InternetLoadWorld.GetCurrentServerPage();
+
+		if(not ServerPage.isFetching) then
+			InternetLoadWorld.FetchServerPage(ServerPage);
+		end
+
+		loginMain.refreshing = false;
 	end
 end
 
@@ -1099,8 +1114,6 @@ function loginMain.syncNow(_index)
 end
 
 function loginMain.deleteWorld(_index)
-	--loginMain.LoginPage:CloseWindow();
-
 	local index = tonumber(_index);
 	SyncMain.selectedWorldInfor = InternetLoadWorld.cur_ds[_index];
 

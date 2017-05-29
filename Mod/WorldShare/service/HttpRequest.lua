@@ -19,7 +19,9 @@ function HttpRequest:GetUrl(_params,_callback)
 		--LOG.std(nil,"debug","System ERR",{err});
 
 		if(err == 200 or err == 201 or err == 202 or err == 204) then
-			_callback(data,err);
+			if(_callback) then
+				_callback(data,err);
+			end
 			return;
 		else
 			HttpRequest:retry(err, msg, data, _params, _callback);
@@ -31,18 +33,24 @@ function HttpRequest:retry(_err, _msg, _data, _params, _callback)
 	--LOG.std(nil,"debug","HttpRequest ERR",{_err});
 
 	if(_err == 422 or _err == 404 or _err == 409 or _err == 401) then -- 失败时可直接返回的代码
-		_callback(_data,_err); 
+		if(_callback) then
+			_callback(_data,_err);
+		end
 		return;
 	end
 
 	if(HttpRequest.tryTimes >= 3) then
-		_callback(_data,_err);
+		if(_callback) then
+			_callback(_data,_err);
+		end
 		HttpRequest.tryTimes = 0;
 		return;
 	end
 
 	if(_err == 200 or _err == 201 or _err == 204) then -- 成功时可直接返回的代码
-		_callback(_data,_err);
+		if(_callback) then
+			_callback(_data,_err);
+		end
 		HttpRequest.tryTimes = 0;
 		return
 	else

@@ -131,7 +131,7 @@ function SyncMain:compareRevision(_LoginStatus, _callback)
 			SyncMain.tagInfor = WorldCommon.GetWorldInfo();
 			--LOG.std(nil,"debug","SyncMain.tagInfor",SyncMain.tagInfor);
 
-			SyncMain.worldDir.default = GameLogic.GetWorldDirectory();
+			SyncMain.worldDir.default = GameLogic.GetWorldDirectory():gsub("\\","/");
 			SyncMain.worldDir.utf8    = Encoding.DefaultToUtf8(SyncMain.worldDir.default);
 
 			--LOG.std(nil,"debug","SyncMain.worldDir.utf8",SyncMain.worldDir.utf8)
@@ -770,8 +770,7 @@ function SyncMain:syncToDataSource()
 
 			-- 上传新文件
 			function SyncMain.remoteSync.uploadOne()
-				--LOG.std(nil,"debug","uploadOne-status",SyncMain.curUploadIndex);
-				--LOG.std(nil,"debug","SyncMain.totalLocalIndex",SyncMain.totalLocalIndex);
+				LOG.std("SyncMain", "debug", "NumbersToDSUD", "totals : %s , current : %s", SyncMain.totalLocalIndex, SyncMain.curUploadIndex);
 
 				if(SyncMain.localFiles[SyncMain.curUploadIndex].filename == "revision.xml" and SyncMain.localFiles[SyncMain.curUploadIndex].needChange) then
 					--LOG.std(nil,"debug","findRevision");
@@ -791,9 +790,11 @@ function SyncMain:syncToDataSource()
 				--LOG.std(nil,"debug","SyncMain.localFiles[SyncMain.curUploadIndex]", SyncMain.localFiles[SyncMain.curUploadIndex]);
 
 				if (SyncMain.localFiles[SyncMain.curUploadIndex].needChange) then
+					LOG.std("SyncMain", "debug", "FilesShaToDSUD", "File : %s, 上传中", SyncMain.localFiles[SyncMain.curUploadIndex].filename);
 					SyncMain.localFiles[SyncMain.curUploadIndex].needChange = false;
 					SyncMain:uploadService(SyncMain.foldername.utf8, SyncMain.localFiles[SyncMain.curUploadIndex].filename, SyncMain.localFiles[SyncMain.curUploadIndex].file_content_t,function (bIsUpload, filename)
 						if (bIsUpload) then
+							LOG.std("SyncMain", "debug", "FilesShaToDSUD", "File : %s, 上传完成", SyncMain.localFiles[SyncMain.curUploadIndex].filename);
 							syncGUIIndex = syncGUIIndex + 1;
 							syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, filename .. " （" .. loginMain.GetWorldSize(SyncMain.localFiles[SyncMain.curUploadIndex].filesize, "KB") .. "） " .. "上传完成");
 
@@ -805,17 +806,18 @@ function SyncMain:syncToDataSource()
 								SyncMain.remoteSync.uploadOne(); --继续递归上传
 							end
 						else
-							--_guihelper.MessageBox(L"上传失败");
-							--syncGUIIndex = syncGUIIndex + 1;
-							--syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, filename);
+							_guihelper.MessageBox(SyncMain.localFiles[SyncMain.curUploadIndex].filename .. "上传失败");
+							LOG.std("SyncMain", "debug", "FilesShaToDSUD", "File : %s, 上传失败", SyncMain.localFiles[SyncMain.curUploadIndex].filename);
+
+							syncGUIIndex = syncGUIIndex + 1;
+							syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, SyncMain.localFiles[SyncMain.curUploadIndex].filename .. "上传失败");
 
 							--syncToDataSourceGUI.finish();
 							--SyncMain.finish = true;
 						end
 					end);
 				else
---					syncGUIIndex = syncGUIIndex + 1;
---					syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, SyncMain.localFiles[SyncMain.curUploadIndex].filename);
+					LOG.std("SyncMain", "debug", "FilesShaToDSUD", "File : %s, 已更新，跳过", SyncMain.localFiles[SyncMain.curUploadIndex].filename);
 
 					if (SyncMain.curUploadIndex == SyncMain.totalLocalIndex) then
 						SyncMain.remoteSync.finish();
@@ -863,98 +865,90 @@ function SyncMain:syncToDataSource()
 				local LocalIndex  = nil;
 				local curGitFiles = SyncMain.dataSourceFiles[SyncMain.curUpdateIndex];
 
-				if(curGitFiles.type == "blob") then
-					-- 用数据源的文件和本地的文件对比
-					for key,value in ipairs(SyncMain.localFiles) do
-						if(value.filename == curGitFiles.path) then
-							bIsExisted  = true;
-							LocalIndex  = key; 
-							break;
-						end
+				-- 用数据源的文件和本地的文件对比
+				for key,value in ipairs(SyncMain.localFiles) do
+					if(value.filename == curGitFiles.path) then
+						bIsExisted  = true;
+						LocalIndex  = key; 
+						break;
+					end
+				end
+
+				if(bIsExisted and SyncMain.localFiles[LocalIndex].filename == "revision.xml") then
+					--LOG.std(nil,"debug","findUpdateRevision");
+					SyncMain.revisionUpdate  = true;
+					SyncMain.revisionContent = SyncMain.localFiles[LocalIndex].file_content_t;
+					SyncMain.revisionSha1    = SyncMain.localFiles[LocalIndex].sha1;
+					SyncMain.localFiles[LocalIndex].needChange = false;
+
+					if (SyncMain.curUpdateIndex == SyncMain.totalDataSourceIndex) then
+						SyncMain.remoteSync.uploadOne();
+					else
+						SyncMain.curUpdateIndex = SyncMain.curUpdateIndex + 1; -- 如果不等最大计数则更新
+						SyncMain.remoteSync.updateOne();
 					end
 
-					if(bIsExisted and SyncMain.localFiles[LocalIndex].filename == "revision.xml") then
-						--LOG.std(nil,"debug","findUpdateRevision");
-						SyncMain.revisionUpdate  = true;
-						SyncMain.revisionContent = SyncMain.localFiles[LocalIndex].file_content_t;
-						SyncMain.revisionSha1    = SyncMain.localFiles[LocalIndex].sha1;
-						SyncMain.localFiles[LocalIndex].needChange = false;
+					return;
+				end
 
-						if (SyncMain.curUpdateIndex == SyncMain.totalDataSourceIndex) then
-							SyncMain.remoteSync.uploadOne();
-						else
-							SyncMain.curUpdateIndex = SyncMain.curUpdateIndex + 1; -- 如果不等最大计数则更新
-							SyncMain.remoteSync.updateOne();
-						end
+				--LOG.std(nil, "debug", "LocalIndex", LocalIndex);
+				--LOG.std(nil, "debug", "SyncMain.localFiles[LocalIndex]", SyncMain.localFiles[LocalIndex]);
+				--LOG.std(nil,"debug","dataSourceFiles",curGitFiles.path);
 
-						return;
-					end
+				if (bIsExisted) then
+					syncGUIIndex = syncGUIIndex + 1;
+					syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, SyncMain.localFiles[LocalIndex].filename .. "比对中");
 
-					--LOG.std(nil, "debug", "LocalIndex", LocalIndex);
-					--LOG.std(nil, "debug", "SyncMain.localFiles[LocalIndex]", SyncMain.localFiles[LocalIndex]);
-					--LOG.std(nil,"debug","dataSourceFiles",curGitFiles.path);
+					SyncMain.localFiles[LocalIndex].needChange = false;
+					LOG.std("SyncMain", "debug", "FilesShaToDSUP", "File : %s, DSSha : %s , LCSha : %s", curGitFiles.path, curGitFiles.sha, SyncMain.localFiles[LocalIndex].sha1);
 
-					if (bIsExisted) then
-						syncGUIIndex = syncGUIIndex + 1;
-						syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, SyncMain.localFiles[LocalIndex].filename .. "比对中");
+					if (curGitFiles.sha ~= SyncMain.localFiles[LocalIndex].sha1) then
+						syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, SyncMain.localFiles[LocalIndex].filename .. "更新中");
+						-- 更新已存在的文件
+						SyncMain:updateService(SyncMain.foldername.utf8, SyncMain.localFiles[LocalIndex].filename, SyncMain.localFiles[LocalIndex].file_content_t, curGitFiles.sha, function (bIsUpdate, filename)
+							if (bIsUpdate) then
+								syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, filename .. "更新完成");
 
-						SyncMain.localFiles[LocalIndex].needChange = false;
-						LOG.std("SyncMain", "debug", "FilesShaToDSUP", "File : %s, DSSha : %s , LCSha : %s", curGitFiles.path, curGitFiles.sha, SyncMain.localFiles[LocalIndex].sha1);
-
-						if (curGitFiles.sha ~= SyncMain.localFiles[LocalIndex].sha1) then
-							syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, SyncMain.localFiles[LocalIndex].filename .. "更新中");
-							-- 更新已存在的文件
-							SyncMain:updateService(SyncMain.foldername.utf8, SyncMain.localFiles[LocalIndex].filename, SyncMain.localFiles[LocalIndex].file_content_t, curGitFiles.sha, function (bIsUpdate, filename)
-								if (bIsUpdate) then
-									syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, filename .. "上传完成");
-
-									if (SyncMain.curUpdateIndex == SyncMain.totalDataSourceIndex) then
+								if (SyncMain.curUpdateIndex == SyncMain.totalDataSourceIndex) then
 --										for key,value in ipairs(SyncMain.localFiles) do
 --											LOG.std(nil,"debug","filename",value.filename);
 --											LOG.std(nil,"debug","needChange",value.needChange);
 --										end
 										
-										SyncMain.remoteSync.uploadOne();
-									else
-										SyncMain.curUpdateIndex = SyncMain.curUpdateIndex + 1; -- 如果不等最大计数则更新
-										SyncMain.remoteSync.updateOne();
-									end
+									SyncMain.remoteSync.uploadOne();
 								else
-									_guihelper.MessageBox(L"更新失败");
-									syncGUIIndex = syncGUIIndex + 1;
-									syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, filename);
-									--syncToDataSourceGUI.finish();
-									--SyncMain.finish = true;
+									SyncMain.curUpdateIndex = SyncMain.curUpdateIndex + 1; -- 如果不等最大计数则更新
+									SyncMain.remoteSync.updateOne();
 								end
-							end);
-						else
-							syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, SyncMain.localFiles[LocalIndex].filename .. "版本一致，跳过");
-
-							if (SyncMain.curUpdateIndex == SyncMain.totalDataSourceIndex) then
-								for key,value in ipairs(SyncMain.localFiles) do
-									--LOG.std(nil,"debug","filename",value.filename);
-									--LOG.std(nil,"debug","needChange",value.needChange);
-								end
-								SyncMain.remoteSync.uploadOne();
 							else
-								SyncMain.curUpdateIndex = SyncMain.curUpdateIndex + 1;
-								SyncMain.remoteSync.updateOne();
+								_guihelper.MessageBox(L"更新失败");
+								syncGUIIndex = syncGUIIndex + 1;
+								syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, filename);
+								--syncToDataSourceGUI.finish();
+								--SyncMain.finish = true;
 							end
-						end
+						end);
 					else
-						-- LOG.std(nil,"debug","delete-filename",self.localFiles[LocalIndex].filename);
-						-- LOG.std(nil,"debug","delete-sha1",self.localFiles[LocalIndex].filename);
+						syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, SyncMain.localFiles[LocalIndex].filename .. "版本一致，跳过");
 
-						-- 如果过数据源不删除存在，则删除本地的文件
-						SyncMain.remoteSync.deleteOne();
+						if (SyncMain.curUpdateIndex == SyncMain.totalDataSourceIndex) then
+							--for key,value in ipairs(SyncMain.localFiles) do
+								--LOG.std(nil,"debug","filename",value.filename);
+								--LOG.std(nil,"debug","needChange",value.needChange);
+							--end
+
+							SyncMain.remoteSync.uploadOne();
+						else
+							SyncMain.curUpdateIndex = SyncMain.curUpdateIndex + 1;
+							SyncMain.remoteSync.updateOne();
+						end
 					end
 				else
-					if (SyncMain.curUpdateIndex == SyncMain.totalDataSourceIndex) then
-						SyncMain.remoteSync.uploadOne();
-					else
-						SyncMain.curUpdateIndex = SyncMain.curUpdateIndex + 1;
-						SyncMain.remoteSync.updateOne();
-					end
+					-- LOG.std(nil,"debug","delete-filename",self.localFiles[LocalIndex].filename);
+					-- LOG.std(nil,"debug","delete-sha1",self.localFiles[LocalIndex].filename);
+
+					-- 如果过数据源不删除存在，则删除本地的文件
+					SyncMain.remoteSync.deleteOne();
 				end
 			end
 
@@ -1017,23 +1011,21 @@ function SyncMain:syncToDataSource()
 	------------------------------------------------------------------------
 
 	if(SyncMain.remoteRevison == 0) then
-		SyncMain:create(SyncMain.foldername.utf8,function(data, err)
+		--LOG.std("SyncMain","debug","SyncMain:syncToDataSource","首次同步");
+		SyncMain:create(SyncMain.foldername.utf8,function(data, status)
 			--LOG.std(nil,"debug","SyncMain:create",data);
-			--LOG.std(nil,"debug","SyncMain:create",err);
+			--LOG.std(nil,"debug","SyncMain:create",status);
 
-			if(data == true or err == 422 or err == 201) then
+			if(data == true) then
 				syncToDataSourceGo();
 			else
-				--if(data.name ~= self.foldername) then
 				_guihelper.MessageBox(L"数据源创建失败");
 				syncToDataSourceGUI.finish();
 				return;
-				--end
 			end
 		end);
 	else
-		--LOG.std(nil,"debug","SyncMain:syncToGithub","非首次同步");
-
+		--LOG.std("SyncMain","debug","SyncMain:syncToDataSource","非首次同步");
 		if(loginMain.dataSourceType == "gitlab") then
 			SyncMain:setGitlabProjectId(SyncMain.foldername.utf8);
 		end
@@ -1288,6 +1280,18 @@ function SyncMain.deleteWorld()
 	});
 end
 
+function SyncMain.deleteServerWorld()
+	local zipPath = SyncMain.selectedWorldInfor.localpath;
+
+	if(ParaIO.DeleteFile(zipPath)) then
+		loginMain.RefreshCurrentServerList();
+	else
+		_guihelper.MessageBox(L"无法删除可能您没有足够的权限"); 
+	end
+
+	SyncMain.DeletePage:CloseWindow();
+end
+
 function SyncMain.deleteWorldLocal(_callback)
 	--local world      = InternetLoadWorld:GetCurrentWorld();
 	local foldername = SyncMain.selectedWorldInfor.foldername;
@@ -1333,11 +1337,6 @@ function SyncMain.deleteWorldLocal(_callback)
 
 			SyncMain.DeletePage:CloseWindow();
 			loginMain.RefreshCurrentServerList();
-
-			if(not WorldCommon.GetWorldInfo()) then
-				MainLogin.state.IsLoadMainWorldRequested = nil;
-				MainLogin:next_step();
-			end
 		end
 	end
 
