@@ -61,7 +61,6 @@ end
 
 function SyncMain:init()
 	--LOG.std(nil, "debug", "SyncMain", "init");
-	
 	SyncMain.worldName = nil;
 
 	-- 没有登陆则直接使用离线模式
@@ -145,7 +144,7 @@ function SyncMain:compareRevision(_LoginStatus, _callback)
 			--LOG.std(nil,"debug","selectedWorldInfor-old",SyncMain.selectedWorldInfor);
 			loginMain.RefreshCurrentServerList();
 
-			if(SyncMain.selectedWorldInfor and SyncMain.selectedWorldInfor.is_zip) then
+			if(GameLogic.IsReadOnly()) then
 				_guihelper.MessageBox(L"不能同步ZIP文件");
 				_callback("zip");
 				return;
