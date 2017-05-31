@@ -441,8 +441,8 @@ end
 function loginMain.OnSwitchWorld(index)
 	InternetLoadWorld.OnSwitchWorld(index);
 
-	local selected_world = InternetLoadWorld.cur_ds[index];
-	echo(selected_world);
+--	local selected_world = InternetLoadWorld.cur_ds[index];
+--	echo(selected_world);
 end
 
 function loginMain.GetNetSpeed()
