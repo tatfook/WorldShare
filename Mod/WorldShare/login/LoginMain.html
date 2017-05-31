@@ -359,7 +359,7 @@
                                                     <div>
                                                         <div class="share_world_infor" style="position:relative;margin-left:5px;margin-top:18px;">
                                                             <span style="margin-left:0px;">v<%=loginMain.GetCurWorldInfo("revision",Eval("index")) %></span>
-                                                            <span style="margin-left:10px;"><%=loginMain.GetWorldSize(Eval("size")) %></span>
+                                                            <span style="margin-left:10px;"><%=Eval("size")%>M</span>
                                                             <span style="margin-left:10px;"><%=Eval("author") %></span>
                                                         </div>
                                                         <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) == 100%>'>
@@ -440,7 +440,7 @@
                                                         </div>
                                                         <div class="share_world_infor" style="margin-left:5px;padding-top:5px;">
                                                             <span style="margin-left:0px;">v<%=loginMain.GetCurWorldInfo("revision",Eval("index")) %></span>
-                                                            <span style="margin-left:10px;"><%=loginMain.GetWorldSize(Eval("size")) %></span>
+                                                            <span style="margin-left:10px;"><%=Eval("size") %>M</span>
                                                             <span style="margin-left:10px;"><%=Eval("author") %></span>
                                                         </div>
                                                     </div>
