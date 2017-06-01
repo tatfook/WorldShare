@@ -169,6 +169,10 @@ function SyncMain:compareRevision(_LoginStatus, _callback)
 			--LOG.std(nil,"debug","SyncMain.localFiles",value.filename);
 		end
 
+		if(GitlabService:checkSpecialCharacter(SyncMain.foldername.utf8))then
+			return;
+		end
+
 		local hasRevision = false;
 		for key,value in ipairs(SyncMain.localFiles) do
 			--LOG.std(nil,"debug","filename",value.filename);
@@ -746,18 +750,23 @@ function SyncMain:syncToDataSource()
 										Authorization    = "Bearer " .. loginMain.token,
 										["content-type"] = "application/json",
 									},
-								},function(data, err)
-									--LOG.std(nil,"debug","finish",data);
+								},function(response, err)
+									--LOG.std(nil,"debug","finish",response);
 									--LOG.std(nil,"debug","finish",err);
 
 									if(err == 200) then
-										params.opusId = data.msg.opusId;
+										if(response.error.id == 0) then
+											params.opusId = response.data.opusId;
+										else
+											_guihelper.MessageBox(L"更新服务器列表失败");
+											return;
+										end
 
 										local requestParams = {
 											url  = loginMain.site .. "/api/mod/worldshare/models/worlds",
 											json = true,
 											headers = {Authorization = "Bearer "..loginMain.token},
-											form = {amount = 10000},
+											form = {amount = 1000},
 										}
 
 										--LOG.std(nil,"debug","requestParams",requestParams);
@@ -1493,10 +1502,6 @@ function SyncMain.deleteWorldGitlab()
 					SyncMain.deleteKeepworkWorldsRecord();
 				else
 					_guihelper.MessageBox(L"远程仓库不存在，请联系管理员");
-					if(not WorldCommon.GetWorldInfo()) then
-						MainLogin.state.IsLoadMainWorldRequested = nil;
-						MainLogin:next_step();
-					end
 				end
 			end);
 	    end
@@ -1507,7 +1512,7 @@ function SyncMain.deleteKeepworkWorldsRecord()
 	local foldername = SyncMain.selectedWorldInfor.foldername;
 	local url = loginMain.site .. "/api/mod/worldshare/models/worlds";
 
-	--LOG.std(nil,"debug","deleteKeepworkWorldsRecord",url);
+	LOG.std(nil,"debug","deleteKeepworkWorldsRecord",url);
 	--LOG.std(nil,"debug","deleteKeepworkWorldsRecord",foldername);
 	--LOG.std(nil,"debug","deleteKeepworkWorldsRecord",loginMain.token);
 
@@ -1522,20 +1527,11 @@ function SyncMain.deleteKeepworkWorldsRecord()
 			Authorization = "Bearer " .. loginMain.token,
 		},
 	},function(data, err)
-		--LOG.std(nil,"debug","deleteKeepworkWorldsRecord",data)
-		--LOG.std(nil,"debug","deleteKeepworkWorldsRecord",err)
+		LOG.std(nil,"debug","deleteKeepworkWorldsRecord",data)
+		LOG.std(nil,"debug","deleteKeepworkWorldsRecord",err)
 
-		if(err == 204) then
-			SyncMain.DeletePage:CloseWindow();
-
+		if(err == 204 or err == 200) then
 			SyncMain:deleteWorldMD(foldername,function()
-				HttpRequest:GetUrl({
-					url  = loginMain.site.."/api/mod/worldshare/models/worlds",
-					json = true,
-					headers = {Authorization = "Bearer "..loginMain.token},
-					form = {amount = 100},
-				});
-
 				loginMain.RefreshCurrentServerList();
 			end)
 		end

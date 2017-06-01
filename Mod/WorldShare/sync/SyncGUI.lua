@@ -50,9 +50,9 @@ function SyncGUI:ctor()
 		directPosition = true,
 		align = "_ct",
 		x = -500/2,
-		y = -270/2,
+		y = -320/2,
 		width = 500,
-		height = 270,
+		height = 320,
 		cancelShowAnimation = true,
 	});
 end

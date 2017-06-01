@@ -13,7 +13,7 @@ local GithubService = commonlib.gettable("Mod.WorldShare.service.GithubService")
 NPL.load("(gl)Mod/WorldShare/login.lua");
 NPL.load("(gl)script/ide/System/Encoding/base64.lua");
 NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua");
-NPL.load("(gl)Mod/WorldShare/services/HttRequest.lua");
+NPL.load("(gl)Mod/WorldShare/services/HttpRequest.lua");
 
 local login         = commonlib.gettable("Mod.WorldShare.login");
 local Encoding      = commonlib.gettable("System.Encoding");

@@ -32,6 +32,22 @@ GitlabService.blob    = {};
 GitlabService.getTreePage     = 1;
 GitlabService.getTreePer_page = 100;
 
+function GitlabService:checkSpecialCharacter(_filename)
+	local specialCharacter = {"【" , "】" , "《" , "》" , "·" , " "};
+
+	for key, item in pairs(specialCharacter) do
+		if(string.find(_filename,item)) then
+			commonlib.TimerManager.SetTimeout(function()
+				_guihelper.MessageBox(_filename .. "文件包含了特殊字符或空格，请重命名文件，否则无法上传。");
+			end,500);
+			
+			return true;
+		end
+	end
+
+	return false;
+end
+
 function GitlabService:apiGet(_url, _callback)
 	_url = loginMain.apiBaseUrl .. "/" .._url
 
@@ -46,7 +62,7 @@ function GitlabService:apiGet(_url, _callback)
 	},function(data ,err) 
 		--LOG.std(nil,"debug","GitlabService:apiGet-data",data);
 		--LOG.std(nil,"debug","GitlabService:apiGet-err",err);
-		_callback(data, err)
+		_callback(data, err);
 	end);
 end
 
@@ -65,7 +81,7 @@ function GitlabService:apiPost(_url, _params, _callback)
 	},function(data ,err)
 		--LOG.std(nil,"debug","GitlabService:apiPost-data",data);
 		--LOG.std(nil,"debug","GitlabService:apiPost-err",err);
-		_callback(data, err)
+		_callback(data, err);
 	end);
 end
 
@@ -85,7 +101,7 @@ function GitlabService:apiPut(_url, _params, _callback)
 	},function(data ,err) 
 		--LOG.std(nil,"debug","GitlabService:apiPut-data",data);
 		--LOG.std(nil,"debug","GitlabService:apiPut-err",err);
-		_callback(data, err)
+		_callback(data, err);
 	end);
 end
 
@@ -110,7 +126,7 @@ function GitlabService:apiDelete(_url, _params, _callback)
 	},function(data ,err) 
 		--LOG.std(nil,"debug","GitlabService:apiDelete-data",data);
 		--LOG.std(nil,"debug","GitlabService:apiDelete-err",err);
-		_callback(data, err)
+		_callback(data, err);
 	end);
 end
 
@@ -119,7 +135,7 @@ function GitlabService:getFileUrlPrefix(_projectId)
 		_projectId = GitlabService.projectId;
 	end
 
-    return '/projects/' .. _projectId .. '/repository/files/';
+    return 'projects/' .. _projectId .. '/repository/files/';
 end
 
 function GitlabService:getCommitMessagePrefix()
@@ -297,7 +313,12 @@ end
 
 -- 写文件
 function GitlabService:writeFile(_filename, _file_content_t, _callback, _projectId) --params, cb, errcb
-    local url = GitlabService:getFileUrlPrefix(_projectId) .. _filename;
+	if(GitlabService:checkSpecialCharacter(_filename)) then
+		_callback(false, _filename);
+		return;
+	end
+
+    local url = GitlabService:getFileUrlPrefix(_projectId) .. Encoding.url_encode(_filename);
 	--LOG.std(nil,"debug","GitlabService:writeFile",url);
 
 	local params = {
@@ -321,7 +342,12 @@ end
 
 --更新文件
 function GitlabService:update(_filename, _file_content_t, _sha, _callback, _projectId)
-	local url = GitlabService:getFileUrlPrefix(_projectId) .. _filename;
+	if(GitlabService:checkSpecialCharacter(_filename)) then
+		_callback(false, _filename);
+		return;
+	end
+
+	local url = GitlabService:getFileUrlPrefix(_projectId) .. Encoding.url_encode(_filename);
 
 	local params = {
 		commit_message = GitlabService:getCommitMessagePrefix() .. _filename,

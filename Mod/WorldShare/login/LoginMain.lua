@@ -276,7 +276,7 @@ function loginMain.LoginAction(_page, _callback)
 
 							loginMain.changeLoginType(3);
 							loginMain.closeLoginInfo();
-							loginMain.syncWorldsList();
+							loginMain.RefreshCurrentServerList();
 
 							if(loginMain.ModalPage) then
 								loginMain.closeModalPage();
@@ -285,13 +285,6 @@ function loginMain.LoginAction(_page, _callback)
 							if(_callback) then
 								_callback();
 							end
-
-							local requestParams = {
-								url  = loginMain.site .. "/api/mod/worldshare/models/worlds",
-								json = true,
-								headers = {Authorization = "Bearer "..loginMain.token},
-								form = {amount = 10000},
-							}
 
 							SyncMain:genIndexMD();
 						end);
@@ -1028,7 +1021,19 @@ function loginMain.syncWorldsList(_callback)
 	        end
 	    end
 
-		--LOG.std(nil,"debug","localWorlds",localWorlds);
+		if(localWorlds) then
+			local tmp = 0;
+  
+			for i=1,#localWorlds-1 do
+				for j=1,#localWorlds-i do
+					if localWorlds[j].modifyTime < localWorlds[j+1].modifyTime then
+						tmp = localWorlds[j];
+						localWorlds[j] = localWorlds[j+1];
+						localWorlds[j+1] = tmp;
+					end  
+				end  
+			end 
+		end
 
 		if(loginMain.LoginPage) then
 			loginMain.LoginPage:Refresh(0.01);
@@ -1038,6 +1043,63 @@ function loginMain.syncWorldsList(_callback)
 			_callback();
 		end
 	end);
+end
+
+function loginMain:formatDate(modDate)
+	local function strRepeat(num,str)
+		local strRepeat = "";
+
+		for i=1,num do
+			strRepeat = strRepeat .. str;
+		end
+
+		return strRepeat;
+	end
+
+	local modDateTable = {};
+
+	for modDateEle in string.gmatch(modDate,"[^-]+") do
+		modDateTable[#modDateTable+1] = modDateEle;
+	end
+	--echo(modDateTable);
+	local newModDate = "";
+
+	if(#modDateTable[1] ~= 4) then
+		local num = 4 - #modDateTable[1];
+		newModDate = newModDate .. strRepeat(num,'0') .. modDateTable[1];
+	elseif(#modDateTable[1] == 4) then
+		newModDate = newModDate .. modDateTable[1];
+	end
+
+	if(#modDateTable[2] ~= 2) then
+		local num = 2 - #modDateTable[2];
+		newModDate = newModDate .. strRepeat(num,'0') .. modDateTable[2];
+	elseif(#modDateTable[2] == 2) then
+		newModDate = newModDate .. modDateTable[2];
+	end
+
+	if(#modDateTable[3] ~= 2) then
+		local num = 2 - #modDateTable[3];
+		newModDate = newModDate .. strRepeat(num,'0') .. modDateTable[3];
+	elseif(#modDateTable[3] == 2) then
+		newModDate = newModDate .. modDateTable[3];
+	end
+
+	if(#modDateTable[4] ~= 2) then
+		local num = 2 - #modDateTable[4];
+		newModDate = newModDate .. strRepeat(num,'0') .. modDateTable[4];
+	elseif(#modDateTable[4] == 2) then
+		newModDate = newModDate .. modDateTable[4];
+	end
+
+	if(#modDateTable[5] ~= 2) then
+		local num = 2 - #modDateTable[5];
+		newModDate = newModDate .. strRepeat(num,'0') .. modDateTable[5];
+	elseif(#modDateTable[5] == 2) then
+		newModDate = newModDate .. modDateTable[5];
+	end
+
+	return tonumber(newModDate);
 end
 
 function loginMain.enterWorld(_index)
