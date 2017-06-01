@@ -1026,7 +1026,7 @@ function loginMain.syncWorldsList(_callback)
   
 			for i=1,#localWorlds-1 do
 				for j=1,#localWorlds-i do
-					if localWorlds[j].modifyTime < localWorlds[j+1].modifyTime then
+					if loginMain:formatDate(localWorlds[j].modifyTime) < loginMain:formatDate(localWorlds[j+1].modifyTime) then
 						tmp = localWorlds[j];
 						localWorlds[j] = localWorlds[j+1];
 						localWorlds[j+1] = tmp;
