@@ -709,7 +709,6 @@ function SyncMain:syncToDataSource()
 								for key,value in ipairs(SyncMain.localFiles) do
 									if(value.filename == "README.md") then
 										readme = LocalService:getFileContent(SyncMain.worldDir.default .. "README.md");
-										readme = Encoding.DefaultToUtf8(readme);
 
 										--LOG.std(nil,"debug","SyncMain.worldDir.default",SyncMain.worldDir.default);
 										--LOG.std(nil,"debug","readme",readme);
@@ -1012,7 +1011,7 @@ function SyncMain:syncToDataSource()
 				if(not hasReadme) then
 					local filePath = SyncMain.worldDir.default .. "README.md";
 					local file = ParaIO.open(filePath, "w");
-					local content = Encoding.Utf8ToDefault(KeepworkGen.readmeDefault);
+					local content = KeepworkGen.readmeDefault;
 
 					file:write(content,#content);
 					file:close();
@@ -1157,8 +1156,11 @@ end
 function SyncMain:genIndexMD(_callback)
 	local function gen(keepworkId)
 		local contentUrl = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. loginMain.keepWorkDataSource .. "/raw/master/" .. loginMain.username .. "/paracraft/index.md";
-
+		--echo(contentUrl);
 		HttpRequest:GetUrl(contentUrl, function(data, err)
+			--echo(data);
+			--echo(err);
+
 			if(err == 404) then
 				local indexPath = loginMain.username .. "/paracraft/index.md";
 
@@ -1207,7 +1209,7 @@ function SyncMain:genWorldMD(worldInfor, _callback)
 					worldUrl	  = worldUrl,
 					logoUrl		  = worldInfor.preview,
 					desc		  = "",
-					username	  = username,
+					username	  = loginMain.username,
 					visitCount    = 1,
 					favoriteCount = 1,
 					updateDate	  = worldInfor.modDate,
@@ -1215,7 +1217,7 @@ function SyncMain:genWorldMD(worldInfor, _callback)
 					opusId        = worldInfor.opusId,
 					filesTotals   = worldInfor.filesTotals,
 				}
-
+				
 				world3D = KeepworkGen:setCommand("world3D",world3D);
 
 				SyncMain.worldFile = KeepworkGen:SetAutoGenContent(worldInfor.readme, world3D)
@@ -1243,7 +1245,7 @@ function SyncMain:genWorldMD(worldInfor, _callback)
 					worldUrl	  = worldUrl,
 					logoUrl		  = worldInfor.preview,
 					desc		  = "",
-					username	  = username,
+					username	  = loginMain.username,
 					visitCount    = 1,
 					favoriteCount = 1,
 					updateDate	  = worldInfor.modDate,
