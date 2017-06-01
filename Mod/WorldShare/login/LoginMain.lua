@@ -67,11 +67,11 @@ function loginMain.ShowPage()
 			allowDrag = true,
 			bShow = bShow,
 			directPosition = true,
-				align = "_ct",
-				x = -860/2,
-				y = -470/2,
-				width = 860,
-				height = 470,
+			align = "_ct",
+			x = -860/2,
+			y = -470/2,
+			width = 860,
+			height = 470,
 			cancelShowAnimation = true,
 	});
 end

@@ -1319,11 +1319,11 @@ function SyncMain.deleteWorld()
 		allowDrag = true,
 		bShow = bShow,
 		directPosition = true,
-			align = "_ct",
-			x = -500/2,
-			y = -270/2,
-			width = 500,
-			height = 270,
+		align = "_ct",
+		x = -500/2,
+		y = -270/2,
+		width = 500,
+		height = 270,
 		cancelShowAnimation = true,
 	});
 end

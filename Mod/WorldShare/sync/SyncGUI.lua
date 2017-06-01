@@ -41,17 +41,18 @@ function SyncGUI:ctor()
 		url  = "Mod/WorldShare/sync/SyncGUI.html", 
 		name = "SyncWorldShare", 
 		isShowTitleBar = false,
-		DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory / false will only hide window
+		DestroyOnClose = true,
 		style = CommonCtrl.WindowFrame.ContainerStyle,
 		zorder = 0,
-		allowDrag = true,
+		isTopLevel = true,
+		allowDrag = false,
 		bShow = bShow,
 		directPosition = true,
-			align = "_ct",
-			x = -500/2,
-			y = -270/2,
-			width = 500,
-			height = 270,
+		align = "_ct",
+		x = -500/2,
+		y = -270/2,
+		width = 500,
+		height = 270,
 		cancelShowAnimation = true,
 	});
 end
@@ -62,6 +63,7 @@ function SyncGUI:OnInit()
 end
 
 function SyncGUI.closeWindow()
+	SyncGUI.isStart = false;
 	SyncPage:CloseWindow();
 end
 
