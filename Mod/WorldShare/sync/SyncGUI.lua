@@ -91,7 +91,12 @@ end
 
 function SyncGUI:retry()
 	SyncGUI.finish();
-	SyncMain.syncCompare(true);
+
+	if(SyncMain.syncType == "sync") then
+		SyncMain.syncCompare(true);
+	elseif(SyncMain.syncType == "share") then
+		ShareWorld.shareCompare();
+	end
 end
 
 function SyncGUI:updateDataBar(_current, _total, _files)

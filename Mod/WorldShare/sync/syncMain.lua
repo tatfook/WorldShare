@@ -101,6 +101,7 @@ end
 
 function SyncMain:StartSyncPage()
 	SyncMain.isStart = true;
+	SyncMain.syncType = "sync";
 
 	System.App.Commands.Call("File.MCMLWindowFrame", {
 		url  = "Mod/WorldShare/sync/StartSync.html", 
@@ -1012,7 +1013,7 @@ function SyncMain:syncToDataSource()
 				local hasReadme = false;
 
 				for key,value in ipairs(SyncMain.localFiles) do
-					if(value.filename == "README.md") then
+					if(value.filename == "README.md" or value.filename == "readme.md") then
 						hasReadme = true;
 					end
 				end
@@ -1228,6 +1229,10 @@ function SyncMain:genWorldMD(worldInfor, _callback)
 				}
 				
 				world3D = KeepworkGen:setCommand("world3D",world3D);
+
+				if(not worldInfor.readme) then
+					worldInfor.readme = "";
+				end
 
 				SyncMain.worldFile = KeepworkGen:SetAutoGenContent(worldInfor.readme, world3D)
 				SyncMain.worldFile = SyncMain.worldFile .. "\r\n" .. KeepworkGen:setCommand("comment");

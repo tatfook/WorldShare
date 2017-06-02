@@ -148,7 +148,7 @@ function GitlabService:getTree(_callback, _commitId, _projectId)
 		_projectId = GitlabService.projectId;
 	end
 
-	local url = '/projects/' .. _projectId .. '/repository/tree?';
+	local url = 'projects/' .. _projectId .. '/repository/tree?';
 	
 	if(_commitId) then
 		url = url .. "?ref=" .. _commitId;
@@ -241,7 +241,7 @@ function GitlabService:getSubTree(_callback, _path, _commitId, _projectId)
 		_projectId = GitlabService.projectId;
 	end
 
-	local url = '/projects/' .. _projectId .. '/repository/tree' .. "?path=" .. _path;
+	local url = 'projects/' .. _projectId .. '/repository/tree' .. "?path=" .. _path;
 	
 	if(_commitId) then
 		url = url .. "&ref=" .. _commitId;
@@ -307,7 +307,7 @@ function GitlabService:listCommits(_callback, _projectId)
 		_projectId = GitlabService.projectId;
 	end
 
-    local url = '/projects/' .. _projectId .. '/repository/commits';
+    local url = 'projects/' .. _projectId .. '/repository/commits';
     GitlabService:apiGet(url, _callback);
 end
 
@@ -435,7 +435,7 @@ end
 
 --通过仓名获取仓ID
 function GitlabService:getProjectIdByName(_name, _callback)
-	local url   = "/projects";
+	local url   = "projects";
 	
 	GitlabService:apiGet(url .. "?owned=true",function(projectList,err)
 		--LOG.std(nil,"debug","projectList",projectList);
@@ -450,7 +450,7 @@ end
 -- 初始化
 function GitlabService:init(_foldername, _callback)
 	_foldername = GitEncoding.base32(_foldername);
-	local url   = "/projects";
+	local url   = "projects";
 
 	GitlabService:apiGet(url .. "?owned=true",function(projectList, err)
 		if(projectList) then

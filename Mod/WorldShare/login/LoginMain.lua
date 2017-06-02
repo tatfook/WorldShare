@@ -57,6 +57,9 @@ function loginMain.init()
 end
 
 function loginMain.ShowPage()
+	InternetLoadWorld.OnInit();
+	loginMain.OnInit();
+
 	System.App.Commands.Call("File.MCMLWindowFrame", {
 			url = "Mod/WorldShare/login/LoginMain.html", 
 			name = "LoadMainWorld", 
@@ -74,6 +77,11 @@ function loginMain.ShowPage()
 			height = 470,
 			cancelShowAnimation = true,
 	});
+
+	loginMain.getRememberPassword();
+	loginMain.setSite();
+	loginMain.autoLoginAction();
+	loginMain.RefreshCurrentServerList();
 end
 
 function loginMain.OnInit()
@@ -154,6 +162,12 @@ function loginMain.LoginAction(_page, _callback)
 	local loginServer   = _page:GetValue("loginServer");
 	local isRememberPwd = _page:GetValue("rememberPassword"); 
 	local autoLogin     = _page:GetValue("autoLogin"); 
+
+	_page:SetNodeValue("account", account);
+	_page:SetNodeValue("password", password);
+
+	--echo(account);
+	--echo(password);
 
 	if(account == nil or account == "") then
 	    _guihelper.MessageBox(L"账号不能为空");
@@ -255,7 +269,7 @@ function loginMain.LoginAction(_page, _callback)
 								siteParams.desc = "paracraft作品集";
 								siteParams.displayName = loginMain.username;
 								siteParams.domain = "paracraft";
-								siteParams.logoUrl = "";
+								siteParams.logoUrl = "/wiki/assets/imgs/paracraft.png";
 								siteParams.name = "paracraft";
 								siteParams.styleId = 1;
 								siteParams.styleName = "WIKI样式";
@@ -837,6 +851,7 @@ end
 function loginMain.logout()
 	if(loginMain.IsSignedIn()) then
 		loginMain.changeLoginType(1);
+
 		loginMain:RefreshCurrentServerList();
 	end
 end
@@ -1030,9 +1045,9 @@ function loginMain.syncWorldsList(_callback)
 						tmp = localWorlds[j];
 						localWorlds[j] = localWorlds[j+1];
 						localWorlds[j+1] = tmp;
-					end  
-				end  
-			end 
+					end
+				end
+			end
 		end
 
 		if(loginMain.LoginPage) then

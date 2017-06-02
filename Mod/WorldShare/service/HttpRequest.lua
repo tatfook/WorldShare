@@ -16,10 +16,17 @@ HttpRequest.tryTimes = 0;
 
 function HttpRequest:GetUrl(_params,_callback)
 	System.os.GetUrl(_params,function(err, msg, data)
-		--LOG.std(nil,"debug","System ERR",{err});
-
 		if(err == 200 or err == 201 or err == 202 or err == 204) then
 			if(_callback) then
+				local debugUrl = "";
+
+				if(type(_params) == "string") then
+					debugUrl = _params;
+				elseif(type(_params) == "table") then
+					debugUrl = _params.url;
+				end
+
+				LOG.std("HttpRequest","debug","Request","Status Code: %s, URL: %s", err, debugUrl);
 				_callback(data,err);
 			end
 			return;

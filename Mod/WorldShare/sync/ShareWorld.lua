@@ -30,6 +30,8 @@ function ShareWorld:ctor()
 end
 
 function ShareWorld.ShowPage()
+	SyncMain.syncType = "share";
+
 	if(loginMain.login_type == 1) then
 		loginMain.showLoginModalImp();
 		return;
