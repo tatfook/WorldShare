@@ -448,6 +448,7 @@ end
 function loginMain.OnSwitchWorld(index)
 	InternetLoadWorld.OnSwitchWorld(index);
 
+	loginMain.LoginPage:Refresh(0.01);
 --	local selected_world = InternetLoadWorld.cur_ds[index];
 --	echo(selected_world);
 end
@@ -547,6 +548,8 @@ end
 function loginMain.OnChangeType(index)
 	loginMain.current_type = index;
 	InternetLoadWorld.OnChangeType(index);
+
+	loginMain.LoginPage:Refresh(0.01);
 end
 
 function loginMain.BeHasWorldInSlot(is_empty_slot,is_buy_slot)

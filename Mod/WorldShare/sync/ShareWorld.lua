@@ -51,10 +51,10 @@ function ShareWorld.ShowPageImp()
 		isTopLevel = true,
 		directPosition = true,
 			align = "_ct",
-			x = -500/2,
-			y = -400/2,
-			width = 500,
-			height = 400,
+			x = -640/2,
+			y = -415/2,
+			width = 640,
+			height = 415,
 	});
 end
 

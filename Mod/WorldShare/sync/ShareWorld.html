@@ -15,38 +15,48 @@
                 ShareWorld.setSharePage();
              ]]>
         </script>
-        <aries:window mode="thin" width="500" height="400" style="float:left;" title='<%=L"分享世界" %>' onclose="ShareWorld.closeSharePage">
-            <div style="padding:20px;color:#ffffff">
-                <div>
-                    <div style="float:left">
-                        <img name="ShareWorldImage" zorder="1" width="240" height="160" />
-                    </div>
-                    <div style="float:right;padding-left:28px;font-size:18px;base-font-size:18">
-                        <div><%= SyncMain.foldername.utf8%></div>
-                        <div>大小：<%= loginMain.GetWorldSize(ShareWorld.getWorldSize())%></div>
-                        <input type="button" style="font-size:11px;height:20px;color:#ffffff;" value="重新截图" class="mc_blue_button_with_fillet" onclick="ShareWorld.snapshot()" />
-                    </div>
-                </div>
-                    
-                <div style="margin-top:15px;">
-                    <div style="width:380px;font-size:12px;float:left"><%= ShareWorld.getWorldUrl()%></div>
-                    <input type="button" width="61" height="25" style="margin-left:5px;background:url(textures/worldshare_32bits.png#46 20 16 16:4 4 4 4);float:left;color:#ffffff;textcolor:#ffffff" value="打开" onclick="ShareWorld.openWorldWebPage()" />
-                </div>
-                    
-                <div style="margin-top:10px;">
+        <style type="text/mcss">
+            {
+                text_field = {
+                    textcolor = "#ffffff",
+                    float = "left",
+                    width = 510,
+                    height = 30,
+                    background = "Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;263 346 36 36:15 15 15 15",
+                },
+                info = {
+                    ["font-size"] = 13,
+                    ["base-font-size"] = 13,
+                    ["margin-bottom"] = 5,
+                }
+            }
+        </style>
+        <aries:window mode="thin" width="640" height="415" style="float:left;" title='<%=L"分享世界" %>' onclose="ShareWorld.closeSharePage">
+            <div style="color:#ffffff">
+                <div style="padding:20px;">
                     <div>
-                        远程版本号：<%=SyncMain.remoteRevison %>
+                        <div style="float:left">
+                            <img name="ShareWorldImage" zorder="1" width="300" height="200" />
+                        </div>
+                        <div style="float:right;padding-left:28px;">
+                            <div style="font-size:18px;base-font-size:18;margin-bottom:25px;"><%= SyncMain.foldername.utf8%></div>
+
+                            <div class="info">大小：<%= loginMain.GetWorldSize(ShareWorld.getWorldSize())%></div>
+                            <div class="info">远程版本号：<%=SyncMain.remoteRevison %></div>
+                            <div class="info">本地版本号：<%=SyncMain.currentRevison %></div>
+                            <input type="button" style="font-size:11px;height:20px;color:#ffffff;margin-top:10px;width:65px;height:30px;" value="重新截图" class="mc_light_grey_button_with_fillet" onclick="ShareWorld.snapshot()" />
+                        </div>
                     </div>
-                    <div style="margin-top:5px;">
-                        本地版本号：<%=SyncMain.currentRevison %>
+                    
+                    <div style="margin-top:20px;">
+                        <input type="text" value="<%= ShareWorld.getWorldUrl()%>" class="text_field"/>
+                        <input type="button" width="75" height="30" style="margin-left:10px;" class="mc_light_grey_button_with_fillet" value="浏览" onclick="ShareWorld.openWorldWebPage()" />
                     </div>
                 </div>
-                <div style="margin-top:10px;margin-bottom:10px;">
-                    <hr />
-                </div>
+                <hr style="margin-left:-4px;"/>
                 <div>
                     <pe:if condition="<%= SyncMain.compareFinish%>">
-                        <input type="button" onclick="ShareWorld.shareNow()" value="上传并分享" class="mc_big_button" align="right" style="margin-top:5px;min-width:160px;height:40px" />
+                        <input type="button" onclick="ShareWorld.shareNow()" value="上传并分享" class="mc_big_button" align="right" style="margin-right:20px;margin-top:20px;min-width:160px;height:40px" />
                     </pe:if>
                     <pe:if condition="<%= not SyncMain.compareFinish%>">
                         正在比对本地版本与远程版本, 请稍后...
