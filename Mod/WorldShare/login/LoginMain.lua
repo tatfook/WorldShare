@@ -301,6 +301,7 @@ function loginMain.LoginAction(_page, _callback)
 							end
 
 							SyncMain:genIndexMD();
+							SyncMain:genThemeMD();
 						end);
 					else
 						--local clientLogin = Page:GetNode("clientLogin");

@@ -1201,6 +1201,41 @@ function SyncMain:genIndexMD(_callback)
 	end
 end
 
+function SyncMain:genThemeMD(_callback)
+	local function gen(keepworkId)
+		local contentUrl = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. loginMain.keepWorkDataSource .. "/raw/master/" .. loginMain.username .. "/paracraft/_theme.md";
+		--echo(contentUrl);
+		HttpRequest:GetUrl(contentUrl, function(data, err)
+			--echo(data);
+			--echo(err);
+
+			if(err == 404) then
+				local themePath = loginMain.username .. "/paracraft/_theme.md";
+
+				SyncMain:uploadService(
+					loginMain.keepWorkDataSource,
+					themePath,
+					KeepworkGen.paracraftContainer,
+					function(data, err) 
+						if(_callback) then
+							_callback();
+						end
+					end,
+					keepworkId
+				);
+			end
+		end);
+	end
+	
+	if(loginMain.dataSourceType == "github") then
+		--gen();
+	elseif(loginMain.dataSourceType == "gitlab") then
+		GitlabService:getProjectIdByName(loginMain.keepWorkDataSource,function(keepworkId)
+			gen(keepworkId);
+		end);
+	end
+end
+
 function SyncMain:genWorldMD(worldInfor, _callback)
 	local function gen(keepworkId)
 		local contentUrl = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. loginMain.keepWorkDataSource .. "/raw/master/" .. loginMain.username .. "/paracraft/world_" .. worldInfor.worldsName .. ".md";
