@@ -48,6 +48,42 @@ function GitlabService:checkSpecialCharacter(_filename)
 	return false;
 end
 
+function GitlabService:checkProjectId(_projectId, _foldername, _callback)
+	if(not _projectId) then
+		_projectId = GitlabService.projectId;
+	else
+		if(_callback)then
+			_callback(_projectId);
+		end
+	end
+
+	if(not _projectId) then
+		if(_foldername) then
+			local foldername = GitEncoding.base32(_foldername)
+
+			GitlabService:getProjectIdByName(foldername,function(projectId)
+				if(projectId) then
+					GitlabService.projectId = projectId;
+					
+					if(_callback)then
+						_callback(projectId);
+					end
+				else
+					--echo("a");
+					_guihelper.MessageBox(L"获取projectId失败");
+				end
+			end);
+		else
+			--echo("b")
+			_guihelper.MessageBox(L"获取projectId失败");
+		end
+	else
+		if(_callback)then
+			_callback(_projectId);
+		end
+	end
+end
+
 function GitlabService:apiGet(_url, _callback)
 	_url = loginMain.apiBaseUrl .. "/" .._url
 
@@ -62,7 +98,9 @@ function GitlabService:apiGet(_url, _callback)
 	},function(data ,err) 
 		--LOG.std(nil,"debug","GitlabService:apiGet-data",data);
 		--LOG.std(nil,"debug","GitlabService:apiGet-err",err);
-		_callback(data, err);
+		if(_callback) then
+			_callback(data, err);
+		end
 	end);
 end
 
@@ -131,10 +169,6 @@ function GitlabService:apiDelete(_url, _params, _callback)
 end
 
 function GitlabService:getFileUrlPrefix(_projectId)
-	if(not _projectId) then
-		_projectId = GitlabService.projectId;
-	end
-
     return 'projects/' .. _projectId .. '/repository/files/';
 end
 
@@ -143,104 +177,100 @@ function GitlabService:getCommitMessagePrefix()
 end
 
 -- 获得文件列表
-function GitlabService:getTree(_callback, _commitId, _projectId)
-	if(not _projectId) then
-		_projectId = GitlabService.projectId;
-	end
-
-	local url = 'projects/' .. _projectId .. '/repository/tree?';
+function GitlabService:getTree(_callback, _commitId, _projectId, _foldername)
+	local function go(_projectId)
+		local url = 'projects/' .. _projectId .. '/repository/tree?';
 	
-	if(_commitId) then
-		url = url .. "?ref=" .. _commitId;
-	end
+		if(_commitId) then
+			url = url .. "?ref=" .. _commitId;
+		end
 
-	--LOG.std(nil,"debug","GitlabService:getTree-url",url);
+		--LOG.std(nil,"debug","GitlabService:getTree-url",url);
 
-	GitlabService.blob = {};
-	GitlabService.tree = {};
+		GitlabService.blob = {};
+		GitlabService.tree = {};
 
-	GitlabService:getTreeApi(url, function(data, err)
-		--LOG.std(nil,"debug","GitlabService:getTree-data",data);
-		--LOG.std(nil,"debug","GitlabService:getTree-err",err);
+		GitlabService:getTreeApi(url, function(data, err)
+			--LOG.std(nil,"debug","GitlabService:getTree-data",data);
+			--LOG.std(nil,"debug","GitlabService:getTree-err",err);
 
-		if(err == 404) then
-			if(_callback) then
-				_callback(data, err);
-			end
-		else
-			for key,value in ipairs(data) do
-				if(value.type == "tree") then
-					GitlabService.tree[#GitlabService.tree + 1] = value;
+			if(err == 404) then
+				if(_callback) then
+					_callback(data, err);
+				end
+			else
+				for key,value in ipairs(data) do
+					if(value.type == "tree") then
+						GitlabService.tree[#GitlabService.tree + 1] = value;
+					end
+
+					if(value.type == "blob") then
+						GitlabService.blob[#GitlabService.blob + 1] = value;
+					end
 				end
 
-				if(value.type == "blob") then
-					GitlabService.blob[#GitlabService.blob + 1] = value;
-				end
-			end
+				local fetchTimes = 0;
+				--LOG.std(nil,"debug","GitlabService.tree",GitlabService.tree);
+				--LOG.std(nil,"debug","GitlabService.blob",GitlabService.blob);
 
-			local fetchTimes = 0;
-			--LOG.std(nil,"debug","GitlabService.tree",GitlabService.tree);
-			--LOG.std(nil,"debug","GitlabService.blob",GitlabService.blob);
+				local function getSubTree()
+					if(#GitlabService.tree ~= 0) then
+						--echo("不等");
+						for key, value in ipairs(GitlabService.tree) do
+							GitlabService:getSubTree(function(subTree, subFolderName, _commitId, _projectId)
+								--echo(subTree);
+								--echo(subFolderName);
+								--echo(_commitId);
+								--echo(_projectId);
 
-			local function getSubTree()
-				if(#GitlabService.tree ~= 0) then
-					--echo("不等");
-					for key, value in ipairs(GitlabService.tree) do
-						GitlabService:getSubTree(function(subTree, subFolderName, _commitId, _projectId)
-							--echo(subTree);
-							--echo(subFolderName);
-							--echo(_commitId);
-							--echo(_projectId);
-
-							for checkKey, checkValue in ipairs(GitlabService.tree) do
-								if(checkValue.path == subFolderName) then
-									if(not checkValue.alreadyGet) then
-										checkValue.alreadyGet = true;
-									else
-										return;
+								for checkKey, checkValue in ipairs(GitlabService.tree) do
+									if(checkValue.path == subFolderName) then
+										if(not checkValue.alreadyGet) then
+											checkValue.alreadyGet = true;
+										else
+											return;
+										end
 									end
 								end
-							end
 
-							fetchTimes = fetchTimes + 1;
+								fetchTimes = fetchTimes + 1;
 
-							for subKey, subValue in ipairs(subTree) do
-								GitlabService.newTree[#GitlabService.newTree + 1] = subValue;
-							end
+								for subKey, subValue in ipairs(subTree) do
+									GitlabService.newTree[#GitlabService.newTree + 1] = subValue;
+								end
 
-							if(#GitlabService.tree == fetchTimes)then
-								fetchTimes = 0;
-								GitlabService.tree = commonlib.copy(GitlabService.newTree);
-								GitlabService.newTree = {};
+								if(#GitlabService.tree == fetchTimes)then
+									fetchTimes = 0;
+									GitlabService.tree = commonlib.copy(GitlabService.newTree);
+									GitlabService.newTree = {};
 
-								getSubTree();
-							end
-						end, value.path, _commitId, _projectId);
-					end
-				elseif(#GitlabService.tree == 0) then
-					--echo("等");
-					for cbKey,cbValue in ipairs(GitlabService.blob) do
-						cbValue.sha = cbValue.id;
-					end
+									getSubTree();
+								end
+							end, value.path, _commitId, _projectId);
+						end
+					elseif(#GitlabService.tree == 0) then
+						--echo("等");
+						for cbKey,cbValue in ipairs(GitlabService.blob) do
+							cbValue.sha = cbValue.id;
+						end
 
-					--echo(GitlabService.blob);
+						--echo(GitlabService.blob);
 
-					if(_callback) then
-						_callback(GitlabService.blob);
+						if(_callback) then
+							_callback(GitlabService.blob, 200);
+						end
 					end
 				end
-			end
 
-			getSubTree();
-		end
-	end);
+				getSubTree();
+			end
+		end);
+	end
+	
+	GitlabService:checkProjectId(_projectId, _foldername, go);
 end
 
 function GitlabService:getSubTree(_callback, _path, _commitId, _projectId)
-	if(not _projectId) then
-		_projectId = GitlabService.projectId;
-	end
-
 	local url = 'projects/' .. _projectId .. '/repository/tree' .. "?path=" .. _path;
 	
 	if(_commitId) then
@@ -302,69 +332,77 @@ function GitlabService:getTreeApi(_url, _callback)
 end
 
 -- commit
-function GitlabService:listCommits(_callback, _projectId)
-	if(not _projectId) then
-		_projectId = GitlabService.projectId;
+function GitlabService:listCommits(_callback, _projectId, _foldername)
+	local function go(_projectId)
+		local url = 'projects/' .. _projectId .. '/repository/commits';
+		GitlabService:apiGet(url, _callback);
 	end
 
-    local url = 'projects/' .. _projectId .. '/repository/commits';
-    GitlabService:apiGet(url, _callback);
+	GitlabService:checkProjectId(_projectId, _foldername, go);
 end
 
 -- 写文件
-function GitlabService:writeFile(_filename, _file_content_t, _callback, _projectId) --params, cb, errcb
-	if(GitlabService:checkSpecialCharacter(_filename)) then
-		_callback(false, _filename);
-		return;
+function GitlabService:writeFile(_filename, _file_content_t, _callback, _projectId, _foldername) --params, cb, errcb
+	local function go(_projectId)
+		if(GitlabService:checkSpecialCharacter(_filename)) then
+			_callback(false, _filename);
+			return;
+		end
+
+		local url = GitlabService:getFileUrlPrefix(_projectId) .. Encoding.url_encode(_filename);
+		--LOG.std(nil,"debug","GitlabService:writeFile",url);
+
+		local params = {
+			commit_message = GitlabService:getCommitMessagePrefix() .. _filename,
+			branch		   = "master",
+			content 	   = _file_content_t,
+		}
+
+		GitlabService:apiPost(url, params, function(data, err)
+			--LOG.std(nil,"debug","GitlabService:writeFile",data);
+			--LOG.std(nil,"debug","GitlabService:writeFile",err);
+
+			if(err == 201) then
+				_callback(true, _filename, data, err);
+			else
+				GitlabService:update(_filename, _file_content_t, _sha, _callback, _projectId)
+				--_callback(false, _filename, data, err);
+			end
+		end);
 	end
 
-    local url = GitlabService:getFileUrlPrefix(_projectId) .. Encoding.url_encode(_filename);
-	--LOG.std(nil,"debug","GitlabService:writeFile",url);
-
-	local params = {
-		commit_message = GitlabService:getCommitMessagePrefix() .. _filename,
-		branch		   = "master",
-		content 	   = _file_content_t,
-	}
-
-	GitlabService:apiPost(url, params, function(data, err)
-		--LOG.std(nil,"debug","GitlabService:writeFile",data);
-		--LOG.std(nil,"debug","GitlabService:writeFile",err);
-
-		if(err == 201) then
-			_callback(true, _filename, data, err);
-		else
-			GitlabService:update(_filename, _file_content_t, _sha, _callback, _projectId)
-			--_callback(false, _filename, data, err);
-		end
-	end);
+	GitlabService:checkProjectId(_projectId, _foldername, go);
 end
 
 --更新文件
-function GitlabService:update(_filename, _file_content_t, _sha, _callback, _projectId)
-	if(GitlabService:checkSpecialCharacter(_filename)) then
-		_callback(false, _filename);
-		return;
+function GitlabService:update(_filename, _file_content_t, _sha, _callback, _projectId, _foldername)
+	local function go(_projectId)
+		if(GitlabService:checkSpecialCharacter(_filename)) then
+			_callback(false, _filename);
+			return;
+		end
+
+		local url = GitlabService:getFileUrlPrefix(_projectId) .. Encoding.url_encode(_filename);
+
+		local params = {
+			commit_message = GitlabService:getCommitMessagePrefix() .. _filename,
+			branch		   = "master",
+			content 	   = _file_content_t,
+		}
+
+		GitlabService:apiPut(url, params, function(data, err)
+			--LOG.std(nil,"debug","GitlabService:update",data);
+			--LOG.std(nil,"debug","GitlabService:update",err);
+
+			if(err == 200) then
+				_callback(true, _filename, data, err);
+			else
+				_callback(false, _filename, data, err);
+			end
+		end);
 	end
 
-	local url = GitlabService:getFileUrlPrefix(_projectId) .. Encoding.url_encode(_filename);
-
-	local params = {
-		commit_message = GitlabService:getCommitMessagePrefix() .. _filename,
-		branch		   = "master",
-		content 	   = _file_content_t,
-	}
-
-	GitlabService:apiPut(url, params, function(data, err)
-		--LOG.std(nil,"debug","GitlabService:update",data);
-		--LOG.std(nil,"debug","GitlabService:update",err);
-
-		if(err == 200) then
-			_callback(true, _filename, data, err);
-		else
-			_callback(false, _filename, data, err);
-		end
-	end);
+	GitlabService:checkProjectId(_projectId, _foldername, go);
 end
 
 -- 获取文件
@@ -382,9 +420,9 @@ end
 
 -- 获取文件
 function GitlabService:getContentWithRaw(_foldername, _path, _callback)
-	_foldername = GitEncoding.base32(_foldername);
+	local foldername = GitEncoding.base32(_foldername);
 
-	local url  = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. _foldername .. "/raw/master/" .. _path;
+	local url  = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. foldername .. "/raw/master/" .. _path;
 
 	HttpRequest:GetUrl({
 		url     = url,
@@ -401,48 +439,57 @@ function GitlabService:getContentWithRaw(_foldername, _path, _callback)
 end
 
 -- 删除文件
-function GitlabService:deleteFile(_path, _sha, _callback, _projectId)
-    local url = GitlabService:getFileUrlPrefix(_projectId) .. _path;
+function GitlabService:deleteFile(_path, _sha, _callback, _projectId, _foldername)
+	local function go(_projectId)
+		local url = GitlabService:getFileUrlPrefix(_projectId) .. _path;
 
-	local params = {
-		commit_message = GitlabService:getCommitMessagePrefix() .. _path,
-		branch         = 'master',
-	}
+		local params = {
+			commit_message = GitlabService:getCommitMessagePrefix() .. _path,
+			branch         = 'master',
+		}
 
-	--LOG.std(nil,"debug","deleteFile",url);
-	GitlabService:apiDelete(url, params, function(data, err)
-		--LOG.std(nil,"debug","deleteFile",data);
-		--LOG.std(nil,"debug","deleteFilerr",err);
+		--LOG.std(nil,"debug","deleteFile",url);
+		GitlabService:apiDelete(url, params, function(data, err)
+			--LOG.std(nil,"debug","deleteFile",data);
+			--LOG.std(nil,"debug","deleteFilerr",err);
 
-		if(err == 204) then
-			_callback(true);
-		else
-			_callback(false);
-		end
-	end);
+			if(err == 204) then
+				_callback(true);
+			else
+				_callback(false);
+			end
+		end);
+	end
+   
+	GitlabService:checkProjectId(_projectId, _foldername, go);
 end
 
 --删除仓
 function GitlabService:deleteResp(_foldername, _callback, _projectId)
-	if(not _projectId) then
-		_projectId = GitlabService.projectId;
+	local function go(_projectId)
+		local url = "/projects/" .. _projectId;
+		GitlabService:apiDelete(url, {}, _callback);
 	end
 
-	local url = "/projects/" .. _projectId;
-
-	GitlabService:apiDelete(url, {}, _callback);
+	GitlabService:checkProjectId(_projectId, _foldername, go);
 end
 
 --通过仓名获取仓ID
 function GitlabService:getProjectIdByName(_name, _callback)
-	local url   = "projects";
+	local url = "projects";
 	
-	GitlabService:apiGet(url .. "?owned=true",function(projectList,err)
-		--LOG.std(nil,"debug","projectList",projectList);
+	GitlabService:apiGet(url .. "?owned=true&page=1&per_page=100",function(projectList, err)
 		for i=1,#projectList do
             if (projectList[i].name == _name) then
-				_callback(projectList[i].id);
+				if(_callback) then
+					_callback(projectList[i].id);
+				end
+				return;
 			end
+		end
+
+		if(_callback) then
+			_callback(false);
 		end
 	end);
 end
@@ -452,7 +499,7 @@ function GitlabService:init(_foldername, _callback)
 	_foldername = GitEncoding.base32(_foldername);
 	local url   = "projects";
 
-	GitlabService:apiGet(url .. "?owned=true",function(projectList, err)
+	GitlabService:apiGet(url .. "?owned=true&page=1&per_page=100",function(projectList, err)
 		if(projectList) then
 			for i=1,#projectList do
 				if (projectList[i].name == _foldername) then

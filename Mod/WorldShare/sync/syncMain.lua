@@ -676,7 +676,7 @@ function SyncMain:syncToDataSource()
 				SyncMain.remoteSync.revision(function()
 					syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, L'同步完成');
 
-					SyncMain:getCommits(function(data, err)
+					SyncMain:getCommits(SyncMain.foldername.utf8,function(data, err)
 						--LOG.std(nil,"debug","data",data);
 						--LOG.std(nil,"debug","err",err);
 
@@ -738,10 +738,13 @@ function SyncMain:syncToDataSource()
 								params.preview         = preview;
 								params.filesTotals	   = filesTotals;
 								params.commitId		   = lastCommitSha;
-
-								--LOG.std(nil,"debug","params",params);
+								echo(GitlabService.projectId);
+								LOG.std(nil,"debug","params",params);
 
 								-- SyncMain:genWorldMD(params);
+
+								loginMain.refreshing = true;
+								loginMain.LoginPage:Refresh(0.01);
 
 								HttpRequest:GetUrl({
 									url     = loginMain.site .. "/api/mod/worldshare/models/worlds/refresh",
@@ -752,8 +755,10 @@ function SyncMain:syncToDataSource()
 										["content-type"] = "application/json",
 									},
 								},function(response, err)
-									--LOG.std(nil,"debug","finish",response);
-									--LOG.std(nil,"debug","finish",err);
+									LOG.std(nil,"debug","finish",response);
+									LOG.std(nil,"debug","finish",err);
+
+									GitlabService.projectId = nil;
 
 									if(err == 200) then
 										if(response.error.id == 0) then
@@ -791,6 +796,7 @@ function SyncMain:syncToDataSource()
 							--LOG.std(nil,"debug","lastCommitSha",lastCommitSha);
 						else
 							_guihelper.MessageBox(L"上传失败");
+							GitlabService.projectId = nil;
 						end
 					end);
 				end)
@@ -997,9 +1003,9 @@ function SyncMain:syncToDataSource()
 						end
 					end
 				else
-					-- LOG.std(nil,"debug","delete-filename",self.localFiles[LocalIndex].filename);
+					--LOG.std(nil,"debug","delete-filename",curGitFiles.path);
 					-- LOG.std(nil,"debug","delete-sha1",self.localFiles[LocalIndex].filename);
-
+					
 					-- 如果过数据源不删除存在，则删除本地的文件
 					SyncMain.remoteSync.deleteOne();
 				end
@@ -1069,7 +1075,7 @@ function SyncMain:syncToDataSource()
 		--LOG.std("SyncMain","debug","SyncMain:syncToDataSource","首次同步");
 		SyncMain:create(SyncMain.foldername.utf8,function(data, status)
 			--LOG.std(nil,"debug","SyncMain:create",data);
-			--LOG.std(nil,"debug","SyncMain:create",status);
+			LOG.std(nil,"debug","SyncMain:create",status);
 
 			if(data == true) then
 				syncToDataSourceGo();
@@ -1083,9 +1089,8 @@ function SyncMain:syncToDataSource()
 		--LOG.std("SyncMain","debug","SyncMain:syncToDataSource","非首次同步");
 		if(loginMain.dataSourceType == "gitlab") then
 			SyncMain:setGitlabProjectId(SyncMain.foldername.utf8);
+			syncToDataSourceGo();
 		end
-
-		syncToDataSourceGo();
 	end
 end
 
@@ -1144,11 +1149,16 @@ function SyncMain:checkWorldSize()
 end
 
 function SyncMain:setGitlabProjectId(_foldername)
+	--echo(SyncMain.remoteWorldsList);
 	for key,value in ipairs(SyncMain.remoteWorldsList) do
 		if(value.worldsName == _foldername) then
 			GitlabService.projectId = value.gitlabProjectId;
+			--echo(GitlabService.projectId);
+			return;
 		end
 	end
+	--echo(GitlabService.projectId);
+	GitlabService.projectId = nil;
 end
 
 function SyncMain:getGitlabCommitId(_foldername)
@@ -1530,11 +1540,14 @@ end
 
 function SyncMain.deleteWorldGitlab()
 	local foldername = SyncMain.selectedWorldInfor.foldername;
-	
+
 	SyncMain:setGitlabProjectId(foldername);
 
 	_guihelper.MessageBox(format(L"确定删除Gitlab远程世界:%s?", foldername or ""), function(res)
 	    SyncMain.DeletePage:CloseWindow();
+
+		loginMain.refreshing = true;
+		loginMain.LoginPage:Refresh(0.01);
 
 	    if(res and res == 6) then
 	    	GitlabService:deleteResp(foldername, function(data, err)
@@ -1588,7 +1601,7 @@ function SyncMain:create(_foldername,_callback)
 	if(loginMain.dataSourceType == "github") then
 		GithubService:create(_foldername,_callback);
 	elseif(loginMain.dataSourceType == "gitlab") then
-		GitlabService:init(_foldername,_callback);
+		GitlabService:init(_foldername, _callback);
 	end
 end
 
@@ -1604,7 +1617,7 @@ function SyncMain:uploadService(_foldername, _filename, _file_content_t, _callba
 	if(loginMain.dataSourceType == "github") then
 		GithubService:upload(_foldername,_filename,_file_content_t,_callback);
 	elseif(loginMain.dataSourceType == "gitlab") then
-		GitlabService:writeFile(_filename,_file_content_t,_callback, _projectId);
+		GitlabService:writeFile(_filename,_file_content_t,_callback, _projectId, _foldername);
 	end
 end
 
@@ -1612,7 +1625,7 @@ function SyncMain:updateService(_foldername, _filename, _file_content_t, _sha, _
 	if(loginMain.dataSourceType == "github") then
 		GithubService:update(_foldername, _filename, _file_content_t, _sha, _callback);
 	elseif(loginMain.dataSourceType == "gitlab") then
-		GitlabService:update(_filename, _file_content_t, _sha, _callback, _projectId);
+		GitlabService:update(_filename, _file_content_t, _sha, _callback, _projectId, _foldername);
 	end
 end
 
@@ -1620,7 +1633,7 @@ function SyncMain:deleteFileService(_foldername, _path, _sha, _callback, _projec
 	if(loginMain.dataSourceType == "github") then
 		GithubService:deleteFile(_foldername, _path, _sha, _callback);
 	elseif(loginMain.dataSourceType == "gitlab") then
-		GitlabService:deleteFile(_path, _sha, _callback, _projectId);
+		GitlabService:deleteFile(_path, _sha, _callback, _projectId, _foldername);
 	end
 end
 
@@ -1628,14 +1641,14 @@ function SyncMain:getFileShaListService(_foldername, _callback, _commitId, _proj
 	if(loginMain.dataSourceType == "github") then
 		GithubService:getFileShaList(_foldername, _callback);
 	elseif(loginMain.dataSourceType == "gitlab") then
-		GitlabService:getTree(_callback, _commitId, _projectId);
+		GitlabService:getTree(_callback, _commitId, _projectId, _foldername);
 	end
 end
 
-function SyncMain:getCommits(_callback, _projectId)
+function SyncMain:getCommits(_foldername, _callback, _projectId)
 	if(loginMain.dataSourceType == "github") then
 		GithubService:getCommits(_foldername, _callback);
 	elseif(loginMain.dataSourceType == "gitlab") then
-		GitlabService:listCommits(_callback, _projectId);
+		GitlabService:listCommits(_callback, _projectId, _foldername);
 	end
 end

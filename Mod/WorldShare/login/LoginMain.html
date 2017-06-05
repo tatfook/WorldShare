@@ -11,6 +11,7 @@
                 loginMain         = commonlib.gettable("Mod.WorldShare.login.loginMain");
                 
                 loginMain.setLoginPage();
+                InternetLoadWorld.OnInit();
             ]]>
         </script>
         <style type="text/mcss">
@@ -451,7 +452,7 @@
                                 <EmptyDataTemplate>
                                     <div style="margin:10px;font-weight:bold;color:#ffffff"><%=L"暂无存档，请创建" %></div>
                                     <div>
-                                        <input type="button" class="mc_light_grey_button_with_fillet" onclick="InternetLoadWorld.RefreshCurrentServerList" value='<%=L"刷新" %>' style="float:left;margin-left:10px;width:86px;height:22px;font-weight:bold;font-size:14px;" />
+                                        <input type="button" class="mc_light_grey_button_with_fillet" onclick="loginMain.RefreshCurrentServerList()" value='<%=L"刷新" %>' style="float:left;margin-left:10px;width:86px;height:22px;font-weight:bold;font-size:14px;" />
                                     </div>
                                 </EmptyDataTemplate>
                                 <FetchingDataTemplate>

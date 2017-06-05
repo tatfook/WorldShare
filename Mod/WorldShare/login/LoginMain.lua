@@ -57,7 +57,6 @@ function loginMain.init()
 end
 
 function loginMain.ShowPage()
-	InternetLoadWorld.OnInit();
 	loginMain.OnInit();
 
 	System.App.Commands.Call("File.MCMLWindowFrame", {
@@ -166,8 +165,8 @@ function loginMain.LoginAction(_page, _callback)
 	_page:SetNodeValue("account", account);
 	_page:SetNodeValue("password", password);
 
-	--echo(account);
-	--echo(password);
+	echo(account);
+	echo(password);
 
 	if(account == nil or account == "") then
 	    _guihelper.MessageBox(L"账号不能为空");
@@ -182,7 +181,7 @@ function loginMain.LoginAction(_page, _callback)
 	loginMain.showLoginInfo();
 
 	loginMain.LoginActionApi(account,password,function (response,err)
-			--LOG.std(nil,"debug","response",response);
+			LOG.std(nil,"debug","response",response);
 			if(type(response) == "table") then
 				if(response['data'] ~= nil and response['data']['userinfo']['_id']) then
 					loginMain.token = response['data']['token'];
@@ -856,12 +855,13 @@ function loginMain.logout()
 	if(loginMain.IsSignedIn()) then
 		loginMain.changeLoginType(1);
 
-		loginMain:RefreshCurrentServerList();
+		loginMain.RefreshCurrentServerList();
 	end
 end
 
 function loginMain.RefreshCurrentServerList()
 	loginMain.refreshing = true;
+	loginMain.LoginPage:Refresh(0.01);
 
 	if(loginMain.current_type == 1 and loginMain.login_type == 1) then
 		loginMain.getLocalWorldList(function()
@@ -888,6 +888,8 @@ function loginMain.RefreshCurrentServerList()
 
 		loginMain.refreshing = false;
 	end
+
+	loginMain.LoginPage:Refresh(0.01);
 end
 
 function loginMain.getLocalWorldList(_callback)
