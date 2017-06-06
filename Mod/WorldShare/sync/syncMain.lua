@@ -827,13 +827,13 @@ function SyncMain:syncToDataSource()
 				end
 
 				--LOG.std(nil,"debug","SyncMain.localFiles[SyncMain.curUploadIndex]", SyncMain.localFiles[SyncMain.curUploadIndex]);
-
 				if (SyncMain.localFiles[SyncMain.curUploadIndex].needChange) then
 					SyncMain.localFiles[SyncMain.curUploadIndex].needChange = false;
 					SyncMain.isFetching = true;
 
 					LOG.std("SyncMain", "debug", "FilesShaToDSUD", "File : %s, 上传中", SyncMain.localFiles[SyncMain.curUploadIndex].filename);
 					SyncMain:uploadService(SyncMain.foldername.utf8, SyncMain.localFiles[SyncMain.curUploadIndex].filename, SyncMain.localFiles[SyncMain.curUploadIndex].file_content_t,function (bIsUpload, filename)
+						SyncMain.isFetching = false;
 						if (bIsUpload) then
 							LOG.std("SyncMain", "debug", "FilesShaToDSUD", "File : %s, 上传完成", SyncMain.localFiles[SyncMain.curUploadIndex].filename);
 							syncGUIIndex = syncGUIIndex + 1;
@@ -856,8 +856,6 @@ function SyncMain:syncToDataSource()
 							--syncToDataSourceGUI.finish();
 							--SyncMain.finish = true;
 						end
-
-						SyncMain.isFetching = false;
 					end);
 				else
 					LOG.std("SyncMain", "debug", "FilesShaToDSUD", "File : %s, 已更新，跳过", SyncMain.localFiles[SyncMain.curUploadIndex].filename);

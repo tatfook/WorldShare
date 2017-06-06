@@ -64,8 +64,8 @@ function WorldShare:init()
 		return false;
 	end);
 
---	NPL.load("(gl)script/apps/WebServer/WebServer.lua");
---	WebServer:Start("script/apps/WebServer/admin","0.0.0.0",8095);
+NPL.load("(gl)script/apps/WebServer/WebServer.lua");
+WebServer:Start("script/apps/WebServer/admin","0.0.0.0",8095);
 end
 
 function WorldShare:OnInitDesktop()

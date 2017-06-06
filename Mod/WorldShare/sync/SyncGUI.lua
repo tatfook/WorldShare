@@ -67,7 +67,7 @@ function SyncGUI.closeWindow()
 	SyncPage:CloseWindow();
 end
 
-function SyncGUI.finish()
+function SyncGUI.finish(_callback)
 	SyncMain.finish = true;
 	SyncGUI.isStart = false;
 
@@ -75,6 +75,7 @@ function SyncGUI.finish()
 	SyncPage:Refresh(0.01);
 
 	local function checkFinish()
+		echo(SyncMain.isFetching);
 		commonlib.TimerManager.SetTimeout(function()
 			if(SyncMain.isFetching) then
 				SyncGUI.files = "正在等待上次同步完成，请稍后...";
@@ -82,6 +83,9 @@ function SyncGUI.finish()
 				checkFinish();
 			else
 				SyncPage:CloseWindow();
+				if(_callback) then
+					_callback();
+				end
 			end
 		end,100);
 	end
@@ -90,15 +94,15 @@ function SyncGUI.finish()
 end
 
 function SyncGUI:retry()
-	SyncGUI.finish();
-
-	if(SyncMain.syncType == "sync") then
-		SyncMain.syncCompare(true);
-	elseif(SyncMain.syncType == "share") then
-		ShareWorld.shareCompare();
-	else
-		SyncMain.syncCompare(true);
-	end
+	SyncGUI.finish(function()
+		if(SyncMain.syncType == "sync") then
+			SyncMain.syncCompare(true);
+		elseif(SyncMain.syncType == "share") then
+			ShareWorld.shareCompare();
+		else
+			SyncMain.syncCompare(true);
+		end
+	end);
 end
 
 function SyncGUI:updateDataBar(_current, _total, _files)

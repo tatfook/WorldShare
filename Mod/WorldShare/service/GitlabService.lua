@@ -33,7 +33,7 @@ GitlabService.getTreePage     = 1;
 GitlabService.getTreePer_page = 100;
 
 function GitlabService:checkSpecialCharacter(_filename)
-	local specialCharacter = {"【" , "】" , "《" , "》" , "·" , " "};
+	local specialCharacter = {"【" , "】" , "《" , "》" , "·" , " ", "，"};
 
 	for key, item in pairs(specialCharacter) do
 		if(string.find(_filename,item)) then
