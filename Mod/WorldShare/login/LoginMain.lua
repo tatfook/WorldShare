@@ -165,8 +165,8 @@ function loginMain.LoginAction(_page, _callback)
 	_page:SetNodeValue("account", account);
 	_page:SetNodeValue("password", password);
 
-	echo(account);
-	echo(password);
+	--echo(account);
+	--echo(password);
 
 	if(account == nil or account == "") then
 	    _guihelper.MessageBox(L"账号不能为空");

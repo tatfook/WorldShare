@@ -738,8 +738,8 @@ function SyncMain:syncToDataSource()
 								params.preview         = preview;
 								params.filesTotals	   = filesTotals;
 								params.commitId		   = lastCommitSha;
-								echo(GitlabService.projectId);
-								LOG.std(nil,"debug","params",params);
+								--echo(GitlabService.projectId);
+								--LOG.std(nil,"debug","params",params);
 
 								-- SyncMain:genWorldMD(params);
 

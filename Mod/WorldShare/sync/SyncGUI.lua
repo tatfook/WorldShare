@@ -96,6 +96,8 @@ function SyncGUI:retry()
 		SyncMain.syncCompare(true);
 	elseif(SyncMain.syncType == "share") then
 		ShareWorld.shareCompare();
+	else
+		SyncMain.syncCompare(true);
 	end
 end
 
