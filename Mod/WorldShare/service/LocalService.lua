@@ -46,7 +46,7 @@ end
 
 function LocalService:filesFind(_result)
 	if(type(_result) == "table") then
-		local convertLineEnding = {[".xml"] = true, [".txt"] = true, [".md"] = true, [".bmax"] = true};
+		local convertLineEnding = {[".xml"] = true, [".txt"] = true, [".md"] = true, [".bmax"] = true, [".lua"] = true};
 
 		for i = 1, #_result do
 			local item = _result[i];

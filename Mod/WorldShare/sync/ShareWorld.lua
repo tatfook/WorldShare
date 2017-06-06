@@ -61,7 +61,10 @@ end
 function ShareWorld:init()
 	local filepath = SyncMain.worldDir.default .. "preview.jpg";
 	--LOG.std(nil,"debug","filepath",filepath);
-	ShareWorld.SharePage:SetNodeValue("ShareWorldImage", filepath);
+
+	if(ParaIO.DoesFileExist(filepath)) then
+		ShareWorld.SharePage:SetNodeValue("ShareWorldImage", filepath);
+	end
 
 	ShareWorld.SharePage:Refresh();
 end

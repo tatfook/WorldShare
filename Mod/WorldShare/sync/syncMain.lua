@@ -1014,6 +1014,8 @@ function SyncMain:syncToDataSource()
 				--LOG.std(nil,"debug","SyncMain:getFileShaListService-data",data);
 				--LOG.std(nil,"debug","SyncMain:getFileShaListService-err",err);
 
+				SyncMain.localFiles = LocalService:LoadFiles(SyncMain.worldDir.default,"",nil,1000,nil); --再次获取本地文件，保证上传的内容为最新
+
 				local hasReadme = false;
 
 				for key,value in ipairs(SyncMain.localFiles) do
@@ -1524,11 +1526,8 @@ function SyncMain.deleteWorldGithub(_password)
 	    			if(err == 204) then
 	    				SyncMain.deleteKeepworkWorldsRecord();
 	    			else
-						_guihelper.MessageBox(L"远程仓库不存在，请联系管理员");
-						if(not WorldCommon.GetWorldInfo()) then
-							MainLogin.state.IsLoadMainWorldRequested = nil;
-							MainLogin:next_step();
-						end
+						_guihelper.MessageBox(L"远程仓库不存在，记录将直接被删除");
+						SyncMain.deleteKeepworkWorldsRecord();
 					end
 	    		end)
 	    	end
@@ -1552,7 +1551,8 @@ function SyncMain.deleteWorldGitlab()
 				if(err == 202) then
 					SyncMain.deleteKeepworkWorldsRecord();
 				else
-					_guihelper.MessageBox(L"远程仓库不存在，请联系管理员");
+					_guihelper.MessageBox(L"远程仓库不存在，记录将直接被删除");
+					SyncMain.deleteKeepworkWorldsRecord();
 				end
 			end);
 	    end
