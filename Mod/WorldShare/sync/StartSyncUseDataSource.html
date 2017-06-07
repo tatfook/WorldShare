@@ -9,14 +9,15 @@
         <script type="text/npl" refresh="false">
             <![CDATA[
                 SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
-                SyncMain.setComparePage();
-
+                SyncMain.setSyncPage();
+                
             	function replace()
                     SyncMain:syncToLocal(); -- 下载或覆盖
+                    SyncMain:backupWorld();
             	end
 
             	function cancel()
-                    SyncMain.ComparePage:CloseWindow();
+                    SyncMain.SyncPage:CloseWindow();
                     SyncMain:StartSyncPage();
             	end
              ]]>

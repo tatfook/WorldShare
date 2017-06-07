@@ -289,6 +289,11 @@ function SyncMain.useLocal()
     end
 end
 
+function SyncMain:backupWorld()
+	local world_revision = WorldRevision:new():init(SyncMain.worldDir.default);
+	world_revision:Backup();
+end
+
 function SyncMain.useRemote()
     SyncMain.SyncPage:CloseWindow();
 
@@ -326,7 +331,7 @@ end
 function SyncMain:useDataSourceGUI()
 	System.App.Commands.Call("File.MCMLWindowFrame", {
 		url  = "Mod/WorldShare/sync/StartSyncUseDataSource.html", 
-		name = "SyncWorldShare", 
+		name = "SyncWorldShare",
 		isShowTitleBar = false,
 		DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory / false will only hide window
 		style = CommonCtrl.WindowFrame.ContainerStyle,
@@ -755,7 +760,7 @@ function SyncMain:syncToDataSource()
 									GitlabService.projectId = nil;
 
 									if(err == 200) then
-										if(response.error.id == 0) then
+										if(type(response) == "table" and response.error.id == 0) then
 											params.opusId = response.data.opusId;
 										else
 											_guihelper.MessageBox(L"更新服务器列表失败");
