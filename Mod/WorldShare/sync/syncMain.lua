@@ -1254,7 +1254,7 @@ end
 
 function SyncMain:genWorldMD(worldInfor, _callback)
 	local function gen(keepworkId)
-		local contentUrl = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. loginMain.keepWorkDataSource .. "/raw/master/" .. loginMain.username .. "/paracraft/world_" .. worldInfor.worldsName .. ".md";
+		local contentUrl = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. loginMain.keepWorkDataSource .. "/raw/master/" .. loginMain.username .. "/paracraft/world_" .. worldInfor.worldsName .. ".md?ver=" .. worldInfor.revision;
 
 		local worldUrl = "";
 		if(loginMain.dataSourceType == "gitlab") then
@@ -1323,7 +1323,7 @@ function SyncMain:genWorldMD(worldInfor, _callback)
 				SyncMain.worldFile = KeepworkGen:SetAutoGenContent(data, world3D);
 
 				--LOG.std(nil,"debug","worldFile",SyncMain.worldFile);
-
+				--echo(loginMain.keepWorkDataSource);
 				SyncMain:updateService(
 					loginMain.keepWorkDataSource,
 					worldFilePath,

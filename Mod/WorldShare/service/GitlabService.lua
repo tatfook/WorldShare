@@ -483,8 +483,9 @@ function GitlabService:getProjectIdByName(_name, _callback)
 	local url = "projects";
 	
 	GitlabService:apiGet(url .. "?owned=true&page=1&per_page=100",function(projectList, err)
+		--echo(projectList);
 		for i=1,#projectList do
-            if (projectList[i].name == _name) then
+            if (string.lower(projectList[i].name) == string.lower(_name)) then
 				if(_callback) then
 					_callback(projectList[i].id);
 				end
