@@ -467,10 +467,10 @@ function loginMain.InputSearchContent()
 end
 
 function loginMain.ClosePage()
-	if(SyncGUI.isStart) then
-		_guihelper.MessageBox(L"世界同步中，请等待同步完成后再返回");
-		return;
-	end
+--	if(SyncGUI.isStart) then
+--		_guihelper.MessageBox(L"世界同步中，请等待同步完成后再返回");
+--		return;
+--	end
 
 	if(loginMain.IsMCVersion()) then
 	    InternetLoadWorld.ReturnLastStep();

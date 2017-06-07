@@ -10,6 +10,7 @@
             <![CDATA[
                 SyncGUI    = commonlib.gettable("Mod.WorldShare.sync.SyncGUI");
                 ShareWorld = commonlib.gettable("Mod.WorldShare.sync.ShareWorld");
+                SyncMain   = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
 
                 SyncGUI:OnInit();
              ]]>
@@ -29,7 +30,7 @@
         <div style="width:500px;height:270px;">
             <aries:window mode="thin" width="500" height="320" style="float:left;" title='<%=L"与数据源同步" %>'>
                 <div style="padding:20px;font-size:18px;base-font-size:18px;color:#ffffff;margin-top:20px;">
-                    <pe:if condition="<%=SyncGUI.total == 0 or SyncGUI.current ~= SyncGUI.total %>">
+                    <pe:if condition="<%=not SyncMain.finish%>">
                         <div style="margin-right:20px;">
                             同步进度：<%=SyncGUI.current%> / <%=SyncGUI.total%>
                             <!--<span style="margin-left:5px">size</span>-->
@@ -37,7 +38,10 @@
                             <%=SyncGUI.files%>
                         </div>
                     </pe:if>
-                    <pe:if condition="<%=SyncGUI.total ~= 0 and SyncGUI.current == SyncGUI.total %>">
+                    <pe:if condition="<%=SyncGUI.total ~= 0 and SyncGUI.current ~= SyncGUI.total and SyncMain.finish%>">
+                        <%=SyncGUI.files%>
+                    </pe:if>
+                    <pe:if condition="<%=SyncGUI.total ~= 0 and SyncGUI.current == SyncGUI.total and SyncMain.finish%>">
                         <div style="margin-right:20px;font-size:13px;base-font-size:13px;">
                             恭喜！世界已经同步完毕！
                             <br />
@@ -54,14 +58,14 @@
                     <div style="margin-top:30px;">
                         <pe:progressbar name="progressbar"  block_bg_autosize = "true" Minimum="0" Maximum="100" Value="0"/>
                     </div>
-                    <pe:if condition="<%=SyncGUI.total ~= 0 and SyncGUI.current == SyncGUI.total %>">
-                        <input type="button" name="" onclick="SyncGUI.closeWindow()" value="关闭" class="button_highlight" style="width: 85px;height: 30px;margin-top:40px;margin-left: 180px" />
-                    </pe:if>
-                    <pe:if condition="<%=SyncGUI.total == 0 or SyncGUI.current ~= SyncGUI.total %>">
+                    <pe:if condition="<%=not SyncMain.finish %>">
                         <div style="margin-top:40px;">
-                            <input type="button" name="" onclick="SyncGUI.finish()" value="取消" class="button_highlight" style="width: 85px;height: 30px;margin-left: 135px" />
-                            <input type="button" name="" onclick="SyncGUI.retry()"  value="重试" class="button_highlight" style="width: 85px;height: 30px;margin-left: 15px" />
+                            <input type="button" name="" onclick="SyncGUI.finish" value="取消" class="button_highlight" style="width: 85px;height: 30px;margin-left: 135px" />
+                            <input type="button" name="" onclick="SyncGUI.retry" value="重试" class="button_highlight" style="width: 85px;height: 30px;margin-left: 15px" />
                         </div>
+                    </pe:if>
+                    <pe:if condition="<%=SyncGUI.total ~= 0 and SyncGUI.current == SyncGUI.total and SyncMain.finish%>">
+                        <input type="button" name="" onclick="SyncGUI.closeWindow" value="关闭" class="button_highlight" style="width: 85px;height: 30px;margin-top:40px;margin-left: 180px" />
                     </pe:if>
                 </div>
             </aries:window>

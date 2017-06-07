@@ -383,8 +383,6 @@ function SyncMain:syncToLocal(_callback)
 		syncToLocalGUI:updateDataBar(syncGUIIndex, syncGUItotal, L'获取文件sha列表');
 
 		function SyncMain.localSync.finish()
-			SyncMain.finish = true;
-
 			syncToLocalGUI:updateDataBar(syncGUIIndex, syncGUItotal, "同步完成");
 			local localWorlds = InternetLoadWorld.cur_ds;
 
@@ -608,6 +606,8 @@ function SyncMain:syncToDataSource()
 
 	-- 加载进度UI界面
 	local syncToDataSourceGUI = SyncGUI:new();
+	SyncMain.finish = false;
+	syncToDataSourceGUI:refresh();
 
 	local function syncToDataSourceGo()
 		if (SyncMain.worldDir.default == "") then
@@ -627,8 +627,6 @@ function SyncMain:syncToDataSource()
 			local syncGUIIndex = 0;
 			local syncGUIFiles = "";
 
-			SyncMain.finish = false;
-
 			syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, L'获取文件sha列表');
 
 			--LOG.std(nil,"debug","SyncMain.curUploadIndex",SyncMain.curUploadIndex);
@@ -642,7 +640,7 @@ function SyncMain:syncToDataSource()
 					SyncMain:uploadService(SyncMain.foldername.utf8, "revision.xml", SyncMain.revisionContent, function (bIsUpload, filename)
 						if (bIsUpload) then
 							syncGUIIndex = syncGUIIndex + 1;
-							syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, filename);
+							syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, L'同步完成，正在更新世界信息，请稍后...');
 
 							_callback();
 						else
@@ -657,7 +655,7 @@ function SyncMain:syncToDataSource()
 					SyncMain:updateService(SyncMain.foldername.utf8, "revision.xml", SyncMain.revisionContent, SyncMain.revisionSha1, function (bIsUpdate, filename)
 						if (bIsUpdate) then
 							syncGUIIndex = syncGUIIndex + 1;
-							syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, filename);
+							syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, L'同步完成，正在更新世界信息，请稍后...');
 
 							_callback();
 						else
@@ -674,8 +672,6 @@ function SyncMain:syncToDataSource()
 				--LOG.std(nil,"debug","send",SyncMain.selectedWorldInfor.tooltip);
 
 				SyncMain.remoteSync.revision(function()
-					syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, L'同步完成');
-
 					SyncMain:getCommits(SyncMain.foldername.utf8,function(data, err)
 						--LOG.std(nil,"debug","data",data);
 						--LOG.std(nil,"debug","err",err);
@@ -687,8 +683,6 @@ function SyncMain:syncToDataSource()
 
 							if(lastCommitFile == "revision.xml") then
 								lastCommitSha = lastCommits.id;
-
-								SyncMain.finish = true;
 
 								local modDateTable = {};
 								local readme;
@@ -755,8 +749,8 @@ function SyncMain:syncToDataSource()
 										["content-type"] = "application/json",
 									},
 								},function(response, err)
-									LOG.std(nil,"debug","finish",response);
-									LOG.std(nil,"debug","finish",err);
+									--LOG.std(nil,"debug","finish",response);
+									--LOG.std(nil,"debug","finish",err);
 
 									GitlabService.projectId = nil;
 
@@ -779,6 +773,7 @@ function SyncMain:syncToDataSource()
 
 										SyncMain:genWorldMD(params, function()
 											SyncMain.finish = true;
+											syncToDataSourceGUI:refresh();
 											loginMain.RefreshCurrentServerList();
 										end);
 									end

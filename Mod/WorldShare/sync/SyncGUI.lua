@@ -20,13 +20,13 @@ local SyncPage;
 SyncGUI.current = 0;
 SyncGUI.total   = 0;
 SyncGUI.files   = "";
-SyncGUI.isStart = false;
+--SyncGUI.isStart = false;
 
 function SyncGUI:ctor()
 	SyncGUI.current = 0;
 	SyncGUI.total   = 0;
 	SyncGUI.files   = "同步中，请稍后...";
-	SyncGUI.isStart = true;
+--	SyncGUI.isStart = true;
 
 	SyncMain.curUpdateIndex        = 1;
 	SyncMain.curUploadIndex        = 1;
@@ -62,28 +62,31 @@ function SyncGUI:OnInit()
 	SyncGUI.progressbar = SyncPage:GetNode("progressbar");
 end
 
+function SyncGUI:refresh()
+	SyncPage:Refresh(0.01);
+end
+
 function SyncGUI.closeWindow()
-	SyncGUI.isStart = false;
+--	SyncGUI.isStart = false;
 	SyncPage:CloseWindow();
 end
 
 function SyncGUI.finish(_callback)
 	SyncMain.finish = true;
-	SyncGUI.isStart = false;
+--	SyncGUI.isStart = false;
 
 	SyncGUI.files = "正在等待上次同步完成，请稍后...";
-	SyncPage:Refresh(0.01);
+	SyncGUI:refresh();
 
 	local function checkFinish()
-		echo(SyncMain.isFetching);
+		--echo(SyncMain.isFetching);
 		commonlib.TimerManager.SetTimeout(function()
 			if(SyncMain.isFetching) then
-				SyncGUI.files = "正在等待上次同步完成，请稍后...";
-				SyncPage:Refresh(0.01);
 				checkFinish();
 			else
 				SyncPage:CloseWindow();
-				if(_callback) then
+				--echo(type(_callback));
+				if(type(_callback) == "function") then
 					_callback();
 				end
 			end

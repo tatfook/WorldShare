@@ -33,7 +33,7 @@ GitlabService.getTreePage     = 1;
 GitlabService.getTreePer_page = 100;
 
 function GitlabService:checkSpecialCharacter(_filename)
-	local specialCharacter = {"【" , "】" , "《" , "》" , "·" , " ", "，"};
+	local specialCharacter = {"【" , "】" , "《" , "》" , "·" , " ", "，","●"};
 
 	for key, item in pairs(specialCharacter) do
 		if(string.find(_filename,item)) then
@@ -199,70 +199,74 @@ function GitlabService:getTree(_callback, _commitId, _projectId, _foldername)
 					_callback(data, err);
 				end
 			else
-				for key,value in ipairs(data) do
-					if(value.type == "tree") then
-						GitlabService.tree[#GitlabService.tree + 1] = value;
+				if(type(data) == "table") then
+					for key,value in ipairs(data) do
+						if(value.type == "tree") then
+							GitlabService.tree[#GitlabService.tree + 1] = value;
+						end
+
+						if(value.type == "blob") then
+							GitlabService.blob[#GitlabService.blob + 1] = value;
+						end
 					end
 
-					if(value.type == "blob") then
-						GitlabService.blob[#GitlabService.blob + 1] = value;
-					end
-				end
+					local fetchTimes = 0;
+					--LOG.std(nil,"debug","GitlabService.tree",GitlabService.tree);
+					--LOG.std(nil,"debug","GitlabService.blob",GitlabService.blob);
 
-				local fetchTimes = 0;
-				--LOG.std(nil,"debug","GitlabService.tree",GitlabService.tree);
-				--LOG.std(nil,"debug","GitlabService.blob",GitlabService.blob);
+					local function getSubTree()
+						if(#GitlabService.tree ~= 0) then
+							--echo("不等");
+							for key, value in ipairs(GitlabService.tree) do
+								GitlabService:getSubTree(function(subTree, subFolderName, _commitId, _projectId)
+									--echo(subTree);
+									--echo(subFolderName);
+									--echo(_commitId);
+									--echo(_projectId);
 
-				local function getSubTree()
-					if(#GitlabService.tree ~= 0) then
-						--echo("不等");
-						for key, value in ipairs(GitlabService.tree) do
-							GitlabService:getSubTree(function(subTree, subFolderName, _commitId, _projectId)
-								--echo(subTree);
-								--echo(subFolderName);
-								--echo(_commitId);
-								--echo(_projectId);
-
-								for checkKey, checkValue in ipairs(GitlabService.tree) do
-									if(checkValue.path == subFolderName) then
-										if(not checkValue.alreadyGet) then
-											checkValue.alreadyGet = true;
-										else
-											return;
+									for checkKey, checkValue in ipairs(GitlabService.tree) do
+										if(checkValue.path == subFolderName) then
+											if(not checkValue.alreadyGet) then
+												checkValue.alreadyGet = true;
+											else
+												return;
+											end
 										end
 									end
-								end
 
-								fetchTimes = fetchTimes + 1;
+									fetchTimes = fetchTimes + 1;
 
-								for subKey, subValue in ipairs(subTree) do
-									GitlabService.newTree[#GitlabService.newTree + 1] = subValue;
-								end
+									for subKey, subValue in ipairs(subTree) do
+										GitlabService.newTree[#GitlabService.newTree + 1] = subValue;
+									end
 
-								if(#GitlabService.tree == fetchTimes)then
-									fetchTimes = 0;
-									GitlabService.tree = commonlib.copy(GitlabService.newTree);
-									GitlabService.newTree = {};
+									if(#GitlabService.tree == fetchTimes)then
+										fetchTimes = 0;
+										GitlabService.tree = commonlib.copy(GitlabService.newTree);
+										GitlabService.newTree = {};
 
-									getSubTree();
-								end
-							end, value.path, _commitId, _projectId);
-						end
-					elseif(#GitlabService.tree == 0) then
-						--echo("等");
-						for cbKey,cbValue in ipairs(GitlabService.blob) do
-							cbValue.sha = cbValue.id;
-						end
+										getSubTree();
+									end
+								end, value.path, _commitId, _projectId);
+							end
+						elseif(#GitlabService.tree == 0) then
+							--echo("等");
+							for cbKey,cbValue in ipairs(GitlabService.blob) do
+								cbValue.sha = cbValue.id;
+							end
 
-						--echo(GitlabService.blob);
+							--echo(GitlabService.blob);
 
-						if(_callback) then
-							_callback(GitlabService.blob, 200);
+							if(_callback) then
+								_callback(GitlabService.blob, 200);
+							end
 						end
 					end
-				end
 
-				getSubTree();
+					getSubTree();
+				else
+					_guihelper.MessageBox(L"获取sha文件失败");
+				end
 			end
 		end);
 	end
