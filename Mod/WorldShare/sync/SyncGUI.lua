@@ -105,6 +105,8 @@ function SyncGUI:retry()
 		else
 			SyncMain.syncCompare(true);
 		end
+
+		SyncMain.syncType = nil;
 	end);
 end
 

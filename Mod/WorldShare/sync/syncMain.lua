@@ -681,6 +681,12 @@ function SyncMain:syncToDataSource()
 						--LOG.std(nil,"debug","data",data);
 						--LOG.std(nil,"debug","err",err);
 
+						if(syncGUIIndex > syncGUItotal) then
+							_guihelper.MessageBox(L"更新失败，请重试再试");
+							syncToDataSourceGUI.closeWindow();
+							return;
+						end
+
 						if(data) then
 							local lastCommits = data[1];
 							lastCommitFile = lastCommits.title:gsub("keepwork commit: ","");
@@ -804,7 +810,7 @@ function SyncMain:syncToDataSource()
 
 			-- 上传新文件
 			function SyncMain.remoteSync.uploadOne()
-				LOG.std("SyncMain", "debug", "NumbersToDSUD", "totals : %s , current : %s", SyncMain.totalLocalIndex, SyncMain.curUploadIndex);
+				LOG.std("SyncMain", "debug", "NumbersToDSUD", "totals : %s , current : %s, file : %s", SyncMain.totalLocalIndex, SyncMain.curUploadIndex, SyncMain.localFiles[SyncMain.curUploadIndex].filename);
 
 				if(SyncMain.finish) then
 					LOG.std("SyncMain","debug", "强制中断");
@@ -883,7 +889,7 @@ function SyncMain:syncToDataSource()
 						if (bIsDelete) then
 							SyncMain.curUpdateIndex = SyncMain.curUpdateIndex + 1;
 
-							if (SyncMain.curUpdateIndex > SyncMain.totalDataSourceIndex) then  --check whether all files have updated or not. if false, update the next one, if true, upload files.
+							if (SyncMain.curUpdateIndex == SyncMain.totalDataSourceIndex) then  --check whether all files have updated or not. if false, update the next one, if true, upload files.
 								SyncMain.remoteSync.uploadOne();
 							else
 								SyncMain.remoteSync.updateOne();
