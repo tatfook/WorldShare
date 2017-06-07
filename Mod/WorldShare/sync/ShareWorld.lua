@@ -20,6 +20,7 @@ local ShareWorldPage = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.
 local SyncMain       = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
 local loginMain		 = commonlib.gettable("Mod.WorldShare.login.loginMain");
 local WorldCommon    = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
+local CommandManager = commonlib.gettable("MyCompany.Aries.Game.CommandManager");
 
 local ShareWorld     = commonlib.inherit(nil,commonlib.gettable("Mod.WorldShare.sync.ShareWorld"));
 
@@ -120,6 +121,12 @@ end
 function ShareWorld.snapshot()
 	ShareWorldPage.TakeSharePageImage();
 	ShareWorld.UpdateImage(true)
+
+	if(SyncMain.remoteRevison == SyncMain.currentRevison)then
+		CommandManager:RunCommand("/save");
+		ShareWorld.SharePage:CloseWindow();
+		ShareWorld.ShowPage();
+	end
 end
 
 function ShareWorld.UpdateImage(bRefreshAsset)

@@ -13,6 +13,10 @@
                 ShareWorld = commonlib.gettable("Mod.WorldShare.sync.ShareWorld");
 
                 ShareWorld.setSharePage();
+
+                function OnOpenWorldDir()
+                    GameLogic.RunCommand("/menu file.openworlddir");
+                end
              ]]>
         </script>
         <style type="text/mcss">
@@ -39,7 +43,10 @@
                             <img name="ShareWorldImage" zorder="1" width="300" height="200" />
                         </div>
                         <div style="float:right;padding-left:28px;">
-                            <div style="font-size:18px;base-font-size:18;margin-bottom:25px;"><%= SyncMain.foldername.utf8%></div>
+                            <div style="font-size:18px;base-font-size:18;margin-bottom:25px;">
+                                <%= SyncMain.foldername.utf8%>
+                                <input type="button" value='...' style="margin-left:3px;font-size:11px;height:20px;color:#ffffff;" class="mc_button_blue" onclick="OnOpenWorldDir"/>
+                            </div>
 
                             <div class="info">大小：<%= loginMain.GetWorldSize(ShareWorld.getWorldSize())%></div>
                             <div class="info">远程版本号：<%=SyncMain.remoteRevison %></div>

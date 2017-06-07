@@ -107,7 +107,7 @@ function loginMain.closeLoginInfo(delayTimeMs)
 			loginMain.InforPage:CloseWindow();
 			loginMain.InforPage = nil;
 		end
-	end, delayTimeMs or 500)
+	end, delayTimeMs or 500);
 end
 
 function loginMain.closeModalPage()
@@ -224,6 +224,7 @@ function loginMain.LoginAction(_page, _callback)
 
 						if(not defaultDataSource) then
 							_guihelper.MessageBox(L"默认数据源不存在");
+							loginMain.closeLoginInfo();
 							return
 						end
 
@@ -305,8 +306,9 @@ function loginMain.LoginAction(_page, _callback)
 					else
 						--local clientLogin = Page:GetNode("clientLogin");
 						--loginMain.changeLoginType(2);
-						loginMain.closeLoginInfo();
 						_guihelper.MessageBox(L"数据源不存在，请联系管理员");
+						loginMain.closeLoginInfo();
+
 						return;
 					end
 				else
