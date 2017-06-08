@@ -13,7 +13,7 @@ ShareWorld.ShowPage()
 
 NPL.load("(gl)Mod/WorldShare/sync/ShareWorld.lua");
 NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/ShareWorldPage.lua");
-NPL.load("(gl)Mod/WorldShare/login/loginMain.lua");
+NPL.load("(gl)Mod/WorldShare/login/LoginMain.lua");
 NPL.load("(gl)script/apps/Aries/Creator/WorldCommon.lua");
 
 local ShareWorldPage = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.Areas.ShareWorldPage");
