@@ -40,7 +40,7 @@ end
 function WorldShare:init()
 	-- replace load world page
 	GameLogic.GetFilters():add_filter("InternetLoadWorld.ShowPage",function (bEnable, bShow)
-		NPL.load("(gl)Mod/WorldShare/login/loginMain.lua");
+		NPL.load("(gl)Mod/WorldShare/login/LoginMain.lua");
 		local loginMain = commonlib.gettable("Mod.WorldShare.login.loginMain");
 		loginMain.ShowPage();
 		return false;

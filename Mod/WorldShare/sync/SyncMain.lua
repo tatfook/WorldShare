@@ -5,7 +5,7 @@ Date:  2017.4.17
 Desc: 
 use the lib:
 ------------------------------------------------------------
-NPL.load("(gl)Mod/WorldShare/sync.SyncMain.lua");
+NPL.load("(gl)Mod/WorldShare/sync/SyncMain.lua");
 local SyncMain  = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
 ------------------------------------------------------------
 ]]
