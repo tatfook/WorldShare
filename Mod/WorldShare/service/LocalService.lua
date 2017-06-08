@@ -14,7 +14,7 @@ NPL.load("(gl)script/ide/Encoding.lua");
 NPL.load("(gl)script/ide/System/Encoding/base64.lua");
 NPL.load("(gl)script/ide/System/Encoding/sha1.lua");
 NPL.load("(gl)Mod/WorldShare/service/GithubService.lua");
-NPL.load("(gl)Mod/WorldShare/login/loginMain.lua");
+NPL.load("(gl)Mod/WorldShare/login/LoginMain.lua");
 NPL.load("(gl)Mod/WorldShare/service/GitlabService.lua");
 NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua");
 NPL.load("(gl)Mod/WorldShare/sync/SyncMain.lua");
