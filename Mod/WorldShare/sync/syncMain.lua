@@ -590,6 +590,7 @@ function SyncMain:syncToLocal(_callback)
 							SyncMain.remoteRevison = remoteRevison;
 							syncGUIIndex = syncGUItotal;
 							SyncMain.localSync.finish();
+							loginMain.RefreshCurrentServerList();
 						else
 							_guihelper.MessageBox(L'下载失败，请稍后再试');
 						end
@@ -1025,8 +1026,13 @@ function SyncMain:syncToDataSource()
 				local hasReadme = false;
 
 				for key,value in ipairs(SyncMain.localFiles) do
-					if(value.filename == "README.md" or value.filename == "readme.md") then
-						hasReadme = true;
+					if(string.upper(value.filename) == "README.MD") then
+						if(value.filename == "README.md") then
+							hasReadme = true;
+						else
+							LocalService:delete(SyncMain.foldername.utf8, value.filename);
+							hasReadme = false;
+						end
 					end
 				end
 

@@ -101,27 +101,16 @@ function loginMain.setModalPage()
 	loginMain.ModalPage = document:GetPageCtrl();
 end
 
-function loginMain.closeLoginInfo(delayTimeMs)
-	commonlib.TimerManager.SetTimeout(function()  
-		if(loginMain.InforPage) then
-			loginMain.InforPage:CloseWindow();
-			loginMain.InforPage = nil;
-		end
-	end, delayTimeMs or 500);
-end
-
-function loginMain.closeModalPage()
-	loginMain.ModalPage:CloseWindow();
-end
-
 function loginMain.refreshPage()
 	loginMain.LoginPage:Refresh();
 end
 
-function loginMain.showLoginInfo()
+function loginMain.showMessageInfo(_msg)
+	loginMain.Msg = _msg;
+	
 	System.App.Commands.Call("File.MCMLWindowFrame", {
-		url = "Mod/WorldShare/login/loginInfor.html",
-		name = "loginMain.loginInfor",
+		url = "Mod/WorldShare/login/Infor.html",
+		name = "loginMain.Infor",
 		isShowTitleBar = false,
 		DestroyOnClose = true,
 		style = CommonCtrl.WindowFrame.ContainerStyle,
@@ -135,6 +124,8 @@ function loginMain.showLoginInfo()
 			width = 500,
 			height = 270,
 	});
+
+	loginMain.Msg = nil;
 end
 
 function loginMain.showLoginModalImp()
@@ -153,6 +144,19 @@ function loginMain.showLoginModalImp()
 			width = 320,
 			height = 350,
 	});
+end
+
+function loginMain.closeMessageInfo(delayTimeMs)
+	commonlib.TimerManager.SetTimeout(function()  
+		if(loginMain.InforPage) then
+			loginMain.InforPage:CloseWindow();
+			loginMain.InforPage = nil;
+		end
+	end, delayTimeMs or 500);
+end
+
+function loginMain.closeModalPage()
+	loginMain.ModalPage:CloseWindow();
 end
 
 function loginMain.LoginAction(_page, _callback)
@@ -178,7 +182,7 @@ function loginMain.LoginAction(_page, _callback)
 	    return;
 	end
 
-	loginMain.showLoginInfo();
+	loginMain.showMessageInfo(L"正在登陆，请稍后...");
 
 	loginMain.LoginActionApi(account,password,function (response,err)
 			LOG.std(nil,"debug","response",response);
@@ -224,7 +228,7 @@ function loginMain.LoginAction(_page, _callback)
 
 						if(not defaultDataSource) then
 							_guihelper.MessageBox(L"默认数据源不存在");
-							loginMain.closeLoginInfo();
+							loginMain.closeMessageInfo();
 							return
 						end
 
@@ -256,7 +260,7 @@ function loginMain.LoginAction(_page, _callback)
 							local site = data["data"];
 							
 							if(not site) then
-								loginMain.closeLoginInfo();
+								loginMain.closeMessageInfo();
 								_guihelper.MessageBox(L"检查站点失败");
 								return;
 							end
@@ -289,7 +293,7 @@ function loginMain.LoginAction(_page, _callback)
 							end
 
 							loginMain.changeLoginType(3);
-							loginMain.closeLoginInfo();
+							loginMain.closeMessageInfo();
 							loginMain.RefreshCurrentServerList();
 
 							if(loginMain.ModalPage) then
@@ -325,8 +329,6 @@ end
 
 function loginMain.LoginActionModal()
 	loginMain.LoginAction(loginMain.ModalPage, function()
-		_guihelper.MessageBox(L"登陆成功");
-
 		ShareWorldPage.ShowPage();
 	end);
 end

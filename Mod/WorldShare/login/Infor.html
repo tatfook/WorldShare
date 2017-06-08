@@ -7,16 +7,15 @@
     <pe:mcml>
         <script type="text/npl" refresh="false">
             <![CDATA[
-            loginMain = commonlib.gettable("Mod.WorldShare.login.loginMain");
-
-            loginMain.setInforPage();
+                loginMain = commonlib.gettable("Mod.WorldShare.login.loginMain");
+                loginMain.setInforPage();
             ]]>
         </script>
         <div style="width:300px;height:150px;">
             <aries:window mode="thin" width="300" height="150" style="float:left;" title='<%=L"登陆" %>'>
                 <div style="padding:20px;font-size:18px;base-font-size:18px;color:#ffffff;margin-top:20px;">
                     <div style="margin-right:60px;">
-                       正在登陆，请稍后...
+                       <%= loginMain.Msg%>
                     </div>
                 </div>
             </aries:window>

@@ -37,6 +37,7 @@ function ShareWorld.ShowPage()
 		loginMain.showLoginModalImp();
 		return;
 	elseif(loginMain.login_type == 3) then
+		loginMain.showMessageInfo(L"正在获取，请稍后...");
 		ShareWorld.shareCompare();
 	end
 end
@@ -96,6 +97,7 @@ function ShareWorld.shareCompare()
 			ShareWorld.CompareResult = result;
 			ShareWorld.SharePage:Refresh();
 			ShareWorld:init();
+			loginMain.closeMessageInfo();
 		else
 			ShareWorld.SharePage:CloseWindow();
 		end

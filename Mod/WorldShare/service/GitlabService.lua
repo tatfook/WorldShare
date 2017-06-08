@@ -458,9 +458,13 @@ function GitlabService:deleteFile(_path, _sha, _callback, _projectId, _foldernam
 			--LOG.std(nil,"debug","deleteFilerr",err);
 
 			if(err == 204) then
-				_callback(true);
+				if(type(_callback) == "function") then
+					_callback(true);
+				end
 			else
-				_callback(false);
+				if(type(_callback) == "function") then
+					_callback(false);
+				end
 			end
 		end);
 	end

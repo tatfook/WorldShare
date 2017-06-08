@@ -40,7 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Mod\WorldShare\login\LoginInfor.html" />
+    <Content Include="Mod\WorldShare\login\Infor.html" />
     <Content Include="Mod\WorldShare\login\LoginMain.html" />
     <Content Include="Mod\WorldShare\login\LoginModal.html" />
     <Content Include="Mod\WorldShare\login\WorldExitDialog.html" />

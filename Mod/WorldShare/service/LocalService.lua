@@ -206,6 +206,7 @@ end
 function LocalService:downloadZip(_foldername, _commitId, _callback)
 	local foldername = GitEncoding.base32(SyncMain.foldername.utf8);
 	local url = "http://git.keepwork.com/" .. loginMain.dataSourceUsername .. "/" .. foldername .. "/repository/archive.zip?ref=" .. SyncMain.commitId;
+	LOG.std("LocalService","debug","DZIPRAW", "raw url: %s", url);
 
 	local Files = FileDownloader:new():Init(nil, url, "temp/archive.zip", function(bSuccess, downloadPath)
 		if(bSuccess) then
@@ -258,7 +259,11 @@ function LocalService:downloadZip(_foldername, _commitId, _callback)
 							end
 
 							local writeFile = ParaIO.open(bashPath .. path, "w");
-
+							
+							if(path == "/revision.xml") then
+								echo(binData);
+							end
+							
 							writeFile:write(binData,#binData);
 							writeFile:close();
 
@@ -314,7 +319,10 @@ function LocalService:delete(_foldername, _filename, _callback)
 	-- LOG.std(nil,"debug","ParaIO.DeleteFile",bashPath .. _filename);
 
 	ParaIO.DeleteFile(bashPath .. _filename);
-	_callback();
+
+	if(type(_callback) == "function") then
+		_callback();
+	end
 end
 
 function LocalService:GetZipWorldSize(_zipWorldDir)
