@@ -260,9 +260,9 @@ function LocalService:downloadZip(_foldername, _commitId, _callback)
 
 							local writeFile = ParaIO.open(bashPath .. path, "w");
 							
-							if(path == "/revision.xml") then
-								echo(binData);
-							end
+--							if(path == "/revision.xml") then
+--								echo(binData);
+--							end
 							
 							writeFile:write(binData,#binData);
 							writeFile:close();
