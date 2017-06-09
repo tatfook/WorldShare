@@ -33,7 +33,7 @@ GitlabService.getTreePage     = 1;
 GitlabService.getTreePer_page = 100;
 
 function GitlabService:checkSpecialCharacter(_filename)
-	local specialCharacter = {"【" , "】" , "《" , "》" , "·" , " ", "，","●"};
+	local specialCharacter = {"【" , "】" , "《" , "》" , "·" , " ", "，", "●"};
 
 	for key, item in pairs(specialCharacter) do
 		if(string.find(_filename,item)) then
@@ -51,17 +51,11 @@ end
 function GitlabService:checkProjectId(_projectId, _foldername, _callback)
 	if(not _projectId) then
 		_projectId = GitlabService.projectId;
-	else
-		if(_callback)then
-			_callback(_projectId);
-		end
 	end
 
 	if(not _projectId) then
 		if(_foldername) then
-			local foldername = GitEncoding.base32(_foldername)
-
-			GitlabService:getProjectIdByName(foldername,function(projectId)
+			GitlabService:getProjectIdByName(_foldername,function(projectId)
 				if(projectId) then
 					GitlabService.projectId = projectId;
 					
@@ -69,12 +63,12 @@ function GitlabService:checkProjectId(_projectId, _foldername, _callback)
 						_callback(projectId);
 					end
 				else
-					--echo("a");
+					LOG.std("GitlabService","debug","GetProjecIdFail","Reson: %s, ProjectName: %s","没有匹配到仓名",_foldername);
 					_guihelper.MessageBox(L"获取projectId失败");
 				end
 			end);
 		else
-			--echo("b")
+			LOG.std("GitlabService","debug","GetProjecIdFail","Reson: %s","没有仓名传入");
 			_guihelper.MessageBox(L"获取projectId失败");
 		end
 	else
@@ -505,7 +499,6 @@ end
 
 -- 初始化
 function GitlabService:init(_foldername, _callback)
-	_foldername = GitEncoding.base32(_foldername);
 	local url   = "projects";
 
 	GitlabService:apiGet(url .. "?owned=true&page=1&per_page=100",function(projectList, err)

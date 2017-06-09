@@ -78,7 +78,6 @@ function loginMain.ShowPage()
 	});
 
 	loginMain.getRememberPassword();
-	loginMain.setSite();
 	loginMain.autoLoginAction();
 	loginMain.RefreshCurrentServerList();
 end
@@ -171,6 +170,7 @@ function loginMain.LoginAction(_page, _callback)
 
 	--echo(account);
 	--echo(password);
+	echo(loginServer);
 
 	if(account == nil or account == "") then
 	    _guihelper.MessageBox(L"账号不能为空");
@@ -185,7 +185,7 @@ function loginMain.LoginAction(_page, _callback)
 	loginMain.showMessageInfo(L"正在登陆，请稍后...");
 
 	loginMain.LoginActionApi(account,password,function (response,err)
-			LOG.std(nil,"debug","response",response);
+			LOG.std(nil,"debug","response",commonlib.Json.Encode(response));
 			if(type(response) == "table") then
 				if(response['data'] ~= nil and response['data']['userinfo']['_id']) then
 					loginMain.token = response['data']['token'];
@@ -217,28 +217,32 @@ function loginMain.LoginAction(_page, _callback)
 					loginMain.username = userinfo['displayName'];
 					loginMain.userId   = userinfo['_id'];
 
-					if(userinfo['dataSourceId'] and userinfo['dataSource'] ~= {}) then
-						local defaultDataSource;
+					if(userinfo['defaultSiteDataSource']) then
+						local defaultSiteDataSource = userinfo['defaultSiteDataSource'];
+						local dataSourceSetting;
 
-						for key,value in ipairs(userinfo['dataSource']) do
-							if(value._id == userinfo['dataSourceId']) then
-								defaultDataSource = value;
+						for _, value in ipairs(userinfo['dataSource']) do
+							if(value.type == defaultSiteDataSource.type) then
+								dataSourceSetting = value;
+								break;
 							end
 						end
 
-						if(not defaultDataSource) then
-							_guihelper.MessageBox(L"默认数据源不存在");
+						if(not dataSourceSetting) then
+							_guihelper.MessageBox(L"数据源配置文件不存在");
 							loginMain.closeMessageInfo();
 							return
 						end
 
-						loginMain.dataSourceId       = userinfo['dataSourceId'];				-- 数据源
-						loginMain.dataSourceToken    = defaultDataSource['dataSourceToken'];    -- 数据源Token
-						loginMain.dataSourceUsername = defaultDataSource['dataSourceUsername']; -- 数据源用户名
-						loginMain.dataSourceType     = defaultDataSource['type'];				-- 数据源类型
-						loginMain.apiBaseUrl		 = defaultDataSource['apiBaseUrl']			-- 数据源api
-						loginMain.rawBaseUrl		 = defaultDataSource['rawBaseUrl']          -- 数据源raw
-						loginMain.keepWorkDataSource = defaultDataSource['projectName']			-- keepwork仓名
+						--echo(dataSourceSetting);
+						loginMain.dataSourceToken      = dataSourceSetting['dataSourceToken'];    -- 数据源Token
+						loginMain.dataSourceUsername   = dataSourceSetting['dataSourceUsername']; -- 数据源用户名
+						loginMain.dataSourceType       = dataSourceSetting['type'];				  -- 数据源类型
+						loginMain.apiBaseUrl		   = dataSourceSetting['apiBaseUrl'];         -- 数据源api
+						loginMain.rawBaseUrl		   = dataSourceSetting['rawBaseUrl'];         -- 数据源raw
+
+						loginMain.keepWorkDataSource   = defaultSiteDataSource['projectName'];    -- keepwork仓名
+						loginMain.keepWorkDataSourceId = defaultSiteDataSource['projectId'];      -- keepwork仓ID
 
 						--echo({loginMain.dataSourceToken,loginMain.dataSourceUsername});
 						loginMain.personPageUrl = loginMain.site .. "/" .. loginMain.username .. "/paracraft/index";--loginMain.site .. "/wiki/mod/worldshare/person/#?userid=" .. userinfo._id;
@@ -311,16 +315,16 @@ function loginMain.LoginAction(_page, _callback)
 						--local clientLogin = Page:GetNode("clientLogin");
 						--loginMain.changeLoginType(2);
 						_guihelper.MessageBox(L"数据源不存在，请联系管理员");
-						loginMain.closeLoginInfo();
+						loginMain.closeMessageInfo();
 
 						return;
 					end
 				else
-					loginMain.closeLoginInfo();
+					loginMain.closeMessageInfo();
 					_guihelper.MessageBox(L"用户名或者密码错误");
 				end
 			else
-				loginMain.closeLoginInfo();
+				loginMain.closeMessageInfo();
 				_guihelper.MessageBox(L"服务器连接失败");
 			end
 		end
@@ -679,11 +683,15 @@ function loginMain.getRememberPassword()
 
 			if(PWD[3] and PWD[3] == "keepwork") then
 				page:GetNode("keepwork"):SetAttribute("selected","selected");
+				loginMain.site = "http://keepwork.com";
 			elseif(PWD[3] and PWD[3] == "keepworkDev") then
+				loginMain.site = "http://dev.keepwork.com";
 				page:GetNode("keepworkDev"):SetAttribute("selected","selected");
 			elseif(PWD[3] and PWD[3] == "keepworkTest") then
+				loginMain.site = "http://test.keepwork.com";
 				page:GetNode("keepworkTest"):SetAttribute("selected","selected");
 			elseif(PWD[3] and PWD[3] == "local") then
+				loginMain.site = "http://localhost:8099";
 				page:GetNode("local"):SetAttribute("selected","selected");
 			end
 
@@ -734,14 +742,6 @@ function loginMain.setSite()
 	end
 
 	register:SetAttribute("href",loginMain.site .. "/wiki/home");
-
-	if(loginMain.LoginPage) then
-		loginMain.LoginPage:Refresh(0.01);
-	end
-
-	if(loginMain.ModalPage) then
-		loginMain.ModalPage:Refresh(0.01);
-	end
 end
 
 function loginMain.setRememberAuto()
