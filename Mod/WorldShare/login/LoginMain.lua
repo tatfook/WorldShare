@@ -78,6 +78,7 @@ function loginMain.ShowPage()
 	});
 
 	loginMain.getRememberPassword();
+	loginMain.setSite();
 	loginMain.autoLoginAction();
 	loginMain.RefreshCurrentServerList();
 end
@@ -185,7 +186,8 @@ function loginMain.LoginAction(_page, _callback)
 	loginMain.showMessageInfo(L"正在登陆，请稍后...");
 
 	loginMain.LoginActionApi(account,password,function (response,err)
-			LOG.std(nil,"debug","response",commonlib.Json.Encode(response));
+			LOG.std("LoginMain","debug","Login Response","Response is : %s",response);
+			--echo(response,true);
 			if(type(response) == "table") then
 				if(response['data'] ~= nil and response['data']['userinfo']['_id']) then
 					loginMain.token = response['data']['token'];
@@ -475,11 +477,6 @@ function loginMain.InputSearchContent()
 end
 
 function loginMain.ClosePage()
---	if(SyncGUI.isStart) then
---		_guihelper.MessageBox(L"世界同步中，请等待同步完成后再返回");
---		return;
---	end
-
 	if(loginMain.IsMCVersion()) then
 	    InternetLoadWorld.ReturnLastStep();
 	else
@@ -669,42 +666,24 @@ function loginMain.getRememberPassword()
 			end
 			
 			if(PWD[1]) then
-				page:SetNodeValue("account", PWD[1]);
+				page:SetValue("account", PWD[1]);
 			end
 
 			if(PWD[2]) then
-				page:SetNodeValue("password",Encoding.PasswordDecodeWithMac(PWD[2]));
+				page:SetValue("password",Encoding.PasswordDecodeWithMac(PWD[2]));
 			end
 
-			page:GetNode("keepwork"):SetAttribute("selected",nil);
-			page:GetNode("keepworkDev"):SetAttribute("selected",nil);
-			page:GetNode("keepworkTest"):SetAttribute("selected",nil);
-			page:GetNode("local"):SetAttribute("selected",nil);
-
-			if(PWD[3] and PWD[3] == "keepwork") then
-				page:GetNode("keepwork"):SetAttribute("selected","selected");
-				loginMain.site = "http://keepwork.com";
-			elseif(PWD[3] and PWD[3] == "keepworkDev") then
-				loginMain.site = "http://dev.keepwork.com";
-				page:GetNode("keepworkDev"):SetAttribute("selected","selected");
-			elseif(PWD[3] and PWD[3] == "keepworkTest") then
-				loginMain.site = "http://test.keepwork.com";
-				page:GetNode("keepworkTest"):SetAttribute("selected","selected");
-			elseif(PWD[3] and PWD[3] == "local") then
-				loginMain.site = "http://localhost:8099";
-				page:GetNode("local"):SetAttribute("selected","selected");
-			end
-
-			page:GetNode("rememberPassword"):SetAttribute("checked","checked");
+			page:SetValue("loginServer",PWD[3]);
+			page:SetValue("rememberPassword",true);
 
 			if(not PWD[5] or PWD[5] == "true") then
-				page:GetNode("autoLogin"):SetAttribute("checked","checked");
+				page:SetValue("autoLogin", true);
 			else
-				page:GetNode("autoLogin"):SetAttribute("checked",nil);
+				page:SetValue("autoLogin", false);
 			end
 		else
-			page:GetNode("rememberPassword"):SetAttribute("checked",nil);
-			page:GetNode("autoLogin"):SetAttribute("checked",nil);
+			page:SetValue("rememberPassword",false);
+			page:SetValue("autoLogin", false);
 		end
 	end
 
@@ -834,7 +813,7 @@ function loginMain.autoLoginAction()
 	local function autoLoginAction(_page)
 		if(not loginMain.IsSignedIn()) then
 			local autoLogin = _page:GetValue("autoLogin");
-
+			--echo(autoLogin);
 			if(autoLogin) then
 				loginMain.LoginActionMain();
 			end
