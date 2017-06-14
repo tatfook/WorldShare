@@ -57,8 +57,6 @@ function loginMain.init()
 end
 
 function loginMain.ShowPage()
-	loginMain.OnInit();
-
 	System.App.Commands.Call("File.MCMLWindowFrame", {
 			url = "Mod/WorldShare/login/LoginMain.html", 
 			name = "LoadMainWorld", 
@@ -79,7 +77,7 @@ function loginMain.ShowPage()
 
 	loginMain.getRememberPassword();
 	loginMain.setSite();
-	loginMain.autoLoginAction();
+	loginMain.autoLoginAction("main");
 	loginMain.RefreshCurrentServerList();
 end
 
@@ -144,6 +142,10 @@ function loginMain.showLoginModalImp()
 			width = 320,
 			height = 350,
 	});
+
+    loginMain.getRememberPassword();
+    loginMain.setSite();
+	loginMain.autoLoginAction("modal");
 end
 
 function loginMain.closeMessageInfo(delayTimeMs)
@@ -479,9 +481,9 @@ end
 function loginMain.ClosePage()
 	if(loginMain.IsMCVersion()) then
 	    InternetLoadWorld.ReturnLastStep();
-	else
-	    loginMain.LoginPage:CloseWindow();
 	end
+
+	loginMain.LoginPage:CloseWindow();
 end
 
 function loginMain.GetDefaultValueForAddress()
@@ -697,18 +699,17 @@ function loginMain.getRememberPassword()
 end
 
 function loginMain.setSite()
-	local register;
-	local loginServer;
+	local page;
 
 	if(loginMain.LoginPage) then
-		register    = loginMain.LoginPage:GetNode("register");
-		loginServer = loginMain.LoginPage:GetValue("loginServer");
+		page = loginMain.LoginPage;
 	end
 
 	if(loginMain.ModalPage) then
-		register    = loginMain.ModalPage:GetNode("register");
-		loginServer = loginMain.ModalPage:GetValue("loginServer");
+		page = loginMain.ModalPage;
 	end
+
+	local loginServer = page:GetValue("loginServer");
 
 	if(loginServer == "keepwork") then
 	    loginMain.site = "http://keepwork.com";
@@ -720,7 +721,8 @@ function loginMain.setSite()
 	    loginMain.site = "http://localhost:8099";
 	end
 
-	register:SetAttribute("href",loginMain.site .. "/wiki/home");
+	page:GetNode("register"):SetAttribute("href",loginMain.site .. "/wiki/home");
+	page:Refresh(0.01);
 end
 
 function loginMain.setRememberAuto()
@@ -808,14 +810,17 @@ function loginMain.setAutoRemember()
 	end
 end
 
-function loginMain.autoLoginAction()
-
+function loginMain.autoLoginAction(_type)
 	local function autoLoginAction(_page)
 		if(not loginMain.IsSignedIn()) then
 			local autoLogin = _page:GetValue("autoLogin");
 			--echo(autoLogin);
 			if(autoLogin) then
-				loginMain.LoginActionMain();
+				if(_type == "main") then
+					loginMain.LoginActionMain();
+				elseif(_type == "modal") then
+					loginMain.LoginActionModal();
+				end
 			end
 		end
 	end
@@ -837,42 +842,44 @@ end
 function loginMain.logout()
 	if(loginMain.IsSignedIn()) then
 		loginMain.changeLoginType(1);
-
+		loginMain.token = nil;
 		loginMain.RefreshCurrentServerList();
 	end
 end
 
 function loginMain.RefreshCurrentServerList()
-	loginMain.refreshing = true;
-	loginMain.LoginPage:Refresh(0.01);
+	if(loginMain.LoginPage) then
+		loginMain.refreshing = true;
+		loginMain.LoginPage:Refresh(0.01);
 
-	if(loginMain.current_type == 1 and loginMain.login_type == 1) then
-		loginMain.getLocalWorldList(function()
-			loginMain.changeRevision(function()
-				loginMain.refreshing = false;
-			end);
-		end);
-	elseif(loginMain.current_type == 1 and loginMain.login_type == 3) then
-		loginMain.getLocalWorldList(function()
-			loginMain.changeRevision(function()
-				loginMain.syncWorldsList(function()
+		if(loginMain.current_type == 1 and loginMain.login_type == 1) then
+			loginMain.getLocalWorldList(function()
+				loginMain.changeRevision(function()
 					loginMain.refreshing = false;
 				end);
 			end);
-		end);
-	end
-
-	if(loginMain.current_type == 2) then
-		local ServerPage = InternetLoadWorld.GetCurrentServerPage();
-
-		if(not ServerPage.isFetching) then
-			InternetLoadWorld.FetchServerPage(ServerPage);
+		elseif(loginMain.current_type == 1 and loginMain.login_type == 3) then
+			loginMain.getLocalWorldList(function()
+				loginMain.changeRevision(function()
+					loginMain.syncWorldsList(function()
+						loginMain.refreshing = false;
+					end);
+				end);
+			end);
 		end
 
-		loginMain.refreshing = false;
-	end
+		if(loginMain.current_type == 2) then
+			local ServerPage = InternetLoadWorld.GetCurrentServerPage();
 
-	loginMain.LoginPage:Refresh(0.01);
+			if(not ServerPage.isFetching) then
+				InternetLoadWorld.FetchServerPage(ServerPage);
+			end
+
+			loginMain.refreshing = false;
+		end
+
+		loginMain.LoginPage:Refresh(0.01);
+	end
 end
 
 function loginMain.getLocalWorldList(_callback)
@@ -1068,38 +1075,38 @@ function loginMain:formatDate(modDate)
 	--echo(modDateTable);
 	local newModDate = "";
 
-	if(#modDateTable[1] ~= 4) then
+	if(modDateTable[1] and #modDateTable[1] ~= 4) then
 		local num = 4 - #modDateTable[1];
 		newModDate = newModDate .. strRepeat(num,'0') .. modDateTable[1];
-	elseif(#modDateTable[1] == 4) then
+	elseif(modDateTable[1] and #modDateTable[1] == 4) then
 		newModDate = newModDate .. modDateTable[1];
 	end
 
-	if(#modDateTable[2] ~= 2) then
+	if(modDateTable[2] and #modDateTable[2] ~= 2) then
 		local num = 2 - #modDateTable[2];
 		newModDate = newModDate .. strRepeat(num,'0') .. modDateTable[2];
-	elseif(#modDateTable[2] == 2) then
+	elseif(modDateTable[2] and #modDateTable[2] == 2) then
 		newModDate = newModDate .. modDateTable[2];
 	end
 
-	if(#modDateTable[3] ~= 2) then
+	if(modDateTable[3] and #modDateTable[3] ~= 2) then
 		local num = 2 - #modDateTable[3];
 		newModDate = newModDate .. strRepeat(num,'0') .. modDateTable[3];
-	elseif(#modDateTable[3] == 2) then
+	elseif(modDateTable[3] and #modDateTable[3] == 2) then
 		newModDate = newModDate .. modDateTable[3];
 	end
 
-	if(#modDateTable[4] ~= 2) then
+	if(modDateTable[4] and #modDateTable[4] ~= 2) then
 		local num = 2 - #modDateTable[4];
 		newModDate = newModDate .. strRepeat(num,'0') .. modDateTable[4];
-	elseif(#modDateTable[4] == 2) then
+	elseif(modDateTable[4] and #modDateTable[4] == 2) then
 		newModDate = newModDate .. modDateTable[4];
 	end
 
-	if(#modDateTable[5] ~= 2) then
+	if(modDateTable[5] and #modDateTable[5] ~= 2) then
 		local num = 2 - #modDateTable[5];
 		newModDate = newModDate .. strRepeat(num,'0') .. modDateTable[5];
-	elseif(#modDateTable[5] == 2) then
+	elseif(modDateTable[5] and modDateTable[5] and #modDateTable[5] == 2) then
 		newModDate = newModDate .. modDateTable[5];
 	end
 

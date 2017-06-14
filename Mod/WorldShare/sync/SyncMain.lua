@@ -150,10 +150,12 @@ function SyncMain:compareRevision(_LoginStatus, _callback)
 				_callback("zip");
 				return;
 			end
-
-			for _, value in ipairs(InternetLoadWorld.cur_ds) do
-				if(value.foldername == SyncMain.foldername.utf8)then
-					SyncMain.selectedWorldInfor = value;
+			
+			if(InternetLoadWorld.cur_ds) then
+				for _, value in ipairs(InternetLoadWorld.cur_ds) do
+					if(value.foldername == SyncMain.foldername.utf8)then
+						SyncMain.selectedWorldInfor = value;
+					end
 				end
 			end
 
@@ -701,7 +703,7 @@ function SyncMain:syncToDataSource()
 								local modDateTable = {};
 								local readme;
 
-								if(SyncMain.selectedWorldInfor.tooltip)then
+								if(SyncMain.selectedWorldInfor and SyncMain.selectedWorldInfor.tooltip)then
 									for modDateEle in string.gmatch(SyncMain.selectedWorldInfor.tooltip,"[^:]+") do
 										modDateTable[#modDateTable+1] = modDateEle;
 									end
@@ -733,7 +735,10 @@ function SyncMain:syncToDataSource()
 								preview[0].previewUrl = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. GitEncoding.base32(SyncMain.foldername.utf8) .. "/raw/master/preview.jpg";
 								preview = NPL.ToJson(preview,true);
 
-								local filesTotals = SyncMain.selectedWorldInfor.size;
+								local filesTotals = 0;
+								if(SyncMain.selectedWorldInfor) then
+									local filesTotals = SyncMain.selectedWorldInfor.size;
+								end
 
 								local params = {};
 								params.modDate		   = modDateTable;
@@ -752,7 +757,9 @@ function SyncMain:syncToDataSource()
 								-- SyncMain:genWorldMD(params);
 
 								loginMain.refreshing = true;
-								loginMain.LoginPage:Refresh(0.01);
+								if(loginMain.LoginPage) then
+									loginMain.LoginPage:Refresh(0.01);
+								end
 
 								HttpRequest:GetUrl({
 									url     = loginMain.site .. "/api/mod/worldshare/models/worlds/refresh",
