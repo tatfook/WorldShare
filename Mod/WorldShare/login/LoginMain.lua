@@ -186,7 +186,7 @@ function loginMain.LoginAction(_page, _callback)
 	loginMain.showMessageInfo(L"正在登陆，请稍后...");
 
 	loginMain.LoginActionApi(account,password,function (response,err)
-			LOG.std("LoginMain","debug","Login Response","Response is : %s",response);
+			LOG.std("LoginMain","debug","Login Response",response);
 			--echo(response,true);
 			if(type(response) == "table") then
 				if(response['data'] ~= nil and response['data']['userinfo']['_id']) then
