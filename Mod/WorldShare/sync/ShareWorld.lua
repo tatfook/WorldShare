@@ -91,6 +91,7 @@ function ShareWorld.shareCompare()
 		if(result and result == "tryAgain") then
 			ShareWorld.shareCompare();
 		elseif(result == "zip") then
+			loginMain.closeMessageInfo();
 			return;
 		elseif(result) then
 			ShareWorld.ShowPageImp();
