@@ -171,7 +171,7 @@ function loginMain.LoginAction(_page, _callback)
 
 	--echo(account);
 	--echo(password);
-	echo(loginServer);
+	--echo(loginServer);
 
 	if(account == nil or account == "") then
 	    _guihelper.MessageBox(L"账号不能为空");
