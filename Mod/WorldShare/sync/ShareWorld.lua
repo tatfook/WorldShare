@@ -34,6 +34,9 @@ function ShareWorld.ShowPage()
 	SyncMain.syncType = "share";
 
 	if(loginMain.login_type == 1) then
+		loginMain.modalCall = function()
+			ShareWorldPage.ShowPage();
+		end;
 		loginMain.showLoginModalImp();
 		return;
 	elseif(loginMain.login_type == 3) then
@@ -91,6 +94,7 @@ function ShareWorld.shareCompare()
 		if(result and result == "tryAgain") then
 			ShareWorld.shareCompare();
 		elseif(result == "zip") then
+			_guihelper.MessageBox(L"不能同步ZIP文件");
 			loginMain.closeMessageInfo();
 			return;
 		elseif(result) then

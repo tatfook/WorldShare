@@ -337,7 +337,10 @@ end
 
 function loginMain.LoginActionModal()
 	loginMain.LoginAction(loginMain.ModalPage, function()
-		ShareWorldPage.ShowPage();
+		if(loginMain.modalCall) then
+			loginMain.modalCall();
+		end
+		loginMain.modalCall = nil;
 	end);
 end
 

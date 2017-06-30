@@ -146,8 +146,10 @@ function SyncMain:compareRevision(_LoginStatus, _callback)
 			loginMain.RefreshCurrentServerList();
 
 			if(GameLogic.IsReadOnly()) then
-				_guihelper.MessageBox(L"不能同步ZIP文件");
-				_callback("zip");
+				if(type(_callback) == "function")then
+					_callback("zip");
+				end
+				
 				return;
 			end
 			
@@ -225,7 +227,10 @@ function SyncMain:compareRevision(_LoginStatus, _callback)
 
 				if(err == 0) then
 					_guihelper.MessageBox(L"网络错误");
-					_callback(false);
+
+					if(type(_callback) == "function") then
+						_callback(false);
+					end
 					return
 				else
 					local result;
@@ -242,7 +247,9 @@ function SyncMain:compareRevision(_LoginStatus, _callback)
 
 					SyncMain.compareFinish = true;
 
-					_callback(result);
+					if(type(_callback) == "function") then
+						_callback(result);
+					end
 				end
 			end);
 		else
