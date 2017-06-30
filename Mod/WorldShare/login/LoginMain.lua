@@ -850,7 +850,7 @@ function loginMain.logout()
 	end
 end
 
-function loginMain.RefreshCurrentServerList()
+function loginMain.RefreshCurrentServerList(_callback)
 	if(loginMain.LoginPage) then
 		loginMain.refreshing = true;
 		loginMain.LoginPage:Refresh(0.01);
@@ -859,6 +859,9 @@ function loginMain.RefreshCurrentServerList()
 			loginMain.getLocalWorldList(function()
 				loginMain.changeRevision(function()
 					loginMain.refreshing = false;
+					if(type(_callback) == "function") then
+						_callback();
+					end
 				end);
 			end);
 		elseif(loginMain.current_type == 1 and loginMain.login_type == 3) then
@@ -866,6 +869,9 @@ function loginMain.RefreshCurrentServerList()
 				loginMain.changeRevision(function()
 					loginMain.syncWorldsList(function()
 						loginMain.refreshing = false;
+						if(type(_callback) == "function") then
+							_callback();
+						end
 					end);
 				end);
 			end);
@@ -980,9 +986,14 @@ function loginMain.syncWorldsList(_callback)
 	]]
 
 	loginMain.getWorldsList(function(response, err)
+		--LOG.std(nil,"debug","response",response);
 		SyncMain.remoteWorldsList = response.data;
-		--LOG.std(nil,"debug","remoteWorldsList-syncWorldsList",SyncMain.remoteWorldsList);
 	    -- 处理本地网络同时存在 本地不存在 网络存在 的世界 
+		if(type(SyncMain.remoteWorldsList) ~= "table") then
+			_guihelper.MessageBox(L"获取服务器世界列表错误");
+			return;
+		end
+
 	    for keyDistance,valueDistance in ipairs(SyncMain.remoteWorldsList) do
 	        local isExist = false;
 
@@ -1176,7 +1187,7 @@ function loginMain.syncNow(_index)
 			SyncMain.foldername.utf8    = SyncMain.selectedWorldInfor.foldername;
 			SyncMain.foldername.default = Encoding.Utf8ToDefault(SyncMain.foldername.utf8);
 
-			SyncMain.worldDir.utf8 = "worlds/DesignHouse/" .. SyncMain.foldername.utf8 .. "/";
+			SyncMain.worldDir.utf8    = "worlds/DesignHouse/" .. SyncMain.foldername.utf8 .. "/";
 			SyncMain.worldDir.default = "worlds/DesignHouse/" .. SyncMain.foldername.default .. "/";
 
 			--LOG.std(nil,"debug","SyncMain.worldDir.default",SyncMain.worldDir.default);

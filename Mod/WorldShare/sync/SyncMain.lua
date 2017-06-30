@@ -126,6 +126,130 @@ function SyncMain:compareRevision(_LoginStatus, _callback)
 	SyncMain.compareFinish = false;
 
 	if(loginMain.token) then
+		local function go()
+			SyncMain.foldername.base32 = GitEncoding.base32(SyncMain.foldername.utf8);
+
+			WorldRevisionCheckOut   = WorldRevision:new():init(SyncMain.worldDir.default);
+			SyncMain.currentRevison = WorldRevisionCheckOut:Checkout();
+
+			SyncMain.localFiles = LocalService:LoadFiles(SyncMain.worldDir.default,"",nil,1000,nil);
+
+			--LOG.std(nil,"debug","SyncMain.localFiles",SyncMain.localFiles);
+			for _,value in ipairs(SyncMain.localFiles) do
+				--LOG.std(nil,"debug","SyncMain.localFiles",value.filename);
+			end
+
+			if(GitlabService:checkSpecialCharacter(SyncMain.foldername.utf8))then
+				return;
+			end
+
+			local hasRevision = false;
+			for key,value in ipairs(SyncMain.localFiles) do
+				--LOG.std(nil,"debug","filename",value.filename);
+				if(value.filename == "revision.xml") then
+					hasRevision = true;
+					break;
+				end
+			end
+
+			if(hasRevision and SyncMain.currentRevison ~= 0 and SyncMain.currentRevison ~= 1) then
+				local contentUrl;
+				if(loginMain.dataSourceType == 'github') then
+					contentUrl = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. GitEncoding.base32(SyncMain.foldername.utf8) .. "/master/revision.xml";
+				elseif(loginMain.dataSourceType == 'gitlab') then
+					SyncMain.commitId = SyncMain:getGitlabCommitId(SyncMain.foldername.utf8);
+
+					if(SyncMain.commitId) then
+						contentUrl = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. GitEncoding.base32(SyncMain.foldername.utf8) .. "/raw/" .. SyncMain.commitId .. "/revision.xml";
+					else
+						contentUrl = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. GitEncoding.base32(SyncMain.foldername.utf8) .. "/raw/master/revision.xml";
+					end
+				
+					--LOG.std("SyncMain","debug","contentUrl",contentUrl);
+				end
+
+				SyncMain.remoteRevison = 0;
+
+				--LOG.std(nil,"debug","contentUrl",contentUrl);
+
+				HttpRequest:GetUrl(contentUrl, function(data,err)
+					--LOG.std(nil,"debug","contentUrl",contentUrl);
+					--LOG.std(nil,"debug","data",data);
+					--LOG.std(nil,"debug","err",err);
+
+					SyncMain.remoteRevison = tonumber(data);
+					if(not SyncMain.remoteRevison) then
+						SyncMain.remoteRevison = 0;
+					end
+
+					SyncMain.currentRevison = tonumber(SyncMain.currentRevison);
+					--LOG.std(nil,"debug","SyncMain.remoteRevison",SyncMain.remoteRevison);
+					--LOG.std(nil,"debug","SyncMain.currentRevison",SyncMain.currentRevison);
+
+					if(err == 0) then
+						_guihelper.MessageBox(L"网络错误");
+
+						if(type(_callback) == "function") then
+							_callback(false);
+						end
+
+						return
+					else
+						local result;
+
+						if(SyncMain.currentRevison < SyncMain.remoteRevison) then
+							result = "remoteBigger"
+						elseif(SyncMain.remoteRevison == 0) then
+							result = "justLocal";
+						elseif(SyncMain.currentRevison > SyncMain.remoteRevison) then
+							result = "localBigger";
+						elseif(SyncMain.currentRevison == SyncMain.remoteRevison) then
+							result = "equal";
+						end
+
+						if(SyncMain.remoteRevison ~= 0) then
+							local isWorldInRemoteLists = false;
+
+							for keyDistance,valueDistance in ipairs(SyncMain.remoteWorldsList) do
+								if(valueDistance["worldsName"] == SyncMain.foldername.utf8) then
+									isWorldInRemoteLists = true;
+								end
+							end
+							echo("isWorldInRemoteLists");
+							echo(isWorldInRemoteLists)
+							if(not isWorldInRemoteLists) then
+								SyncMain:refreshRemoteWorldLists(nil,function()
+									SyncMain.compareFinish = true;
+
+									if(type(_callback) == "function") then
+										_callback("tryAgain");
+									end
+								end)
+
+								return;
+							end
+						end
+
+						SyncMain.compareFinish = true;
+
+						if(type(_callback) == "function") then
+							_callback(result);
+						end
+					end
+				end);
+			else
+				if(not _LoginStatus) then
+					CommandManager:RunCommand("/save");
+					SyncMain.compareFinish = true;
+					_callback("tryAgain");
+				else
+					_guihelper.MessageBox(L"本地世界沒有版本信息");
+					SyncMain.compareFinish = true;
+					return;
+				end
+			end
+		end
+
 		--LOG.std(nil,"debug","_LoginStatus",_LoginStatus);
 		if(not _LoginStatus) then
 			SyncMain.tagInfor = WorldCommon.GetWorldInfo();
@@ -138,130 +262,33 @@ function SyncMain:compareRevision(_LoginStatus, _callback)
 			--LOG.std(nil,"debug","SyncMain.worldDir.default",SyncMain.worldDir.default)
 
 			SyncMain.foldername.default = SyncMain.worldDir.default:match("worlds/DesignHouse/([^/]*)/");
-			--LOG.std(nil,"debug","SyncMain.foldername.default",SyncMain.foldername.default)
 			SyncMain.foldername.utf8    = SyncMain.worldDir.utf8:match("worlds/DesignHouse/([^/]*)/");
+			--LOG.std(nil,"debug","SyncMain.foldername.default",SyncMain.foldername.default)
 			--LOG.std(nil,"debug","SyncMain.foldername.utf8",SyncMain.foldername.utf8)
 
 			--LOG.std(nil,"debug","selectedWorldInfor-old",SyncMain.selectedWorldInfor);
-			loginMain.RefreshCurrentServerList();
-
-			if(GameLogic.IsReadOnly()) then
-				if(type(_callback) == "function")then
-					_callback("zip");
-				end
+			loginMain.RefreshCurrentServerList(function()
+				if(GameLogic.IsReadOnly()) then
+					if(type(_callback) == "function")then
+						_callback("zip");
+					end
 				
-				return;
-			end
+					return;
+				end
 			
-			if(InternetLoadWorld.cur_ds) then
-				for _, value in ipairs(InternetLoadWorld.cur_ds) do
-					if(value.foldername == SyncMain.foldername.utf8)then
-						SyncMain.selectedWorldInfor = value;
+				if(InternetLoadWorld.cur_ds) then
+					for _, value in ipairs(InternetLoadWorld.cur_ds) do
+						if(value.foldername == SyncMain.foldername.utf8)then
+							SyncMain.selectedWorldInfor = value;
+						end
 					end
 				end
-			end
 
-			--LOG.std(nil,"debug","selectedWorldInfor-new",SyncMain.selectedWorldInfor);
-		end
-
-		SyncMain.foldername.base32 = GitEncoding.base32(SyncMain.foldername.utf8);
-
-		WorldRevisionCheckOut   = WorldRevision:new():init(SyncMain.worldDir.default);
-		SyncMain.currentRevison = WorldRevisionCheckOut:Checkout();
-
-		SyncMain.localFiles = LocalService:LoadFiles(SyncMain.worldDir.default,"",nil,1000,nil);
-
-		--LOG.std(nil,"debug","SyncMain.localFiles",SyncMain.localFiles);
-		for _,value in ipairs(SyncMain.localFiles) do
-			--LOG.std(nil,"debug","SyncMain.localFiles",value.filename);
-		end
-
-		if(GitlabService:checkSpecialCharacter(SyncMain.foldername.utf8))then
-			return;
-		end
-
-		local hasRevision = false;
-		for key,value in ipairs(SyncMain.localFiles) do
-			--LOG.std(nil,"debug","filename",value.filename);
-			if(value.filename == "revision.xml") then
-				hasRevision = true;
-				break;
-			end
-		end
-
-		if(hasRevision) then
-			local contentUrl;
-			if(loginMain.dataSourceType == 'github') then
-				contentUrl = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. GitEncoding.base32(SyncMain.foldername.utf8) .. "/master/revision.xml";
-			elseif(loginMain.dataSourceType == 'gitlab') then
-				SyncMain.commitId = SyncMain:getGitlabCommitId(SyncMain.foldername.utf8);
-
-				if(SyncMain.commitId) then
-					contentUrl = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. GitEncoding.base32(SyncMain.foldername.utf8) .. "/raw/" .. SyncMain.commitId .. "/revision.xml";
-				else
-					contentUrl = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. GitEncoding.base32(SyncMain.foldername.utf8) .. "/raw/master/revision.xml";
-				end
-				
-				--LOG.std("SyncMain","debug","contentUrl",contentUrl);
-			end
-
-			SyncMain.remoteRevison = 0;
-
-			--LOG.std(nil,"debug","contentUrl",contentUrl);
-
-			HttpRequest:GetUrl(contentUrl, function(data,err)
-				--LOG.std(nil,"debug","contentUrl",contentUrl);
-				--LOG.std(nil,"debug","data",data);
-				--LOG.std(nil,"debug","err",err);
-
-				SyncMain.remoteRevison = tonumber(data);
-				if(not SyncMain.remoteRevison) then
-					SyncMain.remoteRevison = 0;
-				end
-
-				--SyncMain.isFetchRemoteRevision = true;
-
-				SyncMain.currentRevison = tonumber(SyncMain.currentRevison);
-				--LOG.std(nil,"debug","SyncMain.remoteRevison",SyncMain.remoteRevison);
-				--LOG.std(nil,"debug","SyncMain.currentRevison",SyncMain.currentRevison);
-
-				if(err == 0) then
-					_guihelper.MessageBox(L"网络错误");
-
-					if(type(_callback) == "function") then
-						_callback(false);
-					end
-					return
-				else
-					local result;
-
-					if(SyncMain.currentRevison < SyncMain.remoteRevison) then
-						result = "remoteBigger"
-					elseif(SyncMain.remoteRevison == 0) then
-						result = "justLocal";
-					elseif(SyncMain.currentRevison > SyncMain.remoteRevison) then
-						result = "localBigger";
-					elseif(SyncMain.currentRevison == SyncMain.remoteRevison) then
-						result = "equal";
-					end
-
-					SyncMain.compareFinish = true;
-
-					if(type(_callback) == "function") then
-						_callback(result);
-					end
-				end
+				go();
 			end);
+			--LOG.std(nil,"debug","selectedWorldInfor-new",SyncMain.selectedWorldInfor);
 		else
-			if(not _LoginStatus) then
-				CommandManager:RunCommand("/save");
-				SyncMain.compareFinish = true;
-				_callback("tryAgain");
-			else
-				_guihelper.MessageBox(L"本地世界沒有版本信息");
-				SyncMain.compareFinish = true;
-				return;
-			end
+			go();
 		end
 	end
 end
@@ -689,130 +716,13 @@ function SyncMain:syncToDataSource()
 				--LOG.std(nil,"debug","send",SyncMain.selectedWorldInfor.tooltip);
 
 				SyncMain.remoteSync.revision(function()
-					SyncMain:getCommits(SyncMain.foldername.base32,function(data, err)
-						--LOG.std(nil,"debug","data",data);
-						--LOG.std(nil,"debug","err",err);
+					if(syncGUIIndex > syncGUItotal) then
+						_guihelper.MessageBox(L"更新失败，请重试再试");
+						syncToDataSourceGUI.closeWindow();
+						return;
+					end
 
-						if(syncGUIIndex > syncGUItotal) then
-							_guihelper.MessageBox(L"更新失败，请重试再试");
-							syncToDataSourceGUI.closeWindow();
-							return;
-						end
-
-						if(data) then
-							local lastCommits = data[1];
-							lastCommitFile = lastCommits.title:gsub("keepwork commit: ","");
-							lastCommitSha  = "";
-
-							if(lastCommitFile == "revision.xml") then
-								lastCommitSha = lastCommits.id;
-
-								local modDateTable = {};
-								local readme;
-
-								if(SyncMain.selectedWorldInfor and SyncMain.selectedWorldInfor.tooltip)then
-									for modDateEle in string.gmatch(SyncMain.selectedWorldInfor.tooltip,"[^:]+") do
-										modDateTable[#modDateTable+1] = modDateEle;
-									end
-
-									modDateTable = modDateTable[1];
-								else
-									modDateTable = os.date("%Y-%m-%d-%H-%M-%S");
-								end
-					
-								local hasPreview = false;
-
-								for key,value in ipairs(SyncMain.localFiles) do
-									if(value.filename == "preview.jpg") then
-										hasPreview = true;
-									end
-								end
-
-								for key,value in ipairs(SyncMain.localFiles) do
-									if(value.filename == "README.md") then
-										readme = LocalService:getFileContent(SyncMain.worldDir.default .. "README.md");
-
-										--LOG.std(nil,"debug","SyncMain.worldDir.default",SyncMain.worldDir.default);
-										--LOG.std(nil,"debug","readme",readme);
-									end
-								end
-
-								local preview = {};
-								preview[0] = {};
-								preview[0].previewUrl = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. GitEncoding.base32(SyncMain.foldername.utf8) .. "/raw/master/preview.jpg";
-								preview = NPL.ToJson(preview,true);
-
-								local filesTotals = 0;
-								if(SyncMain.selectedWorldInfor) then
-									local filesTotals = SyncMain.selectedWorldInfor.size;
-								end
-
-								local params = {};
-								params.modDate		   = modDateTable;
-								params.worldsName      = SyncMain.foldername.utf8;
-								params.revision        = SyncMain.currentRevison;
-								params.hasPreview      = hasPreview;
-								params.dataSourceType  = loginMain.dataSourceType;
-								params.gitlabProjectId = GitlabService.projectId;
-								params.readme          = readme;
-								params.preview         = preview;
-								params.filesTotals	   = filesTotals;
-								params.commitId		   = lastCommitSha;
-								--echo(GitlabService.projectId);
-								--LOG.std(nil,"debug","params",params);
-
-								-- SyncMain:genWorldMD(params);
-
-								loginMain.refreshing = true;
-								if(loginMain.LoginPage) then
-									loginMain.LoginPage:Refresh(0.01);
-								end
-
-								HttpRequest:GetUrl({
-									url     = loginMain.site .. "/api/mod/worldshare/models/worlds/refresh",
-									json    = true,
-									form    = params,
-									headers = {
-										Authorization    = "Bearer " .. loginMain.token,
-										["content-type"] = "application/json",
-									},
-								},function(response, err)
-									--LOG.std(nil,"debug","finish",response);
-									--LOG.std(nil,"debug","finish",err);
-
-									GitlabService.projectId = nil;
-
-									if(err == 200) then
-										if(type(response) == "table" and response.error.id == 0) then
-											params.opusId = response.data.opusId;
-										else
-											_guihelper.MessageBox(L"更新服务器列表失败");
-											return;
-										end
-
-										SyncMain:genWorldMD(params, function()
-											SyncMain.finish = true;
-											syncToDataSourceGUI:refresh();
-											loginMain.RefreshCurrentServerList();
-										end);
-									end
-								end);
-
-								if(SyncMain.firstCreate) then
-									SyncMain.firstCreate = false;
-								end
-							else
-								_guihelper.MessageBox(L"上传失败");
-							end
-
-							--LOG.std(nil,"debug","lastCommits",lastCommits);
-							--LOG.std(nil,"debug","lastCommitFile",lastCommitFile);
-							--LOG.std(nil,"debug","lastCommitSha",lastCommitSha);
-						else
-							_guihelper.MessageBox(L"上传失败");
-							GitlabService.projectId = nil;
-						end
-					end);
+					SyncMain:refreshRemoteWorldLists(syncToDataSourceGUI);
 				end)
 			end
 
@@ -1111,6 +1021,127 @@ function SyncMain:syncToDataSource()
 			syncToDataSourceGo();
 		end
 	end
+end
+
+function SyncMain:refreshRemoteWorldLists(syncGUI, _callback)
+	SyncMain:getCommits(SyncMain.foldername.base32,function(data, err)
+		--LOG.std(nil,"debug","data",data);
+		--LOG.std(nil,"debug","err",err);
+
+		if(data) then
+			local lastCommits    = data[1];
+			local lastCommitFile = lastCommits.title:gsub("keepwork commit: ","");
+			local lastCommitSha  = lastCommits.id;
+
+			if(lastCommitFile ~= "revision.xml") then
+				_guihelper.MessageBox(L"上一次同步到数据源同步失败，请重新同步世界到数据源");
+				return;
+			end
+
+			local modDateTable = {};
+			local readme	   = "";
+
+			if(SyncMain.selectedWorldInfor and SyncMain.selectedWorldInfor.tooltip)then
+				for modDateEle in string.gmatch(SyncMain.selectedWorldInfor.tooltip,"[^:]+") do
+					modDateTable[#modDateTable+1] = modDateEle;
+				end
+
+				modDateTable = modDateTable[1];
+			else
+				modDateTable = os.date("%Y-%m-%d-%H-%M-%S");
+			end
+
+			local hasPreview = false;
+
+			for key,value in ipairs(SyncMain.localFiles) do
+				if(value.filename == "preview.jpg") then
+					hasPreview = true;
+				end
+			end
+
+			for key,value in ipairs(SyncMain.localFiles) do
+				if(value.filename == "README.md") then
+					readme = LocalService:getFileContent(SyncMain.worldDir.default .. "README.md");
+				end
+			end
+
+			local preview = {};
+			preview[0]    = {};
+			preview[0].previewUrl = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. GitEncoding.base32(SyncMain.foldername.utf8) .. "/raw/master/preview.jpg";
+			preview = NPL.ToJson(preview,true);
+
+			local filesTotals = 0;
+			if(SyncMain.selectedWorldInfor) then
+				filesTotals = SyncMain.selectedWorldInfor.size;
+			end
+
+			local params = {};
+			params.modDate		   = modDateTable;
+			params.worldsName      = SyncMain.foldername.utf8;
+			params.revision        = SyncMain.currentRevison;
+			params.hasPreview      = hasPreview;
+			params.dataSourceType  = loginMain.dataSourceType;
+			params.gitlabProjectId = GitlabService.projectId;
+			params.readme          = readme;
+			params.preview         = preview;
+			params.filesTotals	   = filesTotals;
+			params.commitId		   = lastCommitSha;
+
+			loginMain.refreshing = true;
+
+			if(loginMain.LoginPage) then
+				loginMain.LoginPage:Refresh(0.01);
+			end
+
+			HttpRequest:GetUrl({
+				url     = loginMain.site .. "/api/mod/worldshare/models/worlds/refresh",
+				json    = true,
+				form    = params,
+				headers = {
+					Authorization    = "Bearer " .. loginMain.token,
+					["content-type"] = "application/json",
+				},
+			},function(response, err)
+				--LOG.std(nil,"debug","finish",response);
+				--LOG.std(nil,"debug","finish",err);
+
+				if(err == 200) then
+					if(type(response) == "table" and response.error.id == 0) then
+						params.opusId = response.data.opusId;
+					else
+						_guihelper.MessageBox(L"更新服务器列表失败");
+						return;
+					end
+
+					SyncMain:genWorldMD(params, function()
+						SyncMain.finish = true;
+
+						if(syncGUI) then
+							syncGUI:refresh();
+						end
+
+						loginMain.RefreshCurrentServerList(function()
+							if(type(_callback) == "function") then
+								_callback();
+							end
+						end);
+					end);
+				end
+			end);
+
+			if(SyncMain.firstCreate) then
+				SyncMain.firstCreate = false;
+			end
+
+			--LOG.std(nil,"debug","lastCommits",lastCommits);
+			--LOG.std(nil,"debug","lastCommitFile",lastCommitFile);
+			--LOG.std(nil,"debug","lastCommitSha",lastCommitSha);
+		else
+			_guihelper.MessageBox(L"获取Commit列表失败");
+		end
+
+		GitlabService.projectId = nil;
+	end);
 end
 
 function SyncMain:showBeyondVolume()
