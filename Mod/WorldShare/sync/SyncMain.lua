@@ -215,8 +215,8 @@ function SyncMain:compareRevision(_LoginStatus, _callback)
 									isWorldInRemoteLists = true;
 								end
 							end
-							echo("isWorldInRemoteLists");
-							echo(isWorldInRemoteLists)
+							--echo("isWorldInRemoteLists");
+							--echo(isWorldInRemoteLists)
 							if(not isWorldInRemoteLists) then
 								SyncMain:refreshRemoteWorldLists(nil,function()
 									SyncMain.compareFinish = true;
@@ -309,7 +309,6 @@ function SyncMain.syncCompare(_LoginStatus)
 				SyncMain:StartSyncPage();
 			elseif(result == "tryAgain") then
 				commonlib.TimerManager.SetTimeout(function()
-					CommandManager:RunCommand("/save");
 					SyncMain.syncCompare();
 				end,1000)
 			end
