@@ -1222,6 +1222,15 @@ end
 
 function loginMain.LoginActionApi(_account,_password,_callback)
 	local url = loginMain.site .. "/api/wiki/models/user/login";
+	local timeout = false;
+
+	commonlib.TimerManager.SetTimeout(function()
+		if(not timeout) then
+			timeout = true;
+			_guihelper.MessageBox(L"链接超时");
+			loginMain.closeMessageInfo();
+		end
+	end, 4000);
 
 	HttpRequest:GetUrl({
 		url  = url,
@@ -1230,7 +1239,15 @@ function loginMain.LoginActionApi(_account,_password,_callback)
 			username = _account,
 			password = _password,
 		},
-	},_callback);
+	},function(data, err)
+		if(not timeout) then
+			if(type(_callback) == "function") then
+				_callback(data, err);
+			end
+
+			timeout = true;
+		end
+	end);
 end
 
 function loginMain.getUserInfo(_callback)
