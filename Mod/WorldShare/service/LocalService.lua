@@ -359,8 +359,12 @@ function LocalService:GetTag(_foldername)
 	local filePath  = "worlds/DesignHouse/" .. _foldername .. "/tag.xml";
 
 	local tag = ParaXML.LuaXML_ParseFile(filePath);
-	tag = tag[1][1]['attr'];
-	return tag;
+	
+	if(type(tag) == "table" and type(tag[1]) == "table" and type(tag[1][1]) == "table") then
+		return tag[1][1]['attr'];
+	else
+		return {};
+	end
 end
 
 function LocalService:getDataSourceContent(_foldername, _path, _callback)

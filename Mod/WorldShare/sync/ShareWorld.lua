@@ -156,7 +156,7 @@ function ShareWorld.getWorldUrl(bEncode)
 	if(bEncode) then
 		foldername = commonlib.Encoding.url_encode("world_" .. SyncMain.foldername.utf8);
 	else
-		foldername = SyncMain.foldername.utf8;
+		foldername = "world_" .. SyncMain.foldername.utf8;
 	end
 
 	local url = loginMain.site .. "/" .. loginMain.username .. "/paracraft/" .. foldername;

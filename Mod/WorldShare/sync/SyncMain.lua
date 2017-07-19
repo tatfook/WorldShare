@@ -755,11 +755,14 @@ function SyncMain:syncToDataSource()
 					SyncMain.isFetching = true;
 
 					LOG.std("SyncMain", "debug", "FilesShaToDSUD", "File : %s, 上传中", SyncMain.localFiles[SyncMain.curUploadIndex].filename);
+					syncGUIIndex = syncGUIIndex + 1;
+					syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, SyncMain.localFiles[SyncMain.curUploadIndex].filename .. " （" .. loginMain.GetWorldSize(SyncMain.localFiles[SyncMain.curUploadIndex].filesize, "KB") .. "） " .. "上传中");
+
 					SyncMain:uploadService(SyncMain.foldername.base32, SyncMain.localFiles[SyncMain.curUploadIndex].filename, SyncMain.localFiles[SyncMain.curUploadIndex].file_content_t,function (bIsUpload, filename)
 						SyncMain.isFetching = false;
+
 						if (bIsUpload) then
 							LOG.std("SyncMain", "debug", "FilesShaToDSUD", "File : %s, 上传完成", SyncMain.localFiles[SyncMain.curUploadIndex].filename);
-							syncGUIIndex = syncGUIIndex + 1;
 							syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, filename .. " （" .. loginMain.GetWorldSize(SyncMain.localFiles[SyncMain.curUploadIndex].filesize, "KB") .. "） " .. "上传完成");
 
 							if (SyncMain.curUploadIndex == SyncMain.totalLocalIndex) then
@@ -878,6 +881,7 @@ function SyncMain:syncToDataSource()
 
 					SyncMain.localFiles[LocalIndex].needChange = false;
 					SyncMain.isFetching = true;
+
 					LOG.std("SyncMain", "debug", "FilesShaToDSUP", "File : %s, DSSha : %s , LCSha : %s", curGitFiles.path, curGitFiles.sha, SyncMain.localFiles[LocalIndex].sha1);
 
 					if (curGitFiles.sha ~= SyncMain.localFiles[LocalIndex].sha1) then
@@ -1027,7 +1031,7 @@ function SyncMain:refreshRemoteWorldLists(syncGUI, _callback)
 		--LOG.std(nil,"debug","data",data);
 		--LOG.std(nil,"debug","err",err);
 
-		if(data) then
+		if(data and data[1]) then
 			local lastCommits    = data[1];
 			local lastCommitFile = lastCommits.title:gsub("keepwork commit: ","");
 			local lastCommitSha  = lastCommits.id;
@@ -1074,6 +1078,8 @@ function SyncMain:refreshRemoteWorldLists(syncGUI, _callback)
 				filesTotals = SyncMain.selectedWorldInfor.size;
 			end
 
+			local worldTag = LocalService:GetTag(SyncMain.foldername.default);
+
 			local params = {};
 			params.modDate		   = modDateTable;
 			params.worldsName      = SyncMain.foldername.utf8;
@@ -1085,6 +1091,7 @@ function SyncMain:refreshRemoteWorldLists(syncGUI, _callback)
 			params.preview         = preview;
 			params.filesTotals	   = filesTotals;
 			params.commitId		   = lastCommitSha;
+			params.name            = worldTag.name;
 
 			loginMain.refreshing = true;
 
@@ -1278,11 +1285,15 @@ function SyncMain:genWorldMD(worldInfor, _callback)
 	end
 
 	local worldFilePath =  loginMain.username .. "/paracraft/world_" .. worldInfor.worldsName .. ".md";
+	local worldTag      = LocalService:GetTag(SyncMain.foldername.default);
+
+	--log(SyncMain.foldername.default);
+	--log(worldTag)
 
 	HttpRequest:GetUrl(contentUrl, function(data, err)
 		if(err == 404) then
 			local world3D = {
-				worldName	  = worldInfor.worldsName,
+				worldName	  = worldTag.name,
 				worldUrl	  = worldUrl,
 				logoUrl		  = worldInfor.preview,
 				desc		  = "",
@@ -1305,8 +1316,8 @@ function SyncMain:genWorldMD(worldInfor, _callback)
 			SyncMain.worldFile = SyncMain.worldFile .. "\r\n" .. KeepworkGen:setCommand("comment");
 
 			--LOG.std(nil,"debug","worldFile",SyncMain.worldFile);
-			echo(loginMain.keepWorkDataSource);
-			echo(loginMain.keepWorkDataSourceId);
+			--echo(loginMain.keepWorkDataSource);
+			--echo(loginMain.keepWorkDataSourceId);
 			SyncMain:uploadService(
 				loginMain.keepWorkDataSource,
 				worldFilePath,
@@ -1322,7 +1333,7 @@ function SyncMain:genWorldMD(worldInfor, _callback)
 			--local paramsText = KeepworkGen:GetContent(content);
 			--local params     = KeepworkGen:getCommand("world3D", paramsText);
 			local world3D = {
-				worldName	  = worldInfor.worldsName,
+				worldName	  = worldTag.name,
 				worldUrl	  = worldUrl,
 				logoUrl		  = worldInfor.preview,
 				desc		  = "",
