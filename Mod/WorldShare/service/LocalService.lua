@@ -47,6 +47,7 @@ end
 function LocalService:filesFind(_result)
 	if(type(_result) == "table") then
 		local convertLineEnding = {[".xml"] = true, [".txt"] = true, [".md"] = true, [".bmax"] = true, [".lua"] = true};
+		local zipFile           = {[".bmax"] = true, [".xml"] = true};
 
 		for i = 1, #_result do
 			local item = _result[i];
@@ -63,7 +64,15 @@ function LocalService:filesFind(_result)
 					if(sExt == ".bak") then
 						item = false;
 					else
-						if(convertLineEnding[sExt]) then
+						local bConvert = false;
+
+						if(convertLineEnding[sExt] and zipFile[sExt]) then
+							bConvert = not self:isZip(item.file_path);
+						elseif(convertLineEnding[sExt]) then
+							bConvert = true;
+						end
+
+						if(bConvert) then
 							item.file_content_t = self:getFileContent(item.file_path):gsub("\r\n","\n");
 							item.filesize = #item.file_content_t;
 							item.sha1 = EncodingS.sha1("blob " .. item.filesize .. "\0" .. item.file_content_t, "hex");
@@ -85,6 +94,28 @@ function LocalService:filesFind(_result)
 				end
 			end
 		end
+	end
+end
+
+function LocalService:isZip(path)
+	local file = ParaIO.open(path, "r");
+	local fileType = nil;
+
+	if(file:IsValid()) then	
+		local o = {};
+		file:ReadBytes(2, o);
+
+		if (o[1] and o[2])then
+			fileType = o[1] .. o[2];
+		end
+	
+		file:close();
+	end
+
+	if(fileType and fileType == "8075") then
+		return true;
+	else
+		return false;
 	end
 end
 
