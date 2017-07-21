@@ -218,7 +218,7 @@ function loginMain.LoginAction(_page, _callback)
 
 					local userinfo = response['data']['userinfo'];
 
-					loginMain.username = userinfo['displayName'];
+					loginMain.username = userinfo['username'];
 					loginMain.userId   = userinfo['_id'];
 
 					if(userinfo['defaultSiteDataSource']) then
