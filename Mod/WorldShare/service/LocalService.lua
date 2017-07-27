@@ -47,6 +47,10 @@ function LocalService:LoadFiles(worldDir)
 	local result = Files.Find({}, self.worldDir, self.nMaxFileLevels, self.nMaxFilesNum, self.filter);
 
 	self:filesFind(result, self.worldDir);
+	
+	for key, value in ipairs(self.output) do
+		echo(value.filename)
+	end
 
 	return self.output;
 end
@@ -64,8 +68,8 @@ function LocalService:filesFind(result, path, subPath)
 			if(item.filesize ~= 0) then
 				item.file_path = curPath .. '/' .. item.filename;
 
-				if(subPath) then
-					item.filename  = subPath .. '/' .. item.filename;
+				if(curSubPath) then
+					item.filename  = curSubPath .. '/' .. item.filename;
 				end
 
 				local sExt = item.filename:match("%.[^&.]+$");
