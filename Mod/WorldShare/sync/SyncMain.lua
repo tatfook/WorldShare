@@ -132,7 +132,7 @@ function SyncMain:compareRevision(_LoginStatus, _callback)
 			WorldRevisionCheckOut   = WorldRevision:new():init(SyncMain.worldDir.default);
 			SyncMain.currentRevison = WorldRevisionCheckOut:Checkout();
 
-			SyncMain.localFiles = LocalService:LoadFiles(SyncMain.worldDir.default,"",nil,1000,nil);
+			SyncMain.localFiles = LocalService:LoadFiles(SyncMain.worldDir.default, nil, 1000);
 
 			--LOG.std(nil,"debug","SyncMain.localFiles",SyncMain.localFiles);
 			for _,value in ipairs(SyncMain.localFiles) do
@@ -597,9 +597,7 @@ function SyncMain:syncToLocal(_callback)
 					return;
 				end
 
-				--LOG.std(nil,"debug","SyncMain:getFileShaListService-data",data);
-
-				SyncMain.localFiles      = LocalService:LoadFiles(SyncMain.worldDir.default,"",nil,1000,nil);
+				SyncMain.localFiles      = LocalService:LoadFiles(SyncMain.worldDir.default, nil, 1000);
 				SyncMain.dataSourceFiles = data;
 
 				SyncMain.totalLocalIndex      = #SyncMain.localFiles;
@@ -941,7 +939,7 @@ function SyncMain:syncToDataSource()
 				--LOG.std(nil,"debug","SyncMain:getFileShaListService-data",data);
 				--LOG.std(nil,"debug","SyncMain:getFileShaListService-err",err);
 
-				SyncMain.localFiles = LocalService:LoadFiles(SyncMain.worldDir.default,"",nil,1000,nil); --再次获取本地文件，保证上传的内容为最新
+				SyncMain.localFiles = LocalService:LoadFiles(SyncMain.worldDir.default, nil, 1000); --再次获取本地文件，保证上传的内容为最新
 
 				local hasReadme = false;
 

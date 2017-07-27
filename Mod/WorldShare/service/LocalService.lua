@@ -32,68 +32,80 @@ local SyncMain       = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
 
 local LocalService   = commonlib.gettable("Mod.WorldShare.service.LocalService");
 
-LocalService.gitAttribute = "*.* binary";
+LocalService.output = {};
 
---get file content by text
+function LocalService:LoadFiles(worldDir, filter, nMaxFileLevels, nMaxFilesNum)
+	self.filter 		= filter         or "*.*";
+	self.nMaxFileLevels = nMaxFileLevels or 0;
+	self.nMaxFilesNum   = nMaxFilesNum   or 500;
+
+	if(string.sub(worldDir, -1, -1) == "/") then
+		worldDir = string.sub(worldDir, 1, -2);
+	end
+
+	local result = Files.Find({}, worldDir, self.nMaxFileLevels, self.nMaxFilesNum, self.filter);
+
+	self:filesFind(result, worldDir);
+
+	return self.output;
+end
+
+function LocalService:filesFind(result, path)
+	local curResult = commonlib.copy(result);
+	local curPath   = commonlib.copy(path);
+
+	if(type(curResult) == "table") then
+		local convertLineEnding = {[".xml"] = true, [".bmax"] = true, [".txt"] = true, [".md"] = true, [".lua"] = true};
+		local zipFile           = {[".xml"] = true, [".bmax"] = true};
+
+		for key, item in ipairs(curResult) do
+			if(item.filesize ~= 0) then
+				item.file_path = curPath .. '/' .. item.filename;
+				--item.id = item.filename;
+
+				local sExt = item.filename:match("%.[^&.]+$");
+
+				--echo(sExt);
+				if(sExt == ".bak") then
+					item = false;
+				else
+					local bConvert = false;
+
+					if(convertLineEnding[sExt] and zipFile[sExt]) then
+						bConvert = not self:isZip(item.file_path);
+					elseif(convertLineEnding[sExt]) then
+						bConvert = true;
+					end
+
+					if(bConvert) then
+						item.file_content_t = self:getFileContent(item.file_path):gsub("\r\n","\n");
+						item.filesize = #item.file_content_t;
+						item.sha1 = EncodingS.sha1("blob " .. item.filesize .. "\0" .. item.file_content_t, "hex");
+					else
+						item.file_content_t = self:getFileContent(item.file_path);
+						item.sha1 = EncodingS.sha1("blob " .. item.filesize .. "\0" .. item.file_content_t, "hex");
+					end
+
+					item.needChange = true;
+
+					self.output[#self.output+1] = item;
+				end
+			else
+				local subPath   = curPath .. '/' .. item.filename;
+				local subResult = Files.Find({}, subPath, self.nMaxFileLevels, self.nMaxFilesNum, self.filter);
+
+				self:filesFind(subResult, subPath);
+			end
+		end
+	end
+end
+
 function LocalService:getFileContent(_filePath)      
 	local file = ParaIO.open(_filePath, "r");
 	if(file:IsValid()) then
 		local fileContent = file:GetText(0, -1);
 		file:close();
 		return fileContent;
-	end
-end
-
-function LocalService:filesFind(_result)
-	if(type(_result) == "table") then
-		local convertLineEnding = {[".xml"] = true, [".txt"] = true, [".md"] = true, [".bmax"] = true, [".lua"] = true};
-		local zipFile           = {[".bmax"] = true, [".xml"] = true};
-
-		for i = 1, #_result do
-			local item = _result[i];
-
-			if(not string.match(item.filename, '/')) then
-				if(item.filesize ~= 0) then
-					item.file_path = self.path..'/'..item.filename;
-					item.filename = EncodingC.DefaultToUtf8(string.gsub(item.file_path, self.worldDir..'/', '', 1));
-					item.id = item.filename;
-
-					local sExt = item.filename:match("%.[^&.]+$");
-
-					--echo(sExt);
-					if(sExt == ".bak") then
-						item = false;
-					else
-						local bConvert = false;
-
-						if(convertLineEnding[sExt] and zipFile[sExt]) then
-							bConvert = not self:isZip(item.file_path);
-						elseif(convertLineEnding[sExt]) then
-							bConvert = true;
-						end
-
-						if(bConvert) then
-							item.file_content_t = self:getFileContent(item.file_path):gsub("\r\n","\n");
-							item.filesize = #item.file_content_t;
-							item.sha1 = EncodingS.sha1("blob " .. item.filesize .. "\0" .. item.file_content_t, "hex");
-						else
-							item.file_content_t = self:getFileContent(item.file_path);
-							item.sha1 = EncodingS.sha1("blob " .. item.filesize .. "\0" .. item.file_content_t, "hex");
-						end
-
-						item.needChange = true;
-
-						self.output[#self.output+1] = item;
-					end
-				else
-					self.path = self.path ..'/'.. item.filename;
-					local result = Files.Find({}, self.path, 0, nMaxFilesNum, filter);
-					self:filesFind(result);
-
-					self.path = string.gsub(self.path, ('/'..item.filename), '', 1);
-				end
-			end
-		end
 	end
 end
 
@@ -119,119 +131,96 @@ function LocalService:isZip(path)
 	end
 end
 
-function LocalService:LoadFiles(_worldDir, _curPath, _filter, _nMaxFileLevels, _nMaxFilesNum)
-	filter 		   = _filter or "*.*";
-	nMaxFileLevels = _nMaxFileLevels or 0;
-	nMaxFilesNum   = _nMaxFilesNum or 500;
-
-	LocalService.output   = {};
-	LocalService.path     = _worldDir .. _curPath;
-	LocalService.worldDir = _worldDir;
-
-	if(_curPath ~= "") then
-		LocalService.curPath = _curPath .. "/";
-	end
-
-	local result = Files.Find({}, LocalService.path, 0, nMaxFilesNum, filter);
-	LocalService:filesFind(result);
-
-	return LocalService.output;
-end
-
 function LocalService:update(_foldername, _path, _callback)
 	LocalService:FileDownloader(_foldername, _path, _callback);
---	LocalService:getDataSourceContent(_foldername, _path, function(content, err)
---		local foldernameForLocal = EncodingC.Utf8ToDefault(_foldername);
---		local bashPath = "worlds/DesignHouse/" .. SyncMain.foldername.default .. "/";
---
---		local file = ParaIO.open(bashPath .. _path, "w");
---		
---		LOG.std(nil,"debug","LocalService:update",content);
---		if(err == 200) then
---			if(not content) then
---				LocalService:getDataSourceContentWithRaw(_foldername, _path, function(data, err)
---					if(err == 200) then
---						content = data;
---						
---						file:write(content,#content);
---						file:close();
---
---						local returnData = {filename = _path, content = content};
---						_callback(true,returnData);
---					else
---						_callback(false,nil);
---					end
---				end);
---
---				return;
---			end
---
---			content = EncodingS.unbase64(content);
---			file:write(content,#content);
---			file:close();
---
---			local returnData = {filename = _path,content = content};
---			_callback(true,returnData);
---		else
---			_callback(false,nil);
---		end
---	end)
+	--[[LocalService:getDataSourceContent(_foldername, _path, function(content, err)
+		local foldernameForLocal = EncodingC.Utf8ToDefault(_foldername);
+		local bashPath = "worlds/DesignHouse/" .. SyncMain.foldername.default .. "/";
+
+		local file = ParaIO.open(bashPath .. _path, "w");
+		
+		LOG.std(nil,"debug","LocalService:update",content);
+		if(err == 200) then
+			if(not content) then
+				LocalService:getDataSourceContentWithRaw(_foldername, _path, function(data, err)
+					if(err == 200) then
+						content = data;
+						
+						file:write(content,#content);
+						file:close();
+
+						local returnData = {filename = _path, content = content};
+						_callback(true,returnData);
+					else
+						_callback(false,nil);
+					end
+				end);
+
+				return;
+			end
+
+			content = EncodingS.unbase64(content);
+			file:write(content,#content);
+			file:close();
+
+			local returnData = {filename = _path,content = content};
+			_callback(true,returnData);
+		else
+			_callback(false,nil);
+		end
+	end)]]
 end
 
 function LocalService:download(_foldername, _path, _callback)
-	-- LOG.std(nil,"debug","_foldername",_foldername);
-	-- LOG.std(nil,"debug","_path",_path);
-	-- LOG.std(nil,"debug","_callback",_callback);
-
 	LocalService:FileDownloader(_foldername, _path, _callback);
---	LocalService:getDataSourceContent(_foldername, _path, function(content, err)
---		if(err == 200) then
---			local path = {};
---			local returnData = {};
---
---			local bashPath = "worlds/DesignHouse/" .. SyncMain.foldername.default .. "/";
---			local folderCreate = "";
---
---			for segmentation in string.gmatch(_path,"[^/]+") do
---				path[#path+1] = segmentation;
---			end
---
---			folderCreate = commonlib.copy(bashPath);
---
---			for i = 1, #path - 1, 1 do
---				folderCreate = folderCreate .. path[i] .. "/";
---				ParaIO.CreateDirectory(folderCreate);
---				--LOG.std(nil,"debug","folderCreate",folderCreate);
---			end
---
---			local file = ParaIO.open(bashPath .. _path, "w");
---
---			if(not content) then
---				LocalService:getDataSourceContentWithRaw(_foldername, _path, function(content, err)
---					if(err == 200) then
---						file:write(content,#content);
---						file:close();
---
---						returnData = {filename = _path, content = content};
---						_callback(true,returnData);
---					else
---						_callback(false,nil);
---					end
---				end);
---
---				return;
---			end
---
---			content = EncodingS.unbase64(content);
---			file:write(content,#content);
---			file:close();
---
---			returnData = {filename = _path, content = content};
---			_callback(true,returnData);
---		else
---			_callback(false,nil);
---		end
---	end);
+	--[[LocalService:getDataSourceContent(_foldername, _path, function(content, err)
+		if(err == 200) then
+			local path = {};
+			local returnData = {};
+
+			local bashPath = "worlds/DesignHouse/" .. SyncMain.foldername.default .. "/";
+			local folderCreate = "";
+
+			for segmentation in string.gmatch(_path,"[^/]+") do
+				path[#path+1] = segmentation;
+			end
+
+			folderCreate = commonlib.copy(bashPath);
+
+			for i = 1, #path - 1, 1 do
+				folderCreate = folderCreate .. path[i] .. "/";
+				ParaIO.CreateDirectory(folderCreate);
+				--LOG.std(nil,"debug","folderCreate",folderCreate);
+			end
+
+			local file = ParaIO.open(bashPath .. _path, "w");
+
+			if(not content) then
+				LocalService:getDataSourceContentWithRaw(_foldername, _path, function(content, err)
+					if(err == 200) then
+						file:write(content,#content);
+						file:close();
+
+						returnData = {filename = _path, content = content};
+						_callback(true,returnData);
+					else
+						_callback(false,nil);
+					end
+				end);
+
+				return;
+			end
+
+			content = EncodingS.unbase64(content);
+			file:write(content,#content);
+			file:close();
+
+			returnData = {filename = _path, content = content};
+			_callback(true,returnData);
+		else
+			_callback(false,nil);
+		end
+	end);]]
 end
 
 function LocalService:downloadZip(_foldername, _commitId, _callback)
@@ -290,10 +279,6 @@ function LocalService:downloadZip(_foldername, _commitId, _callback)
 							end
 
 							local writeFile = ParaIO.open(bashPath .. path, "w");
-							
---							if(path == "/revision.xml") then
---								echo(binData);
---							end
 							
 							writeFile:write(binData,#binData);
 							writeFile:close();
