@@ -30,29 +30,31 @@ local Files          = commonlib.gettable("commonlib.Files");
 local loginMain      = commonlib.gettable("Mod.WorldShare.login.loginMain");
 local SyncMain       = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
 
-local LocalService   = commonlib.gettable("Mod.WorldShare.service.LocalService");
+local LocalService   = commonlib.inherit(nil, commonlib.gettable("Mod.WorldShare.service.LocalService"));
 
-LocalService.output = {};
+function LocalService:ctor()
+	self.filter 		= "*.*";
+	self.nMaxFileLevels = 0;
+	self.nMaxFilesNum   = 500;
+	self.output         = {};
+end
 
-function LocalService:LoadFiles(worldDir, filter, nMaxFileLevels, nMaxFilesNum)
-	self.filter 		= filter         or "*.*";
-	self.nMaxFileLevels = nMaxFileLevels or 0;
-	self.nMaxFilesNum   = nMaxFilesNum   or 500;
-
+function LocalService:LoadFiles(worldDir)
 	if(string.sub(worldDir, -1, -1) == "/") then
-		worldDir = string.sub(worldDir, 1, -2);
+		self.worldDir = string.sub(worldDir, 1, -2);
 	end
 
-	local result = Files.Find({}, worldDir, self.nMaxFileLevels, self.nMaxFilesNum, self.filter);
+	local result = Files.Find({}, self.worldDir, self.nMaxFileLevels, self.nMaxFilesNum, self.filter);
 
-	self:filesFind(result, worldDir);
+	self:filesFind(result, self.worldDir);
 
 	return self.output;
 end
 
-function LocalService:filesFind(result, path)
-	local curResult = commonlib.copy(result);
-	local curPath   = commonlib.copy(path);
+function LocalService:filesFind(result, path, subPath)
+	local curResult  = commonlib.copy(result);
+	local curPath    = commonlib.copy(path);
+	local curSubPath = commonlib.copy(subPath);
 
 	if(type(curResult) == "table") then
 		local convertLineEnding = {[".xml"] = true, [".bmax"] = true, [".txt"] = true, [".md"] = true, [".lua"] = true};
@@ -61,11 +63,13 @@ function LocalService:filesFind(result, path)
 		for key, item in ipairs(curResult) do
 			if(item.filesize ~= 0) then
 				item.file_path = curPath .. '/' .. item.filename;
-				--item.id = item.filename;
+
+				if(subPath) then
+					item.filename  = subPath .. '/' .. item.filename;
+				end
 
 				local sExt = item.filename:match("%.[^&.]+$");
 
-				--echo(sExt);
 				if(sExt == ".bak") then
 					item = false;
 				else
@@ -91,10 +95,17 @@ function LocalService:filesFind(result, path)
 					self.output[#self.output+1] = item;
 				end
 			else
-				local subPath   = curPath .. '/' .. item.filename;
-				local subResult = Files.Find({}, subPath, self.nMaxFileLevels, self.nMaxFilesNum, self.filter);
+				local newPath    = curPath .. '/' .. item.filename;
+				local newResult  = Files.Find({}, newPath, self.nMaxFileLevels, self.nMaxFilesNum, self.filter);
+				local newSubPath = nil; 
 
-				self:filesFind(subResult, subPath);
+				if(subPath) then
+					newSubPath = subPath .. "/" .. item.filename;
+				else
+					newSubPath = item.filename;
+				end
+
+				self:filesFind(newResult, newPath, newSubPath);
 			end
 		end
 	end

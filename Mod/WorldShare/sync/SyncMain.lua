@@ -132,12 +132,9 @@ function SyncMain:compareRevision(_LoginStatus, _callback)
 			WorldRevisionCheckOut   = WorldRevision:new():init(SyncMain.worldDir.default);
 			SyncMain.currentRevison = WorldRevisionCheckOut:Checkout();
 
-			SyncMain.localFiles = LocalService:LoadFiles(SyncMain.worldDir.default, nil, 1000);
+			SyncMain.localFiles = LocalService:new():LoadFiles(SyncMain.worldDir.default);
 
 			--LOG.std(nil,"debug","SyncMain.localFiles",SyncMain.localFiles);
-			for _,value in ipairs(SyncMain.localFiles) do
-				--LOG.std(nil,"debug","SyncMain.localFiles",value.filename);
-			end
 
 			if(GitlabService:checkSpecialCharacter(SyncMain.foldername.utf8))then
 				return;
@@ -597,7 +594,7 @@ function SyncMain:syncToLocal(_callback)
 					return;
 				end
 
-				SyncMain.localFiles      = LocalService:LoadFiles(SyncMain.worldDir.default, nil, 1000);
+				SyncMain.localFiles      = LocalService:new():LoadFiles(SyncMain.worldDir.default);
 				SyncMain.dataSourceFiles = data;
 
 				SyncMain.totalLocalIndex      = #SyncMain.localFiles;
@@ -939,7 +936,7 @@ function SyncMain:syncToDataSource()
 				--LOG.std(nil,"debug","SyncMain:getFileShaListService-data",data);
 				--LOG.std(nil,"debug","SyncMain:getFileShaListService-err",err);
 
-				SyncMain.localFiles = LocalService:LoadFiles(SyncMain.worldDir.default, nil, 1000); --再次获取本地文件，保证上传的内容为最新
+				SyncMain.localFiles = LocalService:new():LoadFiles(SyncMain.worldDir.default); --再次获取本地文件，保证上传的内容为最新
 
 				local hasReadme = false;
 
