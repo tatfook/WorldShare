@@ -99,8 +99,8 @@ function LocalService:filesFind(result, path, subPath)
 				local newResult  = Files.Find({}, newPath, self.nMaxFileLevels, self.nMaxFilesNum, self.filter);
 				local newSubPath = nil; 
 
-				if(subPath) then
-					newSubPath = subPath .. "/" .. item.filename;
+				if(curSubPath) then
+					newSubPath = curSubPath .. "/" .. item.filename;
 				else
 					newSubPath = item.filename;
 				end
