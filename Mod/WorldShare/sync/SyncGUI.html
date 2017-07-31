@@ -28,8 +28,8 @@
                  },
             }
         </style>
-        <div style="width:500px;height:270px;">
-            <aries:window mode="thin" width="500" height="320" style="float:left;" title='<%=L"与数据源同步" %>'>
+        <div style="width:550px;height:320px;">
+            <aries:window mode="thin" width="550" height="320" style="float:left;" title='<%=L"与数据源同步" %>'>
                 <div style="padding:20px;font-size:18px;base-font-size:18px;color:#ffffff;margin-top:20px;">
                     <pe:if condition="<%=not SyncMain.finish%>">
                         <div style="margin-right:20px;">
@@ -61,12 +61,12 @@
                     </div>
                     <pe:if condition="<%=not SyncMain.finish %>">
                         <div style="margin-top:40px;">
-                            <input type="button" name="" onclick="SyncGUI.finish" value="取消" class="button_highlight" style="width: 85px;height: 30px;margin-left: 135px" />
+                            <input type="button" name="" onclick="SyncGUI.finish" value="取消" class="button_highlight" style="width: 85px;height: 30px;margin-left: 155px" />
                             <input type="button" name="" onclick="SyncGUI.retry" value="重试" class="button_highlight" style="width: 85px;height: 30px;margin-left: 15px" />
                         </div>
                     </pe:if>
                     <pe:if condition="<%=SyncGUI.total ~= 0 and SyncGUI.current == SyncGUI.total and SyncMain.finish%>">
-                        <input type="button" name="" onclick="SyncGUI.closeWindow" value="关闭" class="button_highlight" style="width: 85px;height: 30px;margin-top:40px;margin-left: 180px" />
+                        <input type="button" name="" onclick="SyncGUI.closeWindow" value="关闭" class="button_highlight" style="width: 85px;height: 30px;margin-top:40px;margin-left: 200px" />
                     </pe:if>
                 </div>
             </aries:window>

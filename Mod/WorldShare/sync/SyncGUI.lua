@@ -49,9 +49,9 @@ function SyncGUI:ctor()
 		bShow = bShow,
 		directPosition = true,
 		align = "_ct",
-		x = -500/2,
+		x = -550/2,
 		y = -320/2,
-		width = 500,
+		width = 550,
 		height = 320,
 		cancelShowAnimation = true,
 	});
