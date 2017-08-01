@@ -136,9 +136,9 @@ function SyncMain:compareRevision(_LoginStatus, _callback)
 
 			--LOG.std(nil,"debug","SyncMain.localFiles",SyncMain.localFiles);
 
-			if(GitlabService:checkSpecialCharacter(SyncMain.foldername.utf8))then
+			--[[if(GitlabService:checkSpecialCharacter(SyncMain.foldername.utf8))then
 				return;
-			end
+			end]]
 
 			local hasRevision = false;
 			for key,value in ipairs(SyncMain.localFiles) do

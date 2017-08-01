@@ -342,10 +342,10 @@ end
 -- 写文件
 function GitlabService:writeFile(_filename, _file_content_t, _callback, _projectId, _foldername) --params, cb, errcb
 	local function go(_projectId)
-		if(GitlabService:checkSpecialCharacter(_filename)) then
+		--[[if(GitlabService:checkSpecialCharacter(_filename)) then
 			_callback(false, _filename);
 			return;
-		end
+		end]]
 
 		local url = GitlabService:getFileUrlPrefix(_projectId) .. Encoding.url_encode(_filename);
 		--LOG.std(nil,"debug","GitlabService:writeFile",url);
@@ -375,10 +375,10 @@ end
 --更新文件
 function GitlabService:update(_filename, _file_content_t, _sha, _callback, _projectId, _foldername)
 	local function go(_projectId)
-		if(GitlabService:checkSpecialCharacter(_filename)) then
+		--[[if(GitlabService:checkSpecialCharacter(_filename)) then
 			_callback(false, _filename);
 			return;
-		end
+		end]]
 
 		local url = GitlabService:getFileUrlPrefix(_projectId) .. Encoding.url_encode(_filename);
 

@@ -48,6 +48,10 @@ function LocalService:LoadFiles(worldDir)
 
 	self:filesFind(result, self.worldDir);
 
+	for _, item in ipairs(self.output) do
+		item.filename = EncodingC.DefaultToUtf8(item.filename);
+	end
+
 	return self.output;
 end
 
