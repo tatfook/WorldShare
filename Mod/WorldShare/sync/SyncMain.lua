@@ -1166,7 +1166,7 @@ function SyncMain:showBeyondVolume()
 end
 
 function SyncMain.getBeyondMsg()
-	local str = format("世界" .. SyncMain.foldername.utf8 .. "文件总大小超过了%dMB, 请清理不必要的文件后才能上传。(VIP用户最大可上传%dMB)", 15, 50);
+	local str = format("世界" .. SyncMain.foldername.utf8 .. "文件总大小超过了%dMB，是否清理文件？(请使用MP3、OGG格式音频，避免使用FBX格式，VIP用户最大可上传%dMB)", 25, 50);
 
 	return str;
 end
@@ -1187,9 +1187,7 @@ function SyncMain:checkWorldSize()
 		filesTotal = filesTotal + tonumber(value.filesize);
 	end
 	
-	local maxSize = 15 * 1024 * 1024;
-
-	--LOG.std(nil,"debug","worldSize",filesTotal);
+	local maxSize = 25 * 1024 * 1024;
 
 	if(filesTotal > maxSize) then
 		SyncMain:showBeyondVolume();
