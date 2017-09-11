@@ -855,6 +855,7 @@ function loginMain.RefreshCurrentServerList(_callback)
 		loginMain.refreshing = true;
 		loginMain.LoginPage:Refresh(0.01);
 
+		-- user
 		if(loginMain.current_type == 1 and loginMain.login_type == 1) then
 			loginMain.getLocalWorldList(function()
 				loginMain.changeRevision(function()
@@ -877,6 +878,7 @@ function loginMain.RefreshCurrentServerList(_callback)
 			end);
 		end
 
+		--offical
 		if(loginMain.current_type == 2) then
 			local ServerPage = InternetLoadWorld.GetCurrentServerPage();
 
@@ -909,63 +911,59 @@ function loginMain.getLocalWorldList(_callback)
 end
 
 function loginMain.changeRevision(_callback)
-	commonlib.TimerManager.SetTimeout(function()
-		local localWorlds = InternetLoadWorld.ServerPage_ds[1]['ds'];
+	local localWorlds = InternetLoadWorld.ServerPage_ds[1]['ds'];
 
-		if(localWorlds) then
-			--LOG.std(nil,"debug","localWorlds",localWorlds);
+	if(localWorlds) then
+		for key, value in ipairs(localWorlds) do
+			if(not value.is_zip) then
+				value.modifyTime = value.revision;
 
-			for key,value in ipairs(localWorlds) do
-				if(not value.is_zip) then
-					value.modifyTime = value.revision;
+				local foldername = {};
+				foldername.utf8    = value.foldername;
+				foldername.default = Encoding.Utf8ToDefault(value.foldername);
 
-					local foldername = {};
-					foldername.utf8    = value.foldername;
-					foldername.default = Encoding.Utf8ToDefault(value.foldername);
-
-					local WorldRevisionCheckOut = WorldRevision:new():init("worlds/DesignHouse/" .. foldername.default .. "/");
-					value.revision = WorldRevisionCheckOut:GetDiskRevision();
+				local WorldRevisionCheckOut = WorldRevision:new():init("worlds/DesignHouse/" .. foldername.default .. "/");
+				value.revision = WorldRevisionCheckOut:GetDiskRevision();
 
 --					local worldSize = WorldShare:GetWorldData("worldSize", foldername.utf8);
-					local tag = LocalService:GetTag(foldername.default);
-					--LOG.std(nil,"debug","tag",tag);
+				local tag = LocalService:GetTag(foldername.default);
+				--LOG.std(nil,"debug","tag",tag);
 
-					if(tag.size) then
-						value.size = tag.size;
-					else
-						value.size = 0;
-					end
+				if(tag.size) then
+					value.size = tag.size;
 				else
-					value.modifyTime = value.revision;
-
-					local zipWorldDir = {};
-					zipWorldDir.default = value.remotefile:gsub("local://","");
-					zipWorldDir.utf8 = Encoding.Utf8ToDefault(zipWorldDir.default);
-
-					local zipFoldername = {};
-					zipFoldername.default = zipWorldDir.default:gsub("worlds/DesignHouse/","");
-					zipFoldername.utf8    = Encoding.Utf8ToDefault(zipFoldername.default);
-
-					--LOG.std(nil,"debug","zipWorldDir.default",zipWorldDir.default);
-
-					value.revision = LocalService:GetZipRevision(zipWorldDir.default);
-					value.size = LocalService:GetZipWorldSize(zipWorldDir.default);
+					value.size = 0;
 				end
-			end
+			else
+				value.modifyTime = value.revision;
 
-			if(loginMain.LoginPage) then
-				loginMain.LoginPage:Refresh();
-			end
+				local zipWorldDir = {};
+				zipWorldDir.default = value.remotefile:gsub("local://","");
+				zipWorldDir.utf8 = Encoding.Utf8ToDefault(zipWorldDir.default);
 
-			if(_callback) then
-				_callback();
-			end
+				local zipFoldername = {};
+				zipFoldername.default = zipWorldDir.default:gsub("worlds/DesignHouse/","");
+				zipFoldername.utf8    = Encoding.Utf8ToDefault(zipFoldername.default);
 
-			return;
-		else
-			loginMain.changeRevision();
+				--LOG.std(nil,"debug","zipWorldDir.default",zipWorldDir.default);
+
+				value.revision = LocalService:GetZipRevision(zipWorldDir.default);
+				value.size = LocalService:GetZipWorldSize(zipWorldDir.default);
+			end
 		end
-	end, 30);
+
+		if(loginMain.LoginPage) then
+			loginMain.LoginPage:Refresh();
+		end
+
+		if(_callback) then
+			_callback();
+		end
+
+		return;
+	else
+		loginMain.changeRevision();
+	end
 end
 
 function loginMain.syncWorldsList(_callback)
@@ -975,7 +973,6 @@ function loginMain.syncWorldsList(_callback)
 		localWorlds = {};
 	end
 
-	--LOG.std(nil,"debug","localWorlds-syncWorldsList",localWorlds);
 	--[[
 		status代码含义:
 		1:仅本地
@@ -986,7 +983,6 @@ function loginMain.syncWorldsList(_callback)
 	]]
 
 	loginMain.getWorldsList(function(response, err)
-		--LOG.std(nil,"debug","response",response);
 		SyncMain.remoteWorldsList = response.data;
 	    -- 处理本地网络同时存在 本地不存在 网络存在 的世界 
 		if(type(SyncMain.remoteWorldsList) ~= "table") then
