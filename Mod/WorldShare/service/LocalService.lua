@@ -20,7 +20,7 @@ NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua");
 NPL.load("(gl)Mod/WorldShare/sync/SyncMain.lua");
 NPL.load("(gl)Mod/WorldShare/service/FileDownloader.lua");
 
-local FileDownloader = commonlib.inherit(nil, commonlib.gettable("Mod.WorldShare.service.FileDownloader"));
+local FileDownloader = commonlib.gettable("Mod.WorldShare.service.FileDownloader");
 local GitEncoding    = commonlib.gettable("Mod.WorldShare.helper.GitEncoding");
 local GitlabService  = commonlib.gettable("Mod.WorldShare.service.GitlabService");
 local GithubService  = commonlib.gettable("Mod.WorldShare.service.GithubService");
@@ -243,7 +243,7 @@ function LocalService:downloadZip(_foldername, _commitId, _callback)
 	local url = "http://git.keepwork.com/" .. loginMain.dataSourceUsername .. "/" .. foldername .. "/repository/archive.zip?ref=" .. SyncMain.commitId;
 	LOG.std("LocalService","debug","DZIPRAW", "raw url: %s", url);
 
-	local Files = FileDownloader:new():Init(nil, url, "temp/archive.zip", function(bSuccess, downloadPath)
+	FileDownloader:new():Init(nil, url, "temp/archive.zip", function(bSuccess, downloadPath)
 		if(bSuccess) then
 			local remoteRevison;
 
