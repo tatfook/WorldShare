@@ -27,17 +27,17 @@ NPL.load("(gl)Mod/WorldShare/helper/KeepworkGen.lua");
 NPL.load("(gl)Mod/WorldShare/sync/ShareWorld.lua");
 NPL.load("(gl)script/apps/Aries/Creator/Game/Login/LocalLoadWorld.lua");
 
-local LocalLoadWorld	 = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalLoadWorld");
-local ShareWorld		 = commonlib.gettable("Mod.WorldShare.sync.ShareWorld");
+local LocalLoadWorld     = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalLoadWorld");
+local ShareWorld         = commonlib.gettable("Mod.WorldShare.sync.ShareWorld");
 local SyncGUI            = commonlib.gettable("Mod.WorldShare.sync.SyncGUI");
 local WorldCommon        = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
-local MainLogin		     = commonlib.gettable("MyCompany.Aries.Game.MainLogin");
+local MainLogin          = commonlib.gettable("MyCompany.Aries.Game.MainLogin");
 local WorldRevision      = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision");
 local loginMain          = commonlib.gettable("Mod.WorldShare.login.loginMain");
 local GithubService      = commonlib.gettable("Mod.WorldShare.service.GithubService");
 local GitlabService      = commonlib.gettable("Mod.WorldShare.service.GitlabService");
 local LocalService       = commonlib.gettable("Mod.WorldShare.service.LocalService");
-local HttpRequest		 = commonlib.gettable("Mod.WorldShare.service.HttpRequest");
+local HttpRequest        = commonlib.gettable("Mod.WorldShare.service.HttpRequest");
 local Encoding           = commonlib.gettable("commonlib.Encoding");
 local EncodingS          = commonlib.gettable("System.Encoding");
 local GitEncoding        = commonlib.gettable("Mod.WorldShare.helper.GitEncoding");

@@ -24,19 +24,19 @@ NPL.load("(gl)Mod/WorldShare/main.lua");
 NPL.load("(gl)script/apps/Aries/Creator/Game/Login/LocalLoadWorld.lua");
 NPL.load("(gl)script/apps/Aries/Creator/Game/Login/CreateNewWorld.lua");
 
-local CreateNewWorld	 = commonlib.gettable("MyCompany.Aries.Game.MainLogin.CreateNewWorld");
-local LocalLoadWorld	 = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalLoadWorld");
+local CreateNewWorld     = commonlib.gettable("MyCompany.Aries.Game.MainLogin.CreateNewWorld");
+local LocalLoadWorld     = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalLoadWorld");
 local WorldShare         = commonlib.gettable("Mod.WorldShare");
-local SyncGUI			 = commonlib.gettable("Mod.WorldShare.sync.SyncGUI");
-local LocalService		 = commonlib.gettable("Mod.WorldShare.service.LocalService");
+local SyncGUI            = commonlib.gettable("Mod.WorldShare.sync.SyncGUI");
+local LocalService       = commonlib.gettable("Mod.WorldShare.service.LocalService");
 local MainLogin          = commonlib.gettable("MyCompany.Aries.Game.MainLogin");
 local HttpRequest        = commonlib.gettable("Mod.WorldShare.service.HttpRequest");
 local GitlabService      = commonlib.gettable("Mod.WorldShare.service.GitlabService");
 local GithubService      = commonlib.gettable("Mod.WorldShare.service.GithubService");
-local Encoding  	     = commonlib.gettable("commonlib.Encoding");
+local Encoding           = commonlib.gettable("commonlib.Encoding");
 local InternetLoadWorld  = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld");
 local WorldRevision      = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision");
-local SyncMain			 = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
+local SyncMain           = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
 local RemoteServerList   = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.RemoteServerList");
 local ShareWorldPage     = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.Areas.ShareWorldPage");
 

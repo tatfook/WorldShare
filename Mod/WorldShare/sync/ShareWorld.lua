@@ -18,7 +18,7 @@ NPL.load("(gl)script/apps/Aries/Creator/WorldCommon.lua");
 
 local ShareWorldPage = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.Areas.ShareWorldPage");
 local SyncMain       = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
-local loginMain		 = commonlib.gettable("Mod.WorldShare.login.loginMain");
+local loginMain      = commonlib.gettable("Mod.WorldShare.login.loginMain");
 local WorldCommon    = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 local CommandManager = commonlib.gettable("MyCompany.Aries.Game.CommandManager");
 

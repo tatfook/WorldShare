@@ -33,7 +33,7 @@ local SyncMain       = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
 local LocalService   = commonlib.inherit(nil, commonlib.gettable("Mod.WorldShare.service.LocalService"));
 
 function LocalService:ctor()
-	self.filter 		= "*.*";
+	self.filter         = "*.*";
 	self.nMaxFileLevels = 0;
 	self.nMaxFilesNum   = 500;
 	self.output         = {};
