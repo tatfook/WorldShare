@@ -1237,13 +1237,20 @@ function loginMain.LoginActionApi(_account,_password,_callback)
 		},
 	},function(data, err)
 		if(not timeout) then
-			if(type(_callback) == "function") then
-				_callback(data, err);
-			end
+			if(err == 503) then
+				_guihelper.MessageBox(L"keepwork正在维护中，我们马上回来");
+				loginMain.closeMessageInfo();
 
-			timeout = true;
+				timeout = true;
+			elseif(err == 200) then
+				if(type(_callback) == "function") then
+					_callback(data, err);
+				end
+
+				timeout = true;
+			end
 		end
-	end);
+	end, 503);
 end
 
 function loginMain.getUserInfo(_callback)
