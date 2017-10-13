@@ -12,21 +12,16 @@ local HttpRequest = commonlib.gettable("Mod.WorldShare.service.HttpRequest");
 
 local HttpRequest = commonlib.gettable("Mod.WorldShare.service.HttpRequest");
 
-HttpRequest.tryTimes = 0;
+HttpRequest.tryTimes    = 1;
+HttpRequest.maxTryTimes = 3; 
+HttpRequest.successCode = {200, 201, 202, 204};
 
 function HttpRequest:GetUrl(params, callback, noTryStatus)
 	System.os.GetUrl(params, function(err, msg, data)
-		-- debug code
-		local debugUrl = "";
-
-		if(type(params) == "string") then
-			debugUrl = params;
-		elseif(type(params) == "table") then
-			debugUrl = params.url;
-		end
-
+		---- debug code ----
+		local debugUrl = type(params) == "string" and params or params.url;
 		LOG.std("HttpRequest","debug","Request","Status Code: %s, URL: %s", err, debugUrl);
-		-- debug code end
+		---- debug code ----
 
 		-- no try status code, return directly
 		if(type(noTryStatus) == "table") then
@@ -41,52 +36,45 @@ function HttpRequest:GetUrl(params, callback, noTryStatus)
 			end
 		end
 
-		-- success return
-		if(err == 200 or err == 201 or err == 202 or err == 204) then
+		if(err == 422 or err == 404 or err == 409 or err == 401) then -- 失败时可直接返回的代码
 			if(type(callback) == "function") then
 				callback(data, err);
 			end
 
+			HttpRequest.tryTimes = 1;
 			return;
-		else
-			-- fail try
-			HttpRequest:retry(err, msg, data, params, callback);
 		end
+
+		-- success return
+		for _, code in pairs(HttpRequest.successCode) do
+			if(err == code and type(callback) == "function") then
+				callback(data, err);
+
+				HttpRequest.tryTimes = 1;
+				return;
+			end
+		end
+
+		-- fail try
+		HttpRequest:retry(err, msg, data, params, callback);
 	end);
 end
 
 function HttpRequest:retry(err, msg, data, params, callback)
-	if(err == 422 or err == 404 or err == 409 or err == 401) then -- 失败时可直接返回的代码
+	-- beyond the max try times, must be return
+	if(HttpRequest.tryTimes >= HttpRequest.maxTryTimes) then
 		if(type(callback) == "function") then
 			callback(data, err);
 		end
 
+		HttpRequest.tryTimes = 1;
 		return;
 	end
 
-	if(HttpRequest.tryTimes >= 3) then
-		if(type(callback) == "function") then
-			callback(data, err);
-		end
+	-- continue try
+	HttpRequest.tryTimes = HttpRequest.tryTimes + 1;
 
-		HttpRequest.tryTimes = 0;
-
-		return;
-	end
-
-	if(err == 200 or err == 201 or err == 204) then -- 成功时可直接返回的代码
-		if(type(callback) == "function") then
-			callback(data, err);
-		end
-
-		HttpRequest.tryTimes = 0;
-
-		return
-	else
-		HttpRequest.tryTimes = HttpRequest.tryTimes + 1;
-		
-		commonlib.TimerManager.SetTimeout(function()
-			HttpRequest:GetUrl(params, callback); -- 如果获取失败则递归获取数据
-		end, 2100);
-	end
+	commonlib.TimerManager.SetTimeout(function()
+		HttpRequest:GetUrl(params, callback);
+	end, 2100);
 end

@@ -102,6 +102,7 @@ function GitlabService:apiPost(_url, _params, _callback)
 	_url = loginMain.apiBaseUrl .. "/" .._url
 
 	HttpRequest:GetUrl({
+		method    = "POST",
 		url       = _url,
 		json      = true,
 		headers   = {
@@ -340,52 +341,53 @@ function GitlabService:listCommits(_callback, _projectId, _foldername)
 end
 
 -- 写文件
-function GitlabService:writeFile(_filename, _file_content_t, _callback, _projectId, _foldername) --params, cb, errcb
-	local function go(_projectId)
+function GitlabService:writeFile(filename, content, callback, projectId, foldername) --params, cb, errcb
+	local function go(projectId)
 		--[[if(GitlabService:checkSpecialCharacter(_filename)) then
 			_callback(false, _filename);
 			return;
 		end]]
 
-		local url = GitlabService:getFileUrlPrefix(_projectId) .. Encoding.url_encode(_filename);
+		local url = GitlabService:getFileUrlPrefix(projectId) .. Encoding.url_encode(filename);
 		--LOG.std(nil,"debug","GitlabService:writeFile",url);
 
 		local params = {
-			commit_message = GitlabService:getCommitMessagePrefix() .. _filename,
+			commit_message = GitlabService:getCommitMessagePrefix() .. filename,
 			branch		   = "master",
-			content 	   = _file_content_t,
+			content 	   = content,
 		}
 
-		GitlabService:apiPost(url, params, function(data, err)
-			--LOG.std(nil,"debug","GitlabService:writeFile",data);
-			--LOG.std(nil,"debug","GitlabService:writeFile",err);
+		LOG.std("GitlabService","debug","GitlabService:writeFile", #content);
 
-			if(err == 201) then
-				_callback(true, _filename, data, err);
+		GitlabService:apiPost(url, params, function(data, err)
+			LOG.std(nil,"debug","GitlabService:writeFile",data);
+			LOG.std(nil,"debug","GitlabService:writeFile",err);
+
+			if(err == 201 and type(callback) == "function") then
+				callback(true, filename, data, err);
 			else
-				GitlabService:update(_filename, _file_content_t, _sha, _callback, _projectId)
-				--_callback(false, _filename, data, err);
+				GitlabService:update(filename, content, sha, callback, projectId);
 			end
 		end);
 	end
 
-	GitlabService:checkProjectId(_projectId, _foldername, go);
+	GitlabService:checkProjectId(projectId, foldername, go);
 end
 
 --更新文件
-function GitlabService:update(_filename, _file_content_t, _sha, _callback, _projectId, _foldername)
-	local function go(_projectId)
+function GitlabService:update(filename, content, sha, callback, projectId, foldername)
+	local function go(projectId)
 		--[[if(GitlabService:checkSpecialCharacter(_filename)) then
 			_callback(false, _filename);
 			return;
 		end]]
 
-		local url = GitlabService:getFileUrlPrefix(_projectId) .. Encoding.url_encode(_filename);
+		local url = GitlabService:getFileUrlPrefix(projectId) .. Encoding.url_encode(filename);
 
 		local params = {
-			commit_message = GitlabService:getCommitMessagePrefix() .. _filename,
+			commit_message = GitlabService:getCommitMessagePrefix() .. filename,
 			branch		   = "master",
-			content 	   = _file_content_t,
+			content 	   = content,
 		}
 
 		GitlabService:apiPut(url, params, function(data, err)
@@ -393,14 +395,18 @@ function GitlabService:update(_filename, _file_content_t, _sha, _callback, _proj
 			--LOG.std(nil,"debug","GitlabService:update",err);
 
 			if(err == 200) then
-				_callback(true, _filename, data, err);
+				if(type(callback) == "function") then
+					callback(true, filename, data, err);
+				end
 			else
-				_callback(false, _filename, data, err);
+				if(type(callback) == "function") then
+					callback(false, filename, data, err);
+				end
 			end
 		end);
 	end
 
-	GitlabService:checkProjectId(_projectId, _foldername, go);
+	GitlabService:checkProjectId(projectId, foldername, go);
 end
 
 -- 获取文件
