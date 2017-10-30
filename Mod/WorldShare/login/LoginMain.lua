@@ -58,20 +58,20 @@ end
 
 function loginMain.ShowPage()
 	System.App.Commands.Call("File.MCMLWindowFrame", {
-			url = "Mod/WorldShare/login/LoginMain.html", 
-			name = "LoadMainWorld", 
+			url            = "Mod/WorldShare/login/LoginMain.html", 
+			name           = "LoadMainWorld", 
 			isShowTitleBar = false,
 			DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
-			style = CommonCtrl.WindowFrame.ContainerStyle,
-			zorder = 0,
-			allowDrag = true,
-			bShow = bShow,
+			style          = CommonCtrl.WindowFrame.ContainerStyle,
+			zorder         = 0,
+			allowDrag      = true,
+			bShow          = bShow,
 			directPosition = true,
-			align = "_ct",
-			x = -860/2,
-			y = -470/2,
-			width = 860,
-			height = 470,
+			align          = "_ct",
+			x              = -860/2,
+			y              = -470/2,
+			width          = 860,
+			height         = 470,
 			cancelShowAnimation = true,
 	});
 
@@ -92,6 +92,7 @@ function loginMain.setInforPage()
 	if(loginMain.InforPage) then
 		loginMain.InforPage:CloseWindow();
 	end
+
 	loginMain.InforPage = document:GetPageCtrl();
 end
 
@@ -103,24 +104,24 @@ function loginMain.refreshPage()
 	loginMain.LoginPage:Refresh();
 end
 
-function loginMain.showMessageInfo(_msg)
-	loginMain.Msg = _msg;
+function loginMain.showMessageInfo(msg)
+	loginMain.Msg = msg;
 	
 	System.App.Commands.Call("File.MCMLWindowFrame", {
-		url = "Mod/WorldShare/login/Infor.html",
-		name = "loginMain.Infor",
+		url            = "Mod/WorldShare/login/Infor.html",
+		name           = "loginMain.Infor",
 		isShowTitleBar = false,
 		DestroyOnClose = true,
-		style = CommonCtrl.WindowFrame.ContainerStyle,
-		allowDrag = false,
-		isTopLevel = true,
-		zorder = 1,
+		style          = CommonCtrl.WindowFrame.ContainerStyle,
+		allowDrag      = false,
+		isTopLevel     = true,
+		zorder         = 1,
 		directPosition = true,
-			align = "_ct",
-			x = -300/2,
-			y = -150/2,
-			width = 500,
-			height = 270,
+		align          = "_ct",
+		x              = -300/2,
+		y              = -150/2,
+		width          = 500,
+		height         = 270,
 	});
 
 	loginMain.Msg = nil;
@@ -128,19 +129,19 @@ end
 
 function loginMain.showLoginModalImp()
 	System.App.Commands.Call("File.MCMLWindowFrame", {
-		url = "Mod/WorldShare/login/LoginModal.html",
-		name = "loginMain.LoginModal",
+		url            = "Mod/WorldShare/login/LoginModal.html",
+		name           = "loginMain.LoginModal",
 		isShowTitleBar = false,
 		DestroyOnClose = true,
-		style = CommonCtrl.WindowFrame.ContainerStyle,
-		allowDrag = true,
-		isTopLevel = true,
+		style          = CommonCtrl.WindowFrame.ContainerStyle,
+		allowDrag      = true,
+		isTopLevel     = true,
 		directPosition = true,
-			align = "_ct",
-			x = -320/2,
-			y = -350/2,
-			width = 320,
-			height = 350,
+		align          = "_ct",
+		x              = -320/2,
+		y              = -350/2,
+		width          = 320,
+		height         = 350,
 	});
 
     loginMain.getRememberPassword();
@@ -161,15 +162,15 @@ function loginMain.closeModalPage()
 	loginMain.ModalPage:CloseWindow();
 end
 
-function loginMain.LoginAction(_page, _callback)
-	local account       = _page:GetValue("account");
-	local password      = _page:GetValue("password");
-	local loginServer   = _page:GetValue("loginServer");
-	local isRememberPwd = _page:GetValue("rememberPassword"); 
-	local autoLogin     = _page:GetValue("autoLogin"); 
+function loginMain.LoginAction(page, callback)
+	local account       = page:GetValue("account");
+	local password      = page:GetValue("password");
+	local loginServer   = page:GetValue("loginServer");
+	local isRememberPwd = page:GetValue("rememberPassword"); 
+	local autoLogin     = page:GetValue("autoLogin"); 
 
-	_page:SetNodeValue("account", account);
-	_page:SetNodeValue("password", password);
+	page:SetNodeValue("account", account);
+	page:SetNodeValue("password", password);
 
 	--echo(account);
 	--echo(password);
@@ -187,9 +188,9 @@ function loginMain.LoginAction(_page, _callback)
 
 	loginMain.showMessageInfo(L"正在登陆，请稍后...");
 
-	loginMain.LoginActionApi(account,password,function (response,err)
+	loginMain.LoginActionApi(account, password, function (response,err)
 			LOG.std("LoginMain","debug","Login Response",response);
-			--echo(response,true);
+
 			if(type(response) == "table") then
 				if(response['data'] ~= nil and response['data']['userinfo']['_id']) then
 					loginMain.token = response['data']['token'];
@@ -238,7 +239,6 @@ function loginMain.LoginAction(_page, _callback)
 							return
 						end
 
-						--echo(dataSourceSetting);
 						loginMain.dataSourceToken      = dataSourceSetting['dataSourceToken'];    -- 数据源Token
 						loginMain.dataSourceUsername   = dataSourceSetting['dataSourceUsername']; -- 数据源用户名
 						loginMain.dataSourceType       = dataSourceSetting['type'];				  -- 数据源类型
@@ -248,23 +248,18 @@ function loginMain.LoginAction(_page, _callback)
 						loginMain.keepWorkDataSource   = defaultSiteDataSource['projectName'];    -- keepwork仓名
 						loginMain.keepWorkDataSourceId = defaultSiteDataSource['projectId'];      -- keepwork仓ID
 
-						--echo({loginMain.dataSourceToken,loginMain.dataSourceUsername});
 						loginMain.personPageUrl = loginMain.site .. "/" .. loginMain.username .. "/paracraft/index";--loginMain.site .. "/wiki/mod/worldshare/person/#?userid=" .. userinfo._id;
-
-						--local myWorlds = loginMain.LoginPage:GetNode("myWorlds");
-						--myWorlds:SetAttribute("href", loginMain.personPageUrl);--loginMain.site.."/wiki/mod/worldshare/person/"
 
 						--判断paracraf站点是否存在，不存在则创建
 						HttpRequest:GetUrl({
-							url  = loginMain.site.."/api/wiki/models/website/getDetailInfo",
-							json = true,
+							url     = loginMain.site.."/api/wiki/models/website/getDetailInfo",
+							json    = true,
 							headers = {Authorization = "Bearer "..loginMain.token},
-							form = {
+							form    = {
 								username = loginMain.username,
 								sitename = "paracraft",
 							},
 						},function(data, err)
-							--LOG.std(nil,"debug","sitedata",data);
 							local site = data["data"];
 							
 							if(not site) then
@@ -276,28 +271,27 @@ function loginMain.LoginAction(_page, _callback)
 							if(not site.siteinfo) then
 								--创建站点
 								local siteParams = {};
-								siteParams.categoryId = 1;
+
+								siteParams.categoryId   = 1;
 								siteParams.categoryName = "作品网站";
-								siteParams.desc = "paracraft作品集";
-								siteParams.displayName = loginMain.username;
-								siteParams.domain = "paracraft";
-								siteParams.logoUrl = "/wiki/assets/imgs/paracraft.png";
-								siteParams.name = "paracraft";
-								siteParams.styleId = 1;
-								siteParams.styleName = "WIKI样式";
-								siteParams.templateId = 1;
+								siteParams.desc         = "paracraft作品集";
+								siteParams.displayName  = loginMain.username;
+								siteParams.domain       = "paracraft";
+								siteParams.logoUrl      = "/wiki/assets/imgs/paracraft.png";
+								siteParams.name         = "paracraft";
+								siteParams.styleId      = 1;
+								siteParams.styleName    = "WIKI样式";
+								siteParams.templateId   = 1;
 								siteParams.templateName = "WIKI模板";
-								siteParams.userId = loginMain.userId;
+								siteParams.userId   = loginMain.userId;
 								siteParams.username = loginMain.username;
 
 								HttpRequest:GetUrl({
-									url  = loginMain.site .. "/api/wiki/models/website/new",
-									json = true,
+									url     = loginMain.site .. "/api/wiki/models/website/new",
+									json    = true,
 									headers = {Authorization = "Bearer " .. loginMain.token},
-									form = siteParams,
-								},function(data, err)
-									--LOG.std(nil,"debug","new site",data);
-								end);
+									form    = siteParams,
+								},function(data, err) end);
 							end
 
 							loginMain.changeLoginType(3);
@@ -308,8 +302,8 @@ function loginMain.LoginAction(_page, _callback)
 								loginMain.closeModalPage();
 							end
 
-							if(_callback) then
-								_callback();
+							if(type(callback) == "function") then
+								callback();
 							end
 
 							SyncMain:genIndexMD();
@@ -1168,11 +1162,11 @@ function loginMain.downloadWorld()
 	end);
 end
 
-function loginMain.syncNow(_index)
-	local index = tonumber(_index);
-	SyncMain.selectedWorldInfor = InternetLoadWorld.cur_ds[_index];
+function loginMain.syncNow(index)
+	local index = tonumber(index);
 
-	--LOG.std(nil,"debug","SyncMain.selectedWorldInfor",SyncMain.selectedWorldInfor);
+	SyncMain.selectedWorldInfor = InternetLoadWorld.cur_ds[index];
+
 	if(loginMain.login_type == 3) then
 		if(SyncMain.selectedWorldInfor.status ~= nil and SyncMain.selectedWorldInfor.status ~= 2)then
 			if(SyncMain.selectedWorldInfor.is_zip)then
@@ -1186,20 +1180,19 @@ function loginMain.syncNow(_index)
 			SyncMain.worldDir.utf8    = "worlds/DesignHouse/" .. SyncMain.foldername.utf8 .. "/";
 			SyncMain.worldDir.default = "worlds/DesignHouse/" .. SyncMain.foldername.default .. "/";
 
-			--LOG.std(nil,"debug","SyncMain.worldDir.default",SyncMain.worldDir.default);
 			SyncMain.syncCompare(true);
 		else
 			loginMain.downloadWorld();
-			--_guihelper.MessageBox(L"本地无数据，请直接登陆");
 		end
 	else
 		_guihelper.MessageBox(L"登陆后才能同步");
 	end
 end
 
-function loginMain.deleteWorld(_index)
-	local index = tonumber(_index);
-	SyncMain.selectedWorldInfor = InternetLoadWorld.cur_ds[_index];
+function loginMain.deleteWorld(index)
+	local index = tonumber(index);
+
+	SyncMain.selectedWorldInfor = InternetLoadWorld.cur_ds[index];
 
 	if(SyncMain.tagInfor) then
 		if(SyncMain.tagInfor.name == SyncMain.selectedWorldInfor.foldername) then

@@ -60,7 +60,6 @@ function SyncMain:ctor()
 end
 
 function SyncMain:init()
-	--LOG.std(nil, "debug", "SyncMain", "init");
 	SyncMain.worldName = nil;
 
 	-- 没有登陆则直接使用离线模式
@@ -100,29 +99,29 @@ function SyncMain.closeBeyondPage()
 end
 
 function SyncMain:StartSyncPage()
-	SyncMain.isStart = true;
+	SyncMain.isStart  = true;
 	SyncMain.syncType = "sync";
 
 	System.App.Commands.Call("File.MCMLWindowFrame", {
-		url  = "Mod/WorldShare/sync/StartSync.html", 
-		name = "SyncWorldShare",
+		url            = "Mod/WorldShare/sync/StartSync.html", 
+		name           = "SyncWorldShare",
 		isShowTitleBar = false,
 		DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory / false will only hide window
-		style = CommonCtrl.WindowFrame.ContainerStyle,
-		zorder = 0,
-		allowDrag = true,
-		bShow = bShow,
+		style          = CommonCtrl.WindowFrame.ContainerStyle,
+		zorder         = 0,
+		allowDrag      = true,
+		bShow          = bShow,
 		directPosition = true,
-			align = "_ct",
-			x = -500/2,
-			y = -270/2,
-			width = 500,
-			height = 270,
+		align          = "_ct",
+		x              = -500/2,
+		y              = -270/2,
+		width          = 500,
+		height         = 270,
 		cancelShowAnimation = true,
 	});
 end
 
-function SyncMain:compareRevision(_LoginStatus, _callback)
+function SyncMain:compareRevision(LoginStatus, callback)
 	SyncMain.compareFinish = false;
 
 	if(loginMain.token) then
@@ -134,16 +133,13 @@ function SyncMain:compareRevision(_LoginStatus, _callback)
 
 			SyncMain.localFiles = LocalService:new():LoadFiles(SyncMain.worldDir.default);
 
-			--LOG.std(nil,"debug","SyncMain.localFiles",SyncMain.localFiles);
-
 			--[[if(GitlabService:checkSpecialCharacter(SyncMain.foldername.utf8))then
 				return;
 			end]]
 
 			local hasRevision = false;
 			for key,value in ipairs(SyncMain.localFiles) do
-				--LOG.std(nil,"debug","filename",value.filename);
-				if(value.filename == "revision.xml") then
+				if(string.lower(value.filename) == "revision.xml") then
 					hasRevision = true;
 					break;
 				end
@@ -161,18 +157,11 @@ function SyncMain:compareRevision(_LoginStatus, _callback)
 					else
 						contentUrl = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. GitEncoding.base32(SyncMain.foldername.utf8) .. "/raw/master/revision.xml";
 					end
-				
-					--LOG.std("SyncMain","debug","contentUrl",contentUrl);
 				end
 
 				SyncMain.remoteRevison = 0;
 
-				--LOG.std(nil,"debug","contentUrl",contentUrl);
-
 				HttpRequest:GetUrl(contentUrl, function(data,err)
-					--LOG.std(nil,"debug","contentUrl",contentUrl);
-					--LOG.std(nil,"debug","data",data);
-					--LOG.std(nil,"debug","err",err);
 
 					SyncMain.remoteRevison = tonumber(data);
 					if(not SyncMain.remoteRevison) then
@@ -180,14 +169,12 @@ function SyncMain:compareRevision(_LoginStatus, _callback)
 					end
 
 					SyncMain.currentRevison = tonumber(SyncMain.currentRevison);
-					--LOG.std(nil,"debug","SyncMain.remoteRevison",SyncMain.remoteRevison);
-					--LOG.std(nil,"debug","SyncMain.currentRevison",SyncMain.currentRevison);
 
 					if(err == 0) then
 						_guihelper.MessageBox(L"网络错误");
 
-						if(type(_callback) == "function") then
-							_callback(false);
+						if(type(callback) == "function") then
+							callback(false);
 						end
 
 						return
@@ -212,14 +199,13 @@ function SyncMain:compareRevision(_LoginStatus, _callback)
 									isWorldInRemoteLists = true;
 								end
 							end
-							--echo("isWorldInRemoteLists");
-							--echo(isWorldInRemoteLists)
+
 							if(not isWorldInRemoteLists) then
 								SyncMain:refreshRemoteWorldLists(nil,function()
 									SyncMain.compareFinish = true;
 
-									if(type(_callback) == "function") then
-										_callback("tryAgain");
+									if(type(callback) == "function") then
+										callback("tryAgain");
 									end
 								end)
 
@@ -229,16 +215,20 @@ function SyncMain:compareRevision(_LoginStatus, _callback)
 
 						SyncMain.compareFinish = true;
 
-						if(type(_callback) == "function") then
-							_callback(result);
+						if(type(callback) == "function") then
+							callback(result);
 						end
 					end
 				end);
 			else
-				if(not _LoginStatus) then
+				if(not LoginStatus) then
 					CommandManager:RunCommand("/save");
+					
 					SyncMain.compareFinish = true;
-					_callback("tryAgain");
+
+					if(type(callback) == "function") then
+						callback("tryAgain");
+					end
 				else
 					_guihelper.MessageBox(L"本地世界沒有版本信息");
 					SyncMain.compareFinish = true;
@@ -247,27 +237,19 @@ function SyncMain:compareRevision(_LoginStatus, _callback)
 			end
 		end
 
-		--LOG.std(nil,"debug","_LoginStatus",_LoginStatus);
-		if(not _LoginStatus) then
+		if(not LoginStatus) then
 			SyncMain.tagInfor = WorldCommon.GetWorldInfo();
-			--LOG.std(nil,"debug","SyncMain.tagInfor",SyncMain.tagInfor);
 
 			SyncMain.worldDir.default = GameLogic.GetWorldDirectory():gsub("\\","/");
 			SyncMain.worldDir.utf8    = Encoding.DefaultToUtf8(SyncMain.worldDir.default);
 
-			--LOG.std(nil,"debug","SyncMain.worldDir.utf8",SyncMain.worldDir.utf8)
-			--LOG.std(nil,"debug","SyncMain.worldDir.default",SyncMain.worldDir.default)
-
 			SyncMain.foldername.default = SyncMain.worldDir.default:match("worlds/DesignHouse/([^/]*)/");
 			SyncMain.foldername.utf8    = SyncMain.worldDir.utf8:match("worlds/DesignHouse/([^/]*)/");
-			--LOG.std(nil,"debug","SyncMain.foldername.default",SyncMain.foldername.default)
-			--LOG.std(nil,"debug","SyncMain.foldername.utf8",SyncMain.foldername.utf8)
 
-			--LOG.std(nil,"debug","selectedWorldInfor-old",SyncMain.selectedWorldInfor);
 			loginMain.RefreshCurrentServerList(function()
 				if(GameLogic.IsReadOnly()) then
-					if(type(_callback) == "function")then
-						_callback("zip");
+					if(type(callback) == "function")then
+						callback("zip");
 					end
 				
 					return;
@@ -283,19 +265,15 @@ function SyncMain:compareRevision(_LoginStatus, _callback)
 
 				go();
 			end);
-			--LOG.std(nil,"debug","selectedWorldInfor-new",SyncMain.selectedWorldInfor);
 		else
 			go();
 		end
 	end
 end
 
-function SyncMain.syncCompare(_LoginStatus)
-	SyncMain:compareRevision(_LoginStatus, function(result)
-		--echo(result);
-		--echo(_LoginStatus);
-
-		if(_LoginStatus) then
+function SyncMain.syncCompare(LoginStatus)
+	SyncMain:compareRevision(LoginStatus, function(result)
+		if(LoginStatus) then
 			if(result == "justLocal") then
 				SyncMain.syncToDataSource();
 			else
@@ -382,7 +360,7 @@ function SyncMain:useDataSourceGUI()
 	});
 end
 
-function SyncMain:syncToLocal(_callback)
+function SyncMain:syncToLocal(callback)
 	if(not SyncMain.finish) then
 		--_guihelper.MessageBox(L"同步尚未结束");
 		--return;
@@ -393,8 +371,6 @@ function SyncMain:syncToLocal(_callback)
 
 	-- 加载进度UI界面
 	local syncToLocalGUI = SyncGUI:new();
-
-	--LOG.std(nil,"debug","worldDir",_worldDir);
 
 	if(loginMain.dataSourceType == "gitlab") then
 		SyncMain:setGitlabProjectId(SyncMain.foldername.utf8);
@@ -416,9 +392,6 @@ function SyncMain:syncToLocal(_callback)
 
 		SyncMain.finish = false;
 
-		-- LOG.std(nil,"debug","SyncMainGUI",SyncMain.curDownloadIndex);
-		-- LOG.std(nil,"debug","SyncMainGUI",SyncMain.totalDataSourceIndex);
-
 		syncToLocalGUI:updateDataBar(syncGUIIndex, syncGUItotal, L'获取文件sha列表');
 
 		function SyncMain.localSync.finish()
@@ -435,12 +408,11 @@ function SyncMain:syncToLocal(_callback)
 			end
 
 			--成功是返回信息给login
-			if(_callback) then
+			if(type(callback) == "function") then
 				local params = {};
-				params.revison     = SyncMain.remoteRevison;
-				-- params.filesTotals = LocalService:GetWorldFileSize(SyncMain.foldername.utf8);
+				params.revison = SyncMain.remoteRevison;
 
-				_callback(true,params);
+				callback(true,params);
 			end
 
 			SyncMain.finish = true;
@@ -577,8 +549,6 @@ function SyncMain:syncToLocal(_callback)
 					end
 				end
 			else
-				--LOG.std(nil,"debug","delete-filename",SyncMain.localFiles[SyncMain.curUpdateIndex].filename);
-				--LOG.std(nil,"debug","delete-sha1",SyncMain.localFiles[SyncMain.curUpdateIndex].sha1);
 
 				-- 如果过github不删除存在，则删除本地的文件
 				SyncMain.localSync.deleteOne();
@@ -610,9 +580,6 @@ function SyncMain:syncToLocal(_callback)
 
 				syncToLocalGUI:updateDataBar(syncGUIIndex , syncGUItotal, L"开始同步");
 
-				--LOG.std(nil,"debug","SyncMain.totalLocalIndex",SyncMain.totalLocalIndex);
-				--LOG.std(nil,"debug","SyncMain.totalDataSourceIndex",SyncMain.totalDataSourceIndex);
-
 				if (SyncMain.totalLocalIndex ~= 0) then
 					SyncMain.localSync.updateOne();
 				else
@@ -640,6 +607,7 @@ function SyncMain:syncToDataSource()
 	if(SyncMain:checkWorldSize()) then
 		return;
 	end
+
 	SyncMain.remoteSync = {};
 
 	-- 加载进度UI界面
@@ -667,20 +635,16 @@ function SyncMain:syncToDataSource()
 
 			syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, L'获取文件sha列表');
 
-			--LOG.std(nil,"debug","SyncMain.curUploadIndex",SyncMain.curUploadIndex);
-			--LOG.std(nil,"debug","SyncMain.totalDataSourceIndex",SyncMain.totalDataSourceIndex);
-
-			function SyncMain.remoteSync.revision(_callback)
-				--LOG.std(nil,"debug","SyncMain.revisionUpload",SyncMain.revisionUpload);
-				--LOG.std(nil,"debug","SyncMain.revisionUpdate",SyncMain.revisionUpdate);
-
+			function SyncMain.remoteSync.revision(callback)
 				if(SyncMain.revisionUpload) then
 					SyncMain:uploadService(SyncMain.foldername.base32, "revision.xml", SyncMain.revisionContent, function (bIsUpload, filename)
 						if (bIsUpload) then
 							syncGUIIndex = syncGUIIndex + 1;
 							syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, L'同步完成，正在更新世界信息，请稍后...');
 
-							_callback();
+							if(type(callback) == "function") then
+								callback();
+							end
 						else
 							_guihelper.MessageBox(L"revision上传失败");
 							syncGUIIndex = syncGUIIndex + 1;
@@ -706,9 +670,6 @@ function SyncMain:syncToDataSource()
 			end
 
 			function SyncMain.remoteSync.finish()
-				--LOG.std(nil,"debug","SyncMain.selectedWorldInfor",SyncMain.selectedWorldInfor);
-				--LOG.std(nil,"debug","send",SyncMain.selectedWorldInfor.tooltip);
-
 				SyncMain.remoteSync.revision(function()
 					if(syncGUIIndex > syncGUItotal) then
 						_guihelper.MessageBox(L"更新失败，请重试再试");
@@ -729,8 +690,7 @@ function SyncMain:syncToDataSource()
 					return;
 				end
 
-				if(SyncMain.localFiles[SyncMain.curUploadIndex].filename == "revision.xml" and SyncMain.localFiles[SyncMain.curUploadIndex].needChange) then
-					--LOG.std(nil,"debug","findRevision");
+				if(string.lower(SyncMain.localFiles[SyncMain.curUploadIndex].filename) == "revision.xml" and SyncMain.localFiles[SyncMain.curUploadIndex].needChange) then
 					SyncMain.revisionUpload  = true;
 					SyncMain.revisionContent = SyncMain.localFiles[SyncMain.curUploadIndex].file_content_t;
 
@@ -744,7 +704,6 @@ function SyncMain:syncToDataSource()
 					return;
 				end
 
-				--LOG.std(nil,"debug","SyncMain.localFiles[SyncMain.curUploadIndex]", SyncMain.localFiles[SyncMain.curUploadIndex]);
 				if (SyncMain.localFiles[SyncMain.curUploadIndex].needChange) then
 					SyncMain.localFiles[SyncMain.curUploadIndex].needChange = false;
 					SyncMain.isFetching = true;
@@ -761,7 +720,6 @@ function SyncMain:syncToDataSource()
 							syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, filename .. " （" .. loginMain.GetWorldSize(SyncMain.localFiles[SyncMain.curUploadIndex].filesize, "KB") .. "） " .. "上传完成");
 
 							if (SyncMain.curUploadIndex == SyncMain.totalLocalIndex) then
-								--LOG.std(nil,"debug","SyncMain.localFiles",SyncMain.localFiles);
 								SyncMain.remoteSync.finish();
 							else
 								SyncMain.curUploadIndex = SyncMain.curUploadIndex + 1;
@@ -849,11 +807,11 @@ function SyncMain:syncToDataSource()
 					end
 				end
 
-				if(bIsExisted and SyncMain.localFiles[LocalIndex].filename == "revision.xml") then
-					--LOG.std(nil,"debug","findUpdateRevision");
+				if(bIsExisted and string.lower(SyncMain.localFiles[LocalIndex].filename) == "revision.xml") then
 					SyncMain.revisionUpdate  = true;
 					SyncMain.revisionContent = SyncMain.localFiles[LocalIndex].file_content_t;
 					SyncMain.revisionSha1    = SyncMain.localFiles[LocalIndex].sha1;
+
 					SyncMain.localFiles[LocalIndex].needChange = false;
 
 					if (SyncMain.curUpdateIndex == SyncMain.totalDataSourceIndex) then
@@ -865,10 +823,6 @@ function SyncMain:syncToDataSource()
 
 					return;
 				end
-
-				--LOG.std(nil, "debug", "LocalIndex", LocalIndex);
-				--LOG.std(nil, "debug", "SyncMain.localFiles[LocalIndex]", SyncMain.localFiles[LocalIndex]);
-				--LOG.std(nil,"debug","dataSourceFiles",curGitFiles.path);
 
 				if (bIsExisted) then
 					syncGUIIndex = syncGUIIndex + 1;
@@ -887,11 +841,6 @@ function SyncMain:syncToDataSource()
 								syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, filename .. "更新完成");
 
 								if (SyncMain.curUpdateIndex == SyncMain.totalDataSourceIndex) then
---										for key,value in ipairs(SyncMain.localFiles) do
---											LOG.std(nil,"debug","filename",value.filename);
---											LOG.std(nil,"debug","needChange",value.needChange);
---										end
-										
 									SyncMain.remoteSync.uploadOne();
 								else
 									SyncMain.curUpdateIndex = SyncMain.curUpdateIndex + 1; -- 如果不等最大计数则更新
@@ -901,8 +850,6 @@ function SyncMain:syncToDataSource()
 								_guihelper.MessageBox(L"更新失败");
 								syncGUIIndex = syncGUIIndex + 1;
 								syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, filename);
-								--syncToDataSourceGUI.finish();
-								--SyncMain.finish = true;
 							end
 
 							SyncMain.isFetching = false;
@@ -911,21 +858,13 @@ function SyncMain:syncToDataSource()
 						syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, SyncMain.localFiles[LocalIndex].filename .. "版本一致，跳过");
 
 						if (SyncMain.curUpdateIndex == SyncMain.totalDataSourceIndex) then
-							--for key,value in ipairs(SyncMain.localFiles) do
-								--LOG.std(nil,"debug","filename",value.filename);
-								--LOG.std(nil,"debug","needChange",value.needChange);
-							--end
-
 							SyncMain.remoteSync.uploadOne();
 						else
 							SyncMain.curUpdateIndex = SyncMain.curUpdateIndex + 1;
 							SyncMain.remoteSync.updateOne();
 						end
 					end
-				else
-					--LOG.std(nil,"debug","delete-filename",curGitFiles.path);
-					-- LOG.std(nil,"debug","delete-sha1",self.localFiles[LocalIndex].filename);
-					
+				else				
 					-- 如果过数据源不删除存在，则删除本地的文件
 					SyncMain.remoteSync.deleteOne();
 				end
@@ -933,9 +872,6 @@ function SyncMain:syncToDataSource()
 
 			-- 获取数据源仓文件
 			SyncMain:getFileShaListService(SyncMain.foldername.base32, function(data, err)
-				--LOG.std(nil,"debug","SyncMain:getFileShaListService-data",data);
-				--LOG.std(nil,"debug","SyncMain:getFileShaListService-err",err);
-
 				SyncMain.localFiles = LocalService:new():LoadFiles(SyncMain.worldDir.default); --再次获取本地文件，保证上传的内容为最新
 
 				local hasReadme = false;
@@ -959,15 +895,12 @@ function SyncMain:syncToDataSource()
 					file:write(content,#content);
 					file:close();
 
-					--LOG.std(nil,"debug","filePath",filePath);
-
 					local readMeFiles = {
 						filename       = "README.md",
 						file_path      = filePath,
 						file_content_t = content,
 					};
 
-					--LOG.std(nil,"debug","localFiles",readMeFiles);
 					local otherFile = commonlib.copy(SyncMain.localFiles[#SyncMain.localFiles]);
 					SyncMain.localFiles[#SyncMain.localFiles] = readMeFiles;
 					SyncMain.localFiles[#SyncMain.localFiles + 1] = otherFile;
@@ -977,7 +910,6 @@ function SyncMain:syncToDataSource()
 				syncGUItotal = #SyncMain.localFiles;
 
 				for i=1,#SyncMain.localFiles do
-					-- LOG.std(nil,"debug","localFiles",self.localFiles[i]);
 					SyncMain.localFiles[i].needChange = true;
 					i = i + 1;
 				end
@@ -999,11 +931,8 @@ function SyncMain:syncToDataSource()
 	------------------------------------------------------------------------
 
 	if(SyncMain.remoteRevison == 0) then
-		--LOG.std("SyncMain","debug","SyncMain:syncToDataSource","首次同步");
+		--"首次同步"
 		SyncMain:create(SyncMain.foldername.base32,function(data, status)
-			--LOG.std(nil,"debug","SyncMain:create",data);
-			LOG.std(nil,"debug","SyncMain:create",status);
-
 			if(data == true) then
 				syncToDataSourceGo();
 			else
@@ -1013,7 +942,7 @@ function SyncMain:syncToDataSource()
 			end
 		end);
 	else
-		--LOG.std("SyncMain","debug","SyncMain:syncToDataSource","非首次同步");
+		--"非首次同步"
 		if(loginMain.dataSourceType == "gitlab") then
 			SyncMain:setGitlabProjectId(SyncMain.foldername.utf8);
 			syncToDataSourceGo();
@@ -1023,9 +952,6 @@ end
 
 function SyncMain:refreshRemoteWorldLists(syncGUI, _callback)
 	SyncMain:getCommits(SyncMain.foldername.base32,function(data, err)
-		--LOG.std(nil,"debug","data",data);
-		--LOG.std(nil,"debug","err",err);
-
 		if(data and data[1]) then
 			local lastCommits    = data[1];
 			local lastCommitFile = lastCommits.title:gsub("keepwork commit: ","");
@@ -1103,9 +1029,6 @@ function SyncMain:refreshRemoteWorldLists(syncGUI, _callback)
 					["content-type"] = "application/json",
 				},
 			},function(response, err)
-				--LOG.std(nil,"debug","finish",response);
-				--LOG.std(nil,"debug","finish",err);
-
 				if(err == 200) then
 					if(type(response) == "table" and response.error.id == 0) then
 						params.opusId = response.data.opusId;
@@ -1133,10 +1056,6 @@ function SyncMain:refreshRemoteWorldLists(syncGUI, _callback)
 			if(SyncMain.firstCreate) then
 				SyncMain.firstCreate = false;
 			end
-
-			--LOG.std(nil,"debug","lastCommits",lastCommits);
-			--LOG.std(nil,"debug","lastCommitFile",lastCommitFile);
-			--LOG.std(nil,"debug","lastCommitSha",lastCommitSha);
 		else
 			_guihelper.MessageBox(L"获取Commit列表失败");
 		end
@@ -1147,20 +1066,20 @@ end
 
 function SyncMain:showBeyondVolume()
 	System.App.Commands.Call("File.MCMLWindowFrame", {
-		url  = "Mod/WorldShare/sync/BeyondVolume.html", 
-		name = "BeyondVolume", 
+		url            = "Mod/WorldShare/sync/BeyondVolume.html", 
+		name           = "BeyondVolume", 
 		isShowTitleBar = false,
 		DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory / false will only hide window
-		style = CommonCtrl.WindowFrame.ContainerStyle,
-		zorder = 0,
-		allowDrag = true,
-		bShow = bShow,
+		style          = CommonCtrl.WindowFrame.ContainerStyle,
+		zorder         = 0,
+		allowDrag      = true,
+		bShow          = bShow,
 		directPosition = true,
-			align = "_ct",
-			x = -500/2,
-			y = -270/2,
-			width = 500,
-			height = 270,
+		align          = "_ct",
+		x              = -500/2,
+		y              = -270/2,
+		width          = 500,
+		height         = 270,
 		cancelShowAnimation = true,
 	});
 end
@@ -1222,9 +1141,9 @@ function SyncMain:getGitlabCommitId(_foldername)
 	end
 end
 
-function SyncMain:genIndexMD(_callback)
+function SyncMain:genIndexMD(callback)
 	local contentUrl = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. loginMain.keepWorkDataSource .. "/raw/master/" .. loginMain.username .. "/paracraft/index.md";
-	--echo(contentUrl);
+
 	HttpRequest:GetUrl(contentUrl, function(data, err)
 		if(err == 404) then
 			local indexPath = loginMain.username .. "/paracraft/index.md";
@@ -1237,8 +1156,8 @@ function SyncMain:genIndexMD(_callback)
 				indexPath,
 				SyncMain.indexFile,
 				function(data, err) 
-					if(_callback) then
-						_callback();
+					if(type(callback) == "function") then
+						callback();
 					end
 				end,
 				loginMain.keepWorkDataSourceId
