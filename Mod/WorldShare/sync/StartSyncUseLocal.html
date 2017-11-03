@@ -12,7 +12,7 @@
                 SyncMain.setSyncPage();
 
             	function replace()
-                    SyncMain:syncToDataSource();  -- _guihelper.MessageBox("强制同步--将本地大小有变化的文件上传到github");-- 下载或覆盖
+                    SyncMain:syncToDataSource();
             	end
 
             	function cancel()
@@ -28,10 +28,10 @@
         <div style="width:500px;height:270px;">
             <aries:window mode="thin" width="500" height="270" style="float:left;" title='<%=L"与Github同步" %>'>
             	<div style="padding:40px;font-size:18px;base-font-size:18px;color:#ffffff">
-            		<div>你是否确定用本地的更低的版本<%= SyncMain.currentRevison%>, 替换服务器上更高的版本<%= SyncMain.remoteRevison%>？</div>
+            		<div><%=L"你是否确定用本地的更低的版本" %><%= SyncMain.currentRevison%><%=L", 替换服务器上更高的版本" %><%= SyncMain.remoteRevison%><%=L"？" %></div>
             		<div style="margin-top:30px;">
-            			<input type="button" onclick="replace" class="button_highlight" style="margin-left:140px;width: 60px;height: 30px;margin"  name="" value="替换" />
-            			<input type="button" onclick="cancel"  class="button_highlight" style="margin-left:20px;width: 60px;height: 30px;"  name="" value="取消" />
+            			<input type="button" onclick="replace" class="button_highlight" style="margin-left:140px;width: 60px;height: 30px;margin"  name="" value='<%=L"替换" %>' />
+            			<input type="button" onclick="cancel"  class="button_highlight" style="margin-left:20px;width: 60px;height: 30px;"  name=""value='<%=L"取消" %>' />
             		</div>
             	</div>
             </aries:window>

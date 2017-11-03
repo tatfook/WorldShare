@@ -53,7 +53,7 @@ end
     <div style="padding:20px;color:#ffffff">
         <div>
             <div style="float:left">
-                <img name="ShareWorldImage" zorder="1" width="240" height="160" onclick="snapshot()" tooltip="重新截图"/>
+                <img name="ShareWorldImage" zorder="1" width="240" height="160" onclick="snapshot()" tooltip='<%= L"重新截图" %>' />
             </div>
             <div style="float:right;padding-left:28px;">
                 <div style="" tooltip='<%=L"点击打开所在目录"%>' onclick="OnOpenWorldDir">
@@ -71,7 +71,7 @@ end
             </div>
         </div>
         <div style="margin-top:15px;base-font-size:15px;font-size:15px;">
-            您上次保存世界是: <span style="color:#ff6a00"><%=format("%d秒前", GetElapsedUnSavedSeconds())%></span>
+            <%= L"您上次保存世界是:"%> <span style="color:#ff6a00"><%=format(L"%d秒前", GetElapsedUnSavedSeconds())%></span>
         </div>
         <div style="margin-top:15px;">
             <input type="button" onclick="OnClickSaveAndExit()" value='<%=L"保存并退出" %>' class="mc_big_button" style="min-width:128px;" />

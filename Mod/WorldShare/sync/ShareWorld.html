@@ -48,25 +48,25 @@
                                 <input type="button" value='...' style="margin-left:3px;margin-top:4px;font-size:11px;height:18px;color:#ffffff;" class="mc_button_blue" onclick="OnOpenWorldDir"/>
                             </div>
 
-                            <div class="info">大小：<%= loginMain.GetWorldSize(ShareWorld.getWorldSize())%></div>
-                            <div class="info">远程版本号：<%=SyncMain.remoteRevison %></div>
-                            <div class="info">本地版本号：<%=SyncMain.currentRevison %></div>
-                            <input type="button" style="font-size:11px;height:20px;color:#ffffff;margin-top:10px;width:65px;height:30px;" value="重新截图" class="mc_light_grey_button_with_fillet" onclick="ShareWorld.snapshot()" />
+                            <div class="info"><%=L"大小：" %><%= loginMain.GetWorldSize(ShareWorld.getWorldSize())%></div>
+                            <div class="info"><%=L"远程版本号：" %><%=SyncMain.remoteRevison %></div>
+                            <div class="info"><%=L"本地版本号：" %><%=SyncMain.currentRevison %></div>
+                            <input type="button" style="font-size:11px;height:20px;color:#ffffff;margin-top:10px;width:65px;height:30px;" value='<%=L"重新截图" %>' class="mc_light_grey_button_with_fillet" onclick="ShareWorld.snapshot()" />
                         </div>
                     </div>
                     
                     <div style="margin-top:20px;">
                         <input type="text" value="<%= ShareWorld.getWorldUrl()%>" class="text_field"/>
-                        <input type="button" width="75" height="30" style="margin-left:10px;" class="mc_light_grey_button_with_fillet" value="浏览" onclick="ShareWorld.openWorldWebPage()" />
+                        <input type="button" width="75" height="30" style="margin-left:10px;" class="mc_light_grey_button_with_fillet" value='<%=L"浏览" %>' onclick="ShareWorld.openWorldWebPage()" />
                     </div>
                 </div>
                 <hr style="margin-left:-4px;"/>
                 <div>
                     <pe:if condition="<%= SyncMain.compareFinish%>">
-                        <input type="button" onclick="ShareWorld.shareNow()" value="上传并分享" class="mc_big_button" align="right" style="margin-right:20px;margin-top:20px;min-width:160px;height:40px" />
+                        <input type="button" onclick="ShareWorld.shareNow()" value='<%=L"上传并分享" %>' class="mc_big_button" align="right" style="margin-right:20px;margin-top:20px;min-width:160px;height:40px" />
                     </pe:if>
                     <pe:if condition="<%= not SyncMain.compareFinish%>">
-                        正在比对本地版本与远程版本, 请稍后...
+                        <%=L"正在比对本地版本与远程版本, 请稍后..." %>
                     </pe:if>
                 </div>
             </div>

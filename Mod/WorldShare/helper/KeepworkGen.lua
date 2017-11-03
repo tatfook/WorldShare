@@ -137,6 +137,10 @@ KeepworkGen.readmeDefault = [[
 <br/>
 ]];
 
+KeepworkGen.readmeEnglish = [[
+
+]]
+
 KeepworkGen.paracraftContainer = [[
 ```@template/js/default
 {"class":"paracraft"}

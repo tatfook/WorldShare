@@ -55,11 +55,11 @@ function ShareWorld.ShowPageImp()
 		allowDrag = true,
 		isTopLevel = true,
 		directPosition = true,
-			align = "_ct",
-			x = -640/2,
-			y = -415/2,
-			width = 640,
-			height = 415,
+		align = "_ct",
+		x = -640/2,
+		y = -415/2,
+		width = 640,
+		height = 415,
 	});
 end
 
@@ -115,7 +115,7 @@ function ShareWorld.shareNow()
 	--LOG.std(nil,"debug","ShareWorld.CompareResult", ShareWorld.CompareResult);
 
     if(ShareWorld.CompareResult == "remoteBigger") then
-        _guihelper.MessageBox("当前本地版本小于远程版本，是否继续上传？", function(res)
+        _guihelper.MessageBox(L"当前本地版本小于远程版本，是否继续上传？", function(res)
             if(res and res == 6) then
                 SyncMain:syncToDataSource();
             end

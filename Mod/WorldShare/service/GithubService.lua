@@ -144,26 +144,21 @@ function GithubService:update(_foldername, _fileName, _fileContent, _sha, _callb
 	end);
 end
 
-function GithubService:upload(_foldername, _fileName, _fileContent, _callback)
-	_foldername = GitEncoding.base32(_foldername);
+function GithubService:upload(foldername, fileName, fileContent, callback)
+	foldername = GitEncoding.base32(foldername);
 
 	local github_token = login.dataSourceToken;
 
-	-- LOG.std(nil,"debug","GithubService:upload",{_foldername, _fileName, _fileContent});
+	local url = "repos/" .. login.dataSourceUsername .. "/" .. foldername .. "/contents/" .. fileName .. "?access_token=" .. github_token["access_token"];
 
-	local url = "repos/" .. login.dataSourceUsername .. "/" .. _foldername .. "/contents/" .. _fileName .. "?access_token=" .. github_token["access_token"];
-
-	-- LOG.std(nil,"debug","GithubService:upload",url);
-
-	_fileContent = Encoding.base64(_fileContent);
+	fileContent = Encoding.base64(fileContent);
 
 	params = '{"message": "File upload","content": "'.. _fileContent ..'"}';
 
-	-- _callback(true,{});
-
 	self:apiPut(url,params,function(data)
-		-- LOG.std(nil,"debug","GithubService:upload",data);
-		_callback(true,{});
+		if(type(callback) == "function") then
+			callback(true,{});
+		end
 	end);
 end
 

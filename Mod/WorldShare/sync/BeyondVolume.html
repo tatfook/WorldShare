@@ -23,13 +23,13 @@
                     <div style="margin-top:30px;">
                         <%= SyncMain.getBeyondMsg() %>
                         <br />
-                        是否现在清理？
+                        <%= L"是否现在清理？" %>
                     </div>
                     <br />
                     <div style="margin-top:30px;">
-                        <input type="button" onclick="SyncMain.openWorldFolder" class="button_highlight" style="float:left;width: 130px;height: 30px;" name="" value="是" />
-                        <input type="button" onclick="SyncMain.closeBeyondPage" class="button_highlight" style="float:left;margin-left:10px;width: 130px;height: 30px;" name="" value="否" />
-                        <input type="button" onclick="SyncMain.closeBeyondPage" class="button_highlight" style="float:left;margin-left:10px;width: 130px;height: 30px;" name="" value="取消" />
+                        <input type="button" onclick="SyncMain.openWorldFolder" class="button_highlight" style="float:left;width: 130px;height: 30px;" name="" value='<%= L"是"%>' />
+                        <input type="button" onclick="SyncMain.closeBeyondPage" class="button_highlight" style="float:left;margin-left:10px;width: 130px;height: 30px;" name="" value='<%=L"否"%>'/>
+                        <input type="button" onclick="SyncMain.closeBeyondPage" class="button_highlight" style="float:left;margin-left:10px;width: 130px;height: 30px;" name="" value='<%=L"取消"%>'/>
                     </div>
                 </div>
             </aries:window>

@@ -32,13 +32,13 @@ GitlabService.blob    = {};
 GitlabService.getTreePage     = 1;
 GitlabService.getTreePer_page = 100;
 
-function GitlabService:checkSpecialCharacter(_filename)
+function GitlabService:checkSpecialCharacter(filename)
 	local specialCharacter = {"【" , "】" , "《" , "》" , "·" , " ", "，", "●"};
 
 	for key, item in pairs(specialCharacter) do
 		if(string.find(_filename,item)) then
 			commonlib.TimerManager.SetTimeout(function()
-				_guihelper.MessageBox(_filename .. "文件包含了特殊字符或空格，请重命名文件，否则无法上传。");
+				_guihelper.MessageBox(format(L"%s文件包含了特殊字符或空格，请重命名文件，否则无法上传。", filename));
 			end,500);
 			
 			return true;
@@ -48,104 +48,94 @@ function GitlabService:checkSpecialCharacter(_filename)
 	return false;
 end
 
-function GitlabService:checkProjectId(_projectId, _foldername, _callback)
-	if(not _projectId) then
-		_projectId = GitlabService.projectId;
+function GitlabService:checkProjectId(projectId, foldername, callback)
+	if(not projectId) then
+		projectId = GitlabService.projectId;
 	end
 
-	if(not _projectId) then
-		if(_foldername) then
-			GitlabService:getProjectIdByName(_foldername,function(projectId)
+	if(not projectId) then
+		if(foldername) then
+			GitlabService:getProjectIdByName(foldername, function(projectId)
 				if(projectId) then
 					GitlabService.projectId = projectId;
 					
-					if(_callback)then
-						_callback(projectId);
+					if(type(callback) == "function") then
+						callback(projectId);
 					end
 				else
-					LOG.std("GitlabService","debug","GetProjecIdFail","Reson: %s, ProjectName: %s","没有匹配到仓名",_foldername);
 					_guihelper.MessageBox(L"获取projectId失败");
 				end
 			end);
 		else
-			LOG.std("GitlabService","debug","GetProjecIdFail","Reson: %s","没有仓名传入");
 			_guihelper.MessageBox(L"获取projectId失败");
 		end
 	else
-		if(_callback)then
-			_callback(_projectId);
+		if(type(callback) == "function") then
+			callback(projectId);
 		end
 	end
 end
 
-function GitlabService:apiGet(_url, _callback)
-	_url = loginMain.apiBaseUrl .. "/" .._url
+function GitlabService:apiGet(url, callback)
+	url = loginMain.apiBaseUrl .. "/" .. url;
 
-	--LOG.std(nil,"debug","apiGet-url",_url);
 	HttpRequest:GetUrl({
-		url     = _url,
+		url     = url,
 		json    = true,
 		headers = {
 			["PRIVATE-TOKEN"] = loginMain.dataSourceToken,
 			["User-Agent"]    = "npl",
 		},
 	},function(data ,err) 
-		--LOG.std(nil,"debug","GitlabService:apiGet-data",data);
-		--LOG.std(nil,"debug","GitlabService:apiGet-err",err);
-		if(_callback) then
-			_callback(data, err);
+		if(type(callback) == "function") then
+			callback(data, err);
 		end
 	end);
 end
 
-function GitlabService:apiPost(_url, _params, _callback)
-	_url = loginMain.apiBaseUrl .. "/" .._url
+function GitlabService:apiPost(url, params, callback)
+	url = loginMain.apiBaseUrl .. "/" .. url;
 
 	HttpRequest:GetUrl({
 		method    = "POST",
-		url       = _url,
+		url       = url,
 		json      = true,
 		headers   = {
 			["PRIVATE-TOKEN"] = loginMain.dataSourceToken,
 			["User-Agent"]    = "npl",
 			["content-type"]  = "application/json"
 		},
-		form = _params,
+		form = params,
 	},function(data ,err)
-		--LOG.std(nil,"debug","GitlabService:apiPost-data",data);
-		--LOG.std(nil,"debug","GitlabService:apiPost-err",err);
-		_callback(data, err);
+		if(type(callback) == "function") then
+			callback(data, err);
+		end
 	end);
 end
 
-function GitlabService:apiPut(_url, _params, _callback)
-	_url = loginMain.apiBaseUrl .. "/" .._url
+function GitlabService:apiPut(url, params, callback)
+	url = loginMain.apiBaseUrl .. "/" .. url;
 
 	HttpRequest:GetUrl({
 		method     = "PUT",
-		url        = _url,
+		url        = url,
 		json       = true,
 	  	headers    = {
 		  	["PRIVATE-TOKEN"] = loginMain.dataSourceToken,
 			["User-Agent"]    = "npl",
 			["content-type"]  = "application/json"
 		},
-		form = _params
+		form = params
 	},function(data ,err) 
-		--LOG.std(nil,"debug","GitlabService:apiPut-data",data);
-		--LOG.std(nil,"debug","GitlabService:apiPut-err",err);
-		_callback(data, err);
+		if(type(callback) == "function") then
+			callback(data, err);
+		end
 	end);
 end
 
-function GitlabService:apiDelete(_url, _params, _callback)
-	_url = loginMain.apiBaseUrl .. "/" .._url
-
-	local github_token = loginMain.dataSourceToken;
+function GitlabService:apiDelete(url, params, callback)
+	url = loginMain.apiBaseUrl .. "/" .. url;
 	
-	--LOG.std(nil,"debug","GitlabService:apiDelete-token",github_token);
-	--LOG.std(nil,"debug","GitlabService:apiDelete-_url",_url);
-
 	HttpRequest:GetUrl({
 		method     = "DELETE",
 		url        = _url,
@@ -155,16 +145,16 @@ function GitlabService:apiDelete(_url, _params, _callback)
 			["User-Agent"]    = "npl",
 			["content-type"]  = "application/json"
 		},
-		form = _params,
+		form = params,
 	},function(data ,err) 
-		--LOG.std(nil,"debug","GitlabService:apiDelete-data",data);
-		--LOG.std(nil,"debug","GitlabService:apiDelete-err",err);
-		_callback(data, err);
+		if(type(callback) == "function") then
+			callback(data, err);
+		end
 	end);
 end
 
-function GitlabService:getFileUrlPrefix(_projectId)
-    return 'projects/' .. _projectId .. '/repository/files/';
+function GitlabService:getFileUrlPrefix(projectId)
+    return 'projects/' .. projectId .. '/repository/files/';
 end
 
 function GitlabService:getCommitMessagePrefix()
@@ -172,26 +162,21 @@ function GitlabService:getCommitMessagePrefix()
 end
 
 -- 获得文件列表
-function GitlabService:getTree(_callback, _commitId, _projectId, _foldername)
-	local function go(_projectId)
-		local url = 'projects/' .. _projectId .. '/repository/tree?';
+function GitlabService:getTree(callback, commitId, projectId, foldername)
+	local function go(projectId)
+		local url = 'projects/' .. projectId .. '/repository/tree?';
 	
-		if(_commitId) then
-			url = url .. "?ref=" .. _commitId;
+		if(commitId) then
+			url = url .. "?ref=" .. commitId;
 		end
-
-		--LOG.std(nil,"debug","GitlabService:getTree-url",url);
 
 		GitlabService.blob = {};
 		GitlabService.tree = {};
 
 		GitlabService:getTreeApi(url, function(data, err)
-			--LOG.std(nil,"debug","GitlabService:getTree-data",data);
-			--LOG.std(nil,"debug","GitlabService:getTree-err",err);
-
 			if(err == 404) then
-				if(_callback) then
-					_callback(data, err);
+				if(type(callback) == "function") then
+					callback(data, err);
 				end
 			else
 				if(type(data) == "table") then
@@ -206,19 +191,11 @@ function GitlabService:getTree(_callback, _commitId, _projectId, _foldername)
 					end
 
 					local fetchTimes = 0;
-					--LOG.std(nil,"debug","GitlabService.tree",GitlabService.tree);
-					--LOG.std(nil,"debug","GitlabService.blob",GitlabService.blob);
 
 					local function getSubTree()
 						if(#GitlabService.tree ~= 0) then
-							--echo("不等");
 							for key, value in ipairs(GitlabService.tree) do
-								GitlabService:getSubTree(function(subTree, subFolderName, _commitId, _projectId)
-									--echo(subTree);
-									--echo(subFolderName);
-									--echo(_commitId);
-									--echo(_projectId);
-
+								GitlabService:getSubTree(function(subTree, subFolderName, commitId, projectId)
 									for checkKey, checkValue in ipairs(GitlabService.tree) do
 										if(checkValue.path == subFolderName) then
 											if(not checkValue.alreadyGet) then
@@ -242,18 +219,15 @@ function GitlabService:getTree(_callback, _commitId, _projectId, _foldername)
 
 										getSubTree();
 									end
-								end, value.path, _commitId, _projectId);
+								end, value.path, commitId, projectId);
 							end
 						elseif(#GitlabService.tree == 0) then
-							--echo("等");
-							for cbKey,cbValue in ipairs(GitlabService.blob) do
+							for cbKey, cbValue in ipairs(GitlabService.blob) do
 								cbValue.sha = cbValue.id;
 							end
 
-							--echo(GitlabService.blob);
-
-							if(_callback) then
-								_callback(GitlabService.blob, 200);
+							if(type(callback) == "function") then
+								callback(GitlabService.blob, 200);
 							end
 						end
 					end
@@ -266,14 +240,14 @@ function GitlabService:getTree(_callback, _commitId, _projectId, _foldername)
 		end);
 	end
 	
-	GitlabService:checkProjectId(_projectId, _foldername, go);
+	GitlabService:checkProjectId(projectId, foldername, go);
 end
 
-function GitlabService:getSubTree(_callback, _path, _commitId, _projectId)
-	local url = 'projects/' .. _projectId .. '/repository/tree' .. "?path=" .. _path;
+function GitlabService:getSubTree(callback, path, commitId, projectId)
+	local url = 'projects/' .. projectId .. '/repository/tree' .. "?path=" .. path;
 	
-	if(_commitId) then
-		url = url .. "&ref=" .. _commitId;
+	if(commitId) then
+		url = url .. "&ref=" .. commitId;
 	end
 	
 	local tree = {};
@@ -288,29 +262,26 @@ function GitlabService:getSubTree(_callback, _path, _commitId, _projectId)
 			end
 		end
 
-		if(_callback) then
-			_callback(tree, _path, _commitId, _projectId);
+		if(type(callback) == "function") then
+			callback(tree, path, commitId, projectId);
 		end
 	end);
 end
 
-function GitlabService:getTreeApi(_url, _callback)
-	local url = _url .. "&page=" .. GitlabService.getTreePage .. "&per_page=" .. GitlabService.getTreePer_page;
-	--echo(url);
+function GitlabService:getTreeApi(url, callback)
+	local url = url .. "&page=" .. GitlabService.getTreePage .. "&per_page=" .. GitlabService.getTreePer_page;
 
 	GitlabService:apiGet(url, function(data, err)
-		--echo(data);
-		
 		if(#data == 0)then
 			GitlabService.getTreePage = 1;
 
 			if(GitlabService.tmpTree) then
-				if(_callback) then
-					_callback(GitlabService.tmpTree, err);
+				if(type(callback) == "function") then
+					callback(GitlabService.tmpTree, err);
 				end
 			else
-				if(_callback) then
-					_callback(data, err);
+				if(type(callback) == "function") then
+					callback(data, err);
 				end
 			end
 
@@ -325,23 +296,23 @@ function GitlabService:getTreeApi(_url, _callback)
 			end
 
 			GitlabService.getTreePage = GitlabService.getTreePage + 1;
-			GitlabService:getTreeApi(_url, _callback);
+			GitlabService:getTreeApi(url, callback);
 		end
 	end)
 end
 
 -- commit
-function GitlabService:listCommits(_callback, _projectId, _foldername)
-	local function go(_projectId)
-		local url = 'projects/' .. _projectId .. '/repository/commits';
-		GitlabService:apiGet(url, _callback);
+function GitlabService:listCommits(callback, projectId, foldername)
+	local function go(projectId)
+		local url = 'projects/' .. projectId .. '/repository/commits';
+		GitlabService:apiGet(url, callback);
 	end
 
-	GitlabService:checkProjectId(_projectId, _foldername, go);
+	GitlabService:checkProjectId(projectId, foldername, go);
 end
 
 -- 写文件
-function GitlabService:writeFile(filename, content, callback, projectId, foldername) --params, cb, errcb
+function GitlabService:writeFile(filename, content, callback, projectId, foldername)
 	local function go(projectId)
 		--[[if(GitlabService:checkSpecialCharacter(_filename)) then
 			_callback(false, _filename);
@@ -349,7 +320,6 @@ function GitlabService:writeFile(filename, content, callback, projectId, foldern
 		end]]
 
 		local url = GitlabService:getFileUrlPrefix(projectId) .. Encoding.url_encode(filename);
-		--LOG.std(nil,"debug","GitlabService:writeFile",url);
 
 		local params = {
 			commit_message = GitlabService:getCommitMessagePrefix() .. filename,
@@ -357,12 +327,7 @@ function GitlabService:writeFile(filename, content, callback, projectId, foldern
 			content 	   = content,
 		}
 
-		LOG.std("GitlabService","debug","GitlabService:writeFile", #content);
-
 		GitlabService:apiPost(url, params, function(data, err)
-			LOG.std(nil,"debug","GitlabService:writeFile",data);
-			LOG.std(nil,"debug","GitlabService:writeFile",err);
-
 			if(err == 201 and type(callback) == "function") then
 				callback(true, filename, data, err);
 			else
@@ -391,9 +356,6 @@ function GitlabService:update(filename, content, sha, callback, projectId, folde
 		}
 
 		GitlabService:apiPut(url, params, function(data, err)
-			--LOG.std(nil,"debug","GitlabService:update",data);
-			--LOG.std(nil,"debug","GitlabService:update",err);
-
 			if(err == 200) then
 				if(type(callback) == "function") then
 					callback(true, filename, data, err);
@@ -410,23 +372,21 @@ function GitlabService:update(filename, content, sha, callback, projectId, folde
 end
 
 -- 获取文件
-function GitlabService:getContent(_path, _callback, _projectId)
-    local url = GitlabService:getFileUrlPrefix(_projectId) .. _path .. '?ref=master';
+function GitlabService:getContent(path, callback, projectId)
+    local url = GitlabService:getFileUrlPrefix(projectId) .. path .. '?ref=master';
 
-	--LOG.std(nil,"debug","apiGet-url",url);
 	GitlabService:apiGet(url, function(data, err)
-		--LOG.std(nil,"debug","apiGet-data",data);
-		--LOG.std(nil,"debug","apiGet-err",err);
-
-		_callback(data.content, err);
+		if(type(callback) == "function") then
+			callback(data.content, err);
+		end
 	end);
 end
 
 -- 获取文件
-function GitlabService:getContentWithRaw(_foldername, _path, _callback)
-	local foldername = GitEncoding.base32(_foldername);
+function GitlabService:getContentWithRaw(foldername, path, callback)
+	local foldername = GitEncoding.base32(foldername);
 
-	local url  = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. foldername .. "/raw/master/" .. _path;
+	local url  = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. foldername .. "/raw/master/" .. path;
 
 	HttpRequest:GetUrl({
 		url     = url,
@@ -436,85 +396,82 @@ function GitlabService:getContentWithRaw(_foldername, _path, _callback)
 			["User-Agent"]    = "npl",
 		},
 	},function(data, err)
-		if(err == 200) then
-			_callback(data, err);
+		if(err == 200 and type(callback) == "function") then
+			callback(data, err);
 		end
 	end);
 end
 
 -- 删除文件
-function GitlabService:deleteFile(_path, _sha, _callback, _projectId, _foldername)
-	local function go(_projectId)
-		local url = GitlabService:getFileUrlPrefix(_projectId) .. _path;
+function GitlabService:deleteFile(path, sha, callback, projectId, foldername)
+	local function go(projectId)
+		local url = GitlabService:getFileUrlPrefix(projectId) .. path;
 
 		local params = {
-			commit_message = GitlabService:getCommitMessagePrefix() .. _path,
+			commit_message = GitlabService:getCommitMessagePrefix() .. path,
 			branch         = 'master',
 		}
 
-		--LOG.std(nil,"debug","deleteFile",url);
 		GitlabService:apiDelete(url, params, function(data, err)
-			--LOG.std(nil,"debug","deleteFile",data);
-			--LOG.std(nil,"debug","deleteFilerr",err);
-
 			if(err == 204) then
-				if(type(_callback) == "function") then
-					_callback(true);
+				if(type(callback) == "function") then
+					callback(true);
 				end
 			else
-				if(type(_callback) == "function") then
-					_callback(false);
+				if(type(callback) == "function") then
+					callback(false);
 				end
 			end
 		end);
 	end
    
-	GitlabService:checkProjectId(_projectId, _foldername, go);
+	GitlabService:checkProjectId(projectId, foldername, go);
 end
 
 --删除仓
-function GitlabService:deleteResp(_foldername, _callback, _projectId)
-	local function go(_projectId)
-		local url = "/projects/" .. _projectId;
-		GitlabService:apiDelete(url, {}, _callback);
+function GitlabService:deleteResp(foldername, callback, projectId)
+	local function go(projectId)
+		local url = "/projects/" .. projectId;
+		GitlabService:apiDelete(url, {}, callback);
 	end
 
-	GitlabService:checkProjectId(_projectId, _foldername, go);
+	GitlabService:checkProjectId(projectId, foldername, go);
 end
 
 --通过仓名获取仓ID
-function GitlabService:getProjectIdByName(_name, _callback)
+function GitlabService:getProjectIdByName(name, callback)
 	local url = "projects";
 	
 	GitlabService:apiGet(url .. "?owned=true&page=1&per_page=100",function(projectList, err)
 		--echo(projectList);
 		for i=1,#projectList do
-            if (string.lower(projectList[i].name) == string.lower(_name)) then
-				if(_callback) then
-					_callback(projectList[i].id);
+            if (string.lower(projectList[i].name) == string.lower(name)) then
+				if(type(callback) == "function") then
+					callback(projectList[i].id);
 				end
+
 				return;
 			end
 		end
 
-		if(_callback) then
-			_callback(false);
+		if(type(callback) == "function") then
+			callback(false);
 		end
 	end);
 end
 
 -- 初始化
-function GitlabService:init(_foldername, _callback)
+function GitlabService:init(foldername, callback)
 	local url   = "projects";
 
-	GitlabService:apiGet(url .. "?owned=true&page=1&per_page=100",function(projectList, err)
+	GitlabService:apiGet(url .. "?owned=true&page=1&per_page=100", function(projectList, err)
 		if(projectList) then
-			for i=1,#projectList do
-				if (projectList[i].name == _foldername) then
+			for i=1, #projectList do
+				if (projectList[i].name == foldername) then
 					GitlabService.projectId = projectList[i].id;
 
-					if(_callback) then
-						_callback(true, "exist");
+					if(type(callback) == "function") then
+						callback(true, "exist");
 					end
 
 					return;
@@ -522,25 +479,26 @@ function GitlabService:init(_foldername, _callback)
 			end
 
 			local params = {
-				name = _foldername,
+				name        = foldername,
+				visibility  = "public",
 				request_access_enabled = true,
-				visibility = "public",
 			};
 
-			GitlabService:apiPost(url, params, function(data,err)
+			GitlabService:apiPost(url, params, function(data, err)
 				if(data.id ~= nil) then
 					GitlabService.projectId = data.id;
-					--LOG.std(nil,"debug","GitlabService.projectId",GitlabService.projectId);
-					--LOG.std(nil,"debug","err",err);
-					if(_callback) then
-						_callback(true, "create");
+
+					if(type(callback) == "function") then
+						callback(true, "create");
 					end
 					
 					return;
 				end
 			end);
 		else
-			_callback(false,err);
+			if(type(callback) == "function") then
+				callback(false, err);
+			end
 		end
 	end);
 end

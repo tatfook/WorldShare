@@ -395,7 +395,7 @@ function SyncMain:syncToLocal(callback)
 		syncToLocalGUI:updateDataBar(syncGUIIndex, syncGUItotal, L'获取文件sha列表');
 
 		function SyncMain.localSync.finish()
-			syncToLocalGUI:updateDataBar(syncGUIIndex, syncGUItotal, "同步完成");
+			syncToLocalGUI:updateDataBar(syncGUIIndex, syncGUItotal, L"同步完成");
 			local localWorlds = InternetLoadWorld.cur_ds;
 
 			for key, value in ipairs(localWorlds) do
@@ -710,14 +710,14 @@ function SyncMain:syncToDataSource()
 
 					LOG.std("SyncMain", "debug", "FilesShaToDSUD", "File : %s, 上传中", SyncMain.localFiles[SyncMain.curUploadIndex].filename);
 					syncGUIIndex = syncGUIIndex + 1;
-					syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, SyncMain.localFiles[SyncMain.curUploadIndex].filename .. " （" .. loginMain.GetWorldSize(SyncMain.localFiles[SyncMain.curUploadIndex].filesize, "KB") .. "） " .. "上传中");
+					syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, format(L"%s （%s） 上传中", SyncMain.localFiles[SyncMain.curUploadIndex].filename, loginMain.GetWorldSize(SyncMain.localFiles[SyncMain.curUploadIndex].filesize, "KB")));
 
 					SyncMain:uploadService(SyncMain.foldername.base32, SyncMain.localFiles[SyncMain.curUploadIndex].filename, SyncMain.localFiles[SyncMain.curUploadIndex].file_content_t,function (bIsUpload, filename)
 						SyncMain.isFetching = false;
 
 						if (bIsUpload) then
 							LOG.std("SyncMain", "debug", "FilesShaToDSUD", "File : %s, 上传完成", SyncMain.localFiles[SyncMain.curUploadIndex].filename);
-							syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, filename .. " （" .. loginMain.GetWorldSize(SyncMain.localFiles[SyncMain.curUploadIndex].filesize, "KB") .. "） " .. "上传完成");
+							syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, format(L"%s（%s）上传完成", filename,  loginMain.GetWorldSize(SyncMain.localFiles[SyncMain.curUploadIndex].filesize, "KB")));
 
 							if (SyncMain.curUploadIndex == SyncMain.totalLocalIndex) then
 								SyncMain.remoteSync.finish();
@@ -726,11 +726,11 @@ function SyncMain:syncToDataSource()
 								SyncMain.remoteSync.uploadOne(); --继续递归上传
 							end
 						else
-							_guihelper.MessageBox(SyncMain.localFiles[SyncMain.curUploadIndex].filename .. "上传失败");
+							_guihelper.MessageBox(format("%s上传失败" ,SyncMain.localFiles[SyncMain.curUploadIndex].filename));
 							LOG.std("SyncMain", "debug", "FilesShaToDSUD", "File : %s, 上传失败", SyncMain.localFiles[SyncMain.curUploadIndex].filename);
 
 							syncGUIIndex = syncGUIIndex + 1;
-							syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, SyncMain.localFiles[SyncMain.curUploadIndex].filename .. "上传失败");
+							syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, format(L"%s上传失败", SyncMain.localFiles[SyncMain.curUploadIndex].filename));
 
 							--syncToDataSourceGUI.finish();
 							--SyncMain.finish = true;
@@ -826,7 +826,7 @@ function SyncMain:syncToDataSource()
 
 				if (bIsExisted) then
 					syncGUIIndex = syncGUIIndex + 1;
-					syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, SyncMain.localFiles[LocalIndex].filename .. "比对中");
+					syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, format(L"%s比对中", SyncMain.localFiles[LocalIndex].filename));
 
 					SyncMain.localFiles[LocalIndex].needChange = false;
 					SyncMain.isFetching = true;
@@ -834,11 +834,11 @@ function SyncMain:syncToDataSource()
 					LOG.std("SyncMain", "debug", "FilesShaToDSUP", "File : %s, DSSha : %s , LCSha : %s", curGitFiles.path, curGitFiles.sha, SyncMain.localFiles[LocalIndex].sha1);
 
 					if (curGitFiles.sha ~= SyncMain.localFiles[LocalIndex].sha1) then
-						syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, SyncMain.localFiles[LocalIndex].filename .. "更新中");
+						syncToDataSourceGUI:updateDataBar(format(L"%s更新中", syncGUIIndex, syncGUItotal, SyncMain.localFiles[LocalIndex].filename));
 						-- 更新已存在的文件
 						SyncMain:updateService(SyncMain.foldername.base32, SyncMain.localFiles[LocalIndex].filename, SyncMain.localFiles[LocalIndex].file_content_t, curGitFiles.sha, function (bIsUpdate, filename)
 							if (bIsUpdate) then
-								syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, filename .. "更新完成");
+								syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, format(L"%s更新完成", filename));
 
 								if (SyncMain.curUpdateIndex == SyncMain.totalDataSourceIndex) then
 									SyncMain.remoteSync.uploadOne();
@@ -855,7 +855,7 @@ function SyncMain:syncToDataSource()
 							SyncMain.isFetching = false;
 						end);
 					else
-						syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, SyncMain.localFiles[LocalIndex].filename .. "版本一致，跳过");
+						syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, format(L"%s版本一致，跳过", SyncMain.localFiles[LocalIndex].filename));
 
 						if (SyncMain.curUpdateIndex == SyncMain.totalDataSourceIndex) then
 							SyncMain.remoteSync.uploadOne();
@@ -1085,7 +1085,7 @@ function SyncMain:showBeyondVolume()
 end
 
 function SyncMain.getBeyondMsg()
-	local str = format("世界" .. SyncMain.foldername.utf8 .. "文件总大小超过了%dMB，是否清理文件？(请使用MP3、OGG格式音频，避免使用FBX格式，VIP用户最大可上传%dMB)", 25, 50);
+	local str = format(L"世界%s文件总大小超过了%dMB，是否清理文件？(请使用MP3、OGG格式音频，避免使用FBX格式，VIP用户最大可上传%dMB)", SyncMain.foldername.utf8, 25, 50);
 
 	return str;
 end

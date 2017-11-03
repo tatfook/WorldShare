@@ -49,6 +49,12 @@ loginMain.ModalPage = nil;
 loginMain.login_type   = 1;
 loginMain.site         = "http://keepwork.com";
 loginMain.current_type = 1;
+loginMain.serverLists  = {
+	{value="keepwork"     , name="keepwork"     , text=L"使用KeepWork登录"},
+	{value="keepworkDev"  , name="keepworkDev"  , text=L"使用KeepWorkDev登录"},
+	{value="keepworkTest" , name="keepworkTest" , text=L"使用KeepWorkTest登录"},
+	{value="local"        , name="local"        , text=L"使用本地服务登录"},
+}
 
 function loginMain:ctor()
 end
@@ -171,10 +177,6 @@ function loginMain.LoginAction(page, callback)
 
 	page:SetNodeValue("account", account);
 	page:SetNodeValue("password", password);
-
-	--echo(account);
-	--echo(password);
-	--echo(loginServer);
 
 	if(account == nil or account == "") then
 	    _guihelper.MessageBox(L"账号不能为空");

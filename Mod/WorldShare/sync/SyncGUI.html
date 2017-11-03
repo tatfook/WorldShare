@@ -33,7 +33,7 @@
                 <div style="padding:20px;font-size:18px;base-font-size:18px;color:#ffffff;margin-top:20px;">
                     <pe:if condition="<%=not SyncMain.finish%>">
                         <div style="margin-right:20px;">
-                            同步进度：<%=SyncGUI.current%> / <%=SyncGUI.total%>
+                            <%=L"同步进度：" %><%=SyncGUI.current%> / <%=SyncGUI.total%>
                             <!--<span style="margin-left:5px">size</span>-->
                             <br />
                             <%=SyncGUI.files%>
@@ -44,14 +44,14 @@
                     </pe:if>
                     <pe:if condition="<%=SyncGUI.total ~= 0 and SyncGUI.current == SyncGUI.total and SyncMain.finish%>">
                         <div style="margin-right:20px;font-size:13px;base-font-size:13px;">
-                            恭喜！世界已经同步完毕！
+                            <%=L"恭喜！世界已经同步完毕！" %>
                             <br />
-                            你可以通过下面页面分享给他人
+                            <%=L"你可以通过下面页面分享给他人" %>
                             <br />
                             <div>
                                 <%= ShareWorld.getWorldUrl()%>
-                                <input type="button" class="common_button mc_light_grey_button_with_fillet" value="复制" onclick="SyncGUI.copy()"/>
-                                <input type="button" class="common_button mc_light_grey_button_with_fillet" value="打开" onclick="ShareWorld.openWorldWebPage()" />
+                                <input type="button" class="common_button mc_light_grey_button_with_fillet" value='<%=L"复制" %>' onclick="SyncGUI.copy()"/>
+                                <input type="button" class="common_button mc_light_grey_button_with_fillet" value='<%=L"打开" %>' onclick="ShareWorld.openWorldWebPage()" />
                             </div>
                         </div>
                     </pe:if>
@@ -61,12 +61,12 @@
                     </div>
                     <pe:if condition="<%=not SyncMain.finish %>">
                         <div style="margin-top:40px;">
-                            <input type="button" name="" onclick="SyncGUI.finish" value="取消" class="button_highlight" style="width: 85px;height: 30px;margin-left: 155px" />
-                            <input type="button" name="" onclick="SyncGUI.retry" value="重试" class="button_highlight" style="width: 85px;height: 30px;margin-left: 15px" />
+                            <input type="button" name="" onclick="SyncGUI.finish" value='<%=L"取消" %>' class="button_highlight" style="width: 85px;height: 30px;margin-left: 155px" />
+                            <input type="button" name="" onclick="SyncGUI.retry" value='<%=L"重试" %>' class="button_highlight" style="width: 85px;height: 30px;margin-left: 15px" />
                         </div>
                     </pe:if>
                     <pe:if condition="<%=SyncGUI.total ~= 0 and SyncGUI.current == SyncGUI.total and SyncMain.finish%>">
-                        <input type="button" name="" onclick="SyncGUI.closeWindow" value="关闭" class="button_highlight" style="width: 85px;height: 30px;margin-top:40px;margin-left: 200px" />
+                        <input type="button" name="" onclick="SyncGUI.closeWindow" value='<%=L"关闭" %>'  class="button_highlight" style="width: 85px;height: 30px;margin-top:40px;margin-left: 200px" />
                     </pe:if>
                 </div>
             </aries:window>

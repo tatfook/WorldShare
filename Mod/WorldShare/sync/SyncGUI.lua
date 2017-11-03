@@ -20,13 +20,11 @@ local SyncPage;
 SyncGUI.current = 0;
 SyncGUI.total   = 0;
 SyncGUI.files   = "";
---SyncGUI.isStart = false;
 
 function SyncGUI:ctor()
 	SyncGUI.current = 0;
 	SyncGUI.total   = 0;
-	SyncGUI.files   = "同步中，请稍后...";
---	SyncGUI.isStart = true;
+	SyncGUI.files   = L"同步中，请稍后...";
 
 	SyncMain.curUpdateIndex        = 1;
 	SyncMain.curUploadIndex        = 1;
@@ -67,27 +65,23 @@ function SyncGUI:refresh()
 end
 
 function SyncGUI.closeWindow()
---	SyncGUI.isStart = false;
 	SyncPage:CloseWindow();
 end
 
-function SyncGUI.finish(_callback)
+function SyncGUI.finish(callback)
 	SyncMain.finish = true;
---	SyncGUI.isStart = false;
 
-	SyncGUI.files = "正在等待上次同步完成，请稍后...";
+	SyncGUI.files = L"正在等待上次同步完成，请稍后...";
 	SyncGUI:refresh();
 
 	local function checkFinish()
-		--echo(SyncMain.isFetching);
 		commonlib.TimerManager.SetTimeout(function()
 			if(SyncMain.isFetching) then
 				checkFinish();
 			else
 				SyncPage:CloseWindow();
-				--echo(type(_callback));
-				if(type(_callback) == "function") then
-					_callback();
+				if(type(callback) == "function") then
+					callback();
 				end
 			end
 		end,100);
@@ -119,7 +113,7 @@ function SyncGUI:updateDataBar(_current, _total, _files)
 	if(_files)then
 		SyncGUI.files = _files;
 	else
-		SyncGUI.files = "同步中，请稍后...";
+		SyncGUI.files = L"同步中，请稍后...";
 	end
 
 	LOG.std("SyncGUI", "debug", "NumbersGUI", "Totals : %s , Current : %s, Status : %s", SyncGUI.total , SyncGUI.current, SyncGUI.files);
