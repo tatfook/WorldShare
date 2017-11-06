@@ -46,17 +46,17 @@
                 <aries:window mode="thin" width="320" height="350" style="float:left;" title='<%=L"登陆" %>' onclose="loginMain.closeModalPage()">
                     <div name="login" class="user_login">
                         <div style="margin-bottom:12px;">
-                            <%= L"服务器："%>
+                            <div style="min-width:80px"><%= L"服务器："%></div>
                             <select name="loginServer" DataSource="<%= loginMain.serverLists%>" onclick="loginMain.setSite()" style="height: 30px;width: 185px;" class="text_field"></select>
                         </div>
                         <div style="margin-bottom:12px;margin-left:15px;">
-                            <%= L"账号：" %><input type="text" EmptyText='<%= L"账户名/邮箱/手机号" %>' class="bbs_text text_field" style="height: 30px;" name="account" />
+                            <div style="min-width:80px"><%= L"账号：" %></div><input type="text" EmptyText='<%= L"账户名/邮箱/手机号" %>' class="bbs_text text_field" style="height: 30px;" name="account" />
                         </div>
                         <div style="margin-bottom:12px;margin-left:15px">
-                            <%= L"密码：" %><input type="text" PasswordChar="*" class="bbs_text text_field" style="height: 30px;" name="password" />
+                            <div style="min-width:80px"><%= L"密码：" %></div><input type="text" PasswordChar="*" class="bbs_text text_field" style="height: 30px;" name="password" />
                         </div>
                         <div style="text-align:left">
-                            <input type="checkbox" style="float:left;margin-left:70px;margin-top:3px;" name="rememberPassword"  onclick="loginMain.setAutoRemember"/><div style="float:left" for="rememberPassword"><%= L"记住密码?" %></div>
+                            <input type="checkbox" style="float:left;margin-left:10px;margin-top:3px;" name="rememberPassword"  onclick="loginMain.setAutoRemember"/><div style="float:left" for="rememberPassword"><%= L"记住密码?" %></div>
                             <input type="checkbox" style="float:left;margin-left:10px;margin-top:3px;" name="autoLogin" onclick="loginMain.setRememberAuto"/><div style="float:left" for="autoLogin"><%= L"自动登录" %></div>
                         </div>
                         <div style="margin-top:30px;margin-bottom:15px;">
