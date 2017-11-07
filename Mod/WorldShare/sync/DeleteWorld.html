@@ -30,18 +30,18 @@
                         </pe:if>
                     </div>
                     <br />
-                    <div style="margin-top:30px;">
+                    <div style="margin-top:25px;">
                         <pe:if condition="<%= selectedWorldInfor.server == 'self' %>">
-                            <input type="button" onclick="SyncMain.deleteServerWorld" class="button_highlight" style="float:left;min-width:130px;height: 30px;" name="" value='<%=L"删除世界"%>' />
+                            <input type="button" onclick="SyncMain.deleteServerWorld" class="button_highlight" style="float:left;margin-top:5px;margin-right:10px;min-width:130px;height: 30px;" name="" value='<%=L"删除世界"%>' />
                         </pe:if>
                         <pe:if condition="<%=loginMain.login_type == 1 or loginMain.login_type == 3 and selectedWorldInfor.status ~= nil and selectedWorldInfor.status ~= 2%>">
-                            <input type="button" onclick="SyncMain.deleteWorldLocal" class="button_highlight" style="float:left;min-width:130px;height: 30px;" name="" value='<%=L"只删除本地"%>' />
+                            <input type="button" onclick="SyncMain.deleteWorldLocal" class="button_highlight" style="float:left;margin-top:5px;margin-right:10px;min-width:130px;height: 30px;" name="" value='<%=L"只删除本地"%>' />
                         </pe:if>
                         <pe:if condition="<%=selectedWorldInfor.status ~= nil and selectedWorldInfor.status ~= 1 %>">
-                            <input type="button" onclick="SyncMain.deleteWorldRemote" class="button_highlight" style="float:left;margin-left:10px;min-width:130px;height: 30px;" name="" value='<%=L"只删除远程"%>' />
+                            <input type="button" onclick="SyncMain.deleteWorldRemote" class="button_highlight" style="float:left;margin-top:5px;margin-right:10px;min-width:130px;height: 30px;" name="" value='<%=L"只删除远程"%>' />
                         </pe:if>
                         <pe:if condition="<%=selectedWorldInfor.status ~= nil and selectedWorldInfor.status ~= 1 and selectedWorldInfor.status ~= 2 %>">
-                            <input type="button" onclick="SyncMain.deleteWorldAll" class="button_highlight" style="float:left;margin-left:10px;min-width:130px;height: 30px;" name="" value='<%=L"全部删除"%>' />
+                            <input type="button" onclick="SyncMain.deleteWorldAll" class="button_highlight" style="float:left;margin-top:5px;margin-right:10px;min-width:130px;height: 30px;" name="" value='<%=L"全部删除"%>' />
                         </pe:if>
                     </div>
                     
