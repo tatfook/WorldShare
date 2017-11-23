@@ -42,9 +42,10 @@ local ShareWorldPage     = commonlib.gettable("MyCompany.Aries.Creator.Game.Desk
 
 local loginMain = commonlib.gettable("Mod.WorldShare.login.loginMain");
 
-loginMain.LoginPage = nil;
-loginMain.InforPage = nil;
-loginMain.ModalPage = nil;
+loginMain.LoginPage  = nil;
+loginMain.InforPage  = nil;
+loginMain.ModalPage  = nil;
+loginMain.isVerified = "noLogin"; 
 
 loginMain.login_type   = 1;
 loginMain.site         = "http://keepwork.com";
@@ -1169,7 +1170,7 @@ function loginMain.downloadWorld()
 end
 
 function loginMain.syncNow(index)
-	if(not loginMain.isVerified) then
+	if(loginMain.isVerified ~= "noLogin" and not loginMain.isVerified) then
 		_guihelper.MessageBox(L"你需要到keepwork官网进行实名认证， 是否现在过去？", function(res)
 			if(res and res == _guihelper.DialogResult.Yes) then
 				ParaGlobal.ShellExecute("open", "http://keepwork.com/wiki/user_center", "", "", 1);
