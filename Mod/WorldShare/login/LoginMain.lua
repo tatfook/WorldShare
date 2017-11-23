@@ -191,8 +191,6 @@ function loginMain.LoginAction(page, callback)
 	loginMain.showMessageInfo(L"正在登陆，请稍后...");
 
 	loginMain.LoginActionApi(account, password, function (response,err)
-			echo(response, true);
-
 			if(type(response) == "table") then
 				if(response['data'] ~= nil and response['data']['userinfo']['_id']) then
 					if(not response['data']['userinfo']['realNameInfo']) then
