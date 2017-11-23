@@ -31,6 +31,16 @@ function ShareWorld:ctor()
 end
 
 function ShareWorld.ShowPage()
+	if(not loginMain.isVerified) then
+		_guihelper.MessageBox(L"你需要到keepwork官网进行实名认证， 是否现在过去？", function(res)
+			if(res and res == _guihelper.DialogResult.Yes) then
+				ParaGlobal.ShellExecute("open", "http://keepwork.com/wiki/user_center", "", "", 1);
+			end
+		end, _guihelper.MessageBoxButtons.YesNo);
+
+		return;
+	end
+
 	SyncMain.syncType = "share";
 
 	if(loginMain.login_type == 1) then

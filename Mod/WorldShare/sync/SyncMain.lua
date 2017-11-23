@@ -194,14 +194,14 @@ function SyncMain:compareRevision(LoginStatus, callback)
 						if(SyncMain.remoteRevison ~= 0) then
 							local isWorldInRemoteLists = false;
 
-							for keyDistance,valueDistance in ipairs(SyncMain.remoteWorldsList) do
+							for keyDistance, valueDistance in ipairs(SyncMain.remoteWorldsList) do
 								if(valueDistance["worldsName"] == SyncMain.foldername.utf8) then
 									isWorldInRemoteLists = true;
 								end
 							end
 
 							if(not isWorldInRemoteLists) then
-								SyncMain:refreshRemoteWorldLists(nil,function()
+								SyncMain:refreshRemoteWorldLists(nil, function()
 									SyncMain.compareFinish = true;
 
 									if(type(callback) == "function") then
@@ -659,7 +659,9 @@ function SyncMain:syncToDataSource()
 							syncGUIIndex = syncGUIIndex + 1;
 							syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, L'同步完成，正在更新世界信息，请稍后...');
 
-							_callback();
+							if(type(callback) == "function") then
+								callback();
+							end
 						else
 							_guihelper.MessageBox(L"revision更新失败");
 							syncGUIIndex = syncGUIIndex + 1;
@@ -950,8 +952,8 @@ function SyncMain:syncToDataSource()
 	end
 end
 
-function SyncMain:refreshRemoteWorldLists(syncGUI, _callback)
-	SyncMain:getCommits(SyncMain.foldername.base32,function(data, err)
+function SyncMain:refreshRemoteWorldLists(syncGUI, callback)
+	SyncMain:getCommits(SyncMain.foldername.base32, function(data, err)
 		if(data and data[1]) then
 			local lastCommits    = data[1];
 			local lastCommitFile = lastCommits.title:gsub("keepwork commit: ","");
@@ -989,10 +991,10 @@ function SyncMain:refreshRemoteWorldLists(syncGUI, _callback)
 				end
 			end
 
-			local preview = {};
-			preview[0]    = {};
+			local preview         = {};
+			preview[0]            = {};
 			preview[0].previewUrl = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. GitEncoding.base32(SyncMain.foldername.utf8) .. "/raw/master/preview.jpg";
-			preview = NPL.ToJson(preview,true);
+			preview               = NPL.ToJson(preview,true);
 
 			local filesTotals = 0;
 			if(SyncMain.selectedWorldInfor) then
@@ -1045,8 +1047,8 @@ function SyncMain:refreshRemoteWorldLists(syncGUI, _callback)
 						end
 
 						loginMain.RefreshCurrentServerList(function()
-							if(type(_callback) == "function") then
-								_callback();
+							if(type(callback) == "function") then
+								callback();
 							end
 						end);
 					end);
@@ -1116,35 +1118,34 @@ function SyncMain:checkWorldSize()
 	end
 end
 
-function SyncMain:setGitlabProjectId(_foldername)
-	--echo(SyncMain.remoteWorldsList);
+function SyncMain:setGitlabProjectId(foldername)
 	for key,value in ipairs(SyncMain.remoteWorldsList) do
-		if(value.worldsName == _foldername) then
+		if(value.worldsName == foldername) then
 			GitlabService.projectId = value.gitlabProjectId;
-			--echo(GitlabService.projectId);
+
 			return;
 		end
 	end
-	--echo(GitlabService.projectId);
+
 	GitlabService.projectId = nil;
 end
 
-function SyncMain:getGitlabCommitId(_foldername)
+function SyncMain:getGitlabCommitId(foldername)
 	if(not SyncMain.remoteWorldsList) then
 		SyncMain.remoteWorldsList = {};
 	end
 
 	for key,value in ipairs(SyncMain.remoteWorldsList) do
-		if(value.worldsName == _foldername) then
+		if(value.worldsName == foldername) then
 			return value.commitId;
 		end
 	end
 end
 
 function SyncMain:genIndexMD(callback)
-	local contentUrl = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. loginMain.keepWorkDataSource .. "/raw/master/" .. loginMain.username .. "/paracraft/index.md";
+	local contentUrl = "projects/" .. loginMain.keepWorkDataSourceId .. "/repository/files/" .. loginMain.username .. "/paracraft/index.md?ref=master";
 
-	HttpRequest:GetUrl(contentUrl, function(data, err)
+	self:getUrl(contentUrl , function(data, err)
 		if(err == 404) then
 			local indexPath = loginMain.username .. "/paracraft/index.md";
 
@@ -1166,10 +1167,10 @@ function SyncMain:genIndexMD(callback)
 	end);
 end
 
-function SyncMain:genThemeMD(_callback)
-	local contentUrl = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. loginMain.keepWorkDataSource .. "/raw/master/" .. loginMain.username .. "/paracraft/_theme.md";
-	--echo(contentUrl);
-	HttpRequest:GetUrl(contentUrl, function(data, err)
+function SyncMain:genThemeMD(callback)
+	local contentUrl = "projects/" .. loginMain.keepWorkDataSourceId .. "/repository/files/" .. loginMain.username .. "/paracraft/_theme.md?ref=master";
+
+	self:getUrl(contentUrl , function(data, err)
 		if(err == 404) then
 			local themePath = loginMain.username .. "/paracraft/_theme.md";
 
@@ -1178,8 +1179,8 @@ function SyncMain:genThemeMD(_callback)
 				themePath,
 				KeepworkGen.paracraftContainer,
 				function(data, err) 
-					if(_callback) then
-						_callback();
+					if(type(callback) == "function") then
+						callback();
 					end
 				end,
 				loginMain.keepWorkDataSourceId
@@ -1188,21 +1189,18 @@ function SyncMain:genThemeMD(_callback)
 	end);
 end
 
-function SyncMain:genWorldMD(worldInfor, _callback)
-	local contentUrl = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. loginMain.keepWorkDataSource .. "/raw/master/" .. loginMain.username .. "/paracraft/world_" .. worldInfor.worldsName .. ".md?ver=" .. worldInfor.revision;
+function SyncMain:genWorldMD(worldInfor, callback)
+	local contentUrl = "projects/" .. loginMain.keepWorkDataSourceId .. "/repository/files/" .. loginMain.username .. "/paracraft/world_" .. worldInfor.worldsName .. ".md?ref=master";
+	local worldUrl   = "";
 
-	local worldUrl = "";
 	if(loginMain.dataSourceType == "gitlab") then
 		worldUrl = "http://git.keepwork.com/" .. loginMain.dataSourceUsername .. "/" .. GitEncoding.base32(SyncMain.foldername.utf8) .. "/repository/archive.zip?ref=" .. worldInfor.commitId;
 	end
 
-	local worldFilePath =  loginMain.username .. "/paracraft/world_" .. worldInfor.worldsName .. ".md";
+	local worldFilePath = loginMain.username .. "/paracraft/world_" .. worldInfor.worldsName .. ".md";
 	local worldTag      = LocalService:GetTag(SyncMain.foldername.default);
 
-	--log(SyncMain.foldername.default);
-	--log(worldTag)
-
-	HttpRequest:GetUrl(contentUrl, function(data, err)
+	self:getUrl(contentUrl , function(data, err)
 		if(err == 404) then
 			local world3D = {
 				worldName	  = worldTag.name,
@@ -1227,23 +1225,20 @@ function SyncMain:genWorldMD(worldInfor, _callback)
 			SyncMain.worldFile = KeepworkGen:SetAutoGenContent(worldInfor.readme, world3D)
 			SyncMain.worldFile = SyncMain.worldFile .. "\r\n" .. KeepworkGen:setCommand("comment");
 
-			--LOG.std(nil,"debug","worldFile",SyncMain.worldFile);
-			--echo(loginMain.keepWorkDataSource);
-			--echo(loginMain.keepWorkDataSourceId);
 			SyncMain:uploadService(
 				loginMain.keepWorkDataSource,
 				worldFilePath,
 				SyncMain.worldFile,
 				function(data, err)
-					if(_callback) then
-						_callback();
+					if(type(callback) == "function") then
+						callback();
 					end
 				end,
 				loginMain.keepWorkDataSourceId
 			);
 		elseif(err == 200 or err == 304) then
-			--local paramsText = KeepworkGen:GetContent(content);
-			--local params     = KeepworkGen:getCommand("world3D", paramsText);
+			data = Encoding.unbase64(data.content);
+
 			local world3D = {
 				worldName	  = worldTag.name,
 				worldUrl	  = worldUrl,
@@ -1261,34 +1256,30 @@ function SyncMain:genWorldMD(worldInfor, _callback)
 			world3D = KeepworkGen:setCommand("world3D",world3D);
 			SyncMain.worldFile = KeepworkGen:SetAutoGenContent(data, world3D);
 
-			--LOG.std(nil,"debug","worldFile",SyncMain.worldFile);
-			--echo(loginMain.keepWorkDataSource);
 			SyncMain:updateService(
 				loginMain.keepWorkDataSource,
 				worldFilePath,
 				SyncMain.worldFile,
 				"",
 				function(isSuccess, path)
-					--LOG.std(nil,"debug","updateService-worldFile",isSuccess)
-					--LOG.std(nil,"debug","updateService-worldFile",path)
-					if(_callback) then
-						_callback();
+					if(type(callback) == "function") then
+						callback();
 					end
 				end,
 				loginMain.keepWorkDataSourceId
 			);
 		end
-	end);
+	end)
 end
 
-function SyncMain:deleteWorldMD(_path, _callback)
+function SyncMain:deleteWorldMD(_path, callback)
 	local function deleteFile(keepworkId)
 		local path = loginMain.username ..  "/paracraft/world_" .. _path .. ".md";
 
 		--LOG.std(nil,"debug","path",path);
 		SyncMain:deleteFileService(loginMain.keepWorkDataSource, path, "", function(data, err)
-			if(_callback) then
-				_callback();
+			if(type(callback) == "function") then
+				callback();
 			end
 		end, keepworkId)
 	end
@@ -1335,7 +1326,7 @@ function SyncMain.deleteServerWorld()
 	SyncMain.DeletePage:CloseWindow();
 end
 
-function SyncMain.deleteWorldLocal(_callback)
+function SyncMain.deleteWorldLocal(callback)
 	--local world      = InternetLoadWorld:GetCurrentWorld();
 	local foldername = SyncMain.selectedWorldInfor.foldername;
 
@@ -1358,8 +1349,8 @@ function SyncMain.deleteWorldLocal(_callback)
 			if(SyncMain.selectedWorldInfor.is_zip) then
 
 				if(ParaIO.DeleteFile(targetDir)) then
-					if(type(_callback) == 'function') then
-						_callback(foldername);
+					if(type(callback) == "function") then
+						callback();
 					end
 				else
 					_guihelper.MessageBox(L"无法删除可能您没有足够的权限"); 
@@ -1370,8 +1361,8 @@ function SyncMain.deleteWorldLocal(_callback)
 				end
 
 				if(commonlib.Files.DeleteFolder(targetDir)) then  
-					if(type(_callback) == 'function') then
-						_callback(foldername);
+					if(type(callback) == 'function') then
+						callback(foldername);
 					end
 				else
 					_guihelper.MessageBox(L"无法删除可能您没有足够的权限"); 
@@ -1500,8 +1491,6 @@ function SyncMain.deleteKeepworkWorldsRecord()
 	local url = loginMain.site .. "/api/mod/worldshare/models/worlds";
 
 	LOG.std(nil,"debug","deleteKeepworkWorldsRecord",url);
-	--LOG.std(nil,"debug","deleteKeepworkWorldsRecord",foldername);
-	--LOG.std(nil,"debug","deleteKeepworkWorldsRecord",loginMain.token);
 
 	HttpRequest:GetUrl({
 		method  = "DELETE",
@@ -1531,58 +1520,67 @@ function SyncMain.deleteWorldAll()
 	end);
 end
 
-function SyncMain:create(_foldername,_callback)
+
+function SyncMain:create(foldername, callback)
 	if(loginMain.dataSourceType == "github") then
-		GithubService:create(_foldername,_callback);
+		GithubService:create(foldername, callback);
 	elseif(loginMain.dataSourceType == "gitlab") then
-		GitlabService:init(_foldername, _callback);
+		GitlabService:init(foldername, callback);
 	end
 end
 
-function SyncMain:getDataSourceContent(_foldername, _path, _callback, _projectId)
+function SyncMain:getDataSourceContent(foldername, path, callback, projectId)
 	if(loginMain.dataSourceType == "github") then
-		GithubService:getContent(_foldername, _path, _callback);
+		GithubService:getContent(foldername, path, callback);
 	elseif(loginMain.dataSourceType == "gitlab") then
-		GitlabService:getContent(_path, _callback,_projectId);
+		GitlabService:getContent(path, callback, projectId);
 	end
 end
 
-function SyncMain:uploadService(_foldername, _filename, _file_content_t, _callback, _projectId)
+function SyncMain:uploadService(foldername, filename, file_content_t, callback, projectId)
 	if(loginMain.dataSourceType == "github") then
-		GithubService:upload(_foldername,_filename,_file_content_t,_callback);
+		GithubService:upload(foldername, filename, file_content_t, callback);
 	elseif(loginMain.dataSourceType == "gitlab") then
-		GitlabService:writeFile(_filename,_file_content_t,_callback, _projectId, _foldername);
+		GitlabService:writeFile(filename, file_content_t, callback, projectId, foldername);
 	end
 end
 
-function SyncMain:updateService(_foldername, _filename, _file_content_t, _sha, _callback, _projectId)
+function SyncMain:updateService(foldername, filename, file_content_t, sha, callback, projectId)
 	if(loginMain.dataSourceType == "github") then
-		GithubService:update(_foldername, _filename, _file_content_t, _sha, _callback);
+		GithubService:update(foldername, filename, file_content_t, sha, callback);
 	elseif(loginMain.dataSourceType == "gitlab") then
-		GitlabService:update(_filename, _file_content_t, _sha, _callback, _projectId, _foldername);
+		GitlabService:update(filename, file_content_t, sha, callback, projectId, foldername);
 	end
 end
 
-function SyncMain:deleteFileService(_foldername, _path, _sha, _callback, _projectId)
+function SyncMain:deleteFileService(foldername, path, sha, callback, projectId)
 	if(loginMain.dataSourceType == "github") then
-		GithubService:deleteFile(_foldername, _path, _sha, _callback);
+		GithubService:deleteFile(foldername, path, sha, callback);
 	elseif(loginMain.dataSourceType == "gitlab") then
-		GitlabService:deleteFile(_path, _sha, _callback, _projectId, _foldername);
+		GitlabService:deleteFile(path, sha, callback, projectId, foldername);
 	end
 end
 
-function SyncMain:getFileShaListService(_foldername, _callback, _commitId, _projectId)
+function SyncMain:getFileShaListService(foldername, callback, commitId, projectId)
 	if(loginMain.dataSourceType == "github") then
-		GithubService:getFileShaList(_foldername, _callback);
+		GithubService:getFileShaList(foldername, callback);
 	elseif(loginMain.dataSourceType == "gitlab") then
-		GitlabService:getTree(_callback, _commitId, _projectId, _foldername);
+		GitlabService:getTree(callback, commitId, projectId, foldername);
 	end
 end
 
-function SyncMain:getCommits(_foldername, _callback, _projectId)
+function SyncMain:getCommits(foldername, callback, projectId)
 	if(loginMain.dataSourceType == "github") then
-		GithubService:getCommits(_foldername, _callback);
+		GithubService:getCommits(foldername, callback);
 	elseif(loginMain.dataSourceType == "gitlab") then
-		GitlabService:listCommits(_callback, _projectId, _foldername);
+		GitlabService:listCommits(callback, projectId, foldername);
+	end
+end
+
+function SyncMain:getUrl(url, callback)
+	if(loginMain.dataSourceType == "github") then
+		
+	elseif(loginMain.dataSourceType == "gitlab") then
+		GitlabService:apiGet(url, callback);
 	end
 end

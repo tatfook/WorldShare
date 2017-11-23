@@ -191,10 +191,16 @@ function loginMain.LoginAction(page, callback)
 	loginMain.showMessageInfo(L"正在登陆，请稍后...");
 
 	loginMain.LoginActionApi(account, password, function (response,err)
-			LOG.std("LoginMain","debug","Login Response",response);
+			echo(response, true);
 
 			if(type(response) == "table") then
 				if(response['data'] ~= nil and response['data']['userinfo']['_id']) then
+					if(not response['data']['userinfo']['realNameInfo']) then
+						loginMain.isVerified = false;
+					else
+						loginMain.isVerified = true;
+					end
+
 					loginMain.token = response['data']['token'];
 
 					-- 如果记住密码则保存密码到redist根目录下
@@ -1165,6 +1171,16 @@ function loginMain.downloadWorld()
 end
 
 function loginMain.syncNow(index)
+	if(not loginMain.isVerified) then
+		_guihelper.MessageBox(L"你需要到keepwork官网进行实名认证， 是否现在过去？", function(res)
+			if(res and res == _guihelper.DialogResult.Yes) then
+				ParaGlobal.ShellExecute("open", "http://keepwork.com/wiki/user_center", "", "", 1);
+			end
+		end, _guihelper.MessageBoxButtons.YesNo);
+
+		return;
+	end
+
 	local index = tonumber(index);
 
 	SyncMain.selectedWorldInfor = InternetLoadWorld.cur_ds[index];
