@@ -81,7 +81,7 @@ function loginMain.ShowPage()
 			height         = 470,
 			cancelShowAnimation = true,
 	});
-
+	
 	loginMain.getRememberPassword();
 	loginMain.setSite();
 	loginMain.autoLoginAction("main");
@@ -654,8 +654,6 @@ function loginMain.findPWDFiles()
 end
 
 function loginMain.getRememberPassword()
-	-- LOG.std(nil,"debug","getRememberPassword",PWD);
-
 	local function setNodeValue(page)
 		if(loginMain.findPWDFiles()) then
 			local file = ParaIO.open("/PWD", "r");
@@ -1171,7 +1169,7 @@ end
 
 function loginMain.syncNow(index)
 	if(loginMain.isVerified ~= "noLogin" and not loginMain.isVerified) then
-		_guihelper.MessageBox(L"你需要到keepwork官网进行实名认证， 是否现在过去？", function(res)
+		_guihelper.MessageBox(L"您需要到keepwork官网进行实名认证，认证成功后需重启paracraft即可正常操作，是否现在认证？", function(res)
 			if(res and res == _guihelper.DialogResult.Yes) then
 				ParaGlobal.ShellExecute("open", "http://keepwork.com/wiki/user_center", "", "", 1);
 			end
@@ -1227,7 +1225,7 @@ function loginMain.sharePersonPage()
 end
 
 function loginMain.LoginActionApi(_account,_password,_callback)
-	local url = loginMain.site .. "/api/wiki/models/user/login";
+	local url     = loginMain.site .. "/api/wiki/models/user/login";
 	local timeout = false;
 
 	commonlib.TimerManager.SetTimeout(function()

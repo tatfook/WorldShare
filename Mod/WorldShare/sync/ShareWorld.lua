@@ -32,7 +32,7 @@ end
 
 function ShareWorld.ShowPage()
 	if(loginMain.isVerified ~= "noLogin" and not loginMain.isVerified) then
-		_guihelper.MessageBox(L"你需要到keepwork官网进行实名认证， 是否现在过去？", function(res)
+		_guihelper.MessageBox(L"您需要到keepwork官网进行实名认证，认证成功后需重启paracraft即可正常操作，是否现在认证？", function(res)
 			if(res and res == _guihelper.DialogResult.Yes) then
 				ParaGlobal.ShellExecute("open", "http://keepwork.com/wiki/user_center", "", "", 1);
 			end
