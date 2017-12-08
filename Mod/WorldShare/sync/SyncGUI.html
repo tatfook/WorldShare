@@ -31,15 +31,14 @@
         <div style="width:550px;height:320px;">
             <aries:window mode="thin" width="550" height="320" style="float:left;" title='<%=L"与数据源同步" %>'>
                 <div style="padding:20px;font-size:18px;base-font-size:18px;color:#ffffff;margin-top:20px;">
-                    <pe:if condition="<%=not SyncMain.finish%>">
+                    <pe:if condition="<%=SyncGUI.total ~= 0 and not SyncMain.finish%>">
                         <div style="margin-right:20px;">
                             <%=L"同步进度：" %><%=SyncGUI.current%> / <%=SyncGUI.total%>
-                            <!--<span style="margin-left:5px">size</span>-->
                             <br />
                             <%=SyncGUI.files%>
                         </div>
                     </pe:if>
-                    <pe:if condition="<%=SyncGUI.total ~= 0 and SyncGUI.current ~= SyncGUI.total and SyncMain.finish%>">
+                    <pe:if condition="<%=SyncGUI.total == 0 or SyncGUI.current ~= SyncGUI.total and SyncMain.finish%>">
                         <%=SyncGUI.files%>
                     </pe:if>
                     <pe:if condition="<%=SyncGUI.total ~= 0 and SyncGUI.current == SyncGUI.total and SyncMain.finish%>">
