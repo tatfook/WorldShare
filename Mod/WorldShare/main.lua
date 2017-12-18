@@ -30,39 +30,39 @@ function WorldShare:ctor()
 end
 
 function WorldShare:GetName()
-	return self.Name;
+    return self.Name;
 end
 
 function WorldShare:GetDesc()
-	return self.Desc;
+    return self.Desc;
 end
 
 function WorldShare:init()
-	-- replace load world page
-	GameLogic.GetFilters():add_filter("InternetLoadWorld.ShowPage",function (bEnable, bShow)
-		NPL.load("(gl)Mod/WorldShare/login/LoginMain.lua");
-		local loginMain = commonlib.gettable("Mod.WorldShare.login.loginMain");
-		loginMain.ShowPage();
-		return false;
-	end);
+    -- replace load world page
+    GameLogic.GetFilters():add_filter("InternetLoadWorld.ShowPage",function (bEnable, bShow)
+        NPL.load("(gl)Mod/WorldShare/login/LoginMain.lua");
+        local loginMain = commonlib.gettable("Mod.WorldShare.login.loginMain");
+        loginMain.ShowPage();
+        return false;
+    end);
 
-	-- replace the exit world dialog
-	GameLogic.GetFilters():add_filter("ShowExitDialog",function (dialog)
-		if(dialog and dialog.callback) then
-			NPL.load("(gl)Mod/WorldShare/login/WorldExitDialog.lua");
-			local WorldExitDialog = commonlib.gettable("Mod.WorldShare.login.WorldExitDialog");
-			WorldExitDialog.ShowPage(dialog.callback);
-			return nil;
-		end
-	end);
+    -- replace the exit world dialog
+    GameLogic.GetFilters():add_filter("ShowExitDialog",function (dialog)
+        if(dialog and dialog.callback) then
+            NPL.load("(gl)Mod/WorldShare/login/WorldExitDialog.lua");
+            local WorldExitDialog = commonlib.gettable("Mod.WorldShare.login.WorldExitDialog");
+            WorldExitDialog.ShowPage(dialog.callback);
+            return nil;
+        end
+    end);
 
-	-- replace share world page
-	GameLogic.GetFilters():add_filter("SaveWorldPage.ShowSharePage",function (bEnable)
-		NPL.load("(gl)Mod/WorldShare/sync/ShareWorld.lua");
-		local ShareWorld = commonlib.gettable("Mod.WorldShare.sync.ShareWorld");
-		ShareWorld.ShowPage()
-		return false;
-	end);
+    -- replace share world page
+    GameLogic.GetFilters():add_filter("SaveWorldPage.ShowSharePage",function (bEnable)
+        NPL.load("(gl)Mod/WorldShare/sync/ShareWorld.lua");
+        local ShareWorld = commonlib.gettable("Mod.WorldShare.sync.ShareWorld");
+        ShareWorld.ShowPage()
+        return false;
+    end);
 end
 
 function WorldShare:OnInitDesktop()
@@ -72,7 +72,7 @@ function WorldShare:OnLogin()
 end
 
 function WorldShare:OnWorldLoad()
-	SyncMain:init();
+    SyncMain:init();
 end
 
 function WorldShare:OnDestroy()

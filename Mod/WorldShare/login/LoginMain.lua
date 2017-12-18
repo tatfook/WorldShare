@@ -82,6 +82,21 @@ function loginMain.ShowPage()
             cancelShowAnimation = true,
     });
     
+    if(System.options.cmdline_usertoken) then
+        loginMain.LoginWithTokenApi(System.options.cmdline_usertoken, function(response, err)
+            local params = {
+                data = {
+                    token    = System.options.cmdline_usertoken,
+                    userinfo = response.data,
+                }
+            };
+
+            loginResponse(params, err);
+        end);
+    
+        return;
+    end
+
     loginMain.getRememberPassword();
     loginMain.setSite();
     loginMain.autoLoginAction("main");
@@ -169,6 +184,149 @@ function loginMain.closeModalPage()
     loginMain.ModalPage:CloseWindow();
 end
 
+function loginResponse(response, err, callback)
+    if(type(response) == "table") then
+        if(response['data'] ~= nil and response['data']['userinfo']['_id']) then
+            if(not response['data']['userinfo']['realNameInfo']) then
+                loginMain.isVerified = false;
+            else
+                loginMain.isVerified = true;
+            end
+
+            loginMain.token = response['data']['token'];
+
+            -- 如果记住密码则保存密码到redist根目录下
+            if(isRememberPwd) then
+                local file      = ParaIO.open("/PWD", "w");
+                local encodePwd = Encoding.PasswordEncodeWithMac(password);
+                        
+                local value;
+
+                if(autoLogin) then
+                    value = account .. "|" .. encodePwd .. "|" .. loginServer .. "|" .. loginMain.token .. "|" .. "true";
+                else
+                    value = account .. "|" .. encodePwd .. "|" .. loginServer .. "|" .. loginMain.token .. "|" .. "false";
+                end
+
+                file:write(value, #value);
+                file:close();
+            else
+                -- 判断文件是否存在，如果存在则删除文件
+                if(loginMain.findPWDFiles()) then
+                    ParaIO.DeleteFile("PWD");
+                end
+            end
+
+            local userinfo = response['data']['userinfo'];
+
+            loginMain.username = userinfo['username'];
+            loginMain.userId   = userinfo['_id'];
+
+            if(userinfo['defaultSiteDataSource']) then
+                local defaultSiteDataSource = userinfo['defaultSiteDataSource'];
+                local dataSourceSetting;
+
+                for _, value in ipairs(userinfo['dataSource']) do
+                    if(value.type == defaultSiteDataSource.type) then
+                        dataSourceSetting = value;
+                        break;
+                    end
+                end
+
+                if(not dataSourceSetting) then
+                    _guihelper.MessageBox(L"数据源配置文件不存在");
+                    loginMain.closeMessageInfo();
+                    return
+                end
+
+                loginMain.dataSourceToken      = dataSourceSetting['dataSourceToken'];    -- 数据源Token
+                loginMain.dataSourceUsername   = dataSourceSetting['dataSourceUsername']; -- 数据源用户名
+                loginMain.dataSourceType       = dataSourceSetting['type'];				  -- 数据源类型
+                loginMain.apiBaseUrl           = dataSourceSetting['apiBaseUrl'];         -- 数据源api
+                loginMain.rawBaseUrl           = dataSourceSetting['rawBaseUrl'];         -- 数据源raw
+
+                loginMain.keepWorkDataSource   = defaultSiteDataSource['projectName'];    -- keepwork仓名
+                loginMain.keepWorkDataSourceId = defaultSiteDataSource['projectId'];      -- keepwork仓ID
+
+                loginMain.personPageUrl = loginMain.site .. "/" .. loginMain.username .. "/paracraft/index";--loginMain.site .. "/wiki/mod/worldshare/person/#?userid=" .. userinfo._id;
+
+                --判断paracraf站点是否存在，不存在则创建
+                HttpRequest:GetUrl({
+                    url     = loginMain.site.."/api/wiki/models/website/getDetailInfo",
+                    json    = true,
+                    headers = {Authorization = "Bearer "..loginMain.token},
+                    form    = {
+                        username = loginMain.username,
+                        sitename = "paracraft",
+                    },
+                },function(data, err)
+                    local site = data["data"];
+                            
+                    if(not site) then
+                        loginMain.closeMessageInfo();
+                        _guihelper.MessageBox(L"检查站点失败");
+                        return;
+                    end
+
+                    if(not site.siteinfo) then
+                        --创建站点
+                        local siteParams = {};
+
+                        siteParams.categoryId   = 1;
+                        siteParams.categoryName = "作品网站";
+                        siteParams.desc         = "paracraft作品集";
+                        siteParams.displayName  = loginMain.username;
+                        siteParams.domain       = "paracraft";
+                        siteParams.logoUrl      = "/wiki/assets/imgs/paracraft.png";
+                        siteParams.name         = "paracraft";
+                        siteParams.styleId      = 1;
+                        siteParams.styleName    = "WIKI样式";
+                        siteParams.templateId   = 1;
+                        siteParams.templateName = "WIKI模板";
+                        siteParams.userId   = loginMain.userId;
+                        siteParams.username = loginMain.username;
+
+                        HttpRequest:GetUrl({
+                            url     = loginMain.site .. "/api/wiki/models/website/new",
+                            json    = true,
+                            headers = {Authorization = "Bearer " .. loginMain.token},
+                            form    = siteParams,
+                        },function(data, err) end);
+                    end
+
+                    loginMain.changeLoginType(3);
+                    loginMain.closeMessageInfo();
+                    loginMain.RefreshCurrentServerList();
+
+                    if(loginMain.ModalPage) then
+                        loginMain.closeModalPage();
+                    end
+
+                    if(type(callback) == "function") then
+                        callback();
+                    end
+
+                    SyncMain:genIndexMD();
+                    SyncMain:genThemeMD();
+                end);
+            else
+                --local clientLogin = Page:GetNode("clientLogin");
+                --loginMain.changeLoginType(2);
+                _guihelper.MessageBox(L"数据源不存在，请联系管理员");
+                loginMain.closeMessageInfo();
+
+                return;
+            end
+        else
+            loginMain.closeMessageInfo();
+            _guihelper.MessageBox(L"用户名或者密码错误");
+        end
+    else
+        loginMain.closeMessageInfo();
+        _guihelper.MessageBox(L"服务器连接失败");
+    end
+end
+
 function loginMain.LoginAction(page, callback)
     local account       = page:GetValue("account");
     local password      = page:GetValue("password");
@@ -191,149 +349,9 @@ function loginMain.LoginAction(page, callback)
 
     loginMain.showMessageInfo(L"正在登陆，请稍后...");
 
-    loginMain.LoginActionApi(account, password, function (response,err)
-            if(type(response) == "table") then
-                if(response['data'] ~= nil and response['data']['userinfo']['_id']) then
-                    if(not response['data']['userinfo']['realNameInfo']) then
-                        loginMain.isVerified = false;
-                    else
-                        loginMain.isVerified = true;
-                    end
-
-                    loginMain.token = response['data']['token'];
-
-                    -- 如果记住密码则保存密码到redist根目录下
-                    if(isRememberPwd) then
-                        local file      = ParaIO.open("/PWD", "w");
-                        local encodePwd = Encoding.PasswordEncodeWithMac(password);
-                        
-                        local value;
-
-                        if(autoLogin) then
-                            value = account .. "|" .. encodePwd .. "|" .. loginServer .. "|" .. loginMain.token .. "|" .. "true";
-                        else
-                            value = account .. "|" .. encodePwd .. "|" .. loginServer .. "|" .. loginMain.token .. "|" .. "false";
-                        end
-
-                        file:write(value, #value);
-                        file:close();
-                    else
-                        -- 判断文件是否存在，如果存在则删除文件
-                        if(loginMain.findPWDFiles()) then
-                            ParaIO.DeleteFile("PWD");
-                        end
-                    end
-
-                    local userinfo = response['data']['userinfo'];
-
-                    loginMain.username = userinfo['username'];
-                    loginMain.userId   = userinfo['_id'];
-
-                    if(userinfo['defaultSiteDataSource']) then
-                        local defaultSiteDataSource = userinfo['defaultSiteDataSource'];
-                        local dataSourceSetting;
-
-                        for _, value in ipairs(userinfo['dataSource']) do
-                            if(value.type == defaultSiteDataSource.type) then
-                                dataSourceSetting = value;
-                                break;
-                            end
-                        end
-
-                        if(not dataSourceSetting) then
-                            _guihelper.MessageBox(L"数据源配置文件不存在");
-                            loginMain.closeMessageInfo();
-                            return
-                        end
-
-                        loginMain.dataSourceToken      = dataSourceSetting['dataSourceToken'];    -- 数据源Token
-                        loginMain.dataSourceUsername   = dataSourceSetting['dataSourceUsername']; -- 数据源用户名
-                        loginMain.dataSourceType       = dataSourceSetting['type'];				  -- 数据源类型
-                        loginMain.apiBaseUrl		   = dataSourceSetting['apiBaseUrl'];         -- 数据源api
-                        loginMain.rawBaseUrl		   = dataSourceSetting['rawBaseUrl'];         -- 数据源raw
-
-                        loginMain.keepWorkDataSource   = defaultSiteDataSource['projectName'];    -- keepwork仓名
-                        loginMain.keepWorkDataSourceId = defaultSiteDataSource['projectId'];      -- keepwork仓ID
-
-                        loginMain.personPageUrl = loginMain.site .. "/" .. loginMain.username .. "/paracraft/index";--loginMain.site .. "/wiki/mod/worldshare/person/#?userid=" .. userinfo._id;
-
-                        --判断paracraf站点是否存在，不存在则创建
-                        HttpRequest:GetUrl({
-                            url     = loginMain.site.."/api/wiki/models/website/getDetailInfo",
-                            json    = true,
-                            headers = {Authorization = "Bearer "..loginMain.token},
-                            form    = {
-                                username = loginMain.username,
-                                sitename = "paracraft",
-                            },
-                        },function(data, err)
-                            local site = data["data"];
-                            
-                            if(not site) then
-                                loginMain.closeMessageInfo();
-                                _guihelper.MessageBox(L"检查站点失败");
-                                return;
-                            end
-
-                            if(not site.siteinfo) then
-                                --创建站点
-                                local siteParams = {};
-
-                                siteParams.categoryId   = 1;
-                                siteParams.categoryName = "作品网站";
-                                siteParams.desc         = "paracraft作品集";
-                                siteParams.displayName  = loginMain.username;
-                                siteParams.domain       = "paracraft";
-                                siteParams.logoUrl      = "/wiki/assets/imgs/paracraft.png";
-                                siteParams.name         = "paracraft";
-                                siteParams.styleId      = 1;
-                                siteParams.styleName    = "WIKI样式";
-                                siteParams.templateId   = 1;
-                                siteParams.templateName = "WIKI模板";
-                                siteParams.userId   = loginMain.userId;
-                                siteParams.username = loginMain.username;
-
-                                HttpRequest:GetUrl({
-                                    url     = loginMain.site .. "/api/wiki/models/website/new",
-                                    json    = true,
-                                    headers = {Authorization = "Bearer " .. loginMain.token},
-                                    form    = siteParams,
-                                },function(data, err) end);
-                            end
-
-                            loginMain.changeLoginType(3);
-                            loginMain.closeMessageInfo();
-                            loginMain.RefreshCurrentServerList();
-
-                            if(loginMain.ModalPage) then
-                                loginMain.closeModalPage();
-                            end
-
-                            if(type(callback) == "function") then
-                                callback();
-                            end
-
-                            SyncMain:genIndexMD();
-                            SyncMain:genThemeMD();
-                        end);
-                    else
-                        --local clientLogin = Page:GetNode("clientLogin");
-                        --loginMain.changeLoginType(2);
-                        _guihelper.MessageBox(L"数据源不存在，请联系管理员");
-                        loginMain.closeMessageInfo();
-
-                        return;
-                    end
-                else
-                    loginMain.closeMessageInfo();
-                    _guihelper.MessageBox(L"用户名或者密码错误");
-                end
-            else
-                loginMain.closeMessageInfo();
-                _guihelper.MessageBox(L"服务器连接失败");
-            end
-        end
-    );
+    loginMain.LoginActionApi(account, password, function(response, err)
+        loginResponse(response, err, callback);
+    end);
 end
 
 function loginMain.LoginActionModal()
@@ -341,6 +359,7 @@ function loginMain.LoginActionModal()
         if(loginMain.modalCall) then
             loginMain.modalCall();
         end
+
         loginMain.modalCall = nil;
     end);
 end
@@ -849,7 +868,7 @@ function loginMain.logout()
     end
 end
 
-function loginMain.RefreshCurrentServerList(_callback)
+function loginMain.RefreshCurrentServerList(callback)
     if(loginMain.LoginPage) then
         loginMain.refreshing = true;
         loginMain.LoginPage:Refresh(0.01);
@@ -859,8 +878,8 @@ function loginMain.RefreshCurrentServerList(_callback)
             loginMain.getLocalWorldList(function()
                 loginMain.changeRevision(function()
                     loginMain.refreshing = false;
-                    if(type(_callback) == "function") then
-                        _callback();
+                    if(type(callback) == "function") then
+                        callback();
                     end
                 end);
             end);
@@ -869,8 +888,8 @@ function loginMain.RefreshCurrentServerList(_callback)
                 loginMain.changeRevision(function()
                     loginMain.syncWorldsList(function()
                         loginMain.refreshing = false;
-                        if(type(_callback) == "function") then
-                            _callback();
+                        if(type(callback) == "function") then
+                            callback();
                         end
                     end);
                 end);
@@ -994,8 +1013,6 @@ function loginMain.syncWorldsList(_callback)
 
             for keyLocal,valueLocal in ipairs(localWorlds) do
                 if(valueDistance["worldsName"] == valueLocal["foldername"]) then
-                    --LOG.std(nil,"debug","foldername",valueLocal["foldername"]);
-                    --LOG.std(nil,"debug","worldsName",valueDistance["worldsName"]);
 
                     if(localWorlds[keyLocal].server) then
                         if(tonumber(valueLocal["revision"]) == tonumber(valueDistance["revision"])) then
@@ -1122,16 +1139,14 @@ function loginMain:formatDate(modDate)
     return tonumber(newModDate);
 end
 
-function loginMain.enterWorld(_index)
-    local index = tonumber(_index);
-    SyncMain.selectedWorldInfor = InternetLoadWorld.cur_ds[_index];
-
-    --LOG.std(nil,"debug","SyncMain.selectedWorldInfor",SyncMain.selectedWorldInfor);
+function loginMain.enterWorld(index)
+    local index = tonumber(index);
+    SyncMain.selectedWorldInfor = InternetLoadWorld.cur_ds[index];
 
     if(SyncMain.selectedWorldInfor.status == 2) then
         loginMain.downloadWorld();
     else
-        InternetLoadWorld.EnterWorld(_index);
+        InternetLoadWorld.EnterWorld(index);
     end
 end
 
@@ -1143,7 +1158,7 @@ function loginMain.downloadWorld()
     SyncMain.worldDir.default = "worlds/DesignHouse/" .. SyncMain.foldername.default .. "/";
 
     SyncMain.commitId = SyncMain:getGitlabCommitId(SyncMain.foldername.utf8);
-    --LOG.std(nil,"debug","SyncMain.commitId",SyncMain.commitId);
+
     ParaIO.CreateDirectory(SyncMain.worldDir.default);
 
     SyncMain:syncToLocal(function(success, params)
@@ -1224,8 +1239,7 @@ function loginMain.sharePersonPage()
     ParaGlobal.ShellExecute("open", url, "", "", 1);
 end
 
-function loginMain.LoginActionApi(_account,_password,_callback)
-    local url     = loginMain.site .. "/api/wiki/models/user/login";
+function loginRequest(url, params, headers, callback)
     local timeout = false;
 
     commonlib.TimerManager.SetTimeout(function()
@@ -1237,12 +1251,10 @@ function loginMain.LoginActionApi(_account,_password,_callback)
     end, 4000);
 
     HttpRequest:GetUrl({
-        url  = url,
-        json = true,
-        form = {
-            username = _account,
-            password = _password,
-        },
+        url     = url,
+        json    = true,
+        form    = params,
+        headers = headers,
     },function(data, err)
         if(not timeout) then
             if(err == 503) then
@@ -1251,8 +1263,8 @@ function loginMain.LoginActionApi(_account,_password,_callback)
 
                 timeout = true;
             elseif(err == 200) then
-                if(type(_callback) == "function") then
-                    _callback(data, err);
+                if(type(callback) == "function") then
+                    callback(data, err);
                 end
 
                 timeout = true;
@@ -1261,8 +1273,38 @@ function loginMain.LoginActionApi(_account,_password,_callback)
     end, 503);
 end
 
-function loginMain.getUserInfo(_callback)
-    System.os.GetUrl({url = loginMain.site.."/api/wiki/models/user/",json = true,headers = {Authorization = "Bearer ".. loginMain.token}},_callback);
+function loginMain.LoginActionApi(account, password, callback)
+    local url = loginMain.site .. "/api/wiki/models/user/login";
+    
+    local params = {
+        username = account,
+        password = password,
+    };
+
+    local headers = {};
+
+    loginRequest(url, params, headers, callback);
+end
+
+function loginMain.LoginWithTokenApi(token, callback)
+    if(not token) then
+        return;
+    end
+
+    loginMain.showMessageInfo(L"正在登陆，请稍后...");
+
+    local url = loginMain.site .. "/api/wiki/models/user/getProfile";
+
+    local params  = {};
+    local headers = {
+        Authorization = "Bearer " .. token,
+    };
+
+    loginRequest(url, params, headers, callback);
+end
+
+function loginMain.getUserInfo(callback)
+    System.os.GetUrl({url = loginMain.site.."/api/wiki/models/user/", json = true, headers = {Authorization = "Bearer " .. loginMain.token}}, callback);
 end
 
 function loginMain.changeLoginType(_type)
