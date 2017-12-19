@@ -82,11 +82,9 @@ function loginMain.ShowPage()
             cancelShowAnimation = true,
     });
 
-    local usertoken = ParaEngine.GetAppCommandLineByParam("usertoken","")
+    local usertoken = ParaEngine.GetAppCommandLineByParam("usertoken","");
 
     if(type(usertoken) == "string") then
-        usertoken = string.sub(usertoken, 0, -2);
-
         loginMain.LoginWithTokenApi(usertoken, function(response, err)
             if(response and response.data) then
                 local params = {
