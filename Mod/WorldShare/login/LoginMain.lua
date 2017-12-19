@@ -81,19 +81,25 @@ function loginMain.ShowPage()
             height         = 470,
             cancelShowAnimation = true,
     });
-    
-    if(System.options.cmdline_usertoken) then
-        loginMain.LoginWithTokenApi(System.options.cmdline_usertoken, function(response, err)
-            local params = {
-                data = {
-                    token    = System.options.cmdline_usertoken,
-                    userinfo = response.data,
-                }
-            };
 
-            loginResponse(params, err);
+    local usertoken = ParaEngine.GetAppCommandLineByParam("usertoken","")
+
+    if(type(usertoken) == "string") then
+        usertoken = string.sub(usertoken, 0, -2);
+
+        loginMain.LoginWithTokenApi(usertoken, function(response, err)
+            if(response and response.data) then
+                local params = {
+                    data = {
+                        token    = usertoken,
+                        userinfo = response.data,
+                    }
+                };
+
+                loginResponse(params, err);
+            end
         end);
-    
+
         return;
     end
 
