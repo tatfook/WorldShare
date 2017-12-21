@@ -237,7 +237,7 @@ function SyncMain:compareRevision(LoginStatus, callback)
             end
         end
 
-        if(not LoginStatus) then
+        if(not LoginStatus) then	
             SyncMain.tagInfor = WorldCommon.GetWorldInfo();
 
             SyncMain.worldDir.default = GameLogic.GetWorldDirectory():gsub("\\","/");
@@ -245,7 +245,7 @@ function SyncMain:compareRevision(LoginStatus, callback)
 
             SyncMain.foldername.default = SyncMain.worldDir.default:match("worlds/DesignHouse/([^/]*)/");
             SyncMain.foldername.utf8    = SyncMain.worldDir.utf8:match("worlds/DesignHouse/([^/]*)/");
-
+			
             loginMain.RefreshCurrentServerList(function()
                 if(GameLogic.IsReadOnly()) then
                     if(type(callback) == "function")then
@@ -262,7 +262,7 @@ function SyncMain:compareRevision(LoginStatus, callback)
                         end
                     end
                 end
-
+				
                 go();
             end);
         else

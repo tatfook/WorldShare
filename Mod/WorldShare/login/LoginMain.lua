@@ -84,7 +84,7 @@ function loginMain.ShowPage()
 
     local usertoken = ParaEngine.GetAppCommandLineByParam("usertoken","");
 
-    if(type(usertoken) == "string") then
+    if(type(usertoken) == "string" and #usertoken > 0) then
         loginMain.LoginWithTokenApi(usertoken, function(response, err)
             if(response and response.data) then
                 local params = {
@@ -153,7 +153,7 @@ function loginMain.showMessageInfo(msg)
     loginMain.Msg = nil;
 end
 
-function loginMain.showLoginModalImp()
+function loginMain.showLoginModalImp(callback)
     System.App.Commands.Call("File.MCMLWindowFrame", {
         url            = "Mod/WorldShare/login/LoginModal.html",
         name           = "loginMain.LoginModal",
@@ -169,7 +169,11 @@ function loginMain.showLoginModalImp()
         width          = 320,
         height         = 350,
     });
-
+	
+	if(type(callback) == "function") then
+		loginMain.modalCall = callback;
+	end
+	
     loginMain.getRememberPassword();
     loginMain.setSite();
     loginMain.autoLoginAction("modal");
@@ -360,7 +364,8 @@ end
 
 function loginMain.LoginActionModal()
     loginMain.LoginAction(loginMain.ModalPage, function()
-        if(loginMain.modalCall) then
+
+        if(type(loginMain.modalCall) == "function") then
             loginMain.modalCall();
         end
 
@@ -913,6 +918,12 @@ function loginMain.RefreshCurrentServerList(callback)
 
         loginMain.LoginPage:Refresh(0.01);
     end
+	
+	if(loginMain.ModalPage) then
+		if(type(callback) == "function") then
+			callback();
+		end
+	end
 end
 
 function loginMain.getLocalWorldList(_callback)

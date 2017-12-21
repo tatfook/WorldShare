@@ -43,15 +43,17 @@ function ShareWorld.ShowPage()
 
 	SyncMain.syncType = "share";
 
-	if(loginMain.login_type == 1) then
-		loginMain.modalCall = function()
+	if(loginMain.login_type == 1) then	
+	
+		loginMain.showLoginModalImp(function()
 			ShareWorldPage.ShowPage();
-		end;
-		loginMain.showLoginModalImp();
-		return;
+		end);
+		
 	elseif(loginMain.login_type == 3) then
+	
 		loginMain.showMessageInfo(L"正在获取，请稍后...");
 		ShareWorld.shareCompare();
+		
 	end
 end
 
@@ -101,20 +103,24 @@ end
 
 function ShareWorld.shareCompare()
 	SyncMain:compareRevision(nil, function(result)
+		echo(result, true);
 		if(result and result == "tryAgain") then
 			ShareWorld.shareCompare();
+			
 		elseif(result == "zip") then
 			_guihelper.MessageBox(L"不能同步ZIP文件");
 			loginMain.closeMessageInfo();
-			return;
+
 		elseif(result) then
 			ShareWorld.ShowPageImp();
 			ShareWorld.CompareResult = result;
 			ShareWorld.SharePage:Refresh();
 			ShareWorld:init();
 			loginMain.closeMessageInfo();
+			
 		else
 			ShareWorld.SharePage:CloseWindow();
+			
 		end
 	end);
 end
