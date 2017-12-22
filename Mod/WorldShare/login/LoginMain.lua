@@ -193,7 +193,6 @@ function loginMain.closeModalPage()
 end
 
 function loginResponse(response, err, callback)
-    echo(response, true);
     if(type(response) == "table") then
         if(response['data'] ~= nil and response['data']['userinfo']['_id']) then
             if(not response['data']['userinfo']['realNameInfo']) then
