@@ -100,14 +100,14 @@ function loginMain.ShowPage()
 
         return;
     end
+    
+    --echo(loginMain.LoginPage:GetNode("gw_world_ds"));
 
+    loginMain.init();
     loginMain.getRememberPassword();
     loginMain.setSite();
     loginMain.autoLoginAction("main");
     loginMain.RefreshCurrentServerList();
-end
-
-function loginMain.OnInit()
 end
 
 function loginMain.setLoginPage()
@@ -169,11 +169,11 @@ function loginMain.showLoginModalImp(callback)
         width          = 320,
         height         = 350,
     });
-	
-	if(type(callback) == "function") then
-		loginMain.modalCall = callback;
-	end
-	
+
+    if(type(callback) == "function") then
+        loginMain.modalCall = callback;
+    end
+
     loginMain.getRememberPassword();
     loginMain.setSite();
     loginMain.autoLoginAction("modal");
@@ -432,14 +432,11 @@ function loginMain.formatStatus(_status)
     end
 end
 
-function loginMain.formatDatetime(_datetime)
-    --LOG.std(nil,"debug","_datetime",_datetime);
-    
-    if(_datetime) then
+function loginMain.formatDatetime(datetime)
+    if(datetime) then
         local n = 1;
         local formatDatetime = "";
-        for value in string.gmatch(_datetime,"[^-]+") do
-            --LOG.std(nil,"debug","formatDatetime",value);
+        for value in string.gmatch(datetime,"[^-]+") do
 
             if(n == 3) then
                 formatDatetime = formatDatetime .. value .. " ";
@@ -457,7 +454,7 @@ function loginMain.formatDatetime(_datetime)
         return formatDatetime;
     end
 
-    return _datetime;
+    return datetime;
 end
 
 function loginMain.GetWorldType()
@@ -469,10 +466,11 @@ function loginMain.CreateNewWorld()
     CreateNewWorld.ShowPage();
 end
 
-function loginMain.GetCurWorldInfo(info_type,world_index)
-    local index = tonumber(world_index);
-    local selected_world = InternetLoadWorld.cur_ds[world_index]
+function loginMain.GetCurWorldInfo(info_type, world_index)
     --local cur_world = InternetLoadWorld:GetCurrentWorld();
+
+    local index          = tonumber(world_index);
+    local selected_world = InternetLoadWorld.cur_ds[world_index];
 
     if(selected_world) then
         if(info_type == "mode") then
@@ -489,12 +487,35 @@ function loginMain.GetCurWorldInfo(info_type,world_index)
     end
 end
 
+function loginMain.updateWorldInfo(worldIndex, callback)
+    local selectWorld = LocalLoadWorld.BuildLocalWorldList(true)[worldIndex];
+    
+    if(type(selectWorld) == "table") then
+        local filesize = LocalService:GetWorldSize(selectWorld.worldpath);
+        local worldTag = LocalService:GetTag(Encoding.Utf8ToDefault(selectWorld.foldername));
+
+        worldTag.size = filesize;
+
+        LocalService:SetTag(selectWorld.worldpath, worldTag);
+
+        InternetLoadWorld.GetCurrentServerPage().ds[worldIndex].size = filesize;
+
+        if(type(callback) == "function") then
+            callback();
+        end
+    end
+end
+
 function loginMain.OnSwitchWorld(index)
     InternetLoadWorld.OnSwitchWorld(index);
 
-    loginMain.LoginPage:Refresh(0.01);
---	local selected_world = InternetLoadWorld.cur_ds[index];
---	echo(selected_world);
+    if(loginMain.current_type == 1) then
+        loginMain.updateWorldInfo(index, function()
+            loginMain.LoginPage:Refresh(0.01);
+        end);
+    else
+        loginMain.LoginPage:Refresh(0.01);
+    end
 end
 
 function loginMain.GetNetSpeed()
@@ -559,7 +580,7 @@ function loginMain.OpenBBS()
 end
 
 function loginMain.OnImportWorld()
-    ParaGlobal.ShellExecute("open", ParaIO.GetCurDirectory(0)..LocalLoadWorld.GetWorldFolder(), "", "", 1);
+    ParaGlobal.ShellExecute("open", ParaIO.GetCurDirectory(0) .. LocalLoadWorld.GetWorldFolder(), "", "", 1);
 end
 
 function loginMain.GetDesForWorld()
@@ -918,15 +939,15 @@ function loginMain.RefreshCurrentServerList(callback)
 
         loginMain.LoginPage:Refresh(0.01);
     end
-	
-	if(loginMain.ModalPage) then
-		if(type(callback) == "function") then
-			callback();
-		end
-	end
+
+    if(loginMain.ModalPage) then
+        if(type(callback) == "function") then
+            callback();
+        end
+    end
 end
 
-function loginMain.getLocalWorldList(_callback)
+function loginMain.getLocalWorldList(callback)
     local ServerPage = InternetLoadWorld.GetCurrentServerPage();
     
     RemoteServerList:new():Init("local", "localworld", function(bSucceed, serverlist)
@@ -937,14 +958,14 @@ function loginMain.getLocalWorldList(_callback)
         ServerPage.ds = serverlist.worlds or {};
         InternetLoadWorld.OnChangeServerPage();
 
-        if(_callback) then
-            _callback();
+        if(callback) then
+            callback();
         end
     end);
 end
 
-function loginMain.changeRevision(_callback)
-    local localWorlds = InternetLoadWorld.ServerPage_ds[1]['ds'];
+function loginMain.changeRevision(callback)
+    local localWorlds = InternetLoadWorld.GetCurrentServerPage().ds;
 
     if(localWorlds) then
         for key, value in ipairs(localWorlds) do
@@ -958,9 +979,7 @@ function loginMain.changeRevision(_callback)
                 local WorldRevisionCheckOut = WorldRevision:new():init("worlds/DesignHouse/" .. foldername.default .. "/");
                 value.revision = WorldRevisionCheckOut:GetDiskRevision();
 
-                --local worldSize = WorldShare:GetWorldData("worldSize", foldername.utf8);
                 local tag = LocalService:GetTag(foldername.default);
-                --LOG.std(nil,"debug","tag",tag);
 
                 if(tag.size) then
                     value.size = tag.size;
@@ -989,8 +1008,8 @@ function loginMain.changeRevision(_callback)
             loginMain.LoginPage:Refresh();
         end
 
-        if(_callback) then
-            _callback();
+        if(callback) then
+            callback();
         end
 
         return;

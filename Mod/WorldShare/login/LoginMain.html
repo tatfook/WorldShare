@@ -7,7 +7,7 @@
     <pe:mcml>
         <script type="text/npl" refresh="false">
             <![CDATA[
-	            InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld");
+                InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld");
                 loginMain         = commonlib.gettable("Mod.WorldShare.login.loginMain");
                 
                 loginMain.setLoginPage();
@@ -287,19 +287,19 @@
                                             <div name='<%=Eval("index")%>' class="share_selected_item">
                                                 <pe:if condition='<%= loginMain.current_type == 1%>'>
                                                     <div>
-                                                        <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index")) and  loginMain.GetCurWorldInfo("status",Eval("index")) == 1%>'>
+                                                        <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index")) and  loginMain.GetCurWorldInfo("status", Eval("index")) == 1%>'>
                                                             <div class="status" style="background:url(textures/worldshare_32bits.png#72 104 16 16)" tooltip='<%= loginMain.formatStatus(loginMain.GetCurWorldInfo("status",Eval("index")))%>' />
                                                         </pe:if>
-                                                        <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index")) and  loginMain.GetCurWorldInfo("status",Eval("index")) == 2%>'>
+                                                        <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index")) and  loginMain.GetCurWorldInfo("status", Eval("index")) == 2%>'>
                                                             <div class="status" style="background:url(textures/worldshare_32bits.png#98 104 16 16)" tooltip='<%= loginMain.formatStatus(loginMain.GetCurWorldInfo("status",Eval("index")))%>' />
                                                         </pe:if>
-                                                        <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index")) and  loginMain.GetCurWorldInfo("status",Eval("index")) == 3%>'>
+                                                        <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index")) and  loginMain.GetCurWorldInfo("status", Eval("index")) == 3%>'>
                                                             <div class="status" style="background:url(textures/worldshare_32bits.png#20 104 16 16)" tooltip='<%= loginMain.formatStatus(loginMain.GetCurWorldInfo("status",Eval("index")))%>' />
                                                         </pe:if>
-                                                        <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index")) and  loginMain.GetCurWorldInfo("status",Eval("index")) == 4%>'>
+                                                        <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index")) and  loginMain.GetCurWorldInfo("status", Eval("index")) == 4%>'>
                                                             <div class="status" style="background:url(textures/worldshare_32bits.png#46 104 16 16)" tooltip='<%= loginMain.formatStatus(loginMain.GetCurWorldInfo("status",Eval("index")))%>' />
                                                         </pe:if>
-                                                        <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index")) and  loginMain.GetCurWorldInfo("status",Eval("index")) == 5%>'>
+                                                        <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index")) and  loginMain.GetCurWorldInfo("status", Eval("index")) == 5%>'>
                                                             <div class="status" style="background:url(textures/worldshare_32bits.png#124 104 16 16)" tooltip='<%= loginMain.formatStatus(loginMain.GetCurWorldInfo("status",Eval("index")))%>' />
                                                         </pe:if>
                                                         <pe:if condition='<%= loginMain.login_type == 1 or loginMain.GetCurWorldInfo("is_zip", Eval("index"))%>'>
@@ -330,7 +330,7 @@
                                                                 <div class="share_button" style="float:left"/>
                                                             </pe:if>
                                                             <input type="button" class="share_button" style="background:url(textures/worldshare_32bits.png#78 46 48 48)"   onclick='loginMain.deleteWorld()' tooltip='<%=L"删除"%>' name='<%=Eval("index")%>' /><!-- 删除 -->
-                                                            <pe:if condition="<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo('is_zip', Eval('index'))%>">
+                                                            <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index"))%>'>
                                                                 <input type="button" class="share_button" style="background:url(textures/worldshare_32bits.png#136 46 48 48)" onclick="loginMain.syncNow()" tooltip='<%=L"同步"%>' name='<%=Eval("index")%>' /><!-- 手动同步 -->
                                                             </pe:if>
                                                             <input type="button" class="share_button" style="background:url(textures/worldshare_32bits.png#20 46 48 48)"    onclick="loginMain.enterWorld()" tooltip='<%=L"进入"%>' name='<%=Eval("index")%>' /><!-- 进入 -->

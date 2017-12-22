@@ -237,7 +237,7 @@ function SyncMain:compareRevision(LoginStatus, callback)
             end
         end
 
-        if(not LoginStatus) then	
+        if(not LoginStatus) then
             SyncMain.tagInfor = WorldCommon.GetWorldInfo();
 
             SyncMain.worldDir.default = GameLogic.GetWorldDirectory():gsub("\\","/");
@@ -245,7 +245,7 @@ function SyncMain:compareRevision(LoginStatus, callback)
 
             SyncMain.foldername.default = SyncMain.worldDir.default:match("worlds/DesignHouse/([^/]*)/");
             SyncMain.foldername.utf8    = SyncMain.worldDir.utf8:match("worlds/DesignHouse/([^/]*)/");
-			
+
             loginMain.RefreshCurrentServerList(function()
                 if(GameLogic.IsReadOnly()) then
                     if(type(callback) == "function")then
@@ -262,7 +262,7 @@ function SyncMain:compareRevision(LoginStatus, callback)
                         end
                     end
                 end
-				
+
                 go();
             end);
         else
@@ -1100,19 +1100,12 @@ function SyncMain.openWorldFolder()
 end
 
 function SyncMain:checkWorldSize()
-    local files = commonlib.Files.Find({}, SyncMain.worldDir.default, 5, 5000, function(item)
-        return true;
-    end);
-
-    local filesTotal = 0;
-    for key, value in ipairs(files) do
-        filesTotal = filesTotal + tonumber(value.filesize);
-    end
-    
-    local maxSize = 25 * 1024 * 1024;
+    local maxSize    = 25 * 1024 * 1024;
+    local filesTotal =  LocalService:GetWorldSize(SyncMain.worldDir.default);
 
     if(filesTotal > maxSize) then
         SyncMain:showBeyondVolume();
+
         return true;
     else
         return false;
