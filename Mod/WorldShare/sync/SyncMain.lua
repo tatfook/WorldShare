@@ -1005,7 +1005,7 @@ function SyncMain:refreshRemoteWorldLists(syncGUI, callback)
             local worldTag = LocalService:GetTag(SyncMain.foldername.default);
 
             local params = {};
-            params.modDate		   = modDateTable;
+            params.modDate         = modDateTable;
             params.worldsName      = SyncMain.foldername.utf8;
             params.revision        = SyncMain.currentRevison;
             params.hasPreview      = hasPreview;
@@ -1088,7 +1088,13 @@ function SyncMain:showBeyondVolume()
 end
 
 function SyncMain.getBeyondMsg()
-    local str = format(L"世界%s文件总大小超过了%dMB，是否清理文件？(请使用MP3、OGG格式音频，避免使用FBX格式，VIP用户最大可上传%dMB)", SyncMain.foldername.utf8, 25, 50);
+    local str;
+
+    if(loginMain.userType == "vip") then
+        str = format(L"世界%s文件总大小超过了%dMB，是否清理文件？(请使用MP3、OGG格式音频，避免使用FBX格式)", SyncMain.foldername.utf8, 50);
+    else
+        str = format(L"世界%s文件总大小超过了%dMB，是否清理文件？(请使用MP3、OGG格式音频，避免使用FBX格式，VIP用户最大可上传%dMB)", SyncMain.foldername.utf8, 25, 50);
+    end
 
     return str;
 end
@@ -1100,8 +1106,14 @@ function SyncMain.openWorldFolder()
 end
 
 function SyncMain:checkWorldSize()
-    local maxSize    = 25 * 1024 * 1024;
-    local filesTotal =  LocalService:GetWorldSize(SyncMain.worldDir.default);
+    local filesTotal = LocalService:GetWorldSize(SyncMain.worldDir.default);
+    local maxSize    = 0;
+
+    if(loginMain.userType == "vip") then
+        maxSize = 50 * 1024 * 1024;
+    else
+        maxSize = 25 * 1024 * 1024;
+    end
 
     if(filesTotal > maxSize) then
         SyncMain:showBeyondVolume();

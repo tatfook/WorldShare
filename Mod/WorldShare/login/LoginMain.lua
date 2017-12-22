@@ -193,6 +193,7 @@ function loginMain.closeModalPage()
 end
 
 function loginResponse(response, err, callback)
+    echo(response, true);
     if(type(response) == "table") then
         if(response['data'] ~= nil and response['data']['userinfo']['_id']) then
             if(not response['data']['userinfo']['realNameInfo']) then
@@ -229,6 +230,27 @@ function loginResponse(response, err, callback)
 
             loginMain.username = userinfo['username'];
             loginMain.userId   = userinfo['_id'];
+            
+            if(type(userinfo['vipInfo']) == "table" and userinfo["vipInfo"]["endDate"]) then
+                local endDate   = userinfo["vipInfo"]["endDate"];
+                local startDate = userinfo["vipInfo"]["startDate"];
+
+                local datePattern    = "(%d+)-(%d+)-(%d+)";
+
+                local year, month, day = endDate:match(datePattern);
+                local endDateTimestamp = os.time({year = year, month = month, day = day});
+
+                local year, month, day   = startDate:match(datePattern);
+                local startDateTimestamp = os.time({year = year, month = month, day = day});
+
+                if(endDateTimestamp < os.time()) then
+                    loginMain.userType = "normal";
+                else
+                    loginMain.userType = "vip";
+                end
+            else
+                loginMain.userType = "normal";
+            end
 
             if(userinfo['defaultSiteDataSource']) then
                 local defaultSiteDataSource = userinfo['defaultSiteDataSource'];
