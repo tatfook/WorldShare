@@ -53,7 +53,6 @@ loginMain.current_type = 1;
 loginMain.serverLists  = {
     {value="keepwork"     , name="keepwork"     , text=L"使用KeepWork登录", selected=true},
     {value="keepworkDev"  , name="keepworkDev"  , text=L"使用KeepWorkDev登录"},
-    {value="keepworkTest" , name="keepworkTest" , text=L"使用KeepWorkTest登录"},
     {value="local"        , name="local"        , text=L"使用本地服务登录"},
 }
 
@@ -100,8 +99,6 @@ function loginMain.ShowPage()
 
         return;
     end
-    
-    --echo(loginMain.LoginPage:GetNode("gw_world_ds"));
 
     loginMain.init();
     loginMain.getRememberPassword();
@@ -787,8 +784,6 @@ function loginMain.setSite()
         loginMain.site = "http://keepwork.com";
     elseif(loginServer == "keepworkDev") then
         loginMain.site = "http://dev.keepwork.com";
-    elseif(loginServer == "keepworkTest") then
-        loginMain.site = "http://test.keepwork.com";
     elseif(loginServer == "local") then
         loginMain.site = "http://localhost:8099";
     end
@@ -962,9 +957,16 @@ function loginMain.RefreshCurrentServerList(callback)
     end
 
     if(loginMain.ModalPage) then
-        if(type(callback) == "function") then
-            callback();
-        end
+        loginMain.getLocalWorldList(function()
+            loginMain.changeRevision(function()
+                loginMain.syncWorldsList(function()
+                    loginMain.refreshing = false;
+                    if(type(callback) == "function") then
+                        callback();
+                    end
+                end);
+            end);
+        end);
     end
 end
 
@@ -1153,7 +1155,7 @@ function loginMain:formatDate(modDate)
     for modDateEle in string.gmatch(modDate,"[^-]+") do
         modDateTable[#modDateTable+1] = modDateEle;
     end
-    --echo(modDateTable);
+
     local newModDate = "";
 
     if(modDateTable[1] and #modDateTable[1] ~= 4) then
@@ -1370,13 +1372,13 @@ function loginMain.changeLoginType(_type)
     end
 end
 
-function loginMain.getWorldsList(_callback)
+function loginMain.getWorldsList(callback)
     local params = {
-        url  = loginMain.site .. "/api/mod/worldshare/models/worlds",
-        json = true,
+        url     = loginMain.site .. "/api/mod/worldshare/models/worlds",
+        json    = true,
         headers = {Authorization = "Bearer " .. loginMain.token},
-        form = {amount = 100},
+        form    = {amount = 100},
     };
 
-    HttpRequest:GetUrl(params,_callback);
+    HttpRequest:GetUrl(params, callback);
 end

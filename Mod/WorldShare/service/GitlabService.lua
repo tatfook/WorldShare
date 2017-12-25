@@ -443,7 +443,6 @@ function GitlabService:getProjectIdByName(name, callback)
     local url = "projects";
     
     GitlabService:apiGet(url .. "?owned=true&page=1&per_page=100",function(projectList, err)
-        --echo(projectList);
         for i=1,#projectList do
             if (string.lower(projectList[i].name) == string.lower(name)) then
                 if(type(callback) == "function") then

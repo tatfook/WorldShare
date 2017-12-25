@@ -27,7 +27,6 @@ local ShareWorld     = commonlib.inherit(nil,commonlib.gettable("Mod.WorldShare.
 ShareWorld.SharePage = nil
 
 function ShareWorld:ctor()
-
 end
 
 function ShareWorld.ShowPage()
@@ -43,35 +42,31 @@ function ShareWorld.ShowPage()
 
     SyncMain.syncType = "share";
 
-    if(loginMain.login_type == 1) then	
-    
+    if(loginMain.login_type == 1) then
         loginMain.showLoginModalImp(function()
             ShareWorldPage.ShowPage();
         end);
-        
     elseif(loginMain.login_type == 3) then
-    
         loginMain.showMessageInfo(L"正在获取，请稍后...");
         ShareWorld.shareCompare();
-        
     end
 end
 
 function ShareWorld.ShowPageImp()
     System.App.Commands.Call("File.MCMLWindowFrame", {
-        url = "Mod/WorldShare/sync/ShareWorld.html",
-        name = "SaveWorldPage.ShowSharePage",
+        url            = "Mod/WorldShare/sync/ShareWorld.html",
+        name           = "SaveWorldPage.ShowSharePage",
         isShowTitleBar = false,
         DestroyOnClose = true,
-        style = CommonCtrl.WindowFrame.ContainerStyle,
-        allowDrag = true,
-        isTopLevel = true,
+        style          = CommonCtrl.WindowFrame.ContainerStyle,
+        allowDrag      = true,
+        isTopLevel     = true,
         directPosition = true,
-        align = "_ct",
-        x = -640/2,
-        y = -415/2,
-        width = 640,
-        height = 415,
+        align          = "_ct",
+        x              = -640/2,
+        y              = -415/2,
+        width          = 640,
+        height         = 415,
     });
 end
 
@@ -101,32 +96,27 @@ end
 
 function ShareWorld.shareCompare()
     SyncMain:compareRevision(nil, function(result)
-        echo(result, true);
         if(result and result == "tryAgain") then
             ShareWorld.shareCompare();
-            
         elseif(result == "zip") then
             _guihelper.MessageBox(L"不能同步ZIP文件");
             loginMain.closeMessageInfo();
-
         elseif(result) then
             ShareWorld.ShowPageImp();
             ShareWorld.CompareResult = result;
             ShareWorld.SharePage:Refresh();
             ShareWorld:init();
             loginMain.closeMessageInfo();
-            
         else
-            ShareWorld.SharePage:CloseWindow();
-            
+            if(ShareWorld.SharePage) then
+                ShareWorld.SharePage:CloseWindow();
+            end
         end
     end);
 end
 
 function ShareWorld.shareNow()
     ShareWorld.SharePage:CloseWindow();
-
-    --LOG.std(nil,"debug","ShareWorld.CompareResult", ShareWorld.CompareResult);
 
     if(ShareWorld.CompareResult == "remoteBigger") then
         _guihelper.MessageBox(L"当前本地版本小于远程版本，是否继续上传？", function(res)

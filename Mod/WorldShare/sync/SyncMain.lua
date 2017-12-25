@@ -162,7 +162,6 @@ function SyncMain:compareRevision(LoginStatus, callback)
                 SyncMain.remoteRevison = 0;
 
                 HttpRequest:GetUrl(contentUrl, function(data,err)
-
                     SyncMain.remoteRevison = tonumber(data);
                     if(not SyncMain.remoteRevison) then
                         SyncMain.remoteRevison = 0;
@@ -170,7 +169,7 @@ function SyncMain:compareRevision(LoginStatus, callback)
 
                     SyncMain.currentRevison = tonumber(SyncMain.currentRevison);
 
-                    if(err == 0) then
+                    if(err == 0 or err == 502) then
                         _guihelper.MessageBox(L"网络错误");
 
                         if(type(callback) == "function") then
@@ -194,7 +193,7 @@ function SyncMain:compareRevision(LoginStatus, callback)
                         if(SyncMain.remoteRevison ~= 0) then
                             local isWorldInRemoteLists = false;
 
-                            for keyDistance, valueDistance in ipairs(SyncMain.remoteWorldsList) do
+                            for _, valueDistance in ipairs(SyncMain.remoteWorldsList) do
                                 if(valueDistance["worldsName"] == SyncMain.foldername.utf8) then
                                     isWorldInRemoteLists = true;
                                 end
@@ -219,7 +218,7 @@ function SyncMain:compareRevision(LoginStatus, callback)
                             callback(result);
                         end
                     end
-                end);
+                end, {0, 502});
             else
                 if(not LoginStatus) then
                     CommandManager:RunCommand("/save");
@@ -254,9 +253,9 @@ function SyncMain:compareRevision(LoginStatus, callback)
                 
                     return;
                 end
-            
-                if(InternetLoadWorld.cur_ds) then
-                    for _, value in ipairs(InternetLoadWorld.cur_ds) do
+
+                if(InternetLoadWorld.GetCurrentServerPage().ds) then
+                    for _, value in ipairs(InternetLoadWorld.GetCurrentServerPage().ds) do
                         if(value.foldername == SyncMain.foldername.utf8)then
                             SyncMain.selectedWorldInfor = value;
                         end
@@ -935,7 +934,7 @@ function SyncMain:syncToDataSource()
 
     if(SyncMain.remoteRevison == 0) then
         --"首次同步"
-        SyncMain:create(SyncMain.foldername.base32,function(data, status)
+        SyncMain:create(SyncMain.foldername.base32, function(data, status)
             if(data == true) then
                 syncToDataSourceGo();
             else
@@ -966,7 +965,7 @@ function SyncMain:refreshRemoteWorldLists(syncGUI, callback)
             end
 
             local modDateTable = {};
-            local readme	   = "";
+            local readme       = "";
 
             if(SyncMain.selectedWorldInfor and SyncMain.selectedWorldInfor.tooltip)then
                 for modDateEle in string.gmatch(SyncMain.selectedWorldInfor.tooltip,"[^:]+") do
@@ -1013,8 +1012,8 @@ function SyncMain:refreshRemoteWorldLists(syncGUI, callback)
             params.gitlabProjectId = GitlabService.projectId;
             params.readme          = readme;
             params.preview         = preview;
-            params.filesTotals	   = filesTotals;
-            params.commitId		   = lastCommitSha;
+            params.filesTotals     = filesTotals;
+            params.commitId        = lastCommitSha;
             params.name            = worldTag.name;
 
             loginMain.refreshing = true;
