@@ -1,4 +1,3 @@
-<!-- "script/apps/Aries/Creator/Game/Login/InternetLoadWorld.html" -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -6,27 +5,27 @@
 </head>
 <body>
     <pe:mcml>
-        <script type="text/npl" refresh="false">
+        <script type="text/npl">
             <![CDATA[
                 loginMain = commonlib.gettable("Mod.WorldShare.login.loginMain");
                 SyncMain  = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
-                
+
                 SyncMain.setDeletePage();
                 selectedWorldInfor = SyncMain.selectedWorldInfor;
-             ]]>
+            ]]>
         </script>
         <div style="width:500px;height:270px;">
             <aries:window mode="thin" width="500" height="270" style="float:left;" title='<%=L"删除世界" %>' onclose="SyncMain.closeDeletePage">
-            	<div style="font-size:18px;base-font-size:18px;color:#ffffff;padding:30px;">
+                <div style="font-size:18px;base-font-size:18px;color:#ffffff;padding:30px;">
                     <div style="margin-top:30px;">
                         <pe:if condition="<%= selectedWorldInfor.server == 'self' %>">
-                            <%=L"你确定要删除："%><%= selectedWorldInfor.text .. '.zip' %><%=L世界么？请选择"%>
+                            <%= L"你确定要删除："%><%= selectedWorldInfor.text .. '.zip' %><%= L"世界么？请选择"%>
                         </pe:if>
                         <pe:if condition="<%= selectedWorldInfor.server == 'local' and selectedWorldInfor.is_zip %>">
-                            <%=L"你确定要删除："%><%= selectedWorldInfor.text .. '.zip' %><%=L世界么？请选择"%>
+                            <%= L"你确定要删除："%><%= selectedWorldInfor.text .. '.zip' %><%= L"世界么？请选择"%>
                         </pe:if>
                         <pe:if condition="<%= selectedWorldInfor.server == 'local' and not selectedWorldInfor.is_zip %>">
-                            <%=L"你确定要删除："%><%= selectedWorldInfor.foldername %><%=L世界么？请选择"%>
+                            <%= L"你确定要删除："%><%= selectedWorldInfor.foldername %><%= L"世界么？请选择"%>
                         </pe:if>
                     </div>
                     <br />
@@ -34,18 +33,17 @@
                         <pe:if condition="<%= selectedWorldInfor.server == 'self' %>">
                             <input type="button" onclick="SyncMain.deleteServerWorld" class="button_highlight" style="float:left;margin-top:5px;margin-right:10px;min-width:130px;height: 30px;" name="" value='<%=L"删除世界"%>' />
                         </pe:if>
-                        <pe:if condition="<%=loginMain.login_type == 1 or loginMain.login_type == 3 and selectedWorldInfor.status ~= nil and selectedWorldInfor.status ~= 2%>">
+                        <pe:if condition="<%= loginMain.login_type == 1 or loginMain.login_type == 3 and selectedWorldInfor.status ~= nil and selectedWorldInfor.status ~= 2%>">
                             <input type="button" onclick="SyncMain.deleteWorldLocal" class="button_highlight" style="float:left;margin-top:5px;margin-right:10px;min-width:130px;height: 30px;" name="" value='<%=L"只删除本地"%>' />
                         </pe:if>
-                        <pe:if condition="<%=selectedWorldInfor.status ~= nil and selectedWorldInfor.status ~= 1 %>">
+                        <pe:if condition="<%= selectedWorldInfor.status ~= nil and selectedWorldInfor.status ~= 1 %>">
                             <input type="button" onclick="SyncMain.deleteWorldRemote" class="button_highlight" style="float:left;margin-top:5px;margin-right:10px;min-width:130px;height: 30px;" name="" value='<%=L"只删除远程"%>' />
                         </pe:if>
-                        <pe:if condition="<%=selectedWorldInfor.status ~= nil and selectedWorldInfor.status ~= 1 and selectedWorldInfor.status ~= 2 %>">
+                        <pe:if condition="<%= selectedWorldInfor.status ~= nil and selectedWorldInfor.status ~= 1 and selectedWorldInfor.status ~= 2 %>">
                             <input type="button" onclick="SyncMain.deleteWorldAll" class="button_highlight" style="float:left;margin-top:5px;margin-right:10px;min-width:130px;height: 30px;" name="" value='<%=L"全部删除"%>' />
                         </pe:if>
                     </div>
-                    
-            	</div>
+                </div>
             </aries:window>
         </div>
     </pe:mcml>

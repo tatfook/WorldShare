@@ -1298,21 +1298,21 @@ end
 
 function SyncMain.deleteWorld()
     System.App.Commands.Call("File.MCMLWindowFrame", {
-        url  = "Mod/WorldShare/sync/DeleteWorld.html",
-        name = "DeleteWorld", 
+        url            = "Mod/WorldShare/sync/DeleteWorld.html",
+        name           = "DeleteWorld",
         isShowTitleBar = false,
         DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory / false will only hide window
-        style = CommonCtrl.WindowFrame.ContainerStyle,
-        zorder = 0,
-        isTopLevel = true,
-        allowDrag = true,
-        bShow = bShow,
+        style          = CommonCtrl.WindowFrame.ContainerStyle,
+        zorder         = 0,
+        isTopLevel     = true,
+        allowDrag      = true,
+        bShow          = bShow,
         directPosition = true,
-        align = "_ct",
-        x = -500/2,
-        y = -270/2,
-        width = 500,
-        height = 270,
+        align          = "_ct",
+        x              = -500/2,
+        y              = -270/2,
+        width          = 500,
+        height         = 270,
         cancelShowAnimation = true,
     });
 end
