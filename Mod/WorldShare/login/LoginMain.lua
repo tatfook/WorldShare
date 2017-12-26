@@ -228,18 +228,18 @@ function loginResponse(response, err, callback)
             loginMain.userId   = userinfo['_id'];
             
             if(type(userinfo['vipInfo']) == "table" and userinfo["vipInfo"]["endDate"]) then
-                local endDate   = userinfo["vipInfo"]["endDate"];
-                local startDate = userinfo["vipInfo"]["startDate"];
-
-                local datePattern    = "(%d+)-(%d+)-(%d+)";
+                local endDate     = userinfo["vipInfo"]["endDate"];
+                local datePattern = "(%d+)-(%d+)-(%d+)";
 
                 local year, month, day = endDate:match(datePattern);
-                local endDateTimestamp = os.time({year = year, month = month, day = day});
 
-                local year, month, day   = startDate:match(datePattern);
-                local startDateTimestamp = os.time({year = year, month = month, day = day});
+                local endDateTimestamp;
 
-                if(endDateTimestamp < os.time()) then
+                if(year and month and day) then
+                    endDateTimestamp = os.time({year = year, month = month, day = day});
+                end
+
+                if(not endDateTimestamp or endDateTimestamp < os.time()) then
                     loginMain.userType = "normal";
                 else
                     loginMain.userType = "vip";
@@ -247,7 +247,7 @@ function loginResponse(response, err, callback)
             else
                 loginMain.userType = "normal";
             end
-
+            echo(loginMain.userType);
             if(userinfo['defaultSiteDataSource']) then
                 local defaultSiteDataSource = userinfo['defaultSiteDataSource'];
                 local dataSourceSetting;

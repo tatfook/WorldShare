@@ -1213,14 +1213,12 @@ function SyncMain:genWorldMD(worldInfor, callback)
                 logoUrl       = worldInfor.preview,
                 desc          = "",
                 username      = loginMain.username,
-                visitCount    = 1,
-                favoriteCount = 1,
                 updateDate    = worldInfor.modDate,
                 version       = worldInfor.revision,
                 opusId        = worldInfor.opusId,
                 filesTotals   = worldInfor.filesTotals,
             }
-                
+
             world3D = KeepworkGen:setCommand("world3D",world3D);
 
             if(not worldInfor.readme) then

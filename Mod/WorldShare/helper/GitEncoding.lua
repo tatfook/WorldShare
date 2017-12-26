@@ -19,47 +19,47 @@ local GitEncoding = commonlib.gettable("Mod.WorldShare.helper.GitEncoding");
 
 -- =转成-equal  +转成-plus  /转成-slash
 function GitEncoding.base32(text)
-	if(text) then
-		local notLetter = string.find(text,"%A%A");
+    if(text) then
+        local notLetter = string.find(text,"%A%A");
 
-		if(notLetter) then
-			text = Encoding.to_base32(text);
+        if(notLetter) then
+            text = Encoding.to_base32(text);
 
-			text = text:gsub("[=]"  , "-equal");
-			text = text:gsub("[%+]" , "-plus");
-			text = text:gsub("[/]"  , "-slash");
+            text = text:gsub("[=]"  , "-equal");
+            text = text:gsub("[%+]" , "-plus");
+            text = text:gsub("[/]"  , "-slash");
 
-			text = "world_base32_" .. text;
-		else
-			text = "world_" .. text;
-		end
+            text = "world_base32_" .. text;
+        else
+            text = "world_" .. text;
+        end
 
-		--LOG.std(nil,"debug","text",text);
+        --LOG.std(nil,"debug","text",text);
 
-		return text;
-	else
-		return nil;
-	end
+        return text;
+    else
+        return nil;
+    end
 end
 
 function GitEncoding.unbase32(text)
-	if(text) then
-		local notLetter = string.find(text,"world_base32_");
+    if(text) then
+        local notLetter = string.find(text,"world_base32_");
 
-		if(notLetter) then
-			text = text:gsub("world_base32_","");
+        if(notLetter) then
+            text = text:gsub("world_base32_","");
 
-			text = text:gsub("[-equal]" , "=");
-			text = text:gsub("[-plus]"  , "+");
-			text = text:gsub("[-slash]" , "/");
+            text = text:gsub("[-equal]" , "=");
+            text = text:gsub("[-plus]"  , "+");
+            text = text:gsub("[-slash]" , "/");
 
-			return Encoding.from_base32(text);
-		else
-			text = text:gsub("world_","");
+            return Encoding.from_base32(text);
+        else
+            text = text:gsub("world_", "");
 
-			return text;
-		end
-	else
-		return nil;
-	end
+            return text;
+        end
+    else
+        return nil;
+    end
 end
