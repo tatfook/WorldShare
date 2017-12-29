@@ -189,7 +189,13 @@ function loginMain.closeModalPage()
     loginMain.ModalPage:CloseWindow();
 end
 
-function loginResponse(response, err, callback)
+function loginResponse(page, response, err, callback)
+    local account       = page:GetValue("account");
+    local password      = page:GetValue("password");
+    local loginServer   = page:GetValue("loginServer");
+    local isRememberPwd = page:GetValue("rememberPassword"); 
+    local autoLogin     = page:GetValue("autoLogin"); 
+
     if(type(response) == "table") then
         if(response['data'] ~= nil and response['data']['userinfo']['_id']) then
             if(not response['data']['userinfo']['realNameInfo']) then
@@ -202,7 +208,7 @@ function loginResponse(response, err, callback)
 
             -- 如果记住密码则保存密码到redist根目录下
             if(isRememberPwd) then
-                local file      = ParaIO.open("/PWD", "w");
+                local file      = ParaIO.open("PWD", "w");
                 local encodePwd = Encoding.PasswordEncodeWithMac(password);
                         
                 local value;
@@ -247,7 +253,7 @@ function loginResponse(response, err, callback)
             else
                 loginMain.userType = "normal";
             end
-            echo(loginMain.userType);
+
             if(userinfo['defaultSiteDataSource']) then
                 local defaultSiteDataSource = userinfo['defaultSiteDataSource'];
                 local dataSourceSetting;
@@ -356,9 +362,6 @@ end
 function loginMain.LoginAction(page, callback)
     local account       = page:GetValue("account");
     local password      = page:GetValue("password");
-    local loginServer   = page:GetValue("loginServer");
-    local isRememberPwd = page:GetValue("rememberPassword"); 
-    local autoLogin     = page:GetValue("autoLogin"); 
 
     page:SetNodeValue("account", account);
     page:SetNodeValue("password", password);
@@ -376,7 +379,7 @@ function loginMain.LoginAction(page, callback)
     loginMain.showMessageInfo(L"正在登陆，请稍后...");
 
     loginMain.LoginActionApi(account, password, function(response, err)
-        loginResponse(response, err, callback);
+        loginResponse(page, response, err, callback);
     end);
 end
 
@@ -709,10 +712,10 @@ function loginMain.CancelChangeName()
 end
 
 function loginMain.findPWDFiles()
-    local result = commonlib.Files.Find({}, "/", 0, 500,"*.*");
+    local result = commonlib.Files.Find({}, "./", 0, 500,"*");
 
     for key,value in ipairs(result) do
-        if(value.filename == "PWD" and value.fileattr ~= 0) then
+        if(value.filename == "PWD" and value.fileattr == 0) then
             return true;
         end
     end
@@ -723,7 +726,7 @@ end
 function loginMain.getRememberPassword()
     local function getRememberPassword(page)
         if(loginMain.findPWDFiles()) then
-            local file        = ParaIO.open("/PWD", "r");
+            local file        = ParaIO.open("PWD", "r");
             local fileContent = "";
 
             if(file:IsValid()) then
@@ -808,7 +811,7 @@ function loginMain.setRememberAuto()
 
             page:Refresh(0.01);
         else
-            local file    = ParaIO.open("/PWD", "r");
+            local file    = ParaIO.open("PWD", "r");
             local binData = file:GetText(0, -1);
 
             file:close();
@@ -828,7 +831,7 @@ function loginMain.setRememberAuto()
                 newStr = newStr .. settingData[4] .. "|";
                 newStr = newStr .. "false";
 
-                local file = ParaIO.open("/PWD", "w");
+                local file = ParaIO.open("PWD", "w");
                 file:write(newStr,#newStr);
             
                 file:close();
