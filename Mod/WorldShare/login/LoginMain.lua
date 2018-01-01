@@ -601,7 +601,7 @@ function loginMain.OpenBBS()
 end
 
 function loginMain.OnImportWorld()
-    ParaGlobal.ShellExecute("open", ParaIO.GetCurDirectory(0) .. LocalLoadWorld.GetWorldFolder(), "", "", 1);
+    ParaGlobal.ShellExecute("open", LocalLoadWorld.GetWorldFolderFullPath(), "", "", 1);
 end
 
 function loginMain.GetDesForWorld()

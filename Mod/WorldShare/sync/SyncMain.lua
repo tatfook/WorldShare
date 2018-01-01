@@ -1100,7 +1100,7 @@ end
 
 function SyncMain.openWorldFolder()
     SyncMain.closeBeyondPage();
-    local path = ParaIO.GetCurDirectory(0) .. LocalLoadWorld.GetWorldFolder() .. "/" .. SyncMain.foldername.default;
+    local path = LocalLoadWorld.GetWorldFolderFullPath() .. "/" .. SyncMain.foldername.default;
     ParaGlobal.ShellExecute("open", path, "", "", 1);
 end
 
