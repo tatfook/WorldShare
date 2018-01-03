@@ -150,7 +150,7 @@ function LocalService:update(_foldername, _path, _callback)
     LocalService:FileDownloader(_foldername, _path, _callback);
     --[[LocalService:getDataSourceContent(_foldername, _path, function(content, err)
         local foldernameForLocal = EncodingC.Utf8ToDefault(_foldername);
-        local bashPath = "worlds/DesignHouse/" .. SyncMain.foldername.default .. "/";
+        local bashPath = SyncMain.GetWorldFolderFullPath() .. "/" .. SyncMain.foldername.default .. "/";
 
         local file = ParaIO.open(bashPath .. _path, "w");
         
@@ -193,7 +193,7 @@ function LocalService:download(_foldername, _path, _callback)
             local path = {};
             local returnData = {};
 
-            local bashPath = "worlds/DesignHouse/" .. SyncMain.foldername.default .. "/";
+            local bashPath = SyncMain.GetWorldFolderFullPath() .. "/" .. SyncMain.foldername.default .. "/";
             local folderCreate = "";
 
             for segmentation in string.gmatch(_path,"[^/]+") do
@@ -257,9 +257,9 @@ function LocalService:downloadZip(_foldername, _commitId, _callback)
 
                 --LOG.std(nil,"debug","filesOut", filesOut);
 
-                local bashPath = "worlds/DesignHouse/" .. SyncMain.foldername.default .. "/";
+                local bashPath = SyncMain.GetWorldFolderFullPath() .. "/" .. SyncMain.foldername.default .. "/";
                 local folderCreate = "";
-                local rootFolder = filesOut[1].filename;
+                local rootFolder = filesOut[1] and filesOut[1].filename;
 
                 --LOG.std(nil,"debug","rootFolder",rootFolder);
 
@@ -342,7 +342,7 @@ function LocalService:FileDownloader(_foldername, _path, _callback)
 end
 
 function LocalService:delete(_foldername, _filename, _callback)
-    local bashPath = "worlds/DesignHouse/" .. SyncMain.foldername.default .. "/";
+    local bashPath = SyncMain.GetWorldFolderFullPath() .. "/" .. SyncMain.foldername.default .. "/";
     -- LOG.std(nil,"debug","ParaIO.DeleteFile",bashPath .. _filename);
 
     ParaIO.DeleteFile(bashPath .. _filename);
@@ -416,7 +416,7 @@ function LocalService:SetTag(worldDir, newTag)
 end
 
 function LocalService:GetTag(foldername)
-    local filePath  = "worlds/DesignHouse/" .. foldername .. "/tag.xml";
+    local filePath  = SyncMain.GetWorldFolderFullPath() .. "/" .. foldername .. "/tag.xml";
 
     local tag = ParaXML.LuaXML_ParseFile(filePath);
 

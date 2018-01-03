@@ -68,6 +68,14 @@ function SyncMain:init()
     end
 end
 
+function SyncMain.GetWorldFolder()
+	return LocalLoadWorld.GetWorldFolder();
+end
+
+function SyncMain.GetWorldFolderFullPath()
+    return LocalLoadWorld.GetWorldFolderFullPath();
+end
+
 function SyncMain.setSyncPage()
     SyncMain.SyncPage = document:GetPageCtrl();
 end
@@ -242,8 +250,8 @@ function SyncMain:compareRevision(LoginStatus, callback)
             SyncMain.worldDir.default = GameLogic.GetWorldDirectory():gsub("\\","/");
             SyncMain.worldDir.utf8    = Encoding.DefaultToUtf8(SyncMain.worldDir.default);
 
-            SyncMain.foldername.default = SyncMain.worldDir.default:match("worlds/DesignHouse/([^/]*)/");
-            SyncMain.foldername.utf8    = SyncMain.worldDir.utf8:match("worlds/DesignHouse/([^/]*)/");
+            SyncMain.foldername.default = SyncMain.worldDir.default:match("([^/]*)/$");
+            SyncMain.foldername.utf8    = SyncMain.worldDir.utf8:match("([^/]*)/$");
 
             loginMain.RefreshCurrentServerList(function()
                 if(GameLogic.IsReadOnly()) then

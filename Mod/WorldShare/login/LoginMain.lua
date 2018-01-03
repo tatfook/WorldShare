@@ -1002,7 +1002,7 @@ function loginMain.changeRevision(callback)
                 foldername.utf8    = value.foldername;
                 foldername.default = Encoding.Utf8ToDefault(value.foldername);
 
-                local WorldRevisionCheckOut = WorldRevision:new():init("worlds/DesignHouse/" .. foldername.default .. "/");
+                local WorldRevisionCheckOut = WorldRevision:new():init(SyncMain.GetWorldFolderFullPath() .. "/" .. foldername.default .. "/");
                 value.revision = WorldRevisionCheckOut:GetDiskRevision();
 
                 local tag = LocalService:GetTag(foldername.default);
@@ -1020,7 +1020,7 @@ function loginMain.changeRevision(callback)
                 zipWorldDir.utf8 = Encoding.Utf8ToDefault(zipWorldDir.default);
 
                 local zipFoldername = {};
-                zipFoldername.default = zipWorldDir.default:gsub("worlds/DesignHouse/","");
+                zipFoldername.default = zipWorldDir.default:match("([^/\\]+)/[^/]*$");
                 zipFoldername.utf8    = Encoding.Utf8ToDefault(zipFoldername.default);
 
                 --LOG.std(nil,"debug","zipWorldDir.default",zipWorldDir.default);
@@ -1214,8 +1214,8 @@ function loginMain.downloadWorld()
     SyncMain.foldername.utf8 = SyncMain.selectedWorldInfor.foldername;
     SyncMain.foldername.default = Encoding.Utf8ToDefault(SyncMain.foldername.utf8);
 
-    SyncMain.worldDir.utf8    = "worlds/DesignHouse/" .. SyncMain.foldername.utf8 .. "/";
-    SyncMain.worldDir.default = "worlds/DesignHouse/" .. SyncMain.foldername.default .. "/";
+    SyncMain.worldDir.utf8    = SyncMain.GetWorldFolderFullPath() .. "/" .. SyncMain.foldername.utf8 .. "/";
+    SyncMain.worldDir.default = SyncMain.GetWorldFolderFullPath() .. "/" .. SyncMain.foldername.default .. "/";
 
     SyncMain.commitId = SyncMain:getGitlabCommitId(SyncMain.foldername.utf8);
 
@@ -1235,7 +1235,7 @@ function loginMain.downloadWorld()
             SyncMain.selectedWorldInfor.force_nid   = 0;
             SyncMain.selectedWorldInfor.ws_id       = "";
             SyncMain.selectedWorldInfor.author      = "";
-            SyncMain.selectedWorldInfor.remotefile  = "local://worlds/DesignHouse/" .. SyncMain.foldername.default;
+            SyncMain.selectedWorldInfor.remotefile  = "local://"..SyncMain.GetWorldFolderFullPath() .. "/" .. SyncMain.foldername.default;
 
             loginMain.LoginPage:Refresh();
         end
@@ -1267,8 +1267,8 @@ function loginMain.syncNow(index)
             SyncMain.foldername.utf8    = SyncMain.selectedWorldInfor.foldername;
             SyncMain.foldername.default = Encoding.Utf8ToDefault(SyncMain.foldername.utf8);
 
-            SyncMain.worldDir.utf8    = "worlds/DesignHouse/" .. SyncMain.foldername.utf8 .. "/";
-            SyncMain.worldDir.default = "worlds/DesignHouse/" .. SyncMain.foldername.default .. "/";
+            SyncMain.worldDir.utf8    = SyncMain.GetWorldFolderFullPath() .. "/" .. SyncMain.foldername.utf8 .. "/";
+            SyncMain.worldDir.default = SyncMain.GetWorldFolderFullPath() .. "/" .. SyncMain.foldername.default .. "/";
 
             SyncMain.syncCompare(true);
         else
