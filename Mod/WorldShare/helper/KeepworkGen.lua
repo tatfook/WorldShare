@@ -76,7 +76,7 @@ end
 
 function KeepworkGen:setCommand(command, params)
     local content = [[
-```@wiki/js/{{command}}
+```@{{command}}
 {{params}}
 ```
 ]];
@@ -99,7 +99,7 @@ function KeepworkGen:setCommand(command, params)
 end
 
 function KeepworkGen:getCommand(command, content)
-    content = content:gsub("```@wiki/js/" .. command , "");
+    content = content:gsub("```@" .. command , "");
     content = content:gsub("```" , "");
 
     local params = {};

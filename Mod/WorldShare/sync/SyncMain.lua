@@ -1216,18 +1216,18 @@ function SyncMain:genWorldMD(worldInfor, callback)
     self:getUrl(contentUrl , function(data, err)
         if(err == 404) then
             local world3D = {
-                worldName     = worldTag.name,
-                worldUrl      = worldUrl,
-                logoUrl       = worldInfor.preview,
-                desc          = "",
-                username      = loginMain.username,
-                updateDate    = worldInfor.modDate,
-                version       = worldInfor.revision,
-                opusId        = worldInfor.opusId,
-                filesTotals   = worldInfor.filesTotals,
+                link_world_name   = worldTag.name,
+                link_world_url    = worldUrl,
+                media_logo        = worldInfor.preview,
+                link_desc         = "",
+                link_username     = loginMain.username,
+                link_update_date  = worldInfor.modDate,
+                link_version      = worldInfor.revision,
+                link_opus_id      = worldInfor.opusId,
+                link_files_totals = worldInfor.filesTotals,
             }
 
-            world3D = KeepworkGen:setCommand("world3D",world3D);
+            world3D = KeepworkGen:setCommand("paracraft",world3D);
 
             if(not worldInfor.readme) then
                 worldInfor.readme = "";
@@ -1251,20 +1251,18 @@ function SyncMain:genWorldMD(worldInfor, callback)
             data = Encoding.unbase64(data.content);
 
             local world3D = {
-                worldName     = worldTag.name,
-                worldUrl      = worldUrl,
-                logoUrl       = worldInfor.preview,
-                desc          = "",
-                username      = loginMain.username,
-                visitCount    = 1,
-                favoriteCount = 1,
-                updateDate    = worldInfor.modDate,
-                version       = worldInfor.revision,
-                filesTotals   = worldInfor.filesTotals,
-                opusId        = worldInfor.opusId,
+                link_world_name   = worldTag.name,
+                link_world_url    = worldUrl,
+                media_logo        = worldInfor.preview,
+                link_desc         = "",
+                link_username     = loginMain.username,
+                link_update_date  = worldInfor.modDate,
+                link_version      = worldInfor.revision,
+                link_opus_id      = worldInfor.opusId,
+                link_files_totals = worldInfor.filesTotals,
             }
 
-            world3D = KeepworkGen:setCommand("world3D",world3D);
+            world3D = KeepworkGen:setCommand("paracraft",world3D);
             SyncMain.worldFile = KeepworkGen:SetAutoGenContent(data, world3D);
 
             SyncMain:updateService(

@@ -39,6 +39,7 @@ local WorldRevision      = commonlib.gettable("MyCompany.Aries.Creator.Game.Worl
 local SyncMain           = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
 local RemoteServerList   = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.RemoteServerList");
 local ShareWorldPage     = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.Areas.ShareWorldPage");
+local GameLogic          = commonlib.gettable("MyCompany.Aries.Game.GameLogic");
 
 local loginMain = commonlib.gettable("Mod.WorldShare.login.loginMain");
 
@@ -51,9 +52,10 @@ loginMain.login_type   = 1;
 loginMain.site         = "http://keepwork.com";
 loginMain.current_type = 1;
 loginMain.serverLists  = {
-    {value="keepwork"     , name="keepwork"     , text=L"使用KeepWork登录", selected=true},
-    {value="keepworkDev"  , name="keepworkDev"  , text=L"使用KeepWorkDev登录"},
-    {value="local"        , name="local"        , text=L"使用本地服务登录"},
+    {value="keepwork"        , name="keepwork"        , text=L"使用KeepWork登录", selected=true},
+    {value="keepworkRelease" , name="keepworkRelease" , text=L"使用KeepWorkRelease登录"},
+    {value="keepworkDev"     , name="keepworkDev"     , text=L"使用KeepWorkDev登录"},
+    {value="local"           , name="local"           , text=L"使用本地服务登录"},
 }
 
 function loginMain:ctor()
@@ -284,7 +286,7 @@ function loginResponse(page, response, err, callback)
 
                 --判断paracraf站点是否存在，不存在则创建
                 HttpRequest:GetUrl({
-                    url     = loginMain.site.."/api/wiki/models/website/getDetailInfo",
+                    url     = loginMain.site .. "/api/wiki/models/website/getDetailInfo",
                     json    = true,
                     headers = {Authorization = "Bearer "..loginMain.token},
                     form    = {
@@ -482,7 +484,41 @@ function loginMain.GetWorldType()
     return InternetLoadWorld.type_ds;
 end
 
+function loginMain:sensitiveCheck(callback)
+    local new_world_name = CreateNewWorld.page:GetValue("new_world_name");
+
+    if(new_world_name) then
+        HttpRequest:GetUrl({
+            url    = loginMain.site .. "/api/wiki/models/sensitive_words/query";
+            form = {
+                query = {
+                    name = new_world_name
+                }
+            },
+            json   = true,
+        }, function(data, err)
+            if(data and type(data) == "table") then
+                echo(data.data.total, true);
+
+                if(data.data.total == 0) then
+                    if(callback and type(callback) == "function") then
+                        callback();
+                    end
+                else
+                    return _guihelper.MessageBox(L"世界名字中含有敏感词汇，请重新输入");
+                end
+            end
+        end);
+    end
+end
+
 function loginMain.CreateNewWorld()
+    GameLogic.GetFilters():add_filter('create_world', function(callback)
+        loginMain:sensitiveCheck(callback);
+
+        return true;
+    end);
+
     loginMain.LoginPage:CloseWindow();
     CreateNewWorld.ShowPage();
 end
@@ -785,6 +821,8 @@ function loginMain.setSite()
 
     if(loginServer == "keepwork") then
         loginMain.site = "http://keepwork.com";
+    elseif(loginServer == "keepworkRelease") then
+        loginMain.site = "http://release.keepwork.com";
     elseif(loginServer == "keepworkDev") then
         loginMain.site = "http://dev.keepwork.com";
     elseif(loginServer == "local") then
@@ -1229,7 +1267,7 @@ function loginMain.downloadWorld()
             SyncMain.selectedWorldInfor.icon        = "Texture/blocks/items/1013_Carrot.png";
             SyncMain.selectedWorldInfor.revision    = params.revison;
             SyncMain.selectedWorldInfor.filesTotals = params.filesTotals;
-            SyncMain.selectedWorldInfor.text 		= SyncMain.foldername.utf8;
+            SyncMain.selectedWorldInfor.tex         = SyncMain.foldername.utf8;
             SyncMain.selectedWorldInfor.world_mode  = "edit";
             SyncMain.selectedWorldInfor.gs_nid      = "";
             SyncMain.selectedWorldInfor.force_nid   = 0;
