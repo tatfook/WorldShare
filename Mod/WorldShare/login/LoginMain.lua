@@ -484,41 +484,47 @@ function loginMain.GetWorldType()
     return InternetLoadWorld.type_ds;
 end
 
-function loginMain:sensitiveCheck(callback)
-    local new_world_name = CreateNewWorld.page:GetValue("new_world_name");
-
-    if(new_world_name) then
-        HttpRequest:GetUrl({
-            url    = loginMain.site .. "/api/wiki/models/sensitive_words/query";
-            form = {
-                query = {
-                    name = new_world_name
-                }
-            },
-            json   = true,
-        }, function(data, err)
-            if(data and type(data) == "table") then
-                echo(data.data.total, true);
-
-                if(data.data.total == 0) then
-                    if(callback and type(callback) == "function") then
-                        callback();
-                    end
-                else
-                    return _guihelper.MessageBox(L"世界名字中含有敏感词汇，请重新输入");
-                end
-            end
-        end);
-    end
-end
+--loginMain.OnClickCreateWorld = CreateNewWorld.OnClickCreateWorld;
+--
+--CreateNewWorld.OnClickCreateWorld = function()
+--    loginMain:sensitiveCheck(function(hasSensitive)
+--        if(hasSensitive) then
+--            _guihelper.MessageBox(L"世界名字中含有敏感词汇，请重新输入");
+--        else
+--            loginMain.OnClickCreateWorld();
+--        end
+--    end)
+--end
+--
+--function loginMain:sensitiveCheck(callback)
+--    local new_world_name = CreateNewWorld.page:GetValue("new_world_name");
+--
+--    if(new_world_name) then
+--        HttpRequest:GetUrl({
+--            url    = loginMain.site .. "/api/wiki/models/sensitive_words/query";
+--            form = {
+--                query = {
+--                    name = new_world_name
+--                }
+--            },
+--            json   = true,
+--        }, function(data, err)
+--            if(data and type(data) == "table") then
+--                if(data.data.total ~= 0) then
+--                    if(callback and type(callback) == "function") then
+--                        callback(true);
+--                    end
+--                else
+--                    if(callback and type(callback) == "function") then
+--                        callback(false);
+--                    end
+--                end
+--            end
+--        end);
+--    end
+--end
 
 function loginMain.CreateNewWorld()
-    GameLogic.GetFilters():add_filter('create_world', function(callback)
-        loginMain:sensitiveCheck(callback);
-
-        return true;
-    end);
-
     loginMain.LoginPage:CloseWindow();
     CreateNewWorld.ShowPage();
 end

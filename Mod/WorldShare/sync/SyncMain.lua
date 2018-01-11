@@ -962,7 +962,7 @@ end
 
 function SyncMain:refreshRemoteWorldLists(syncGUI, callback)
     SyncMain:getCommits(SyncMain.foldername.base32, function(data, err)
-        if(data and data[1]) then
+        if (data and data[1]) then
             local lastCommits    = data[1];
             local lastCommitFile = lastCommits.title:gsub("keepwork commit: ","");
             local lastCommitSha  = lastCommits.id;
@@ -1333,11 +1333,7 @@ function SyncMain.deleteServerWorld()
 end
 
 function SyncMain.deleteWorldLocal(callback)
-    --local world      = InternetLoadWorld:GetCurrentWorld();
     local foldername = SyncMain.selectedWorldInfor.foldername;
-
-    --LOG.std(nil,"debug","world",world);
-    --LOG.std(nil,"debug","SyncMain.selectedWorldInfor",SyncMain.selectedWorldInfor);
 
     if(not SyncMain.selectedWorldInfor) then
         _guihelper.MessageBox(L"请先选择世界");
@@ -1349,8 +1345,6 @@ function SyncMain.deleteWorldLocal(callback)
             InternetLoadWorld.RefreshAll();
         elseif(SyncMain.selectedWorldInfor.remotefile) then
             local targetDir = SyncMain.selectedWorldInfor.remotefile:gsub("^local://", ""); -- local world, delete all files in folder and the folder itself.
-
-            --LOG.std(nil,"debug","SyncMain.deleteWorldLocal",targetDir);
             
             if(SyncMain.selectedWorldInfor.is_zip) then
 
