@@ -1267,7 +1267,7 @@ function loginMain.downloadWorld()
             SyncMain.selectedWorldInfor.icon        = "Texture/blocks/items/1013_Carrot.png";
             SyncMain.selectedWorldInfor.revision    = params.revison;
             SyncMain.selectedWorldInfor.filesTotals = params.filesTotals;
-            SyncMain.selectedWorldInfor.tex         = SyncMain.foldername.utf8;
+            SyncMain.selectedWorldInfor.text        = SyncMain.foldername.utf8;
             SyncMain.selectedWorldInfor.world_mode  = "edit";
             SyncMain.selectedWorldInfor.gs_nid      = "";
             SyncMain.selectedWorldInfor.force_nid   = 0;

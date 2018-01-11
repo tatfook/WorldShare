@@ -999,10 +999,7 @@ function SyncMain:refreshRemoteWorldLists(syncGUI, callback)
                 end
             end
 
-            local preview         = {};
-            preview[0]            = {};
-            preview[0].previewUrl = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. GitEncoding.base32(SyncMain.foldername.utf8) .. "/raw/master/preview.jpg";
-            preview               = NPL.ToJson(preview,true);
+            local preview = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. GitEncoding.base32(SyncMain.foldername.utf8) .. "/raw/master/preview.jpg";;
 
             local filesTotals = 0;
             if(SyncMain.selectedWorldInfor) then
