@@ -197,7 +197,7 @@ function loginResponse(page, response, err, callback)
     local loginServer   = page:GetValue("loginServer");
     local isRememberPwd = page:GetValue("rememberPassword"); 
     local autoLogin     = page:GetValue("autoLogin"); 
-
+    
     if(type(response) == "table") then
         if(response['data'] ~= nil and response['data']['userinfo']['_id']) then
             if(not response['data']['userinfo']['realNameInfo']) then
@@ -207,6 +207,9 @@ function loginResponse(page, response, err, callback)
             end
 
             loginMain.token = response['data']['token'];
+
+            -- 手机号或其他账号登陆时，重新获取用户名 
+            account = response.data.userinfo.defaultSiteDataSource.username;
 
             local getDataSourceApi = loginMain.site .. '/api/wiki/models/site_data_source/getDefaultSiteDataSource'
 
