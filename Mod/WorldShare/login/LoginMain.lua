@@ -497,6 +497,7 @@ function loginMain.GetWorldType()
     return InternetLoadWorld.type_ds;
 end
 
+--[[ TODO: this makes paracraft NOT able to run when network is down.
 local OnClickCreateWorld = CreateNewWorld.OnClickCreateWorld;
 
 CreateNewWorld.OnClickCreateWorld = function()
@@ -508,6 +509,7 @@ CreateNewWorld.OnClickCreateWorld = function()
         end
     end)
 end
+]]
 
 function loginMain:sensitiveCheck(callback)
     local new_world_name = CreateNewWorld.page:GetValue("new_world_name");
