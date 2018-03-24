@@ -999,7 +999,7 @@ function SyncMain:refreshRemoteWorldLists(syncGUI, callback)
                 end
             end
 
-            local preview = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. GitEncoding.base32(SyncMain.foldername.utf8) .. "/raw/master/preview.jpg";;
+            local preview = loginMain.rawBaseUrl .. "/" .. loginMain.dataSourceUsername .. "/" .. GitEncoding.base32(SyncMain.foldername.utf8) .. "/raw/master/preview.jpg";
 
             local filesTotals = 0;
             if(SyncMain.selectedWorldInfor) then
