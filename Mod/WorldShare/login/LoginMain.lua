@@ -472,7 +472,7 @@ function loginMain.formatDatetime(datetime)
     if(datetime) then
         local n = 1;
         local formatDatetime = "";
-        for value in string.gmatch(datetime,"[^-]+") do
+        for value in string.gmatch(datetime,"[^%-]+") do
 
             if(n == 3) then
                 formatDatetime = formatDatetime .. value .. " ";
@@ -486,7 +486,6 @@ function loginMain.formatDatetime(datetime)
 
             n = n + 1;
         end
-
         return formatDatetime;
     end
 
@@ -1214,7 +1213,7 @@ function loginMain:formatDate(modDate)
 
     local modDateTable = {};
 
-    for modDateEle in string.gmatch(modDate,"[^-]+") do
+    for modDateEle in string.gmatch(modDate,"[^%-]+") do
         modDateTable[#modDateTable+1] = modDateEle;
     end
 
