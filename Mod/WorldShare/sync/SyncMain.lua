@@ -133,7 +133,7 @@ function SyncMain:compareRevision(LoginStatus, callback)
     SyncMain.compareFinish = false;
 
     if(loginMain.token) then
-        local function go()
+        local function compare()
             SyncMain.foldername.base32 = GitEncoding.base32(SyncMain.foldername.utf8);
 
             WorldRevisionCheckOut   = WorldRevision:new():init(SyncMain.worldDir.default);
@@ -252,8 +252,8 @@ function SyncMain:compareRevision(LoginStatus, callback)
 
             SyncMain.foldername.default = SyncMain.worldDir.default:match("([^/]*)/$");
             SyncMain.foldername.utf8    = SyncMain.worldDir.utf8:match("([^/]*)/$");
-
-            loginMain.RefreshCurrentServerList(function()
+            
+            local function comparePrepare()
                 if(GameLogic.IsReadOnly()) then
                     if(type(callback) == "function")then
                         callback("zip");
@@ -270,11 +270,23 @@ function SyncMain:compareRevision(LoginStatus, callback)
                     end
                 end
 
-                go();
-            end);
+                compare();
+            end
+
+            if(loginMain.LoginPage or loginMain.ModalPage) then
+                loginMain.RefreshCurrentServerList(function()
+                    comparePrepare()
+                end);
+            else
+                comparePrepare()
+            end
         else
-            go();
+            compare();
         end
+    else
+        loginMain.LoginWithTokenApi(function()
+            self:compareRevision(LoginStatus, callback)
+        end)
     end
 end
 

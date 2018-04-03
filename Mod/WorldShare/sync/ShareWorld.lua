@@ -42,11 +42,11 @@ function ShareWorld.ShowPage()
 
     SyncMain.syncType = "share";
 
-    if(loginMain.login_type == 1) then
+    if(not loginMain.IsSignedIn()) then
         loginMain.showLoginModalImp(function()
             ShareWorldPage.ShowPage();
         end);
-    elseif(loginMain.login_type == 3) then
+    else
         loginMain.showMessageInfo(L"正在获取，请稍后...");
         ShareWorld.shareCompare();
     end

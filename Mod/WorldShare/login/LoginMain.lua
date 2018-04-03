@@ -83,26 +83,10 @@ function loginMain.ShowPage()
             cancelShowAnimation = true,
     });
 
-    local usertoken = ParaEngine.GetAppCommandLineByParam("usertoken","");
-
-    if(type(usertoken) == "string" and #usertoken > 0) then
-        loginMain.LoginWithTokenApi(usertoken, function(response, err)
-            if(response and response.data) then
-                local params = {
-                    data = {
-                        token    = usertoken,
-                        userinfo = response.data,
-                    }
-                };
-
-                loginResponse(params, err);
-            end
-        end);
-
+    if(not loginMain.IsSignedIn() and loginMain.LoginWithTokenApi()) then
         return;
     end
 
-    loginMain.init();
     loginMain.getRememberPassword();
     loginMain.setSite();
     loginMain.autoLoginAction("main");
@@ -153,6 +137,10 @@ function loginMain.showMessageInfo(msg)
 end
 
 function loginMain.showLoginModalImp(callback)
+    if(loginMain.LoginWithTokenApi(callback)) then
+        return;
+    end
+
     System.App.Commands.Call("File.MCMLWindowFrame", {
         url            = "Mod/WorldShare/login/LoginModal.html",
         name           = "loginMain.LoginModal",
@@ -168,7 +156,7 @@ function loginMain.showLoginModalImp(callback)
         width          = 320,
         height         = 350,
     });
-
+    
     if(type(callback) == "function") then
         loginMain.modalCall = callback;
     end
@@ -192,11 +180,11 @@ function loginMain.closeModalPage()
 end
 
 function loginResponse(page, response, err, callback)
-    local account       = page:GetValue("account");
-    local password      = page:GetValue("password");
-    local loginServer   = page:GetValue("loginServer");
-    local isRememberPwd = page:GetValue("rememberPassword"); 
-    local autoLogin     = page:GetValue("autoLogin"); 
+    local account       = page and page:GetValue("account");
+    local password      = page and page:GetValue("password");
+    local loginServer   = page and page:GetValue("loginServer");
+    local isRememberPwd = page and page:GetValue("rememberPassword"); 
+    local autoLogin     = page and page:GetValue("autoLogin"); 
     
     if(type(response) == "table") then
         if(response['data'] ~= nil and response['data']['userinfo']['_id']) then
@@ -981,7 +969,7 @@ function loginMain.RefreshCurrentServerList(callback)
         loginMain.LoginPage:Refresh(0.01);
 
         -- user
-        if(loginMain.current_type == 1 and loginMain.login_type == 1) then
+        if(loginMain.current_type == 1 and not loginMain.IsSignedIn()) then
             loginMain.getLocalWorldList(function()
                 loginMain.changeRevision(function()
                     loginMain.refreshing = false;
@@ -990,7 +978,7 @@ function loginMain.RefreshCurrentServerList(callback)
                     end
                 end);
             end);
-        elseif(loginMain.current_type == 1 and loginMain.login_type == 3) then
+        elseif(loginMain.current_type == 1 and loginMain.IsSignedIn()) then
             loginMain.getLocalWorldList(function()
                 loginMain.changeRevision(function()
                     loginMain.syncWorldsList(function()
@@ -1404,21 +1392,40 @@ function loginMain.LoginActionApi(account, password, callback)
     loginRequest(url, params, headers, callback);
 end
 
-function loginMain.LoginWithTokenApi(token, callback)
-    if(not token) then
-        return;
+function loginMain.LoginWithTokenApi(callback)
+    local cmdline = ParaEngine.GetAppCommandLine();
+    local urlProtocol = string.match(cmdline or "", "paracraft://(.*)$");
+    urlProtocol = string.gsub(urlProtocol, '%%22', '\"')
+
+    local usertoken = urlProtocol:match("usertoken=\"([%S]+)\"");
+
+    if(type(usertoken) == "string" and #usertoken > 0) then
+        loginMain.showMessageInfo(L"正在登陆，请稍后...");
+
+        local url = loginMain.site .. "/api/wiki/models/user/getProfile";
+
+        local params  = {};
+        local headers = {
+            Authorization = "Bearer " .. usertoken,
+        };
+
+        loginRequest(url, params, headers, function(response)
+            if(response and response.data) then
+                local params = {
+                    data = {
+                        token    = usertoken,
+                        userinfo = response.data,
+                    }
+                };
+
+                loginResponse(nil, params, err, callback);
+            end
+        end);
+
+        return true;
+    else
+        return false;
     end
-
-    loginMain.showMessageInfo(L"正在登陆，请稍后...");
-
-    local url = loginMain.site .. "/api/wiki/models/user/getProfile";
-
-    local params  = {};
-    local headers = {
-        Authorization = "Bearer " .. token,
-    };
-
-    loginRequest(url, params, headers, callback);
 end
 
 function loginMain.getUserInfo(callback)
