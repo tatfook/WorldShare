@@ -1395,7 +1395,7 @@ end
 function loginMain.LoginWithTokenApi(callback)
     local cmdline = ParaEngine.GetAppCommandLine();
     local urlProtocol = string.match(cmdline or "", "paracraft://(.*)$");
-    urlProtocol = string.gsub(urlProtocol, '%%22', '\"')
+    urlProtocol = string.gsub(urlProtocol or "", '%%22', '\"')
 
     local usertoken = urlProtocol:match("usertoken=\"([%S]+)\"");
 
