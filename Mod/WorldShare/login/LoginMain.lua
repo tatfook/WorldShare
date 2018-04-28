@@ -837,7 +837,10 @@ function loginMain.setSite()
         loginMain.site = "http://localhost:8099";
     end
 
-    page:GetNode("register"):SetAttribute("href",loginMain.site .. "/wiki/join");
+    local node = page:GetNode("register");
+    if(node) then
+        node:SetAttribute("href",loginMain.site .. "/wiki/join");
+    end
     page:Refresh(0.01);
 end
 

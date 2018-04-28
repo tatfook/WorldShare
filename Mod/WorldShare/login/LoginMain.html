@@ -1,3 +1,4 @@
+<!-- Mod/WorldShare/login/LoginMain.html -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -5,7 +6,7 @@
 </head>
 <body>
     <pe:mcml>
-        <script type="text/npl" refresh="false">
+        <script type="text/npl" refresh="false" src="LoginMain.lua">
             <![CDATA[
                 InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld");
                 loginMain         = commonlib.gettable("Mod.WorldShare.login.loginMain");
@@ -16,53 +17,15 @@
         </script>
         <style type="text/mcss">
             {
-                user_area = {
-                    float  = "left",
-                    width  = 345,
-                    height = 441,
-                    ["padding-left"]  = 25,
-                    ["padding-right"] = 30,
-                },
-                user_area_world_type = {
-                    ["margin-top"] = 20,
-                    height = 40,
-                },
-                user_area_world_type_selected = {
-                    height = 30,
-                    spacing = 20,
-                    background = "textures/worldshare_32bits.png;98 20 16 16:4 4 4 4",
-                    color = "#FFFFFF",
-                    ["margin-right"] = 15,
-                },
-                user_area_world_type_unselect = {
-                    height = 30,
-                    spacing = 20,
-                    background = "textures/worldshare_32bits.png;124 20 16 16:4 4 4 4",
-                    color = "#FFFFFF",
-                    ["margin-right"] = 15,
-                },
-                user_login = {
-                    ["base-font-size"]   = 16,
-                    ["font-size"]        = 16,
-                    ["margin-top"]       = 10,
-                    color                = "#ffffff",
-                    ["background-color"] = "#454340",
-                    ["padding-right"]    = 20,
-                    ["padding-left"]     = 20,
-                    ["padding-top"]      = 20,
-                    ["height"] = 295,
-                },
                 text_field = {
                     background = "textures/worldshare_32bits.png;72 20 16 16:3 3 3 3",
                     border = "none",
                 },
                 login_button = {
-                    ["margin-left"] = 55,
-                    width           = 150,
-                    height          = 33,
-                    textcolor = "#ffffff",
-                    color = "#ffffff",
-                    background      = "textures/worldshare_32bits.png;20 20 16 16:4 4 4 4",
+                    ["min-width"]   = 100,
+                    height          = 28,
+                    color = "#cccccc",
+                    background = "Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;179 89 21 21:8 8 8 8",
                 },
                 logged_common_button = {
                     width = 130,
@@ -76,23 +39,35 @@
                 middle_line = {
                     float  = "left",
                     width  = 2,
-                    height = 441,
+                    height = 430,
                     ["margin-left"] = 0,
                     ["margin-top"]  = 0,
                     ["background-color"] = "#b7b2b2"
                 },
+                user_area = {
+                    float = "left",
+                    width  = 158,
+                    height = 430,
+                },
                 world_area = {
                     float = "left",
-                    width  = 345,
-                    height = 441,
-                    ["padding-top"] = 20,
-                    ["padding-left"] = 30,
-                    ["padding-right"] = 20,
+                    width  = 340,
+                    height = 430,
+                    ["padding-top"] = 10,
+                    ["padding-left"] = 10,
+                    ["padding-right"] = 0,
+                },
+                events_area = {
+                    float = "left",
+                    width  = 315,
+                    height = 430,
+                    ["padding-top"] = 10,
+                    ["padding-left"] = 10,
+                    ["padding-right"] = 10,
                 },
                 add_server_text_field = {
                     textcolor = "#ffffff",
                     float = "left",
-                    width = 237,
                     height = 30,
                     background = "Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;263 346 36 36:15 15 15 15",
                 },
@@ -157,310 +132,263 @@
                     ["font-weight"] = "bold",
                     ["font-size"]   = 14,
                 },
+                nav_button = {
+                    color = "#cccccc",
+                    background = "",
+                    ["margin-top"] = 0,
+                    height=28,
+                    background2 = "Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;179 89 21 21:8 8 8 8",
+                },
+                flat_button = {
+                    color = "#cccccc",
+                    ["margin-top"] = 0,
+                    background = "Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;179 89 21 21:8 8 8 8",
+                },
             }
         </style>
-        <div style="width:860px;height:470px;">
-            <div style="float:left;margin-top:0px;width:160px;height:470px;" class="mc_panel">
-                <pe:if condition='<%= System.options.mc%>'>
-                    <div style="position:relative;margin-left:0px;margin-top:0px;">
-                        <div style="margin-left:0px;margin-top:0px;">
-                            <pe:if condition='<%= System.User.isOnline%>'>
-                                <pe:if condition='<%= loginMain.current_type%>'>
-                                    <div style="margin-top: 20px; text-align: center; color: #ffffff;">
-                                        <%= GetCurrentServerPageNickName() %>
-                                    </div>
-                                    <div style="margin-left:45px;margin-top:10px;">
-                                        <input type="button" value='<%= L"修改名称" %>' onclick="loginMain.ChangeName()" style="width: 70px; height: 22px; color: #ffffff; " class="mc_light_grey_button_with_fillet" />
-                                    </div>
-                                </pe:if>
-                                <pe:if condition='<%= loginMain.IsChangingName()%>'>
-                                    <div style="margin-left:15px;margin-top:20px;">
-                                        <input type="text" name="nickname" autofocus="true" value='<%= loginMain.GetUserNickName() %>' rows="1" style="margin-top:0px;margin-left:0px;width:130px;height:22px;" class="mc_text" />
-                                    </div>
-                                    <div style="margin-left: 0px; margin-top: 10px;">
-                                        <input type="button" value='<%= L"确定" %>' onclick="loginMain.SaveName()" style="float: left; margin-left: 15px; width: 60px; height: 22px; color: #ffffff; " class="mc_light_grey_button_with_fillet" />
-                                        <input type="button" value='<%= L"取消" %>' onclick="loginMain.CancelChangeName()" style="float: left; margin-left: 10px; width: 60px; height: 22px; color: #ffffff; " class="mc_light_grey_button_with_fillet" />
-                                    </div>
-                                </pe:if>
-                            </pe:if>
-                        </div>
+        <div class="default" style="width:860px;background:url(Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#267 89 34 34:8 8 8 8);">
+            <div style="height:32px;margin:2px;margin-top:5px;margin-left:5px;margin-bottom:0px" width="100%">
+                <div style="float:left;margin-top:5px"></div>
+                <div style="float:left;margin-top:2px;margin-left:10px;">
+                    <input class="nav_button" style="width:28px;" type="button" value="<" tooltip='<%=L"返回"%>'/>
+                    <input class="nav_button" style="width:28px;" type="button" value=">" tooltip='<%=L"前进"%>'/>
+                    <input class="nav_button" type="button" value='<%=L"刷新"%>' onclick="loginMain.RefreshCurrentServerList()" tooltip='<%=L"刷新本地目录或远程网址"%>'/>
+                </div>
+                <div style="float:left;margin-left:5px;margin-top:2px;">
+                    <div style="float:left" class="add_server_text_field">
+                        <input type="text" name="content" style="width:400px;height:30px;background:url();textcolor:#ffffff" spacing="4" EmptyText='<%=loginMain.GetDefaultValueForAddress() %>' rows="1" CaretColor="#FFFFFFFF"  />
+                        <input class="flat_button" style="height:26px;margin-top:2px;margin:2px;min-width:32px" type="button" value="..." tooltip='<%=L"管理访问历史"%>'/>
                     </div>
-                    <div style="position:relative;margin-left:-48px;margin-top:90px;width:256px;height:226px;">
-                        <div>
-                            <pe:mc_player name="MyPlayer" miniscenegraphname="AvatarMyselfTabCharacter" style="width:256px;height:256px;" isinteractive="false" />
-                        </div>
-                    </div>
-                    <div style="position:relative;margin-left:0px;margin-top:340px;height:256px;">
-                        <div style="margin-left:0px;margin-top:0px;height:50px;">
-                            <pe:if condition='<%= System.User.isOnline%>'>
-                            </pe:if>
-                            <pe:if condition='<%= not System.User.isOnline%>'>
-                            </pe:if>
-                        </div>
-                    </div>
-                </pe:if>
+                    <input type="button" value='<%=L"打开" %>' class="flat_button" style="margin-left:3px;height:30px" onclick="InternetLoadWorld.OnAddSearchPage"/>
+                </div>
+                <input style="margin-top:0px;float:left;background:url(Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#363 59 26 26:7 7 7 7);width:26px;height:26px" type="button" align="right" />
             </div>
-            <aries:window mode="thin" width="700" height="470" style="float:left;" title='<%= L"服务器列表" %>' onclose="loginMain.ClosePage()"> 
-                <div style="width:700px;height:470px;">
-                    <!--categories-->
-                    <!-- 登陆界面 -->
-                    <div class="user_area">
-                        <div class="user_area_world_type">
-                            <pe:repeat DataSource="<%=loginMain.GetWorldType()%>">
-                                <pe:repeatitem style="float:left;">
-                                    <pe:if condition='<%=InternetLoadWorld.type_index == Eval("index") %>'>
-                                        <input type="button" value='<%=Eval("text")%>' name='<%=Eval("index")%>' onclick="loginMain:OnChangeType()" class="user_area_world_type_selected" />
-                                    </pe:if>
-                                    <pe:if condition='<%=InternetLoadWorld.type_index ~= Eval("index") %>'>
-                                        <input type="button" value='<%=Eval("text")%>' name='<%=Eval("index")%>' onclick="loginMain:OnChangeType()" class="user_area_world_type_unselect" />
-                                    </pe:if>
-                                </pe:repeatitem>
-                            </pe:repeat>
-                        </div>
-                        <!--未登陆-->
-                        <pe:if condition="<%=loginMain.login_type == 1 %>">
-                            <div name="loginMain" class="user_login">
-                                <div style="margin-bottom:12px;">
-                                    <div style="float:left;min-width:80px;"><%= L"服务器：" %></div>
-                                    <select name="loginServer" AllowUserEdit="false" DataSource="<%= loginMain.serverLists %>" onclick="loginMain.setSite()" style="height: 30px;" class="text_field"></select>
-                                </div>
-                                <div style="margin-bottom:12px;">
-                                    <div style="float:left;min-width:80px;"><%= L"账号：" %></div><input type="text" EmptyText='<%= L"账户名/邮箱/手机号" %>' class="bbs_text text_field" style="height: 30px;" name="account"/>
-                                </div>
-                                <div style="margin-bottom:12px;">
-                                    <div style="float:left;min-width:80px;"><%= L"密码：" %></div><input type="text" PasswordChar="*" class="bbs_text text_field" style="height: 30px;" name="password"/>
-                                </div>
-                                <div>
-                                    <div style="float:left;min-width:120px;"><input type="checkbox" style="margin-top:3px;" name="rememberPassword" onclick="loginMain.setAutoRemember"/><div style="float:left" for="rememberPassword"><%= L"记住密码?" %></div></div>
-                                    <div style="float:left;min-width:120px;"><input type="checkbox" style="margin-top:3px;" name="autoLogin"  onclick="loginMain.setRememberAuto"/><div style="float:left" for="autoLogin"><%= L"自动登录" %></div></div>
-                                </div>
-                                <div style="margin-top:30px;margin-bottom:15px;">
-                                    <input type="button" DefaultButton="true" class="login_button" onclick="loginMain.LoginActionMain()" value='<%= L"登   录"%>'/>
-                                </div>
-                                <div style="text-align:left;margin-left:55px;">
-                                    <span style="color:#ffffff;"><%= L"还没有帐号？" %></span>
-                                    <a name="register" style="background:url(textures/worldshare_32bits.png#176 0 64 30:0 0 0 0);height:30px;width:150px;font-size: 14px;color: #fe5927;"><%= L"点击注册" %></a>
-                                </div>
-                            </div>
-                        </pe:if>
-                        <pe:if condition="<%=loginMain.login_type == 3 %>">
-                            <div name="loginsuccess" class="user_login" style="width:290px;">
-                                <div style="margin-bottom:25px;">
-                                    <%= L"欢迎:" %><span style="color:#ff6666"><%=loginMain.username%></span>
-                                </div>
-                                <div style="margin-bottom:13px;">
-                                    <%= L"我的作品网站" %>
-                                    <input type="button" tooltip='<%= string.format(L"点击打开:%s", loginMain.personPageUrl) %>' onclick="loginMain.sharePersonPage()" style="width:20px;height:16px;background:url(textures/worldshare_32bits.png#194 46 25 20);margin-top:3px;margin-left:13px;" class="button_highlight" />
-                                </div>
-                                <div style="height:90px;" >
-                                    <div onclick="loginMain.sharePersonPage()" tooltip='<%= string.format(L"点击打开:%s", loginMain.personPageUrl) %>'>
-                                        <%=loginMain.personPageUrl %>
-                                    </div>
-                                </div>
-                                <div>
-                                    <input type="button" onclick="loginMain.logout()" class="logged_common_button" value='<%= L"退出登录" %>' />
-                                </div>
-                            </div>
-                        </pe:if>
-                        <div style="margin-top:30px">
-                            <input type="button" value='<%=L"导入/导出..." %>'  onclick="loginMain.OnImportWorld()" class="common_button mc_light_grey_button_with_fillet" />
-                            <input type="button" value='<%=L"刷新" %>' style="margin-left:15px;" onclick="loginMain.RefreshCurrentServerList()" class="common_button mc_light_grey_button_with_fillet" />
-                        </div>
+            <div style="height:2px;" width="100%" class="mc_line"></div>
+            <div class="user_area">
+                <div style="margin-top:10px;height:40px;">
+                    <div style="margin-left:15px;">
+                        <input type="text" name="nickname" EmptyText='<%=L"输入角色名字"%>' value='<%=loginMain.username %>' rows="1" CaretColor="#FFFFFFFF" style="textcolor:#ffffff;width:130px;height:22px;" class="mc_item" />
                     </div>
-                    <!--line-->
-                    <div class="middle_line" />
-                    <!--worlds-->
-                    <div class="world_area">
-                        <div style="height: 25px;margin-bottom:25px;">
-                            <input type="text" name="content" spacing="4" EmptyText='<%=loginMain.GetDefaultValueForAddress() %>' rows="1" CaretColor="#FFFFFFFF" class="add_server_text_field" />
-                            <input type="button" value='<%=L"打开" %>' class="add_server_button mc_light_grey_button_with_fillet" onclick="InternetLoadWorld.OnAddSearchPage"/>
+                </div>
+                <div style="margin-left:-48px;margin-top:10px;width:256px;height:226px;">
+                    <div>
+                        <pe:mc_player name="MyPlayer" miniscenegraphname="AvatarMyselfTabCharacter" style="width:256px;height:256px;" isinteractive="false" />
+                    </div>
+                </div>
+                <div style="margin-top:20px;margin:10px">
+                    <pe:if condition="<%=loginMain.login_type == 1 %>">
+                        <div style="text-align:center;width:140px;"><%=L"目前为离线模式"%></div>
+                        <div style="margin-top:10px">
+                            <input type="button" style="margin-left:20px" class="login_button" onclick="loginMain.LoginActionMain()" value='<%= L"登录"%>'/>
                         </div>
-                        <div style="height: 308px;width:315px;">
-                            <pe:if style="margin-top:10px;font-weight:bold;color:#ffffff" condition="<%= loginMain.refreshing%>">
-                                <%=L"正在刷新, 请稍候 ... " %>
-                            </pe:if>
-                            <pe:gridview RememberScrollPos="true" AllowPaging="false" VerticalScrollBarStep="30" DefaultNodeHeight="80" ItemsPerLine="1" name="gw_world_ds" DataSource='<%=InternetLoadWorld.DS_Func_Worlds%>'>
-                                <Columns>
-                                    <pe:if condition="<%= not loginMain.refreshing%>">
-                                        <!--选中的项-->
-                                        <pe:if condition='<%= Eval("index") == InternetLoadWorld.selected_world_index%>'>
-                                            <div name='<%=Eval("index")%>' class="share_selected_item">
-                                                <pe:if condition='<%= loginMain.current_type == 1%>'>
+                    </pe:if>
+                    <pe:if condition="<%=loginMain.login_type == 3 %>">
+                        <div name="loginsuccess" class="user_login" style="width:290px;">
+                            <div style="margin-bottom:10px;">
+                                <%= L"欢迎:" %><span style="color:#ff6666"><%=loginMain.username%></span>
+                            </div>
+                            <div>
+                                <input type="button" onclick="loginMain.logout()" class="login_button" value='<%= L"退出登录" %>' />
+                            </div>
+                        </div>
+                    </pe:if>
+                </div>
+            </div>
+            <div class="middle_line"/>
+            <div class="world_area">
+                <div style="height:350px;">
+                    <pe:if style="margin-top:10px;font-weight:bold;color:#ffffff" condition="<%= loginMain.refreshing%>">
+                        <%=L"正在刷新, 请稍候 ... " %>
+                    </pe:if>
+                    <pe:gridview RememberScrollPos="true" AllowPaging="false" VerticalScrollBarStep="30" DefaultNodeHeight="80" ItemsPerLine="1" name="gw_world_ds" DataSource='<%=InternetLoadWorld.DS_Func_Worlds%>'>
+                        <Columns>
+                            <pe:if condition="<%= not loginMain.refreshing%>">
+                                <!--选中的项-->
+                                <pe:if condition='<%= Eval("index") == InternetLoadWorld.selected_world_index%>'>
+                                    <div name='<%=Eval("index")%>' class="share_selected_item">
+                                        <pe:if condition='<%= loginMain.current_type == 1%>'>
+                                            <div>
+                                                <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index")) and  loginMain.GetCurWorldInfo("status", Eval("index")) == 1%>'>
+                                                    <div class="status" style="background:url(textures/worldshare_32bits.png#72 104 16 16)" tooltip='<%= loginMain.formatStatus(loginMain.GetCurWorldInfo("status",Eval("index")))%>' />
+                                                </pe:if>
+                                                <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index")) and  loginMain.GetCurWorldInfo("status", Eval("index")) == 2%>'>
+                                                    <div class="status" style="background:url(textures/worldshare_32bits.png#98 104 16 16)" tooltip='<%= loginMain.formatStatus(loginMain.GetCurWorldInfo("status",Eval("index")))%>' />
+                                                </pe:if>
+                                                <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index")) and  loginMain.GetCurWorldInfo("status", Eval("index")) == 3%>'>
+                                                    <div class="status" style="background:url(textures/worldshare_32bits.png#20 104 16 16)" tooltip='<%= loginMain.formatStatus(loginMain.GetCurWorldInfo("status",Eval("index")))%>' />
+                                                </pe:if>
+                                                <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index")) and  loginMain.GetCurWorldInfo("status", Eval("index")) == 4%>'>
+                                                    <div class="status" style="background:url(textures/worldshare_32bits.png#46 104 16 16)" tooltip='<%= loginMain.formatStatus(loginMain.GetCurWorldInfo("status",Eval("index")))%>' />
+                                                </pe:if>
+                                                <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index")) and  loginMain.GetCurWorldInfo("status", Eval("index")) == 5%>'>
+                                                    <div class="status" style="background:url(textures/worldshare_32bits.png#124 104 16 16)" tooltip='<%= loginMain.formatStatus(loginMain.GetCurWorldInfo("status",Eval("index")))%>' />
+                                                </pe:if>
+                                                <pe:if condition='<%= loginMain.login_type == 1 or loginMain.GetCurWorldInfo("is_zip", Eval("index"))%>'>
+                                                    <div style="float:left;width:9px;height:32px;background:#fff" />
+                                                </pe:if>
+                                                <div class="share_world_name">
+                                                    <%= Eval("text") %><%= if_else( Eval("is_zip") == true, L".zip", "")%>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div class="share_world_infor" style="position:relative;margin-top:2px;">
                                                     <div>
-                                                        <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index")) and  loginMain.GetCurWorldInfo("status", Eval("index")) == 1%>'>
-                                                            <div class="status" style="background:url(textures/worldshare_32bits.png#72 104 16 16)" tooltip='<%= loginMain.formatStatus(loginMain.GetCurWorldInfo("status",Eval("index")))%>' />
+                                                        <pe:if condition='<%= loginMain.login_type == 3%>'>
+                                                            <div style="float:left;width:25px;height:20px;background:#fff" />
                                                         </pe:if>
-                                                        <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index")) and  loginMain.GetCurWorldInfo("status", Eval("index")) == 2%>'>
-                                                            <div class="status" style="background:url(textures/worldshare_32bits.png#98 104 16 16)" tooltip='<%= loginMain.formatStatus(loginMain.GetCurWorldInfo("status",Eval("index")))%>' />
-                                                        </pe:if>
-                                                        <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index")) and  loginMain.GetCurWorldInfo("status", Eval("index")) == 3%>'>
-                                                            <div class="status" style="background:url(textures/worldshare_32bits.png#20 104 16 16)" tooltip='<%= loginMain.formatStatus(loginMain.GetCurWorldInfo("status",Eval("index")))%>' />
-                                                        </pe:if>
-                                                        <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index")) and  loginMain.GetCurWorldInfo("status", Eval("index")) == 4%>'>
-                                                            <div class="status" style="background:url(textures/worldshare_32bits.png#46 104 16 16)" tooltip='<%= loginMain.formatStatus(loginMain.GetCurWorldInfo("status",Eval("index")))%>' />
-                                                        </pe:if>
-                                                        <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index")) and  loginMain.GetCurWorldInfo("status", Eval("index")) == 5%>'>
-                                                            <div class="status" style="background:url(textures/worldshare_32bits.png#124 104 16 16)" tooltip='<%= loginMain.formatStatus(loginMain.GetCurWorldInfo("status",Eval("index")))%>' />
-                                                        </pe:if>
-                                                        <pe:if condition='<%= loginMain.login_type == 1 or loginMain.GetCurWorldInfo("is_zip", Eval("index"))%>'>
-                                                            <div style="float:left;width:9px;height:32px;background:#fff" />
-                                                        </pe:if>
-                                                        <div class="share_world_name">
-                                                            <%= Eval("text") %><%= if_else( Eval("is_zip") == true, L".zip", "")%>
-                                                        </div>
+                                                        <span style="float:left;margin-left:0px;">v<%=loginMain.GetCurWorldInfo("revision",Eval("index")) %></span>
+                                                        <span style="float:left;margin-left:15px;"><%=loginMain.GetWorldSize(Eval("size")) %></span>
                                                     </div>
                                                     <div>
-                                                        <div class="share_world_infor" style="position:relative;margin-top:2px;">
-                                                            <div>
-                                                                <pe:if condition='<%= loginMain.login_type == 3%>'>
-                                                                    <div style="float:left;width:25px;height:20px;background:#fff" />
-                                                                </pe:if>
-                                                                <span style="float:left;margin-left:0px;">v<%=loginMain.GetCurWorldInfo("revision",Eval("index")) %></span>
-                                                                <span style="float:left;margin-left:15px;"><%=loginMain.GetWorldSize(Eval("size")) %></span>
-                                                            </div>
-                                                            <div>
-                                                                <pe:if condition='<%= loginMain.login_type == 3%>'>
-                                                                    <div style="float:left;width:24px;height:20px;background:#fff" />
-                                                                </pe:if>
-                                                                <span style="margin-left:0px;"><%=loginMain.formatDatetime(loginMain.GetCurWorldInfo("modifyTime",Eval("index"))) %></span>
-                                                            </div>
-                                                        </div>
-                                                        <div style="position:relative;margin-left:170px;margin-top:3px;">
-                                                            <pe:if condition='<%= loginMain.login_type == 1 or loginMain.GetCurWorldInfo("is_zip", Eval("index"))%>'>
-                                                                <div class="share_button" style="float:left"/>
-                                                            </pe:if>
-                                                            <input type="button" class="share_button" style="background:url(textures/worldshare_32bits.png#78 46 48 48)"   onclick='loginMain.deleteWorld()' tooltip='<%=L"删除"%>' name='<%=Eval("index")%>' /><!-- 删除 -->
-                                                            <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index"))%>'>
-                                                                <input type="button" class="share_button" style="background:url(textures/worldshare_32bits.png#136 46 48 48)" onclick="loginMain.syncNow()" tooltip='<%=L"同步"%>' name='<%=Eval("index")%>' /><!-- 手动同步 -->
-                                                            </pe:if>
-                                                            <input type="button" class="share_button" style="background:url(textures/worldshare_32bits.png#20 46 48 48)"    onclick="loginMain.enterWorld()" tooltip='<%=L"进入"%>' name='<%=Eval("index")%>' /><!-- 进入 -->
-                                                        </div>
+                                                        <pe:if condition='<%= loginMain.login_type == 3%>'>
+                                                            <div style="float:left;width:24px;height:20px;background:#fff" />
+                                                        </pe:if>
+                                                        <span style="margin-left:0px;"><%=loginMain.formatDatetime(loginMain.GetCurWorldInfo("modifyTime",Eval("index"))) %></span>
+                                                    </div>
+                                                </div>
+                                                <div style="position:relative;margin-left:170px;margin-top:3px;">
+                                                    <pe:if condition='<%= loginMain.login_type == 1 or loginMain.GetCurWorldInfo("is_zip", Eval("index"))%>'>
+                                                        <div class="share_button" style="float:left"/>
+                                                    </pe:if>
+                                                    <input type="button" class="share_button" style="background:url(textures/worldshare_32bits.png#78 46 48 48)"   onclick='loginMain.deleteWorld()' tooltip='<%=L"删除"%>' name='<%=Eval("index")%>' /><!-- 删除 -->
+                                                    <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index"))%>'>
+                                                        <input type="button" class="share_button" style="background:url(textures/worldshare_32bits.png#136 46 48 48)" onclick="loginMain.syncNow()" tooltip='<%=L"同步"%>' name='<%=Eval("index")%>' /><!-- 手动同步 -->
+                                                    </pe:if>
+                                                    <input type="button" class="share_button" style="background:url(textures/worldshare_32bits.png#20 46 48 48)"    onclick="loginMain.enterWorld()" tooltip='<%=L"进入"%>' name='<%=Eval("index")%>' /><!-- 进入 -->
+                                                </div>
+                                            </div>
+                                        </pe:if>
+                                        <pe:if condition='<%= loginMain.current_type == 2%>'>
+                                            <div>
+                                                <div style="margin-left:5px;">
+                                                    <div class="share_world_name">
+                                                        <%=Eval("text") %><%=if_else( Eval("is_zip") == true , L".zip", "")%>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div class="share_world_infor" style="position:relative;margin-left:5px;margin-top:18px;">
+                                                    <span style="margin-left:0px;">v<%=loginMain.GetCurWorldInfo("revision",Eval("index")) %></span>
+                                                    <span style="margin-left:10px;"><%=Eval("size")%>M</span>
+                                                    <span style="margin-left:10px;"><%=Eval("author") %></span>
+                                                </div>
+                                                <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) == 100%>'>
+                                                    <div style="margin-left:208px;margin-top:10px;">
+                                                        <input type="button" class="share_button" style="background:url(textures/worldshare_32bits.png#78 46 48 48)" onclick='loginMain.deleteWorld()' tooltip='<%=L"删除"%>' name='<%=Eval("index")%>' /><!-- 删除 -->
+                                                        <input type="button" class="share_button" style="background:url(textures/worldshare_32bits.png#20 46 48 48)" onclick="loginMain.enterWorld()" tooltip='<%=L"进入"%>' name='<%=Eval("index")%>' /><!-- 进入 -->
                                                     </div>
                                                 </pe:if>
-                                                <pe:if condition='<%= loginMain.current_type == 2%>'>
-                                                    <div>
-                                                        <div style="margin-left:5px;">
-                                                            <div class="share_world_name">
-                                                                <%=Eval("text") %><%=if_else( Eval("is_zip") == true , L".zip", "")%>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div>
-                                                        <div class="share_world_infor" style="position:relative;margin-left:5px;margin-top:18px;">
-                                                            <span style="margin-left:0px;">v<%=loginMain.GetCurWorldInfo("revision",Eval("index")) %></span>
-                                                            <span style="margin-left:10px;"><%=Eval("size")%>M</span>
-                                                            <span style="margin-left:10px;"><%=Eval("author") %></span>
-                                                        </div>
-                                                        <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) == 100%>'>
-                                                            <div style="margin-left:208px;margin-top:10px;">
-                                                                <input type="button" class="share_button" style="background:url(textures/worldshare_32bits.png#78 46 48 48)" onclick='loginMain.deleteWorld()' tooltip='<%=L"删除"%>' name='<%=Eval("index")%>' /><!-- 删除 -->
-                                                                <input type="button" class="share_button" style="background:url(textures/worldshare_32bits.png#20 46 48 48)" onclick="loginMain.enterWorld()" tooltip='<%=L"进入"%>' name='<%=Eval("index")%>' /><!-- 进入 -->
-                                                            </div>
-                                                        </pe:if>
-                                                        <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) < 100 %>'>
-                                                            <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) >= 0 %>'>
-                                                                <input type="button" value='<%=L"下载中" %>' style="margin-left:225px;max-width:60px;height:46px;font-size:12px;font-weight:bold;" onclick="InternetLoadWorld.DownLoadWorld" name='<%=Eval("index")%>' class="mc_button_grey" />
-                                                            </pe:if>
-                                                            <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) < 0 %>'>
-                                                                <input type="button" value='<%=L"下载" %>' style="margin-left:225px;max-width:60px;height:46px;font-size:12px;font-weight:bold;color:#333333" onclick="InternetLoadWorld.DownLoadWorld" name='<%=Eval("index")%>' class="mc_button_grey" />
-                                                            </pe:if>
-                                                        </pe:if>
+                                                <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) < 100 %>'>
+                                                    <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) >= 0 %>'>
+                                                        <input type="button" value='<%=L"下载中" %>' style="margin-left:225px;max-width:60px;height:46px;font-size:12px;font-weight:bold;" onclick="InternetLoadWorld.DownLoadWorld" name='<%=Eval("index")%>' class="mc_button_grey" />
+                                                    </pe:if>
+                                                    <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) < 0 %>'>
+                                                        <input type="button" value='<%=L"下载" %>' style="margin-left:225px;max-width:60px;height:46px;font-size:12px;font-weight:bold;color:#333333" onclick="InternetLoadWorld.DownLoadWorld" name='<%=Eval("index")%>' class="mc_button_grey" />
+                                                    </pe:if>
+                                                </pe:if>
 
-                                                        <!--<div style="position:relative;margin-left:250px;margin-top:3px;">
-                                                            <input type="button" class="share_button" style="background:url(textures/worldshare_32bits.png#20 130 48 48:6 6 6 6)" onclick="loginMain.enterWorld()" name='<%=Eval("index")%>' />进入
-                                                        </div>-->
-                                                    </div>
-                                                </pe:if>
-                                                <!--<div style="position:relative;margin-left:10px;margin-top:28px;font-size:12px;color:#9e9e9e">
-                                                    <input type="button" name='<%=Eval("slot_id")%>' value="在线保存" tooltip="上传本地世界到服务器" style="width:68px;height:20px;font-size:12px;" onclick="loginMain.OnSaveToSlot()" class="mc_light_grey_button_with_fillet" />
-                                                    <input type="button" name='<%=Eval("slot_id")%>' value="下载本地" tooltip="将本地世界和服务器存档同步或从服务器下载世界" style="margin-left:10px;width:68px;height:20px;font-size:12px;" onclick="InternetLoadWorld.OnCopyFormSlot" class="mc_light_grey_button_with_fillet" />
+                                                <!--<div style="position:relative;margin-left:250px;margin-top:3px;">
+                                                    <input type="button" class="share_button" style="background:url(textures/worldshare_32bits.png#20 130 48 48:6 6 6 6)" onclick="loginMain.enterWorld()" name='<%=Eval("index")%>' />进入
                                                 </div>-->
                                             </div>
                                         </pe:if>
+                                        <!--<div style="position:relative;margin-left:10px;margin-top:28px;font-size:12px;color:#9e9e9e">
+                                            <input type="button" name='<%=Eval("slot_id")%>' value="在线保存" tooltip="上传本地世界到服务器" style="width:68px;height:20px;font-size:12px;" onclick="loginMain.OnSaveToSlot()" class="mc_light_grey_button_with_fillet" />
+                                            <input type="button" name='<%=Eval("slot_id")%>' value="下载本地" tooltip="将本地世界和服务器存档同步或从服务器下载世界" style="margin-left:10px;width:68px;height:20px;font-size:12px;" onclick="InternetLoadWorld.OnCopyFormSlot" class="mc_light_grey_button_with_fillet" />
+                                        </div>-->
+                                    </div>
+                                </pe:if>
 
-                                        <!--未选中的项-->
-                                        <pe:if condition='<%= Eval("index") ~= InternetLoadWorld.selected_world_index%>'>
-                                            <input type="button" style="position:relative;width:297px;height:70px;background:#000000" name='<%=Eval("index")%>' onclick="loginMain.OnSwitchWorld" />
-                                            <div name='<%=Eval("index")%>' class="share_unselect_item">
-                                                <pe:if condition='<%= loginMain.current_type == 1%>'>
-                                                    <div style="position:relative;width:200px;">
-                                                        <div>
-                                                            <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index")) and  loginMain.GetCurWorldInfo("status",Eval("index")) == 1%>'>
-                                                                <div class="status" style="background:url(textures/worldshare_32bits.png#72 104 16 16)" tooltip='<%= loginMain.formatStatus(loginMain.GetCurWorldInfo("status",Eval("index")))%>' />
-                                                            </pe:if>
-                                                            <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index")) and  loginMain.GetCurWorldInfo("status",Eval("index")) == 2%>'>
-                                                                <div class="status" style="background:url(textures/worldshare_32bits.png#98 104 16 16)" tooltip='<%= loginMain.formatStatus(loginMain.GetCurWorldInfo("status",Eval("index")))%>' />
-                                                            </pe:if>
-                                                            <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index")) and  loginMain.GetCurWorldInfo("status",Eval("index")) == 3%>'>
-                                                                <div class="status" style="background:url(textures/worldshare_32bits.png#20 104 16 16)" tooltip='<%= loginMain.formatStatus(loginMain.GetCurWorldInfo("status",Eval("index")))%>'/>
-                                                            </pe:if>
-                                                            <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index")) and  loginMain.GetCurWorldInfo("status",Eval("index")) == 4%>'>
-                                                                <div class="status" style="background:url(textures/worldshare_32bits.png#46 104 16 16)" tooltip='<%= loginMain.formatStatus(loginMain.GetCurWorldInfo("status",Eval("index")))%>'/>
-                                                            </pe:if>
-                                                            <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index")) and  loginMain.GetCurWorldInfo("status",Eval("index")) == 5%>'>
-                                                                <div class="status" style="background:url(textures/worldshare_32bits.png#124 104 16 16)" tooltip='<%= loginMain.formatStatus(loginMain.GetCurWorldInfo("status",Eval("index")))%>' />
-                                                            </pe:if>
-                                                            <pe:if condition='<%= loginMain.login_type == 1 or loginMain.GetCurWorldInfo("is_zip", Eval("index"))%>'>
-                                                                <div style="float:left;width:9px;height:32px;background:#fff"/>
-                                                            </pe:if>
-                                                            <div class="share_world_name">
-                                                                <%= Eval("text") %><%= if_else( Eval("is_zip") == true, L".zip", "")%>
-                                                            </div>
-                                                        </div>
-                                                        <div class="share_world_infor" style="padding-top:5px;">
-                                                            <pe:if condition='<%= loginMain.login_type == 3%>'>
-                                                                <div style="float:left;width:24px;height:10px;background:#fff" />
-                                                            </pe:if>
-                                                            <span style="float:left;margin-left:0px;"><%=loginMain.formatDatetime(loginMain.GetCurWorldInfo("modifyTime",Eval("index"))) %></span>
-                                                            <span style="float:left;margin-left:10px;">v<%=loginMain.GetCurWorldInfo("revision",Eval("index")) %></span>
-                                                            <span style="float:left;margin-left:10px;"><%=loginMain.GetWorldSize(Eval("size")) %></span>
-                                                        </div>
-                                                    </div>
-                                                    <div align="right" style="position:relative;width:30px;height:30px;margin-right:13px;margin-top:20px;">
-                                                        <input type="button" class="share_button" style="background:url(textures/worldshare_32bits.png#20 46 48 48)" onclick="loginMain.enterWorld()" name='<%=Eval("index")%>' /><!--进入-->
-                                                    </div>
-                                                </pe:if>
-                                                <pe:if condition='<%= loginMain.current_type == 2%>'>
-                                                    <div style="position:relative;width:200px;">
-                                                        <div style="margin-left:5px;">
-                                                            <div class="share_world_name">
-                                                                <%=Eval("text") %><%=if_else(Eval("is_zip")==true, L".zip", "")%>
-                                                            </div>
-                                                        </div>
-                                                        <div class="share_world_infor" style="margin-left:5px;padding-top:5px;">
-                                                            <span style="margin-left:0px;">v<%=loginMain.GetCurWorldInfo("revision",Eval("index")) %></span>
-                                                            <span style="margin-left:10px;"><%=Eval("size") %>M</span>
-                                                            <span style="margin-left:10px;"><%=Eval("author") %></span>
-                                                        </div>
-                                                    </div>
-                                                    <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) == 100%>'>
-                                                        <div style="position:relative;margin-left:246px;margin-top: 20px;">
-                                                            <input type="button" class="share_button" style="background:url(textures/worldshare_32bits.png#20 46 48 48)" onclick="loginMain.enterWorld()" tooltip="进入" name='<%=Eval("index")%>' /><!-- 进入 -->
-                                                        </div>
+                                <!--未选中的项-->
+                                <pe:if condition='<%= Eval("index") ~= InternetLoadWorld.selected_world_index%>'>
+                                    <input type="button" style="position:relative;width:297px;height:70px;background:#000000" name='<%=Eval("index")%>' onclick="loginMain.OnSwitchWorld" />
+                                    <div name='<%=Eval("index")%>' class="share_unselect_item">
+                                        <pe:if condition='<%= loginMain.current_type == 1%>'>
+                                            <div style="position:relative;width:200px;">
+                                                <div>
+                                                    <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index")) and  loginMain.GetCurWorldInfo("status",Eval("index")) == 1%>'>
+                                                        <div class="status" style="background:url(textures/worldshare_32bits.png#72 104 16 16)" tooltip='<%= loginMain.formatStatus(loginMain.GetCurWorldInfo("status",Eval("index")))%>' />
                                                     </pe:if>
-                                                </pe:if>
+                                                    <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index")) and  loginMain.GetCurWorldInfo("status",Eval("index")) == 2%>'>
+                                                        <div class="status" style="background:url(textures/worldshare_32bits.png#98 104 16 16)" tooltip='<%= loginMain.formatStatus(loginMain.GetCurWorldInfo("status",Eval("index")))%>' />
+                                                    </pe:if>
+                                                    <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index")) and  loginMain.GetCurWorldInfo("status",Eval("index")) == 3%>'>
+                                                        <div class="status" style="background:url(textures/worldshare_32bits.png#20 104 16 16)" tooltip='<%= loginMain.formatStatus(loginMain.GetCurWorldInfo("status",Eval("index")))%>'/>
+                                                    </pe:if>
+                                                    <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index")) and  loginMain.GetCurWorldInfo("status",Eval("index")) == 4%>'>
+                                                        <div class="status" style="background:url(textures/worldshare_32bits.png#46 104 16 16)" tooltip='<%= loginMain.formatStatus(loginMain.GetCurWorldInfo("status",Eval("index")))%>'/>
+                                                    </pe:if>
+                                                    <pe:if condition='<%= loginMain.login_type == 3 and not loginMain.GetCurWorldInfo("is_zip", Eval("index")) and  loginMain.GetCurWorldInfo("status",Eval("index")) == 5%>'>
+                                                        <div class="status" style="background:url(textures/worldshare_32bits.png#124 104 16 16)" tooltip='<%= loginMain.formatStatus(loginMain.GetCurWorldInfo("status",Eval("index")))%>' />
+                                                    </pe:if>
+                                                    <pe:if condition='<%= loginMain.login_type == 1 or loginMain.GetCurWorldInfo("is_zip", Eval("index"))%>'>
+                                                        <div style="float:left;width:9px;height:32px;background:#fff"/>
+                                                    </pe:if>
+                                                    <div class="share_world_name">
+                                                        <%= Eval("text") %><%= if_else( Eval("is_zip") == true, L".zip", "")%>
+                                                    </div>
+                                                </div>
+                                                <div class="share_world_infor" style="padding-top:5px;">
+                                                    <pe:if condition='<%= loginMain.login_type == 3%>'>
+                                                        <div style="float:left;width:24px;height:10px;background:#fff" />
+                                                    </pe:if>
+                                                    <span style="float:left;margin-left:0px;"><%=loginMain.formatDatetime(loginMain.GetCurWorldInfo("modifyTime",Eval("index"))) %></span>
+                                                    <span style="float:left;margin-left:10px;">v<%=loginMain.GetCurWorldInfo("revision",Eval("index")) %></span>
+                                                    <span style="float:left;margin-left:10px;"><%=loginMain.GetWorldSize(Eval("size")) %></span>
+                                                </div>
+                                            </div>
+                                            <div align="right" style="position:relative;width:30px;height:30px;margin-right:13px;margin-top:20px;">
+                                                <input type="button" class="share_button" style="background:url(textures/worldshare_32bits.png#20 46 48 48)" onclick="loginMain.enterWorld()" name='<%=Eval("index")%>' /><!--进入-->
                                             </div>
                                         </pe:if>
-                                    </pe:if>
-                                </Columns>
-                                <EmptyDataTemplate>
-                                    <div style="margin:10px;font-weight:bold;color:#ffffff"><%=L"暂无存档，请创建" %></div>
-                                    <div>
-                                        <input type="button" class="mc_light_grey_button_with_fillet" onclick="loginMain.RefreshCurrentServerList()" value='<%=L"刷新" %>' style="float:left;margin-left:10px;width:86px;height:22px;font-weight:bold;font-size:14px;" />
+                                        <pe:if condition='<%= loginMain.current_type == 2%>'>
+                                            <div style="position:relative;width:200px;">
+                                                <div style="margin-left:5px;">
+                                                    <div class="share_world_name">
+                                                        <%=Eval("text") %><%=if_else(Eval("is_zip")==true, L".zip", "")%>
+                                                    </div>
+                                                </div>
+                                                <div class="share_world_infor" style="margin-left:5px;padding-top:5px;">
+                                                    <span style="margin-left:0px;">v<%=loginMain.GetCurWorldInfo("revision",Eval("index")) %></span>
+                                                    <span style="margin-left:10px;"><%=Eval("size") %>M</span>
+                                                    <span style="margin-left:10px;"><%=Eval("author") %></span>
+                                                </div>
+                                            </div>
+                                            <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) == 100%>'>
+                                                <div style="position:relative;margin-left:246px;margin-top: 20px;">
+                                                    <input type="button" class="share_button" style="background:url(textures/worldshare_32bits.png#20 46 48 48)" onclick="loginMain.enterWorld()" tooltip="进入" name='<%=Eval("index")%>' /><!-- 进入 -->
+                                                </div>
+                                            </pe:if>
+                                        </pe:if>
                                     </div>
-                                </EmptyDataTemplate>
-                                <FetchingDataTemplate>
-                                    <div style="margin-top:10px;font-weight:bold;color:#ffffff"><%=L"正在搜索, 请稍候 ... " %></div>
-                                </FetchingDataTemplate>
-                            </pe:gridview>
-                        </div>
-                        <div style="margin-top:17px;padding-right:15px;">
-                            <input type="button" value='<%=L"创建世界" %>' style="float:left;min-width:120px" onclick="loginMain.CreateNewWorld()" class="common_button mc_light_grey_button_with_fillet" />
-                            <input type="button" value='<%=L"官网" %>' align="right" style="float:right;" onclick="loginMain.OpenBBS()" class="common_button mc_light_grey_button_with_fillet" />
-                        </div>
-                    </div>
+                                </pe:if>
+                            </pe:if>
+                        </Columns>
+                        <EmptyDataTemplate>
+                            <div style="margin:10px;font-weight:bold;color:#ffffff"><%=L"暂无存档，请创建" %></div>
+                            <div>
+                                <input type="button" class="mc_light_grey_button_with_fillet" onclick="loginMain.RefreshCurrentServerList()" value='<%=L"刷新" %>' style="float:left;margin-left:10px;width:86px;height:22px;font-weight:bold;font-size:14px;" />
+                            </div>
+                        </EmptyDataTemplate>
+                        <FetchingDataTemplate>
+                            <div style="margin-top:10px;font-weight:bold;color:#ffffff"><%=L"正在搜索, 请稍候 ... " %></div>
+                        </FetchingDataTemplate>
+                    </pe:gridview>
                 </div>
-            </aries:window>
+                <div style="margin-top:20px">
+                    <input type="button" value='<%=L"创建世界" %>' style="float:left;margin-left:80px;min-width:120px" onclick="loginMain.CreateNewWorld()" class="common_button mc_light_grey_button_with_fillet" />
+                    <input type="button" value='<%="..." %>'  style="margin-left:10px;height:30px;min-width:30px" onclick="loginMain.OnImportWorld()" class="flat_button" tooltip='<%=L"导入/导出..." %>'/>
+                </div>
+            </div>
+            <!--line-->
+            <div class="middle_line" />
+            <!--events_area-->
+            <div class="events_area">
+                <div style="margin-top:17px;padding-right:15px;">
+                    <input type="button" value='<%=L"官网" %>' align="right" style="float:right;" onclick="loginMain.OpenBBS()" class="flat_button"/>
+                </div>
+            </div>
+            
         </div>
     </pe:mcml>
 </body>
