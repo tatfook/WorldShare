@@ -17,24 +17,11 @@
         </script>
         <style type="text/mcss">
             {
-                text_field = {
-                    background = "textures/worldshare_32bits.png;72 20 16 16:3 3 3 3",
-                    border = "none",
-                },
                 login_button = {
                     ["min-width"]   = 100,
                     height          = 28,
                     color = "#cccccc",
                     background = "Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;179 89 21 21:8 8 8 8",
-                },
-                logged_common_button = {
-                    width = 130,
-                    height = 31,
-                    ["margin-left"] = 60,
-                    ["margin-bottom"] = 20,
-                    textcolor = "#ffffff",
-                    color = "#ffffff",
-                    background = "textures/worldshare_32bits.png;46 20 16 16:4 4 4 4",
                 },
                 middle_line = {
                     float  = "left",
@@ -59,7 +46,7 @@
                 },
                 events_area = {
                     float = "left",
-                    width  = 315,
+                    width  = 340,
                     height = 430,
                     ["padding-top"] = 10,
                     ["padding-left"] = 10,
@@ -71,14 +58,9 @@
                     height = 30,
                     background = "Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;263 346 36 36:15 15 15 15",
                 },
-                add_server_button = {
-                    ["margin-left"] = 8,
-                    height = 30,
-                    ["min-width"] = 50,
-                },
                 share_selected_item = {
                     ["margin-left"] = 0,
-                    ["margin-bottom"] = 10,
+                    ["margin-bottom"] = 5,
                     ["padding-left"] = 5,
                     ["padding-top"] = 5,
                     width  = 295,
@@ -144,19 +126,50 @@
                     ["margin-top"] = 0,
                     background = "Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;179 89 21 21:8 8 8 8",
                 },
+                link_big_event = {
+                    ["background"] = "",
+                    ["padding-left"] = 0,
+                    ["padding-top"] = 0,
+                    ["padding-right"] = 0,
+                    ["padding-bottom"] = 0,
+                    background = "",
+                },
+                big_event_item = {
+                    ["margin-bottom"] = 20,
+                    ["padding-left"] = 5,
+                    ["padding-top"] = 5,
+                    width  = 295,
+                    height = 65,
+                    ["background-color"] = "#454340",
+                },
+                event_title = {
+                    ["base-font-size"] = 16,
+                    ["font-size"] = 16,
+                    ["margin-top"] = 2,
+                    ["text-align"] = "left",
+                    color = "#ffffff",
+                },
+                left_arrow = {
+                    float = "left",
+                    ["background-color"] = "#33ff33",
+                    width = 18,
+                    height = 18,
+                    ["margin-top"] = 4,
+                    background = "Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#223 148 18 18"
+                },
             }
         </style>
-        <div class="default" style="width:860px;background:url(Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#267 89 34 34:8 8 8 8);">
+        <div class="default" style="width:850px;background:url(Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#267 89 34 34:8 8 8 8);">
             <div style="height:32px;margin:2px;margin-top:5px;margin-left:5px;margin-bottom:0px" width="100%">
                 <div style="float:left;margin-top:5px"></div>
-                <div style="float:left;margin-top:2px;margin-left:10px;">
-                    <input class="nav_button" style="width:28px;" type="button" value="<" tooltip='<%=L"返回"%>'/>
-                    <input class="nav_button" style="width:28px;" type="button" value=">" tooltip='<%=L"前进"%>'/>
-                    <input class="nav_button" type="button" value='<%=L"刷新"%>' onclick="loginMain.RefreshCurrentServerList()" tooltip='<%=L"刷新本地目录或远程网址"%>'/>
+                <div style="float:left;margin-top:5px;margin-left:10px;">
+                    <input class="nav_button" style="background-color:#ffffff33;width:28px;height:20px;background:url(Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#217 183 28 20);" type="button" tooltip='<%=L"返回"%>'/>
+                    <input class="nav_button" style="background-color:#ffffff33;width:28px;height:20px;margin-left:5px;background:url(Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#242 183 28 20);" type="button" tooltip='<%=L"前进"%>'/>
+                    <input class="nav_button" style="width:28px;height:20px;margin-left:5px;background:url(Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#267 183 28 20);" type="button" onclick="loginMain.RefreshCurrentServerList()" tooltip='<%=L"刷新本地目录或远程网址"%>'/>
                 </div>
                 <div style="float:left;margin-left:5px;margin-top:2px;">
                     <div style="float:left" class="add_server_text_field">
-                        <input type="text" name="content" style="width:400px;height:30px;background:url();textcolor:#ffffff" spacing="4" EmptyText='<%=loginMain.GetDefaultValueForAddress() %>' rows="1" CaretColor="#FFFFFFFF"  />
+                        <input type="text" name="content" style="width:400px;height:30px;background:url();textcolor:#ffffff" spacing="4" EmptyText='<%=L"输入课程ID或服务器地址"%>' rows="1" CaretColor="#FFFFFFFF"  />
                         <input class="flat_button" style="height:26px;margin-top:2px;margin:2px;min-width:32px" type="button" value="..." tooltip='<%=L"管理访问历史"%>'/>
                     </div>
                     <input type="button" value='<%=L"打开" %>' class="flat_button" style="margin-left:3px;height:30px" onclick="InternetLoadWorld.OnAddSearchPage"/>
@@ -165,30 +178,35 @@
             </div>
             <div style="height:2px;" width="100%" class="mc_line"></div>
             <div class="user_area">
-                <div style="margin-top:10px;height:40px;">
+                <div style="margin-top:10px;">
                     <div style="margin-left:15px;">
                         <input type="text" name="nickname" EmptyText='<%=L"输入角色名字"%>' value='<%=loginMain.username %>' rows="1" CaretColor="#FFFFFFFF" style="textcolor:#ffffff;width:130px;height:22px;" class="mc_item" />
                     </div>
                 </div>
-                <div style="margin-left:-48px;margin-top:10px;width:256px;height:226px;">
+                <div style="margin-left:-48px;margin-top:10px;width:256px;">
                     <div>
                         <pe:mc_player name="MyPlayer" miniscenegraphname="AvatarMyselfTabCharacter" style="width:256px;height:256px;" isinteractive="false" />
                     </div>
+                </div>
+                <div style="position:relative;margin-top:-10px;">
+                    <input class="nav_button" style="margin-left:25px;width:28px;height:20px;background:url(Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#217 183 28 20);" type="button" tooltip='<%=L"上一个"%>'/>
+                    <input name="avatar_id" value="1/6" style="color:#cccccc;margin-left:5px;min-width:50px;height:20px;background:url();" type="button"/>
+                    <input class="nav_button" style="margin-left:5px;width:28px;height:20px;margin-left:5px;background:url(Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#242 183 28 20);" type="button" tooltip='<%=L"下一个"%>'/>
                 </div>
                 <div style="margin-top:20px;margin:10px">
                     <pe:if condition="<%=loginMain.login_type == 1 %>">
                         <div style="text-align:center;width:140px;"><%=L"目前为离线模式"%></div>
                         <div style="margin-top:10px">
-                            <input type="button" style="margin-left:20px" class="login_button" onclick="loginMain.LoginActionMain()" value='<%= L"登录"%>'/>
+                            <input type="button" style="margin-left:20px" class="login_button" onclick="loginMain.OnClickLogin()" value='<%= L"登录"%>'/>
                         </div>
                     </pe:if>
                     <pe:if condition="<%=loginMain.login_type == 3 %>">
                         <div name="loginsuccess" class="user_login" style="width:290px;">
-                            <div style="margin-bottom:10px;">
-                                <%= L"欢迎:" %><span style="color:#ff6666"><%=loginMain.username%></span>
+                            <div style="text-align:center;width:140px;color:#ff6666" onclick="loginMain.sharePersonPage()" tooltip='<%= string.format(L"点击打开:%s", loginMain.personPageUrl) %>'>
+                                <%=loginMain.username%>
                             </div>
-                            <div>
-                                <input type="button" onclick="loginMain.logout()" class="login_button" value='<%= L"退出登录" %>' />
+                            <div style="margin-top:10px">
+                                <input type="button" style="margin-left:20px" onclick="loginMain.logout()" class="login_button" value='<%= L"退出登录" %>' />
                             </div>
                         </div>
                     </pe:if>
@@ -384,11 +402,39 @@
             <div class="middle_line" />
             <!--events_area-->
             <div class="events_area">
-                <div style="margin-top:17px;padding-right:15px;">
-                    <input type="button" value='<%=L"官网" %>' align="right" style="float:right;" onclick="loginMain.OpenBBS()" class="flat_button"/>
+                <pe:if condition='<%=InternetLoadWorld.type_index == 2 %>'>
+                    <a onclick="loginMain.OnClickLocalWorlds()" class="link_big_event" tooltip='<%=L"点击切换"%>'>
+                        <div class="big_event_item">
+                            <div style="margin-left:5px;" class="event_title"><%=L"我的世界"%></div>
+                            <div style="margin-left:5px;color:#33cc33;" class="event_title"><div class="left_arrow"></div>官方推荐用户作品欣赏</div>
+                        </div>
+                    </a>
+                </pe:if>
+                <pe:if condition='<%=InternetLoadWorld.type_index ~= 2 %>'>
+                    <a onclick="loginMain.OnClickOfficialWorlds()" class="link_big_event" tooltip='<%=L"点击切换"%>'>
+                        <div class="big_event_item">
+                            <div style="margin-left:5px;color:#33cc33;" class="event_title"><div class="left_arrow"></div><%=L"我的世界"%></div>
+                            <div style="margin-left:5px;" class="event_title">官方推荐用户作品欣赏</div>
+                        </div>
+                    </a>
+                </pe:if>
+                <a href="http://keepwork.com/official/paracraft" class="link_big_event">
+                    <div class="big_event_item">
+                        <div style="margin-left:5px;" class="event_title">教学视频</div>
+                    </div>
+                </a>
+                <a href="http://keepwork.com/paracraft/pac" class="link_big_event">
+                    <div class="big_event_item">
+                        <div style="margin-left:5px;" class="event_title">2018创作大赛报名中</div>
+                    </div>
+                </a>
+                <div class="big_event_item">
+                    <div style="margin-left:5px;color:#ffffff80" class="event_title">NPL编程课程6月开启报名</div>
+                </div>
+                <div class="big_event_item">
+                    <div style="margin-left:5px;color:#ffffff80" class="event_title" >资源库7月开启</div>
                 </div>
             </div>
-            
         </div>
     </pe:mcml>
 </body>

@@ -76,9 +76,9 @@ function loginMain.ShowPage()
             bShow          = bShow,
             directPosition = true,
             align          = "_ct",
-            x              = -860/2,
+            x              = -850/2,
             y              = -470/2,
-            width          = 860,
+            width          = 850,
             height         = 470,
             cancelShowAnimation = true,
     });
@@ -670,6 +670,13 @@ function loginMain.QQLogin()
     InternetLoadWorld.QQLogin();
 end
 
+function loginMain.OnClickLocalWorlds()
+    loginMain.OnChangeType(1);
+end
+function loginMain.OnClickOfficialWorlds()
+    loginMain.OnChangeType(2);
+end
+
 function loginMain.OnChangeType(index)
     loginMain.current_type = index;
     InternetLoadWorld.OnChangeType(index);
@@ -842,6 +849,14 @@ function loginMain.setSite()
         node:SetAttribute("href",loginMain.site .. "/wiki/join");
     end
     page:Refresh(0.01);
+end
+
+function loginMain.OnClickLogin()
+    loginMain.showLoginModalImp(function()
+        if(page) then
+            page:Refresh(0.01);
+        end
+    end);
 end
 
 function loginMain.setRememberAuto()
@@ -1444,6 +1459,9 @@ function loginMain.changeLoginType(_type)
 end
 
 function loginMain.getWorldsList(callback)
+    if(not loginMain.token) then
+        return
+    end
     local params = {
         url     = loginMain.site .. "/api/mod/worldshare/models/worlds",
         json    = true,
