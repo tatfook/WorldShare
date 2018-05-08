@@ -1,6 +1,6 @@
 --[[
 Title: login
-Author(s):  big
+Author(s):  big, minor refactor by LiXizhi
 Date: 2017/4/11
 Desc: 
 use the lib:
@@ -65,31 +65,48 @@ function loginMain.init()
 end
 
 function loginMain.ShowPage()
-    System.App.Commands.Call("File.MCMLWindowFrame", {
-            url            = "Mod/WorldShare/login/LoginMain.html", 
-            name           = "LoadMainWorld", 
-            isShowTitleBar = false,
-            DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
-            style          = CommonCtrl.WindowFrame.ContainerStyle,
-            zorder         = 0,
-            allowDrag      = true,
-            bShow          = bShow,
-            directPosition = true,
-            align          = "_ct",
-            x              = -850/2,
-            y              = -470/2,
-            width          = 850,
-            height         = 470,
-            cancelShowAnimation = true,
-    });
+    local params = {
+        url            = "Mod/WorldShare/login/LoginMain.html", 
+        name           = "LoadMainWorld", 
+        isShowTitleBar = false,
+        DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
+        style          = CommonCtrl.WindowFrame.ContainerStyle,
+        zorder         = 0,
+        allowDrag      = true,
+        bShow          = bShow,
+        directPosition = true,
+        align          = "_ct",
+        x              = -850/2,
+        y              = -470/2,
+        width          = 850,
+        height         = 470,
+        cancelShowAnimation = true,
+    }
+    System.App.Commands.Call("File.MCMLWindowFrame", params);
 
+    params._page.OnClose = function()
+        loginMain.LoginPage  = nil;
+    end
+    
     if(not loginMain.IsSignedIn() and loginMain.LoginWithTokenApi()) then
         return;
     end
 
-    loginMain.getRememberPassword();
-    loginMain.setSite();
-    loginMain.autoLoginAction("main");
+    if(loginMain.notFirstTimeShown) then
+        loginMain.ignore_auto_login = true;
+    else
+        loginMain.notFirstTimeShown = true;
+        if(not loginMain.ignore_auto_login) then
+            -- auto sign in here
+            loginMain.checkDoAutoSignin(loginMain.LoginPage);
+        end
+    end
+
+    if(loginMain.hasExplicitLogin) then
+        loginMain.getRememberPassword();
+        loginMain.setSite();
+        -- loginMain.autoLoginAction("main");
+    end
     loginMain.RefreshCurrentServerList();
 end
 
@@ -141,7 +158,7 @@ function loginMain.showLoginModalImp(callback)
         return;
     end
 
-    System.App.Commands.Call("File.MCMLWindowFrame", {
+    local params = {
         url            = "Mod/WorldShare/login/LoginModal.html",
         name           = "loginMain.LoginModal",
         isShowTitleBar = false,
@@ -155,8 +172,12 @@ function loginMain.showLoginModalImp(callback)
         y              = -350/2,
         width          = 320,
         height         = 350,
-    });
-    
+    }
+    System.App.Commands.Call("File.MCMLWindowFrame", params);
+    params._page.OnClose = function()
+        loginMain.modalCall  = nil;
+    end
+
     if(type(callback) == "function") then
         loginMain.modalCall = callback;
     end
@@ -222,24 +243,13 @@ function loginResponse(page, response, err, callback)
 
                     -- 如果记住密码则保存密码到redist根目录下
                     if(isRememberPwd) then
-                        local file      = ParaIO.open("PWD", "w");
-                        local encodePwd = Encoding.PasswordEncodeWithMac(password);
-                        
-                        local value;
-
-                        if(autoLogin) then
-                            value = account .. "|" .. encodePwd .. "|" .. loginServer .. "|" .. loginMain.token .. "|" .. "true";
-                        else
-                            value = account .. "|" .. encodePwd .. "|" .. loginServer .. "|" .. loginMain.token .. "|" .. "false";
-                        end
-
-                        file:write(value, #value);
-                        file:close();
-                    else
-                        -- 判断文件是否存在，如果存在则删除文件
-                        if(loginMain.findPWDFiles()) then
-                            ParaIO.DeleteFile("PWD");
-                        end
+                        loginMain.SaveSigninInfo({
+                            account = account,
+                            password = password, 
+                            loginServer = loginServer, 
+                            token = loginMain.token,
+                            autoLogin = autoLogin, 
+                        });
                     end
 
                     local userinfo = response['data']['userinfo'];
@@ -616,6 +626,29 @@ function loginMain.GetDefaultValueForAddress()
     return s;
 end
 
+local default_avatars = {
+    "default", 
+    "boy01", 
+    "boy04", 
+}
+local cur_index = 1;
+--cycle through 
+function loginMain.OnChangeAvatar(btnName)
+    if(btnName == "pre") then
+        cur_index = cur_index - 1;
+    else
+        cur_index = cur_index + 1;
+    end
+    cur_index = ((cur_index-1) % (#default_avatars)) + 1
+    local playerName = default_avatars[cur_index];
+    if(loginMain.LoginPage) then
+        if(GameLogic.RunCommand) then
+            GameLogic.RunCommand("/avatar "..playerName);
+        end
+        loginMain.LoginPage:CallMethod("MyPlayer", "SetAssetFile", playerName);
+    end
+end
+
 function loginMain.LookPlayerInform()
     local cur_page = InternetLoadWorld.GetCurrentServerPage();
     local nid = cur_page.player_nid;
@@ -762,50 +795,94 @@ function loginMain.CancelChangeName()
     loginMain.LoginPage:Refresh(0.1);
 end
 
-function loginMain.findPWDFiles()
-    local result = commonlib.Files.Find({}, "./", 0, 500,"*");
+function loginMain.GetPasswordFile()
+    if(not loginMain.filename_) then
+        loginMain.filename_ = ParaIO.GetWritablePath() .. "PWD";
+    end
+    return loginMain.filename_;
+end
 
-    for key,value in ipairs(result) do
-        if(value.filename == "PWD" and value.fileattr == 0) then
-            return true;
+-- @return nil if not found or {account, password, loginServer, autoLogin}
+function loginMain.LoadSigninInfo()
+    local file        = ParaIO.open(loginMain.GetPasswordFile(), "r");
+    local fileContent = "";
+
+    if(file:IsValid()) then
+        fileContent = file:GetText(0, -1);
+        file:close();
+
+        local PWD = {};
+        for value in string.gmatch(fileContent,"[^|]+") do
+            PWD[#PWD+1] = value;
+        end
+        
+        local info = {};
+        if(PWD[1]) then
+            info.account = PWD[1];
+        end
+        if(PWD[2]) then
+            info.password = Encoding.PasswordDecodeWithMac(PWD[2]);
+        end
+        info.loginServer = PWD[3];
+        if(PWD[4]) then
+            info.token = Encoding.PasswordDecodeWithMac(PWD[4]);
+        end
+        info.autoLogin = (not PWD[5] or PWD[5] == "true");
+        return info;
+    end
+end
+
+-- @param info: if nil, we will delete the login info. 
+function loginMain.SaveSigninInfo(info)
+    if(not info) then
+        ParaIO.DeleteFile(loginMain.GetPasswordFile());
+    else
+        local newStr = ""
+        newStr = newStr .. (info.account or "") .. "|";
+        newStr = newStr .. Encoding.PasswordEncodeWithMac(info.password or "") .. "|";
+        newStr = newStr .. (info.loginServer or "") .. "|";
+        newStr = newStr .. Encoding.PasswordEncodeWithMac(info.token or "") .. "|";
+        newStr = newStr .. (info.autoLogin and "true" or "false");
+
+        local file = ParaIO.open(loginMain.GetPasswordFile(), "w");
+        if(file) then
+            LOG.std(nil, "info", "loginMain", "save signin info to %s", loginMain.GetPasswordFile());
+            file:write(newStr,#newStr);
+            file:close();
+        else
+            LOG.std(nil, "error", "loginMain", "failed to write file to %s", loginMain.GetPasswordFile());
         end
     end
+end
 
-    return false;
+function loginMain.checkDoAutoSignin(callback)
+    local info = loginMain.LoadSigninInfo();
+    if(info) then
+        if(info.autoLogin and info.account and info.password) then
+            loginMain.showMessageInfo(L"正在登陆，请稍后...");
+            loginMain.LoginActionApi(info.account, info.password, function(response, err)
+                loginResponse(nil, response, err, callback);
+            end);
+        end
+    end
 end
 
 function loginMain.getRememberPassword()
+    local info = loginMain.LoadSigninInfo();
     local function getRememberPassword(page)
-        if(loginMain.findPWDFiles()) then
-            local file        = ParaIO.open("PWD", "r");
-            local fileContent = "";
-
-            if(file:IsValid()) then
-                fileContent = file:GetText(0, -1);
-                file:close();
+        if(info) then
+            if(info.account) then
+                page:SetValue("account", info.account);
             end
 
-            local PWD = {};
-            for value in string.gmatch(fileContent,"[^|]+") do
-                PWD[#PWD+1] = value;
-            end
-            
-            if(PWD[1]) then
-                page:SetValue("account", PWD[1]);
+            if(info.password) then
+                page:SetValue("password", info.password);
             end
 
-            if(PWD[2]) then
-                page:SetValue("password", Encoding.PasswordDecodeWithMac(PWD[2]));
-            end
-
-            page:SetValue("loginServer", PWD[3]);
+            page:SetValue("loginServer", info.loginServer);
             page:SetValue("rememberPassword", true);
 
-            if(not PWD[5] or PWD[5] == "true") then
-                page:SetValue("autoLogin", true);
-            else
-                page:SetValue("autoLogin", false);
-            end
+            page:SetValue("autoLogin", info.autoLogin == true);
         else
             page:SetValue("rememberPassword",false);
             page:SetValue("autoLogin", false);
@@ -852,6 +929,7 @@ function loginMain.setSite()
 end
 
 function loginMain.OnClickLogin()
+    loginMain.ignore_auto_login = true;
     loginMain.showLoginModalImp(function()
         if(page) then
             page:Refresh(0.01);
@@ -875,35 +953,15 @@ function loginMain.setRememberAuto()
 
             page:Refresh(0.01);
         else
-            local file    = ParaIO.open("PWD", "r");
-            local binData = file:GetText(0, -1);
-
-            file:close();
-
-            if(#binData == 0) then
-                ParaIO.DeleteFile("PWD");
-            else
-                local newStr = ""
-                local settingData = {};
-                for value in string.gmatch(binData,"[^|]+") do
-                    settingData[#settingData + 1] = value;
-                end
-
-                newStr = newStr .. settingData[1] .. "|";
-                newStr = newStr .. settingData[2] .. "|";
-                newStr = newStr .. settingData[3] .. "|";
-                newStr = newStr .. settingData[4] .. "|";
-                newStr = newStr .. "false";
-
-                local file = ParaIO.open("PWD", "w");
-                file:write(newStr,#newStr);
-            
-                file:close();
+            local info = loginMain.LoadSigninInfo();
+            if(info) then
+                info.autoLogin = false;
+                loginMain.SaveSigninInfo(info);
             end
         end
     end
 
-    if(loginMain.LoginPage) then
+    if(loginMain.LoginPage and loginMain.hasExplicitLogin) then
         setRememberAuto(loginMain.LoginPage);
     end
 
@@ -928,13 +986,11 @@ function loginMain.setAutoRemember()
 
             page:Refresh(0.01);
 
-            if(loginMain.findPWDFiles()) then
-                ParaIO.DeleteFile("PWD");
-            end
+            loginMain.SaveSigninInfo(nil);
         end
     end
 
-    if(loginMain.LoginPage) then
+    if(loginMain.LoginPage and loginMain.hasExplicitLogin) then
         setAutoRemember(loginMain.LoginPage);
     end
 
@@ -944,7 +1000,9 @@ function loginMain.setAutoRemember()
 end
 
 function loginMain.autoLoginAction(type)
-
+    if(loginMain.ignore_auto_login) then
+        return
+    end
     local function autoLoginAction(page)
         if(not loginMain.IsSignedIn()) then
             local autoLogin = page:GetValue("autoLogin");
@@ -959,7 +1017,7 @@ function loginMain.autoLoginAction(type)
         end
     end
 
-    if(loginMain.LoginPage) then
+    if(loginMain.LoginPage and loginMain.hasExplicitLogin) then
         autoLoginAction(loginMain.LoginPage);
     end
 

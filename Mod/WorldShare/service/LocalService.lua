@@ -416,6 +416,9 @@ function LocalService:SetTag(worldDir, newTag)
 end
 
 function LocalService:GetTag(foldername)
+    if(not foldername) then
+        return {};
+    end
     local filePath  = SyncMain.GetWorldFolderFullPath() .. "/" .. foldername .. "/tag.xml";
 
     local tag = ParaXML.LuaXML_ParseFile(filePath);

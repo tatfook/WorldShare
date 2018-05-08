@@ -174,7 +174,7 @@
                     </div>
                     <input type="button" value='<%=L"打开" %>' class="flat_button" style="margin-left:3px;height:30px" onclick="InternetLoadWorld.OnAddSearchPage"/>
                 </div>
-                <input style="margin-top:0px;float:left;background:url(Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#363 59 26 26:7 7 7 7);width:26px;height:26px" type="button" align="right" />
+                <input onclick="loginMain.ClosePage" style="margin-top:0px;float:left;background:url(Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#363 59 26 26:7 7 7 7);width:26px;height:26px" type="button" align="right" />
             </div>
             <div style="height:2px;" width="100%" class="mc_line"></div>
             <div class="user_area">
@@ -189,9 +189,8 @@
                     </div>
                 </div>
                 <div style="position:relative;margin-top:-10px;">
-                    <input class="nav_button" style="margin-left:25px;width:28px;height:20px;background:url(Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#217 183 28 20);" type="button" tooltip='<%=L"上一个"%>'/>
-                    <input name="avatar_id" value="1/6" style="color:#cccccc;margin-left:5px;min-width:50px;height:20px;background:url();" type="button"/>
-                    <input class="nav_button" style="margin-left:5px;width:28px;height:20px;margin-left:5px;background:url(Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#242 183 28 20);" type="button" tooltip='<%=L"下一个"%>'/>
+                    <input name="pre" onclick="loginMain.OnChangeAvatar" class="nav_button" style="margin-left:50px;width:28px;height:20px;background:url(Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#217 183 28 20);" type="button" tooltip='<%=L"上一个"%>'/>
+                    <input name="next" onclick="loginMain.OnChangeAvatar" class="nav_button" style="margin-left:5px;width:28px;height:20px;margin-left:5px;background:url(Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#242 183 28 20);" type="button" tooltip='<%=L"下一个"%>'/>
                 </div>
                 <div style="margin-top:20px;margin:10px">
                     <pe:if condition="<%=loginMain.login_type == 1 %>">
@@ -218,7 +217,7 @@
                     <pe:if style="margin-top:10px;font-weight:bold;color:#ffffff" condition="<%= loginMain.refreshing%>">
                         <%=L"正在刷新, 请稍候 ... " %>
                     </pe:if>
-                    <pe:gridview RememberScrollPos="true" AllowPaging="false" VerticalScrollBarStep="30" DefaultNodeHeight="80" ItemsPerLine="1" name="gw_world_ds" DataSource='<%=InternetLoadWorld.DS_Func_Worlds%>'>
+                    <pe:gridview RememberScrollPos="true" AllowPaging="false" VerticalScrollBarStep="30" DefaultNodeHeight="85" ItemsPerLine="1" name="gw_world_ds" DataSource='<%=InternetLoadWorld.DS_Func_Worlds%>'>
                         <Columns>
                             <pe:if condition="<%= not loginMain.refreshing%>">
                                 <!--选中的项-->
@@ -406,7 +405,7 @@
                     <a onclick="loginMain.OnClickLocalWorlds()" class="link_big_event" tooltip='<%=L"点击切换"%>'>
                         <div class="big_event_item">
                             <div style="margin-left:5px;" class="event_title"><%=L"我的世界"%></div>
-                            <div style="margin-left:5px;color:#33cc33;" class="event_title"><div class="left_arrow"></div>官方推荐用户作品欣赏</div>
+                            <div style="margin-left:5px;color:#33cc33;" class="event_title"><div class="left_arrow"></div><%=L"官方推荐用户作品欣赏"%></div>
                         </div>
                     </a>
                 </pe:if>
@@ -414,25 +413,25 @@
                     <a onclick="loginMain.OnClickOfficialWorlds()" class="link_big_event" tooltip='<%=L"点击切换"%>'>
                         <div class="big_event_item">
                             <div style="margin-left:5px;color:#33cc33;" class="event_title"><div class="left_arrow"></div><%=L"我的世界"%></div>
-                            <div style="margin-left:5px;" class="event_title">官方推荐用户作品欣赏</div>
+                            <div style="margin-left:5px;" class="event_title"><%=L"官方推荐用户作品欣赏"%></div>
                         </div>
                     </a>
                 </pe:if>
-                <a href="http://keepwork.com/official/paracraft" class="link_big_event">
+                <a href="http://keepwork.com/official/paracraft/VideoTutorials" class="link_big_event">
                     <div class="big_event_item">
-                        <div style="margin-left:5px;" class="event_title">教学视频</div>
+                        <div style="margin-left:5px;" class="event_title"><%=L"教学视频"%></div>
                     </div>
                 </a>
-                <a href="http://keepwork.com/paracraft/pac" class="link_big_event">
+                <a href="http://iicc.keepwork.com/" class="link_big_event">
                     <div class="big_event_item">
-                        <div style="margin-left:5px;" class="event_title">2018创作大赛报名中</div>
+                        <div style="margin-left:5px;" class="event_title"><%=L"创作大赛报名中"%></div>
                     </div>
                 </a>
                 <div class="big_event_item">
-                    <div style="margin-left:5px;color:#ffffff80" class="event_title">NPL编程课程6月开启报名</div>
+                    <div style="margin-left:5px;color:#ffffff80" class="event_title"><%=L"NPL编程课程6月开启报名"%></div>
                 </div>
                 <div class="big_event_item">
-                    <div style="margin-left:5px;color:#ffffff80" class="event_title" >资源库7月开启</div>
+                    <div style="margin-left:5px;color:#ffffff80" class="event_title" ><%=L"资源库7月开启"%></div>
                 </div>
             </div>
         </div>
