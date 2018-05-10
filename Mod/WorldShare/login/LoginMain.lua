@@ -610,8 +610,9 @@ function loginMain.ClosePage()
     if(loginMain.IsMCVersion()) then
         InternetLoadWorld.ReturnLastStep();
     end
-
-    loginMain.LoginPage:CloseWindow();
+    if(loginMain.LoginPage) then
+        loginMain.LoginPage:CloseWindow();
+    end
 end
 
 function loginMain.GetDefaultValueForAddress()
@@ -629,6 +630,11 @@ end
 local default_avatars = {
     "default", 
     "boy01", 
+    "girl01", 
+    "boy02", 
+    "girl02", 
+    "boy03", 
+    "girl03", 
     "boy04", 
 }
 local cur_index = 1;
