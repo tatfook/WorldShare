@@ -87,6 +87,9 @@ function loginMain.ShowPage()
     params._page.OnClose = function()
         loginMain.LoginPage  = nil;
     end
+
+    -- load last selected avatar if world is not loaded before. 
+    loginMain.OnChangeAvatar();
     
     if(not loginMain.IsSignedIn() and loginMain.LoginWithTokenApi()) then
         return;
@@ -628,7 +631,6 @@ function loginMain.GetDefaultValueForAddress()
 end
 
 local default_avatars = {
-    "default", 
     "boy01", 
     "girl01", 
     "boy02", 
@@ -636,10 +638,34 @@ local default_avatars = {
     "boy03", 
     "girl03", 
     "boy04", 
+    "default", 
 }
 local cur_index = 1;
+
+function loginMain.GetValidAvatarFilename(playerName)
+    if(playerName) then
+        NPL.load("(gl)script/apps/Aries/Creator/Game/Entity/PlayerAssetFile.lua");
+        local PlayerAssetFile = commonlib.gettable("MyCompany.Aries.Game.EntityManager.PlayerAssetFile")
+        PlayerAssetFile:Init();
+        return PlayerAssetFile:GetValidAssetByString(playerName)
+    end
+end
+
 --cycle through 
+-- @param btnName: if nil, we will load the default one if scene is not started. 
 function loginMain.OnChangeAvatar(btnName)
+    if(not btnName) then
+        local filename = GameLogic.options:GetMainPlayerAssetName();
+        if(not GameLogic.IsStarted) then
+            GameLogic.options:SetMainPlayerAssetName();
+            filename = GameLogic.options:GetMainPlayerAssetName() or loginMain.GetValidAvatarFilename(default_avatars[cur_index]);
+        end
+        if(filename and loginMain.LoginPage) then
+            loginMain.LoginPage:CallMethod("MyPlayer", "SetAssetFile", filename);
+        end
+        return
+    end
+
     if(btnName == "pre") then
         cur_index = cur_index - 1;
     else
@@ -647,11 +673,16 @@ function loginMain.OnChangeAvatar(btnName)
     end
     cur_index = ((cur_index-1) % (#default_avatars)) + 1
     local playerName = default_avatars[cur_index];
-    if(loginMain.LoginPage) then
-        if(GameLogic.RunCommand) then
-            GameLogic.RunCommand("/avatar "..playerName);
+    
+    if(playerName and loginMain.LoginPage) then
+        local filename = loginMain.GetValidAvatarFilename(playerName);
+        if(filename) then
+            if(GameLogic.RunCommand) then
+                GameLogic.RunCommand("/avatar "..playerName);
+            end
+            GameLogic.options:SetMainPlayerAssetName(filename);
+            loginMain.LoginPage:CallMethod("MyPlayer", "SetAssetFile", playerName);
         end
-        loginMain.LoginPage:CallMethod("MyPlayer", "SetAssetFile", playerName);
     end
 end
 
