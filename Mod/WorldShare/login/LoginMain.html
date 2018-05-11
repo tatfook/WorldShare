@@ -217,7 +217,7 @@
                     <pe:if style="margin-top:10px;font-weight:bold;color:#ffffff" condition="<%= loginMain.refreshing%>">
                         <%=L"正在刷新, 请稍候 ... " %>
                     </pe:if>
-                    <pe:gridview RememberScrollPos="true" AllowPaging="false" VerticalScrollBarStep="30" DefaultNodeHeight="85" ItemsPerLine="1" name="gw_world_ds" DataSource='<%=InternetLoadWorld.DS_Func_Worlds%>'>
+                    <pe:gridview RememberScrollPos="true" AllowPaging="false" VerticalScrollBarStep="50" DefaultNodeHeight="85" ItemsPerLine="1" name="gw_world_ds" DataSource='<%=InternetLoadWorld.DS_Func_Worlds%>'>
                         <Columns>
                             <pe:if condition="<%= not loginMain.refreshing%>">
                                 <!--选中的项-->
@@ -401,22 +401,11 @@
             <div class="middle_line" />
             <!--events_area-->
             <div class="events_area">
-                <pe:if condition='<%=InternetLoadWorld.type_index == 2 %>'>
-                    <a onclick="loginMain.OnClickLocalWorlds()" class="link_big_event" tooltip='<%=L"点击切换"%>'>
-                        <div class="big_event_item">
-                            <div style="margin-left:5px;" class="event_title"><%=L"我的世界"%></div>
-                            <div style="margin-left:5px;color:#33cc33;" class="event_title"><div class="left_arrow"></div><%=L"官方推荐用户作品欣赏"%></div>
-                        </div>
-                    </a>
-                </pe:if>
-                <pe:if condition='<%=InternetLoadWorld.type_index ~= 2 %>'>
-                    <a onclick="loginMain.OnClickOfficialWorlds()" class="link_big_event" tooltip='<%=L"点击切换"%>'>
-                        <div class="big_event_item">
-                            <div style="margin-left:5px;color:#33cc33;" class="event_title"><div class="left_arrow"></div><%=L"我的世界"%></div>
-                            <div style="margin-left:5px;" class="event_title"><%=L"官方推荐用户作品欣赏"%></div>
-                        </div>
-                    </a>
-                </pe:if>
+                <a onclick="loginMain.OnClickOfficialWorlds()" class="link_big_event">
+                    <div class="big_event_item">
+                        <div style="margin-left:5px;" class="event_title"><%=L"官方推荐用户作品欣赏"%></div>
+                    </div>
+                </a>
                 <a href="http://keepwork.com/official/paracraft/VideoTutorials" class="link_big_event">
                     <div class="big_event_item">
                         <div style="margin-left:5px;" class="event_title"><%=L"教学视频"%></div>

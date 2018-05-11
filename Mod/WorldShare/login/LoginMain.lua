@@ -743,8 +743,15 @@ end
 function loginMain.OnClickLocalWorlds()
     loginMain.OnChangeType(1);
 end
+
 function loginMain.OnClickOfficialWorlds()
-    loginMain.OnChangeType(2);
+    NPL.load("(gl)Mod/WorldShare/login/BrowseRemoteWorlds.lua");
+    local BrowseRemoteWorlds = commonlib.gettable("Mod.WorldShare.login.BrowseRemoteWorlds");
+    BrowseRemoteWorlds.ShowPage(function(bHasEnteredWorld)
+        if(bHasEnteredWorld) then
+            loginMain.ClosePage();
+        end
+    end)
 end
 
 function loginMain.OnChangeType(index)

@@ -1,0 +1,139 @@
+<!-- Mod/WorldShare/login/BrowseRemoteWorlds.html -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>world share login mod,by big,2016/12/9</title>
+</head>
+<body>
+    <pe:mcml>
+        <script type="text/npl" refresh="false" src="BrowseRemoteWorlds.lua">
+            <![CDATA[
+                InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld");
+                BrowseRemoteWorlds = commonlib.gettable("Mod.WorldShare.login.BrowseRemoteWorlds");
+                BrowseRemoteWorlds.init();
+                InternetLoadWorld.OnInit();
+            ]]>
+        </script>
+        <style type="text/mcss">
+            {
+                world_area = {
+                    ["padding-top"] = 10,
+                    ["padding-left"] = 0,
+                    ["padding-right"] = 0,
+                    ["background-color"] = "#000000",
+                },
+                share_selected_item = {
+                    ["margin-left"] = 0,
+                    ["margin-bottom"] = 5,
+                    ["padding-left"] = 5,
+                    ["padding-top"] = 5,
+                    width  = 250,
+                    height = 65,
+                    ["background-color"] = "#454340",
+                },
+                share_world_name = {
+                    ["text-singleline"] = "true",
+                    width = 30,
+                    float = "left",
+                    ["base-font-size"] = 16,
+                    ["font-size"] = 16,
+                    ["margin-top"] = 2,
+                    ["text-align"] = "left",
+                    color = "#ffffff",
+                },
+                share_world_infor = {
+                    ["text-singleline"] = "true",
+                    float = "left",
+                    ["margin-left"] = 8,
+                    height = 18,
+                    ["font-size"] = 12,
+                    color = "#9e9e9e",
+                },
+                share_button = {
+                    width = 32,
+                    height = 32,
+                    ["margin-right"] = 6,
+                },
+                status = {
+                    float   = "left",
+                    padding = 8,
+                    width   = 16,
+                    height  = 16,
+                    ["margin-top"]    = 8,
+                    ["margin-bottom"] = 8,
+                    ["margin-left"]   = 8,
+                    ["margin-right"]  = 8,
+                },
+                common_button = {
+                    height = 30,
+                    spacing = 20,
+                    ["font-weight"] = "bold",
+                    ["font-size"]   = 14,
+                },
+                nav_button = {
+                    color = "#cccccc",
+                    background = "",
+                    ["margin-top"] = 0,
+                    height=28,
+                    background2 = "Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;179 89 21 21:8 8 8 8",
+                },
+                flat_button = {
+                    color = "#cccccc",
+                    ["margin-top"] = 0,
+                    background = "Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;179 89 21 21:8 8 8 8",
+                },
+            }
+        </style>
+        <div class="world_area">
+            <div style="margin-left:10px;">
+                    <input class="flat_button" onclick="BrowseRemoteWorlds.OnClickBack()" style="height:26px;min-width:60px" type="button" value='<%=L"返回"%>' />
+            </div>
+            <div style="height:2px;margin-top:5px;" width="100%" class="mc_line"></div>
+            <div style="margin-left:10px;">
+                <pe:if style="margin-top:10px;font-weight:bold;color:#ffffff" condition="<%= BrowseRemoteWorlds.refreshing%>">
+                    <%=L"正在刷新, 请稍候 ... " %>
+                </pe:if>
+                <pe:gridview RememberScrollPos="true" AllowPaging="false" VerticalScrollBarStep="30" DefaultNodeHeight="70" ItemsPerLine='<%=BrowseRemoteWorlds.GetItemsPerLine()%>' name="gw_world_ds" DataSource='<%=InternetLoadWorld.DS_Func_Worlds%>'>
+                    <Columns>
+                        <pe:if condition="<%= not BrowseRemoteWorlds.refreshing%>">
+                            <div name='<%=Eval("index")%>' style="margin-right:5px;" class="share_selected_item">
+                                <div style="position:relative;">
+                                    <div style="margin-left:5px;">
+                                        <div class="share_world_name">
+                                            <%=Eval("text") %>
+                                        </div>
+                                    </div>
+                                    <div class="share_world_infor" style="position:relative;margin-left:5px;margin-top:5px;">
+                                        <span style="margin-left:0px;">v<%=BrowseRemoteWorlds.GetCurWorldInfo("revision",Eval("index")) %></span>
+                                        <span style="margin-left:10px;"><%=Eval("size")%>M</span>
+                                        <span style="margin-left:10px;"><%=Eval("author") %></span>
+                                    </div>
+                                </div>
+                                <div style="margin-left:160px;margin-top:20px;position:relative">
+                                    <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) == 100%>'>
+                                        <input type="button" class="share_button" style="background:url(textures/worldshare_32bits.png#78 46 48 48)" onclick='BrowseRemoteWorlds.deleteWorld()' tooltip='<%=L"删除"%>' name='<%=Eval("index")%>' /><!-- 删除 -->
+                                        <input type="button" class="share_button" style="background:url(textures/worldshare_32bits.png#20 46 48 48)" onclick="BrowseRemoteWorlds.enterWorld()" tooltip='<%=L"进入"%>' name='<%=Eval("index")%>' /><!-- 进入 -->
+                                    </pe:if>
+                                    <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) < 100 %>'>
+                                        <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) >= 0 %>'>
+                                            <input type="button" value='<%=L"下载中" %>' style="max-width:60px;height:32px;font-size:12px;font-weight:bold;" onclick="InternetLoadWorld.DownLoadWorld" name='<%=Eval("index")%>' class="mc_button_grey" />
+                                        </pe:if>
+                                        <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) < 0 %>'>
+                                            <input type="button" value='<%=L"下载" %>' style="max-width:60px;height:32px;font-size:12px;font-weight:bold;color:#333333" onclick="InternetLoadWorld.DownLoadWorld" name='<%=Eval("index")%>' class="mc_button_grey" />
+                                        </pe:if>
+                                    </pe:if>
+                                </div>
+                            </div>
+                        </pe:if>
+                    </Columns>
+                    <EmptyDataTemplate>
+                    </EmptyDataTemplate>
+                    <FetchingDataTemplate>
+                        <div style="margin-top:10px;font-weight:bold;color:#ffffff"><%=L"正在搜索, 请稍候 ... " %></div>
+                    </FetchingDataTemplate>
+                </pe:gridview>
+            </div>
+        </div>
+    </pe:mcml>
+</body>
+</html>
