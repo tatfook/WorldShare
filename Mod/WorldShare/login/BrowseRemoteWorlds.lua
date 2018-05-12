@@ -30,15 +30,20 @@ function BrowseRemoteWorlds.GetItemsPerLine()
     return BrowseRemoteWorlds.itemsPerLine;
 end
 
+function BrowseRemoteWorlds.GetMarginLeft()
+    return BrowseRemoteWorlds.margin_left;
+end
+
 -- @param callbackFunc: callbackFunc(bHasEnteredWorld) end
 function BrowseRemoteWorlds.ShowPage(callbackFunc)
     BrowseRemoteWorlds.callbackFunc = callbackFunc;
 
     NPL.load("(gl)script/ide/System/Windows/Screen.lua");
     local Screen = commonlib.gettable("System.Windows.Screen");
-    echo({Screen:GetWidth(), Screen:GetHeight()})
-
-    BrowseRemoteWorlds.itemsPerLine = math.floor((Screen:GetWidth()-50)/255);
+    
+    local item_width = 255;
+    BrowseRemoteWorlds.itemsPerLine = math.floor((Screen:GetWidth()-50)/item_width);
+    BrowseRemoteWorlds.margin_left = math.floor((Screen:GetWidth() - BrowseRemoteWorlds.itemsPerLine * item_width)/2);
 
     local params = {
         url            = "Mod/WorldShare/login/BrowseRemoteWorlds.html", 

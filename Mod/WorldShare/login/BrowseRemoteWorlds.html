@@ -85,11 +85,11 @@
             }
         </style>
         <div class="world_area">
-            <div style="margin-left:10px;">
+            <div style='<%=format("margin-left:%dpx;", BrowseRemoteWorlds.GetMarginLeft())%>'>
                     <input class="flat_button" onclick="BrowseRemoteWorlds.OnClickBack()" style="height:26px;min-width:60px" type="button" value='<%=L"返回"%>' />
             </div>
             <div style="height:2px;margin-top:5px;" width="100%" class="mc_line"></div>
-            <div style="margin-left:10px;">
+            <div style='<%=format("margin-left:%dpx;", BrowseRemoteWorlds.GetMarginLeft())%>'>
                 <pe:if style="margin-top:10px;font-weight:bold;color:#ffffff" condition="<%= BrowseRemoteWorlds.refreshing%>">
                     <%=L"正在刷新, 请稍候 ... " %>
                 </pe:if>
