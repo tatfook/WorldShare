@@ -11,7 +11,6 @@
                 InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld");
                 BrowseRemoteWorlds = commonlib.gettable("Mod.WorldShare.login.BrowseRemoteWorlds");
                 BrowseRemoteWorlds.init();
-                InternetLoadWorld.OnInit();
             ]]>
         </script>
         <style type="text/mcss">
@@ -90,41 +89,36 @@
             </div>
             <div style="height:2px;margin-top:5px;" width="100%" class="mc_line"></div>
             <div style='<%=format("margin-left:%dpx;", BrowseRemoteWorlds.GetMarginLeft())%>'>
-                <pe:if style="margin-top:10px;font-weight:bold;color:#ffffff" condition="<%= BrowseRemoteWorlds.refreshing%>">
-                    <%=L"正在刷新, 请稍候 ... " %>
-                </pe:if>
-                <pe:gridview RememberScrollPos="true" AllowPaging="false" VerticalScrollBarStep="30" DefaultNodeHeight="70" ItemsPerLine='<%=BrowseRemoteWorlds.GetItemsPerLine()%>' name="gw_world_ds" DataSource='<%=InternetLoadWorld.DS_Func_Worlds%>'>
+                <pe:gridview RememberScrollPos="true" AllowPaging="false" VerticalScrollBarStep="30" DefaultNodeHeight="70" ItemsPerLine='<%=BrowseRemoteWorlds.GetItemsPerLine()%>' name="gw_browserworld_ds" DataSource='<%=InternetLoadWorld.DS_Func_Worlds%>'>
                     <Columns>
-                        <pe:if condition="<%= not BrowseRemoteWorlds.refreshing%>">
-                            <div name='<%=Eval("index")%>' style="margin-right:5px;" class="share_selected_item">
-                                <div style="position:relative;">
-                                    <div style="margin-left:5px;">
-                                        <div class="share_world_name">
-                                            <%=Eval("text") %>
-                                        </div>
-                                    </div>
-                                    <div class="share_world_infor" style="position:relative;margin-left:5px;margin-top:5px;">
-                                        <span style="margin-left:0px;">v<%=BrowseRemoteWorlds.GetCurWorldInfo("revision",Eval("index")) %></span>
-                                        <span style="margin-left:10px;"><%=Eval("size")%>M</span>
-                                        <span style="margin-left:10px;"><%=Eval("author") %></span>
+                        <div name='<%=Eval("index")%>' style="margin-right:5px;" class="share_selected_item">
+                            <div style="position:relative;">
+                                <div style="margin-left:5px;">
+                                    <div class="share_world_name">
+                                        <%=Eval("text") %>
                                     </div>
                                 </div>
-                                <div style="margin-left:160px;margin-top:20px;position:relative">
-                                    <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) == 100%>'>
-                                        <input type="button" class="share_button" style="background:url(textures/worldshare_32bits.png#78 46 48 48)" onclick='BrowseRemoteWorlds.deleteWorld()' tooltip='<%=L"删除"%>' name='<%=Eval("index")%>' /><!-- 删除 -->
-                                        <input type="button" class="share_button" style="background:url(textures/worldshare_32bits.png#20 46 48 48)" onclick="BrowseRemoteWorlds.enterWorld()" tooltip='<%=L"进入"%>' name='<%=Eval("index")%>' /><!-- 进入 -->
-                                    </pe:if>
-                                    <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) < 100 %>'>
-                                        <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) >= 0 %>'>
-                                            <input type="button" value='<%=L"下载中" %>' style="max-width:60px;height:32px;font-size:12px;font-weight:bold;" onclick="InternetLoadWorld.DownLoadWorld" name='<%=Eval("index")%>' class="mc_button_grey" />
-                                        </pe:if>
-                                        <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) < 0 %>'>
-                                            <input type="button" value='<%=L"下载" %>' style="max-width:60px;height:32px;font-size:12px;font-weight:bold;color:#333333" onclick="InternetLoadWorld.DownLoadWorld" name='<%=Eval("index")%>' class="mc_button_grey" />
-                                        </pe:if>
-                                    </pe:if>
+                                <div class="share_world_infor" style="position:relative;margin-left:5px;margin-top:5px;">
+                                    <span style="margin-left:0px;">v<%=BrowseRemoteWorlds.GetCurWorldInfo("revision",Eval("index")) %></span>
+                                    <span style="margin-left:10px;"><%=Eval("size")%>M</span>
+                                    <span style="margin-left:10px;"><%=Eval("author") %></span>
                                 </div>
                             </div>
-                        </pe:if>
+                            <div style="margin-left:160px;margin-top:20px;position:relative">
+                                <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) == 100%>'>
+                                    <input type="button" class="share_button" style="background:url(textures/worldshare_32bits.png#78 46 48 48)" onclick='BrowseRemoteWorlds.deleteWorld()' tooltip='<%=L"删除"%>' name='<%=Eval("index")%>' /><!-- 删除 -->
+                                    <input type="button" class="share_button" style="background:url(textures/worldshare_32bits.png#20 46 48 48)" onclick="BrowseRemoteWorlds.enterWorld()" tooltip='<%=L"进入"%>' name='<%=Eval("index")%>' /><!-- 进入 -->
+                                </pe:if>
+                                <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) < 100 %>'>
+                                    <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) >= 0 %>'>
+                                        <input type="button" value='<%=L"下载中" %>' style="max-width:60px;height:32px;font-size:12px;font-weight:bold;" onclick="InternetLoadWorld.DownLoadWorld" name='<%=Eval("index")%>' class="mc_button_grey" />
+                                    </pe:if>
+                                    <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) < 0 %>'>
+                                        <input type="button" value='<%=L"下载" %>' style="max-width:60px;height:32px;font-size:12px;font-weight:bold;color:#333333" onclick="InternetLoadWorld.DownLoadWorld" name='<%=Eval("index")%>' class="mc_button_grey" />
+                                    </pe:if>
+                                </pe:if>
+                            </div>
+                        </div>
                     </Columns>
                     <EmptyDataTemplate>
                     </EmptyDataTemplate>

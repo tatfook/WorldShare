@@ -22,6 +22,7 @@ NPL.load("(gl)script/apps/Aries/Creator/Game/Login/RemoteServerList.lua");
 NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/ShareWorldPage.lua");
 NPL.load("(gl)Mod/WorldShare/main.lua");
 NPL.load("(gl)script/apps/Aries/Creator/Game/Login/LocalLoadWorld.lua");
+NPL.load("(gl)script/apps/Aries/Creator/Game/Login/InternetLoadWorld.lua");
 NPL.load("(gl)script/apps/Aries/Creator/Game/Login/CreateNewWorld.lua");
 
 local CreateNewWorld     = commonlib.gettable("MyCompany.Aries.Game.MainLogin.CreateNewWorld");
@@ -115,6 +116,14 @@ end
 
 function loginMain.setLoginPage()
     loginMain.LoginPage = document:GetPageCtrl();
+    InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld");
+    InternetLoadWorld.OnStaticInit();
+    InternetLoadWorld.GetEvents():AddEventListener("dataChanged", function(self, event)
+            if(event.type_index == 1) then
+                loginMain.refreshPage()
+            end
+    end, nil, "loginMain");   
+        
 end
 
 function loginMain.setInforPage()
@@ -130,7 +139,9 @@ function loginMain.setModalPage()
 end
 
 function loginMain.refreshPage()
-    loginMain.LoginPage:Refresh();
+    if(loginMain.LoginPage) then
+        loginMain.LoginPage:Refresh();
+    end
 end
 
 function loginMain.showMessageInfo(msg)
@@ -586,14 +597,9 @@ end
 
 function loginMain.OnSwitchWorld(index)
     InternetLoadWorld.OnSwitchWorld(index);
-
-    if(loginMain.current_type == 1) then
-        loginMain.updateWorldInfo(index, function()
-            loginMain.LoginPage:Refresh(0.01);
-        end);
-    else
+    loginMain.updateWorldInfo(index, function()
         loginMain.LoginPage:Refresh(0.01);
-    end
+    end);
 end
 
 function loginMain.GetNetSpeed()
@@ -744,10 +750,6 @@ function loginMain.QQLogin()
     InternetLoadWorld.QQLogin();
 end
 
-function loginMain.OnClickLocalWorlds()
-    loginMain.OnChangeType(1);
-end
-
 function loginMain.OnClickOfficialWorlds()
     NPL.load("(gl)Mod/WorldShare/login/BrowseRemoteWorlds.lua");
     local BrowseRemoteWorlds = commonlib.gettable("Mod.WorldShare.login.BrowseRemoteWorlds");
@@ -756,13 +758,6 @@ function loginMain.OnClickOfficialWorlds()
             loginMain.ClosePage();
         end
     end)
-end
-
-function loginMain.OnChangeType(index)
-    loginMain.current_type = index;
-    InternetLoadWorld.OnChangeType(index);
-
-    loginMain.LoginPage:Refresh(0.01);
 end
 
 function loginMain.BeHasWorldInSlot(is_empty_slot,is_buy_slot)
@@ -1090,10 +1085,9 @@ end
 function loginMain.RefreshCurrentServerList(callback)
     if(loginMain.LoginPage) then
         loginMain.refreshing = true;
-        loginMain.LoginPage:Refresh(0.01);
 
         -- user
-        if(loginMain.current_type == 1 and not loginMain.IsSignedIn()) then
+        if(not loginMain.IsSignedIn()) then
             loginMain.getLocalWorldList(function()
                 loginMain.changeRevision(function()
                     loginMain.refreshing = false;
@@ -1102,7 +1096,7 @@ function loginMain.RefreshCurrentServerList(callback)
                     end
                 end);
             end);
-        elseif(loginMain.current_type == 1 and loginMain.IsSignedIn()) then
+        elseif(loginMain.IsSignedIn()) then
             loginMain.getLocalWorldList(function()
                 loginMain.changeRevision(function()
                     loginMain.syncWorldsList(function()
@@ -1113,17 +1107,6 @@ function loginMain.RefreshCurrentServerList(callback)
                     end);
                 end);
             end);
-        end
-
-        --offical
-        if(loginMain.current_type == 2) then
-            local ServerPage = InternetLoadWorld.GetCurrentServerPage();
-
-            if(not ServerPage.isFetching) then
-                InternetLoadWorld.FetchServerPage(ServerPage);
-            end
-
-            loginMain.refreshing = false;
         end
 
         loginMain.LoginPage:Refresh(0.01);
@@ -1302,9 +1285,7 @@ function loginMain.syncWorldsList(_callback)
             end
         end
 
-        if(loginMain.LoginPage) then
-            loginMain.LoginPage:Refresh(0.01);
-        end
+        loginMain.refreshPage();
 
         if(_callback) then
             _callback();

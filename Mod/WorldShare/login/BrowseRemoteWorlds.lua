@@ -23,7 +23,22 @@ BrowseRemoteWorlds.itemsPerLine = 3;
 
 function BrowseRemoteWorlds.init()
     InternetLoadWorld.OnChangeType(2);
-    BrowseRemoteWorlds.LoginPage = document:GetPageCtrl();
+    BrowseRemoteWorlds.Page = document:GetPageCtrl();
+
+    InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld");
+    InternetLoadWorld.OnStaticInit();
+    InternetLoadWorld.GetEvents():AddEventListener("dataChanged", function(self, event)
+            if(event.type_index ~= 1) then
+                BrowseRemoteWorlds.refreshPage()
+            end
+    end, nil, "BrowseRemoteWorlds");   
+
+end
+
+function BrowseRemoteWorlds.refreshPage()
+    if(BrowseRemoteWorlds.Page) then
+        BrowseRemoteWorlds.Page:Refresh();
+    end
 end
 
 function BrowseRemoteWorlds.GetItemsPerLine()
@@ -66,19 +81,11 @@ function BrowseRemoteWorlds.ShowPage(callbackFunc)
     System.App.Commands.Call("File.MCMLWindowFrame", params);
 
     params._page.OnClose = function()
-        BrowseRemoteWorlds.LoginPage  = nil;
+        BrowseRemoteWorlds.Page  = nil;
         InternetLoadWorld.OnChangeType(1);
     end
    
     BrowseRemoteWorlds.RefreshCurrentServerList();
-end
-
-function BrowseRemoteWorlds.refreshPage()
-    BrowseRemoteWorlds.LoginPage:Refresh();
-end
-
-function BrowseRemoteWorlds.GetWorldType()
-    return InternetLoadWorld.type_ds;
 end
 
 function BrowseRemoteWorlds.GetCurWorldInfo(info_type, world_index)
@@ -105,8 +112,8 @@ function BrowseRemoteWorlds.OnClickBack()
 end
 
 function BrowseRemoteWorlds.ClosePage(bHasEnteredWorld)
-    if(BrowseRemoteWorlds.LoginPage) then
-        BrowseRemoteWorlds.LoginPage:CloseWindow();
+    if(BrowseRemoteWorlds.Page) then
+        BrowseRemoteWorlds.Page:CloseWindow();
     end
     if(BrowseRemoteWorlds.callbackFunc) then
         BrowseRemoteWorlds.callbackFunc(bHasEnteredWorld);
@@ -114,19 +121,14 @@ function BrowseRemoteWorlds.ClosePage(bHasEnteredWorld)
 end
 
 function BrowseRemoteWorlds.RefreshCurrentServerList(callback)
-    if(BrowseRemoteWorlds.LoginPage) then
-        BrowseRemoteWorlds.refreshing = true;
-        BrowseRemoteWorlds.LoginPage:Refresh(0.01);
-       
+    if(BrowseRemoteWorlds.Page) then
         local ServerPage = InternetLoadWorld.GetCurrentServerPage();
 
         if(not ServerPage.isFetching) then
             InternetLoadWorld.FetchServerPage(ServerPage);
         end
 
-        BrowseRemoteWorlds.refreshing = false;
-
-        BrowseRemoteWorlds.LoginPage:Refresh(0.01);
+        BrowseRemoteWorlds.refreshPage()
     end
 end
 
@@ -169,7 +171,7 @@ function BrowseRemoteWorlds.downloadWorld()
             SyncMain.selectedWorldInfor.author      = "";
             SyncMain.selectedWorldInfor.remotefile  = "local://"..SyncMain.GetWorldFolderFullPath() .. "/" .. SyncMain.foldername.default;
 
-            BrowseRemoteWorlds.LoginPage:Refresh();
+            BrowseRemoteWorlds.refreshPage()
         end
     end);
 end
