@@ -658,7 +658,11 @@ function loginMain.OnChangeAvatar(btnName)
         local filename = GameLogic.options:GetMainPlayerAssetName();
         if(not GameLogic.IsStarted) then
             GameLogic.options:SetMainPlayerAssetName();
-            filename = GameLogic.options:GetMainPlayerAssetName() or loginMain.GetValidAvatarFilename(default_avatars[cur_index]);
+            filename = GameLogic.options:GetMainPlayerAssetName();
+            if(not filename) then
+                filename = loginMain.GetValidAvatarFilename(default_avatars[cur_index]);
+                GameLogic.options:SetMainPlayerAssetName(filename);
+            end
         end
         if(filename and loginMain.LoginPage) then
             loginMain.LoginPage:CallMethod("MyPlayer", "SetAssetFile", filename);
