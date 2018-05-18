@@ -144,6 +144,28 @@ function BrowseRemoteWorlds.enterWorld(index)
     end
 end
 
+function BrowseRemoteWorlds.deleteWorld(index)
+    local index = tonumber(index);
+
+    SyncMain.selectedWorldInfor = InternetLoadWorld.cur_ds[index];
+
+    if(SyncMain.tagInfor) then
+        if(SyncMain.tagInfor.name == SyncMain.selectedWorldInfor.foldername) then
+            _guihelper.MessageBox(L"不能刪除正在编辑的世界");
+            return;
+        end
+    end
+
+    local zipPath = SyncMain.selectedWorldInfor.localpath;
+    if (zipPath) then
+        if(ParaIO.DeleteFile(zipPath)) then
+            BrowseRemoteWorlds.RefreshCurrentServerList();
+        else
+            _guihelper.MessageBox(L"无法删除可能您没有足够的权限"); 
+        end
+    end
+end
+
 function BrowseRemoteWorlds.downloadWorld()
     SyncMain.foldername.utf8 = SyncMain.selectedWorldInfor.foldername;
     SyncMain.foldername.default = Encoding.Utf8ToDefault(SyncMain.foldername.utf8);
