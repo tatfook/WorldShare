@@ -55,7 +55,7 @@ loginMain.current_type = 1;
 loginMain.serverLists  = {
     {value="keepwork"        , name="keepwork"        , text=L"使用KeepWork登录", selected=true},
     {value="stage"           , name="stage"           , text=L"使用stage登录"},
-    {value="release"         , name="release"         , text=L"使用releasee登录"},
+    {value="release"         , name="release"         , text=L"使用release登录"},
     {value="local"           , name="local"           , text=L"使用本地服务登录"},
 }
 
