@@ -90,11 +90,6 @@ end
 
 function SyncMain.closeDeletePage()
     SyncMain.DeletePage:CloseWindow();
-
---    if(not WorldCommon.GetWorldInfo()) then
---        MainLogin.state.IsLoadMainWorldRequested = nil;
---        MainLogin:next_step();
---    end
 end
 
 function SyncMain.closeSyncPage()
@@ -140,10 +135,6 @@ function SyncMain:compareRevision(LoginStatus, callback)
             SyncMain.currentRevison = WorldRevisionCheckOut:Checkout();
 
             SyncMain.localFiles = LocalService:new():LoadFiles(SyncMain.worldDir.default);
-
-            --[[if(GitlabService:checkSpecialCharacter(SyncMain.foldername.utf8))then
-                return;
-            end]]
 
             local hasRevision = false;
             for key,value in ipairs(SyncMain.localFiles) do
@@ -380,11 +371,6 @@ function SyncMain:useDataSourceGUI()
 end
 
 function SyncMain:syncToLocal(callback)
-    if(not SyncMain.finish) then
-        --_guihelper.MessageBox(L"同步尚未结束");
-        --return;
-    end
-
     SyncMain.localSync = {};
     SyncMain.finish = false;
 
@@ -1020,29 +1006,33 @@ function SyncMain:refreshRemoteWorldLists(syncGUI, callback)
 
             local worldTag = LocalService:GetTag(SyncMain.foldername.default);
 
-            local params = {};
-            params.modDate         = modDateTable;
-            params.worldsName      = SyncMain.foldername.utf8;
-            params.revision        = SyncMain.currentRevison;
-            params.hasPreview      = hasPreview;
-            params.dataSourceType  = loginMain.dataSourceType;
-            params.gitlabProjectId = GitlabService.projectId;
-            params.readme          = readme;
-            params.preview         = preview;
-            params.filesTotals     = filesTotals;
-            params.commitId        = lastCommitSha;
-            params.name            = worldTag.name;
+            self.worldInfo = {};
+            self.worldInfo.modDate         = modDateTable;
+            self.worldInfo.worldsName      = SyncMain.foldername.utf8;
+            self.worldInfo.revision        = SyncMain.currentRevison;
+            self.worldInfo.hasPreview      = hasPreview;
+            self.worldInfo.dataSourceType  = loginMain.dataSourceType;
+            self.worldInfo.gitlabProjectId = GitlabService.projectId;
+            self.worldInfo.readme          = readme;
+            self.worldInfo.preview         = preview;
+            self.worldInfo.filesTotals     = filesTotals;
+            self.worldInfo.commitId        = lastCommitSha;
+            self.worldInfo.name            = worldTag.name;
+            self.worldInfo.download        = format(
+                "%s/%s/%s/repository/archive.zip?ref=%s",
+                loginMain.rawBaseUrl,
+                loginMain.dataSourceUsername,
+                GitEncoding.base32(SyncMain.foldername.utf8),
+                self.worldInfo.commitId
+            );
 
             loginMain.refreshing = true;
-
-            if(loginMain.LoginPage) then
-                loginMain.LoginPage:Refresh(0.01);
-            end
+            loginMain.refreshPage();
 
             HttpRequest:GetUrl({
                 url     = loginMain.site .. "/api/mod/worldshare/models/worlds/refresh",
                 json    = true,
-                form    = params,
+                form    = self.worldInfo,
                 headers = {
                     Authorization    = "Bearer " .. loginMain.token,
                     ["content-type"] = "application/json",
@@ -1050,13 +1040,13 @@ function SyncMain:refreshRemoteWorldLists(syncGUI, callback)
             },function(response, err)
                 if(err == 200) then
                     if(type(response) == "table" and response.error.id == 0) then
-                        params.opusId = response.data.opusId;
+                        self.worldInfo.opusId = response.data.opusId;
                     else
                         _guihelper.MessageBox(L"更新服务器列表失败");
                         return;
                     end
 
-                    SyncMain:genWorldMD(params, function()
+                    local function refresh()
                         SyncMain.finish = true;
 
                         if(syncGUI) then
@@ -1068,7 +1058,9 @@ function SyncMain:refreshRemoteWorldLists(syncGUI, callback)
                                 callback();
                             end
                         end);
-                    end);
+                    end
+
+                    SyncMain:genWorldMD(refresh);
                 end
             end);
 
@@ -1211,38 +1203,38 @@ function SyncMain:genThemeMD(callback)
     end);
 end
 
-function SyncMain:genWorldMD(worldInfor, callback)
-    local contentUrl = "projects/" .. loginMain.keepWorkDataSourceId .. "/repository/files/" .. loginMain.username .. "/paracraft/world_" .. worldInfor.worldsName .. ".md?ref=master";
-    local worldUrl   = "";
+function SyncMain:genWorldMD(callback)
+    local contentUrl = format(
+        "projects/%s/repository/files/%s/paracraft/world_%s.md?ref=master",
+        loginMain.keepWorkDataSourceId,
+        loginMain.username,
+        self.worldInfo.worldsName
+    );
 
-    if(loginMain.dataSourceType == "gitlab") then
-        worldUrl = "http://git.keepwork.com/" .. loginMain.dataSourceUsername .. "/" .. GitEncoding.base32(SyncMain.foldername.utf8) .. "/repository/archive.zip?ref=" .. worldInfor.commitId;
-    end
+    local worldFilePath = format("%s/paracraft/world_%s.md", loginMain.username, self.worldInfo.worldsName);
 
-    local worldFilePath = loginMain.username .. "/paracraft/world_" .. worldInfor.worldsName .. ".md";
-    local worldTag      = LocalService:GetTag(SyncMain.foldername.default);
+    local paracraftParams = {
+        link_world_name   = self.worldInfo.name,
+        link_world_url    = self.worldInfo.download,
+        media_logo        = self.worldInfo.preview,
+        link_desc         = "",
+        link_username     = loginMain.username,
+        link_update_date  = self.worldInfo.modDate,
+        link_version      = self.worldInfo.revision,
+        link_opus_id      = self.worldInfo.opusId,
+        link_files_totals = self.worldInfo.filesTotals,
+    }
+
+    local paracraftCommand = KeepworkGen:setCommand("paracraft", paracraftParams);
 
     self:getUrl(contentUrl , function(data, err)
-        if(err == 404) then
-            local world3D = {
-                link_world_name   = worldTag.name,
-                link_world_url    = worldUrl,
-                media_logo        = worldInfor.preview,
-                link_desc         = "",
-                link_username     = loginMain.username,
-                link_update_date  = worldInfor.modDate,
-                link_version      = worldInfor.revision,
-                link_opus_id      = worldInfor.opusId,
-                link_files_totals = worldInfor.filesTotals,
-            }
+        if (err == 404) then
 
-            world3D = KeepworkGen:setCommand("paracraft",world3D);
-
-            if(not worldInfor.readme) then
-                worldInfor.readme = "";
+            if(not self.worldInfo.readme) then
+                self.worldInfo.readme = "";
             end
 
-            SyncMain.worldFile = KeepworkGen:SetAutoGenContent(worldInfor.readme, world3D)
+            SyncMain.worldFile = KeepworkGen:SetAutoGenContent(self.worldInfo.readme, paracraftCommand)
             SyncMain.worldFile = SyncMain.worldFile .. "\r\n" .. KeepworkGen:setCommand("comment");
 
             SyncMain:uploadService(
@@ -1256,23 +1248,10 @@ function SyncMain:genWorldMD(worldInfor, callback)
                 end,
                 loginMain.keepWorkDataSourceId
             );
-        elseif(err == 200 or err == 304) then
+        elseif (err == 200 or err == 304) then
             data = Encoding.unbase64(data.content);
 
-            local world3D = {
-                link_world_name   = worldTag.name,
-                link_world_url    = worldUrl,
-                media_logo        = worldInfor.preview,
-                link_desc         = "",
-                link_username     = loginMain.username,
-                link_update_date  = worldInfor.modDate,
-                link_version      = worldInfor.revision,
-                link_opus_id      = worldInfor.opusId,
-                link_files_totals = worldInfor.filesTotals,
-            }
-
-            world3D = KeepworkGen:setCommand("paracraft",world3D);
-            SyncMain.worldFile = KeepworkGen:SetAutoGenContent(data, world3D);
+            SyncMain.worldFile = KeepworkGen:SetAutoGenContent(data, paracraftCommand);
 
             SyncMain:updateService(
                 loginMain.keepWorkDataSource,

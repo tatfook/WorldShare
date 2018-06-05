@@ -54,8 +54,8 @@ loginMain.site         = "http://keepwork.com";
 loginMain.current_type = 1;
 loginMain.serverLists  = {
     {value="keepwork"        , name="keepwork"        , text=L"使用KeepWork登录", selected=true},
-    {value="keepworkRelease" , name="keepworkRelease" , text=L"使用KeepWorkRelease登录"},
-    {value="keepworkDev"     , name="keepworkDev"     , text=L"使用KeepWorkDev登录"},
+    {value="stage"           , name="stage"           , text=L"使用stage登录"},
+    {value="release"         , name="release"         , text=L"使用release登录"},
     {value="local"           , name="local"           , text=L"使用本地服务登录"},
 }
 
@@ -138,9 +138,9 @@ function loginMain.setModalPage()
     loginMain.ModalPage = document:GetPageCtrl();
 end
 
-function loginMain.refreshPage()
+function loginMain.refreshPage(time)
     if(loginMain.LoginPage) then
-        loginMain.LoginPage:Refresh();
+        loginMain.LoginPage:Refresh(time or 0.01);
     end
 end
 
@@ -956,10 +956,10 @@ function loginMain.setSite()
 
     if(loginServer == "keepwork") then
         loginMain.site = "http://keepwork.com";
-    elseif(loginServer == "keepworkRelease") then
+    elseif(loginServer == "release") then
         loginMain.site = "http://release.keepwork.com";
-    elseif(loginServer == "keepworkDev") then
-        loginMain.site = "http://dev.keepwork.com";
+    elseif(loginServer == "stage") then
+        loginMain.site = "http://stage.keepwork.com";
     elseif(loginServer == "local") then
         loginMain.site = "http://localhost:8099";
     end

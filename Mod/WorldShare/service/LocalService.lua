@@ -148,99 +148,15 @@ end
 
 function LocalService:update(_foldername, _path, _callback)
     LocalService:FileDownloader(_foldername, _path, _callback);
-    --[[LocalService:getDataSourceContent(_foldername, _path, function(content, err)
-        local foldernameForLocal = EncodingC.Utf8ToDefault(_foldername);
-        local bashPath = SyncMain.GetWorldFolderFullPath() .. "/" .. SyncMain.foldername.default .. "/";
-
-        local file = ParaIO.open(bashPath .. _path, "w");
-        
-        LOG.std(nil,"debug","LocalService:update",content);
-        if(err == 200) then
-            if(not content) then
-                LocalService:getDataSourceContentWithRaw(_foldername, _path, function(data, err)
-                    if(err == 200) then
-                        content = data;
-                        
-                        file:write(content,#content);
-                        file:close();
-
-                        local returnData = {filename = _path, content = content};
-                        _callback(true,returnData);
-                    else
-                        _callback(false,nil);
-                    end
-                end);
-
-                return;
-            end
-
-            content = EncodingS.unbase64(content);
-            file:write(content,#content);
-            file:close();
-
-            local returnData = {filename = _path,content = content};
-            _callback(true,returnData);
-        else
-            _callback(false,nil);
-        end
-    end)]]
 end
 
 function LocalService:download(_foldername, _path, _callback)
     LocalService:FileDownloader(_foldername, _path, _callback);
-    --[[LocalService:getDataSourceContent(_foldername, _path, function(content, err)
-        if(err == 200) then
-            local path = {};
-            local returnData = {};
-
-            local bashPath = SyncMain.GetWorldFolderFullPath() .. "/" .. SyncMain.foldername.default .. "/";
-            local folderCreate = "";
-
-            for segmentation in string.gmatch(_path,"[^/]+") do
-                path[#path+1] = segmentation;
-            end
-
-            folderCreate = commonlib.copy(bashPath);
-
-            for i = 1, #path - 1, 1 do
-                folderCreate = folderCreate .. path[i] .. "/";
-                ParaIO.CreateDirectory(folderCreate);
-                --LOG.std(nil,"debug","folderCreate",folderCreate);
-            end
-
-            local file = ParaIO.open(bashPath .. _path, "w");
-
-            if(not content) then
-                LocalService:getDataSourceContentWithRaw(_foldername, _path, function(content, err)
-                    if(err == 200) then
-                        file:write(content,#content);
-                        file:close();
-
-                        returnData = {filename = _path, content = content};
-                        _callback(true,returnData);
-                    else
-                        _callback(false,nil);
-                    end
-                end);
-
-                return;
-            end
-
-            content = EncodingS.unbase64(content);
-            file:write(content,#content);
-            file:close();
-
-            returnData = {filename = _path, content = content};
-            _callback(true,returnData);
-        else
-            _callback(false,nil);
-        end
-    end);]]
 end
 
 function LocalService:downloadZip(_foldername, _commitId, _callback)
     local foldername = GitEncoding.base32(SyncMain.foldername.utf8);
-    local url = "http://git.keepwork.com/" .. loginMain.dataSourceUsername .. "/" .. foldername .. "/repository/archive.zip?ref=" .. SyncMain.commitId;
+    local url = loginMain.rawBaseUrl .. loginMain.dataSourceUsername .. "/" .. foldername .. "/repository/archive.zip?ref=" .. SyncMain.commitId;
     LOG.std("LocalService","debug","DZIPRAW", "raw url: %s", url);
 
     FileDownloader:new():Init(nil, url, "temp/archive.zip", function(bSuccess, downloadPath)
