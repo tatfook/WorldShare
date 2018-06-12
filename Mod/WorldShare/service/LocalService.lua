@@ -156,7 +156,7 @@ end
 
 function LocalService:downloadZip(_foldername, _commitId, _callback)
     local foldername = GitEncoding.base32(SyncMain.foldername.utf8);
-    local url = loginMain.rawBaseUrl .. loginMain.dataSourceUsername .. "/" .. foldername .. "/repository/archive.zip?ref=" .. SyncMain.commitId;
+    local url = format("%s/%s/%s/repository/archive.zip?ref=%s", loginMain.rawBaseUrl, loginMain.dataSourceUsername, foldername, SyncMain.commitId);
     LOG.std("LocalService","debug","DZIPRAW", "raw url: %s", url);
 
     FileDownloader:new():Init(nil, url, "temp/archive.zip", function(bSuccess, downloadPath)

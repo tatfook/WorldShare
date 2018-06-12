@@ -577,29 +577,30 @@ function loginMain.GetCurWorldInfo(info_type, world_index)
 end
 
 function loginMain.updateWorldInfo(worldIndex, callback)
-    local selectWorld = LocalLoadWorld.BuildLocalWorldList(true)[worldIndex];
-    
-    if(type(selectWorld) == "table") then
-        local filesize = LocalService:GetWorldSize(selectWorld.worldpath);
-        local worldTag = LocalService:GetTag(Encoding.Utf8ToDefault(selectWorld.foldername));
+    local selectWorld = LocalLoadWorld.BuildLocalWorldList(true)[worldIndex]
 
-        worldTag.size = filesize;
+    if (type(selectWorld) == "table") then
+        local filesize = LocalService:GetWorldSize(selectWorld.worldpath)
+        local worldTag = LocalService:GetTag(Encoding.Utf8ToDefault(selectWorld.foldername))
 
-        LocalService:SetTag(selectWorld.worldpath, worldTag);
+        worldTag.size = filesize
 
-        InternetLoadWorld.GetCurrentServerPage().ds[worldIndex].size = filesize;
+        LocalService:SetTag(selectWorld.worldpath, worldTag)
 
-        if(type(callback) == "function") then
-            callback();
-        end
+        InternetLoadWorld.GetCurrentServerPage().ds[worldIndex].size = filesize
+    end
+
+    if (type(callback) == "function") then
+        callback()
     end
 end
 
 function loginMain.OnSwitchWorld(index)
-    InternetLoadWorld.OnSwitchWorld(index);
-    loginMain.updateWorldInfo(index, function()
-        loginMain.LoginPage:Refresh(0.01);
-    end);
+    InternetLoadWorld.OnSwitchWorld(index)
+    loginMain.updateWorldInfo(
+        index,
+        loginMain.refreshPage
+    )
 end
 
 function loginMain.GetNetSpeed()
