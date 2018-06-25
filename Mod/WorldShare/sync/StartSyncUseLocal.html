@@ -12,16 +12,17 @@
                 SyncMain.setSyncPage();
 
             	function replace()
-                    SyncMain:syncToDataSource();
+                    SyncMain:syncToDataSource()
+                    SyncMain.closeSyncPage()
             	end
 
             	function cancel()
-                    SyncMain.SyncPage:CloseWindow();
-                    SyncMain:StartSyncPage();
+                    SyncMain:StartSyncPage()
+                    SyncMain.closeSyncPage()
             	end
 
             	function offline()
-                    SyncMain.ComparePage:CloseWindow();
+                    SyncMain.closeSyncPage()
             	end
              ]]>
         </script>

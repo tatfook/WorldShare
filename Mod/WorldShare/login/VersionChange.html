@@ -1,0 +1,78 @@
+<html>
+<body>
+    <pe:mcml>
+        <script type="text/npl" refresh="false" src="VersionChange.lua">
+            VersionChange = commonlib.gettable("Mod.WorldShare.login.VersionChange")
+
+            VersionChange.SetPage()
+            
+            function get_source()
+                local repeat_data = {
+                    {a=1},
+                    {a=2},
+                    {a=1},
+                    {a=2},
+                    {a=1},
+                    {a=2},
+                    {a=1},
+                    {a=2},
+                    {a=1},
+                    {a=2},
+                    {a=1},
+                    {a=2},
+                    {a=1},
+                    {a=2},
+                    {a=1},
+                    {a=2},
+                    {a=1},
+                    {a=2},
+                    {a=1},
+                    {a=2},
+                    {a=1},
+                    {a=2},
+                    {a=1},
+                    {a=2},
+                    {a=1},
+                    {a=2},
+                    {a=1},
+                    {a=2},
+                    {a=1},
+                    {a=2},
+                    {a=1},
+                    {a=2},
+                    {a=1},
+                    {a=2},
+                }
+
+                return repeat_data
+            end
+
+            function version_button()
+                return "color:#FFFFF;textcolor:#FFFFF;width:280px;height: 30px;margin-top: 10px;margin-bottom: 10px"
+            end
+
+            function get_value()
+                echo(Eval("a"), true)
+                return format("%s%s", "版本：", tostring(Eval("a")))
+            end
+
+            function select_version()
+
+            end
+        </script>
+        <aries:window
+            class="default"
+            mode="thin"
+            width="300"
+            height="400"
+            title='<%=L"版本切换" %>'
+            onclose="VersionChange.ClosePage">
+            <pe:gridview DataSource="<%=get_source()%>">
+                <Columns style="color:#FFFFF;textcolor:#FFFFF;">
+                    <input type="button" onclick="select_version()" class="mc_light_grey_button_with_fillet" value='<%=get_value()%>' style='<%=version_button()%>' />
+                </Columns>
+            </pe:repeat>
+        </aries:window>
+    </pe:mcml>
+</body>
+</html>

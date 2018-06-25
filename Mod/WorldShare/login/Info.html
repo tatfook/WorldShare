@@ -1,0 +1,20 @@
+﻿<body>
+    <pe:mcml>
+        <script type="text/npl" refresh="false">
+            <![CDATA[
+                LoginMain = commonlib.gettable("Mod.WorldShare.login.LoginMain");
+                LoginMain.setInfoPage();
+            ]]>
+        </script>
+        <div style="width:300px;height:150px;">
+            <aries:window mode="thin" width="300" height="150" style="float:left;" title='<%=L"登陆" %>'>
+                <div style="padding:20px;font-size:18px;base-font-size:18px;color:#ffffff;margin-top:20px;">
+                    <div style="margin-right:60px;">
+                       <%= LoginMain.Msg %>
+                    </div>
+                </div>
+            </aries:window>
+        </div>
+    </pe:mcml>
+</body>
+</html>

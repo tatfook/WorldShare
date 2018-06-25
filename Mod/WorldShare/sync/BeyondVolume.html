@@ -1,10 +1,4 @@
-﻿<!-- "script/apps/Aries/Creator/Game/Login/InternetLoadWorld.html" -->
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-    <title>beyond volume,by big,2017.5.15</title>
-</head>
-<body>
+﻿<body>
     <pe:mcml>
         <script type="text/npl" refresh="false">
             <![CDATA[
@@ -15,19 +9,37 @@
             selectedWorldInfor = SyncMain.selectedWorldInfor;
             maxWorldSize = 15;
             maxWorldSizeVIP = 50;
+
+            function getBeyondMsg()
+                local str;
+
+                if(loginMain.userType == "vip") then
+                    str = format(L"世界%s文件总大小超过了%dMB，是否清理文件？(请使用MP3、OGG格式音频，避免使用FBX格式)", SyncMain.foldername.utf8, 50);
+                else
+                    str = format(L"世界%s文件总大小超过了%dMB，是否清理文件？(请使用MP3、OGG格式音频，避免使用FBX格式，VIP用户最大可上传%dMB)", SyncMain.foldername.utf8, 25, 50);
+                end
+
+                return str;
+            end
+
+            function openWorldFolder()
+                SyncMain.closeBeyondPage();
+                local path = LocalLoadWorld.GetWorldFolderFullPath() .. "/" .. SyncMain.foldername.default;
+                ParaGlobal.ShellExecute("open", path, "", "", 1);
+            end
             ]]>
         </script>
         <div style="width:500px;height:270px;">
             <aries:window mode="thin" width="500" height="270" style="float:left;" title='<%=L"购买VIP" %>' onclose="SyncMain.closeBeyondPage">
                 <div style="font-size:16px;base-font-size:16px;color:#ffffff;padding:30px;">
                     <div style="margin-top:30px;">
-                        <%= SyncMain.getBeyondMsg() %>
+                        <%= getBeyondMsg() %>
                         <br />
                         <%= L"是否现在清理？" %>
                     </div>
                     <br />
                     <div style="margin-top:30px;">
-                        <input type="button" onclick="SyncMain.openWorldFolder" class="button_highlight" style="float:left;width: 130px;height: 30px;" name="" value='<%= L"是"%>' />
+                        <input type="button" onclick="openWorldFolder" class="button_highlight" style="float:left;width: 130px;height: 30px;" name="" value='<%= L"是"%>' />
                         <input type="button" onclick="SyncMain.closeBeyondPage" class="button_highlight" style="float:left;margin-left:10px;width: 130px;height: 30px;" name="" value='<%=L"否"%>'/>
                         <input type="button" onclick="SyncMain.closeBeyondPage" class="button_highlight" style="float:left;margin-left:10px;width: 130px;height: 30px;" name="" value='<%=L"取消"%>'/>
                     </div>

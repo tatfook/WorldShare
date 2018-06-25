@@ -81,7 +81,7 @@ function GithubService:apiDelete(_url, _params, _callback)
 	},_callback);
 end
 
-function GithubService:getFileShaList(_foldername, _callback)
+function GithubService:getTree(_foldername, _callback)
 	_foldername = GitEncoding.base32(_foldername);
 	--LOG.std(nil,"debug","getFileShaList",_foldername);
 	
@@ -185,4 +185,8 @@ function GithubService:getAllresponse(_callback)
 	local url = "user/repos?access_token=" .. github_token["access_token"] .. "&type=owner";
 
     self:githubApiGet(url,_callback);
+end
+
+function GithubService:getWorldRevison()
+	local contentUrl = format("%s/%s/%s/master/revision.xml", loginMain.rawBaseUrl, loginMain.dataSourceUsername, foldername.base32)
 end

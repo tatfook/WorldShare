@@ -8,14 +8,29 @@
     <pe:mcml>
         <script type="text/npl" refresh="false">
             <![CDATA[
-                SyncMain   = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
-                loginMain  = commonlib.gettable("Mod.WorldShare.login.loginMain");
-                ShareWorld = commonlib.gettable("Mod.WorldShare.sync.ShareWorld");
+                SyncMain   = commonlib.gettable("Mod.WorldShare.sync.SyncMain")
+                ShareWorld = commonlib.gettable("Mod.WorldShare.sync.ShareWorld")
 
                 ShareWorld.setSharePage();
 
                 function OnOpenWorldDir()
                     GameLogic.RunCommand("/menu file.openworlddir");
+                end
+
+                function foldername()
+                    return ShareWorld.GetFoldername()
+                end
+
+                function size()
+                    return ShareWorld.GetWorldSize()
+                end
+
+                function remoteRevision()
+                    return ShareWorld.GetRemoteRevision()
+                end
+
+                function currentRevision()
+                    return ShareWorld.GetCurrentRevision()
                 end
              ]]>
         </script>
@@ -44,17 +59,18 @@
                         </div>
                         <div style="float:right;padding-left:28px;">
                             <div style="font-size:18px;base-font-size:18;margin-bottom:25px;">
-                                <%= SyncMain.foldername.utf8%>
+                                <%= foldername() %>
                                 <input type="button" value='...' style="margin-left:3px;margin-top:4px;font-size:11px;height:18px;color:#ffffff;" class="mc_button_blue" onclick="OnOpenWorldDir"/>
                             </div>
 
-                            <div class="info"><%=L"大小：" %><%= loginMain.GetWorldSize(ShareWorld.getWorldSize())%></div>
-                            <div class="info"><%=L"远程版本号：" %><%=SyncMain.remoteRevison %></div>
-                            <div class="info"><%=L"本地版本号：" %><%=SyncMain.currentRevison %></div>
+                            <div class="info"><%=L"大小：" %><%= size() %></div>
+                            <div class="info"><%=L"远程版本号：" %><%= remoteRevision() %></div>
+                            <div class="info"><%=L"本地版本号：" %><%= currentRevision() %></div>
+
                             <input type="button" style="font-size:11px;height:20px;color:#ffffff;margin-top:10px;min-width:65px;height:30px;" value='<%=L"重新截图" %>' class="mc_light_grey_button_with_fillet" onclick="ShareWorld.snapshot()" />
                         </div>
                     </div>
-                    
+
                     <div style="margin-top:20px;">
                         <input type="text" value="<%= ShareWorld.getWorldUrl()%>" class="text_field"/>
                         <input type="button" width="75" height="30" style="margin-left:10px;" class="mc_light_grey_button_with_fillet" value='<%=L"浏览" %>' onclick="ShareWorld.openWorldWebPage()" />
@@ -62,12 +78,7 @@
                 </div>
                 <hr style="margin-left:-4px;"/>
                 <div>
-                    <pe:if condition="<%= SyncMain.compareFinish%>">
-                        <input type="button" onclick="ShareWorld.shareNow()" value='<%=L"上传并分享" %>' class="mc_big_button" align="right" style="margin-right:20px;margin-top:20px;min-width:160px;height:40px" />
-                    </pe:if>
-                    <pe:if condition="<%= not SyncMain.compareFinish%>">
-                        <%=L"正在比对本地版本与远程版本, 请稍后..." %>
-                    </pe:if>
+                    <input type="button" onclick="ShareWorld.shareNow()" value='<%=L"上传并分享" %>' class="mc_big_button" align="right" style="margin-right:20px;margin-top:20px;min-width:160px;height:40px" />
                 </div>
             </div>
         </aries:window>
