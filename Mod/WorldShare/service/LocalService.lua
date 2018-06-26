@@ -18,10 +18,10 @@ NPL.load("(gl)Mod/WorldShare/login/LoginMain.lua")
 NPL.load("(gl)Mod/WorldShare/service/GitlabService.lua")
 NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua")
 NPL.load("(gl)Mod/WorldShare/sync/SyncMain.lua")
-NPL.load("(gl)Mod/WorldShare/service/FileDownloader.lua")
+NPL.load("(gl)Mod/WorldShare/service/FileDownloader/FileDownloader.lua")
 NPL.load("(gl)Mod/WorldShare/store/Global.lua")
 
-local FileDownloader = commonlib.gettable("Mod.WorldShare.service.FileDownloader")
+local FileDownloader = commonlib.gettable("Mod.WorldShare.service.FileDownloader.FileDownloader")
 local GitEncoding = commonlib.gettable("Mod.WorldShare.helper.GitEncoding")
 local GitlabService = commonlib.gettable("Mod.WorldShare.service.GitlabService")
 local GithubService = commonlib.gettable("Mod.WorldShare.service.GithubService")
@@ -178,6 +178,7 @@ function LocalService:MoveZipToFolder(path)
     commonlib.Files.Find(filesOut, "", 0, 10000, ":.", path) -- ":.", any regular expression after : is supported. `.` match to all strings.
 
     local bashPath = format("%s/%s/", SyncMain.GetWorldFolderFullPath(), foldername.default)
+
     local folderCreate = ""
     local rootFolder = filesOut[1] and filesOut[1].filename
 

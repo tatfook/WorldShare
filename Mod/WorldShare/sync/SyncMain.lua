@@ -6,7 +6,7 @@ Desc:
 use the lib:
 ------------------------------------------------------------
 NPL.load("(gl)Mod/WorldShare/sync/SyncMain.lua");
-local SyncMain  = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
+local SyncMain  = commonlib.gettable("Mod.WorldShare.sync.SyncMain")
 ------------------------------------------------------------
 ]]
 NPL.load("(gl)Mod/WorldShare/login/LoginMain.lua")
@@ -23,11 +23,13 @@ NPL.load("(gl)Mod/WorldShare/sync/GenerateMdPage.lua")
 NPL.load("(gl)Mod/WorldShare/login/LoginUserInfo.lua")
 NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 NPL.load("(gl)Mod/WorldShare/sync/SyncToLocal.lua")
+NPL.load("(gl)Mod/WorldShare/login/LoginWorldList.lua")
 
 local LocalLoadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalLoadWorld")
 local LoginMain = commonlib.gettable("Mod.WorldShare.login.LoginMain")
 local GitService = commonlib.gettable("Mod.WorldShare.service.GitService")
 local LocalService = commonlib.gettable("Mod.WorldShare.service.LocalService")
+local Encoding = commonlib.gettable("commonlib.Encoding")
 local GitEncoding = commonlib.gettable("Mod.WorldShare.helper.GitEncoding")
 local SyncCompare = commonlib.gettable("Mod.WorldShare.sync.SyncCompare")
 local GlobalStore = commonlib.gettable("Mod.WorldShare.store.Global")
@@ -38,6 +40,7 @@ local GenerateMdPage = commonlib.gettable("Mod.WorldShare.sync.GenerateMdPage")
 local LoginUserInfo = commonlib.gettable("Mod.WorldShare.login.LoginUserInfo")
 local Utils = commonlib.gettable("Mod.WorldShare.helper.Utils")
 local WorldRevision = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision")
+local LoginWorldList = commonlib.gettable("Mod.WorldShare.login.LoginWorldList")
 
 local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain")
 
@@ -52,17 +55,72 @@ end
 
 function SyncMain:SyncWillEnterWorld()
     -- 没有登陆则直接使用离线模式
+    local enterWorld = GlobalStore.get("enterWorld")
+
+    if (not enterWorld) then
+        self:CommandEnter()
+    end
+
     if (LoginUserInfo.IsSignedIn()) then
         SyncCompare:syncCompare()
     end
 end
 
-function SyncMain.GetWorldFolder()
+function SyncMain:CommandEnter()
+    GlobalStore.set("IsEnterWorld", true)
+    local world = self:GetWorldDirectory()
+    local foldername = {}
+
+    for item in string.gmatch(world , "([^worlds/DesignHouse/]+)") do
+        foldername.default = item
+        foldername.utf8 = Encoding.DefaultToUtf8(foldername.default)
+        foldername.base32 = GitEncoding.base32(foldername.utf8)
+    end
+
+    GlobalStore.set("foldername", foldername)
+    GlobalStore.set("enterFoldername", foldername)
+
+    local function handleSelectWorld()
+        local compareWorldList = GlobalStore.get("compareWorldList")
+        local currentWorld = {}
+
+        for key, item in ipairs(compareWorldList) do
+            if(item.foldername == foldername.utf8) then
+                currentWorld = item
+            end
+        end
+        
+        GlobalStore.set("selectWorld", currentWorld)
+        GlobalStore.set("enterWorld", currentWorld)
+        
+        local worldDir = {}
+        worldDir.default = currentWorld.worldpath .. "/"
+        worldDir.utf8 = Encoding.DefaultToUtf8(currentWorld.worldpath)
+
+        GlobalStore.set("worldDir", worldDir)
+        GlobalStore.set("enterWorldDir", worldDir)
+
+        local worldTag = LocalService:GetTag(foldername.default)
+
+        worldTag.size = filesize
+        LocalService:SetTag(worldDir.default, worldTag)
+
+        GlobalStore.set("worldTag", worldTag)
+    end
+
+    LoginWorldList.RefreshCurrentServerList(handleSelectWorld)
+end
+
+function SyncMain:GetWorldFolder()
     return LocalLoadWorld.GetWorldFolder()
 end
 
-function SyncMain.GetWorldFolderFullPath()
+function SyncMain:GetWorldFolderFullPath()
     return LocalLoadWorld.GetWorldFolderFullPath()
+end
+
+function SyncMain:GetWorldDirectory()
+    return ParaWorld.GetWorldDirectory()
 end
 
 function SyncMain.setSyncPage()
@@ -221,7 +279,7 @@ function SyncMain:RefreshKeepworkList(callback)
         function(pProjectId)
             projectId = pProjectId
 
-            GitService:new():getCommits(projectId, foldername.base32, handleKeepworkList)
+            GitService:new():getCommits(projectId, foldername.base32, false, handleKeepworkList)
         end
     )
 end

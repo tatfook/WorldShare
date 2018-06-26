@@ -12,11 +12,12 @@ local GlobalStore = commonlib.gettable("Mod.WorldShare.store.Global")
 local GlobalStore = commonlib.gettable("Mod.WorldShare.store.Global")
 
 function GlobalStore.set(key, value)
-    GlobalStore[key] = value
+    GlobalStore[key] = commonlib.copy(value)
 end
 
 function GlobalStore.get(key)
-    return GlobalStore[key]
+    local value = commonlib.copy(GlobalStore[key])
+    return value
 end
 
 function GlobalStore.remove(key)

@@ -35,6 +35,7 @@ function SyncToLocal:init(callback)
     self.worldDir = GlobalStore.get("worldDir")
     self.foldername = GlobalStore.get("foldername")
     local selectWorld = GlobalStore.get("selectWorld")
+    local commitId = GlobalStore.get("commitId")
 
     if (not self.worldDir or not self.worldDir.default or self.worldDir.default == "") then
         _guihelper.MessageBox(L "下载失败，原因：下载目录为空")
@@ -52,14 +53,16 @@ function SyncToLocal:init(callback)
         selectWorld.projectId = projectId
         GlobalStore.set("selectWorld", selectWorld)
 
-        if (selectWorld.status == 2) then
+        if (commitId or selectWorld.status == 2) then
             -- down zip
             self:DownloadZIP()
             return false
         end
 
         -- 加载进度UI界面
-        self.syncGUI = SyncGUI:new()
+        SyncGUI.init()
+        SyncGUI.SetSync(self)
+
         self:SetFinish(false)
 
         self:syncToLocal()
@@ -72,7 +75,7 @@ function SyncToLocal:syncToLocal()
     self.compareListIndex = 1
     self.compareListTotal = 0
 
-    self.syncGUI:updateDataBar(0, 0, L "正在对比文件列表...")
+    SyncGUI:updateDataBar(0, 0, L "正在对比文件列表...")
 
     local function handleSyncToLocal(data, err)
         self.localFiles = LocalService:new():LoadFiles(self.worldDir.default)
@@ -142,7 +145,7 @@ function SyncToLocal:RefreshList()
                 GlobalStore.remove('willEnterWorld')
             end
 
-            SyncGUI:SetFinish(true)
+            SyncGUI.SetFinish(true)
             SyncGUI:refresh()
         end
     )
@@ -167,7 +170,7 @@ function SyncToLocal:HandleCompareList()
     local currentItem = self.compareList[self.compareListIndex]
 
     local function retry()
-        self.syncGUI:updateDataBar(
+        SyncGUI:updateDataBar(
             self.compareListIndex,
             self.compareListTotal,
             format(L "%s 处理完成", currentItem.file),
@@ -195,6 +198,10 @@ function SyncToLocal:SetFinish(value)
     self.finish = value
 end
 
+function SyncToLocal:SetBorke(value)
+    self.broke = value
+end
+
 function SyncToLocal:GetLocalFileByFilename(filename)
     for key, item in ipairs(self.localFiles) do
         if (item.filename == filename) then
@@ -216,10 +223,11 @@ function SyncToLocal:downloadOne(file, callback)
     local currentRemoteItem = self:GetRemoteFileByPath(file)
 
     GitService:new():getContentWithRaw(
-        self.foldername.utf8,
+        self.foldername.base32,
         currentRemoteItem.path,
+        nil,
         function(content, size)
-            self.syncGUI:updateDataBar(
+            SyncGUI:updateDataBar(
                 self.compareListIndex,
                 self.compareListTotal,
                 format(L "%s （%s） 更新中", currentRemoteItem.path, Utils.formatFileSize(size, "KB"))
@@ -248,7 +256,7 @@ function SyncToLocal:updateOne(file, callback)
     end
 
     local function handleUpdate(content, size)
-        self.syncGUI:updateDataBar(
+        SyncGUI:updateDataBar(
             self.compareListIndex,
             self.compareListTotal,
             format(L "%s （%s） 更新中", currentRemoteItem.path, Utils.formatFileSize(size, "KB"))
@@ -261,14 +269,14 @@ function SyncToLocal:updateOne(file, callback)
         end
     end
 
-    GitService:new():getContentWithRaw(self.foldername.utf8, currentRemoteItem.path, handleUpdate)
+    GitService:new():getContentWithRaw(self.foldername.base32, currentRemoteItem.path, nil, handleUpdate)
 end
 
 -- 删除文件
 function SyncToLocal:deleteOne(file, callback)
     local currentLocalItem = self:GetLocalFileByFilename(file)
 
-    self.syncGUI:updateDataBar(
+    SyncGUI:updateDataBar(
         self.compareListIndex,
         self.compareListTotal,
         format(L "%s （%s） 更新中", currentLocalItem.filename, Utils.formatFileSize(currentLocalItem.size, "KB"))
@@ -303,7 +311,8 @@ function SyncToLocal:DownloadZIP()
             commitId,
             function(bSuccess, downloadPath)
                 LocalService:new():MoveZipToFolder(downloadPath)
-                self:RefreshList() 
+                self:RefreshList()
+                GlobalStore.remove("commitId")
             end
         )
     end
@@ -312,6 +321,7 @@ function SyncToLocal:DownloadZIP()
         GitService:new():getCommits(
             self.projectId,
             self.foldername.base32,
+            false,
             function(data, err)
                 if (data and data[1] and data[1]["id"]) then
                     handleDownloadZIP(data[1]["id"])

@@ -18,6 +18,7 @@ NPL.load("(gl)Mod/WorldShare/store/Global.lua")
 NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 NPL.load("(gl)Mod/WorldShare/login/LoginUserinfo.lua")
 NPL.load("(gl)Mod/WorldShare/login/LoginWorldList.lua")
+NPL.load("(gl)script/apps/Aries/Creator/Game/Login/LocalLoadWorld.lua")
 
 local WorldShare = commonlib.gettable("Mod.WorldShare")
 local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
@@ -27,6 +28,7 @@ local GlobalStore = commonlib.gettable("Mod.WorldShare.store.Global")
 local Utils = commonlib.gettable("Mod.WorldShare.helper.Utils")
 local LoginUserInfo = commonlib.gettable("Mod.WorldShare.login.LoginUserInfo")
 local LoginWorldList = commonlib.gettable("Mod.WorldShare.login.LoginWorldList")
+local LocalLoadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalLoadWorld")
 
 local LoginMain = commonlib.gettable("Mod.WorldShare.login.LoginMain")
 
@@ -113,7 +115,7 @@ function LoginMain.showLoginModalImp(callback)
     local params = Utils:ShowWindow(320, 350, "Mod/WorldShare/login/LoginModal.html", "LoginModal")
 
     params._page.OnClose = function()
-        LoginMain.modalCall = nil
+        -- LoginMain.modalCall = nil
     end
 
     if (type(callback) == "function") then

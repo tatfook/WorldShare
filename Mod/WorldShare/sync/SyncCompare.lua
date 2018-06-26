@@ -16,6 +16,7 @@ NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
 NPL.load("(gl)Mod/WorldShare/login/LoginWorldList.lua")
 NPL.load("(gl)script/ide/Encoding.lua")
 NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
+NPL.load("(gl)Mod/WorldShare/sync/ShareWorld.lua")
 
 local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain")
 local LoginMain = commonlib.gettable("Mod.WorldShare.login.LoginMain")
@@ -30,6 +31,7 @@ local GitService = commonlib.gettable("Mod.WorldShare.service.GitService")
 local LoginWorldList = commonlib.gettable("Mod.WorldShare.login.LoginWorldList")
 local Encoding = commonlib.gettable("commonlib.Encoding")
 local Utils = commonlib.gettable("Mod.WorldShare.helper.Utils")
+local ShareWorld = commonlib.gettable("Mod.WorldShare.sync.ShareWorld")
 
 local SyncCompare = commonlib.gettable("Mod.WorldShare.sync.SyncCompare")
 
@@ -50,6 +52,14 @@ function SyncCompare:syncCompare()
     self:compareRevision(
         function(result)
             if (IsEnterWorld and not IsShowLoginPage) then
+                local IsShareMode = GlobalStore.get("ShareMode")
+
+                if(IsShareMode) then
+                    ShareWorld:init()
+                    LoginMain.closeMessageInfo()
+                    return false
+                end
+
                 if (result == REMOTEBIGGER) then
                     SyncMain:StartSyncPage()
                 elseif (result == TRYAGAIN) then

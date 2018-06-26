@@ -43,8 +43,11 @@ function SyncToDataSource:init()
     end
 
     -- 加载进度UI界面
-    self.syncGUI = SyncGUI:new(SyncToDataSource)
+    SyncGUI.init()
+    SyncGUI.SetSync(self)
+
     self:SetFinish(false)
+    self:SetBroke(false)
 
     GitService:new():create(
         self.foldername.base32,
@@ -68,7 +71,7 @@ function SyncToDataSource:syncToDataSource()
     self.compareListIndex = 1
     self.compareListTotal = 0
 
-    self.syncGUI:updateDataBar(0, 0, L "正在对比文件列表...")
+    SyncGUI:updateDataBar(0, 0, L "正在对比文件列表...")
 
     local function handleSyncToDataSource(data, err)
         self.dataSourceFiles = data
@@ -185,7 +188,8 @@ function SyncToDataSource:RefreshList()
         function()
             LoginWorldList.RefreshCurrentServerList(
                 function()
-                    SyncGUI:SetFinish(true)
+                    GlobalStore.set("ShareMode", false)
+                    SyncGUI.SetFinish(true)
                     SyncGUI:refresh()
                 end
             )
@@ -205,14 +209,14 @@ function SyncToDataSource:HandleCompareList()
 
     if (self.broke) then
         self:SetFinish(true)
-        LOG.std("SyncToDataSource", "debug", "上传被中断")
+        LOG.std("SyncToDataSource", "debug", "SyncToDataSource", "上传被中断")
         return false
     end
 
     local currentItem = self.compareList[self.compareListIndex]
 
     local function retry()
-        self.syncGUI:updateDataBar(
+        SyncGUI:updateDataBar(
             self.compareListIndex,
             self.compareListTotal,
             format(L "%s 处理完成", currentItem.file),
@@ -252,9 +256,8 @@ function SyncToDataSource:GetRemoteFileByPath(path)
     end
 end
 
-function SyncToDataSource:SetBorke(value)
+function SyncToDataSource:SetBroke(value)
     self.broke = value
-    self.syncGUI.SetBroke(true)
 end
 
 function SyncToDataSource:SetFinish(value)
@@ -265,7 +268,7 @@ end
 function SyncToDataSource:uploadOne(file, callback)
     local currentItem = self:GetLocalFileByFilename(file)
 
-    self.syncGUI:updateDataBar(
+    SyncGUI:updateDataBar(
         self.compareListIndex,
         self.compareListTotal,
         format(L "%s （%s） 上传中", currentItem.filename, Utils.formatFileSize(currentItem.filesize, "KB"))
@@ -283,8 +286,9 @@ function SyncToDataSource:uploadOne(file, callback)
                 end
             else
                 _guihelper.MessageBox(format("%s上传失败", currentItem.filename))
-                self.SetBroke(true)
-                self.syncGUI:updateDataBar(
+                self:SetBroke(true)
+
+                SyncGUI:updateDataBar(
                     self.compareListIndex,
                     self.compareListTotal,
                     format(L "%s 上传失败", currentItem.filename)
@@ -299,13 +303,13 @@ function SyncToDataSource:updateOne(file, callback)
     local currentLocalItem = self:GetLocalFileByFilename(file)
     local currentRemoteItem = self:GetRemoteFileByPath(file)
 
-    self.syncGUI:updateDataBar(
+    SyncGUI:updateDataBar(
         self.compareListIndex,
         self.compareListTotal,
         format(L "%s （%s） 更新中", currentLocalItem.filename, Utils.formatFileSize(currentLocalItem.filesize, "KB"))
     )
 
-    if (currentLocalItem.sha1 == currentRemoteItem.sha) then
+    if (currentLocalItem.sha1 == currentRemoteItem.sha and currentLocalItem.filename ~= "revision.xml") then
         if (type(callback) == "function") then
             Utils.SetTimeOut(callback)
         end
@@ -326,8 +330,9 @@ function SyncToDataSource:updateOne(file, callback)
                 end
             else
                 _guihelper.MessageBox(L "更新失败")
+                self:SetBroke(true)
 
-                self.syncGUI:updateDataBar(
+                SyncGUI:updateDataBar(
                     self.compareListIndex,
                     self.compareListTotal,
                     format(L "%s 更新失败", currentItem.filename)
@@ -353,8 +358,9 @@ function SyncToDataSource:deleteOne(file, callback)
                 end
             else
                 _guihelper.MessageBox(L "删除失败")
+                self:SetBroke(true)
 
-                self.syncGUI:updateDataBar(
+                SyncGUI:updateDataBar(
                     self.compareListIndex,
                     self.compareListTotal,
                     format(L "%s 删除失败", currentItem.filename)

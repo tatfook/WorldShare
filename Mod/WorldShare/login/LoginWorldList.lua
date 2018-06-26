@@ -25,7 +25,6 @@ local CreateNewWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.Create
 local LoginMain = commonlib.gettable("Mod.WorldShare.login.LoginMain")
 local LocalLoadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalLoadWorld")
 local LocalService = commonlib.gettable("Mod.WorldShare.service.LocalService")
-local Encoding = commonlib.gettable("commonlib.Encoding")
 local WorldRevision = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision")
 local RemoteServerList = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.RemoteServerList")
 local LoginUserInfo = commonlib.gettable("Mod.WorldShare.login.LoginUserInfo")
@@ -35,6 +34,7 @@ local KeepworkService = commonlib.gettable("Mod.WorldShare.service.KeepworkServi
 local GlobalStore = commonlib.gettable("Mod.WorldShare.store.Global")
 local SyncCompare = commonlib.gettable("Mod.WorldShare.sync.SyncCompare")
 local DeleteWorld = commonlib.gettable("Mod.WorldShare.login.DeleteWorld")
+local Encoding = commonlib.gettable("commonlib.Encoding")
 local GitEncoding = commonlib.gettable("Mod.WorldShare.helper.GitEncoding")
 local VersionChange = commonlib.gettable("Mod.WorldShare.login.VersionChange")
 
@@ -207,8 +207,11 @@ function LoginWorldList.changeRevision(callback)
             value.revision = LocalService:GetZipRevision(zipWorldDir.default)
             value.size = LocalService:GetZipWorldSize(zipWorldDir.default)
         end
+
+        value.modifyTime = value.writedate
     end
 
+    GlobalStore.set("localWorlds", localWorlds)
     GlobalStore.set("compareWorldList", localWorlds)
     LoginMain.refreshPage()
 
@@ -218,6 +221,13 @@ function LoginWorldList.changeRevision(callback)
 end
 
 function LoginWorldList.selectVersion()
+    local selectWorld = GlobalStore.get('selectWorld')
+
+    if(selectWorld.status == 1) then
+        _guihelper.MessageBox(L "此世界仅在本地，无法切换版本")
+        return false
+    end
+
     VersionChange:init()
 end
 
@@ -390,12 +400,9 @@ function LoginWorldList:formatDate(modDate)
 end
 
 function LoginWorldList.syncNow(index)
-    if (not LoginUserInfo.IsSignedIn() or LoginUserInfo.CheckoutVerified()) then
+    if (not LoginUserInfo.IsSignedIn() or not LoginUserInfo.CheckoutVerified()) then
         return false
     end
-
-    local index = tonumber(index)
-    local selectWorld = GlobalStore.get("selectWorld")
 
     SyncCompare:syncCompare()
 end
@@ -470,17 +477,21 @@ function LoginWorldList.GetDesForWorld()
 end
 
 function LoginWorldList.enterWorld()
-    local selectWorld = GlobalStore.get("selectWorld")
+    local enterWorld = GlobalStore.get("selectWorld")
+    local enterWorldDir = GlobalStore.get("worldDir")
+    local enterFoldername = GlobalStore.get("foldername")
     local compareWorldList = GlobalStore.get("compareWorldList")
 
-    GlobalStore.set("enterWorld", selectWorld)
+    GlobalStore.set("enterWorld", enterWorld)
+    GlobalStore.set("enterWorldDir", enterWorldDir)
+    GlobalStore.set("enterFoldername", enterFoldername)
 
     if (not LoginUserInfo.IsSignedIn()) then
         InternetLoadWorld.EnterWorld()
         return
     end
 
-    if (selectWorld.status == 2) then
+    if (LoginWorldList.status == 2) then
         GlobalStore.set("willEnterWorld", InternetLoadWorld.EnterWorld)
 
         SyncCompare:syncCompare()
@@ -555,7 +566,7 @@ function LoginWorldList:sensitiveCheck(callback)
     if (new_world_name) then
         HttpRequest:GetUrl(
             {
-                url = LoginMain.site .. "/api/wiki/models/sensitive_words/query",
+                url = format("%s/api/wiki/models/sensitive_words/query", LoginMain.site),
                 form = {
                     query = {
                         name = new_world_name

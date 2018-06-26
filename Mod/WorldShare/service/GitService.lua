@@ -40,10 +40,10 @@ function GitService:getContent(projectId, foldername, path, callback)
     end
 end
 
-function GitService:getContentWithRaw(foldername, path, callback)
+function GitService:getContentWithRaw(foldername, path, commitId, callback)
     if (self.dataSourceType == GITHUB) then
     elseif (self.dataSourceType == GITLAB) then
-        GitlabService:new():getContentWithRaw(foldername, path, callback)
+        GitlabService:new():getContentWithRaw(foldername, path, commitId, callback)
     end
 end
 
@@ -87,11 +87,11 @@ function GitService:getTree(projectId, foldername, commitId, callback)
     end
 end
 
-function GitService:getCommits(projectId, foldername, callback)
+function GitService:getCommits(projectId, foldername, IsGetAll, callback)
     if (self.dataSourceType == GITHUB) then
-        GithubService:new():getCommits(foldername, callback)
+        GithubService:new():getCommits(foldername, IsGetAll, callback)
     elseif (self.dataSourceType == GITLAB) then
-        GitlabService:new():getCommits(projectId, callback)
+        GitlabService:new():getCommits(projectId, IsGetAll, callback)
     end
 end
 

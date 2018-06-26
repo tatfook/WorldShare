@@ -14,6 +14,7 @@ NPL.load("(gl)Mod/WorldShare/login/LoginMain.lua")
 NPL.load("(gl)Mod/WorldShare/main.lua")
 NPL.load("(gl)script/ide/Encoding.lua")
 NPL.load("(gl)Mod/WorldShare/sync/SyncMain.lua")
+NPL.load("(gl)Mod/WorldShare/service/FileDownloader/FileDownloader.lua")
 
 local HttpRequest = commonlib.gettable("Mod.WorldShare.service.HttpRequest")
 local loginMain = commonlib.gettable("Mod.WorldShare.login.loginMain")
@@ -22,7 +23,7 @@ local WorldShare = commonlib.gettable("Mod.WorldShare")
 local Encoding = commonlib.gettable("commonlib.Encoding")
 local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain")
 local GlobalStore = commonlib.gettable("Mod.WorldShare.store.Global")
-local FileDownloader = commonlib.gettable("Mod.WorldShare.service.FileDownloader")
+local FileDownloader = commonlib.gettable("Mod.WorldShare.service.FileDownloader.FileDownloader")
 
 local GitlabService = commonlib.inherit(nil, commonlib.gettable("Mod.WorldShare.service.GitlabService"))
 
@@ -374,9 +375,41 @@ function GitlabService:create(foldername, callback)
 end
 
 -- commit
-function GitlabService:getCommits(projectId, callback)
-    local url = format("projects/%s/repository/commits", projectId)
-    self:apiGet(url, callback)
+local per_page = 100
+local page = 1
+local commits = commonlib.vector:new()
+function GitlabService:getCommits(projectId, IsGetAll, callback)
+    local url = format("projects/%s/repository/commits?per_page=%s&page=%s", projectId, per_page, page)
+
+    self:apiGet(
+        url,
+        function(data, err)
+            if (IsGetAll) then
+                if (#data == 0) then
+                    if (type(callback) == "function") then
+                        local results = commonlib.copy(commits)
+                        callback(results, err)
+                    end
+
+                    page = 1
+                    commits:clear()
+
+                    return false
+                end
+
+                commits:AddAll(data)
+
+                page = page + 1
+                self:getCommits(projectId, IsGetAll, callback)
+
+                return false
+            end
+
+            if (type(callback) == "function") then
+                callback(data, err)
+            end
+        end
+    )
 end
 
 -- 写文件
@@ -464,12 +497,22 @@ function GitlabService:getContent(projectId, path, callback)
 end
 
 -- 获取文件
-function GitlabService:getContentWithRaw(foldername, path, callback)
-    local foldername = GitEncoding.base32(foldername)
+function GitlabService:getContentWithRaw(foldername, path, commitId, callback)
     local dataSourceInfo = GlobalStore.get("dataSourceInfo")
 
+    if (not commitId) then
+        commitId = "master"
+    end
+
     local url =
-        format("%s/%s/%s/raw/master/%s", dataSourceInfo.rawBaseUrl, dataSourceInfo.dataSourceUsername, foldername, path)
+        format(
+        "%s/%s/%s/raw/%s/%s",
+        dataSourceInfo.rawBaseUrl,
+        dataSourceInfo.dataSourceUsername,
+        foldername,
+        commitId,
+        path
+    )
 
     HttpRequest:GetUrl(
         {
@@ -493,8 +536,7 @@ function GitlabService:DownloadZIP(foldername, commitId, callback)
         return false
     end
 
-    local url =
-        format(
+    local url = format(
         "%s/%s/%s/repository/archive.zip?ref=%s",
         self.dataSourceInfo.rawBaseUrl,
         self.dataSourceInfo.dataSourceUsername,
@@ -508,13 +550,13 @@ function GitlabService:DownloadZIP(foldername, commitId, callback)
         nil,
         url,
         "temp/archive.zip",
-        function(bSuccess, downloadPath)           
+        function(bSuccess, downloadPath)
             if (type(callback) == "function") then
                 callback(bSuccess, downloadPath)
             end
         end,
         "access plus 5 mins",
-        true
+        false
     )
 end
 

@@ -65,7 +65,7 @@ function DeleteWorld.DeleteWorld()
     DeleteWorld.ShowDeleteWorldPage()
 end
 
-function DeleteWorld.DeleteLocal(callback)
+function DeleteWorld.DeleteLocal()
     local selectWorld = GlobalStore.get("selectWorld")
 
     if (not selectWorld) then

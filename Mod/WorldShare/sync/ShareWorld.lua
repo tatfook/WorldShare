@@ -18,6 +18,7 @@ NPL.load("(gl)Mod/WorldShare/store/Global.lua")
 NPL.load("(gl)Mod/WorldShare/login/LoginUserInfo.lua")
 NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 NPL.load("(gl)Mod/WorldShare/sync/SyncCompare.lua")
+NPL.load("(gl)Mod/WorldShare/login/LoginWorldList.lua")
 
 local ShareWorldPage = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.Areas.ShareWorldPage")
 local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain")
@@ -29,6 +30,7 @@ local GlobalStore = commonlib.gettable("Mod.WorldShare.store.Global")
 local LoginUserInfo = commonlib.gettable("Mod.WorldShare.login.LoginUserInfo")
 local SyncCompare = commonlib.gettable("Mod.WorldShare.sync.SyncCompare")
 local Utils = commonlib.gettable("Mod.WorldShare.helper.Utils")
+local LoginWorldList = commonlib.gettable("Mod.WorldShare.login.LoginWorldList")
 
 local ShareWorld = commonlib.inherit(nil, commonlib.gettable("Mod.WorldShare.sync.ShareWorld"))
 
@@ -38,35 +40,33 @@ function ShareWorld:ctor()
 end
 
 function ShareWorld.ShowPage()
-    if (not LoginUserInfo.isVerified) then
-        _guihelper.MessageBox(
-            L "您需要到keepwork官网进行实名认证，认证成功后需重启paracraft即可正常操作，是否现在认证？",
-            function(res)
-                if (res and res == _guihelper.DialogResult.Yes) then
-                    ParaGlobal.ShellExecute("open", "http://keepwork.com/wiki/user_center", "", "", 1)
-                end
-            end,
-            _guihelper.MessageBoxButtons.YesNo
-        )
-
-        return
-    end
-
     if (not LoginUserInfo.IsSignedIn()) then
         LoginMain.showLoginModalImp(
             function()
-                ShareWorldPage.ShowPage()
+                LoginWorldList.RefreshCurrentServerList(
+                    function()
+                        ShareWorld.ShowPage()
+                    end
+                )
             end
         )
 
         return false
     end
 
-    SyncCompare:compare(
-        function()
-            ShareWorld:init()
-        end
-    )
+    if (not LoginUserInfo.CheckoutVerified()) then
+        return false
+    end
+
+    local enterWorld = GlobalStore.get("enterWorld")
+
+    if(not enterWorld) then
+        _guihelper.MessageBox(L "此世界不支持分享")
+        return false
+    end
+
+    GlobalStore.set("ShareMode", true)
+    SyncCompare:syncCompare()
 end
 
 function ShareWorld.ShowPageImp()
@@ -76,14 +76,30 @@ end
 function ShareWorld:init()
     ShareWorld.ShowPageImp()
 
-    local worldDir = GlobalStore.get("worldDir")
+    local worldDir = self:GetWorldDir()
     local filepath = format("%spreview.jpg", worldDir.default)
 
     if (ParaIO.DoesFileExist(filepath) and ShareWorld.SharePage) then
         ShareWorld.SharePage:SetNodeValue("ShareWorldImage", filepath)
     end
 
+    GlobalStore.set("worldDir", self:GetWorldDir())
+    GlobalStore.set("foldername", self:GetFoldername())
+    GlobalStore.set("selectWorld", self:GetSelectWorld())
+
     ShareWorld.RefreshPage()
+end
+
+function ShareWorld:GetWorldDir()
+    return GlobalStore.get("enterWorldDir")
+end
+
+function ShareWorld:GetFoldername()
+    return GlobalStore.get("enterFoldername")
+end
+
+function ShareWorld:GetSelectWorld()
+    return GlobalStore.get("enterWorld")
 end
 
 function ShareWorld.setSharePage()
@@ -98,12 +114,6 @@ function ShareWorld.RefreshPage(times)
     if (ShareWorld.SharePage) then
         ShareWorld.SharePage:Refresh(times or 0.01)
     end
-end
-
-function ShareWorld.GetFoldername()
-    local foldername = GlobalStore.get("foldername")
-
-    return foldername.utf8
 end
 
 function ShareWorld.GetWorldSize()

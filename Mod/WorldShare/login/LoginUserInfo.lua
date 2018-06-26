@@ -256,7 +256,7 @@ function loginResponse(page, response, err, callback)
                                         {
                                             url = format("%s/api/wiki/models/website/new", LoginUserInfo.site),
                                             json = true,
-                                            headers = {Authorization = "Bearer " .. LoginUserInfo.token},
+                                            headers = {Authorization = format("Bearer %s", LoginUserInfo.token)},
                                             form = siteParams
                                         },
                                         function(data, err)
@@ -307,6 +307,8 @@ function LoginUserInfo.CheckoutVerified()
         )
 
         return false
+    else
+        return true
     end
 end
 
@@ -443,7 +445,7 @@ end
 -- @param info: if nil, we will delete the login info.
 function LoginUserInfo.SaveSigninInfo(info)
     if (not info) then
-        ParaIO.DeleteFile(LoginMain.GetPasswordFile())
+        ParaIO.DeleteFile(LoginUserInfo.GetPasswordFile())
     else
         local newStr =
             format(
@@ -549,10 +551,10 @@ function LoginUserInfo.setRememberAuto()
 
             page:Refresh(0.01)
         else
-            local info = LoginMain.LoadSigninInfo()
+            local info = LoginUserInfo.LoadSigninInfo()
             if (info) then
                 info.autoLogin = false
-                LoginMain.SaveSigninInfo(info)
+                LoginUserInfo.SaveSigninInfo(info)
             end
         end
     end
@@ -582,7 +584,7 @@ function LoginUserInfo.setAutoRemember()
 
             page:Refresh(0.01)
 
-            LoginMain.SaveSigninInfo(nil)
+            LoginUserInfo.SaveSigninInfo(nil)
         end
     end
 
@@ -697,7 +699,7 @@ function LoginUserInfo.OnChangeAvatar(btnName)
             GameLogic.options:SetMainPlayerAssetName()
             filename = GameLogic.options:GetMainPlayerAssetName()
             if (not filename) then
-                filename = LoginMain.GetValidAvatarFilename(default_avatars[cur_index])
+                filename = LoginUserInfo.GetValidAvatarFilename(default_avatars[cur_index])
                 GameLogic.options:SetMainPlayerAssetName(filename)
             end
         end

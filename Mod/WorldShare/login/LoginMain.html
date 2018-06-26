@@ -112,7 +112,7 @@
 
                 function selected_version()
                     return '<input type="button" \
-                             class="common_button mc_light_grey_button_with_fillet" \
+                             class="common_button login_button" \
                              onclick="LoginWorldList.selectVersion()" \
                              style="float:left;margin-left:0px;base-font-size:6px;font-size:6px;height:15px;width:50px" \
                              value="v' .. get_world_version() .. '"/>'
@@ -504,7 +504,7 @@
                 <div style="margin-top:20px">
                     <input type="button" value='<%=L"创建世界" %>' style="float:left;margin-left:80px;min-width:120px" onclick="LoginWorldList.CreateNewWorld()"
                         class="common_button mc_light_grey_button_with_fillet" />
-                    <input type="button" value='<%="..." %>' style="margin-left:10px;height:30px;min-width:30px" onclick="LoginWorldList.OnImportWorld()"
+                    <input type="button" value='<%="..." %>' style="margin-left:10px;height:30px;min-width:30px" onclick="LoginMain.OnImportWorld()"
                         class="flat_button" tooltip='<%=L"导入/导出..." %>' />
                 </div>
             </div>

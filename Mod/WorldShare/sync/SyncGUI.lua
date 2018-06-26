@@ -26,17 +26,20 @@ local total = 0
 local files = ""
 local finish
 local broke
+local Sync
 
-function SyncGUI:ctor(sync)
+function SyncGUI.init()
     current = 0
     total = 0
     files = L "同步中，请稍后..."
     finish = false
     broke = false
 
-    self.sync = sync
-
     Utils:ShowWindow(550, 320, "Mod/WorldShare/sync/SyncGUI.html", "SyncGUI")
+end
+
+function SyncGUI.SetSync(sync)
+    Sync = sync
 end
 
 function SyncGUI:OnInit()
@@ -60,46 +63,48 @@ function SyncGUI.closeWindow()
 end
 
 function SyncGUI.cancel(callback)
+    Sync:SetBroke(true)
+
     files = L "正在等待上次同步完成，请稍后..."
-    self:SetBroke(true)
-    self:refresh()
+
+    SyncGUI.SetBroke(true)
+    SyncGUI.SetFinish(true)
+    SyncGUI:refresh()
 
     local function checkFinish()
         Utils.SetTimeOut(
             function()
-                if (self.sync.finish) then
+                if (not Sync.finish) then
                     checkFinish()
-                else
-                    self:CloseWindow()
-
-                    if(type(callback) == 'function') then
-                        callback()
-                    end
+                    return false
                 end
-            end
+
+                SyncGUI:closeWindow()
+
+                if (type(callback) == "function") then
+                    callback()
+                end
+            end,
+            1000
         )
     end
 
     checkFinish()
 end
 
-function SyncGUI:retry()
-    self.finish(
+function SyncGUI.retry()
+    SyncGUI.cancel(
         function()
             SyncCompare:syncCompare()
         end
     )
-
-    -- if (SyncMain.syncType == "sync") then
-    --     SyncMain.syncCompare(true)
-    -- elseif (SyncMain.syncType == "share") then
-    --     ShareWorld.shareCompare()
-    -- else
-    --     SyncMain.syncCompare(true)
-    -- end
 end
 
 function SyncGUI:updateDataBar(pCurrent, pTotal, pFiles, pFinish)
+    if (broke) then
+        return false
+    end
+
     current = pCurrent
     total = pTotal
     files = pFiles
@@ -111,8 +116,8 @@ function SyncGUI:updateDataBar(pCurrent, pTotal, pFiles, pFinish)
 
     LOG.std("SyncGUI", "debug", "SyncGUI", format("Totals : %s , Current : %s, Status : %s", total, current, files))
 
-    self:GetProgressBar():SetAttribute("Maximum", total)
-    self:GetProgressBar():SetAttribute("Value", current)
+    SyncGUI:GetProgressBar():SetAttribute("Maximum", total)
+    SyncGUI:GetProgressBar():SetAttribute("Value", current)
 
     self:refresh()
 end
@@ -141,10 +146,10 @@ function SyncGUI.GetBroke()
     return broke
 end
 
-function SyncGUI:SetBroke(value)
+function SyncGUI.SetBroke(value)
     broke = value
 end
 
-function SyncGUI:SetFinish(value)
+function SyncGUI.SetFinish(value)
     finish = value
 end

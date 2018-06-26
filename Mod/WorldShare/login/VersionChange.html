@@ -7,59 +7,31 @@
             VersionChange.SetPage()
             
             function get_source()
-                local repeat_data = {
-                    {a=1},
-                    {a=2},
-                    {a=1},
-                    {a=2},
-                    {a=1},
-                    {a=2},
-                    {a=1},
-                    {a=2},
-                    {a=1},
-                    {a=2},
-                    {a=1},
-                    {a=2},
-                    {a=1},
-                    {a=2},
-                    {a=1},
-                    {a=2},
-                    {a=1},
-                    {a=2},
-                    {a=1},
-                    {a=2},
-                    {a=1},
-                    {a=2},
-                    {a=1},
-                    {a=2},
-                    {a=1},
-                    {a=2},
-                    {a=1},
-                    {a=2},
-                    {a=1},
-                    {a=2},
-                    {a=1},
-                    {a=2},
-                    {a=1},
-                    {a=2},
-                }
-
-                return repeat_data
+                return VersionChange:GetAllRevision()
             end
 
             function version_button()
-                return "color:#FFFFF;textcolor:#FFFFF;width:280px;height: 30px;margin-top: 10px;margin-bottom: 10px"
+                return "color:#FFFFF;textcolor:#FFFFF;width:280px;height: 30px;;margin-top: 10px;margin-bottom: 10px"
             end
 
             function get_value()
-                echo(Eval("a"), true)
-                return format("%s%s", "版本：", tostring(Eval("a")))
+                return format(" 时间： %s  版本：%s", tostring(Eval("date")), tostring(Eval("revision")))
             end
 
-            function select_version()
-
+            function select_version(index)
+                VersionChange:SelectVersion(index)
             end
         </script>
+        <style type="text/mcss">
+            {
+                login_button = {
+                    ["min-width"]   = 100,
+                    height          = 28,
+                    color = "#cccccc",
+                    background = "Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;179 89 21 21:8 8 8 8",
+                }
+            }
+        </style>
         <aries:window
             class="default"
             mode="thin"
@@ -69,7 +41,12 @@
             onclose="VersionChange.ClosePage">
             <pe:gridview DataSource="<%=get_source()%>">
                 <Columns style="color:#FFFFF;textcolor:#FFFFF;">
-                    <input type="button" onclick="select_version()" class="mc_light_grey_button_with_fillet" value='<%=get_value()%>' style='<%=version_button()%>' />
+                    <input type="button"
+                           onclick="select_version"
+                           class="login_button"
+                           value='<%=get_value()%>'
+                           name='<%=Eval("index")%>'
+                           style='<%=version_button()%>' />
                 </Columns>
             </pe:repeat>
         </aries:window>

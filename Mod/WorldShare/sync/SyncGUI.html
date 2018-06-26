@@ -26,6 +26,14 @@
                 function broke()
                     return SyncGUI.GetBroke()
                 end
+
+                function retry()
+                    SyncGUI.retry()
+                end
+
+                function cancel()
+                    SyncGUI.cancel()
+                end
              ]]>
         </script>
         <style type="text/mcss">
@@ -73,7 +81,7 @@
                     </div>
                     <pe:if condition="<%=not finish() %>">
                         <div style="margin-top:40px;">
-                            <input type="button" name="" onclick="calcel()" value='<%=L"取消" %>' class="button_highlight" style="width: 85px;height: 30px;margin-left: 155px" />
+                            <input type="button" name="" onclick="cancel()" value='<%=L"取消" %>' class="button_highlight" style="width: 85px;height: 30px;margin-left: 155px" />
                             <input type="button" name="" onclick="retry()" value='<%=L"重试" %>' class="button_highlight" style="width: 85px;height: 30px;margin-left: 15px" />
                         </div>
                     </pe:if>
