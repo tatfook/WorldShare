@@ -16,6 +16,7 @@ NPL.load("(gl)Mod/WorldShare/store/Global.lua")
 NPL.load("(gl)Mod/WorldShare/login/LoginMain.lua")
 NPL.load("(gl)Mod/WorldShare/sync/SyncMain.lua")
 NPL.load("(gl)Mod/WorldShare/login/DeleteWorld.lua")
+NPL.load("(gl)Mod/WorldShare/login/LoginUserInfo.lua")
 
 local DeleteWorld = commonlib.gettable("Mod.WorldShare.login.DeleteWorld")
 local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain")
@@ -23,10 +24,16 @@ local GitService = commonlib.gettable("Mod.WorldShare.service.GitService")
 local Utils = commonlib.gettable("Mod.WorldShare.helper.Utils")
 local GlobalStore = commonlib.gettable("Mod.WorldShare.store.Global")
 local LoginMain = commonlib.gettable("Mod.WorldShare.login.LoginMain")
+local LoginUserInfo = commonlib.gettable("Mod.WorldShare.login.LoginUserInfo")
 
 local VersionChange = commonlib.gettable("Mod.WorldShare.login.VersionChange")
 
 function VersionChange:init()
+    if(not LoginUserInfo.IsSignedIn()) then
+        _guihelper.MessageBox(L "登录后才能继续")
+        return false
+    end
+
     self.foldername = GlobalStore.get("foldername")
 
     LoginMain.showMessageInfo(L "请稍后...")
