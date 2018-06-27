@@ -29,7 +29,7 @@ local LoginUserInfo = commonlib.gettable("Mod.WorldShare.login.LoginUserInfo")
 local VersionChange = commonlib.gettable("Mod.WorldShare.login.VersionChange")
 
 function VersionChange:init()
-    if(not LoginUserInfo.IsSignedIn()) then
+    if (not LoginUserInfo.IsSignedIn()) then
         _guihelper.MessageBox(L "登录后才能继续")
         return false
     end
@@ -117,9 +117,10 @@ function VersionChange:GetRevisionContent(callback)
     end
 
     local currentItem = self.allRevision[index]
-    local selectWorld = GlobalStore.get('selectWorld')
+    local selectWorld = GlobalStore.get("selectWorld")
     local commitId = SyncMain:GetCurrentRevisionInfo()
-    commitId = commitId['id']
+
+    commitId = commitId and commitId["id"] or ""
 
     GitService:new():getContentWithRaw(
         self.foldername.base32,
@@ -133,13 +134,13 @@ function VersionChange:GetRevisionContent(callback)
             currentItem.revision = content
             currentItem.shortId = string.sub(currentItem.commitId, 1, 5)
 
-            if(tonumber(selectWorld.revision) == tonumber(currentItem.revision)) then
+            if (tonumber(selectWorld.revision) == tonumber(currentItem.revision)) then
                 currentItem.isActive = true
             else
                 currentItem.isActive = false
             end
 
-            if(currentItem.commitId == commitId) then
+            if (currentItem.commitId == commitId) then
                 currentItem.isActiveFull = true
             else
                 currentItem.isActiveFull = false
@@ -159,14 +160,14 @@ function VersionChange:SelectVersion(index)
     local selectWorld = GlobalStore.get("selectWorld")
     local foldername = GlobalStore.get("foldername")
     local commitId = self.allRevision[index]["commitId"]
-    
+
     GlobalStore.set("commitId", commitId)
     SyncMain:SetCurrentCommidId(commitId)
 
     local targetDir = format("%s/%s/", SyncMain.GetWorldFolderFullPath(), foldername.default)
 
     commonlib.Files.DeleteFolder(targetDir)
-    
+
     self:ClosePage()
 
     SyncMain:syncToLocal()
