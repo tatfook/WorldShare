@@ -11,11 +11,27 @@
             end
 
             function version_button()
-                return "color:#FFFFF;textcolor:#FFFFF;width:280px;height: 30px;;margin-top: 10px;margin-bottom: 10px"
+                local isActive = Eval("isActive")
+                local isActiveFull = Eval("isActiveFull")
+                local style = ""
+
+                if (isActive) then
+                    echo(1111, true)
+                    style = style .. "background:Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#208 89 21 21:8 8 8 8;"
+                else
+                    echo(2222, true)
+                    style = style .. "background:Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#179 89 21 21:8 8 8 8;"
+                end
+
+                if (isActiveFull) then
+                    style = style .. "font-weight:bold"
+                end
+
+                return style
             end
 
             function get_value()
-                return format(" 时间： %s  版本：%s", tostring(Eval("date")), tostring(Eval("revision")))
+                return format(" 时间： %s  版本：%s ID: %s", tostring(Eval("date")), tostring(Eval("revision")), tostring(Eval("shortId")))
             end
 
             function select_version(index)
@@ -24,11 +40,12 @@
         </script>
         <style type="text/mcss">
             {
-                login_button = {
-                    ["min-width"]   = 100,
-                    height          = 28,
-                    color = "#cccccc",
-                    background = "Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;179 89 21 21:8 8 8 8",
+                button = {
+                    width = 280,
+                    height = 30,
+                    color = "#FFFFF",
+                    textcolor = "#FFFFF",
+                    ["margin-top"] = 10
                 }
             }
         </style>
@@ -39,11 +56,11 @@
             height="400"
             title='<%=L"版本切换" %>'
             onclose="VersionChange.ClosePage">
-            <pe:gridview DataSource="<%=get_source()%>">
-                <Columns style="color:#FFFFF;textcolor:#FFFFF;">
+            <pe:gridview DataSource="<%= get_source()%>">
+                <Columns>
                     <input type="button"
                            onclick="select_version"
-                           class="login_button"
+                           class="button"
                            value='<%=get_value()%>'
                            name='<%=Eval("index")%>'
                            style='<%=version_button()%>' />

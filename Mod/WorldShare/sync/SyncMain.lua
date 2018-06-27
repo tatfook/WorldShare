@@ -5,7 +5,7 @@ Date:  2017.4.17
 Desc: 
 use the lib:
 ------------------------------------------------------------
-NPL.load("(gl)Mod/WorldShare/sync/SyncMain.lua");
+NPL.load("(gl)Mod/WorldShare/sync/SyncMain.lua")
 local SyncMain  = commonlib.gettable("Mod.WorldShare.sync.SyncMain")
 ------------------------------------------------------------
 ]]
@@ -41,6 +41,7 @@ local LoginUserInfo = commonlib.gettable("Mod.WorldShare.login.LoginUserInfo")
 local Utils = commonlib.gettable("Mod.WorldShare.helper.Utils")
 local WorldRevision = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision")
 local LoginWorldList = commonlib.gettable("Mod.WorldShare.login.LoginWorldList")
+local WorldShare = commonlib.gettable("Mod.WorldShare")
 
 local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain")
 
@@ -71,7 +72,7 @@ function SyncMain:CommandEnter()
     local world = self:GetWorldDirectory()
     local foldername = {}
 
-    for item in string.gmatch(world , "([^worlds/DesignHouse/]+)") do
+    for item in string.gmatch(world, "([^worlds/DesignHouse/]+)") do
         foldername.default = item
         foldername.utf8 = Encoding.DefaultToUtf8(foldername.default)
         foldername.base32 = GitEncoding.base32(foldername.utf8)
@@ -85,14 +86,14 @@ function SyncMain:CommandEnter()
         local currentWorld = {}
 
         for key, item in ipairs(compareWorldList) do
-            if(item.foldername == foldername.utf8) then
+            if (item.foldername == foldername.utf8) then
                 currentWorld = item
             end
         end
-        
+
         GlobalStore.set("selectWorld", currentWorld)
         GlobalStore.set("enterWorld", currentWorld)
-        
+
         local worldDir = {}
         worldDir.default = currentWorld.worldpath .. "/"
         worldDir.utf8 = Encoding.DefaultToUtf8(currentWorld.worldpath)
@@ -213,6 +214,8 @@ function SyncMain:RefreshKeepworkList(callback)
         local dataSourceInfo = GlobalStore.get("dataSourceInfo")
         local localFiles = LocalService:new():LoadFiles(worldDir.default)
 
+        self:SetCommidId(lastCommitSha)
+
         GlobalStore.set("localFiles", localFiles)
 
         local readme = ""
@@ -282,6 +285,21 @@ function SyncMain:RefreshKeepworkList(callback)
             GitService:new():getCommits(projectId, foldername.base32, false, handleKeepworkList)
         end
     )
+end
+
+function SyncMain:SetCurrentCommidId(commitId)
+    local worldDir = GlobalStore.get("worldDir")
+
+    WorldShare:SetWorldData("revision", {id = commitId}, worldDir.default)
+
+    ParaIO.CreateDirectory(format("%smod/", worldDir.default))
+    WorldShare:SaveWorldData(worldDir.default)
+end
+
+function SyncMain:GetCurrentRevisionInfo()
+    local worldDir = GlobalStore.get("worldDir")
+
+    return WorldShare:GetWorldData("revision", worldDir.default)
 end
 
 function SyncMain:checkWorldSize()

@@ -153,6 +153,10 @@ function FileDownloader:Start(src, dest, callbackFunc, cachePolicy)
                 OnFail(L "下载终止了")
             end
             if (text and self.text ~= "official_texture_package") then
+                if(self.text == "temp/archive.zip") then
+                    self.text = ''
+                end
+
                 BroadcastHelper.PushLabel(
                     {
                         id = "noWrap",

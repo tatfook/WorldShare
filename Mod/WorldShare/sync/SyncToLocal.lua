@@ -15,6 +15,7 @@ NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 NPL.load("(gl)Mod/WorldShare/login/LoginWorldList.lua")
 NPL.load("(gl)Mod/WorldShare/sync/ShareWorld.lua")
+NPL.load("(gl)Mod/WorldShare/sync/SyncMain.lua")
 
 local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain")
 local GitService = commonlib.gettable("Mod.WorldShare.service.GitService")
@@ -156,6 +157,9 @@ function SyncToLocal:HandleCompareList()
 
         self:SetFinish(true)
         self:RefreshList()
+
+        local selectWorld = GlobalStore.get("selectWorld")
+        SyncMain:SetCurrentCommidId(selectWorld.lastCommitId)
 
         self.compareListIndex = 1
         return false
@@ -312,6 +316,8 @@ function SyncToLocal:DownloadZIP()
             function(bSuccess, downloadPath)
                 LocalService:new():MoveZipToFolder(downloadPath)
                 self:RefreshList()
+
+                SyncMain:SetCurrentCommidId(commitId)
                 GlobalStore.remove("commitId")
             end
         )

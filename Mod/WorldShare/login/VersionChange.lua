@@ -117,6 +117,9 @@ function VersionChange:GetRevisionContent(callback)
     end
 
     local currentItem = self.allRevision[index]
+    local selectWorld = GlobalStore.get('selectWorld')
+    local commitId = SyncMain:GetCurrentRevisionInfo()
+    commitId = commitId['id']
 
     GitService:new():getContentWithRaw(
         self.foldername.base32,
@@ -128,6 +131,20 @@ function VersionChange:GetRevisionContent(callback)
             end
 
             currentItem.revision = content
+            currentItem.shortId = string.sub(currentItem.commitId, 1, 5)
+
+            if(tonumber(selectWorld.revision) == tonumber(currentItem.revision)) then
+                currentItem.isActive = true
+            else
+                currentItem.isActive = false
+            end
+
+            if(currentItem.commitId == commitId) then
+                currentItem.isActiveFull = true
+            else
+                currentItem.isActiveFull = false
+            end
+
             index = index + 1
             self:GetRevisionContent(callback)
         end
@@ -141,8 +158,10 @@ end
 function VersionChange:SelectVersion(index)
     local selectWorld = GlobalStore.get("selectWorld")
     local foldername = GlobalStore.get("foldername")
-
-    GlobalStore.set("commitId", self.allRevision[index]["commitId"])
+    local commitId = self.allRevision[index]["commitId"]
+    
+    GlobalStore.set("commitId", commitId)
+    SyncMain:SetCurrentCommidId(commitId)
 
     local targetDir = format("%s/%s/", SyncMain.GetWorldFolderFullPath(), foldername.default)
 

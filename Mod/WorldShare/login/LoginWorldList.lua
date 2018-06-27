@@ -256,15 +256,19 @@ function LoginWorldList.syncWorldsList(callback)
             local isExist = false
             local worldpath = ""
             local status
+            local revision
 
             for LKey, LItem in ipairs(localWorlds) do
                 if (DItem["worldsName"] == LItem["foldername"]) then
                     if (tonumber(LItem["revision"]) == tonumber(DItem["revision"])) then
                         status = 3 --本地网络一致
+                        revision = LItem['revision']
                     elseif (tonumber(LItem["revision"]) > tonumber(DItem["revision"])) then
                         status = 4 --网络更新
+                        revision = LItem['revision']
                     elseif (tonumber(LItem["revision"]) < tonumber(DItem["revision"])) then
                         status = 5 --本地更新
+                        revision = LItem['revision']
                     end
 
                     isExist = true
@@ -274,17 +278,20 @@ function LoginWorldList.syncWorldsList(callback)
             end
 
             if (not isExist) then
+                --仅网络
                 status = 2
+                revision = DItem['revision']
             end
 
             local currentWorld = {
                 text = DItem["worldsName"],
                 foldername = DItem["worldsName"],
-                revision = DItem["revision"],
+                revision = revision,
                 size = DItem["filesTotals"],
                 modifyTime = DItem["modDate"],
+                lastCommitId = DItem["commitId"], 
                 worldpath = worldpath,
-                status = status --仅网络
+                status = status
             }
 
             compareWorldList:push_back(currentWorld)
