@@ -27,10 +27,17 @@
                 local path = LocalLoadWorld.GetWorldFolderFullPath() .. "/" .. SyncMain.foldername.default;
                 ParaGlobal.ShellExecute("open", path, "", "", 1);
             end
+
+            function get_window_style()
+                NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
+                Utils = commonlib.gettable("Mod.WorldShare.helper.Utils")
+
+                return Utils.FixCenter(500, 270)
+            end
             ]]>
         </script>
-        <div style="width:500px;height:270px;">
-            <aries:window mode="thin" width="500" height="270" style="float:left;" title='<%=L"购买VIP" %>' onclose="SyncMain.closeBeyondPage">
+        <div width="100%" height="100%">
+            <aries:window mode="thin" width="500" height="270" style="<%=get_window_style()%>" title='<%=L"购买VIP" %>' onclose="SyncMain.closeBeyondPage">
                 <div style="font-size:16px;base-font-size:16px;color:#ffffff;padding:30px;">
                     <div style="margin-top:30px;">
                         <%= getBeyondMsg() %>

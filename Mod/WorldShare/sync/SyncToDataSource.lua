@@ -75,10 +75,12 @@ function SyncToDataSource:syncToDataSource()
 
     local function handleSyncToDataSource(data, err)
         self.dataSourceFiles = data
-        self.localFiles = LocalService:new():LoadFiles(self.worldDir.default) --再次获取本地文件，保证上传的内容为最新
+        self.localFiles = commonlib.vector:new()
+        self.localFiles:AddAll(LocalService:new():LoadFiles(self.worldDir.default)) --再次获取本地文件，保证上传的内容为最新
 
-        GlobalStore.set('localFiles', localFiles)
+        GlobalStore.set('localFiles', self.localFiles)
         
+        self:IgnoreFiles()
         self:CheckReadmeFile()
         self:GetCompareList()
         self:HandleCompareList()
@@ -90,6 +92,18 @@ function SyncToDataSource:syncToDataSource()
         nil, --commitId
         handleSyncToDataSource
     )
+end
+
+function SyncToDataSource:IgnoreFiles()
+    local fileList = {"mod/"}
+
+    for LKey, LItem in ipairs(self.localFiles) do
+        for FKey, FItem in ipairs(fileList) do
+            if(string.find(LItem.filename, FItem)) then
+                self.localFiles:remove(LKey)
+            end
+        end
+    end
 end
 
 function SyncToDataSource:CheckReadmeFile()
@@ -124,10 +138,7 @@ function SyncToDataSource:CheckReadmeFile()
             file_content_t = content
         }
 
-        local otherFile = commonlib.copy(self.localFiles[#self.localFiles])
-
-        self.localFiles[#self.localFiles] = readMeFiles
-        self.localFiles[#self.localFiles + 1] = otherFile
+        self.localFiles:push_back(readMeFiles)
     end
 end
 
@@ -345,6 +356,12 @@ end
 -- 删除数据源文件
 function SyncToDataSource:deleteOne(file, callback)
     local currentItem = self:GetRemoteFileByPath(file)
+
+    SyncGUI:updateDataBar(
+        self.compareListIndex,
+        self.compareListTotal,
+        format(L "%s 删除中", currentItem.path)
+    )
 
     GitService:new():deleteFile(
         self.projectId,

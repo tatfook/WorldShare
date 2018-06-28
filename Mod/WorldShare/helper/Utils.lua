@@ -10,7 +10,7 @@ local Utils = commonlib.gettable("Mod.WorldShare.helper.Utils")
 ]]
 local Utils = commonlib.gettable("Mod.WorldShare.helper.Utils")
 
-function Utils:ShowWindow(width, height, url, name, x, y)
+function Utils:ShowWindow(width, height, url, name, x, y, align, allowDrag)
     if (not x) then
         x = width
     end
@@ -25,16 +25,17 @@ function Utils:ShowWindow(width, height, url, name, x, y)
         isShowTitleBar = false,
         DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
         style = CommonCtrl.WindowFrame.ContainerStyle,
-        zorder = 0,
-        allowDrag = true,
+        zorder = zorder or 0,
+        allowDrag = allowDrag == nil and true or allowDrag,
         bShow = bShow,
         directPosition = true,
-        align = "_ct",
+        align = align or "_ct",
         x = -x / 2,
         y = -y / 2,
         width = width,
         height = height,
-        cancelShowAnimation = true
+        cancelShowAnimation = true,
+        bToggleShowHide  = true
     }
 
     System.App.Commands.Call("File.MCMLWindowFrame", params)
@@ -74,4 +75,14 @@ end
 
 function Utils.SetTimeOut(callback, times)
     commonlib.TimerManager.SetTimeout(callback, times or 100)
+end
+
+function Utils.FixCenter(width, height)
+    NPL.load("(gl)script/ide/System/Windows/Screen.lua")
+    local Screen = commonlib.gettable("System.Windows.Screen")
+
+    local marginLeft = math.floor((Screen:GetWidth()/2))
+    local marginTop = math.floor((Screen:GetHeight()/2))
+
+    return format("margin-left:%s;margin-top: %s", marginLeft - width/2, marginTop - height/2)
 end

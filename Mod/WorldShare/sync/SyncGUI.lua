@@ -35,7 +35,7 @@ function SyncGUI.init()
     finish = false
     broke = false
 
-    Utils:ShowWindow(550, 320, "Mod/WorldShare/sync/SyncGUI.html", "SyncGUI")
+    Utils:ShowWindow(0, 0, "Mod/WorldShare/sync/SyncGUI.html", "SyncGUI", 0, 0, "_fi", false)
 end
 
 function SyncGUI.SetSync(sync)

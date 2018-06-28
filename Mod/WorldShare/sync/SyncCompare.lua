@@ -112,6 +112,7 @@ function SyncCompare:compareRevision(callback)
     if (LoginUserInfo.IsSignedIn()) then
         if (selectWorld.is_zip) then
             _guihelper.MessageBox(L "不能同步ZIP文件")
+            LoginMain.closeMessageInfo()
             return false
         end
 

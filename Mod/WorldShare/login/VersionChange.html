@@ -32,6 +32,13 @@
                 return format(" 时间： %s  版本：%s ID: %s", tostring(Eval("date")), tostring(Eval("revision")), tostring(Eval("shortId")))
             end
 
+            function get_window_style()
+                NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
+                Utils = commonlib.gettable("Mod.WorldShare.helper.Utils")
+
+                return Utils.FixCenter(300, 400)
+            end
+
             function select_version(index)
                 VersionChange:SelectVersion(index)
             end
@@ -47,24 +54,27 @@
                 }
             }
         </style>
-        <aries:window
-            class="default"
-            mode="thin"
-            width="300"
-            height="400"
-            title='<%=L"版本切换" %>'
-            onclose="VersionChange.ClosePage">
-            <pe:gridview DataSource="<%= get_source()%>">
-                <Columns>
-                    <input type="button"
-                           onclick="select_version"
-                           class="button"
-                           value='<%=get_value()%>'
-                           name='<%=Eval("index")%>'
-                           style='<%=version_button()%>' />
-                </Columns>
-            </pe:repeat>
-        </aries:window>
+        <div width="100%" height="100%">
+            <aries:window
+                class="default"
+                mode="thin"
+                width="300"
+                height="400"
+                style="<%=get_window_style()%>"
+                title='<%=L"版本切换" %>'
+                onclose="VersionChange.ClosePage">
+                <pe:gridview DataSource="<%= get_source()%>">
+                    <Columns>
+                        <input type="button"
+                               onclick="select_version"
+                               class="button"
+                               value='<%=get_value()%>'
+                               name='<%=Eval("index")%>'
+                               style='<%=version_button()%>' />
+                    </Columns>
+                </pe:repeat>
+            </aries:window>
+        </div>
     </pe:mcml>
 </body>
 </html>

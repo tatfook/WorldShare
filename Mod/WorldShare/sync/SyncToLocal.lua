@@ -139,8 +139,10 @@ function SyncToLocal:RefreshList()
     LoginWorldList.RefreshCurrentServerList(
         function()
             local willEnterWorld = GlobalStore.get('willEnterWorld')
-
+            
             if(type(willEnterWorld) == 'function') then
+                local worldIndex = GlobalStore.get("worldIndex")
+                LoginWorldList.OnSwitchWorld(worldIndex)
                 willEnterWorld()
 
                 GlobalStore.remove('willEnterWorld')

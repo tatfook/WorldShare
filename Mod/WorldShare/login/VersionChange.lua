@@ -36,6 +36,18 @@ function VersionChange:init()
 
     self.foldername = GlobalStore.get("foldername")
 
+    local IsEnterWorld = GlobalStore.get("IsEnterWorld")
+
+    if (IsEnterWorld) then
+        local selectWorld = GlobalStore.get("selectWorld")
+        local enterWorld = GlobalStore.get("enterWorld")
+
+        if(enterWorld.foldername == selectWorld.foldername) then
+            _guihelper.MessageBox(L "不能切换当前编辑的世界")
+            return
+        end
+    end
+
     LoginMain.showMessageInfo(L "请稍后...")
     self:GetVersionSource(
         function()
@@ -56,7 +68,7 @@ function VersionChange:ClosePage()
 end
 
 function VersionChange:ShowPage()
-    Utils:ShowWindow(300, 400, "Mod/WorldShare/login/VersionChange.html", "VersionChange")
+    Utils:ShowWindow(0, 0, "Mod/WorldShare/login/VersionChange.html", "VersionChange", 0, 0, "_fi", false)
 end
 
 function VersionChange:GetVersionSource(callback)
@@ -168,9 +180,9 @@ function VersionChange:SelectVersion(index)
 
     commonlib.Files.DeleteFolder(targetDir)
 
-    self:ClosePage()
-
     SyncMain:syncToLocal()
+    
+    GlobalStore.set('willEnterWorld', self.ClosePage)
 end
 
 -- function VersionChange:FilterSameVersion(callback)

@@ -81,7 +81,7 @@ end
 function LoginMain.showMessageInfo(msg)
     LoginMain.Msg = msg
 
-    Utils:ShowWindow(500, 270, "Mod/WorldShare/login/Info.html", "Info", 300, 150)
+    Utils:ShowWindow(0, 0, "Mod/WorldShare/login/Info.html", "Info", 0, 0, "_fi", false)
 
     LoginMain.Msg = nil
 end
