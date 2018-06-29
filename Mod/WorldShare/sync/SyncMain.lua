@@ -95,24 +95,16 @@ function SyncMain:CommandEnter()
         end
 
         if(currentWorld) then
-            GlobalStore.set("selectWorld", currentWorld)
-            GlobalStore.set("enterWorld", currentWorld)
+            GlobalStore.set("worldDir", worldDir)
+            GlobalStore.set("enterWorldDir", worldDir)
 
-            worldDir.default = currentWorld.worldpath .. "/"
-            worldDir.utf8 = Encoding.DefaultToUtf8(currentWorld.worldpath)
-        else
+            local worldTag = LocalService:GetTag(foldername.default)
 
+            worldTag.size = filesize
+            LocalService:SetTag(worldDir.default, worldTag)
+
+            GlobalStore.set("worldTag", worldTag)
         end
-
-        GlobalStore.set("worldDir", worldDir)
-        GlobalStore.set("enterWorldDir", worldDir)
-
-        local worldTag = LocalService:GetTag(foldername.default)
-
-        worldTag.size = filesize
-        LocalService:SetTag(worldDir.default, worldTag)
-
-        GlobalStore.set("worldTag", worldTag)
     end
 
     LoginWorldList.RefreshCurrentServerList(handleSelectWorld)
