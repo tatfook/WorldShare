@@ -5,130 +5,151 @@ Date: 	2017.4.17
 Desc: 
 use the lib:
 ------------------------------------------------------------
-NPL.load("(gl)Mod/WorldShare/sync/SyncGUI.lua");
-local SyncGUI = commonlib.gettable("Mod.WorldShare.sync.SyncGUI");
+NPL.load("(gl)Mod/WorldShare/sync/SyncGUI.lua")
+local SyncGUI = commonlib.gettable("Mod.WorldShare.sync.SyncGUI")
 ------------------------------------------------------------
 ]]
-NPL.load("(gl)Mod/WorldShare/sync/SyncMain.lua");
+NPL.load("(gl)Mod/WorldShare/sync/SyncMain.lua")
+NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
+NPL.load("(gl)Mod/WorldShare/sync/SyncCompare.lua")
 
-local SyncMain   = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
-local SyncGUI    = commonlib.inherit(nil,commonlib.gettable("Mod.WorldShare.sync.SyncGUI"));
-local ShareWorld = commonlib.gettable("Mod.WorldShare.sync.ShareWorld");
+local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain")
+local Utils = commonlib.gettable("Mod.WorldShare.helper.Utils")
+local ShareWorld = commonlib.gettable("Mod.WorldShare.sync.ShareWorld")
+local SyncCompare = commonlib.gettable("Mod.WorldShare.sync.SyncCompare")
 
-local SyncPage;
+local SyncGUI = commonlib.inherit(nil, commonlib.gettable("Mod.WorldShare.sync.SyncGUI"))
 
-SyncGUI.current = 0;
-SyncGUI.total   = 0;
-SyncGUI.files   = "";
+local SyncPage
+local current = 0
+local total = 0
+local files = ""
+local finish
+local broke
+local Sync
 
-function SyncGUI:ctor()
-    SyncGUI.current = 0;
-    SyncGUI.total   = 0;
-    SyncGUI.files   = L"同步中，请稍后...";
+function SyncGUI.init()
+    current = 0
+    total = 0
+    files = L "同步中，请稍后..."
+    finish = false
+    broke = false
 
-    SyncMain.curUpdateIndex        = 1;
-    SyncMain.curUploadIndex        = 1;
-    SyncMain.totalLocalIndex       = nil;
-    SyncMain.totalDataSourceIndex  = nil;
-    SyncMain.dataSourceFiles       = {};
+    Utils:ShowWindow(0, 0, "Mod/WorldShare/sync/SyncGUI.html", "SyncGUI", 0, 0, "_fi", false)
+end
 
-    SyncMain.curDownloadIndex      = 1;
-    SyncMain.dataSourceIndex       = 0;
-
-    System.App.Commands.Call("File.MCMLWindowFrame", {
-        url  = "Mod/WorldShare/sync/SyncGUI.html", 
-        name = "SyncWorldShare", 
-        isShowTitleBar = false,
-        DestroyOnClose = true,
-        style = CommonCtrl.WindowFrame.ContainerStyle,
-        zorder = 0,
-        isTopLevel = true,
-        allowDrag = false,
-        bShow = bShow,
-        directPosition = true,
-        align = "_ct",
-        x = -550/2,
-        y = -320/2,
-        width = 550,
-        height = 320,
-        cancelShowAnimation = true,
-    });
+function SyncGUI.SetSync(sync)
+    Sync = sync
 end
 
 function SyncGUI:OnInit()
-    SyncPage = document:GetPageCtrl();
-    SyncGUI.progressbar = SyncPage:GetNode("progressbar");
+    SyncPage = document:GetPageCtrl()
 end
 
-function SyncGUI:refresh()
-    SyncPage:Refresh(0.01);
+function SyncGUI:GetProgressBar()
+    return SyncPage:GetNode("progressbar")
+end
+
+function SyncGUI:refresh(delayTimeMs)
+    if (SyncPage) then
+        SyncPage:Refresh(delayTimeMs or 0.01)
+    end
 end
 
 function SyncGUI.closeWindow()
-    SyncPage:CloseWindow();
+    if (SyncPage) then
+        SyncPage:CloseWindow()
+    end
 end
 
-function SyncGUI.finish(callback)
-    SyncMain.finish = true;
+function SyncGUI.cancel(callback)
+    Sync:SetBroke(true)
 
-    SyncGUI.files = L"正在等待上次同步完成，请稍后...";
-    SyncGUI:refresh(0.01);
+    files = L "正在等待上次同步完成，请稍后..."
 
-    log(SyncGUI.total);
-    log(SyncGUI.current);
-    log(SyncMain.finish);
+    SyncGUI.SetBroke(true)
+    SyncGUI.SetFinish(true)
+    SyncGUI:refresh()
 
     local function checkFinish()
-        commonlib.TimerManager.SetTimeout(function()
-            if(SyncMain.isFetching) then
-                checkFinish();
-            else
-                SyncPage:CloseWindow();
-                if(type(callback) == "function") then
-                    callback();
+        Utils.SetTimeOut(
+            function()
+                if (not Sync.finish) then
+                    checkFinish()
+                    return false
                 end
-            end
-        end, 100);
+
+                SyncGUI:closeWindow()
+
+                if (type(callback) == "function") then
+                    callback()
+                end
+            end,
+            1000
+        )
     end
 
-    checkFinish();
+    checkFinish()
 end
 
-function SyncGUI:retry()
-    SyncGUI.finish(function()
-        if(SyncMain.syncType == "sync") then
-            SyncMain.syncCompare(true);
-        elseif(SyncMain.syncType == "share") then
-            ShareWorld.shareCompare();
-        else
-            SyncMain.syncCompare(true);
+function SyncGUI.retry()
+    SyncGUI.cancel(
+        function()
+            SyncCompare:syncCompare()
         end
-
-        SyncMain.syncType = nil;
-    end);
+    )
 end
 
-function SyncGUI:updateDataBar(current, total, files)
-    local databar = SyncPage:GetNode("databar");
-    
-    SyncGUI.current  = current;
-    SyncGUI.total    = total;
-
-    if(files)then
-        SyncGUI.files = files;
-    else
-        SyncGUI.files = L"同步中，请稍后...";
+function SyncGUI:updateDataBar(pCurrent, pTotal, pFiles, pFinish)
+    if (broke) then
+        return false
     end
 
-    LOG.std("SyncGUI", "debug", "NumbersGUI", "Totals : %s , Current : %s, Status : %s", SyncGUI.total , SyncGUI.current, SyncGUI.files);
+    current = pCurrent
+    total = pTotal
+    files = pFiles
+    finish = pFinish
 
-    SyncGUI.progressbar:SetAttribute("Maximum", SyncGUI.total);
-    SyncGUI.progressbar:SetAttribute("Value", SyncGUI.current);
+    if (not files) then
+        files = L "同步中，请稍后..."
+    end
 
-    SyncPage:Refresh(0.01);
+    LOG.std("SyncGUI", "debug", "SyncGUI", format("Totals : %s , Current : %s, Status : %s", total, current, files))
+
+    SyncGUI:GetProgressBar():SetAttribute("Maximum", total)
+    SyncGUI:GetProgressBar():SetAttribute("Value", current)
+
+    self:refresh()
 end
 
 function SyncGUI.copy()
-    ParaMisc.CopyTextToClipboard(ShareWorld.getWorldUrl(true));
+    ParaMisc.CopyTextToClipboard(ShareWorld.getWorldUrl())
 end
 
+function SyncGUI.GetCurrent()
+    return current
+end
+
+function SyncGUI.GetTotal()
+    return total
+end
+
+function SyncGUI.GetFiles()
+    return files
+end
+
+function SyncGUI.GetFinish()
+    return finish
+end
+
+function SyncGUI.GetBroke()
+    return broke
+end
+
+function SyncGUI.SetBroke(value)
+    broke = value
+end
+
+function SyncGUI.SetFinish(value)
+    finish = value
+end

@@ -5,24 +5,34 @@ Date: 2017.5.12
 Desc:  It can take snapshot for the current world. It can quick save or full save the world to datasource. 
 use the lib:
 ------------------------------------------------------------
-NPL.load("(gl)Mod/WorldShare/sync/ShareWorld.lua");
-local ShareWorld = commonlib.gettable("Mod.WorldShare.sync.ShareWorld");
+NPL.load("(gl)Mod/WorldShare/sync/ShareWorld.lua")
+local ShareWorld = commonlib.gettable("Mod.WorldShare.sync.ShareWorld")
 ShareWorld.ShowPage()
 -------------------------------------------------------
 ]]
+NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/ShareWorldPage.lua")
+NPL.load("(gl)Mod/WorldShare/login/LoginMain.lua")
+NPL.load("(gl)script/apps/Aries/Creator/WorldCommon.lua")
+NPL.load("(gl)Mod/WorldShare/login/LoginUserInfo.lua")
+NPL.load("(gl)Mod/WorldShare/store/Global.lua")
+NPL.load("(gl)Mod/WorldShare/login/LoginUserInfo.lua")
+NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
+NPL.load("(gl)Mod/WorldShare/sync/SyncCompare.lua")
+NPL.load("(gl)Mod/WorldShare/login/LoginWorldList.lua")
 
-NPL.load("(gl)Mod/WorldShare/sync/ShareWorld.lua");
-NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/ShareWorldPage.lua");
-NPL.load("(gl)Mod/WorldShare/login/LoginMain.lua");
-NPL.load("(gl)script/apps/Aries/Creator/WorldCommon.lua");
+local ShareWorldPage = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.Areas.ShareWorldPage")
+local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain")
+local LoginMain = commonlib.gettable("Mod.WorldShare.login.LoginMain")
+local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
+local CommandManager = commonlib.gettable("MyCompany.Aries.Game.CommandManager")
+local LoginUserInfo = commonlib.gettable("Mod.WorldShare.login.LoginUserInfo")
+local GlobalStore = commonlib.gettable("Mod.WorldShare.store.Global")
+local LoginUserInfo = commonlib.gettable("Mod.WorldShare.login.LoginUserInfo")
+local SyncCompare = commonlib.gettable("Mod.WorldShare.sync.SyncCompare")
+local Utils = commonlib.gettable("Mod.WorldShare.helper.Utils")
+local LoginWorldList = commonlib.gettable("Mod.WorldShare.login.LoginWorldList")
 
-local ShareWorldPage = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.Areas.ShareWorldPage");
-local SyncMain       = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
-local loginMain      = commonlib.gettable("Mod.WorldShare.login.loginMain");
-local WorldCommon    = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
-local CommandManager = commonlib.gettable("MyCompany.Aries.Game.CommandManager");
-
-local ShareWorld     = commonlib.inherit(nil,commonlib.gettable("Mod.WorldShare.sync.ShareWorld"));
+local ShareWorld = commonlib.inherit(nil, commonlib.gettable("Mod.WorldShare.sync.ShareWorld"))
 
 ShareWorld.SharePage = nil
 
@@ -30,145 +40,159 @@ function ShareWorld:ctor()
 end
 
 function ShareWorld.ShowPage()
-    if(loginMain.isVerified ~= "noLogin" and not loginMain.isVerified) then
-        _guihelper.MessageBox(L"您需要到keepwork官网进行实名认证，认证成功后需重启paracraft即可正常操作，是否现在认证？", function(res)
-            if(res and res == _guihelper.DialogResult.Yes) then
-                ParaGlobal.ShellExecute("open", "http://keepwork.com/wiki/user_center", "", "", 1);
+    if (not LoginUserInfo.IsSignedIn()) then
+        LoginMain.showLoginModalImp(
+            function()
+                LoginWorldList.RefreshCurrentServerList(
+                    function()
+                        ShareWorld.ShowPage()
+                    end
+                )
             end
-        end, _guihelper.MessageBoxButtons.YesNo);
+        )
 
-        return;
+        return false
     end
 
-    SyncMain.syncType = "share";
-
-    if(not loginMain.IsSignedIn()) then
-        loginMain.showLoginModalImp(function()
-            ShareWorldPage.ShowPage();
-        end);
-    else
-        loginMain.showMessageInfo(L"正在获取，请稍后...");
-        ShareWorld.shareCompare();
+    if (not LoginUserInfo.CheckoutVerified()) then
+        return false
     end
+
+    local enterWorld = GlobalStore.get("enterWorld")
+
+    if(not enterWorld) then
+        _guihelper.MessageBox(L "此世界不支持分享")
+        return false
+    end
+
+    GlobalStore.set("ShareMode", true)
+    SyncCompare:syncCompare()
 end
 
 function ShareWorld.ShowPageImp()
-    System.App.Commands.Call("File.MCMLWindowFrame", {
-        url            = "Mod/WorldShare/sync/ShareWorld.html",
-        name           = "SaveWorldPage.ShowSharePage",
-        isShowTitleBar = false,
-        DestroyOnClose = true,
-        style          = CommonCtrl.WindowFrame.ContainerStyle,
-        allowDrag      = true,
-        isTopLevel     = true,
-        directPosition = true,
-        align          = "_ct",
-        x              = -640/2,
-        y              = -415/2,
-        width          = 640,
-        height         = 415,
-    });
+    Utils:ShowWindow(640, 415, "Mod/WorldShare/sync/ShareWorld.html", "ShareWorld")
 end
 
 function ShareWorld:init()
-    local filepath = SyncMain.worldDir.default .. "preview.jpg";
+    ShareWorld.ShowPageImp()
 
-    if(ParaIO.DoesFileExist(filepath)) then
-        ShareWorld.SharePage:SetNodeValue("ShareWorldImage", filepath);
+    local worldDir = self:GetWorldDir()
+    local filepath = format("%spreview.jpg", worldDir.default)
+
+    if (ParaIO.DoesFileExist(filepath) and ShareWorld.SharePage) then
+        ShareWorld.SharePage:SetNodeValue("ShareWorldImage", filepath)
     end
 
-    ShareWorld.SharePage:Refresh();
+    GlobalStore.set("worldDir", self:GetWorldDir())
+    GlobalStore.set("foldername", self:GetFoldername())
+    GlobalStore.set("selectWorld", self:GetSelectWorld())
+
+    ShareWorld.RefreshPage()
+end
+
+function ShareWorld:GetWorldDir()
+    return GlobalStore.get("enterWorldDir")
+end
+
+function ShareWorld:GetFoldername()
+    return GlobalStore.get("enterFoldername")
+end
+
+function ShareWorld:GetSelectWorld()
+    return GlobalStore.get("enterWorld")
 end
 
 function ShareWorld.setSharePage()
-    ShareWorld.SharePage = document:GetPageCtrl();
+    ShareWorld.SharePage = document:GetPageCtrl()
 end
 
 function ShareWorld.closeSharePage()
-    ShareWorld.SharePage:CloseWindow();
+    ShareWorld.SharePage:CloseWindow()
 end
 
-function ShareWorld.getWorldSize()
-    SyncMain.tagInfor = WorldCommon.GetWorldInfo();
-
-    return SyncMain.tagInfor.size;
-end
-
-function ShareWorld.shareCompare()
-    SyncMain:compareRevision(nil, function(result)
-        if(result and result == "tryAgain") then
-            ShareWorld.shareCompare();
-        elseif(result == "zip") then
-            _guihelper.MessageBox(L"不能同步ZIP文件");
-            loginMain.closeMessageInfo();
-        elseif(result) then
-            ShareWorld.ShowPageImp();
-            ShareWorld.CompareResult = result;
-            ShareWorld.SharePage:Refresh();
-            ShareWorld:init();
-            loginMain.closeMessageInfo();
-        else
-            if(ShareWorld.SharePage) then
-                ShareWorld.SharePage:CloseWindow();
-            end
-        end
-    end);
-end
-
-function ShareWorld.shareNow()
-    ShareWorld.SharePage:CloseWindow();
-
-    if(ShareWorld.CompareResult == "remoteBigger") then
-        _guihelper.MessageBox(L"当前本地版本小于远程版本，是否继续上传？", function(res)
-            if(res and res == 6) then
-                SyncMain:syncToDataSource();
-            end
-        end);
-    elseif(ShareWorld.CompareResult == "localBigger" or ShareWorld.CompareResult == "justLocal" or ShareWorld.CompareResult == "equal") then
-        SyncMain:syncToDataSource();
+function ShareWorld.RefreshPage(times)
+    if (ShareWorld.SharePage) then
+        ShareWorld.SharePage:Refresh(times or 0.01)
     end
 end
 
+function ShareWorld.GetWorldSize()
+    local tagInfor = WorldCommon.GetWorldInfo()
+
+    return Utils.formatFileSize(tagInfor.size)
+end
+
+function ShareWorld.GetRemoteRevision()
+    local remoteRevision = GlobalStore.get("remoteRevision")
+
+    return remoteRevision
+end
+
+function ShareWorld.GetCurrentRevision()
+    local currentRevision = GlobalStore.get("currentRevision")
+
+    return currentRevision
+end
+
+function ShareWorld.shareNow()
+    if (ShareWorld.GetRemoteRevision() > ShareWorld.GetCurrentRevision()) then
+        _guihelper.MessageBox(
+            L "当前本地版本小于远程版本，是否继续上传？",
+            function(res)
+                if (res and res == 6) then
+                    SyncMain:syncToDataSource()
+                    ShareWorld.closeSharePage()
+                end
+            end
+        )
+
+        return true
+    end
+
+    SyncMain:syncToDataSource()
+    ShareWorld.closeSharePage()
+end
+
 function ShareWorld.snapshot()
-    ShareWorldPage.TakeSharePageImage();
+    ShareWorldPage.TakeSharePageImage()
     ShareWorld.UpdateImage(true)
 
-    if(SyncMain.remoteRevison == SyncMain.currentRevison)then
-        CommandManager:RunCommand("/save");
-        ShareWorld.SharePage:CloseWindow();
-        ShareWorld.ShowPage();
+    if (SyncMain.remoteRevison == SyncMain.currentRevison) then
+        CommandManager:RunCommand("/save")
+        ShareWorld.SharePage:CloseWindow()
+        ShareWorld.ShowPage()
     end
 end
 
 function ShareWorld.UpdateImage(bRefreshAsset)
-    if(ShareWorld.SharePage) then
-        local filepath = ShareWorldPage.GetPreviewImagePath();
-        ShareWorld.SharePage:SetUIValue("ShareWorldImage", filepath);
-        if(bRefreshAsset) then
-            ParaAsset.LoadTexture("",filepath,1):UnloadAsset();
+    if (ShareWorld.SharePage) then
+        local filepath = ShareWorldPage.GetPreviewImagePath()
+        ShareWorld.SharePage:SetUIValue("ShareWorldImage", filepath)
+        if (bRefreshAsset) then
+            ParaAsset.LoadTexture("", filepath, 1):UnloadAsset()
         end
     end
 end
 
-function ShareWorld.getWorldUrl(bEncode)
-    if(loginMain.login_type == 1) then
-        return "";
+function ShareWorld.getWorldUrl()
+    if (not LoginUserInfo.IsSignedIn()) then
+        return ""
     end
 
-    local foldername;
+    local foldername = GlobalStore.get("foldername")
+    local userinfo = GlobalStore.get("userinfo")
 
-    if(bEncode) then
-        foldername = commonlib.Encoding.url_encode("world_" .. SyncMain.foldername.utf8);
-    else
-        foldername = "world_" .. SyncMain.foldername.utf8;
-    end
-
-    local url = loginMain.site .. "/" .. loginMain.username .. "/paracraft/" .. foldername;
-    return url;
+    return format("%s/%s/paracraft/%s", LoginUserInfo.site, userinfo.username, foldername.utf8)
 end
 
 function ShareWorld.openWorldWebPage()
-    local url = ShareWorld.getWorldUrl(true);
-    ParaGlobal.ShellExecute("open", url, "", "", 1);
-end
+    if (not LoginUserInfo.IsSignedIn()) then
+        return ""
+    end
 
+    local foldername = GlobalStore.get("foldername")
+    local userinfo = GlobalStore.get("userinfo")
+
+    local url = format("%s/%s/paracraft/%s", LoginUserInfo.site, userinfo.username, foldername.default)
+    ParaGlobal.ShellExecute("open", url, "", "", 1)
+end

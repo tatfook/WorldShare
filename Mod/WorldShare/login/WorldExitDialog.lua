@@ -10,63 +10,52 @@ local WorldExitDialog = commonlib.gettable("Mod.WorldShare.login.WorldExitDialog
 WorldExitDialog.ShowPage();
 ------------------------------------------------------------
 ]]
-NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/ShareWorldPage.lua");
+NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/ShareWorldPage.lua")
+NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 
-local WorldExitDialog = commonlib.gettable("Mod.WorldShare.login.WorldExitDialog");
-local ShareWorldPage  = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.Areas.ShareWorldPage");
+local Utils = commonlib.gettable("Mod.WorldShare.helper.Utils")
+local WorldExitDialog = commonlib.gettable("Mod.WorldShare.login.WorldExitDialog")
 
--- @param callback: function(res) end. 
+local ShareWorldPage = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.Areas.ShareWorldPage")
+
+-- @param callback: function(res) end.
 function WorldExitDialog.ShowPage(callback)
-    WorldExitDialog.callback = callback;
+    WorldExitDialog.callback = callback
 
-    System.App.Commands.Call("File.MCMLWindowFrame", {
-            url            = "Mod/WorldShare/login/WorldExitDialog.html",
-            name           = "Mod.WorldShare.WorldExitDialog",
-            isShowTitleBar = false,
-            DestroyOnClose = true,
-            style          = CommonCtrl.WindowFrame.ContainerStyle,
-            allowDrag      = true,
-            isTopLevel     = true,
-            directPosition = true,
-            align          = "_ct",
-            x              = -500/2,
-            y              = -320/2,
-            width          = 500,
-            height         = 320,
-        });
+    Utils:ShowWindow(500, 320, "Mod/WorldShare/login/WorldExitDialog.html", "Mod.WorldShare.WorldExitDialog")
 end
 
 function WorldExitDialog.GetPreviewImagePath()
-    return ParaWorld.GetWorldDirectory() .. "preview.jpg";
+    return ParaWorld.GetWorldDirectory() .. "preview.jpg"
 end
 
 function WorldExitDialog:OnInit()
-    WorldExitDialog.page = document:GetPageCtrl();
-    WorldExitDialog.page:SetNodeValue("ShareWorldImage", WorldExitDialog.GetPreviewImagePath());
+    WorldExitDialog.page = document:GetPageCtrl()
+    WorldExitDialog.page:SetNodeValue("ShareWorldImage", WorldExitDialog.GetPreviewImagePath())
 end
 
 -- @param res: _guihelper.DialogResult
 function WorldExitDialog.OnDialogResult(res)
-    if(WorldExitDialog.page) then
-        WorldExitDialog.page:CloseWindow();
+    if (WorldExitDialog.page) then
+        WorldExitDialog.page:CloseWindow()
     end
-    if(WorldExitDialog.callback) then
-        WorldExitDialog.callback(res);
+    if (WorldExitDialog.callback) then
+        WorldExitDialog.callback(res)
     end
 end
 
 function WorldExitDialog.snapshot()
-    ShareWorldPage.TakeSharePageImage();
+    ShareWorldPage.TakeSharePageImage()
     WorldExitDialog.UpdateImage(true)
 end
 
 function WorldExitDialog.UpdateImage(bRefreshAsset)
-    if(WorldExitDialog.page) then
-        local filepath = ShareWorldPage.GetPreviewImagePath();
-        WorldExitDialog.page:SetUIValue("ShareWorldImage", filepath);
+    if (WorldExitDialog.page) then
+        local filepath = ShareWorldPage.GetPreviewImagePath()
+        WorldExitDialog.page:SetUIValue("ShareWorldImage", filepath)
 
-        if(bRefreshAsset) then
-            ParaAsset.LoadTexture("",filepath,1):UnloadAsset();
+        if (bRefreshAsset) then
+            ParaAsset.LoadTexture("", filepath, 1):UnloadAsset()
         end
     end
 end

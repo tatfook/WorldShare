@@ -1,18 +1,46 @@
-<!-- "script/apps/Aries/Creator/Game/Login/InternetLoadWorld.html" -->
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-    <title>exit world sync,by big,2016/12/10</title>
-</head>
 <body>
     <pe:mcml>
         <script type="text/npl" refresh="false" src="SyncGUI.lua">
             <![CDATA[
-                SyncGUI    = commonlib.gettable("Mod.WorldShare.sync.SyncGUI");
-                ShareWorld = commonlib.gettable("Mod.WorldShare.sync.ShareWorld");
-                SyncMain   = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
+                SyncGUI    = commonlib.gettable("Mod.WorldShare.sync.SyncGUI")
+                ShareWorld = commonlib.gettable("Mod.WorldShare.sync.ShareWorld")
 
-                SyncGUI:OnInit();
+                SyncGUI:OnInit()
+
+                function current()
+                    return SyncGUI.GetCurrent()
+                end
+
+                function total()
+                    return SyncGUI.GetTotal()
+                end
+
+                function files()
+                    return SyncGUI.GetFiles()
+                end
+
+                function finish()
+                    return SyncGUI.GetFinish()
+                end
+
+                function broke()
+                    return SyncGUI.GetBroke()
+                end
+
+                function retry()
+                    SyncGUI.retry()
+                end
+
+                function cancel()
+                    SyncGUI.cancel()
+                end
+
+                function get_window_style()
+                    NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
+                    Utils = commonlib.gettable("Mod.WorldShare.helper.Utils")
+
+                    return Utils.FixCenter(500, 270)
+                end
              ]]>
         </script>
         <style type="text/mcss">
@@ -28,20 +56,17 @@
                  },
             }
         </style>
-        <div style="width:550px;height:320px;">
-            <aries:window mode="thin" width="550" height="320" style="float:left;" title='<%=L"与数据源同步" %>'>
+        <div width="100%" height="100%">
+            <aries:window mode="thin" width="550" height="320" style="<%=get_window_style()%>" title='<%=L"与数据源同步" %>'>
                 <div style="padding:20px;font-size:18px;base-font-size:18px;color:#ffffff;margin-top:20px;">
-                    <pe:if condition="<%=SyncGUI.total ~= 0 and not SyncMain.finish%>">
+                    <pe:if condition="<%= not finish() and not broke() %>">
                         <div style="margin-right:20px;">
-                            <%=L"同步进度：" %><%=SyncGUI.current%> / <%=SyncGUI.total%>
+                            <%=L"同步进度：" %><%= current() %> / <%= total() %>
                             <br />
-                            <%=SyncGUI.files%>
+                            <%= files() %>
                         </div>
                     </pe:if>
-                    <pe:if condition="<%=SyncGUI.total == 0 or SyncGUI.current ~= SyncGUI.total and SyncMain.finish%>">
-                        <%=SyncGUI.files%>
-                    </pe:if>
-                    <pe:if condition="<%=SyncGUI.total ~= 0 and SyncGUI.current == SyncGUI.total and SyncMain.finish%>">
+                    <pe:if condition="<%= finish() and not broke() %>">
                         <div style="margin-right:20px;font-size:13px;base-font-size:13px;">
                             <%=L"恭喜！世界已经同步完毕！" %>
                             <br />
@@ -54,17 +79,20 @@
                             </div>
                         </div>
                     </pe:if>
+                    <pe:if condition="<%= broke() %>">
+                        <%= files() %>
+                    </pe:if>
 
                     <div style="margin-top:30px;">
                         <pe:progressbar name="progressbar"  block_bg_autosize = "true" Minimum="0" Maximum="100" Value="0"/>
                     </div>
-                    <pe:if condition="<%=not SyncMain.finish %>">
+                    <pe:if condition="<%=not finish() %>">
                         <div style="margin-top:40px;">
-                            <input type="button" name="" onclick="SyncGUI.finish" value='<%=L"取消" %>' class="button_highlight" style="width: 85px;height: 30px;margin-left: 155px" />
-                            <input type="button" name="" onclick="SyncGUI.retry" value='<%=L"重试" %>' class="button_highlight" style="width: 85px;height: 30px;margin-left: 15px" />
+                            <input type="button" name="" onclick="cancel()" value='<%=L"取消" %>' class="button_highlight" style="width: 85px;height: 30px;margin-left: 155px" />
+                            <input type="button" name="" onclick="retry()" value='<%=L"重试" %>' class="button_highlight" style="width: 85px;height: 30px;margin-left: 15px" />
                         </div>
                     </pe:if>
-                    <pe:if condition="<%=SyncGUI.total ~= 0 and SyncGUI.current == SyncGUI.total and SyncMain.finish%>">
+                    <pe:if condition="<%= finish() %>">
                         <input type="button" name="" onclick="SyncGUI.closeWindow" value='<%=L"关闭" %>'  class="button_highlight" style="width: 85px;height: 30px;margin-top:40px;margin-left: 200px" />
                     </pe:if>
                 </div>
