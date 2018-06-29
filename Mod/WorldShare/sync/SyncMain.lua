@@ -72,18 +72,21 @@ function SyncMain:CommandEnter()
     local world = self:GetWorldDirectory()
     local foldername = {}
 
-    for item in string.gmatch(world, "([^worlds/DesignHouse/]+)") do
-        foldername.default = item
-        foldername.utf8 = Encoding.DefaultToUtf8(foldername.default)
-        foldername.base32 = GitEncoding.base32(foldername.utf8)
-    end
+    local world = string.gsub(world, "worlds/DesignHouse/", "")
+    world = string.gsub(world, "/", "")
+
+    foldername.default = world
+    foldername.utf8 = Encoding.DefaultToUtf8(foldername.default)
+    foldername.base32 = GitEncoding.base32(foldername.utf8)
 
     GlobalStore.set("foldername", foldername)
     GlobalStore.set("enterFoldername", foldername)
 
     local function handleSelectWorld()
         local compareWorldList = GlobalStore.get("compareWorldList")
-        local currentWorld = {}
+
+        local currentWorld = nil
+        local worldDir = {}
 
         for key, item in ipairs(compareWorldList) do
             if (item.foldername == foldername.utf8) then
@@ -91,12 +94,15 @@ function SyncMain:CommandEnter()
             end
         end
 
-        GlobalStore.set("selectWorld", currentWorld)
-        GlobalStore.set("enterWorld", currentWorld)
+        if(currentWorld) then
+            GlobalStore.set("selectWorld", currentWorld)
+            GlobalStore.set("enterWorld", currentWorld)
 
-        local worldDir = {}
-        worldDir.default = currentWorld.worldpath .. "/"
-        worldDir.utf8 = Encoding.DefaultToUtf8(currentWorld.worldpath)
+            worldDir.default = currentWorld.worldpath .. "/"
+            worldDir.utf8 = Encoding.DefaultToUtf8(currentWorld.worldpath)
+        else
+
+        end
 
         GlobalStore.set("worldDir", worldDir)
         GlobalStore.set("enterWorldDir", worldDir)

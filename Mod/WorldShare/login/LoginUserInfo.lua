@@ -648,7 +648,7 @@ function LoginUserInfo.LoginWithTokenApi(callback)
     if (type(usertoken) == "string" and #usertoken > 0) then
         LoginMain.showMessageInfo(L "正在登陆，请稍后...")
 
-        local url = LoginMain.site .. "/api/wiki/models/user/getProfile"
+        local url = format("%s/api/wiki/models/user/getProfile", LoginUserInfo.site)
 
         local params = {}
         local headers = {
