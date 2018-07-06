@@ -73,7 +73,9 @@ function SyncMain:CommandEnter()
     local foldername = {}
 
     local world = string.gsub(world, "worlds/DesignHouse/", "")
+    world = string.gsub(world, "worlds\\DesignHouse\\", "")
     world = string.gsub(world, "/", "")
+    world = string.gsub(world, "\\", "")
 
     foldername.default = world
     foldername.utf8 = Encoding.DefaultToUtf8(foldername.default)
@@ -95,6 +97,9 @@ function SyncMain:CommandEnter()
         end
 
         if(currentWorld) then
+            worldDir.default = format("%s/", currentWorld.worldpath)
+            worldDir.utf8 = Encoding.DefaultToUtf8(worldDir.default)
+
             GlobalStore.set("worldDir", worldDir)
             GlobalStore.set("enterWorldDir", worldDir)
 
@@ -102,8 +107,10 @@ function SyncMain:CommandEnter()
 
             worldTag.size = filesize
             LocalService:SetTag(worldDir.default, worldTag)
-
             GlobalStore.set("worldTag", worldTag)
+            
+            GlobalStore.set("selectWorld", currentWorld)
+            GlobalStore.set("enterWorld", currentWorld)
         end
     end
 
