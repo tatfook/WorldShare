@@ -134,6 +134,7 @@ function SyncCompare:compare(callback)
     local remoteWorldsList = GlobalStore.get("remoteWorldsList")
     local remoteRevision = 0
     local currentRevision = WorldRevision:new():init(worldDir.default):Checkout()
+
     local localFiles = LocalService:new():LoadFiles(worldDir.default)
     local hasRevision = false
 
