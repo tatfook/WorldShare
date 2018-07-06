@@ -240,7 +240,7 @@ function loginResponse(page, response, err, callback)
                                         categoryId = 1,
                                         categoryName = "作品网站",
                                         desc = "paracraft作品集",
-                                        displayName = LoginUserInfo.username,
+                                        displayName = "paracraft",--LoginUserInfo.username,
                                         domain = "paracraft",
                                         logoUrl = "/wiki/assets/imgs/paracraft.png",
                                         name = "paracraft",
@@ -287,6 +287,24 @@ function loginResponse(page, response, err, callback)
     else
         LoginMain.closeMessageInfo()
         _guihelper.MessageBox(L "服务器连接失败")
+    end
+end
+
+function LoginUserInfo.PWDValidation()
+    local info = LoginUserInfo.LoadSigninInfo()
+    local isDataCorrect = false
+
+    --check site data
+    if (info and info.loginServer) then
+        for key, item in ipairs(LoginUserInfo.serverLists) do
+            if (item.value == info.loginServer) then
+                isDataCorrect = true
+            end
+        end
+    end
+
+    if (not isDataCorrect) then
+        ParaIO.DeleteFile(LoginUserInfo.GetPasswordFile())
     end
 end
 

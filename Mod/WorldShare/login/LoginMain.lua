@@ -52,6 +52,9 @@ function LoginMain.ShowPage()
         LoginMain.LoginPage = nil
     end
 
+    -- checkout wrong PWD
+    LoginUserInfo.PWDValidation()
+
     -- load last selected avatar if world is not loaded before.
     LoginUserInfo.OnChangeAvatar()
 
