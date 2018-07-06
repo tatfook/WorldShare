@@ -29,7 +29,7 @@
             end
 
             function get_value()
-                return format(" 时间： %s  版本：%s ID: %s", tostring(Eval("date")), tostring(Eval("revision")), tostring(Eval("shortId")))
+                return format("%s： %s  %s：%s ID: %s", L "日期", tostring(Eval("date")), L "版本", tostring(Eval("revision")), tostring(Eval("shortId")))
             end
 
             function get_window_style()
