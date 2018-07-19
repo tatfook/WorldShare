@@ -12,6 +12,8 @@ BrowseRemoteWorlds.ShowPage(callbackFunc)
 ]]
 NPL.load("(gl)script/apps/Aries/Creator/Game/Login/RemoteServerList.lua");
 NPL.load("(gl)Mod/WorldShare/sync/SyncMain.lua");
+NPL.load("(gl)script/ide/System/Windows/Screen.lua");
+local Screen = commonlib.gettable("System.Windows.Screen");
 local Encoding           = commonlib.gettable("commonlib.Encoding");
 local InternetLoadWorld  = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld");
 local RemoteServerList   = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.RemoteServerList");
@@ -53,12 +55,7 @@ end
 function BrowseRemoteWorlds.ShowPage(callbackFunc)
     BrowseRemoteWorlds.callbackFunc = callbackFunc;
 
-    NPL.load("(gl)script/ide/System/Windows/Screen.lua");
-    local Screen = commonlib.gettable("System.Windows.Screen");
-    
-    local item_width = 255;
-    BrowseRemoteWorlds.itemsPerLine = math.floor((Screen:GetWidth()-50)/item_width);
-    BrowseRemoteWorlds.margin_left = math.floor((Screen:GetWidth() - BrowseRemoteWorlds.itemsPerLine * item_width)/2);
+    BrowseRemoteWorlds.OnScreenSizeChange();
 
     local params = {
         url            = "Mod/WorldShare/login/BrowseRemoteWorlds.html", 
@@ -80,12 +77,22 @@ function BrowseRemoteWorlds.ShowPage(callbackFunc)
     }
     System.App.Commands.Call("File.MCMLWindowFrame", params);
 
+    Screen:Connect("sizeChanged", BrowseRemoteWorlds, BrowseRemoteWorlds.OnScreenSizeChange, "UniqueConnection");
+
     params._page.OnClose = function()
         BrowseRemoteWorlds.Page  = nil;
         InternetLoadWorld.OnChangeType(1);
+        Screen:Disconnect("sizeChanged", BrowseRemoteWorlds, BrowseRemoteWorlds.OnScreenSizeChange);
     end
    
     BrowseRemoteWorlds.RefreshCurrentServerList();
+end
+
+function BrowseRemoteWorlds:OnScreenSizeChange()
+    local item_width = 255;
+    BrowseRemoteWorlds.itemsPerLine = math.floor((Screen:GetWidth()-50)/item_width);
+    BrowseRemoteWorlds.margin_left = math.floor((Screen:GetWidth() - BrowseRemoteWorlds.itemsPerLine * item_width)/2);
+    BrowseRemoteWorlds.refreshPage(); 
 end
 
 function BrowseRemoteWorlds.GetCurWorldInfo(info_type, world_index)
