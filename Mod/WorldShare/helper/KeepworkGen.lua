@@ -4,8 +4,8 @@ Author(s): big
 Date: 2017.4.24
 Desc: generate KeepWork documentation 
 -------------------------------------------------------
-NPL.load("(gl)Mod/WorldShare/helper/KeepworkGen.lua");
-local KeepworkGen = commonlib.gettable("Mod.WorldShare.helper.KeepworkGen");
+NPL.load("(gl)Mod/WorldShare/helper/KeepworkGen.lua")
+local KeepworkGen = commonlib.gettable("Mod.WorldShare.helper.KeepworkGen")
 -------------------------------------------------------
 ]]
 
