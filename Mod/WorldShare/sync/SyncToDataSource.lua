@@ -13,6 +13,7 @@ NPL.load("(gl)Mod/WorldShare/sync/SyncGUI.lua")
 NPL.load("(gl)Mod/WorldShare/store/Global.lua")
 NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 NPL.load("(gl)Mod/WorldShare/login/LoginWorldList.lua")
+NPL.load("(gl)Mod/WorldShare/helper/KeepworkGen.lua")
 
 local SyncGUI = commonlib.gettable("Mod.WorldShare.sync.SyncGUI")
 local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain")
@@ -21,6 +22,7 @@ local GlobalStore = commonlib.gettable("Mod.WorldShare.store.Global")
 local LocalService = commonlib.gettable("Mod.WorldShare.service.LocalService")
 local LoginWorldList = commonlib.gettable("Mod.WorldShare.login.LoginWorldList")
 local Utils = commonlib.gettable("Mod.WorldShare.helper.Utils")
+local KeepworkGen = commonlib.gettable("Mod.WorldShare.helper.KeepworkGen")
 
 local SyncToDataSource = commonlib.gettable("Mod.WorldShare.sync.SyncToDataSource")
 
