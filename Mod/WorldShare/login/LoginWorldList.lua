@@ -125,7 +125,6 @@ end
 
 function LoginWorldList.RefreshCurrentServerList(callback)
     LoginMain.setPageRefreshing(true)
-
     if (not LoginUserInfo.IsSignedIn()) then
         LoginWorldList.getLocalWorldList(
             function()
@@ -133,7 +132,7 @@ function LoginWorldList.RefreshCurrentServerList(callback)
                     function()
                         LoginWorldList.UpdateWorldList()
                         LoginMain.setPageRefreshing(false)
-
+    
                         if (type(callback) == "function") then
                             callback()
                         end
@@ -448,22 +447,26 @@ function LoginWorldList.updateWorldInfo(worldIndex, callback)
     end
 
     local selectWorld = compareWorldList[worldIndex]
-    GlobalStore.set("selectWorld", selectWorld)
-    GlobalStore.set("worldIndex", worldIndex)
+    
+    if(selectWorld) then
+        local foldername = {}
 
-    local foldername = {}
+        GlobalStore.set("selectWorld", selectWorld)
+        GlobalStore.set("worldIndex", worldIndex)
 
-    foldername.utf8 = selectWorld.foldername
-    foldername.default = Encoding.Utf8ToDefault(foldername.utf8)
-    foldername.base32 = GitEncoding.base32(foldername.utf8)
+        foldername.utf8 = selectWorld.foldername
+        foldername.default = Encoding.Utf8ToDefault(foldername.utf8)
+        foldername.base32 = GitEncoding.base32(foldername.utf8)
+    
 
-    local worldDir = {}
+        local worldDir = {}
 
-    worldDir.utf8 = format("%s/%s/", SyncMain.GetWorldFolderFullPath(), foldername.utf8)
-    worldDir.default = format("%s/%s/", SyncMain.GetWorldFolderFullPath(), foldername.default)
+        worldDir.utf8 = format("%s/%s/", SyncMain.GetWorldFolderFullPath(), foldername.utf8)
+        worldDir.default = format("%s/%s/", SyncMain.GetWorldFolderFullPath(), foldername.default)
 
-    GlobalStore.set("foldername", foldername)
-    GlobalStore.set("worldDir", worldDir)
+        GlobalStore.set("foldername", foldername)
+        GlobalStore.set("worldDir", worldDir)
+    end
 
     if (type(callback) == "function") then
         callback()
