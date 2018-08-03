@@ -40,7 +40,7 @@ function SyncToDataSource:init()
     end
 
     if (not self.worldDir or not self.worldDir.default or self.worldDir.default == "") then
-        _guihelper.MessageBox(L "上传失败，将使用离线模式，原因：上传目录为空")
+        _guihelper.MessageBox(L"上传失败，将使用离线模式，原因：上传目录为空")
         return false
     end
 
@@ -55,7 +55,7 @@ function SyncToDataSource:init()
         self.foldername.base32,
         function(projectId)
             if (not projectId) then
-                _guihelper.MessageBox(L "数据源创建失败")
+                _guihelper.MessageBox(L"数据源创建失败")
                 SyncGUI.closeWindow()
                 return false
             end
@@ -73,7 +73,7 @@ function SyncToDataSource:syncToDataSource()
     self.compareListIndex = 1
     self.compareListTotal = 0
 
-    SyncGUI:updateDataBar(0, 0, L "正在对比文件列表...")
+    SyncGUI:updateDataBar(0, 0, L"正在对比文件列表...")
 
     local function handleSyncToDataSource(data, err)
         self.dataSourceFiles = data
@@ -232,7 +232,7 @@ function SyncToDataSource:HandleCompareList()
         SyncGUI:updateDataBar(
             self.compareListIndex,
             self.compareListTotal,
-            format(L "%s 处理完成", currentItem.file),
+            format(L"%s 处理完成", currentItem.file),
             self.finish
         )
 
@@ -284,7 +284,7 @@ function SyncToDataSource:uploadOne(file, callback)
     SyncGUI:updateDataBar(
         self.compareListIndex,
         self.compareListTotal,
-        format(L "%s （%s） 上传中", currentItem.filename, Utils.formatFileSize(currentItem.filesize, "KB"))
+        format(L"%s （%s） 上传中", currentItem.filename, Utils.formatFileSize(currentItem.filesize, "KB"))
     )
 
     GitService:new():upload(
@@ -304,7 +304,7 @@ function SyncToDataSource:uploadOne(file, callback)
                 SyncGUI:updateDataBar(
                     self.compareListIndex,
                     self.compareListTotal,
-                    format(L "%s 上传失败", currentItem.filename)
+                    format(L"%s 上传失败", currentItem.filename)
                 )
             end
         end
@@ -319,7 +319,7 @@ function SyncToDataSource:updateOne(file, callback)
     SyncGUI:updateDataBar(
         self.compareListIndex,
         self.compareListTotal,
-        format(L "%s （%s） 更新中", currentLocalItem.filename, Utils.formatFileSize(currentLocalItem.filesize, "KB"))
+        format(L"%s （%s） 更新中", currentLocalItem.filename, Utils.formatFileSize(currentLocalItem.filesize, "KB"))
     )
 
     if (currentLocalItem.sha1 == currentRemoteItem.sha and currentLocalItem.filename ~= "revision.xml") then
@@ -342,13 +342,13 @@ function SyncToDataSource:updateOne(file, callback)
                     callback()
                 end
             else
-                _guihelper.MessageBox(L "更新失败")
+                _guihelper.MessageBox(L"更新失败")
                 self:SetBroke(true)
 
                 SyncGUI:updateDataBar(
                     self.compareListIndex,
                     self.compareListTotal,
-                    format(L "%s 更新失败", currentItem.filename)
+                    format(L"%s 更新失败", currentItem.filename)
                 )
             end
         end
@@ -362,7 +362,7 @@ function SyncToDataSource:deleteOne(file, callback)
     SyncGUI:updateDataBar(
         self.compareListIndex,
         self.compareListTotal,
-        format(L "%s 删除中", currentItem.path)
+        format(L"%s 删除中", currentItem.path)
     )
 
     GitService:new():deleteFile(
@@ -376,13 +376,13 @@ function SyncToDataSource:deleteOne(file, callback)
                     callback()
                 end
             else
-                _guihelper.MessageBox(L "删除失败")
+                _guihelper.MessageBox(L"删除失败")
                 self:SetBroke(true)
 
                 SyncGUI:updateDataBar(
                     self.compareListIndex,
                     self.compareListTotal,
-                    format(L "%s 删除失败", currentItem.filename)
+                    format(L"%s 删除失败", currentItem.filename)
                 )
             end
         end

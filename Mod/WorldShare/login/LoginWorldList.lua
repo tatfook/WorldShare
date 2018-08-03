@@ -55,9 +55,9 @@ function LoginWorldList.GetCurWorldInfo(info_type, world_index)
             local mode = selected_world["world_mode"]
 
             if (mode == "edit") then
-                return L "创作"
+                return L"创作"
             else
-                return L "参观"
+                return L"参观"
             end
         else
             return selected_world[info_type]
@@ -103,7 +103,7 @@ function LoginWorldList.GetInternetWorldList(callback)
                 BroadcastHelper.PushLabel(
                     {
                         id = "userworlddownload",
-                        label = L "无法下载服务器列表, 请检查网络连接",
+                        label = L"无法下载服务器列表, 请检查网络连接",
                         max_duration = 10000,
                         color = "255 0 0",
                         scaling = 1.1,
@@ -197,6 +197,7 @@ function LoginWorldList.changeRevision(callback)
             value.revision = LocalService:GetZipRevision(value.worldpath)
             value.size = LocalService:GetZipWorldSize(value.worldpath)
             value.foldername = value.Title
+            value.text = value.Title
             value.is_zip = true
             value.remotefile = format("local://%s", value.worldpath)
         end
@@ -206,6 +207,7 @@ function LoginWorldList.changeRevision(callback)
 
     GlobalStore.set("localWorlds", localWorlds)
     GlobalStore.set("compareWorldList", localWorlds)
+    
     LoginMain.refreshPage()
 
     if (callback) then
@@ -217,7 +219,7 @@ function LoginWorldList.selectVersion()
     local selectWorld = GlobalStore.get('selectWorld')
 
     if(selectWorld.status == 1) then
-        _guihelper.MessageBox(L "此世界仅在本地，无法切换版本")
+        _guihelper.MessageBox(L"此世界仅在本地，无法切换版本")
         return false
     end
 
@@ -241,7 +243,7 @@ function LoginWorldList.syncWorldsList(callback)
 
         -- 处理本地网络同时存在 本地不存在 网络存在 的世界
         if (type(remoteWorldsList) ~= "table") then
-            _guihelper.MessageBox(L "获取服务器世界列表错误")
+            _guihelper.MessageBox(L"获取服务器世界列表错误")
             return false
         end
 
@@ -449,16 +451,16 @@ function LoginWorldList.updateWorldInfo(worldIndex, callback)
     local selectWorld = compareWorldList[worldIndex]
     
     if(selectWorld) then
-        local foldername = {}
-
+        
         GlobalStore.set("selectWorld", selectWorld)
         GlobalStore.set("worldIndex", worldIndex)
+        
+        local foldername = {}
 
         foldername.utf8 = selectWorld.foldername
         foldername.default = Encoding.Utf8ToDefault(foldername.utf8)
         foldername.base32 = GitEncoding.base32(foldername.utf8)
     
-
         local worldDir = {}
 
         worldDir.utf8 = format("%s/%s/", SyncMain.GetWorldFolderFullPath(), foldername.utf8)
@@ -515,17 +517,17 @@ end
 
 function LoginWorldList.formatStatus(status)
     if (status == 1) then
-        return L "仅本地"
+        return L"仅本地"
     elseif (status == 2) then
-        return L "仅网络"
+        return L"仅网络"
     elseif (status == 3) then
-        return L "本地版本与远程数据源一致"
+        return L"本地版本与远程数据源一致"
     elseif (status == 4) then
-        return L "本地版本更加新"
+        return L"本地版本更加新"
     elseif (status == 5) then
-        return L "远程版本更加新"
+        return L"远程版本更加新"
     else
-        return L "获取状态中"
+        return L"获取状态中"
     end
 end
 
@@ -550,48 +552,4 @@ function LoginWorldList.formatDatetime(datetime)
     end
 
     return datetime
-end
-
---[[ TODO: this makes paracraft NOT able to run when network is down.
-local OnClickCreateWorld = CreateNewWorld.OnClickCreateWorld;
-
-CreateNewWorld.OnClickCreateWorld = function()
-    LoginMain:sensitiveCheck(function(hasSensitive)
-        if(hasSensitive) then
-            _guihelper.MessageBox(L"世界名字中含有敏感词汇，请重新输入");
-        else
-            OnClickCreateWorld();
-        end
-    end)
-end
-]]
-function LoginWorldList:sensitiveCheck(callback)
-    local new_world_name = CreateNewWorld.page:GetValue("new_world_name")
-
-    if (new_world_name) then
-        HttpRequest:GetUrl(
-            {
-                url = format("%s/api/wiki/models/sensitive_words/query", LoginMain.site),
-                form = {
-                    query = {
-                        name = new_world_name
-                    }
-                },
-                json = true
-            },
-            function(data, err)
-                if (data and type(data) == "table") then
-                    if (data.data.total ~= 0) then
-                        if (callback and type(callback) == "function") then
-                            callback(true)
-                        end
-                    else
-                        if (callback and type(callback) == "function") then
-                            callback(false)
-                        end
-                    end
-                end
-            end
-        )
-    end
 end

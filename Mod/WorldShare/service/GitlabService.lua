@@ -49,7 +49,7 @@ function GitlabService:checkSpecialCharacter(filename)
         if (string.find(_filename, item)) then
             commonlib.TimerManager.SetTimeout(
                 function()
-                    _guihelper.MessageBox(format(L "%s文件包含了特殊字符或空格，请重命名文件，否则无法上传。", filename))
+                    _guihelper.MessageBox(format(L"%s文件包含了特殊字符或空格，请重命名文件，否则无法上传。", filename))
                 end,
                 500
             )
@@ -253,7 +253,7 @@ function GitlabService:getTree(projectId, commitId, callback)
 
                     getSubTree()
                 else
-                    _guihelper.MessageBox(L "获取sha文件失败")
+                    _guihelper.MessageBox(L"获取sha文件失败")
                 end
             end
         end

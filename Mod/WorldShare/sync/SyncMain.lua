@@ -58,24 +58,28 @@ function SyncMain:SyncWillEnterWorld()
     -- 没有登陆则直接使用离线模式
     local enterWorld = GlobalStore.get("enterWorld")
 
-    if (not enterWorld) then
-        self:CommandEnter()
+    function compare()
+        if (LoginUserInfo.IsSignedIn()) then
+            GlobalStore.remove("ShareMode")
+            SyncCompare:syncCompare()
+        end
     end
 
-    if (LoginUserInfo.IsSignedIn()) then
-        SyncCompare:syncCompare()
+    if (not enterWorld) then
+        self:CommandEnter(compare)
+    else
+        compare()
     end
 end
 
-function SyncMain:CommandEnter()
-    GlobalStore.set("IsEnterWorld", true)
-    local world = self:GetWorldDirectory()
-    local foldername = {}
+function SyncMain:SyncWillLeavaWorld()
+    GlobalStore.remove("enterWorld")
+end
 
-    local world = string.gsub(world, "worlds/DesignHouse/", "")
-    world = string.gsub(world, "worlds\\DesignHouse\\", "")
-    world = string.gsub(world, "/", "")
-    world = string.gsub(world, "\\", "")
+function SyncMain:CommandEnter(callback)
+    GlobalStore.set("IsEnterWorld", true)
+    local world = self:GetWorldDefaultName()
+    local foldername = {}
 
     foldername.default = world
     foldername.utf8 = Encoding.DefaultToUtf8(foldername.default)
@@ -96,7 +100,7 @@ function SyncMain:CommandEnter()
             end
         end
 
-        if(currentWorld) then
+        if (currentWorld) then
             worldDir.default = format("%s/", currentWorld.worldpath)
             worldDir.utf8 = Encoding.DefaultToUtf8(worldDir.default)
 
@@ -108,13 +112,21 @@ function SyncMain:CommandEnter()
             worldTag.size = filesize
             LocalService:SetTag(worldDir.default, worldTag)
             GlobalStore.set("worldTag", worldTag)
-            
+
             GlobalStore.set("selectWorld", currentWorld)
             GlobalStore.set("enterWorld", currentWorld)
         end
     end
 
-    LoginWorldList.RefreshCurrentServerList(handleSelectWorld)
+    LoginWorldList.RefreshCurrentServerList(
+        function()
+            handleSelectWorld()
+
+            if (type(callback) == "function") then
+                callback()
+            end
+        end
+    )
 end
 
 function SyncMain:GetWorldFolder()
@@ -125,8 +137,21 @@ function SyncMain:GetWorldFolderFullPath()
     return LocalLoadWorld.GetWorldFolderFullPath()
 end
 
-function SyncMain:GetWorldDirectory()
-    return ParaWorld.GetWorldDirectory()
+function SyncMain:GetWorldDefaultName()
+    local originWorldPath = ParaWorld.GetWorldDirectory()
+
+    world = string.match(originWorldPath, "worlds/DesignHouse/.+")
+
+    if(not world) then
+        world = string.match(originWorldPath, "worlds\\DesignHouse\\.+")
+    end
+
+    world = string.gsub(world, "worlds/DesignHouse/", "")
+    world = string.gsub(world, "worlds\\DesignHouse\\", "")
+    world = string.gsub(world, "/", "")
+    world = string.gsub(world, "\\", "")
+
+    return world
 end
 
 function SyncMain.setSyncPage()
@@ -196,7 +221,7 @@ function SyncMain:RefreshKeepworkList(callback)
 
     local function handleKeepworkList(data, err)
         if (not data or not data[1]) then
-            _guihelper.MessageBox(L "获取Commit列表失败")
+            _guihelper.MessageBox(L"获取Commit列表失败")
             return false
         end
 
@@ -205,7 +230,7 @@ function SyncMain:RefreshKeepworkList(callback)
         local lastCommitSha = lastCommits.id
 
         if (lastCommitFile ~= "revision.xml") then
-            _guihelper.MessageBox(L "上一次同步到数据源同步失败，请重新同步世界到数据源")
+            _guihelper.MessageBox(L"上一次同步到数据源同步失败，请重新同步世界到数据源")
             return false
         end
 
@@ -266,7 +291,7 @@ function SyncMain:RefreshKeepworkList(callback)
                     worldInfo,
                     function(data, err)
                         if (err ~= 200 or type(data) ~= "table" or data.error.id ~= 0) then
-                            _guihelper.MessageBox(L "更新服务器列表失败")
+                            _guihelper.MessageBox(L"更新服务器列表失败")
                             return false
                         end
 

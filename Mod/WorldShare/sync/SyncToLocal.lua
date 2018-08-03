@@ -39,13 +39,13 @@ function SyncToLocal:init(callback)
     local commitId = GlobalStore.get("commitId")
 
     if (not self.worldDir or not self.worldDir.default or self.worldDir.default == "") then
-        _guihelper.MessageBox(L "下载失败，原因：下载目录为空")
+        _guihelper.MessageBox(L"下载失败，原因：下载目录为空")
         return false
     end
 
     local function handleProjectId(projectId)
         if (not projectId) then
-            _guihelper.MessageBox(L "数据源异常")
+            _guihelper.MessageBox(L"数据源异常")
             SyncGUI.closeWindow()
             return false
         end
@@ -76,7 +76,7 @@ function SyncToLocal:syncToLocal()
     self.compareListIndex = 1
     self.compareListTotal = 0
 
-    SyncGUI:updateDataBar(0, 0, L "正在对比文件列表...")
+    SyncGUI:updateDataBar(0, 0, L"正在对比文件列表...")
 
     local function handleSyncToLocal(data, err)
         self.localFiles = LocalService:new():LoadFiles(self.worldDir.default)
@@ -179,7 +179,7 @@ function SyncToLocal:HandleCompareList()
         SyncGUI:updateDataBar(
             self.compareListIndex,
             self.compareListTotal,
-            format(L "%s 处理完成", currentItem.file),
+            format(L"%s 处理完成", currentItem.file),
             self.finish
         )
 
@@ -236,7 +236,7 @@ function SyncToLocal:downloadOne(file, callback)
             SyncGUI:updateDataBar(
                 self.compareListIndex,
                 self.compareListTotal,
-                format(L "%s （%s） 更新中", currentRemoteItem.path, Utils.formatFileSize(size, "KB"))
+                format(L"%s （%s） 更新中", currentRemoteItem.path, Utils.formatFileSize(size, "KB"))
             )
 
             LocalService:write(self.foldername.default, Encoding.Utf8ToDefault(currentRemoteItem.path), content)
@@ -265,7 +265,7 @@ function SyncToLocal:updateOne(file, callback)
         SyncGUI:updateDataBar(
             self.compareListIndex,
             self.compareListTotal,
-            format(L "%s （%s） 更新中", currentRemoteItem.path, Utils.formatFileSize(size, "KB"))
+            format(L"%s （%s） 更新中", currentRemoteItem.path, Utils.formatFileSize(size, "KB"))
         )
 
         LocalService:write(self.foldername.default, Encoding.Utf8ToDefault(currentRemoteItem.path), content)
@@ -285,7 +285,7 @@ function SyncToLocal:deleteOne(file, callback)
     SyncGUI:updateDataBar(
         self.compareListIndex,
         self.compareListTotal,
-        format(L "%s （%s） 更新中", currentLocalItem.filename, Utils.formatFileSize(currentLocalItem.size, "KB"))
+        format(L"%s （%s） 更新中", currentLocalItem.filename, Utils.formatFileSize(currentLocalItem.size, "KB"))
     )
 
     LocalService:delete(self.foldername.default, Encoding.Utf8ToDefault(currentLocalItem.filename))
@@ -308,7 +308,7 @@ function SyncToLocal:DownloadZIP()
         self.localFiles = LocalService:new():LoadFiles(self.worldDir.default)
 
         if (#self.localFiles ~= 0) then
-            _guihelper.MessageBox(L "本地数据错误")
+            _guihelper.MessageBox(L"本地数据错误")
             return false
         end
 

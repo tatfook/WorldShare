@@ -57,7 +57,7 @@ function DeleteWorld.DeleteWorld()
         local enterWorld = GlobalStore.get("enterWorld")
 
         if(enterWorld.foldername == selectWorld.foldername) then
-            _guihelper.MessageBox(L "不能刪除正在编辑的世界")
+            _guihelper.MessageBox(L"不能刪除正在编辑的世界")
             return
         end
     end
@@ -69,7 +69,7 @@ function DeleteWorld.DeleteLocal()
     local selectWorld = GlobalStore.get("selectWorld")
 
     if (not selectWorld) then
-        _guihelper.MessageBox(L "请先选择世界")
+        _guihelper.MessageBox(L"请先选择世界")
         return
     end
 
@@ -84,7 +84,7 @@ function DeleteWorld.DeleteLocal()
                     callback()
                 end
             else
-                _guihelper.MessageBox(L "无法删除可能您没有足够的权限")
+                _guihelper.MessageBox(L"无法删除可能您没有足够的权限")
             end
         else
             if (GameLogic.RemoveWorldFileWatcher) then
@@ -96,7 +96,7 @@ function DeleteWorld.DeleteLocal()
                     callback(foldername)
                 end
             else
-                _guihelper.MessageBox(L "无法删除可能您没有足够的权限")
+                _guihelper.MessageBox(L"无法删除可能您没有足够的权限")
             end
         end
 
@@ -106,7 +106,7 @@ function DeleteWorld.DeleteLocal()
 
     if (selectWorld.status ~= 2) then
         _guihelper.MessageBox(
-            format(L "确定删除本地世界:%s?", selectWorld.text or ""),
+            format(L"确定删除本地世界:%s?", selectWorld.text or ""),
             function(res)
                 if (res and res == _guihelper.DialogResult.Yes) then
                     delete()
@@ -124,7 +124,7 @@ end
 --     if (ParaIO.DeleteFile(zipPath)) then
 --         LoginWorldList.RefreshCurrentServerList()
 --     else
---         _guihelper.MessageBox(L "无法删除可能您没有足够的权限")
+--         _guihelper.MessageBox(L"无法删除可能您没有足够的权限")
 --     end
 
 --     DeleteWorld.closeDeletePage()
@@ -145,7 +145,7 @@ function DeleteWorld.DeleteGitlab()
     local foldername = selectWorld.foldername
 
     _guihelper.MessageBox(
-        format(L "确定删除Gitlab远程世界:%s?", foldername or ""),
+        format(L"确定删除Gitlab远程世界:%s?", foldername or ""),
         function(res)
             DeleteWorld.closeDeletePage()
             LoginMain.setPageRefreshing(true)
@@ -200,7 +200,7 @@ function DeleteWorld.DeleteGithub(password)
     --         local basicAuthData = data
     --         AuthToken = basicAuthData.token
     --         _guihelper.MessageBox(
-    --             format(L "确定删除Gihub远程世界:%s?", foldername or ""),
+    --             format(L"确定删除Gihub远程世界:%s?", foldername or ""),
     --             function(res)
     --                 SyncMain.DeletePage:CloseWindow()
     --                 if (res and res == 6) then
@@ -212,7 +212,7 @@ function DeleteWorld.DeleteGithub(password)
     --                             if (err == 204) then
     --                                 SyncMain.deleteKeepworkWorldsRecord()
     --                             else
-    --                                 _guihelper.MessageBox(L "远程仓库不存在，记录将直接被删除")
+    --                                 _guihelper.MessageBox(L"远程仓库不存在，记录将直接被删除")
     --                                 SyncMain.deleteKeepworkWorldsRecord()
     --                             end
     --                         end

@@ -61,7 +61,7 @@ function ShareWorld.ShowPage()
     local enterWorld = GlobalStore.get("enterWorld")
 
     if(not enterWorld) then
-        _guihelper.MessageBox(L "此世界不支持分享")
+        _guihelper.MessageBox(L"此世界不支持分享")
         return false
     end
 
@@ -137,7 +137,7 @@ end
 function ShareWorld.shareNow()
     if (ShareWorld.GetRemoteRevision() > ShareWorld.GetCurrentRevision()) then
         _guihelper.MessageBox(
-            L "当前本地版本小于远程版本，是否继续上传？",
+            L"当前本地版本小于远程版本，是否继续上传？",
             function(res)
                 if (res and res == 6) then
                     SyncMain:syncToDataSource()

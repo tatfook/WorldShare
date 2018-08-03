@@ -28,17 +28,17 @@ local LoginWorldList = commonlib.gettable("Mod.WorldShare.login.LoginWorldList")
 
 local LoginUserInfo = commonlib.gettable("Mod.WorldShare.login.LoginUserInfo")
 
-local ONLINE = "http://keepwork.com"
-local STAGE = "http://release.keepwork.com"
-local RELEASE = "http://stage.keepwork.com"
+local ONLINE = "https://keepwork.com"
+local STAGE = "https://release.keepwork.com"
+local RELEASE = "https://stage.keepwork.com"
 local LOCAL = "http://localhost:8099"
 
 LoginUserInfo.site = ONLINE
 LoginUserInfo.serverLists = {
-    {value = ONLINE, name = ONLINE, text = L "使用KeepWork登录", selected = true},
-    {value = STAGE, name = STAGE, text = L "使用stage登录"},
-    {value = RELEASE, name = RELEASE, text = L "使用release登录"},
-    {value = LOCAL, name = LOCAL, text = L "使用本地服务登录"}
+    {value = ONLINE, name = ONLINE, text = L"使用KeepWork登录", selected = true},
+    {value = STAGE, name = STAGE, text = L"使用stage登录"},
+    {value = RELEASE, name = RELEASE, text = L"使用release登录"},
+    {value = LOCAL, name = LOCAL, text = L"使用本地服务登录"}
 }
 LoginUserInfo.ignore_auto_login = nil
 LoginUserInfo.hasExplicitLogin = nil
@@ -65,7 +65,7 @@ function loginRequest(url, params, headers, callback)
         function()
             if (not timeout) then
                 timeout = true
-                _guihelper.MessageBox(L "链接超时")
+                _guihelper.MessageBox(L"链接超时")
                 LoginMain.closeMessageInfo()
             end
         end,
@@ -82,7 +82,7 @@ function loginRequest(url, params, headers, callback)
         function(data, err)
             if (not timeout) then
                 if (err == 503) then
-                    _guihelper.MessageBox(L "keepwork正在维护中，我们马上回来")
+                    _guihelper.MessageBox(L"keepwork正在维护中，我们马上回来")
                     LoginMain.closeMessageInfo()
 
                     timeout = true
@@ -136,7 +136,7 @@ function loginResponse(page, response, err, callback)
                     },
                     function(data, err)
                         if (not data) then
-                            _guihelper.MessageBox(L "数据源不存在，请联系管理员")
+                            _guihelper.MessageBox(L"数据源不存在，请联系管理员")
                             LoginMain.closeMessageInfo()
                             return
                         end
@@ -194,7 +194,7 @@ function loginResponse(page, response, err, callback)
                         end
 
                         if (not dataSourceSetting) then
-                            _guihelper.MessageBox(L "数据源配置文件不存在")
+                            _guihelper.MessageBox(L"数据源配置文件不存在")
                             LoginMain.closeMessageInfo()
                             return
                         end
@@ -203,8 +203,8 @@ function loginResponse(page, response, err, callback)
                             dataSourceToken = defaultSiteDataSource["dataSourceToken"], -- 数据源Token
                             dataSourceUsername = defaultSiteDataSource["dataSourceUsername"], -- 数据源用户名
                             dataSourceType = defaultSiteDataSource["type"], -- 数据源类型
-                            apiBaseUrl = defaultSiteDataSource["apiBaseUrl"], -- 数据源api
-                            rawBaseUrl = defaultSiteDataSource["rawBaseUrl"], -- 数据源raw
+                            apiBaseUrl = defaultSiteDataSource["apiBaseUrl"] and string.gsub(defaultSiteDataSource['apiBaseUrl'], 'http://', 'https://') or '', -- 数据源api
+                            rawBaseUrl = defaultSiteDataSource["rawBaseUrl"] and string.gsub(defaultSiteDataSource['rawBaseUrl'], 'http://', 'https://') or '', -- 数据源raw
                             keepWorkDataSource = defaultSiteDataSource["projectName"], -- keepwork仓名
                             keepWorkDataSourceId = defaultSiteDataSource["projectId"] -- keepwork仓ID
                         }
@@ -230,7 +230,7 @@ function loginResponse(page, response, err, callback)
 
                                 if (not site) then
                                     LoginMain.closeMessageInfo()
-                                    _guihelper.MessageBox(L "检查站点失败")
+                                    _guihelper.MessageBox(L"检查站点失败")
                                     return
                                 end
 
@@ -282,11 +282,11 @@ function loginResponse(page, response, err, callback)
             end
         else
             LoginMain.closeMessageInfo()
-            _guihelper.MessageBox(L "用户名或者密码错误")
+            _guihelper.MessageBox(L"用户名或者密码错误")
         end
     else
         LoginMain.closeMessageInfo()
-        _guihelper.MessageBox(L "服务器连接失败")
+        _guihelper.MessageBox(L"服务器连接失败")
     end
 end
 
@@ -315,7 +315,7 @@ end
 function LoginUserInfo.CheckoutVerified()
     if (LoginUserInfo.IsSignedIn() and not LoginUserInfo.isVerified) then
         _guihelper.MessageBox(
-            L "您需要到keepwork官网进行实名认证，认证成功后需重启paracraft即可正常操作，是否现在认证？",
+            L"您需要到keepwork官网进行实名认证，认证成功后需重启paracraft即可正常操作，是否现在认证？",
             function(res)
                 if (res and res == _guihelper.DialogResult.Yes) then
                     ParaGlobal.ShellExecute("open", format("%s/wiki/user_center", LoginUserInfo.site), "", "", 1)
@@ -347,16 +347,16 @@ function LoginUserInfo.LoginAction(page, callback)
     page:SetNodeValue("password", password)
 
     if (account == nil or account == "") then
-        _guihelper.MessageBox(L "账号不能为空")
+        _guihelper.MessageBox(L"账号不能为空")
         return
     end
 
     if (password == nil or password == "") then
-        _guihelper.MessageBox(L "密码不能为空")
+        _guihelper.MessageBox(L"密码不能为空")
         return
     end
 
-    LoginMain.showMessageInfo(L "正在登陆，请稍后...")
+    LoginMain.showMessageInfo(L"正在登陆，请稍后...")
 
     LoginUserInfo.LoginActionApi(
         account,
@@ -419,7 +419,7 @@ function LoginUserInfo.SaveQQ()
 end
 
 function LoginUserInfo.GetUserNickName()
-    return System.User.NickName or L "匿名"
+    return System.User.NickName or L"匿名"
 end
 
 function LoginUserInfo.GetPasswordFile()
@@ -490,7 +490,7 @@ function LoginUserInfo.checkDoAutoSignin(callback)
     local info = LoginUserInfo.LoadSigninInfo()
     if (info) then
         if (info.autoLogin and info.account and info.password) then
-            LoginMain.showMessageInfo(L "正在登陆，请稍后...")
+            LoginMain.showMessageInfo(L"正在登陆，请稍后...")
             LoginUserInfo.LoginActionApi(
                 info.account,
                 info.password,
@@ -664,7 +664,7 @@ function LoginUserInfo.LoginWithTokenApi(callback)
     local usertoken = urlProtocol:match('usertoken="([%S]+)"')
 
     if (type(usertoken) == "string" and #usertoken > 0) then
-        LoginMain.showMessageInfo(L "正在登陆，请稍后...")
+        LoginMain.showMessageInfo(L"正在登陆，请稍后...")
 
         local url = format("%s/api/wiki/models/user/getProfile", LoginUserInfo.site)
 
