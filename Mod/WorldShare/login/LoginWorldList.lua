@@ -197,6 +197,7 @@ function LoginWorldList.changeRevision(callback)
             value.revision = LocalService:GetZipRevision(value.worldpath)
             value.size = LocalService:GetZipWorldSize(value.worldpath)
             value.foldername = value.Title
+            value.text = value.Title
             value.is_zip = true
             value.remotefile = format("local://%s", value.worldpath)
         end
@@ -206,6 +207,7 @@ function LoginWorldList.changeRevision(callback)
 
     GlobalStore.set("localWorlds", localWorlds)
     GlobalStore.set("compareWorldList", localWorlds)
+    
     LoginMain.refreshPage()
 
     if (callback) then
@@ -449,16 +451,16 @@ function LoginWorldList.updateWorldInfo(worldIndex, callback)
     local selectWorld = compareWorldList[worldIndex]
     
     if(selectWorld) then
-        local foldername = {}
-
+        
         GlobalStore.set("selectWorld", selectWorld)
         GlobalStore.set("worldIndex", worldIndex)
+        
+        local foldername = {}
 
         foldername.utf8 = selectWorld.foldername
         foldername.default = Encoding.Utf8ToDefault(foldername.utf8)
         foldername.base32 = GitEncoding.base32(foldername.utf8)
     
-
         local worldDir = {}
 
         worldDir.utf8 = format("%s/%s/", SyncMain.GetWorldFolderFullPath(), foldername.utf8)
@@ -550,48 +552,4 @@ function LoginWorldList.formatDatetime(datetime)
     end
 
     return datetime
-end
-
---[[ TODO: this makes paracraft NOT able to run when network is down.
-local OnClickCreateWorld = CreateNewWorld.OnClickCreateWorld;
-
-CreateNewWorld.OnClickCreateWorld = function()
-    LoginMain:sensitiveCheck(function(hasSensitive)
-        if(hasSensitive) then
-            _guihelper.MessageBox(L"世界名字中含有敏感词汇，请重新输入");
-        else
-            OnClickCreateWorld();
-        end
-    end)
-end
-]]
-function LoginWorldList:sensitiveCheck(callback)
-    local new_world_name = CreateNewWorld.page:GetValue("new_world_name")
-
-    if (new_world_name) then
-        HttpRequest:GetUrl(
-            {
-                url = format("%s/api/wiki/models/sensitive_words/query", LoginMain.site),
-                form = {
-                    query = {
-                        name = new_world_name
-                    }
-                },
-                json = true
-            },
-            function(data, err)
-                if (data and type(data) == "table") then
-                    if (data.data.total ~= 0) then
-                        if (callback and type(callback) == "function") then
-                            callback(true)
-                        end
-                    else
-                        if (callback and type(callback) == "function") then
-                            callback(false)
-                        end
-                    end
-                end
-            end
-        )
-    end
 end

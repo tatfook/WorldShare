@@ -115,7 +115,7 @@ function SyncCompare:compareRevision(callback)
             LoginMain.closeMessageInfo()
             return false
         end
-
+        
         self:compare(callback)
     else
         LoginUserInfo.LoginWithTokenApi(
@@ -135,19 +135,11 @@ function SyncCompare:compare(callback)
     local remoteRevision = 0
     local currentRevision = WorldRevision:new():init(worldDir.default):Checkout()
 
-    local localFiles = LocalService:new():LoadFiles(worldDir.default)
-    local hasRevision = false
-
-    GlobalStore.set("localFiles", localFiles)
-
-    for key, value in ipairs(localFiles) do
-        if (string.lower(value.filename) == "revision.xml") then
-            hasRevision = true
-            break
-        end
+    if (not worldDir) then
+        return false
     end
 
-    if (hasRevision) then
+    if (self:HasRevision()) then
         local function handleRevision(data, err)
             if (err == 0 or err == 502) then
                 _guihelper.MessageBox(L "网络错误")
@@ -219,23 +211,36 @@ function SyncCompare:compare(callback)
 
         GitService:new():getWorldRevision(foldername, handleRevision)
     else
-        if (IsEnterWorld) then
-            CommandManager:RunCommand("/save")
+        _guihelper.MessageBox(L "本地世界沒有版本信息")
+        SyncCompare:SetFinish(true)
+        LoginMain.closeMessageInfo()
 
-            SyncCompare:SetFinish(true)
+        if (type(callback) == "function") then
+            callback()
+        end
 
-            if (type(callback) == "function") then
-                callback(TRYAGAIN)
-            end
-        else
-            _guihelper.MessageBox(L "本地世界沒有版本信息")
-            SyncCompare:SetFinish(true)
+        return false
+    end
+end
 
-            if (type(callback) == "function") then
-                callback()
-            end
+function SyncCompare:HasRevision()
+    local worldDir = GlobalStore.get("worldDir")
 
-            return false
+    if(not worldDir or not worldDir.default) then
+        return false
+    end
+
+    local localFiles = LocalService:new():LoadFiles(worldDir.default)
+    local hasRevision = false
+
+    GlobalStore.set("localFiles", localFiles)
+
+    for key, file in ipairs(localFiles) do
+        if (string.lower(file.filename) == "revision.xml") then
+            hasRevision = true
+            break
         end
     end
+
+    return hasRevision
 end

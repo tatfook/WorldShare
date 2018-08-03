@@ -28,9 +28,9 @@ local LoginWorldList = commonlib.gettable("Mod.WorldShare.login.LoginWorldList")
 
 local LoginUserInfo = commonlib.gettable("Mod.WorldShare.login.LoginUserInfo")
 
-local ONLINE = "http://keepwork.com"
-local STAGE = "http://release.keepwork.com"
-local RELEASE = "http://stage.keepwork.com"
+local ONLINE = "https://keepwork.com"
+local STAGE = "https://release.keepwork.com"
+local RELEASE = "https://stage.keepwork.com"
 local LOCAL = "http://localhost:8099"
 
 LoginUserInfo.site = ONLINE
@@ -203,8 +203,8 @@ function loginResponse(page, response, err, callback)
                             dataSourceToken = defaultSiteDataSource["dataSourceToken"], -- 数据源Token
                             dataSourceUsername = defaultSiteDataSource["dataSourceUsername"], -- 数据源用户名
                             dataSourceType = defaultSiteDataSource["type"], -- 数据源类型
-                            apiBaseUrl = defaultSiteDataSource["apiBaseUrl"], -- 数据源api
-                            rawBaseUrl = defaultSiteDataSource["rawBaseUrl"], -- 数据源raw
+                            apiBaseUrl = defaultSiteDataSource["apiBaseUrl"] and string.gsub(defaultSiteDataSource['apiBaseUrl'], 'http://', 'https://') or '', -- 数据源api
+                            rawBaseUrl = defaultSiteDataSource["rawBaseUrl"] and string.gsub(defaultSiteDataSource['rawBaseUrl'], 'http://', 'https://') or '', -- 数据源raw
                             keepWorkDataSource = defaultSiteDataSource["projectName"], -- keepwork仓名
                             keepWorkDataSourceId = defaultSiteDataSource["projectId"] -- keepwork仓ID
                         }

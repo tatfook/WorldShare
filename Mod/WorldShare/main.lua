@@ -11,12 +11,14 @@ local WorldShare = commonlib.gettable("Mod.WorldShare")
 ]]
 NPL.load("(gl)Mod/WorldShare/sync/SyncMain.lua")
 NPL.load("(gl)Mod/WorldShare/login/LoginMain.lua")
+NPL.load("(gl)Mod/WorldShare/login/CreateWorld.lua")
 NPL.load("(gl)Mod/WorldShare/store/Global.lua")
 
 local GameLogic = commonlib.gettable("MyCompany.Aries.Game.GameLogic")
 local LoginMain = commonlib.gettable("Mod.WorldShare.login.LoginMain")
 local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain")
 local GlobalStore = commonlib.gettable("Mod.WorldShare.store.Global")
+local CreateWorld = commonlib.gettable("Mod.WorldShare.login.CreateWorld")
 
 local WorldShare = commonlib.inherit(commonlib.gettable("Mod.ModBase"), commonlib.gettable("Mod.WorldShare"))
 
@@ -70,6 +72,15 @@ function WorldShare:init()
             return false
         end
     )
+
+    -- replca implement or replace create new world event
+    GameLogic.GetFilters():add_filter(
+        "OnClickCreateWorld",
+        function()
+            CreateWorld.OnClickCreateWorld()
+            return false
+        end
+    )
 end
 
 function WorldShare:OnInitDesktop()
@@ -79,9 +90,11 @@ function WorldShare:OnLogin()
 end
 
 function WorldShare:OnWorldLoad()
-    GlobalStore.set('IsEnterWorld', true)
-    SyncMain:SyncWillEnterWorld()
-end
-
-function WorldShare:OnDestroy()
+    GlobalStore.set("IsEnterWorld", true)
+    LoginMain.ClosePage()
+    CreateWorld:CheckRevision(
+        function()
+            SyncMain:SyncWillEnterWorld()
+        end
+    )
 end

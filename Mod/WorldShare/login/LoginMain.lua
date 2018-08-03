@@ -19,6 +19,7 @@ NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 NPL.load("(gl)Mod/WorldShare/login/LoginUserinfo.lua")
 NPL.load("(gl)Mod/WorldShare/login/LoginWorldList.lua")
 NPL.load("(gl)script/apps/Aries/Creator/Game/Login/LocalLoadWorld.lua")
+NPL.load("(gl)script/apps/Aries/Creator/Game/Login/CreateNewWorld.lua");
 
 local WorldShare = commonlib.gettable("Mod.WorldShare")
 local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
@@ -29,6 +30,7 @@ local Utils = commonlib.gettable("Mod.WorldShare.helper.Utils")
 local LoginUserInfo = commonlib.gettable("Mod.WorldShare.login.LoginUserInfo")
 local LoginWorldList = commonlib.gettable("Mod.WorldShare.login.LoginWorldList")
 local LocalLoadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalLoadWorld")
+local CreateNewWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.CreateNewWorld")
 
 local LoginMain = commonlib.gettable("Mod.WorldShare.login.LoginMain")
 
@@ -191,6 +193,7 @@ function LoginMain.ClosePage()
     if (LoginMain.IsMCVersion()) then
         InternetLoadWorld.ReturnLastStep()
     end
+
     if (LoginMain.LoginPage) then
         LoginMain.LoginPage:CloseWindow()
     end
