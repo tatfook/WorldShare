@@ -47,7 +47,7 @@ function SyncCompare:syncCompare()
     local IsShowLoginPage = LoginMain.IsShowPage()
 
     SyncCompare:SetFinish(false)
-    LoginMain.showMessageInfo(L "请稍后...")
+    LoginMain.showMessageInfo(L"请稍后...")
 
     self:compareRevision(
         function(result)
@@ -111,7 +111,7 @@ function SyncCompare:compareRevision(callback)
 
     if (LoginUserInfo.IsSignedIn()) then
         if (selectWorld.is_zip) then
-            _guihelper.MessageBox(L "不能同步ZIP文件")
+            _guihelper.MessageBox(L"不能同步ZIP文件")
             LoginMain.closeMessageInfo()
             return false
         end
@@ -142,7 +142,7 @@ function SyncCompare:compare(callback)
     if (self:HasRevision()) then
         local function handleRevision(data, err)
             if (err == 0 or err == 502) then
-                _guihelper.MessageBox(L "网络错误")
+                _guihelper.MessageBox(L"网络错误")
                 return false
             end
 
@@ -181,7 +181,7 @@ function SyncCompare:compare(callback)
                 end
 
                 if (not isWorldInRemoteLists) then
-                    LoginMain.showMessageInfo(L "请稍后...")
+                    LoginMain.showMessageInfo(L"请稍后...")
 
                     SyncMain:RefreshKeepworkList(
                         function()
@@ -211,7 +211,7 @@ function SyncCompare:compare(callback)
 
         GitService:new():getWorldRevision(foldername, handleRevision)
     else
-        _guihelper.MessageBox(L "本地世界沒有版本信息")
+        _guihelper.MessageBox(L"本地世界沒有版本信息")
         SyncCompare:SetFinish(true)
         LoginMain.closeMessageInfo()
 

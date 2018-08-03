@@ -221,7 +221,7 @@ function SyncMain:RefreshKeepworkList(callback)
 
     local function handleKeepworkList(data, err)
         if (not data or not data[1]) then
-            _guihelper.MessageBox(L "获取Commit列表失败")
+            _guihelper.MessageBox(L"获取Commit列表失败")
             return false
         end
 
@@ -230,7 +230,7 @@ function SyncMain:RefreshKeepworkList(callback)
         local lastCommitSha = lastCommits.id
 
         if (lastCommitFile ~= "revision.xml") then
-            _guihelper.MessageBox(L "上一次同步到数据源同步失败，请重新同步世界到数据源")
+            _guihelper.MessageBox(L"上一次同步到数据源同步失败，请重新同步世界到数据源")
             return false
         end
 
@@ -291,7 +291,7 @@ function SyncMain:RefreshKeepworkList(callback)
                     worldInfo,
                     function(data, err)
                         if (err ~= 200 or type(data) ~= "table" or data.error.id ~= 0) then
-                            _guihelper.MessageBox(L "更新服务器列表失败")
+                            _guihelper.MessageBox(L"更新服务器列表失败")
                             return false
                         end
 

@@ -30,7 +30,7 @@ local VersionChange = commonlib.gettable("Mod.WorldShare.login.VersionChange")
 
 function VersionChange:init()
     if (not LoginUserInfo.IsSignedIn()) then
-        _guihelper.MessageBox(L "登录后才能继续")
+        _guihelper.MessageBox(L"登录后才能继续")
         return false
     end
 
@@ -43,12 +43,12 @@ function VersionChange:init()
         local enterWorld = GlobalStore.get("enterWorld")
 
         if(enterWorld.foldername == selectWorld.foldername) then
-            _guihelper.MessageBox(L "不能切换当前编辑的世界")
+            _guihelper.MessageBox(L"不能切换当前编辑的世界")
             return
         end
     end
 
-    LoginMain.showMessageInfo(L "请稍后...")
+    LoginMain.showMessageInfo(L"请稍后...")
     self:GetVersionSource(
         function()
             LoginMain.closeMessageInfo()

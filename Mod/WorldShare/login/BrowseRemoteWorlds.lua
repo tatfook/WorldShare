@@ -109,9 +109,9 @@ function BrowseRemoteWorlds.GetCurWorldInfo(info_type, world_index)
             local mode = selected_world["world_mode"]
 
             if (mode == "edit") then
-                return L "创作"
+                return L"创作"
             else
-                return L "参观"
+                return L"参观"
             end
         else
             return selected_world[info_type]
@@ -163,7 +163,7 @@ function BrowseRemoteWorlds.deleteWorld(index)
 
     if (SyncMain.tagInfor) then
         if (SyncMain.tagInfor.name == SyncMain.selectedWorldInfor.foldername) then
-            _guihelper.MessageBox(L "不能刪除正在编辑的世界")
+            _guihelper.MessageBox(L"不能刪除正在编辑的世界")
             return
         end
     end
@@ -173,7 +173,7 @@ function BrowseRemoteWorlds.deleteWorld(index)
         if (ParaIO.DeleteFile(zipPath)) then
             BrowseRemoteWorlds.RefreshCurrentServerList()
         else
-            _guihelper.MessageBox(L "无法删除可能您没有足够的权限")
+            _guihelper.MessageBox(L"无法删除可能您没有足够的权限")
         end
     end
 end

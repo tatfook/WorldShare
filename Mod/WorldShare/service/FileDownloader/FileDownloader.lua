@@ -81,12 +81,12 @@ function FileDownloader:Start(src, dest, callbackFunc, cachePolicy)
 
     local ls = localserver.CreateStore(nil, 1)
     if (not ls) then
-        OnFail(L "本地数据失败")
+        OnFail(L"本地数据失败")
         return
     end
 
     if (self.isFetching) then
-        OnFail(L "还在下载中...")
+        OnFail(L"还在下载中...")
         return
     end
     self.isFetching = true
@@ -98,7 +98,7 @@ function FileDownloader:Start(src, dest, callbackFunc, cachePolicy)
         BroadcastHelper.PushLabel(
             {
                 id = "noWrap",
-                label = format(L "%s: 正在下载中,请耐心等待", self.text),
+                label = format(L"%s: 正在下载中,请耐心等待", self.text),
                 max_duration = 20000,
                 color = "255 0 0",
                 scaling = 1.1,
@@ -123,7 +123,7 @@ function FileDownloader:Start(src, dest, callbackFunc, cachePolicy)
                     OnSucceeded(dest)
                 else
                     --LOG.std(nil, "info", "FileDownloader", "failed copy file from %s to %s", src, dest);
-                    OnFail(L "无法复制文件到指定目录")
+                    OnFail(L"无法复制文件到指定目录")
                 end
             else
                 --LOG.std(nil, "info", "FileDownloader", "successfully downloaded file to %s", entry.payload.cached_filepath);
@@ -135,22 +135,22 @@ function FileDownloader:Start(src, dest, callbackFunc, cachePolicy)
             local text
             self.DownloadState = self.DownloadState
             if (msg.DownloadState == "") then
-                text = L "下载中..."
+                text = L"下载中..."
                 if (msg.totalFileSize) then
                     self.totalFileSize = msg.totalFileSize
                     self.currentFileSize = msg.currentFileSize
                     text =
                         string.format(
-                        L "下载中: %d/%dKB",
+                        L"下载中: %d/%dKB",
                         math.floor(msg.currentFileSize / 1024),
                         math.floor(msg.totalFileSize / 1024)
                     )
                 end
             elseif (msg.DownloadState == "complete") then
-                text = L "下载完毕"
+                text = L"下载完毕"
             elseif (msg.DownloadState == "terminated") then
-                text = L "下载终止了"
-                OnFail(L "下载终止了")
+                text = L"下载终止了"
+                OnFail(L"下载终止了")
             end
             if (text and self.text ~= "official_texture_package") then
                 if(self.text == "temp/archive.zip") then
@@ -160,7 +160,7 @@ function FileDownloader:Start(src, dest, callbackFunc, cachePolicy)
                 BroadcastHelper.PushLabel(
                     {
                         id = "noWrap",
-                        label = format(L "文件%s: %s", self.text, text),
+                        label = format(L"文件%s: %s", self.text, text),
                         max_duration = 10000,
                         color = "255 0 0",
                         scaling = 1.1,
@@ -172,6 +172,6 @@ function FileDownloader:Start(src, dest, callbackFunc, cachePolicy)
         end
     )
     if (not res) then
-        OnFail(L "重复下载")
+        OnFail(L"重复下载")
     end
 end

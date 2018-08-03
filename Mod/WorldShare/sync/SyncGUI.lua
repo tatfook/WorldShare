@@ -31,7 +31,7 @@ local Sync
 function SyncGUI.init()
     current = 0
     total = 0
-    files = L "同步中，请稍后..."
+    files = L"同步中，请稍后..."
     finish = false
     broke = false
 
@@ -65,7 +65,7 @@ end
 function SyncGUI.cancel(callback)
     Sync:SetBroke(true)
 
-    files = L "正在等待上次同步完成，请稍后..."
+    files = L"正在等待上次同步完成，请稍后..."
 
     SyncGUI.SetBroke(true)
     SyncGUI.SetFinish(true)
@@ -111,7 +111,7 @@ function SyncGUI:updateDataBar(pCurrent, pTotal, pFiles, pFinish)
     finish = pFinish
 
     if (not files) then
-        files = L "同步中，请稍后..."
+        files = L"同步中，请稍后..."
     end
 
     LOG.std("SyncGUI", "debug", "SyncGUI", format("Totals : %s , Current : %s, Status : %s", total, current, files))

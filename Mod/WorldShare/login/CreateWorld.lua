@@ -31,7 +31,7 @@ end
 function CreateWorld.CheckRevision(callback)
     function handleCheck()
         if (not SyncCompare:HasRevision()) then
-            LoginMain.showMessageInfo(L "请稍后...")
+            LoginMain.showMessageInfo(L"请稍后...")
 
             Utils.SetTimeOut(
                 function()
