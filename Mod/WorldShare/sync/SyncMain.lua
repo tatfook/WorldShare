@@ -146,6 +146,10 @@ function SyncMain:GetWorldDefaultName()
         world = string.match(originWorldPath, "worlds\\DesignHouse\\.+")
     end
 
+    if(not world) then
+         world = "";
+    end
+
     world = string.gsub(world, "worlds/DesignHouse/", "")
     world = string.gsub(world, "worlds\\DesignHouse\\", "")
     world = string.gsub(world, "/", "")
