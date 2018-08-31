@@ -288,26 +288,29 @@ end
 function LocalService:GetZipRevision(zipWorldDir)
     local zipParentDir = zipWorldDir:gsub("[^/\\]+$", "")
 
-    ParaAsset.OpenArchive(zipWorldDir, true)
+    local needToClose;
+    if(System.World.worldzipfile ~= zipWorldDir) then
+        ParaAsset.OpenArchive(zipWorldDir, true)
+        needToClose = true;
+    end
     local output = {}
 
     Files.Find(output, "", 0, 500, ":revision.xml", zipWorldDir)
 
+    local binData = 0
     if (#output ~= 0) then
         local file = ParaIO.open(zipParentDir .. output[1].filename, "r")
-        local binData
 
         if (file:IsValid()) then
             binData = file:GetText(0, -1)
             --LOG.std(nil,"debug","binData",binData);
             file:close()
         end
-
-        ParaAsset.CloseArchive(zipWorldDir)
-        return binData
-    else
-        return 0
     end
+    if(needToClose) then
+        ParaAsset.CloseArchive(zipWorldDir)
+    end
+    return binData
 end
 
 function LocalService:SetTag(worldDir, newTag)
