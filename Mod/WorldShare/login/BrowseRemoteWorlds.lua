@@ -58,6 +58,7 @@ end
 
 -- @param callbackFunc: callbackFunc(bHasEnteredWorld) end
 function BrowseRemoteWorlds.ShowPage(callbackFunc)
+    InternetLoadWorld.OnStaticInit();
     BrowseRemoteWorlds.callbackFunc = callbackFunc
 
     BrowseRemoteWorlds.OnScreenSizeChange()

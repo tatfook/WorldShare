@@ -47,7 +47,26 @@ end
 function LoginMain.init()
 end
 
+-- this is called from ParaWorld Login App
+function LoginMain.CheckShowUserWorlds()
+    if(System.options.showUserWorldsOnce) then
+        NPL.load("(gl)Mod/WorldShare/login/BrowseRemoteWorlds.lua")
+        local BrowseRemoteWorlds = commonlib.gettable("Mod.WorldShare.login.BrowseRemoteWorlds")
+        BrowseRemoteWorlds.ShowPage(
+            function(bHasEnteredWorld)
+                System.options.showUserWorldsOnce = nil;
+                LoginMain.ClosePage()
+            end
+        )
+        return true;
+    end
+end
+
 function LoginMain.ShowPage()
+    if(LoginMain.CheckShowUserWorlds()) then
+        return
+    end
+
     local params = Utils:ShowWindow(850, 470, "Mod/WorldShare/login/LoginMain.html", "LoginMain")
 
     params._page.OnClose = function()
@@ -93,7 +112,6 @@ end
 
 function LoginMain.setLoginPage()
     LoginMain.LoginPage = document:GetPageCtrl()
-    InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
     InternetLoadWorld.OnStaticInit()
     InternetLoadWorld.GetEvents():AddEventListener(
         "dataChanged",
