@@ -9,8 +9,8 @@ NPL.load("(gl)Mod/WorldShare/service/FileDownloader/FileDownloader.lua")
 local FileDownloader = commonlib.inherit(nil, commonlib.gettable("Mod.WorldShare.service.FileDownloader.FileDownloader"))
 -------------------------------------------------------
 ]]
-NPL.load("(gl)Mod/WorldShare/service/FileDownloader/localserver.lua")
-NPL.load("(gl)Mod/WorldShare/service/FileDownloader/factory.lua")
+NPL.load("./localserver.lua")
+NPL.load("./factory.lua")
 
 local localserver = commonlib.gettable("Mod.WorldShare.service.FileDownloader.localserver")
 

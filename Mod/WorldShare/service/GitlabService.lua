@@ -5,27 +5,22 @@ Date:  2017.4.15
 Desc: 
 use the lib:
 ------------------------------------------------------------
-NPL.load("(gl)Mod/WorldShare/service/GitlabService.lua")
-local GitlabService = commonlib.gettable("Mod.WorldShare.service.GitlabService")
+local GitlabService = NPL.load("(gl)Mod/WorldShare/service/GitlabService.lua")
 ------------------------------------------------------------
 ]]
-NPL.load("(gl)Mod/WorldShare/service/HttpRequest.lua")
-NPL.load("(gl)Mod/WorldShare/login/LoginMain.lua")
-NPL.load("(gl)Mod/WorldShare/main.lua")
-NPL.load("(gl)script/ide/Encoding.lua")
-NPL.load("(gl)Mod/WorldShare/sync/SyncMain.lua")
-NPL.load("(gl)Mod/WorldShare/service/FileDownloader/FileDownloader.lua")
-
-local HttpRequest = commonlib.gettable("Mod.WorldShare.service.HttpRequest")
-local loginMain = commonlib.gettable("Mod.WorldShare.login.loginMain")
-local GitEncoding = commonlib.gettable("Mod.WorldShare.helper.GitEncoding")
-local WorldShare = commonlib.gettable("Mod.WorldShare")
-local Encoding = commonlib.gettable("commonlib.Encoding")
-local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain")
-local GlobalStore = commonlib.gettable("Mod.WorldShare.store.Global")
+NPL.load("./FileDownloader/FileDownloader.lua")
 local FileDownloader = commonlib.gettable("Mod.WorldShare.service.FileDownloader.FileDownloader")
 
-local GitlabService = commonlib.inherit(nil, commonlib.gettable("Mod.WorldShare.service.GitlabService"))
+local WorldShare = commonlib.gettable("Mod.WorldShare")
+local Encoding = commonlib.gettable("commonlib.Encoding")
+
+local LoginMain = NPL.load('(gl)Mod/WorldShare/cellar/Login/LoginMain.lua')
+local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/SyncMain.lua')
+local GitEncoding = NPL.load('(gl)Mod/WorldShare/helper/GitEncoding.lua')
+local HttpRequest = NPL.load('./HttpRequest.lua')
+local Store = NPL.load('(gl)Mod/WorldShare/store/Store.lua')
+
+local GitlabService = NPL.export()
 
 GitlabService.inited = false
 GitlabService.tree = {}
@@ -41,6 +36,32 @@ function GitlabService:ctor(projectId)
     self.apiBaseUrl = self.dataSourceInfo.apiBaseUrl
     self.projectId = projectId
 end
+
+function GitlabService:getDataSourceInfo()
+    return Store:get("user/dataSourceInfo")
+end
+
+function GitlabService:getToken()
+    local dataSourceInfo = self:getDataSourceInfo()
+
+    if (dataSourceInfo and dataSourceInfo.dataSourceToken) then
+        return dataSourceInfo.dataSourceToken
+    else
+        return ''
+    end
+end
+
+function GitlabService:getApiBaseUrl()
+    local dataSourceInfo = self:getDataSourceInfo()
+
+    if (dataSourceInfo and dataSourceInfo.apiBaseUrl) then
+        return dataSourceInfo.apiBaseUrl
+    else
+        return ''
+    end
+end
+
+
 
 function GitlabService:checkSpecialCharacter(filename)
     local specialCharacter = {"【", "】", "《", "》", "·", " ", "，", "●"}
@@ -62,18 +83,21 @@ function GitlabService:checkSpecialCharacter(filename)
 end
 
 function GitlabService:apiGet(url, callback)
-    if (not url or not self.apiBaseUrl) then
+    local apiBaseUrl = self:getApiBaseUrl()
+    local token = self:getToken()
+
+    if (not url or not apiBaseUrl) then
         return false
     end
 
-    url = format("%s/%s", self.apiBaseUrl, url)
+    url = format("%s/%s", apiBaseUrl, url)
 
     HttpRequest:GetUrl(
         {
             url = url,
             json = true,
             headers = {
-                ["PRIVATE-TOKEN"] = self.dataSourceToken,
+                ["PRIVATE-TOKEN"] = token,
                 ["User-Agent"] = "npl"
             }
         },
@@ -86,11 +110,14 @@ function GitlabService:apiGet(url, callback)
 end
 
 function GitlabService:apiPost(url, params, callback)
+    local apiBaseUrl = self:getApiBaseUrl()
+    local token = self:getToken()
+
     if (not url or not params) then
         return false
     end
 
-    url = format("%s/%s", self.apiBaseUrl, url)
+    url = format("%s/%s", apiBaseUrl, url)
 
     HttpRequest:GetUrl(
         {
@@ -98,7 +125,7 @@ function GitlabService:apiPost(url, params, callback)
             url = url,
             json = true,
             headers = {
-                ["PRIVATE-TOKEN"] = self.dataSourceToken,
+                ["PRIVATE-TOKEN"] = token,
                 ["User-Agent"] = "npl",
                 ["content-type"] = "application/json"
             },
@@ -117,7 +144,10 @@ function GitlabService:apiPut(url, params, callback)
         return false
     end
 
-    url = format("%s/%s", self.apiBaseUrl, url)
+    local apiBaseUrl = self:getApiBaseUrl()
+    local token = self:getToken()
+
+    url = format("%s/%s", apiBaseUrl, url)
 
     HttpRequest:GetUrl(
         {
@@ -125,7 +155,7 @@ function GitlabService:apiPut(url, params, callback)
             url = url,
             json = true,
             headers = {
-                ["PRIVATE-TOKEN"] = self.dataSourceToken,
+                ["PRIVATE-TOKEN"] = token,
                 ["User-Agent"] = "npl",
                 ["content-type"] = "application/json"
             },
@@ -140,7 +170,10 @@ function GitlabService:apiPut(url, params, callback)
 end
 
 function GitlabService:apiDelete(url, params, callback)
-    url = self.apiBaseUrl .. "/" .. url
+    local apiBaseUrl = self:getApiBaseUrl()
+    local token = self:getToken()
+
+    url = format("%s/%s", apiBaseUrl, url)
 
     HttpRequest:GetUrl(
         {
@@ -148,7 +181,7 @@ function GitlabService:apiDelete(url, params, callback)
             url = url,
             json = true,
             headers = {
-                ["PRIVATE-TOKEN"] = self.dataSourceToken,
+                ["PRIVATE-TOKEN"] = token,
                 ["User-Agent"] = "npl",
                 ["content-type"] = "application/json"
             },
@@ -498,7 +531,7 @@ end
 
 -- 获取文件
 function GitlabService:getContentWithRaw(foldername, path, commitId, callback)
-    local dataSourceInfo = GlobalStore.get("dataSourceInfo")
+    local dataSourceInfo = self:getDataSourceInfo()
 
     if (not commitId) then
         commitId = "master"
@@ -536,10 +569,12 @@ function GitlabService:DownloadZIP(foldername, commitId, callback)
         return false
     end
 
+    local dataSourceInfo = self:getDataSourceInfo()
+
     local url = format(
         "%s/%s/%s/repository/archive.zip?ref=%s",
-        self.dataSourceInfo.rawBaseUrl,
-        self.dataSourceInfo.dataSourceUsername,
+        dataSourceInfo.rawBaseUrl,
+        dataSourceInfo.dataSourceUsername,
         foldername,
         commitId and commitId or "master"
     )
@@ -607,13 +642,14 @@ function GitlabService:getWorldRevision(foldername, callback)
 
     local contentUrl = ""
     local commitId = self:getCommitIdByFoldername(foldername.utf8)
+    local dataSourceInfo = self:getDataSourceInfo()
 
     if (commitId) then
         contentUrl =
             format(
             "%s/%s/%s/raw/%s/revision.xml",
-            self.dataSourceInfo.rawBaseUrl,
-            self.dataSourceInfo.dataSourceUsername,
+            dataSourceInfo.rawBaseUrl,
+            dataSourceInfo.dataSourceUsername,
             foldername.base32,
             commitId
         )
@@ -621,8 +657,8 @@ function GitlabService:getWorldRevision(foldername, callback)
         contentUrl =
             format(
             "%s/%s/%s/raw/master/revision.xml",
-            self.dataSourceInfo.rawBaseUrl,
-            self.dataSourceInfo.dataSourceUsername,
+            dataSourceInfo.rawBaseUrl,
+            dataSourceInfo.dataSourceUsername,
             foldername.base32
         )
     end
@@ -659,7 +695,7 @@ function GitlabService:getProjectIdByName(name, callback)
 end
 
 function GitlabService:getCommitIdByFoldername(foldername)
-    local remoteWorldsList = GlobalStore.get("remoteWorldsList") or {}
+    local remoteWorldsList = Store:get("world/remoteWorldsList") or {}
 
     for key, value in ipairs(remoteWorldsList) do
         if (value.worldsName == foldername) then

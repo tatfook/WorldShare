@@ -1,0 +1,86 @@
+<!-- "script/apps/Aries/Creator/Game/Login/InternetLoadWorld.html" -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>StartSync,by big,2017.4.18</title>
+</head>
+<body>
+    <pe:mcml>
+        <script type="text/npl" refresh="false">
+            <![CDATA[
+                SyncMain = NPL.load("./SyncMain.lua")
+                SyncCompare = NPL.load("./SyncCompare.lua")
+                MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")
+                Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
+
+                SyncMain:setStartSyncPage();
+
+                function useLocal()
+                    SyncMain:closeStartSyncPage()
+
+                    if(SyncMain.GetCurrentRevision() < SyncMain.GetRemoteRevision()) then
+                        SyncMain:ShowStartSyncUseLocalPage();
+                    elseif(SyncMain.GetCurrentRevision() >= SyncMain.GetRemoteRevision()) then
+                        MsgBox:Show(L"正在处理中，请勿操作...")
+                        SyncMain:syncToDataSource()
+                    end
+                end
+
+                function useRemote()
+                    SyncMain:closeStartSyncPage()
+
+                    if(SyncMain.GetRemoteRevision() < SyncMain.GetCurrentRevision()) then
+                        SyncMain:ShowStartSyncUseDataSourcePage();
+                    elseif(SyncMain.GetRemoteRevision() >= SyncMain.GetCurrentRevision()) then
+                        MsgBox:Show(L"正在处理中，请勿操作...")
+                        SyncMain:syncToLocal()
+                    end
+                end
+
+                function useOffline()
+                    SyncMain:closeStartSyncPage()
+                end
+
+                function beShowUseRemote()
+                    return SyncCompare:IsCompareFinish() and SyncMain.GetRemoteRevision() ~= 0
+                end
+
+                function get_window_style()
+                    return Utils.FixCenter(500, 270)
+                end
+
+                function close()
+                    SyncMain:closeStartSyncPage()
+                end
+
+                function is_compare_finish()
+                    return SyncCompare:IsCompareFinish()
+                end
+             ]]>
+        </script>
+        <div width="100%" height="100%">
+            <aries:window mode="thin" width="500" height="270" style="<%=get_window_style()%>" title='<%=L"与数据源同步" %>' onclose="close()">
+            	<div style="padding:20px;font-size:18px;base-font-size:18px;color:#ffffff">
+            		<div style="margin-left:80px;margin-top:40px;">
+                        <%= L"远程版本号：" %>
+                		<%= SyncMain.GetRemoteRevision()%>
+                		<pe:if condition="<%=beShowUseRemote()%>">
+                             <input onclick="useRemote()" class="button_highlight" style="margin-left:10px;width: 130px;height:30px;" type="button" value='<%=L"使用远程版本" %>' />
+                		</pe:if>
+	                </div>
+	                <div style="margin-left:80px;margin-top:30px;">
+                        <%=L"本地版本号：" %><%= SyncMain.GetCurrentRevision() %>
+	                	<pe:if condition="<%=not is_compare_finish()%>">
+	                		<input onclick="useOffline()" class="button_highlight" style="margin-left:10px;height:30px;" type="button" value='<%=L"使用本地离线版本" %>' />
+	                	</pe:if>
+	                	<pe:if condition="<%=is_compare_finish()%>">
+	                		<input onclick="useLocal()" class="button_highlight" style="margin-left:10px;width: 130px;height:30px;" type="button" value='<%=L"使用本地版本" %>' />
+	                	</pe:if>
+	                </div>
+            	</div>
+            </aries:window>
+        </div>
+    </pe:mcml>
+</body>
+</html>
+

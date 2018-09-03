@@ -5,24 +5,23 @@ Date:  2018.06.21
 Place: Foshan
 use the lib:
 ------------------------------------------------------------
-NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
-local KeepworkService = commonlib.gettable("Mod.WorldShare.service.KeepworkService")
+local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 ------------------------------------------------------------
 ]]
-NPL.load("(gl)Mod/WorldShare/service/HttpRequest.lua")
-NPL.load("(gl)Mod/WorldShare/login/LoginUserInfo.lua")
+local LoginUserInfo = NPL.load('(gl)Mod/WorldShare/cellar/Login/LoginUserInfo.lua')
+local HttpRequest = NPL.load('./HttpRequest.lua')
+local Store = NPL.load('(gl)Mod/WorldShare/store/Store.lua')
 
-local HttpRequest = commonlib.gettable("Mod.WorldShare.service.HttpRequest")
-local LoginUserInfo = commonlib.gettable("Mod.WorldShare.login.LoginUserInfo")
-
-local KeepworkService = commonlib.gettable("Mod.WorldShare.service.KeepworkService")
+local KeepworkService = NPL.export()
 
 function getApi(url)
-    return format("%s%s", LoginUserInfo.site, url)
+    return format("%s%s", LoginUserInfo.site(), url)
 end
 
 function getHeader()
-    return { Authorization = format("Bearer %s", LoginUserInfo.token) }
+    local token = Store:get('user/token')
+
+    return { Authorization = format("Bearer %s", token) }
 end
 
 function getParams(url, method, params, callback)
@@ -64,5 +63,4 @@ function KeepworkService:RefreshKeepworkList(worldInfo, callback)
     end
 
     getParams("/api/mod/worldshare/models/worlds/refresh", 'POST', worldInfo, callback)
-
 end

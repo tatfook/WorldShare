@@ -1,0 +1,56 @@
+<!-- "script/apps/Aries/Creator/Game/Login/InternetLoadWorld.html" -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>use github sync,by big,2016/12/10</title>
+</head>
+<body>
+    <pe:mcml>
+        <script type="text/npl" refresh="false">
+            <![CDATA[
+                SyncMain = NPL.load("./SyncMain.lua")
+                MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")
+                Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
+                Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
+
+                SyncMain:setStartSyncUseDataSourcePage()
+                
+                function replace()
+                    MsgBox:Show(L"正在处理中，请勿操作...")
+                    SyncMain:backupWorld()
+                    SyncMain:closeStartSyncUseDataSourcePage()
+                    SyncMain:syncToLocal()
+            	end
+
+                function cancel()
+                    SyncMain:closeStartSyncUseDataSourcePage()
+                    SyncMain:ShowStartSyncPage()
+                end
+
+                function get_window_style()
+                    return Utils.FixCenter(500, 270)
+                end
+
+                function get_current_revision()
+                    return Store:get("world/currentRevision") or ''
+                end
+
+                function get_remote_revision()
+                    return Store:get("world/remoteRevision") or ''
+                end
+             ]]>
+        </script>
+        <div width="100%" height="100%">
+            <aries:window mode="thin" width="500" height="270" style="<%=get_window_style()%>" title='<%=L"与数据源同步" %>'>
+            	<div style="padding:40px;font-size:18px;base-font-size:18px;color:#ffffff">
+            		<div><%=format("%s%s%s%s%s", L"你是否确定用远程的更低的版本", get_current_revision(), L", 替换本地更高的版本", get_remote_revision(), L"？")%></div>
+            		<div style="margin-top:30px;">
+            			<input type="button" onclick="replace" class="button_highlight" style="margin-left:130px;width: 60px;height: 30px;" name="" value='<%=L"替换" %>' />
+            			<input type="button" onclick="cancel" class="button_highlight" style="margin-left:20px;width: 60px;height: 30px;"  name="" value='<%=L"取消" %>' />
+            		</div>
+            	</div>
+            </aries:window>
+        </div>
+    </pe:mcml>
+</body>
+</html>
