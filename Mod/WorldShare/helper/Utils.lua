@@ -4,11 +4,10 @@ Author(s): big
 Date: 2018.06.21
 Desc: generate KeepWork documentation 
 -------------------------------------------------------
-NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
-local Utils = commonlib.gettable("Mod.WorldShare.helper.Utils")
+local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 -------------------------------------------------------
 ]]
-local Utils = commonlib.gettable("Mod.WorldShare.helper.Utils")
+local Utils = NPL.export()
 
 function Utils:ShowWindow(width, height, url, name, x, y, align, allowDrag)
     if (not x) then

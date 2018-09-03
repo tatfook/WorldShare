@@ -9,16 +9,26 @@ NPL.load("(gl)Mod/WorldShare/main.lua")
 local WorldShare = commonlib.gettable("Mod.WorldShare")
 ------------------------------------------------------------
 ]]
-NPL.load("(gl)Mod/WorldShare/sync/SyncMain.lua")
-NPL.load("(gl)Mod/WorldShare/login/LoginMain.lua")
-NPL.load("(gl)Mod/WorldShare/login/CreateWorld.lua")
-NPL.load("(gl)Mod/WorldShare/store/Global.lua")
+NPL.load("(gl)script/ide/Files.lua")
+NPL.load("(gl)script/ide/Encoding.lua")
+NPL.load("(gl)script/ide/System/Encoding/sha1.lua")
+NPL.load("(gl)script/ide/System/Encoding/base64.lua")
+NPL.load("(gl)script/ide/System/Windows/Screen.lua")
+NPL.load("(gl)script/apps/Aries/Creator/WorldCommon.lua")
+NPL.load("(gl)script/apps/Aries/Creator/Game/Login/InternetLoadWorld.lua")
+NPL.load("(gl)script/apps/Aries/Creator/Game/Login/CreateNewWorld.lua")
+NPL.load("(gl)script/apps/Aries/Creator/Game/Login/LocalLoadWorld.lua")
+NPL.load("(gl)script/apps/Aries/Creator/Game/Login/RemoteServerList.lua")
+NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/ShareWorldPage.lua")
+
+local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
+local LoginMain = NPL.load("(gl)Mod/WorldShare/cellar/Login/LoginMain.lua")
+local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/Login/CreateWorld.lua")
+local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/SyncMain.lua")
+local ShareWorld = NPL.load("(gl)Mod/WorldShare/cellar/ShareWorld/ShareWorld.lua")
+local WorldExitDialog = NPL.load("(gl)Mod/WorldShare/cellar/WorldExitDialog/WorldExitDialog.lua")
 
 local GameLogic = commonlib.gettable("MyCompany.Aries.Game.GameLogic")
-local LoginMain = commonlib.gettable("Mod.WorldShare.login.LoginMain")
-local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain")
-local GlobalStore = commonlib.gettable("Mod.WorldShare.store.Global")
-local CreateWorld = commonlib.gettable("Mod.WorldShare.login.CreateWorld")
 
 local WorldShare = commonlib.inherit(commonlib.gettable("Mod.ModBase"), commonlib.gettable("Mod.WorldShare"))
 
@@ -42,9 +52,7 @@ function WorldShare:init()
     GameLogic.GetFilters():add_filter(
         "InternetLoadWorld.ShowPage",
         function(bEnable, bShow)
-            NPL.load("(gl)Mod/WorldShare/login/LoginMain.lua")
-            local LoginMain = commonlib.gettable("Mod.WorldShare.login.LoginMain")
-            LoginMain.ShowPage()
+            LoginMain:ShowLoginMainPage()
             return false
         end
     )
@@ -54,8 +62,6 @@ function WorldShare:init()
         "ShowExitDialog",
         function(dialog)
             if (dialog and dialog.callback) then
-                NPL.load("(gl)Mod/WorldShare/login/WorldExitDialog.lua")
-                local WorldExitDialog = commonlib.gettable("Mod.WorldShare.login.WorldExitDialog")
                 WorldExitDialog.ShowPage(dialog.callback)
                 return nil
             end
@@ -66,9 +72,7 @@ function WorldShare:init()
     GameLogic.GetFilters():add_filter(
         "SaveWorldPage.ShowSharePage",
         function(bEnable)
-            NPL.load("(gl)Mod/WorldShare/sync/ShareWorld.lua")
-            local ShareWorld = commonlib.gettable("Mod.WorldShare.sync.ShareWorld")
-            ShareWorld.ShowPage()
+            ShareWorld:init()
             return false
         end
     )
@@ -90,8 +94,10 @@ function WorldShare:OnLogin()
 end
 
 function WorldShare:OnWorldLoad()
-    GlobalStore.set("IsEnterWorld", true)
-    LoginMain.ClosePage()
+    Store:set("world/IsEnterWorld", true)
+
+    LoginMain.closeLoginMainPage()
+
     CreateWorld:CheckRevision(
         function()
             SyncMain:SyncWillEnterWorld()

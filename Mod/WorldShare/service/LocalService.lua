@@ -5,43 +5,33 @@ Date:  2016.12.11
 Desc: 
 use the lib:
 ------------------------------------------------------------
-NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
-local LocalService = commonlib.gettable("Mod.WorldShare.service.LocalService")
+local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 ------------------------------------------------------------
 ]]
-NPL.load("(gl)script/ide/Files.lua")
-NPL.load("(gl)script/ide/Encoding.lua")
-NPL.load("(gl)script/ide/System/Encoding/base64.lua")
-NPL.load("(gl)script/ide/System/Encoding/sha1.lua")
-NPL.load("(gl)Mod/WorldShare/service/GithubService.lua")
-NPL.load("(gl)Mod/WorldShare/login/LoginMain.lua")
-NPL.load("(gl)Mod/WorldShare/service/GitlabService.lua")
-NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua")
-NPL.load("(gl)Mod/WorldShare/sync/SyncMain.lua")
-NPL.load("(gl)Mod/WorldShare/service/FileDownloader/FileDownloader.lua")
-NPL.load("(gl)Mod/WorldShare/store/Global.lua")
-
-local FileDownloader = commonlib.gettable("Mod.WorldShare.service.FileDownloader.FileDownloader")
-local GitEncoding = commonlib.gettable("Mod.WorldShare.helper.GitEncoding")
-local GitlabService = commonlib.gettable("Mod.WorldShare.service.GitlabService")
-local GithubService = commonlib.gettable("Mod.WorldShare.service.GithubService")
-local EncodingC = commonlib.gettable("commonlib.Encoding")
-local EncodingS = commonlib.gettable("System.Encoding")
+NPL.load("./FileDownloader/FileDownloader.lua")
 local Files = commonlib.gettable("commonlib.Files")
-local loginMain = commonlib.gettable("Mod.WorldShare.login.loginMain")
-local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain")
-local GlobalStore = commonlib.gettable("Mod.WorldShare.store.Global")
 
-local LocalService = commonlib.inherit(nil, commonlib.gettable("Mod.WorldShare.service.LocalService"))
+local SystemEncoding = commonlib.gettable("System.Encoding")
+local CommonlibEncoding = commonlib.gettable("commonlib.Encoding")
+local FileDownloader = commonlib.gettable("Mod.WorldShare.service.FileDownloader.FileDownloader")
 
-function LocalService:ctor()
-    self.filter = "*.*"
-    self.nMaxFileLevels = 0
-    self.nMaxFilesNum = 500
-    self.output = {}
-end
+local GitlabService = NPL.load("./GitlabService")
+local GithubService = NPL.load("./GithubService")
+local GitEncoding = NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua")
+local LoginMain = NPL.load("(gl)Mod/WorldShare/cellar/Login/LoginMain.lua")
+local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/SyncMain.lua")
+local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
+
+local LocalService = NPL.export()
+
+LocalService.filter = "*.*"
+LocalService.nMaxFileLevels = 0
+LocalService.nMaxFilesNum = 500
+LocalService.output = {}
 
 function LocalService:LoadFiles(worldDir)
+    self.output = {}
+
     if (string.sub(worldDir, -1, -1) == "/") then
         self.worldDir = string.sub(worldDir, 1, -2)
     end
@@ -51,10 +41,10 @@ function LocalService:LoadFiles(worldDir)
     self:filesFind(result, self.worldDir)
 
     for _, item in ipairs(self.output) do
-        item.filename = EncodingC.DefaultToUtf8(item.filename)
+        item.filename = CommonlibEncoding.DefaultToUtf8(item.filename)
     end
 
-    GlobalStore.set('localFiles', self.output)
+    Store:set('world/localFiles', self.output)
 
     return self.output
 end
@@ -92,10 +82,10 @@ function LocalService:filesFind(result, path, subPath)
                     if (bConvert) then
                         item.file_content_t = self:getFileContent(item.file_path):gsub("\r\n", "\n")
                         item.filesize = #item.file_content_t
-                        item.sha1 = EncodingS.sha1("blob " .. item.filesize .. "\0" .. item.file_content_t, "hex")
+                        item.sha1 = SystemEncoding.sha1("blob " .. item.filesize .. "\0" .. item.file_content_t, "hex")
                     else
                         item.file_content_t = self:getFileContent(item.file_path)
-                        item.sha1 = EncodingS.sha1("blob " .. item.filesize .. "\0" .. item.file_content_t, "hex")
+                        item.sha1 = SystemEncoding.sha1("blob " .. item.filesize .. "\0" .. item.file_content_t, "hex")
                     end
 
                     item.needChange = true
@@ -170,7 +160,11 @@ function LocalService:MoveZipToFolder(path)
         return false
     end
 
-    local foldername = GlobalStore.get("foldername")
+    local foldername = Store:get("world/foldername")
+
+    if (not foldername) then
+        return false
+    end
 
     local parentDir = path:gsub("[^/\\]+$", "")
 
@@ -194,7 +188,7 @@ function LocalService:MoveZipToFolder(path)
                 path = path:sub(#rootFolder, #path)
 
                 if (path == "/revision.xml") then
-                    GlobalStore.set('remoteRevision', binData)
+                    Store:set('remoteRevision', binData)
                 end
 
                 for segmentation in string.gmatch(path, "[^/]+") do
@@ -231,11 +225,11 @@ function LocalService:FileDownloader(_foldername, _path, _callback)
     local url = ""
     local downloadDir = ""
 
-    if (loginMain.dataSourceType == "github") then
-    elseif (loginMain.dataSourceType == "gitlab") then
+    if (LoginMain.dataSourceType == "github") then
+    elseif (LoginMain.dataSourceType == "gitlab") then
         url =
-            loginMain.rawBaseUrl ..
-            "/" .. loginMain.dataSourceUsername .. "/" .. foldername .. "/raw/" .. SyncMain.commitId .. "/" .. _path
+            LoginMain.rawBaseUrl ..
+            "/" .. LoginMain.dataSourceUsername .. "/" .. foldername .. "/raw/" .. SyncMain.commitId .. "/" .. _path
         downloadDir = SyncMain.worldDir.default .. _path
     end
 
@@ -288,11 +282,13 @@ end
 function LocalService:GetZipRevision(zipWorldDir)
     local zipParentDir = zipWorldDir:gsub("[^/\\]+$", "")
 
-    local needToClose;
+    local needToClose
+
     if(System.World.worldzipfile ~= zipWorldDir) then
         ParaAsset.OpenArchive(zipWorldDir, true)
         needToClose = true;
     end
+
     local output = {}
 
     Files.Find(output, "", 0, 500, ":revision.xml", zipWorldDir)
@@ -307,9 +303,11 @@ function LocalService:GetZipRevision(zipWorldDir)
             file:close()
         end
     end
+
     if(needToClose) then
         ParaAsset.CloseArchive(zipWorldDir)
     end
+
     return binData
 end
 
@@ -338,7 +336,8 @@ function LocalService:GetTag(foldername)
     if (not foldername) then
         return {}
     end
-    local filePath = SyncMain.GetWorldFolderFullPath() .. "/" .. foldername .. "/tag.xml"
+
+    local filePath = format("%s/%s/tag.xml", SyncMain.GetWorldFolderFullPath() , foldername)
 
     local tag = ParaXML.LuaXML_ParseFile(filePath)
 

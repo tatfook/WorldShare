@@ -5,16 +5,14 @@ Date:  2017.4.22
 Desc: 
 use the lib: corvent base32 and fit to github or gitlab
 ------------------------------------------------------------
-NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua")
-local GitEncoding = commonlib.gettable("Mod.WorldShare.helper.GitEncoding")
+local GitEncoding = NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua")
 ------------------------------------------------------------
 ]]
---NPL.load("(gl)script/ide/System/Encoding/base64.lua");
 NPL.load("(gl)script/ide/System/Encoding/basexx.lua")
 
---local Encoding    = commonlib.gettable("System.Encoding");
 local Encoding = commonlib.gettable("System.Encoding.basexx")
-local GitEncoding = commonlib.gettable("Mod.WorldShare.helper.GitEncoding")
+
+local GitEncoding = NPL.export()
 
 -- =转成-equal  +转成-plus  /转成-slash
 function GitEncoding.base32(text)

@@ -1,0 +1,100 @@
+<html>
+<body>
+    <pe:mcml>
+        <script type="text/npl" refresh="false">
+            <![CDATA[
+                SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/ShareWorld/ShareWorld.lua')
+                ShareWorld = NPL.load('./ShareWorld.lua')
+
+                ShareWorld.setShareWorldImp();
+
+                function open_world()
+                    -- GameLogic.RunCommand("/menu file.openworlddir");
+                    ShareWorld.openWorldWebPage()
+                end
+
+                function foldername()
+                    local foldername = ShareWorld:GetEnterFoldername()
+
+                    if (type(foldername) == 'table') then
+                        return foldername.utf8
+                    end
+                end
+
+                function snapshot()
+                    ShareWorld:snapshot()
+                end
+
+                function size()
+                    return ShareWorld:GetWorldSize()
+                end
+
+                function share_now()
+                    ShareWorld:shareNow()
+                end
+
+                function remote_revision()
+                    return ShareWorld:GetRemoteRevision()
+                end
+
+                function current_revision()
+                    return ShareWorld:GetCurrentRevision()
+                end
+
+                function close()
+                    ShareWorld:closeShareWorldImp()
+                end
+             ]]>
+        </script>
+        <style type="text/mcss">
+            {
+                text_field = {
+                    textcolor = "#ffffff",
+                    float = "left",
+                    width = 510,
+                    height = 30,
+                    background = "Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;263 346 36 36:15 15 15 15",
+                },
+                info = {
+                    ["font-size"] = 13,
+                    ["base-font-size"] = 13,
+                    ["margin-bottom"] = 5,
+                }
+            }
+        </style>
+        <aries:window mode="thin" width="640" height="415" style="float:left;" title='<%=L"分享世界" %>' onclose="close()">
+            <div style="color:#ffffff">
+                <div style="padding:20px;">
+                    <div>
+                        <div style="float:left">
+                            <img name="ShareWorldImage" zorder="1" width="300" height="200" />
+                        </div>
+                        <div style="float:right;padding-left:28px;">
+                            <div style="font-size:18px;base-font-size:18;margin-bottom:25px;">
+                                <%= foldername() %>
+                                <input type="button" value='...' style="margin-left:3px;margin-top:4px;font-size:11px;height:18px;color:#ffffff;" class="mc_button_blue" onclick="open_world()"/>
+                            </div>
+
+                            <div class="info"><%=L"大小：" %><%= size() %></div>
+                            <div class="info"><%=L"远程版本号：" %><%= remote_revision() %></div>
+                            <div class="info"><%=L"本地版本号：" %><%= current_revision() %></div>
+
+                            <input type="button" style="font-size:11px;height:20px;color:#ffffff;margin-top:10px;min-width:65px;height:30px;" value='<%=L"重新截图" %>' class="mc_light_grey_button_with_fillet" onclick="snapshot()" />
+                        </div>
+                    </div>
+
+                    <div style="margin-top:20px;">
+                        <input type="text" value="<%= ShareWorld.getWorldUrl()%>" class="text_field"/>
+                        <input type="button" width="75" height="30" style="margin-left:10px;" class="mc_light_grey_button_with_fillet" value='<%=L"浏览" %>' onclick="open_world()" />
+                    </div>
+                </div>
+                <hr style="margin-left:-4px;"/>
+                <div>
+                    <input type="button" onclick="share_now()" value='<%=L"上传并分享" %>' class="mc_big_button" align="right" style="margin-right:20px;margin-top:20px;min-width:160px;height:40px" />
+                </div>
+            </div>
+        </aries:window>
+        
+    </pe:mcml>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<html>
+<body>
+    <pe:mcml>
+        <script type="text/npl" refresh="false" src="VersionChange.lua">
+            VersionChange = NPL.load('./VersionChange.lua')
+            Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
+
+            VersionChange.SetPage()
+            
+            function get_source()
+                return VersionChange:GetAllRevision()
+            end
+
+            function version_button()
+                local isActive = Eval("isActive")
+                local isActiveFull = Eval("isActiveFull")
+                local style = ""
+
+                if (isActive) then
+                    style = style .. "background:Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#208 89 21 21:8 8 8 8;"
+                else
+                    style = style .. "background:Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#179 89 21 21:8 8 8 8;"
+                end
+
+                if (isActiveFull) then
+                    style = style .. "font-weight:bold"
+                end
+
+                return style
+            end
+
+            function get_value()
+                return format("%s： %s  %s：%s ID: %s", L"日期", tostring(Eval("date")), L"版本", tostring(Eval("revision")), tostring(Eval("shortId")))
+            end
+
+            function get_window_style()
+                return Utils.FixCenter(300, 400)
+            end
+
+            function select_version(index)
+                VersionChange:SelectVersion(index)
+            end
+        </script>
+        <style type="text/mcss">
+            {
+                button = {
+                    width = 280,
+                    height = 30,
+                    color = "#FFFFF",
+                    textcolor = "#FFFFF",
+                    ["margin-top"] = 10
+                }
+            }
+        </style>
+        <div width="100%" height="100%">
+            <aries:window
+                class="default"
+                mode="thin"
+                width="300"
+                height="400"
+                style="<%=get_window_style()%>"
+                title='<%=L"版本切换" %>'
+                onclose="VersionChange.ClosePage">
+                <pe:gridview DataSource="<%= get_source()%>">
+                    <Columns>
+                        <input type="button"
+                               onclick="select_version"
+                               class="button"
+                               value='<%=get_value()%>'
+                               name='<%=Eval("index")%>'
+                               style='<%=version_button()%>' />
+                    </Columns>
+                </pe:repeat>
+            </aries:window>
+        </div>
+    </pe:mcml>
+</body>
+</html>
