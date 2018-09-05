@@ -52,7 +52,7 @@ function WorldShare:init()
     GameLogic.GetFilters():add_filter(
         "InternetLoadWorld.ShowPage",
         function(bEnable, bShow)
-            LoginMain.ShowLoginMainPage()
+            LoginMain:ShowLoginMainPage()
             return false
         end
     )

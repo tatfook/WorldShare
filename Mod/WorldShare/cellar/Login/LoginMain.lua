@@ -31,7 +31,24 @@ end
 function LoginMain.init()
 end
 
-function LoginMain.ShowLoginMainPage()
+-- this is called from ParaWorld Login App
+function LoginMain:CheckShowUserWorlds()
+    if(System.options.showUserWorldsOnce) then
+        BrowseRemoteWorlds.ShowPage(
+            function(bHasEnteredWorld)
+                System.options.showUserWorldsOnce = nil;
+                self.closeLoginMainPage()
+            end
+        )
+        return true;
+    end
+end
+
+function LoginMain:ShowLoginMainPage()
+    if(self:CheckShowUserWorlds()) then
+        return false
+    end
+
     local params = Utils:ShowWindow(850, 470, "Mod/WorldShare/cellar/Login/LoginMain.html", "LoginMain")
 
     params._page.OnClose = function()
