@@ -10,9 +10,10 @@ local BrowseRemoteWorlds = commonlib.gettable("Mod.WorldShare.login.BrowseRemote
 BrowseRemoteWorlds.ShowPage(callbackFunc)
 ------------------------------------------------------------
 ]]
+NPL.load("(gl)script/apps/Aries/Creator/Game/Login/InternetLoadWorld.lua");
+local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
 local Screen = commonlib.gettable("System.Windows.Screen")
 local Encoding = commonlib.gettable("commonlib.Encoding")
-local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
 local RemoteServerList = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.RemoteServerList")
 local GameLogic = commonlib.gettable("MyCompany.Aries.Game.GameLogic")
 
@@ -24,10 +25,10 @@ local BrowseRemoteWorlds = NPL.export()
 BrowseRemoteWorlds.itemsPerLine = 3
 
 function BrowseRemoteWorlds.init()
+    InternetLoadWorld.OnStaticInit()
     InternetLoadWorld.OnChangeType(2)
     Store:set('page/BrowseRemoteWorlds', document:GetPageCtrl())
 
-    InternetLoadWorld.OnStaticInit()
     InternetLoadWorld.GetEvents():AddEventListener(
         "dataChanged",
         function(self, event)
