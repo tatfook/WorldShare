@@ -1,0 +1,143 @@
+<html>
+<body>
+    <pe:mcml>
+        <script type="text/npl" refresh="false" src="HistoryManager.lua">
+            <![CDATA[
+                HistoryManager = NPL.load('./HistoryManager.lua')
+                HistoryManager:setPage()
+
+                function close()
+                    HistoryManager:closePage()
+                end
+
+                function has_data()
+                    return HistoryManager:hasData()
+                end
+            ]]>
+        </script>
+        <style type="text/mcss">
+            {
+                area = {
+                    ["padding-top"] = 10,
+                    ["padding-left"] = 0,
+                    ["padding-right"] = 0,
+                    ["background-color"] = "#000000",
+                    color = 'white'
+                },
+                area_header = {
+                    height = 30
+                },
+                area_content = {
+                    width = 850
+                },
+                area_content_menu = {
+                    width = 80,
+                    float = 'left'
+                },
+                flat_button = {
+                    color = "#cccccc",
+                    ["margin-top"] = 0,
+                    background = "Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;179 89 21 21:8 8 8 8"
+                },
+                area_split = {
+                    float = 'left',
+                    width = 1,
+                    background = "Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;344 66 1 1"
+                },
+                area_content_menu_button = {
+                    ['margin-top'] = 5,
+                    width = 75,
+                    height = 23,
+                    ['font-size'] = 12,
+                    margin = 0,
+                    padding = 0,
+                    color = '#ffffff',
+                    background = "Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#179 89 21 21:4 4 4 4"
+                },
+                area_content_list = {
+                    color = 'white',
+                    float = 'left',
+                    padding = 5
+                },
+                data_list = {
+                    color = 'white',
+                    padding = 10
+                },
+                list_item = {
+                    height = 30,
+                    margin = 5,
+                    ['padding-top'] = 5,
+                    ['padding-left'] = 5,
+                    ['padding-right'] = 5,
+                    color = 'white',
+                    background = "Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;179 89 21 21:8 8 8 8",
+                },
+                item_button = {
+                    color = 'white',
+                    ['margin-left'] = 5,
+                    background = "Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#208 89 21 21:8 8 8 8"
+                }
+            }
+        </style>
+        <div class="area">
+            <div class="area_header" name="area_header">
+                <div style="float: left"><%=L"历史记录"%></div>
+                <input style="float: left;margin-left: 750px;" class="flat_button" type="button" onclick="close()" value="<%=L'关闭'%>"/>
+            </div>
+            <div style="height:2px;margin-top:5px;" width="100%" class="mc_line"></div>
+            <div class="area_content" name="area_content">
+                <div class="area_content_menu">
+                    <pe:gridview name="historyMenus" DefaultNodeHeight="32" DataSource="<%=HistoryManager.Menus%>" pagesize="10" ItemsPerLine="1" AllowPaging="true">
+                        <Columns>
+                            <div>
+                                <input type="button" value='<%=Eval("name") %>' class="area_content_menu_button" />
+                            </div>
+                        </Columns>
+                        <PagerSettings Position="Bottom" height="1" />
+                        <PagerTemplate AutoHidePager="true">
+                            <form>
+                                <label name="page" style="height:18px;margin-left:59px;margin-top:-95px;color:#ffffff;" />
+                                <input type="button" name="pre"  invisibleondisabled="false" zorder=2 animstyle="23" tooltip='<%=L"上一页"%>' style="margin-left:35px;margin-top:-93px;width:13px;height:15px;background:url(Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#224 149 13 15);" Normal_BG="Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#224 149 13 15" Pressed_BG="Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;224 167 13 15" />
+                                <input type="button" name="next" invisibleondisabled="false" zorder=2 animstyle="23" tooltip='<%=L"下一页"%>' style="margin-left:40px;margin-top:-93px;width:13px;height:15px;background:url(Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#249 149 13 15);" Normal_BG="Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;249 149 13 15" Pressed_BG="Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;249 167 13 15" />
+                            </form>
+                        </PagerTemplate>
+                    </pe:gridview>
+                </div>
+                <div class="area_split" name="area_split"></div>
+                <div class="area_content_list">
+                    <pe:if condition="<%= has_data() %>">
+                        <pe:gridview name="historyList" DefaultNodeHeight="32" DataSource="<%={{a=1},{a=2}}%>" pageSize="10" ItemsPerLine="1" AllowPaging="true">
+                            <Columns>
+                                <div name="dateTitle" style="color:white">
+                                    <div>今天-9999.12.31</div>
+                                    <div style="height:2px;margin-top:5px;" width="100%" class="mc_line"></div>
+                                </div>
+                                <div name="dateList" class="date_list">
+                                    <div class="list_item" width="100%">
+                                        9:06 AM [服务器] 127.0.0.1:8099
+                                        <input type="button" class="item_button" value="收藏"/>
+                                        <input type="button" class="item_button" value="删除"/>
+                                    </div>
+                                </div>
+                            </Columns>
+                            <PagerSettings Position="Bottom" height="1" />
+                            <PagerTemplate AutoHidePager="true">
+                                <form>
+                                    <label name="page" style="height:18px;margin-left:59px;margin-top:-95px;color:#ffffff;" />
+                                    <input type="button" name="pre"  invisibleondisabled="false" zorder=2 animstyle="23" tooltip='<%=L"上一页"%>' style="margin-left:35px;margin-top:-93px;width:13px;height:15px;background:url(Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#224 149 13 15);" Normal_BG="Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#224 149 13 15" Pressed_BG="Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;224 167 13 15" />
+                                    <input type="button" name="next" invisibleondisabled="false" zorder=2 animstyle="23" tooltip='<%=L"下一页"%>' style="margin-left:40px;margin-top:-93px;width:13px;height:15px;background:url(Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#249 149 13 15);" Normal_BG="Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;249 149 13 15" Pressed_BG="Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;249 167 13 15" />
+                                </form>
+                            </PagerTemplate>
+                        </pe:gridview>
+                    </pe:if>
+                    <pe:if condition="<%= not has_data() %>">
+                        <div style="color:white">
+                            <%=L"暂时没有历史数据"%>
+                        </div>
+                    </pe:if>
+                </div>
+            </div>
+        </div>
+    </pe:mcml>
+</body>
+</html>

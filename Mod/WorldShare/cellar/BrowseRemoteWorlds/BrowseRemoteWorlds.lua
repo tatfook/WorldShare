@@ -5,20 +5,21 @@ Date: 2018/5/11
 Desc: 
 use the lib:
 ------------------------------------------------------------
-NPL.load("(gl)Mod/WorldShare/login/BrowseRemoteWorlds.lua");
-local BrowseRemoteWorlds = commonlib.gettable("Mod.WorldShare.login.BrowseRemoteWorlds");
+local BrowseRemoteWorlds = NPL.load("(gl)Mod/WorldShare/login/BrowseRemoteWorlds.lua")
 BrowseRemoteWorlds.ShowPage(callbackFunc)
 ------------------------------------------------------------
 ]]
 NPL.load("(gl)script/apps/Aries/Creator/Game/Login/InternetLoadWorld.lua");
-local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
+
 local Screen = commonlib.gettable("System.Windows.Screen")
 local Encoding = commonlib.gettable("commonlib.Encoding")
+local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
 local RemoteServerList = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.RemoteServerList")
 local GameLogic = commonlib.gettable("MyCompany.Aries.Game.GameLogic")
 
 local SyncMain = NPL.load("(gl)Mod/WorldShare/sync/SyncMain.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
+local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 
 local BrowseRemoteWorlds = NPL.export()
 
@@ -63,26 +64,7 @@ function BrowseRemoteWorlds.ShowPage(callbackFunc)
 
     BrowseRemoteWorlds.OnScreenSizeChange()
 
-    local params = {
-        url = "Mod/WorldShare/cellar/BrowseRemoteWorlds/BrowseRemoteWorlds.html",
-        name = "BrowseRemoteWorlds",
-        isShowTitleBar = false,
-        DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
-        style = CommonCtrl.WindowFrame.ContainerStyle,
-        zorder = 0,
-        allowDrag = false,
-        enable_esc_key = true,
-        bShow = true,
-        directPosition = true,
-        align = "_fi",
-        x = 0,
-        y = 0,
-        width = 0,
-        height = 0,
-        cancelShowAnimation = true
-    }
-
-    System.App.Commands.Call("File.MCMLWindowFrame", params)
+    local params = Utils:ShowWindow(0, 0, "Mod/WorldShare/cellar/BrowseRemoteWorlds/BrowseRemoteWorlds.html", "BrowseRemoteWorlds", 0, 0, "_fi", false)
 
     Screen:Connect("sizeChanged", BrowseRemoteWorlds, BrowseRemoteWorlds.OnScreenSizeChange, "UniqueConnection")
 

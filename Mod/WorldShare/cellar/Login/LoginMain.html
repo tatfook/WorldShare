@@ -123,6 +123,10 @@
                     local url = Page:GetValue("content","");
                     InternetLoadWorld.GotoUrl(url)
                 end
+
+                function show_history()
+                    LoginMain:ShowHistoryManager()
+                end
             ]]>
         </script>
         <style type="text/mcss">
@@ -287,7 +291,7 @@
                     <div style="float:left" class="add_server_text_field">
                         <input type="text" name="content" style="width:400px;height:30px;background:url();textcolor:#ffffff" spacing="4" EmptyText='<%=L"输入课程ID或服务器地址"%>'
                             rows="1" CaretColor="#FFFFFFFF" />
-                        <input class="flat_button" style="height:26px;margin-top:2px;margin:2px;min-width:32px" type="button" value="..." tooltip='<%=L"管理访问历史"%>'
+                        <input class="flat_button" onclick="show_history()" style="height:26px;margin-top:2px;margin:2px;min-width:32px" type="button" value="..." tooltip='<%=L"管理访问历史"%>'
                         />
                     </div>
                     <input type="button" value='<%=L"打开" %>' class="flat_button" style="margin-left:3px;height:30px" onclick="GotoUrl"

@@ -30,7 +30,7 @@ function ShareWorld:init()
     Store:set("world/selectWorld", self:GetEnterWorld())
 
     local enterWorld = self:GetEnterWorld()
-    echo(enterWorld, true)
+
     if(not enterWorld or enterWorld.is_zip) then
         _guihelper.MessageBox(L"此世界不支持分享")
         return false
@@ -42,7 +42,8 @@ function ShareWorld:init()
         end
 
         if (not LoginUserInfo.checkDoAutoSignin(syncCompare)) then
-            LoginMain.ShowLoginModalImp(syncCompare)
+            LoginMain.ShowLoginModalImp()
+            Store:set('user/afterLogined', syncCompare)
         end
 
         return false

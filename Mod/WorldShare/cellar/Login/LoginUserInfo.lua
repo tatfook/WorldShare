@@ -40,11 +40,6 @@ else
     }
 end
 
-LoginUserInfo.ignore_auto_login = nil
-LoginUserInfo.hasExplicitLogin = nil
-LoginUserInfo.username = nil
-LoginUserInfo.isVerified = false
-
 local default_avatars = {
     "boy01",
     "girl01",
@@ -99,199 +94,202 @@ function loginRequest(url, params, headers, callback)
     )
 end
 
-function loginResponse(page, response, err, callback)
-    local account = page and page:GetValue("account")
-    local password = page and page:GetValue("password")
-    local loginServer = page and page:GetValue("loginServer")
-    local isRememberPwd = page and page:GetValue("rememberPassword")
-    local autoLogin = page and page:GetValue("autoLogin")
-
-    if (type(response) == "table") then
-        if (response["data"] ~= nil and response["data"]["userinfo"]["_id"]) then
-            if (not response["data"]["userinfo"]["realNameInfo"]) then
-                LoginUserInfo.isVerified = false
-            else
-                LoginUserInfo.isVerified = true
-            end
-
-            local token = response["data"]["token"]
-
-            Store:set('user/token', token)
-
-            -- 手机号或其他账号登陆时，重新获取用户名
-            account = response.data.userinfo.defaultSiteDataSource.username
-
-            local getDataSourceApi =
-                format("%s/api/wiki/models/site_data_source/getDefaultSiteDataSource", LoginUserInfo.site())
-
-            if (token) then
-                HttpRequest:GetUrl(
-                    {
-                        url = getDataSourceApi,
-                        json = true,
-                        headers = {
-                            Authorization = format("Bearer %s", token)
-                        },
-                        form = {
-                            username = account
-                        }
-                    },
-                    function(data, err)
-                        if (not data) then
-                            _guihelper.MessageBox(L"数据源不存在，请联系管理员")
-                            LoginMain.closeMessageInfo()
-                            return
-                        end
-
-                        local defaultSiteDataSource = data.data
-
-                        -- 如果记住密码则保存密码到redist根目录下
-                        if (isRememberPwd) then
-                            LoginUserInfo.SaveSigninInfo(
-                                {
-                                    account = account,
-                                    password = password,
-                                    loginServer = loginServer,
-                                    token = token,
-                                    autoLogin = autoLogin
-                                }
-                            )
-                        end
-
-                        local userinfo = response["data"]["userinfo"]
-                        local username = userinfo["username"]
-                        local userId = userinfo["_id"]
-
-                        Store:set("user/username", userinfo["username"])
-                        Store:set("user/userId", userinfo["_id"])
-                        Store:set("user/userinfo", userinfo)
-
-                        local userType
-
-                        if (type(userinfo["vipInfo"]) == "table" and userinfo["vipInfo"]["endDate"]) then
-                            local endDate = userinfo["vipInfo"]["endDate"]
-                            local datePattern = "(%d+)-(%d+)-(%d+)"
-
-                            local year, month, day = endDate:match(datePattern)
-
-                            local endDateTimestamp
-
-                            if (year and month and day) then
-                                endDateTimestamp = os.time({year = year, month = month, day = day})
-                            end
-
-                            if (not endDateTimestamp or endDateTimestamp < os.time()) then
-                                userType = "normal"
-                            else
-                                userType = "vip"
-                            end
-                        else
-                            userType = "normal"
-                        end
-
-                        Store:set("user/userType", userType)
-
-                        for _, value in ipairs(userinfo["dataSource"]) do
-                            if (value.type == defaultSiteDataSource.type) then
-                                dataSourceSetting = value
-                                break
-                            end
-                        end
-
-                        if (not dataSourceSetting) then
-                            _guihelper.MessageBox(L"数据源配置文件不存在")
-                            MsgBox:Close()
-                            return
-                        end
-
-                        local dataSourceInfo = {
-                            dataSourceToken = defaultSiteDataSource["dataSourceToken"], -- 数据源Token
-                            dataSourceUsername = defaultSiteDataSource["dataSourceUsername"], -- 数据源用户名
-                            dataSourceType = defaultSiteDataSource["type"], -- 数据源类型
-                            apiBaseUrl = defaultSiteDataSource["apiBaseUrl"] and string.gsub(defaultSiteDataSource['apiBaseUrl'], 'http://', 'https://') or '', -- 数据源api
-                            rawBaseUrl = defaultSiteDataSource["rawBaseUrl"] and string.gsub(defaultSiteDataSource['rawBaseUrl'], 'http://', 'https://') or '', -- 数据源raw
-                            keepWorkDataSource = defaultSiteDataSource["projectName"], -- keepwork仓名
-                            keepWorkDataSourceId = defaultSiteDataSource["projectId"] -- keepwork仓ID
-                        }
-
-                        Store:set("user/dataSourceInfo", dataSourceInfo)
-
-                        LoginUserInfo.personPageUrl =
-                            format("%s/%s/paracraft/index", LoginUserInfo.site(), username)
-
-                        --判断paracraf站点是否存在，不存在则创建
-                        HttpRequest:GetUrl(
-                            {
-                                url = format("%s/api/wiki/models/website/getDetailInfo", LoginUserInfo.site()),
-                                json = true,
-                                headers = {Authorization = format("Bearer %s", token)},
-                                form = {
-                                    username = username,
-                                    sitename = "paracraft"
-                                }
-                            },
-                            function(data, err)
-                                local site = data["data"]
-
-                                if (not site) then
-                                    LoginMain.closeMessageInfo()
-                                    _guihelper.MessageBox(L"检查站点失败")
-                                    return
-                                end
-
-                                if (not site.siteinfo) then
-                                    --创建站点
-                                    local siteParams = {
-                                        categoryId = 1,
-                                        categoryName = "作品网站",
-                                        desc = "paracraft作品集",
-                                        displayName = "paracraft",--LoginUserInfo.username,
-                                        domain = "paracraft",
-                                        logoUrl = "/wiki/assets/imgs/paracraft.png",
-                                        name = "paracraft",
-                                        styleId = 1,
-                                        styleName = "WIKI样式",
-                                        templateId = 1,
-                                        templateName = "WIKI模板",
-                                        userId = LoginUserInfo.userId,
-                                        username = LoginUserInfo.username
-                                    }
-
-                                    HttpRequest:GetUrl(
-                                        {
-                                            url = format("%s/api/wiki/models/website/new", LoginUserInfo.site()),
-                                            json = true,
-                                            headers = {Authorization = format("Bearer %s", LoginUserInfo.token)},
-                                            form = siteParams
-                                        },
-                                        function(data, err)
-                                        end
-                                    )
-                                end
-
-                                MsgBox:Close()
-                                LoginWorldList.RefreshCurrentServerList()
-
-                                LoginMain.closeLoginModalImp()
-
-                                if (type(callback) == "function") then
-                                    callback()
-                                end
-
-                                -- GenerateMdPage:genIndexMD()
-                            end
-                        )
-                    end
-                )
-            end
-        else
-            MsgBox:Close()
-            _guihelper.MessageBox(L"用户名或者密码错误")
-        end
-    else
+function loginResponse(response, err, callback)
+    if (type(response) ~= "table") then
         MsgBox:Close()
         _guihelper.MessageBox(L"服务器连接失败")
+        return false
     end
+
+    if (
+        not response["data"] or
+        not response["data"]["token"] or
+        not response["data"]["userinfo"] or
+        not response["data"]["userinfo"]["_id"]
+    ) then
+        MsgBox:Close()
+        _guihelper.MessageBox(L"用户名或者密码错误")
+        return false
+    end
+
+    local token = response["data"]["token"] or ''
+    local userinfo = response["data"]["userinfo"] or {}
+    local userId = userinfo["_id"] or 0
+    local username = userinfo["username"] or ''
+
+    Store:set('user/token', token)
+    Store:set("user/userinfo", userinfo)
+    Store:set("user/userId", userId)
+    Store:set("user/username", username)
+
+    if (not userinfo["realNameInfo"]) then
+        Store:set('user/isVerified', false)
+    else
+        Store:set('user/isVerified', true)
+    end
+
+    -- ensure account is correct when login with phone or email
+    local username = userinfo['defaultSiteDataSource'] and userinfo['defaultSiteDataSource']['username'] or ''
+
+    local getDataSourceApi =
+        format("%s/api/wiki/models/site_data_source/getDefaultSiteDataSource", LoginUserInfo.site())
+
+    local function handleGetDataSource(response, err)
+        if (not response) then
+            _guihelper.MessageBox(L"数据源不存在，请联系管理员")
+            MsgBox:Close()
+            return
+        end
+
+        local defaultSiteDataSource = response.data or {}
+
+        local userType
+
+        if (type(userinfo["vipInfo"]) == "table" and userinfo["vipInfo"]["endDate"]) then
+            local endDate = userinfo["vipInfo"]["endDate"]
+            local datePattern = "(%d+)-(%d+)-(%d+)"
+
+            local year, month, day = endDate:match(datePattern)
+
+            local endDateTimestamp
+
+            if (year and month and day) then
+                endDateTimestamp = os.time({year = year, month = month, day = day})
+            end
+
+            if (not endDateTimestamp or endDateTimestamp < os.time()) then
+                userType = "normal"
+            else
+                userType = "vip"
+            end
+        else
+            userType = "normal"
+        end
+
+        Store:set("user/userType", userType)
+
+        for _, value in ipairs(userinfo["dataSource"]) do
+            if (value.type == defaultSiteDataSource.type) then
+                dataSourceSetting = value
+                break
+            end
+        end
+
+        if (not dataSourceSetting) then
+            _guihelper.MessageBox(L"数据源配置文件不存在")
+            MsgBox:Close()
+            return
+        end
+
+        local dataSourceInfo = {
+            dataSourceToken = defaultSiteDataSource["dataSourceToken"], -- 数据源Token
+            dataSourceUsername = defaultSiteDataSource["dataSourceUsername"], -- 数据源用户名
+            dataSourceType = defaultSiteDataSource["type"], -- 数据源类型
+            apiBaseUrl = defaultSiteDataSource["apiBaseUrl"] and string.gsub(defaultSiteDataSource['apiBaseUrl'], 'http://', 'https://') or '', -- 数据源api
+            rawBaseUrl = defaultSiteDataSource["rawBaseUrl"] and string.gsub(defaultSiteDataSource['rawBaseUrl'], 'http://', 'https://') or '', -- 数据源raw
+            keepWorkDataSource = defaultSiteDataSource["projectName"], -- keepwork仓名
+            keepWorkDataSourceId = defaultSiteDataSource["projectId"] -- keepwork仓ID
+        }
+
+        Store:set("user/dataSourceInfo", dataSourceInfo)
+
+        LoginUserInfo.personPageUrl =
+            format("%s/%s/paracraft/index", LoginUserInfo.site(), username)
+
+        LoginUserInfo.CreateParacraftSite(callback)
+    end
+
+    local params = {
+        url = getDataSourceApi,
+        json = true,
+        headers = {
+            Authorization = format("Bearer %s", token)
+        },
+        form = {
+            username = username
+        }
+    }
+
+    HttpRequest:GetUrl(params, handleGetDataSource)
+end
+
+function LoginUserInfo.CreateParacraftSite(callback)
+    local username = Store:get('user/username')
+    local token = Store:get('user/token')
+    local userId = Store:get('user/userId')
+
+    if (not username or not token) then
+        return false
+    end
+
+    --判断paracraf站点是否存在，不存在则创建
+    HttpRequest:GetUrl(
+        {
+            url = format("%s/api/wiki/models/website/getDetailInfo", LoginUserInfo.site()),
+            json = true,
+            headers = {Authorization = format("Bearer %s", token)},
+            form = {
+                username = username,
+                sitename = "paracraft"
+            }
+        },
+        function(data, err)
+            local site = data["data"]
+
+            if (not site) then
+                MsgBox:Close()
+                _guihelper.MessageBox(L"检查站点失败")
+                return false
+            end
+
+            if (not site.siteinfo) then
+                --创建站点
+                local siteParams = {
+                    categoryId = 1,
+                    categoryName = "作品网站",
+                    desc = "paracraft作品集",
+                    displayName = "paracraft",
+                    domain = "paracraft",
+                    logoUrl = "/wiki/assets/imgs/paracraft.png",
+                    name = "paracraft",
+                    styleId = 1,
+                    styleName = "WIKI样式",
+                    templateId = 1,
+                    templateName = "WIKI模板",
+                    userId = userId,
+                    username = username
+                }
+
+                HttpRequest:GetUrl(
+                    {
+                        url = format("%s/api/wiki/models/website/new", LoginUserInfo.site()),
+                        json = true,
+                        headers = {Authorization = format("Bearer %s", token)},
+                        form = siteParams
+                    }
+                )
+            end
+
+            MsgBox:Close()
+
+            local LoginMainPage = Store:get('page/LoginMain')
+
+            if LoginMainPage then
+                LoginWorldList.RefreshCurrentServerList()
+            end
+
+            local afterLogined = Store:get('user/afterLogined')
+
+            if type(afterLogined) == 'function' then
+                afterLogined()
+                Store:remove('user/afterLogined')
+            end
+
+            if (type(callback) == "function") then
+                callback()
+            end
+        end
+    )
 end
 
 function LoginUserInfo.site()
@@ -329,7 +327,9 @@ function LoginUserInfo.IsSignedIn()
 end
 
 function LoginUserInfo.CheckoutVerified()
-    if (LoginUserInfo.IsSignedIn() and not LoginUserInfo.isVerified) then
+    local isVerified = Store:get('user/isVerified')
+
+    if (LoginUserInfo.IsSignedIn() and not isVerified) then
         _guihelper.MessageBox(
             L"您需要到keepwork官网进行实名认证，认证成功后需重启paracraft即可正常操作，是否现在认证？",
             function(res)
@@ -355,51 +355,76 @@ function LoginUserInfo.GetValidAvatarFilename(playerName)
     end
 end
 
-function LoginUserInfo.LoginAction(page, callback)
-    local account = page:GetValue("account")
-    local password = page:GetValue("password")
+function LoginUserInfo.LoginActionModal()
+    local LoginModalImp = Store:get('page/LoginModal')
 
-    page:SetNodeValue("account", account)
-    page:SetNodeValue("password", password)
+    if (not LoginModalImp) then
+        return false
+    end
 
-    if (account == nil or account == "") then
+    local account = LoginModalImp:GetValue("account")
+    local password = LoginModalImp:GetValue("password")
+    local site = LoginModalImp:GetValue("loginServer")
+    local autoLogin = LoginModalImp:GetValue("autoLogin")
+    local rememberMe = LoginModalImp:GetValue("rememberPassword")
+
+    local inputLoginInfo = {
+        account = account,
+        password = password,
+        site = site,
+        autoLogin = autoLogin,
+        rememberMe = rememberme
+    }
+
+    Store:set('user/inputLoginInfo', inputLoginInfo)
+
+    if (not account or account == '') then
         _guihelper.MessageBox(L"账号不能为空")
-        return
+        return false
     end
 
-    if (password == nil or password == "") then
+    if (not password or password == '') then
         _guihelper.MessageBox(L"密码不能为空")
-        return
+        return false
     end
+
+    if (not site) then
+        _guihelper.MessageBox(L"登陆站点不能为空")
+        return false
+    end
+
+    Store:set('user/site', site)
 
     MsgBox:Show(L"正在登陆，请稍后...")
+
+    local function handleLogined()
+        local token = Store:get('user/token') or ''
+
+        -- 如果记住密码则保存密码到redist根目录下
+        if (rememberMe) then
+            LoginUserInfo.SaveSigninInfo(
+                {
+                    account = account,
+                    password = password,
+                    loginServer = site,
+                    token = token,
+                    autoLogin = autoLogin
+                }
+            )
+        else
+            LoginUserInfo.SaveSigninInfo()
+        end
+
+        LoginMain.closeLoginModalImp()
+    end
 
     LoginUserInfo.LoginActionApi(
         account,
         password,
         function(response, err)
-            loginResponse(page, response, err, callback)
+            loginResponse(response, err, handleLogined)
         end
     )
-end
-
-function LoginUserInfo.LoginActionModal()
-    local LoginModalPage = Store:get('page/LoginModal')
-
-    LoginUserInfo.LoginAction(
-        LoginModalPage,
-        function()
-            if (type(LoginMain.modalCall) == "function") then
-                LoginMain.modalCall()
-            end
-
-            LoginMain.modalCall = nil
-        end
-    )
-end
-
-function LoginUserInfo.LoginActionMain()
-    LoginMain.LoginAction(LoginMain.LoginPage)
 end
 
 function LoginUserInfo.IsMCVersion()
@@ -460,22 +485,31 @@ function LoginUserInfo.LoadSigninInfo()
         file:close()
 
         local PWD = {}
+
         for value in string.gmatch(fileContent, "[^|]+") do
             PWD[#PWD + 1] = value
         end
 
         local info = {}
+
         if (PWD[1]) then
             info.account = PWD[1]
         end
+    
         if (PWD[2]) then
             info.password = Encoding.PasswordDecodeWithMac(PWD[2])
         end
-        info.loginServer = PWD[3]
+    
+        if (PWD[3]) then
+            info.loginServer = PWD[3]
+        end
+    
         if (PWD[4]) then
             info.token = Encoding.PasswordDecodeWithMac(PWD[4])
         end
+    
         info.autoLogin = (not PWD[5] or PWD[5] == "true")
+    
         return info
     end
 end
@@ -519,157 +553,44 @@ function LoginUserInfo.checkDoAutoSignin(callback)
         info.account,
         info.password,
         function(response, err)
-            loginResponse(nil, response, err, callback)
+            loginResponse(response, err, callback)
         end
     )
 
     return true
 end
 
-function LoginUserInfo.getRememberPassword()
-    local info = LoginUserInfo.LoadSigninInfo()
-    local LoginModalPage = Store:get('page/LoginModal')
-   
-    if (not LoginModalPage) then
-        return false;
-    end
-
-    if (info) then
-        if (info.account) then
-            LoginModalPage:SetValue("account", info.account)
-        end
-
-        if (info.password) then
-            LoginModalPage:SetValue("password", info.password)
-        end
-
-        LoginModalPage:SetValue("loginServer", info.loginServer)
-        LoginModalPage:SetValue("rememberPassword", true)
-
-        LoginModalPage:SetValue("autoLogin", info.autoLogin == true)
-    else
-        LoginModalPage:SetValue("rememberPassword", false)
-        LoginModalPage:SetValue("autoLogin", false)
-    end
+function LoginUserInfo.OnClickLogin()
+    Store:set('user/ignoreAutoLogin', true)
+    LoginMain.ShowLoginModalImp()
 end
 
-function LoginUserInfo.setSite()
-    if (not LoginMain.ModalPage) then
+function LoginUserInfo.setAutoLogin()
+    local LoginModalImp = Store:get('page/LoginModal')
+
+    if (not LoginModalImp) then
         return false
     end
 
-    local loginServer = LoginMain.ModalPage:GetValue("loginServer")
-    Store:set("user/site", loginServer)
+    local autoLogin = LoginModalImp:GetValue('autoLogin')
+    local loginServer = LoginModalImp:GetValue('loginServer')
+    local account = LoginModalImp:GetValue('account')
+    local password = LoginModalImp:GetValue('password')
+    local rememberMe = LoginModalImp:GetValue('rememberPassword')
 
-    local node = LoginMain.ModalPage:GetNode("register")
-
-    if (node) then
-        node:SetAttribute("href", format("%s/wiki/join", loginServer))
+    if (autoLogin) then
+        LoginModalImp:SetValue("rememberPassword", true)
+        LoginModalImp:SetValue("autoLogin", true)
+    else
+        LoginModalImp:SetValue("rememberPassword", rememberMe)
+        LoginModalImp:SetValue("autoLogin", false)
     end
 
-    LoginMain.refreshModalPage()
-end
+    LoginModalImp:SetValue('loginServer', loginServer)
+    LoginModalImp:SetValue('account', account)
+    LoginModalImp:SetValue('password', password)
 
-function LoginUserInfo.OnClickLogin()
-    LoginUserInfo.ignore_auto_login = true
-
-    LoginMain.ShowLoginModalImp(
-        function()
-            if (page) then
-                page:Refresh(0.01)
-            end
-        end
-    )
-end
-
-function LoginUserInfo.setRememberAuto()
-    local function setRememberAuto(page)
-        local account = page:GetValue("account")
-        local password = page:GetValue("password")
-        local loginServer = page:GetValue("loginServer")
-
-        local auto = page:GetValue("autoLogin")
-
-        if (auto) then
-            page:GetNode("autoLogin"):SetAttribute("checked", "checked")
-            page:GetNode("rememberPassword"):SetAttribute("checked", "checked")
-            page:SetNodeValue("account", account)
-            page:SetNodeValue("password", password)
-
-            page:Refresh(0.01)
-        else
-            local info = LoginUserInfo.LoadSigninInfo()
-            if (info) then
-                info.autoLogin = false
-                LoginUserInfo.SaveSigninInfo(info)
-            end
-        end
-    end
-
-    if (LoginMain.LoginPage and LoginMain.hasExplicitLogin) then
-        setRememberAuto(LoginMain.LoginPage)
-    end
-
-    if (LoginMain.ModalPage) then
-        setRememberAuto(LoginMain.ModalPage)
-    end
-end
-
-function LoginUserInfo.setAutoRemember()
-    local function setAutoRemember(page)
-        local account = page:GetValue("account")
-        local password = page:GetValue("password")
-        local loginServer = page:GetValue("loginServer")
-
-        local remember = page:GetValue("rememberPassword")
-
-        if (not remember) then
-            page:GetNode("rememberPassword"):SetAttribute("checked", nil)
-            page:GetNode("autoLogin"):SetAttribute("checked", nil)
-            page:SetNodeValue("account", account)
-            page:SetNodeValue("password", password)
-
-            page:Refresh(0.01)
-
-            LoginUserInfo.SaveSigninInfo(nil)
-        end
-    end
-
-    if (LoginMain.LoginPage and LoginMain.hasExplicitLogin) then
-        setAutoRemember(LoginMain.LoginPage)
-    end
-
-    if (LoginMain.ModalPage) then
-        setAutoRemember(LoginMain.ModalPage)
-    end
-end
-
-function LoginUserInfo.autoLoginAction(type)
-    if (LoginUserInfo.ignore_auto_login) then
-        return
-    end
-
-    local function autoLoginAction(page)
-        if (not LoginUserInfo.IsSignedIn()) then
-            local autoLogin = page:GetValue("autoLogin")
-
-            if (autoLogin) then
-                if (type == "main") then
-                    LoginUserInfo.LoginActionMain()
-                elseif (type == "modal") then
-                    LoginUserInfo.LoginActionModal()
-                end
-            end
-        end
-    end
-
-    if (LoginMain.LoginPage and LoginMain.hasExplicitLogin) then
-        autoLoginAction(LoginMain.LoginPage)
-    end
-
-    if (LoginMain.ModalPage) then
-        autoLoginAction(LoginMain.ModalPage)
-    end
+    LoginMain.refreshLoginModalImp()
 end
 
 function LoginUserInfo.LoginActionApi(account, password, callback)
@@ -680,9 +601,7 @@ function LoginUserInfo.LoginActionApi(account, password, callback)
         password = password
     }
 
-    local headers = {}
-
-    loginRequest(url, params, headers, callback)
+    loginRequest(url, params, {}, callback)
 end
 
 function LoginUserInfo.LoginWithTokenApi(callback)
@@ -693,7 +612,7 @@ function LoginUserInfo.LoginWithTokenApi(callback)
     local usertoken = urlProtocol:match('usertoken="([%S]+)"')
 
     if (type(usertoken) == "string" and #usertoken > 0) then
-        LoginMain.showMessageInfo(L"正在登陆，请稍后...")
+        MsgBox:Show(L"正在登陆，请稍后...")
 
         local url = format("%s/api/wiki/models/user/getProfile", LoginUserInfo.site())
 

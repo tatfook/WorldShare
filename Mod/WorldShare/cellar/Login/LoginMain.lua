@@ -18,6 +18,7 @@ local CreateNewWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.Create
 local LoginUserInfo = NPL.load("(gl)Mod/WorldShare/cellar/Login/LoginUserInfo.lua")
 local LoginWorldList = NPL.load("(gl)Mod/WorldShare/cellar/Login/LoginWorldList.lua")
 local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/SyncMain.lua")
+local HistoryManager = NPL.load("(gl)Mod/WorldShare/cellar/HistoryManager/HistoryManager.lua")
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local BrowseRemoteWorlds = NPL.load("(gl)Mod/WorldShare/cellar/BrowseRemoteWorlds/BrowseRemoteWorlds.lua")
@@ -30,24 +31,7 @@ end
 function LoginMain.init()
 end
 
--- this is called from ParaWorld Login App
-function LoginMain:CheckShowUserWorlds()
-    if(System.options.showUserWorldsOnce) then
-        BrowseRemoteWorlds.ShowPage(
-            function(bHasEnteredWorld)
-                System.options.showUserWorldsOnce = nil;
-                self.closeLoginMainPage()
-            end
-        )
-        return true;
-    end
-end
-
-function LoginMain:ShowLoginMainPage()
-    if(self:CheckShowUserWorlds()) then
-        return false
-    end
-
+function LoginMain.ShowLoginMainPage()
     local params = Utils:ShowWindow(850, 470, "Mod/WorldShare/cellar/Login/LoginMain.html", "LoginMain")
 
     params._page.OnClose = function()
@@ -64,20 +48,19 @@ function LoginMain:ShowLoginMainPage()
         return false
     end
 
-    if (LoginMain.notFirstTimeShown) then
-        LoginUserInfo.ignore_auto_login = true
-    else
-        LoginMain.notFirstTimeShown = true
+    local notFirstTimeShown = Store:get('user/notFirstTimeShown')
 
-        if (not LoginUserInfo.ignore_auto_login) then
+    if (notFirstTimeShown) then
+        Store:set('user/ignoreAutoLogin', true)
+    else
+        Store:set('user/notFirstTimeShown', true)
+
+        local ignoreAutoLogin = Store:get('user/ignoreAutoLogin')
+
+        if (not ignoreAutoLogin) then
             -- auto sign in here
             LoginUserInfo.checkDoAutoSignin()
         end
-    end
-
-    if (LoginUserInfo.hasExplicitLogin) then
-        LoginUserInfo.getRememberPassword()
-        LoginUserInfo.setSite()
     end
 
     LoginWorldList.RefreshCurrentServerList()
@@ -148,9 +131,9 @@ function LoginMain.isShowLoginMainPage()
     end
 end
 
-function LoginMain.ShowLoginModalImp(callback)
-    if (LoginUserInfo.LoginWithTokenApi(callback)) then
-        return false
+function LoginMain.ShowLoginModalImp()
+    if (LoginUserInfo.LoginWithTokenApi()) then
+        return true
     end
 
     local params = Utils:ShowWindow(320, 350, "Mod/WorldShare/cellar/Login/LoginModal.html", "LoginModal")
@@ -159,13 +142,34 @@ function LoginMain.ShowLoginModalImp(callback)
         Store:remove('page/LoginModal')
     end
 
-    if (type(callback) == "function") then
-        LoginMain.modalCall = callback
+    local LoginModalImp = Store:get('page/LoginModal')
+
+    if not LoginModalImp then
+        return false
     end
 
-    LoginUserInfo.getRememberPassword()
-    LoginUserInfo.setSite()
-    LoginUserInfo.autoLoginAction("modal")
+    local PWDInfo = LoginUserInfo.LoadSigninInfo()
+
+    if (PWDInfo) then
+        local rememberMeNode = LoginModalImp:GetNode('rememberPassword')
+        local autoLoginNode = LoginModalImp:GetNode('autoLogin')
+
+        rememberMeNode:SetAttribute('checked', 'checked')
+
+        if PWDInfo and PWDInfo.autoLogin then
+            autoLoginNode:SetAttribute('checked', 'checked')
+        end
+
+        LoginModalImp:SetValue('loginServer', PWDInfo.loginServer or '')
+        LoginModalImp:SetValue('account', PWDInfo.account or '')
+        LoginModalImp:SetValue('password', PWDInfo.password or '')
+    end
+
+    local registerUrl = format("%s/wiki/join", LoginUserInfo.site())
+
+    LoginModalImp:GetNode('register'):SetAttribute('href', registerUrl)
+
+    LoginMain.refreshLoginModalImp()
 end
 
 function LoginMain.setLoginModalImp()
@@ -173,26 +177,31 @@ function LoginMain.setLoginModalImp()
 end
 
 function LoginMain.closeLoginModalImp()
-    local LoginModalPage = Store:get('page/LoginModal')
+    local LoginModalImp = Store:get('page/LoginModal')
 
-    if(not LoginModalPage) then
+    if(not LoginModalImp) then
         return false
     end
 
-    LoginModalPage:CloseWindow()
+    LoginModalImp:CloseWindow()
 end
 
 function LoginMain.refreshLoginModalImp(time)
-    local LoginModalPage = Store:get('page/LoginModal')
+    local LoginModalImp = Store:get('page/LoginModal')
 
-    if (LoginModalPage) then
-        LoginModalPage:Refresh(time or 0.01)
+    if (LoginModalImp) then
+        LoginModalImp:Refresh(time or 0.01)
     end
 end
 
 function LoginMain.InputSearchContent()
     InternetLoadWorld.isSearching = true
-    LoginMain.LoginPage:Refresh(0.1)
+
+    local LoginMainPage = Store:get('page/LoginMain')
+
+    if (LoginMainPage) then
+        LoginMainPage:Refresh(0.1)
+    end
 end
 
 function LoginMain.IsMCVersion()
@@ -215,4 +224,8 @@ function LoginMain.OnClickOfficialWorlds()
             end
         end
     )
+end
+
+function LoginMain:ShowHistoryManager()
+    HistoryManager:ShowPage()
 end
