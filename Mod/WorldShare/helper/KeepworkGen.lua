@@ -124,7 +124,7 @@ function KeepworkGen:getParacraftCommand(params)
     local template =
         [[
 ```@Paracraft
-styleID: 3
+styleID: 0
 preview:
     src: {{preview}}
     link: ''
@@ -167,7 +167,7 @@ size:
     target: _self
 download:
     name: ''
-    link: ''
+    link: {{download}}
     width: ''
     height: ''
     src: ''
@@ -176,7 +176,7 @@ download:
     target: _self
 enter:
     name: ''
-    link: ''
+    link: {{enter}}
     width: ''
     height: ''
     src: ''
@@ -211,6 +211,8 @@ backgroundImage:
     result = result:gsub('{{version}}', params.version or '')
     result = result:gsub('{{updateTime}}', params.updateTime or '')
     result = result:gsub('{{size}}', params.size or '')
+    result = result:gsub('{{enter}}', params.download or '')
+    result = result:gsub('{{download}}', params.download or '')
 
     return result
 end

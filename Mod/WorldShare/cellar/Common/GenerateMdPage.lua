@@ -83,7 +83,7 @@ function GenerateMdPage:genWorldMD(worldInfo, callback)
 
     local KPParacraftMod = {
         worldName = worldInfo.name,
-        link_world_url = worldInfo.download,
+        download = worldInfo.download,
         preview = worldInfo.preview,
         link_desc = "",
         author = userinfo.username,

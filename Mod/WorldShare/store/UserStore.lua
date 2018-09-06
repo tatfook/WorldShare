@@ -1,8 +1,8 @@
 --[[
 Title: User
-Author(s):  big
-Date:  2018.8.17
-Desc: 
+Author(s): big
+Date: 2018.8.17
+City: Foshan 
 use the lib:
 ------------------------------------------------------------
 NPL.load("(gl)Mod/WorldShare/store/User.lua")

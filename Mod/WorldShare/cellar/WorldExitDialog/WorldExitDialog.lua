@@ -5,8 +5,7 @@ Date: 2017/5/15
 Desc: 
 use the lib:
 ------------------------------------------------------------
-NPL.load("(gl)Mod/WorldShare/login/WorldExitDialog.lua");
-local WorldExitDialog = commonlib.gettable("Mod.WorldShare.login.WorldExitDialog");
+local WorldExitDialog = NPL.load("(gl)Mod/WorldShare/cellar/WorldExitDialog/WorldExitDialog.lua")
 WorldExitDialog.ShowPage();
 ------------------------------------------------------------
 ]]

@@ -13,7 +13,7 @@ NPL.load("./PageStore.lua")
 
 local UserStore = commonlib.gettable('Mod.WorldShare.store.User')
 local PageStore = commonlib.gettable('Mod.WorldShare.store.Page')
-local WorldStore = commonlib.gettable('Mod.WorldShare.store.WorldStore')
+local WorldStore = commonlib.gettable('Mod.WorldShare.store.World')
 
 local Store = NPL.export()
 
