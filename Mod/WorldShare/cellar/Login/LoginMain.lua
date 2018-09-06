@@ -244,5 +244,6 @@ function LoginMain.OnClickOfficialWorlds()
 end
 
 function LoginMain:ShowHistoryManager()
-    HistoryManager:ShowPage()
+    _guihelper.MessageBox(L"历史记录功能即将到来")
+    -- HistoryManager:ShowPage()
 end
