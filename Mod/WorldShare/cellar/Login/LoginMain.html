@@ -127,6 +127,13 @@
                 function show_history()
                     LoginMain:ShowHistoryManager()
                 end
+
+                function OnClickLesson()
+                    LoginMain.closeLoginMainPage();
+                    NPL.load("(gl)script/apps/Aries/Creator/Game/Login/ParaWorldLessons.lua");
+                    local ParaWorldLessons = commonlib.gettable("MyCompany.Aries.Game.MainLogin.ParaWorldLessons")
+                    ParaWorldLessons.ShowPage()
+                end
             ]]>
         </script>
         <style type="text/mcss">
@@ -519,37 +526,42 @@
             <div class="events_area">
                 <a onclick="LoginMain.OnClickOfficialWorlds()" class="link_big_event">
                     <div class="big_event_item">
-                        <div style="margin-left:5px;" class="event_title">
+                        <div style="float:left;margin-left:5px;background:url(Texture/3DMapSystem/AppIcons/png/Tasks_64.png);width:48px;height:48px;"></div>
+                        <div style="float:left;margin-left:5px;" class="event_title">
                             <%=L"官方推荐作品"%>
                         </div>
                     </div>
                 </a>
-                <a href="http://keepwork.com/official/paracraft/VideoTutorials" class="link_big_event">
+                <a href="https://keepwork.com/official/creativeTimes/latest" class="link_big_event">
                     <div class="big_event_item">
-                        <div style="margin-left:5px;" class="event_title">
+                        <div style="float:left;margin-left:5px;background:url(Texture/3DMapSystem/AppIcons/paraworld_news_32bits.png);width:48px;height:48px;"></div>
+                        <div style="float:left;margin-left:5px;" class="event_title">
+                            <%=L"哈奇时报"%>
+                        </div>
+                    </div>
+                </a>
+                <a onclick="OnClickLesson" class="link_big_event">
+                    <div class="big_event_item">
+                        <div style="float:left;margin-left:5px;background:url(Texture/3DMapSystem/AppIcons/png/Intro_64.png);width:48px;height:48px;"></div>
+                        <div style="float:left;margin-left:5px;" class="event_title">
+                            <%=L"动画与编程在线课程"%>
+                        </div>
+                    </div>
+                </a>
+                <a href="https://keepwork.com/official/paracraft/VideoTutorials" class="link_big_event">
+                    <div class="big_event_item">
+                        <div style="float:left;margin-left:5px;" class="event_title">
                             <%=L"教学视频"%>
                         </div>
                     </div>
                 </a>
                 <a href="http://iicc.keepwork.com/" class="link_big_event">
                     <div class="big_event_item">
-                        <div style="margin-left:5px;" class="event_title">
+                        <div style="float:left;margin-left:5px;" class="event_title">
                             <%=L"创作大赛报名中"%>
                         </div>
                     </div>
                 </a>
-                <a href="http://paracraft.keepwork.com" class="link_big_event">
-                    <div class="big_event_item">
-                        <div style="margin-left:5px;" class="event_title">
-                            <%=L"代码方块上线了~"%>
-                        </div>
-                    </div>
-                </a>
-                <div class="big_event_item">
-                    <div style="margin-left:5px;color:#ffffff80" class="event_title">
-                        <%=L"自主动画系统即将上线"%>
-                    </div>
-                </div>
             </div>
         </div>
     </pe:mcml>
