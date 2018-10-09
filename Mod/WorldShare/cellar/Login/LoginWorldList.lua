@@ -411,10 +411,6 @@ function LoginWorldList:formatDate(modDate)
 end
 
 function LoginWorldList.syncNow(index)
-    if (not LoginUserInfo.IsSignedIn() or not LoginUserInfo.CheckoutVerified()) then
-        return false
-    end
-
     SyncCompare:syncCompare()
 end
 

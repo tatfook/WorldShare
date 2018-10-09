@@ -4,6 +4,7 @@
         <script type="text/npl" refresh="false" src="HistoryManager.lua">
             <![CDATA[
                 HistoryManager = NPL.load('./HistoryManager.lua')
+                Bookmark = NPL.load('(gl)Mod/WorldShare/database/Bookmark.lua')
                 HistoryManager:setPage()
 
                 function close()
@@ -12,6 +13,76 @@
 
                 function has_data()
                     return HistoryManager:hasData()
+                end
+
+                function collect(index)
+                    HistoryManager:collectItem(index)
+                end
+
+                function delete(index)
+                    HistoryManager:deleteItem(index)
+                end
+
+                function select_category(index)
+                    HistoryManager:selectCategory(index)
+                end
+
+                function get_date_format(date)
+                    local formatDate = HistoryManager.formatDate(date)
+
+                    return formatDate
+                end
+
+                function get_world_type(typeName)
+                    if not typeName then
+                        return 'world'
+                    end
+
+                    return typeName
+                end
+
+                function get_world_type_desc(typeName)
+                    typeName = get_world_type(typeName)
+
+                    if typeName == 'server' then
+                        return L'服务器'
+                    end
+
+                    if typeName == 'class' then
+                        return L'课程'
+                    end
+
+                    if typeName == 'world' then
+                        return L'世界'
+                    end
+
+                    return L'其他'
+                end
+
+                function get_favorite_status(index)
+                    local curItem = HistoryManager:getItemsItemByIndex(index)
+
+                    if Bookmark:isTagExist(curItem['displayName'], 'favorite') then
+                        return L'已收藏'
+                    else
+                        return L'收藏'
+                    end
+                end
+
+                function is_selected_category(tagName)
+                    local selectTagName
+
+                    if not HistoryManager.selectTagName then
+                        selectTagName = 'all'
+                    else
+                        selectTagName = HistoryManager.selectTagName
+                    end
+
+                    if tagName == selectTagName then
+                        return true
+                    else
+                        return false
+                    end
                 end
             ]]>
         </script>
@@ -54,6 +125,16 @@
                     color = '#ffffff',
                     background = "Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#179 89 21 21:4 4 4 4"
                 },
+                area_content_menu_selected_button = {
+                    ['margin-top'] = 5,
+                    width = 75,
+                    height = 23,
+                    ['font-size'] = 12,
+                    margin = 0,
+                    padding = 0,
+                    color = '#ffffff',
+                    background = "Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#208 89 21 21:8 8 8 8"
+                },
                 area_content_list = {
                     color = 'white',
                     float = 'left',
@@ -87,10 +168,15 @@
             <div style="height:2px;margin-top:5px;" width="100%" class="mc_line"></div>
             <div class="area_content" name="area_content">
                 <div class="area_content_menu">
-                    <pe:gridview name="historyMenus" DefaultNodeHeight="32" DataSource="<%=HistoryManager.Menus%>" pagesize="10" ItemsPerLine="1" AllowPaging="true">
+                    <pe:gridview name="historyTree" DefaultNodeHeight="32" pagesize="10" ItemsPerLine="1" AllowPaging="true">
                         <Columns>
                             <div>
-                                <input type="button" value='<%=Eval("name") %>' class="area_content_menu_button" />
+                                <pe:if condition="<%= is_selected_category(Eval('name'))%>">
+                                    <input type="button" value='<%=Eval("displayName") %>' onclick="select_category" name="<%=Eval('index')%>" class="area_content_menu_selected_button" />
+                                </pe:if>
+                                <pe:if condition="<%=not is_selected_category(Eval('name'))%>">
+                                    <input type="button" value='<%=Eval("displayName") %>' onclick="select_category" name="<%=Eval('index')%>" class="area_content_menu_button" />
+                                </pe:if>
                             </div>
                         </Columns>
                         <PagerSettings Position="Bottom" height="1" />
@@ -106,19 +192,43 @@
                 <div class="area_split" name="area_split"></div>
                 <div class="area_content_list">
                     <pe:if condition="<%= has_data() %>">
-                        <pe:gridview name="historyList" DefaultNodeHeight="32" DataSource="<%={{a=1},{a=2}}%>" pageSize="10" ItemsPerLine="1" AllowPaging="true">
+                        <pe:gridview name="historyItems" DefaultNodeHeight="32" pageSize="10" ItemsPerLine="1" AllowPaging="true">
                             <Columns>
-                                <div name="dateTitle" style="color:white">
-                                    <div>今天-9999.12.31</div>
-                                    <div style="height:2px;margin-top:5px;" width="100%" class="mc_line"></div>
-                                </div>
-                                <div name="dateList" class="date_list">
-                                    <div class="list_item" width="100%">
-                                        9:06 AM [服务器] 127.0.0.1:8099
-                                        <input type="button" class="item_button" value="收藏"/>
-                                        <input type="button" class="item_button" value="删除"/>
+                                <pe:if condition="<%=Eval('type') == 'date'%>">
+                                    <div name="dateTitle" style="color:white">
+                                        <div><%=get_date_format(Eval('date'))%></div>
+                                        <div style="height:2px;margin-top:5px;" width="100%" class="mc_line"></div>
                                     </div>
-                                </div>
+                                </pe:if>
+                                <pe:if condition="<%=Eval('type') == 'world'%>">
+                                    <div name="dateList" class="date_list">
+                                        <div class="list_item" width="100%">
+                                            <div style="float:left;width: 600px">
+                                                <pe:if condition="<%=get_world_type(Eval('worldType')) == 'server'%>">
+                                                    [<%=get_world_type_desc(Eval('worldType'))%>] <%=Eval('ip')%>
+                                                </pe:if>
+                                                <pe:if condition="<%=get_world_type(Eval('worldType')) == 'class'%>">
+                                                    [<%=get_world_type_desc(Eval('worldType'))%>] <%=Eval('displayName')%> CLASS_ID: <%=Eval('classId')%>
+                                                </pe:if>
+                                                <pe:if condition="<%=get_world_type(Eval('worldType')) == 'world'%>">
+                                                    [<%=get_world_type_desc(Eval('worldType'))%>] <%=Eval('displayName')%>
+                                                </pe:if>
+                                            </div>
+                                            <div style="float:left;width: 100px;">
+                                                <pe:if condition="<%=not Eval('recommend')%>">
+                                                    <input type="button" class="item_button" value="<%=L'删除'%>" name="<%=Eval('index')%>" onclick="delete"/>
+                                                </pe:if>
+                                                <input type="button" class="item_button" value="<%=get_favorite_status(Eval('index'))%>" name="<%=Eval('index')%>" onclick="collect"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </pe:if>
+
+                                <pe:if condition="<%=Eval('type') == 'empty'%>">
+                                    <div style="color:#777777">
+                                        当前日期没有记录
+                                    </div>
+                                </pe:if>
                             </Columns>
                             <PagerSettings Position="Bottom" height="1" />
                             <PagerTemplate AutoHidePager="true">

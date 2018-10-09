@@ -1,4 +1,4 @@
-﻿--[[
+--[[
 Title: share world to datasource
 Author(s): big
 Date: 2017.5.12
@@ -46,10 +46,6 @@ function ShareWorld:init()
             Store:set('user/afterLogined', syncCompare)
         end
 
-        return false
-    end
-
-    if (not LoginUserInfo.CheckoutVerified()) then
         return false
     end
 
@@ -126,13 +122,30 @@ function ShareWorld:GetCurrentRevision()
 end
 
 function ShareWorld:shareNow()
-    if (self:GetRemoteRevision() > self:GetCurrentRevision()) then
+    local canBeShare = true
+    local msg = ''
+
+    if WorldCommon:IsModified() then
+        canBeShare = false
+        msg = L"当前世界未保存，是否继续上传世界？"
+    end
+
+    if canBeShare and self:GetRemoteRevision() > self:GetCurrentRevision() then
+        canBeShare = false
+        msg = L"当前本地版本小于远程版本，是否继续上传？"
+    end
+
+    local function shareNow()
+        SyncMain:syncToDataSource()
+        self:closeShareWorldImp()
+    end
+
+    if (not canBeShare) then
         _guihelper.MessageBox(
-            L"当前本地版本小于远程版本，是否继续上传？",
+            msg,
             function(res)
                 if (res and res == 6) then
-                    SyncMain:syncToDataSource()
-                    self:closeShareWorldImp()
+                    shareNow()
                 end
             end
         )
@@ -140,8 +153,7 @@ function ShareWorld:shareNow()
         return false
     end
 
-    SyncMain:syncToDataSource()
-    self:closeShareWorldImp()
+    shareNow()
 end
 
 function ShareWorld:snapshot()

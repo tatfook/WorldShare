@@ -34,7 +34,7 @@ function Utils:ShowWindow(width, height, url, name, x, y, align, allowDrag)
         width = width,
         height = height,
         cancelShowAnimation = true,
-        bToggleShowHide  = true
+        bToggleShowHide = true
     }
 
     System.App.Commands.Call("File.MCMLWindowFrame", params)
@@ -80,8 +80,80 @@ function Utils.FixCenter(width, height)
     NPL.load("(gl)script/ide/System/Windows/Screen.lua")
     local Screen = commonlib.gettable("System.Windows.Screen")
 
-    local marginLeft = math.floor((Screen:GetWidth()/2))
-    local marginTop = math.floor((Screen:GetHeight()/2))
+    local marginLeft = math.floor((Screen:GetWidth() / 2))
+    local marginTop = math.floor((Screen:GetHeight() / 2))
 
-    return format("margin-left:%s;margin-top: %s", marginLeft - width/2, marginTop - height/2)
+    return format("margin-left:%s;margin-top: %s", marginLeft - width / 2, marginTop - height / 2)
+end
+
+function Utils:GetFileData(url)
+    local file = ParaIO.open(url, "r")
+    local fileContent = ""
+
+    if (file:IsValid()) then
+        fileContent = file:GetText(0, -1)
+        file:close()
+    end
+
+    return fileContent
+end
+
+function Utils:IsEquivalent(a, b)
+    if type(a) ~= "table" or type(b) ~= "table" then
+        return false
+    end
+
+    if (#a ~= #b) then
+        return false
+    end
+
+    for key, value in pairs(a) do
+        if not b[key] then
+            return false
+        end
+
+        if type(value) == "table" then
+            if not self:IsEquivalent(value, b[key]) then
+                return false
+            end
+        else
+            if value ~= b[key] then
+                return false
+            end
+        end
+    end
+
+    return true
+end
+
+function Utils:MergeTable(target, source)
+    if type(target) ~= "table" or type(source) ~= "table" then
+        return false
+    end
+
+    target = commonlib.copy(target)
+    source = commonlib.copy(source)
+
+    for key, value in pairs(source) do
+        target[key] = value
+    end
+
+    return target
+end
+
+function Utils:implode(glue, pieces)
+    glue = glue or ""
+
+    local k, v
+    local result = ""
+
+    for k, v in ipairs(pieces) do
+        if (k == 1) then
+            result = tostring(v)
+        else
+            result = string.format("%s%s%s", result, glue, tostring(v))
+        end
+    end
+
+    return result
 end
