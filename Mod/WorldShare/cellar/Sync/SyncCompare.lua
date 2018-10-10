@@ -35,6 +35,10 @@ local LOCALBIGGER = "LOCALBIGGER"
 local EQUAL = "EQUAL"
 
 function SyncCompare:syncCompare()
+    if (not LoginUserInfo.IsSignedIn() or not LoginUserInfo.CheckoutVerified()) then
+        return false
+    end
+
     local IsEnterWorld = Store:get("world/IsEnterWorld")
     local isShowLoginMainPage = LoginMain.isShowLoginMainPage()
 

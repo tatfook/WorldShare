@@ -334,7 +334,7 @@ function LoginUserInfo.CheckoutVerified()
             L"您需要到keepwork官网进行实名认证，认证成功后需重启paracraft即可正常操作，是否现在认证？",
             function(res)
                 if (res and res == _guihelper.DialogResult.Yes) then
-                    ParaGlobal.ShellExecute("open", format("%s/wiki/user_center", LoginUserInfo.site), "", "", 1)
+                    ParaGlobal.ShellExecute("open", format("%s/wiki/user_center", LoginUserInfo.site()), "", "", 1)
                 end
             end,
             _guihelper.MessageBoxButtons.YesNo
