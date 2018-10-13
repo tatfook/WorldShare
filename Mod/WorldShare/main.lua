@@ -98,9 +98,20 @@ function WorldShare:OnWorldLoad()
 
     LoginMain.closeLoginMainPage()
 
-    CreateWorld:CheckRevision(
-        function()
-            SyncMain:SyncWillEnterWorld()
-        end
-    )
+    local selectedWorld = Store:get("world/selectWorld")
+    if(selectedWorld) then
+        CreateWorld:CheckRevision(
+            function()
+                SyncMain:SyncWillEnterWorld()
+            end
+        )
+    end
+end
+
+function WorldShare:OnLeaveWorld()
+    Store:set("world/selectWorld", nil)
+    Store:set("world/worldIndex", nil)
+    Store:set("world/ShareMode", nil)
+    Store:set("world/worldDir", nil)
+    Store:set("world/foldername", nil)
 end

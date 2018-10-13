@@ -22,7 +22,7 @@ local PAGE = 'page'
 local WORLD = 'world'
 
 function Store:set(key, value)
-    if (not key or not value) then
+    if (not key) then
         return false
     end
 
@@ -66,24 +66,7 @@ function Store:get(key)
 end
 
 function Store:remove(key)
-    if (not key) then
-        return false
-    end
-
-    local storeType = self:getStoreType(key)
-    local storeKey = self:getStoreKey(key)
-
-    if (storeType == USER) then
-        UserStore[storeKey] = nil
-    end
-
-    if (storeType == WORLD) then
-        WorldStore[storeKey] = nil
-    end
-
-    if (storeType == PAGE) then
-        PageStore[storeKey] = nil
-    end
+    self:set(key, nil)
 end
 
 function Store:getStorePath(key)

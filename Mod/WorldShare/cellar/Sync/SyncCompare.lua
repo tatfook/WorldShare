@@ -115,12 +115,13 @@ function SyncCompare:compareRevision(callback)
         end
     end
 
-    if (LoginUserInfo.IsSignedIn()) then
-        if (selectWorld.is_zip) then
-            MsgBox:Close()
-            return false
-        end
+    if (not selectWorld or selectWorld.is_zip) then
+        self:SetFinish(true)
+        MsgBox:Close()
+        return false
+    end
 
+    if (LoginUserInfo.IsSignedIn()) then
         self:compare(callback)
     else
         LoginUserInfo.LoginWithTokenApi(
