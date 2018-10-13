@@ -9,7 +9,7 @@ local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 ]]
 local Utils = NPL.export()
 
-function Utils:ShowWindow(width, height, url, name, x, y, align, allowDrag)
+function Utils:ShowWindow(width, height, url, name, x, y, align, allowDrag, zorder)
     if (not x) then
         x = width
     end

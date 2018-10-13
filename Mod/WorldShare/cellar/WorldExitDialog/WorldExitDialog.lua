@@ -1,6 +1,6 @@
 --[[
 Title: World Exit Dialog
-Author(s):  LiXizhi
+Author(s):  Big, LiXizhi
 Date: 2017/5/15
 Desc: 
 use the lib:
@@ -25,8 +25,9 @@ function WorldExitDialog.ShowPage(callback)
     end
 
     local WorldExitDialogPage = Store:get('page/WorldExitDialog')
-
-    WorldExitDialogPage.callback = callback
+    if(WorldExitDialogPage) then
+        WorldExitDialogPage.callback = callback
+    end
 end
 
 function WorldExitDialog.GetPreviewImagePath()

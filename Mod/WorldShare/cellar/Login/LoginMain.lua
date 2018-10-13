@@ -6,7 +6,9 @@ Desc:
 use the lib:
 ------------------------------------------------------------
 local LoginMain = NPL.load("(gl)Mod/WorldShare/cellar/Login/LoginMain.lua")
-LoginMain.ShowPage()
+if(not LoginMain.IsSignedIn()) then
+    LoginMain.ShowLoginModal(callbackFunc)
+end
 ------------------------------------------------------------
 ]]
 local WorldShare = commonlib.gettable("Mod.WorldShare")
@@ -30,6 +32,11 @@ end
 
 function LoginMain.init()
 end
+
+function LoginMain.IsSignedIn()
+   return LoginUserInfo.IsSignedIn(); 
+end
+
 
 -- this is called from ParaWorld Login App
 function LoginMain:CheckShowUserWorlds()
@@ -148,12 +155,17 @@ function LoginMain.isShowLoginMainPage()
     end
 end
 
+function LoginMain.ShowLoginModal(callbackFunc)
+    LoginMain.ShowLoginModalImp()
+    Store:set('user/afterLogined', callbackFunc)
+end
+
 function LoginMain.ShowLoginModalImp()
     if (LoginUserInfo.LoginWithTokenApi()) then
         return true
     end
 
-    local params = Utils:ShowWindow(320, 350, "Mod/WorldShare/cellar/Login/LoginModal.html", "LoginModal")
+    local params = Utils:ShowWindow(320, 350, "Mod/WorldShare/cellar/Login/LoginModal.html", "LoginModal", nil, nil, nil, nil, 999)
 
     params._page.OnClose = function()
         Store:remove('page/LoginModal')
