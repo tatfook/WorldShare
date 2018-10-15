@@ -31,6 +31,9 @@ function Store:set(key, value)
 
     if (storeType == USER) then
         UserStore[storeKey] = commonlib.copy(value)
+        if(storeKey == "token") then
+            commonlib.setfield("System.User.keepworktoken", value);
+        end
     end
 
     if (storeType == WORLD) then
@@ -101,4 +104,8 @@ function Store:getStoreKey(key)
     else
         return nil
     end
+end
+
+if(System.User.keepworktoken) then
+    Store:set("user/token", System.User.keepworktoken);
 end
