@@ -155,9 +155,10 @@ function LoginMain.isShowLoginMainPage()
     end
 end
 
+-- @param callbackFunc: called after successfully signed in. 
 function LoginMain.ShowLoginModal(callbackFunc)
-    LoginMain.ShowLoginModalImp()
     Store:set('user/afterLogined', callbackFunc)
+    LoginMain.ShowLoginModalImp()
 end
 
 function LoginMain.ShowLoginModalImp()
