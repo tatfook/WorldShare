@@ -604,13 +604,27 @@ function LoginUserInfo.LoginActionApi(account, password, callback)
     loginRequest(url, params, {}, callback)
 end
 
-function LoginUserInfo.LoginWithTokenApi(callback)
+-- return nil or user token in url protocol
+function LoginUserInfo.GetUserTokenFromUrlProtocol()
     local cmdline = ParaEngine.GetAppCommandLine()
     local urlProtocol = string.match(cmdline or "", "paracraft://(.*)$")
     urlProtocol = string.gsub(urlProtocol or "", "%%22", '"')
 
     local usertoken = urlProtocol:match('usertoken="([%S]+)"')
+    return usertoken;
+end
 
+function LoginUserInfo.GetCurrentUserToken()
+    return System.User and System.User.keepworktoken;
+end
+
+function LoginUserInfo.LoginWithTokenApi(callback)
+    local usertoken = LoginUserInfo.GetUserTokenFromUrlProtocol() or LoginUserInfo.GetCurrentUserToken();
+    return LoginUserInfo.LoginWithToken(usertoken, callback)
+end
+
+-- @param usertoken: keepwork user token
+function LoginUserInfo.LoginWithToken(usertoken, callback)
     if (type(usertoken) == "string" and #usertoken > 0) then
         MsgBox:Show(L"正在登陆，请稍后...")
 
@@ -634,7 +648,7 @@ function LoginUserInfo.LoginWithTokenApi(callback)
                         }
                     }
 
-                    loginResponse(nil, params, err, callback)
+                    loginResponse(params, err, callback)
                 end
             end
         )

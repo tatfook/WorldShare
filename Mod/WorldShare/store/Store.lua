@@ -105,7 +105,3 @@ function Store:getStoreKey(key)
         return nil
     end
 end
-
-if(System.User.keepworktoken) then
-    Store:set("user/token", System.User.keepworktoken);
-end
