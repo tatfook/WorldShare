@@ -42,7 +42,7 @@ function ShareWorld:init()
         end
 
         if (not LoginUserInfo.checkDoAutoSignin(syncCompare)) then
-            LoginMain.ShowLoginModalImp()
+            LoginMain.ShowLoginModal()
             Store:set('user/afterLogined', syncCompare)
         end
 

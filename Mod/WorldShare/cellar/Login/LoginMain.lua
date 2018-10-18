@@ -156,7 +156,9 @@ function LoginMain.isShowLoginMainPage()
 end
 
 -- @param callbackFunc: called after successfully signed in. 
-function LoginMain.ShowLoginModal(callbackFunc)
+-- @param loginText: text to display on top
+function LoginMain.ShowLoginModal(callbackFunc, loginText)
+    LoginMain.loginText = loginText
     Store:set('user/afterLogined', callbackFunc)
     LoginMain.ShowLoginModalImp()
 end
@@ -166,7 +168,7 @@ function LoginMain.ShowLoginModalImp()
         return true
     end
 
-    local params = Utils:ShowWindow(320, 350, "Mod/WorldShare/cellar/Login/LoginModal.html", "LoginModal", nil, nil, nil, nil, 999)
+    local params = Utils:ShowWindow(320, 470, "Mod/WorldShare/cellar/Login/LoginModal.html", "LoginModal", nil, nil, nil, nil, 999)
 
     params._page.OnClose = function()
         Store:remove('page/LoginModal')

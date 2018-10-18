@@ -562,7 +562,7 @@ end
 
 function LoginUserInfo.OnClickLogin()
     Store:set('user/ignoreAutoLogin', true)
-    LoginMain.ShowLoginModalImp()
+    LoginMain.ShowLoginModal()
 end
 
 function LoginUserInfo.setAutoLogin()
