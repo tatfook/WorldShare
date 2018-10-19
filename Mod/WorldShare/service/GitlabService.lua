@@ -558,7 +558,11 @@ function GitlabService:getContentWithRaw(foldername, path, commitId, callback)
         },
         function(data, err)
             if (err == 200 and type(callback) == "function") then
-                callback(data, #data, err)
+                if (type(data) ~= 'string' or #data == 0) then
+                    callback('', 0, err)
+                else
+                    callback(data, #data, err)
+                end
             end
         end
     )
