@@ -12,12 +12,12 @@ local WorldStore = commonlib.gettable('Mod.WorldShare.store.World')
 
 local WorldStore = commonlib.gettable('Mod.WorldShare.store.World')
 
-local function setEmpty(value)
+local function SetEmpty(value)
     if (not value) then
         value = nil
     end
 end
 
-setEmpty(WorldStore.worldDir)
-setEmpty(WorldStore.foldername)
-setEmpty(WorldStore.selectWorld)
+SetEmpty(WorldStore.worldDir)
+SetEmpty(WorldStore.foldername)
+SetEmpty(WorldStore.selectWorld)

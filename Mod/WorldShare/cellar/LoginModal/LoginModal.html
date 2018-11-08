@@ -2,21 +2,33 @@
     <pe:mcml>
         <script type="text/npl" refresh="false">
             <![CDATA[
-                LoginMain = NPL.load("./LoginMain.lua")
-                LoginUserInfo = NPL.load("./LoginUserInfo.lua")
-                LoginMain.setLoginModalImp()
+                LoginModal = NPL.load("./LoginModal.lua")
+
+                LoginModal:SetPage()
+
+                function get_server_list()
+                    return LoginModal:GetServerList()
+                end
+
+                function login()
+                    LoginModal:LoginAction()
+                end
+
+                function set_auto_login()
+                    LoginModal:SetAutoLogin()
+                end
             ]]>
         </script>
         <style type="text/mcss">
             {
                 user_login = {
-                    ["base-font-size"]   = 16,
-                    ["font-size"]        = 16,
-                    color                = "#ffffff",
-                    ["padding-right"]    = 20,
-                    ["padding-left"]     = 20,
-                    ["padding-top"]      = 20,
-                    ["padding-bottom"]      = 20,
+                    ["base-font-size"] = 16,
+                    ["font-size"] = 16,
+                    color = "#ffffff",
+                    ["padding-right"] = 20,
+                    ["padding-left"] = 20,
+                    ["padding-top"] = 20,
+                    ["padding-bottom"] = 20,
                 },
                 text_field = {
                     background = "textures/worldshare_32bits.png;72 20 16 16:3 3 3 3",
@@ -33,14 +45,11 @@
                 },
             }
         </style>
-        <aries:window mode="thin" width="320" style="float:left;" title='<%=L"登陆" %>' onclose="LoginMain.closeLoginModalImp()">
+        <aries:window mode="thin" width="320" style="float:left;" title='<%=L"登陆" %>' onclose="UserConsole.closeLoginModalImp()">
             <div name="login" class="user_login">
-                <pe:if condition="<%=LoginMain.loginText~=nil%>">
-                    <div style="margin-bottom:15px;"><%=LoginMain.loginText%></div>
-                </pe:if>
                 <div style="margin-bottom:12px;">
                     <div style="float:left;min-width:80px;"><%= L"服务器："%></div>
-                    <select name="loginServer" DataSource="<%= LoginUserInfo.serverLists%>" style="height: 30px;width: 185px;" class="text_field"></select>
+                    <select name="loginServer" DataSource="<%= get_server_list()%>" style="height: 30px;width: 185px;" class="text_field"></select>
                 </div>
                 <div style="margin-bottom:12px;">
                     <div style="float:left;min-width:80px"><%= L"账号：" %></div><input type="text" EmptyText='<%= L"账户名/邮箱/手机号" %>' class="bbs_text text_field" style="height: 30px;" name="account" />
@@ -53,11 +62,11 @@
                         <input type="checkbox" style="float:left;margin-top:3px;min-width:90px;" name="rememberPassword" /><div style="float:left" for="rememberPassword"><%= L"记住密码?" %></div>
                     </div>
                     <div>
-                        <input type="checkbox" style="float:left;margin-top:3px;min-width:90px;" name="autoLogin" onclick="LoginUserInfo.setAutoLogin()"/><div style="float:left" for="autoLogin"><%= L"自动登录" %></div>    
+                        <input type="checkbox" style="float:left;margin-top:3px;min-width:90px;" name="autoLogin" onclick="set_auto_login()"/><div style="float:left" for="autoLogin"><%= L"自动登录" %></div>    
                     </div>
                 </div>
                 <div style="margin-top:30px;margin-bottom:15px;">
-                    <input type="button" DefaultButton="true" class="login_button" onclick="LoginUserInfo.LoginActionModal()" value='<%= L"登   录"%>' />
+                    <input type="button" DefaultButton="true" class="login_button" onclick="login()" value='<%= L"登   录"%>' />
                 </div>
                 <div style="text-align:left;margin-left:55px;">
                     <span style="color:#ffffff;"><%= L"还没有帐号？" %></span>

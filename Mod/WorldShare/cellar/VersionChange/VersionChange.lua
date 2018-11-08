@@ -10,29 +10,28 @@ local VersionChange = NPL.load("(gl)Mod/WorldShare/cellar/VersionChange/VersionC
 ------------------------------------------------------------
 ]]
 local DeleteWorld = NPL.load("(gl)Mod/WorldShare/cellar/DeleteWorld/DeleteWorld.lua")
-local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/SyncMain.lua")
+local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
 local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
+local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
-local LoginMain = NPL.load("(gl)Mod/WorldShare/cellar/Login/LoginMain.lua")
-local LoginUserInfo = NPL.load("(gl)Mod/WorldShare/cellar/Login/LoginUserInfo.lua")
 local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")
 
 local VersionChange = NPL.export()
 
-function VersionChange:init()
-    if (not LoginUserInfo.IsSignedIn()) then
+function VersionChange:Init()
+    if (not KeepworkService:IsSignedIn()) then
         _guihelper.MessageBox(L"登录后才能继续")
         return false
     end
 
-    self.foldername = Store:get("world/foldername")
+    self.foldername = Store:Get("world/foldername")
 
-    local IsEnterWorld = Store:get("world/IsEnterWorld")
+    local isEnterWorld = Store:Get("world/isEnterWorld")
 
-    if (IsEnterWorld) then
-        local selectWorld = Store:get("world/selectWorld")
-        local enterWorld = Store:get("world/enterWorld")
+    if (isEnterWorld) then
+        local selectWorld = Store:Get("world/selectWorld")
+        local enterWorld = Store:Get("world/enterWorld")
 
         if(enterWorld.foldername == selectWorld.foldername) then
             _guihelper.MessageBox(L"不能切换当前编辑的世界")
@@ -51,11 +50,11 @@ function VersionChange:init()
 end
 
 function VersionChange:SetPage()
-    Store:set('page/VersionChange', document:GetPageCtrl())
+    Store:Set('page/VersionChange', document:GetPageCtrl())
 end
 
 function VersionChange:ClosePage()
-    local VersionChangePage = Store:get('page/VersionChange')
+    local VersionChangePage = Store:Get('page/VersionChange')
 
     if (VersionChangePage) then
         VersionChangePage:CloseWindow()
@@ -66,59 +65,45 @@ function VersionChange:ShowPage()
     local params = Utils:ShowWindow(0, 0, "Mod/WorldShare/cellar/VersionChange/VersionChange.html", "VersionChange", 0, 0, "_fi", false)
 
     params._page.OnClose = function()
-        Store:remove('page/VersionChange')
+        Store:Remove('page/VersionChange')
     end
 end
 
 function VersionChange:GetVersionSource(callback)
     self.allRevision = commonlib.vector:new()
 
-    local function GetAllRevision(projectId)
-        GitService:getCommits(
-            projectId,
-            nil,
-            true,
-            function(data, err)
-                for key, item in ipairs(data) do
-                    local path = item.title:gsub("keepwork commit: ", "")
+    GitService:GetCommits(
+        self.foldername.base32,
+        true,
+        function(data, err)
+            for key, item in ipairs(data) do
+                local path = item.title:gsub("paracraft commit: ", "")
 
-                    local date = {}
-                    for v in string.gmatch(item.created_at, "[^T]+") do
-                        date[#date + 1] = v
-                    end
-
-                    if (path == "revision.xml") then
-                        local currentRevision = {
-                            path = path,
-                            commitId = item.id,
-                            date = date[1]
-                        }
-
-                        self.allRevision:push_back(currentRevision)
-                    end
+                local date = {}
+                for v in string.gmatch(item.created_at, "[^T]+") do
+                    date[#date + 1] = v
                 end
 
-                self:GetRevisionContent(callback)
-            end
-        )
-    end
+                if (path == "revision.xml") then
+                    local currentRevision = {
+                        path = path,
+                        commitId = item.id,
+                        date = date[1]
+                    }
 
-    GitService:getProjectIdByName(
-        self.foldername.base32,
-        function(projectId)
-            if (not projectId) then
-                return false
+                    self.allRevision:push_back(currentRevision)
+                end
             end
 
-            GetAllRevision(projectId)
+            self:GetRevisionContent(callback)
         end
     )
 end
 
-local index = 1
+local verCountIndex = 1
 function VersionChange:GetRevisionContent(callback)
-    if (index > #self.allRevision) then
-        index = 1
+    if (verCountIndex > #self.allRevision) then
+        verCountIndex = 1
 
         if (type(callback) == "function") then
             callback()
@@ -127,13 +112,13 @@ function VersionChange:GetRevisionContent(callback)
         return false
     end
 
-    local currentItem = self.allRevision[index]
-    local selectWorld = Store:get("world/selectWorld")
+    local currentItem = self.allRevision[verCountIndex]
+    local selectWorld = Store:Get("world/selectWorld")
     local commitId = SyncMain:GetCurrentRevisionInfo()
 
     commitId = commitId and commitId["id"] or ""
 
-    GitService:getContentWithRaw(
+    GitService:GetContentWithRaw(
         self.foldername.base32,
         currentItem.path,
         currentItem.commitId,
@@ -157,7 +142,7 @@ function VersionChange:GetRevisionContent(callback)
                 currentItem.isActiveFull = false
             end
 
-            index = index + 1
+            verCountIndex = verCountIndex + 1
             self:GetRevisionContent(callback)
         end
     )
@@ -168,12 +153,12 @@ function VersionChange:GetAllRevision()
 end
 
 function VersionChange:SelectVersion(index)
-    local selectWorld = Store:get("world/selectWorld")
-    local foldername = Store:get("world/foldername")
+    local selectWorld = Store:Get("world/selectWorld")
+    local foldername = Store:Get("world/foldername")
     local commitId = self.allRevision[index]["commitId"]
 
-    Store:set("world/commitId", commitId)
-    SyncMain:SetCurrentCommidId(commitId)
+    Store:Set("world/commitId", commitId)
+    KeepworkService:SetCurrentCommidId(commitId)
 
     local targetDir = format("%s/%s/", SyncMain.GetWorldFolderFullPath(), foldername.default)
 
@@ -181,7 +166,7 @@ function VersionChange:SelectVersion(index)
 
     MsgBox:Show(L'请稍后...')
 
-    SyncMain:syncToLocal()
+    SyncMain:SyncToLocal()
 
     self:ClosePage()
 end

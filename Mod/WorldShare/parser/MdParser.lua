@@ -31,14 +31,14 @@ function MdParser:MdToTable(data)
     local currentType
     local curBlockStrList = {}
 
-    local function handleBlockType(blockType, line, isEnd)
+    local function HandleBlockType(blockType, line, isEnd)
         if blockType and isEnd then
-            self:getBlockStringList(curBlockStrList, line)
+            self:GetBlockStringList(curBlockStrList, line)
         end
 
         if (blockType == TREE or blockType == ITEMS or isEnd) then
             if currentType == TREE then
-                local items, name = self:getBlockTree(curBlockStrList)
+                local items, name = self:GetBlockTree(curBlockStrList)
 
                 if name then
                     self.tree[name] = items
@@ -46,7 +46,7 @@ function MdParser:MdToTable(data)
             end
     
             if currentType == ITEMS then
-                local items = self:getBlockItems(curBlockStrList)
+                local items = self:GetBlockItems(curBlockStrList)
 
                 self.items[#self.items + 1] = items
             end
@@ -62,7 +62,7 @@ function MdParser:MdToTable(data)
             end
         end
 
-        self:getBlockStringList(curBlockStrList, line)
+        self:GetBlockStringList(curBlockStrList, line)
     end
 
     for key, line in ipairs(dataList) do
@@ -70,10 +70,10 @@ function MdParser:MdToTable(data)
 
         -- end point
         if key == #dataList then
-            handleBlockType(blockType, line, true)
+            HandleBlockType(blockType, line, true)
         else
             if blockType then
-                handleBlockType(blockType, line)
+                HandleBlockType(blockType, line)
             end
         end
     end
@@ -83,7 +83,7 @@ end
 
 function MdParser:GetType(line)
     if string.find(line, '^#') then
-        local num = self:getHashTagNum(line)
+        local num = self:GetHashTagNum(line)
 
         if (num == 2) then
             return TREE
@@ -101,15 +101,15 @@ function MdParser:GetType(line)
     return false
 end
 
-function MdParser:getHashTagNum(sinput)
+function MdParser:GetHashTagNum(sinput)
     local count = 0
 
-    local function countHashTag(s)
+    local function CountHashTag(s)
         local exist = string.find(s, '^#')
         
         if (exist) then
             count = count + 1
-            countHashTag(string.sub(s, 2, #s))
+            CountHashTag(string.sub(s, 2, #s))
             return
         end
 
@@ -120,12 +120,12 @@ function MdParser:getHashTagNum(sinput)
         end
     end
 
-    countHashTag(sinput)
-    
+    CountHashTag(sinput)
+
     return count
 end
 
-function MdParser:getBlockStringList(curBlockStrList, line)
+function MdParser:GetBlockStringList(curBlockStrList, line)
     if not curBlockStrList or type(curBlockStrList) ~= 'table' then
         return false
     end
@@ -135,15 +135,15 @@ function MdParser:getBlockStringList(curBlockStrList, line)
     return curBlockStrList
 end
 
-function MdParser:getBlockTree(strBlockList)
+function MdParser:GetBlockTree(strBlockList)
     local items = {}
     local name
 
     for key, item in ipairs(strBlockList) do
         if key == 1 then
-            items['displayName'] = self:getTreeVal(item)
+            items['displayName'] = self:GetTreeVal(item)
         else
-            local keyName, keyVal = self:getKeyVal(item)
+            local keyName, keyVal = self:GetKeyVal(item)
             items[keyName] = keyVal
 
             if keyName == 'name' then
@@ -155,14 +155,14 @@ function MdParser:getBlockTree(strBlockList)
     return items, name
 end
 
-function MdParser:getBlockItems(strBlockList)
+function MdParser:GetBlockItems(strBlockList)
     local items = {}
 
     for key, item in ipairs(strBlockList) do
         if key == 1 then
-            items['displayName'] = self:getItemsVal(item)
+            items['displayName'] = self:GetItemsVal(item)
         else
-            local keyName, keyVal = self:getKeyVal(item)
+            local keyName, keyVal = self:GetKeyVal(item)
             items[keyName] = keyVal
         end
     end
@@ -170,7 +170,7 @@ function MdParser:getBlockItems(strBlockList)
     return items
 end
 
-function MdParser:getTreeVal(str)
+function MdParser:GetTreeVal(str)
     if not str or type(str) ~= 'string' then
         return false
     end
@@ -180,7 +180,7 @@ function MdParser:getTreeVal(str)
     return string.sub(str, endIndex + 1, #str)
 end
 
-function MdParser:getItemsVal(str)
+function MdParser:GetItemsVal(str)
     if not str or type(str) ~= 'string' then
         return false
     end
@@ -190,7 +190,7 @@ function MdParser:getItemsVal(str)
     return string.sub(str, endIndex + 1, #str)
 end
 
-function MdParser:getKeyVal(str)
+function MdParser:GetKeyVal(str)
     if not str or type(str) ~= 'string' then
         return false
     end

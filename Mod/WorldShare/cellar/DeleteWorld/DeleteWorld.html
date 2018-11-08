@@ -4,7 +4,7 @@
             <![CDATA[
                 DeleteWorld = NPL.load("./DeleteWorld.lua")
 
-                DeleteWorld.setDeletePage()
+                DeleteWorld:SetPage()
 
                 function get_select_world()
                     return DeleteWorld.GetSelectWorld()
@@ -21,19 +21,19 @@
                 end
 
                 function delete_remote()
-                    DeleteWorld.DeleteRemote()
+                    DeleteWorld:DeleteRemote()
                 end
 
                 function delete_local()
-                    DeleteWorld.DeleteLocal()
+                    DeleteWorld:DeleteLocal()
                 end
 
                 function delete_all()
-                    DeleteWorld.DeleteAll()
+                    DeleteWorld:DeleteAll()
                 end
 
                 function close_page()
-                    DeleteWorld.closeDeletePage()
+                    DeleteWorld:ClosePage()
                 end
 
                 function get_window_style()

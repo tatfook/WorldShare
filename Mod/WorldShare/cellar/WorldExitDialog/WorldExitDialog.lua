@@ -21,10 +21,10 @@ function WorldExitDialog.ShowPage(callback)
     local params = Utils:ShowWindow(500, 320, "Mod/WorldShare/cellar/WorldExitDialog/WorldExitDialog.html", "WorldExitDialog")
 
     params._page.OnClose = function()
-        Store:remove('page/WorldExitDialog')
+        Store:Remove('page/WorldExitDialog')
     end
 
-    local WorldExitDialogPage = Store:get('page/WorldExitDialog')
+    local WorldExitDialogPage = Store:Get('page/WorldExitDialog')
     if(WorldExitDialogPage) then
         WorldExitDialogPage.callback = callback
     end
@@ -37,14 +37,14 @@ end
 function WorldExitDialog:OnInit()
     local WorldExitDialogPage = document:GetPageCtrl()
 
-    Store:set('page/WorldExitDialog', WorldExitDialogPage)
+    Store:Set('page/WorldExitDialog', WorldExitDialogPage)
 
     WorldExitDialogPage:SetNodeValue("ShareWorldImage", self.GetPreviewImagePath())
 end
 
 -- @param res: _guihelper.DialogResult
 function WorldExitDialog.OnDialogResult(res)
-    local WorldExitDialogPage = Store:get('page/WorldExitDialog')
+    local WorldExitDialogPage = Store:Get('page/WorldExitDialog')
 
     if (WorldExitDialogPage) then
         WorldExitDialogPage:CloseWindow()
@@ -55,13 +55,13 @@ function WorldExitDialog.OnDialogResult(res)
     end
 end
 
-function WorldExitDialog.snapshot()
+function WorldExitDialog.Snapshot()
     ShareWorldPage.TakeSharePageImage()
     WorldExitDialog.UpdateImage(true)
 end
 
 function WorldExitDialog.UpdateImage(bRefreshAsset)
-    local WorldExitDialogPage = Store:get('page/WorldExitDialog')
+    local WorldExitDialogPage = Store:Get('page/WorldExitDialog')
 
     if (WorldExitDialogPage) then
         local filepath = ShareWorldPage.GetPreviewImagePath()

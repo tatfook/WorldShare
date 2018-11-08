@@ -10,9 +10,9 @@ local SyncToLocal = NPL.load("(gl)Mod/WorldShare/sync/SyncToLocal.lua")
 ]]
 local Encoding = commonlib.gettable("commonlib.Encoding")
 
-local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/SyncMain.lua")
-local SyncGUI = NPL.load("(gl)Mod/WorldShare/cellar/Sync/SyncGUI.lua")
-local LoginWorldList = NPL.load("(gl)Mod/WorldShare/cellar/Login/LoginWorldList.lua")
+local KeepworkService = NPL.load("../KeepworkService.lua")
+local Progress = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Progress/Progress.lua")
+local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
@@ -25,66 +25,54 @@ local UPDATE = "UPDATE"
 local DELETE = "DELETE"
 local DOWNLOAD = "DOWNLOAD"
 
-function SyncToLocal:init(callback)
+function SyncToLocal:Init(callback)
     self.broke = false
     self.finish = false
-    self.worldDir = Store:get("world/worldDir")
-    self.foldername = Store:get("world/foldername")
+    self.worldDir = Store:Get("world/worldDir")
+    self.foldername = Store:Get("world/foldername")
 
-    local selectWorld = Store:get("world/selectWorld")
-    local commitId = Store:get("world/commitId")
+    local selectWorld = Store:Get("world/selectWorld")
+    local commitId = Store:Get("world/commitId")
 
     if (not self.worldDir or not self.worldDir.default or self.worldDir.default == "") then
         _guihelper.MessageBox(L"下载失败，原因：下载目录为空")
         return false
     end
 
-    local function handleProjectId(projectId)
-        MsgBox:Close()
+    MsgBox:Close()
 
-        if (not projectId) then
-            _guihelper.MessageBox(L"数据源异常")
-            SyncGUI:closeWindow()
-            return false
-        end
+    Store:Set("world/selectWorld", selectWorld)
 
-        self.projectId = projectId
-        selectWorld.projectId = projectId
-        Store:set("world/selectWorld", selectWorld)
-
-        if (commitId or selectWorld.status == 2) then
-            -- down zip
-            self:DownloadZIP()
-            return false
-        end
-
-        -- 加载进度UI界面
-        SyncGUI:init(self)
-
-        self:SetFinish(false)
-        self:syncToLocal()
+    if (commitId or selectWorld.status == 2) then
+        -- down zip
+        self:DownloadZIP()
+        return false
     end
 
-    GitService:getProjectIdByName(self.foldername.base32, handleProjectId)
+    -- 加载进度UI界面
+    Progress:Init(self)
+
+    self:SetFinish(false)
+    self:SyncToLocal()
 end
 
-function SyncToLocal:syncToLocal()
+function SyncToLocal:SyncToLocal()
     self.compareListIndex = 1
     self.compareListTotal = 0
 
-    SyncGUI:updateDataBar(0, 0, L"正在对比文件列表...")
+    Progress:UpdateDataBar(0, 0, L"正在对比文件列表...")
 
-    local function handleSyncToLocal(data, err)
+    local function Handle(data, err)
         self.localFiles = LocalService:LoadFiles(self.worldDir.default)
         self.dataSourceFiles = data
 
-        Store:set("world/localFiles", localFiles)
+        Store:Set("world/localFiles", localFiles)
 
         self:GetCompareList()
         self:HandleCompareList()
     end
 
-    GitService:getTree(self.projectId, nil, nil, handleSyncToLocal)
+    GitService:GetTree(self.foldername.base32, nil, Handle)
 end
 
 function SyncToLocal:GetCompareList()
@@ -132,20 +120,20 @@ function SyncToLocal:GetCompareList()
 end
 
 function SyncToLocal:RefreshList()
-    LoginWorldList.RefreshCurrentServerList(
+    WorldList:RefreshCurrentServerList(
         function()
-            local willEnterWorld = Store:get('world/willEnterWorld')
-            
+            local willEnterWorld = Store:Get('world/willEnterWorld')
+
             if(type(willEnterWorld) == 'function') then
-                local worldIndex = Store:get("world/worldIndex")
-                LoginWorldList.OnSwitchWorld(worldIndex)
+                local worldIndex = Store:Get("world/worldIndex")
+                WorldList:OnSwitchWorld(worldIndex)
                 willEnterWorld()
 
-                Store:remove('world/willEnterWorld')
+                Store:Remove('world/willEnterWorld')
             end
 
-            SyncGUI:setFinish(true)
-            SyncGUI:refresh()
+            Progress:SetFinish(true)
+            Progress:Refresh()
         end
     )
 end
@@ -156,8 +144,8 @@ function SyncToLocal:HandleCompareList()
         self:SetFinish(true)
         self:RefreshList()
 
-        local selectWorld = Store:get("world/selectWorld")
-        SyncMain:SetCurrentCommidId(selectWorld.lastCommitId)
+        local selectWorld = Store:Get("world/selectWorld")
+        KeepworkService:SetCurrentCommidId(selectWorld.lastCommitId)
 
         self.compareListIndex = 1
         return false
@@ -171,8 +159,8 @@ function SyncToLocal:HandleCompareList()
 
     local currentItem = self.compareList[self.compareListIndex]
 
-    local function retry()
-        SyncGUI:updateDataBar(
+    local function Retry()
+        Progress:UpdateDataBar(
             self.compareListIndex,
             self.compareListTotal,
             format(L"%s 处理完成", currentItem.file),
@@ -184,15 +172,15 @@ function SyncToLocal:HandleCompareList()
     end
 
     if (currentItem.status == UPDATE) then
-        self:updateOne(currentItem.file, retry)
+        self:UpdateOne(currentItem.file, Retry)
     end
 
     if (currentItem.status == DOWNLOAD) then
-        self:downloadOne(currentItem.file, retry)
+        self:DownloadOne(currentItem.file, Retry)
     end
 
     if (currentItem.status == DELETE) then
-        self:deleteOne(currentItem.file, retry)
+        self:DeleteOne(currentItem.file, Retry)
     end
 end
 
@@ -221,15 +209,15 @@ function SyncToLocal:GetRemoteFileByPath(path)
 end
 
 -- 下载新文件
-function SyncToLocal:downloadOne(file, callback)
+function SyncToLocal:DownloadOne(file, callback)
     local currentRemoteItem = self:GetRemoteFileByPath(file)
 
-    GitService:getContentWithRaw(
+    GitService:GetContentWithRaw(
         self.foldername.base32,
         currentRemoteItem.path,
         nil,
         function(content, size)
-            SyncGUI:updateDataBar(
+            Progress:UpdateDataBar(
                 self.compareListIndex,
                 self.compareListTotal,
                 format(L"%s （%s） 更新中", currentRemoteItem.path, Utils.formatFileSize(size, "KB"))
@@ -245,11 +233,11 @@ function SyncToLocal:downloadOne(file, callback)
 end
 
 -- 更新本地文件
-function SyncToLocal:updateOne(file, callback)
+function SyncToLocal:UpdateOne(file, callback)
     local currentLocalItem = self:GetLocalFileByFilename(file)
     local currentRemoteItem = self:GetRemoteFileByPath(file)
 
-    if (currentLocalItem.sha1 == currentRemoteItem.sha) then
+    if (currentLocalItem.sha1 == currentRemoteItem.id) then
         if (type(callback) == "function") then
             Utils.SetTimeOut(callback)
         end
@@ -257,34 +245,34 @@ function SyncToLocal:updateOne(file, callback)
         return false
     end
 
-    local function handleUpdate(content, size)
-        SyncGUI:updateDataBar(
+    local function Handle(content, size)
+        Progress:UpdateDataBar(
             self.compareListIndex,
             self.compareListTotal,
-            format(L"%s （%s） 更新中", currentRemoteItem.path, Utils.formatFileSize(size, "KB"))
+            format(L"%s （%s） 更新中", currentRemoteItem.path, Utils.FormatFileSize(size, "KB"))
         )
 
-        LocalService:write(self.foldername.default, Encoding.Utf8ToDefault(currentRemoteItem.path), content)
+        LocalService:Write(self.foldername.default, Encoding.Utf8ToDefault(currentRemoteItem.path), content)
 
         if (type(callback) == "function") then
             callback()
         end
     end
 
-    GitService:getContentWithRaw(self.foldername.base32, currentRemoteItem.path, nil, handleUpdate)
+    GitService:GetContentWithRaw(self.foldername.base32, currentRemoteItem.path, nil, Handle)
 end
 
 -- 删除文件
-function SyncToLocal:deleteOne(file, callback)
+function SyncToLocal:DeleteOne(file, callback)
     local currentLocalItem = self:GetLocalFileByFilename(file)
 
-    SyncGUI:updateDataBar(
+    Progress:UpdateDataBar(
         self.compareListIndex,
         self.compareListTotal,
-        format(L"%s （%s） 更新中", currentLocalItem.filename, Utils.formatFileSize(currentLocalItem.size, "KB"))
+        format(L"%s （%s） 更新中", currentLocalItem.filename, Utils.FormatFileSize(currentLocalItem.size, "KB"))
     )
 
-    LocalService:delete(self.foldername.default, Encoding.Utf8ToDefault(currentLocalItem.filename))
+    LocalService:Delete(self.foldername.default, Encoding.Utf8ToDefault(currentLocalItem.filename))
 
     if (type(callback) == "function") then
         callback()
@@ -292,9 +280,9 @@ function SyncToLocal:deleteOne(file, callback)
 end
 
 function SyncToLocal:DownloadZIP()
-    local commitId = Store:get("world/commitId")
+    local commitId = Store:Get("world/commitId")
 
-    local function handleDownloadZIP(commitId)
+    local function Handle(commitId)
         if (not commitId) then
             return false
         end
@@ -316,24 +304,23 @@ function SyncToLocal:DownloadZIP()
                 self:RefreshList()
                 MsgBox:Close()
 
-                SyncMain:SetCurrentCommidId(commitId)
-                Store:remove("world/commitId")
+                KeepworkService:SetCurrentCommidId(commitId)
+                Store:Remove("world/commitId")
             end
         )
     end
 
     if (not commitId) then
-        GitService:getCommits(
-            self.projectId,
+        GitService:GetCommits(
             self.foldername.base32,
             false,
             function(data, err)
                 if (data and data[1] and data[1]["id"]) then
-                    handleDownloadZIP(data[1]["id"])
+                    Handle(data[1]["id"])
                 end
             end
         )
     else
-        handleDownloadZIP(commitId)
+        Handle(commitId)
     end
 end

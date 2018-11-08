@@ -12,17 +12,17 @@ local PageStore = commonlib.gettable('Mod.WorldShare.store.Page')
 
 local PageStore = commonlib.gettable('Mod.WorldShare.store.Page')
 
-local function setEmpty(page)
+local function SetEmpty(page)
     if (not page) then
         page = {}
     end
 end
 
-setEmpty(PageStore.LoginMain)
-setEmpty(PageStore.LoginModal)
+SetEmpty(PageStore.UserConsole)
+SetEmpty(PageStore.LoginModal)
 
-setEmpty(PageStore.StartSync)
-setEmpty(PageStore.StartSyncUseLocal)
-setEmpty(PageStore.StartSyncUseDataSource)
+SetEmpty(PageStore.StartSync)
+SetEmpty(PageStore.StartSyncUseLocal)
+SetEmpty(PageStore.StartSyncUseDataSource)
 
-setEmpty(PageStore.WorldExitDialog)
+SetEmpty(PageStore.WorldExitDialog)

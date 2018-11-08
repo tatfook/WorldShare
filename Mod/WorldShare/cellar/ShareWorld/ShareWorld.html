@@ -3,14 +3,14 @@
     <pe:mcml>
         <script type="text/npl" refresh="false">
             <![CDATA[
-                SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/ShareWorld/ShareWorld.lua')
                 ShareWorld = NPL.load('./ShareWorld.lua')
+                KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 
-                ShareWorld.setShareWorldImp();
+                ShareWorld:SetPage();
 
                 function open_world()
-                    -- GameLogic.RunCommand("/menu file.openworlddir");
-                    ShareWorld.openWorldWebPage()
+                    local url = KeepworkService:GetShareUrl()
+                    ParaGlobal.ShellExecute("open", url, "", "", 1)
                 end
 
                 function foldername()
@@ -22,7 +22,7 @@
                 end
 
                 function snapshot()
-                    ShareWorld:snapshot()
+                    ShareWorld:Snapshot()
                 end
 
                 function size()
@@ -30,7 +30,7 @@
                 end
 
                 function share_now()
-                    ShareWorld:shareNow()
+                    ShareWorld:OnClick()
                 end
 
                 function remote_revision()
@@ -42,7 +42,17 @@
                 end
 
                 function close()
-                    ShareWorld:closeShareWorldImp()
+                    ShareWorld:ClosePage()
+                end
+
+                function get_world_url()
+                    local url = KeepworkService:GetShareUrl()
+
+                    if #url == 0 then
+                        return L"此世界暂未分享"
+                    else
+                        return KeepworkService:GetShareUrl()
+                    end
                 end
              ]]>
         </script>
@@ -84,7 +94,7 @@
                     </div>
 
                     <div style="margin-top:20px;">
-                        <input type="text" value="<%= ShareWorld.getWorldUrl()%>" class="text_field"/>
+                        <input type="text" value="<%= get_world_url() %>" class="text_field"/>
                         <input type="button" width="75" height="30" style="margin-left:10px;" class="mc_light_grey_button_with_fillet" value='<%=L"浏览" %>' onclick="open_world()" />
                     </div>
                 </div>

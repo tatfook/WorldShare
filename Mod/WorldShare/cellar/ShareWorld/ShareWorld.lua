@@ -1,4 +1,4 @@
---[[
+﻿--[[
 Title: share world to datasource
 Author(s): big
 Date: 2017.5.12
@@ -9,25 +9,27 @@ local ShareWorld = NPL.load("(gl)Mod/WorldShare/sync/ShareWorld.lua")
 ShareWorld.ShowPage()
 -------------------------------------------------------
 ]]
-local ShareWorldPage = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.Areas.ShareWorldPage")
+local PackageShareWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.Areas.ShareWorldPage")
 local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 local CommandManager = commonlib.gettable("MyCompany.Aries.Game.CommandManager")
 
-local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/SyncMain.lua")
-local LoginMain = NPL.load("(gl)Mod/WorldShare/cellar/Login/LoginMain.lua")
-local LoginUserInfo = NPL.load("(gl)Mod/WorldShare/cellar/Login/LoginUserInfo.lua")
+local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
+local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
+local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua")
+local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
+local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
-local SyncCompare = NPL.load("(gl)Mod/WorldShare/cellar/Sync/SyncCompare.lua")
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
-local LoginWorldList = NPL.load("(gl)Mod/WorldShare/cellar/Login/LoginWorldList.lua")
+local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
+local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 
 local ShareWorld = NPL.export()
 
-function ShareWorld:init()
-    Store:set("world/ShareMode", true)
-    Store:set("world/worldDir", self:GetEnterWorldDir())
-    Store:set("world/foldername", self:GetEnterFoldername())
-    Store:set("world/selectWorld", self:GetEnterWorld())
+function ShareWorld:Init()
+    Store:Set("world/shareMode", true)
+    Store:Set("world/worldDir", self:GetEnterWorldDir())
+    Store:Set("world/foldername", self:GetEnterFoldername())
+    Store:Set("world/selectWorld", self:GetEnterWorld())
 
     local enterWorld = self:GetEnterWorld()
 
@@ -36,49 +38,60 @@ function ShareWorld:init()
         return false
     end
 
-    if (not LoginUserInfo.IsSignedIn()) then
-        function syncCompare()
-            SyncCompare:syncCompare()
+    PackageShareWorld.TakeSharePageImage()
+
+    if (not KeepworkService:IsSignedIn()) then
+        function Handle()
+            local isCommandEnter = Store:Get("world/isCommandEnter")
+            if isCommandEnter then
+                SyncMain:CommandEnter(
+                    function()
+                        Compare:Init()
+                    end
+                )
+            else
+                Compare:Init()
+            end
         end
 
-        if (not LoginUserInfo.checkDoAutoSignin(syncCompare)) then
-            LoginMain.ShowLoginModal()
-            Store:set('user/afterLogined', syncCompare)
+        if (not UserInfo:CheckDoAutoSignin(Handle)) then
+            LoginModal:ShowPage()
+            Store:Set('user/AfterLogined', Handle)
         end
 
         return false
     end
 
-    SyncCompare:syncCompare()
+    Compare:Init()
 end
 
-function ShareWorld:ShowShareWorldImp()
+function ShareWorld:ShowPage()
     local params = Utils:ShowWindow(640, 415, "Mod/WorldShare/cellar/ShareWorld/ShareWorld.html", "ShareWorld")
 
     params._page.OnClose = function()
-        Store:remove('page/ShareWorld')
+        Store:Remove('page/ShareWorld')
     end
 
-    local ShareWorldImp = Store:get('page/ShareWorld')
+    local ShareWorldImp = Store:Get('page/ShareWorld')
     local filepath = self:GetPreviewImagePath()
 
     if (ParaIO.DoesFileExist(filepath) and ShareWorldImp) then
         ShareWorldImp:SetNodeValue("ShareWorldImage", filepath)
     end
 
-    self:refreshShareWorldImp()
+    self:Refresh()
 end
 
 function ShareWorld:GetEnterWorldDir()
-    return Store:get("world/enterWorldDir")
+    return Store:Get("world/enterWorldDir")
 end
 
 function ShareWorld:GetEnterFoldername()
-    return Store:get("world/enterFoldername")
+    return Store:Get("world/enterFoldername")
 end
 
 function ShareWorld:GetEnterWorld()
-    return Store:get("world/enterWorld")
+    return Store:Get("world/enterWorld")
 end
 
 function ShareWorld:GetPreviewImagePath()
@@ -87,41 +100,41 @@ function ShareWorld:GetPreviewImagePath()
     return format("%spreview.jpg", worldDir.default)
 end
 
-function ShareWorld:setShareWorldImp()
-    Store:set('page/ShareWorld', document:GetPageCtrl())
+function ShareWorld:SetPage()
+    Store:Set('page/ShareWorld', document:GetPageCtrl())
 end
 
-function ShareWorld:closeShareWorldImp()
-    local ShareWorldImp = Store:get('page/ShareWorld')
+function ShareWorld:ClosePage()
+    local ShareWorldPage = Store:Get('page/ShareWorld')
 
-    if (ShareWorldImp) then
-        ShareWorldImp:CloseWindow()
+    if (ShareWorldPage) then
+        ShareWorldPage:CloseWindow()
     end
 end
 
-function ShareWorld:refreshShareWorldImp(times)
-    local ShareWorldImp = Store:get('page/ShareWorld')
+function ShareWorld:Refresh(times)
+    local ShareWorldPage = Store:Get('page/ShareWorld')
 
-    if (ShareWorldImp) then
-        ShareWorldImp:Refresh(times or 0.01)
+    if (ShareWorldPage) then
+        ShareWorldPage:Refresh(times or 0.01)
     end
 end
 
 function ShareWorld:GetWorldSize()
     local tagInfor = WorldCommon.GetWorldInfo()
 
-    return Utils.formatFileSize(tagInfor.size)
+    return Utils.FormatFileSize(tagInfor.size)
 end
 
 function ShareWorld:GetRemoteRevision()
-    return tonumber(Store:get("world/remoteRevision")) or 0
+    return tonumber(Store:Get("world/remoteRevision")) or 0
 end
 
 function ShareWorld:GetCurrentRevision()
-    return tonumber(Store:get("world/currentRevision")) or 0
+    return tonumber(Store:Get("world/currentRevision")) or 0
 end
 
-function ShareWorld:shareNow()
+function ShareWorld:OnClick()
     local canBeShare = true
     local msg = ''
 
@@ -135,9 +148,9 @@ function ShareWorld:shareNow()
         msg = L"当前本地版本小于远程版本，是否继续上传？"
     end
 
-    local function shareNow()
-        SyncMain:syncToDataSource()
-        self:closeShareWorldImp()
+    local function Handle()
+        SyncMain:SyncToDataSource()
+        self:ClosePage()
     end
 
     if (not canBeShare) then
@@ -145,7 +158,7 @@ function ShareWorld:shareNow()
             msg,
             function(res)
                 if (res and res == 6) then
-                    shareNow()
+                    Handle()
                 end
             end
         )
@@ -153,23 +166,23 @@ function ShareWorld:shareNow()
         return false
     end
 
-    shareNow()
+    Handle()
 end
 
-function ShareWorld:snapshot()
-    local ShareWorldImp = Store:get('page/ShareWorld')
-    ShareWorldPage.TakeSharePageImage()
+function ShareWorld:Snapshot()
+    local ShareWorldPage = Store:Get('page/ShareWorld')
+    PackageShareWorld.TakeSharePageImage()
     self:UpdateImage(true)
 
     if (self:GetRemoteRevision() == self:GetCurrentRevision()) then
         CommandManager:RunCommand("/save")
-        self:closeShareWorldImp()
-        self:init()
+        self:ClosePage()
+        self:Init()
     end
 end
 
 function ShareWorld:UpdateImage(bRefreshAsset)
-    local ShareWorldPage = Store:get('page/ShareWorld')
+    local ShareWorldPage = Store:Get('page/ShareWorld')
 
     if (ShareWorldPage) then
         local filepath = self:GetPreviewImagePath()
@@ -180,29 +193,6 @@ function ShareWorld:UpdateImage(bRefreshAsset)
             ParaAsset.LoadTexture("", filepath, 1):UnloadAsset()
         end
 
-        self:refreshShareWorldImp()
+        self:Refresh()
     end
-end
-
-function ShareWorld.getWorldUrl()
-    if (not LoginUserInfo.IsSignedIn()) then
-        return ""
-    end
-
-    local foldername = Store:get("world/foldername")
-    local userinfo = Store:get("user/userinfo")
-
-    return format("%s/%s/paracraft/%s", LoginUserInfo.site(), userinfo.username, foldername.utf8)
-end
-
-function ShareWorld.openWorldWebPage()
-    if (not LoginUserInfo.IsSignedIn()) then
-        return ""
-    end
-
-    local foldername = Store:get("world/foldername")
-    local userinfo = Store:get("user/userinfo")
-
-    local url = format("%s/%s/paracraft/%s", LoginUserInfo.site(), userinfo.username, foldername.default)
-    ParaGlobal.ShellExecute("open", url, "", "", 1)
 end

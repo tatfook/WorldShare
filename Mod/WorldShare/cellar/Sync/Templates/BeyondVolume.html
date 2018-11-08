@@ -2,7 +2,7 @@
     <pe:mcml>
         <script type="text/npl" refresh="false">
             <![CDATA[
-            local LoginMain = NPL.load("(gl)Mod/WorldShare/cellar/Login/LoginMain.lua")
+            local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/Login/UserConsole.lua")
             local SyncMain  = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
 
             SyncMain.setBeyondPage();
@@ -13,7 +13,7 @@
             function getBeyondMsg()
                 local str;
 
-                if(loginMain.userType == "vip") then
+                if(UserConsole.userType == "vip") then
                     str = format(L"世界%s文件总大小超过了%dMB，是否清理文件？(请使用MP3、OGG格式音频，避免使用FBX格式)", SyncMain.foldername.utf8, 50);
                 else
                     str = format(L"世界%s文件总大小超过了%dMB，是否清理文件？(请使用MP3、OGG格式音频，避免使用FBX格式，VIP用户最大可上传%dMB)", SyncMain.foldername.utf8, 25, 50);

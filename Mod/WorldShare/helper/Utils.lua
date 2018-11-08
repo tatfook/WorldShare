@@ -42,7 +42,7 @@ function Utils:ShowWindow(width, height, url, name, x, y, align, allowDrag, zord
     return params
 end
 
-function Utils.formatFileSize(size, unit)
+function Utils.FormatFileSize(size, unit)
     local s
     size = tonumber(size)
 
@@ -141,7 +141,7 @@ function Utils:MergeTable(target, source)
     return target
 end
 
-function Utils:implode(glue, pieces)
+function Utils:Implode(glue, pieces)
     glue = glue or ""
 
     local k, v

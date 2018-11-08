@@ -14,35 +14,19 @@ local FileDownloader = commonlib.gettable("Mod.WorldShare.service.FileDownloader
 local WorldShare = commonlib.gettable("Mod.WorldShare")
 local Encoding = commonlib.gettable("commonlib.Encoding")
 
-local LoginMain = NPL.load('(gl)Mod/WorldShare/cellar/Login/LoginMain.lua')
-local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/SyncMain.lua')
-local GitEncoding = NPL.load('(gl)Mod/WorldShare/helper/GitEncoding.lua')
+local UserConsole = NPL.load('(gl)Mod/WorldShare/cellar/UserConsole/Main.lua')
+local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
 local HttpRequest = NPL.load('./HttpRequest.lua')
 local Store = NPL.load('(gl)Mod/WorldShare/store/Store.lua')
 
 local GitlabService = NPL.export()
 
-GitlabService.inited = false
-GitlabService.tree = {}
-GitlabService.newTree = {}
-GitlabService.blob = {}
-GitlabService.getTreePage = 1
-GitlabService.getTreePer_page = 100
-
-function GitlabService:ctor(projectId)
-    self.dataSourceInfo = GlobalStore.get("dataSourceInfo")
-
-    self.dataSourceToken = self.dataSourceInfo.dataSourceToken
-    self.apiBaseUrl = self.dataSourceInfo.apiBaseUrl
-    self.projectId = projectId
+function GitlabService:GetDataSourceInfo()
+    return Store:Get("user/dataSourceInfo")
 end
 
-function GitlabService:getDataSourceInfo()
-    return Store:get("user/dataSourceInfo")
-end
-
-function GitlabService:getToken()
-    local dataSourceInfo = self:getDataSourceInfo()
+function GitlabService:GetToken()
+    local dataSourceInfo = self:GetDataSourceInfo()
 
     if (dataSourceInfo and dataSourceInfo.dataSourceToken) then
         return dataSourceInfo.dataSourceToken
@@ -51,8 +35,8 @@ function GitlabService:getToken()
     end
 end
 
-function GitlabService:getApiBaseUrl()
-    local dataSourceInfo = self:getDataSourceInfo()
+function GitlabService:GetApiBaseUrl()
+    local dataSourceInfo = self:GetDataSourceInfo()
 
     if (dataSourceInfo and dataSourceInfo.apiBaseUrl) then
         return dataSourceInfo.apiBaseUrl
@@ -61,9 +45,14 @@ function GitlabService:getApiBaseUrl()
     end
 end
 
+function GitlabService:GetProjectPath(projectName)
+    local dataSourceInfo = self:GetDataSourceInfo()
+    local projectPath = Encoding.url_encode(format("%s/%s", dataSourceInfo.dataSourceUsername or "", projectName or ""))
 
+    return projectPath
+end
 
-function GitlabService:checkSpecialCharacter(filename)
+function GitlabService:GheckSpecialCharacter(filename)
     local specialCharacter = {"【", "】", "《", "》", "·", " ", "，", "●"}
 
     for key, item in pairs(specialCharacter) do
@@ -82,9 +71,9 @@ function GitlabService:checkSpecialCharacter(filename)
     return false
 end
 
-function GitlabService:apiGet(url, callback)
-    local apiBaseUrl = self:getApiBaseUrl()
-    local token = self:getToken()
+function GitlabService:ApiGet(url, callback)
+    local apiBaseUrl = self:GetApiBaseUrl()
+    local token = self:GetToken()
 
     if (not url or not apiBaseUrl) then
         return false
@@ -109,9 +98,9 @@ function GitlabService:apiGet(url, callback)
     )
 end
 
-function GitlabService:apiPost(url, params, callback)
-    local apiBaseUrl = self:getApiBaseUrl()
-    local token = self:getToken()
+function GitlabService:ApiPost(url, params, callback)
+    local apiBaseUrl = self:GetApiBaseUrl()
+    local token = self:GetToken()
 
     if (not url or not params) then
         return false
@@ -126,8 +115,7 @@ function GitlabService:apiPost(url, params, callback)
             json = true,
             headers = {
                 ["PRIVATE-TOKEN"] = token,
-                ["User-Agent"] = "npl",
-                ["content-type"] = "application/json"
+                ["User-Agent"] = "npl"
             },
             form = params
         },
@@ -139,13 +127,13 @@ function GitlabService:apiPost(url, params, callback)
     )
 end
 
-function GitlabService:apiPut(url, params, callback)
+function GitlabService:ApiPut(url, params, callback)
     if (not url or not params) then
         return false
     end
 
-    local apiBaseUrl = self:getApiBaseUrl()
-    local token = self:getToken()
+    local apiBaseUrl = self:GetApiBaseUrl()
+    local token = self:GetToken()
 
     url = format("%s/%s", apiBaseUrl, url)
 
@@ -156,8 +144,7 @@ function GitlabService:apiPut(url, params, callback)
             json = true,
             headers = {
                 ["PRIVATE-TOKEN"] = token,
-                ["User-Agent"] = "npl",
-                ["content-type"] = "application/json"
+                ["User-Agent"] = "npl"
             },
             form = params
         },
@@ -169,9 +156,9 @@ function GitlabService:apiPut(url, params, callback)
     )
 end
 
-function GitlabService:apiDelete(url, params, callback)
-    local apiBaseUrl = self:getApiBaseUrl()
-    local token = self:getToken()
+function GitlabService:ApiDelete(url, params, callback)
+    local apiBaseUrl = self:GetApiBaseUrl()
+    local token = self:GetToken()
 
     url = format("%s/%s", apiBaseUrl, url)
 
@@ -182,8 +169,7 @@ function GitlabService:apiDelete(url, params, callback)
             json = true,
             headers = {
                 ["PRIVATE-TOKEN"] = token,
-                ["User-Agent"] = "npl",
-                ["content-type"] = "application/json"
+                ["User-Agent"] = "npl"
             },
             form = params
         },
@@ -195,178 +181,89 @@ function GitlabService:apiDelete(url, params, callback)
     )
 end
 
-function GitlabService:getFileUrlPrefix(projectId)
-    if (not projectId) then
+function GitlabService:GetFileUrlPrefix(projectPath)
+    if (not projectPath) then
         return false
     end
 
-    return format("projects/%s/repository/files/", projectId)
+    return format("projects/%s/repository/files/", projectPath)
 end
 
-function GitlabService:getCommitMessagePrefix()
-    return "keepwork commit: "
+function GitlabService:GetCommitMessagePrefix()
+    return "paracraft commit: "
 end
 
--- 获得文件列表
-function GitlabService:getTree(projectId, commitId, callback)
-    local that = self
-    local url = format("projects/%s/repository/tree?", projectId)
+-- get repository tree
+function GitlabService:GetTree(projectName, commitId, callback)
+    local projectPath = self:GetProjectPath(projectName or '')
+    local url = format("projects/%s/repository/tree?recursive=true", projectPath)
 
-    that.blob = {}
-    that.tree = {}
+    self.treeData = commonlib.Array:new()
+    self.treePage = 1
+    self.treePerPage = 100
 
-    if (commitId) then
-        url = format("%sref=%s", url, commitId)
-    end
-
-    local fetchTimes = 0
-    local function getSubTree()
-        if (#that.tree ~= 0) then
-            for key, value in ipairs(that.tree) do
-                that:getSubTree(
-                    function(subTree, subFolderName, commitId, projectId)
-                        for checkKey, checkValue in ipairs(that.tree) do
-                            if (checkValue.path == subFolderName) then
-                                if (not checkValue.alreadyGet) then
-                                    checkValue.alreadyGet = true
-                                else
-                                    return
-                                end
-                            end
-                        end
-
-                        fetchTimes = fetchTimes + 1
-
-                        for subKey, subValue in ipairs(subTree) do
-                            that.newTree[#that.newTree + 1] = subValue
-                        end
-
-                        if (#that.tree == fetchTimes) then
-                            fetchTimes = 0
-                            that.tree = commonlib.copy(that.newTree)
-                            that.newTree = {}
-
-                            getSubTree()
-                        end
-                    end,
-                    value.path,
-                    commitId,
-                    projectId
-                )
-            end
-        elseif (#that.tree == 0) then
-            for cbKey, cbValue in ipairs(that.blob) do
-                cbValue.sha = cbValue.id
-            end
-
-            if (type(callback) == "function") then
-                callback(that.blob, 200)
-            end
-        end
-    end
-
-    that:getTreeApi(
-        url,
-        function(data, err)
-            if (err == 404) then
-                if (type(callback) == "function") then
-                    callback({})
-                end
-            else
-                if (type(data) == "table") then
-                    for key, value in ipairs(data) do
-                        if (value.type == "tree") then
-                            that.tree[#that.tree + 1] = value
-                        end
-
-                        if (value.type == "blob") then
-                            that.blob[#that.blob + 1] = value
-                        end
-                    end
-
-                    getSubTree()
-                else
-                    _guihelper.MessageBox(L"获取sha文件失败")
-                end
-            end
-        end
-    )
-end
-
-function GitlabService:getSubTree(callback, path, commitId, projectId)
-    local url = format("projects/%s/repository/tree?path=%s", projectId, path)
-
-    if (commitId) then
+    if type(commitId) == 'string' then
         url = format("%s&ref=%s", url, commitId)
     end
 
-    local tree = {}
-    self:getTreeApi(
+    self:GetTreeApi(
         url,
-        function(data, err)
+        function(data)
+            if type(callback) ~= 'function' then
+                return false
+            end
+
+            local blob = {}
+
             for key, value in ipairs(data) do
-                if (value.type == "tree") then
-                    tree[#tree + 1] = value
-                end
-
                 if (value.type == "blob") then
-                    self.blob[#self.blob + 1] = value
+                    blob[#blob + 1] = value
                 end
             end
 
-            if (type(callback) == "function") then
-                callback(tree, path, commitId, projectId)
-            end
+            callback(blob)
         end
     )
 end
 
-function GitlabService:getTreeApi(url, callback)
-    local url = format("%s&page=%s&per_page=%s", url, self.getTreePage, self.getTreePer_page)
+function GitlabService:GetTreeApi(url, callback)
+    local pageUrl = format("%s&page=%s&per_page=%s", url, self.treePage, self.treePerPage)
 
-    self:apiGet(
-        url,
+    self:ApiGet(
+        pageUrl,
         function(data, err)
-            if (#data == 0) then
-                self.getTreePage = 1
-
-                if (self.tmpTree) then
-                    if (type(callback) == "function") then
-                        callback(self.tmpTree, err)
-                    end
-                else
-                    if (type(callback) == "function") then
-                        callback(data, err)
-                    end
-                end
-
-                self.tmpTree = nil
-            else
-                if (self.tmpTree) then
-                    for _, value in ipairs(data) do
-                        self.tmpTree[#self.tmpTree + 1] = value
-                    end
-                else
-                    self.tmpTree = data
-                end
-
-                self.getTreePage = self.getTreePage + 1
-                self:getTreeApi(url, callback)
+            if type(callback) ~= 'function' then
+                return false
             end
+
+            if err ~= 200 then
+                callback(self.treeData)
+                return false
+            end
+
+            if type(data) ~= 'table' or #data == 0 then
+                callback(self.treeData)
+                return false
+            end
+
+            self.treeData:AddAll(data)
+
+            self.treePage = self.treePage + 1
+            self:GetTreeApi(url, callback)
         end
     )
 end
 
--- 初始化
-function GitlabService:create(foldername, callback)
+-- Create a gitlab repository
+function GitlabService:Create(projectName, callback)
     local projectId
 
-    self:apiGet(
+    self:ApiGet(
         "projects?owned=true&page=1&per_page=100",
         function(projectList, err)
             if (projectList) then
                 for i = 1, #projectList do
-                    if (projectList[i].name == foldername) then
+                    if (projectList[i].name == projectName) then
                         projectId = projectList[i].id
 
                         if (type(callback) == "function") then
@@ -378,12 +275,12 @@ function GitlabService:create(foldername, callback)
                 end
 
                 local params = {
-                    name = foldername,
+                    name = projectName,
                     visibility = "public",
                     request_access_enabled = true
                 }
 
-                self:apiPost(
+                self:ApiPost(
                     "projects",
                     params,
                     function(data, err)
@@ -407,113 +304,109 @@ function GitlabService:create(foldername, callback)
     )
 end
 
--- commit
-local per_page = 100
-local page = 1
+-- get repository commits
+local commitPrePage = 100
+local commitPage = 1
 local commits = commonlib.vector:new()
-function GitlabService:getCommits(projectId, IsGetAll, callback)
-    local url = format("projects/%s/repository/commits?per_page=%s&page=%s", projectId, per_page, page)
+function GitlabService:GetCommits(projectName, isGetAll, callback)
+    local projectPath = self:GetProjectPath(projectName or '')
 
-    self:apiGet(
+    local url = format("projects/%s/repository/commits?per_page=%s&page=%s", projectPath, commitPrePage, commitPage)
+
+    self:ApiGet(
         url,
         function(data, err)
-            if (IsGetAll) then
-                if (#data == 0) then
-                    if (type(callback) == "function") then
-                        local results = commonlib.copy(commits)
-                        callback(results, err)
-                    end
+            if type(callback) ~= 'function' then
+                return false
+            end
 
-                    page = 1
-                    commits:clear()
+            if err ~= 200 then
+                callback(commonlib.copy(commits), err)
+                return false
+            end
 
-                    return false
-                end
+            if type(data) ~= 'table' or #data == 0 then
+                callback(commonlib.copy(commits), err)
 
-                commits:AddAll(data)
-
-                page = page + 1
-                self:getCommits(projectId, IsGetAll, callback)
+                commitPage = 1
+                commits:clear()
 
                 return false
             end
 
-            if (type(callback) == "function") then
-                callback(data, err)
+            commits:AddAll(data)
+
+            if not isGetAll then
+                callback(commonlib.copy(commits), err)
+                return false
             end
+
+            commitPage = commitPage + 1
+            self:GetCommits(projectName, isGetAll, callback)
         end
     )
 end
 
--- 写文件
-function GitlabService:upload(projectId, filename, content, callback)
-    if (not projectId or not filename or not content) then
-        return false
-    end
-
-    local url = format("%s%s", self:getFileUrlPrefix(projectId), Encoding.url_encode(filename))
+-- write a file
+function GitlabService:Upload(projectName, path, content, callback)
+    local projectPath = self:GetProjectPath(projectName or '')
+    local url = format("%s%s", self:GetFileUrlPrefix(projectPath), Encoding.url_encode(path))
 
     local params = {
-        commit_message = format("%s%s", GitlabService:getCommitMessagePrefix(), filename),
+        commit_message = format("%s%s", GitlabService:GetCommitMessagePrefix(), path),
         branch = "master",
         content = content
     }
 
-    self:apiPost(
+    self:ApiPost(
         url,
         params,
         function(data, err)
             if (err == 201) then
                 if (type(callback) == "function") then
-                    callback(true, filename, data, err)
+                    callback(true, path, data, err)
                 end
             else
-                self:update(projectId, filename, content, callback)
+                self:Update(projectName, path, content, callback)
             end
         end
     )
 end
 
---更新文件
-function GitlabService:update(projectId, filename, content, callback)
-    if (not projectId or not filename or not content) then
-        return false
-    end
-
-    local url = format("%s%s", self:getFileUrlPrefix(projectId), Encoding.url_encode(filename))
+-- Update a file
+function GitlabService:Update(projectName, path, content, callback)
+    local projectPath = self:GetProjectPath(projectName or '')
+    local url = format("%s%s", self:GetFileUrlPrefix(projectPath), Encoding.url_encode(path))
 
     local params = {
-        commit_message = format("%s%s", GitlabService:getCommitMessagePrefix(), filename),
+        commit_message = format("%s%s", GitlabService:GetCommitMessagePrefix(), path),
         branch = "master",
         content = content
     }
 
-    self:apiPut(
+    self:ApiPut(
         url,
         params,
         function(data, err)
             if (err == 200) then
                 if (type(callback) == "function") then
-                    callback(true, filename, data, err)
+                    callback(true, path, data, err)
                 end
             else
                 if (type(callback) == "function") then
-                    callback(false, filename, data, err)
+                    callback(false, path, data, err)
                 end
             end
         end
     )
 end
 
--- 获取文件
-function GitlabService:getContent(projectId, path, callback)
-    if (not projectId or not path) then
-        return false
-    end
+-- get a file content
+function GitlabService:GetContent(projectName, path, commitId, callback)
+    local projectPath = self:GetProjectPath(projectName or '')
+    local url = format("%s%s?ref=%s", self:GetFileUrlPrefix(projectPath), path, commitId or 'master')
 
-    local url = format("%s%s?ref=master", self:getFileUrlPrefix(projectId), path)
-
-    self:apiGet(
+    self:ApiGet(
         url,
         function(data, err)
             if (err == 200 and data) then
@@ -529,9 +422,9 @@ function GitlabService:getContent(projectId, path, callback)
     )
 end
 
--- 获取文件
-function GitlabService:getContentWithRaw(foldername, path, commitId, callback)
-    local dataSourceInfo = self:getDataSourceInfo()
+-- get a file content (with raw protocol)
+function GitlabService:GetContentWithRaw(foldername, path, commitId, callback)
+    local dataSourceInfo = self:GetDataSourceInfo()
 
     if (not commitId) then
         commitId = "master"
@@ -568,12 +461,40 @@ function GitlabService:getContentWithRaw(foldername, path, commitId, callback)
     )
 end
 
+-- remove a file
+function GitlabService:DeleteFile(projectName, path, callback)
+    local projectPath = self:GetProjectPath(projectName or '')
+    local url = format("%s%s", self:GetFileUrlPrefix(projectPath), Encoding.url_encode(path))
+
+    local params = {
+        commit_message = format("%s%s", self:GetCommitMessagePrefix(), path),
+        branch = "master"
+    }
+
+    self:ApiDelete(
+        url,
+        params,
+        function(data, err)
+            if (err == 204) then
+                if (type(callback) == "function") then
+                    callback(true)
+                end
+            else
+                if (type(callback) == "function") then
+                    callback(false)
+                end
+            end
+        end
+    )
+end
+
+-- download all files through zip package
 function GitlabService:DownloadZIP(foldername, commitId, callback)
     if (not foldername or not commitId) then
         return false
     end
 
-    local dataSourceInfo = self:getDataSourceInfo()
+    local dataSourceInfo = self:GetDataSourceInfo()
 
     local url = format(
         "%s/%s/%s/repository/archive.zip?ref=%s",
@@ -599,54 +520,24 @@ function GitlabService:DownloadZIP(foldername, commitId, callback)
     )
 end
 
--- 删除文件
-function GitlabService:deleteFile(projectId, path, callback)
-    if (not projectId) then
-        return false
-    end
-
-    local url = format("%s%s", self:getFileUrlPrefix(projectId), path)
-
-    local params = {
-        commit_message = format("%s%s", self:getCommitMessagePrefix(), path),
-        branch = "master"
-    }
-
-    self:apiDelete(
-        url,
-        params,
-        function(data, err)
-            if (err == 204) then
-                if (type(callback) == "function") then
-                    callback(true)
-                end
-            else
-                if (type(callback) == "function") then
-                    callback(false)
-                end
-            end
-        end
-    )
-end
-
---删除仓
-function GitlabService:deleteResp(projectId, callback)
+-- delete a world repository
+function GitlabService:DeleteResp(projectId, callback)
     if (not projectId) then
         return false
     end
 
     local url = format("projects/%s", projectId)
-    self:apiDelete(url, {}, callback)
+    self:ApiDelete(url, {}, callback)
 end
 
-function GitlabService:getWorldRevision(foldername, callback)
+function GitlabService:GetWorldRevision(foldername, callback)
     if (type(foldername) == "function") then
         return false
     end
 
     local contentUrl = ""
-    local commitId = self:getCommitIdByFoldername(foldername.utf8)
-    local dataSourceInfo = self:getDataSourceInfo()
+    local commitId = self:GetCommitIdByFoldername(foldername.utf8)
+    local dataSourceInfo = self:GetDataSourceInfo()
 
     if (commitId) then
         contentUrl =
@@ -670,15 +561,32 @@ function GitlabService:getWorldRevision(foldername, callback)
     HttpRequest:GetUrl(
         contentUrl,
         function(data, err)
-            callback(tonumber(data) or 0)
+            if type(callback) == "function" then
+                callback(tonumber(data) or 0)
+            end
         end,
         {0, 502}
     )
 end
 
---通过仓名获取仓ID
-function GitlabService:getProjectIdByName(name, callback)
-    self:apiGet(
+function GitlabService:GetSingleProject(projectName, callback)
+    local projectPath = self:GetProjectPath(projectName)
+
+    local url = format("projects/%s", projectPath)
+
+    self:ApiGet(
+        url,
+        function(data, err)
+            if type(callback) == 'function' then
+                callback(data, err)
+            end
+        end
+    )
+end
+
+-- get projectId with projectName
+function GitlabService:GetProjectIdByName(name, callback)
+    self:ApiGet(
         "projects?owned=true&page=1&per_page=100",
         function(projectList, err)
             for i = 1, #projectList do
@@ -698,8 +606,8 @@ function GitlabService:getProjectIdByName(name, callback)
     )
 end
 
-function GitlabService:getCommitIdByFoldername(foldername)
-    local remoteWorldsList = Store:get("world/remoteWorldsList") or {}
+function GitlabService:GetCommitIdByFoldername(foldername)
+    local remoteWorldsList = Store:Get("world/remoteWorldsList") or {}
 
     for key, value in ipairs(remoteWorldsList) do
         if (value.worldsName == foldername) then

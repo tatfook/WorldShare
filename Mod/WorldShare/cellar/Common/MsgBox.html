@@ -3,7 +3,7 @@
         <script type="text/npl" refresh="false">
             <![CDATA[
                 local MsgBox = NPL.load("./MsgBox.lua")
-                MsgBox.setPage();
+                MsgBox.SetPage();
 
                 function get_window_style()
                     Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
@@ -12,7 +12,7 @@
                 end
 
                 function get_msg()
-                    return MsgBox.getMsg()
+                    return MsgBox.GetMsg()
                 end
             ]]>
         </script>

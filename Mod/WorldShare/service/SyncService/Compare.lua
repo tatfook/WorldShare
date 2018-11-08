@@ -1,11 +1,11 @@
 --[[
-Title: SyncCompare
-Author(s):  big
+Title: Compare
+Author(s): big
 Date:  2018.6.20
 Desc: 
 use the lib:
 ------------------------------------------------------------
-local SyncCompare = NPL.load("(gl)Mod/WorldShare/cellar/Sync/SyncCompare.lua")
+local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
 ------------------------------------------------------------
 ]]
 local Encoding = commonlib.gettable("commonlib.Encoding")
@@ -14,33 +14,33 @@ local CommandManager = commonlib.gettable("MyCompany.Aries.Game.CommandManager")
 local WorldRevision = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision")
 
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
-local SyncMain = NPL.load("./SyncMain.lua")
+local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
 local ShareWorld = NPL.load("(gl)Mod/WorldShare/cellar/ShareWorld/ShareWorld.lua")
-local LoginMain = NPL.load("(gl)Mod/WorldShare/cellar/Login/LoginMain.lua")
-local LoginUserInfo = NPL.load("(gl)Mod/WorldShare/cellar/Login/LoginUserInfo.lua")
-local LoginWorldList = NPL.load("(gl)Mod/WorldShare/cellar/Login/LoginWorldList.lua")
+local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
+local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua")
+local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
 local GitEncoding = NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua")
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
+local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")
 
-local SyncCompare = NPL.export()
+local Compare = NPL.export()
 
 local REMOTEBIGGER = "REMOTEBIGGER"
-local TRYAGAIN = "TRYAGAIN"
 local JUSTLOCAL = "JUSTLOCAL"
 local JUSTREMOTE = "JUSTREMOTE"
 local LOCALBIGGER = "LOCALBIGGER"
 local EQUAL = "EQUAL"
 
-function SyncCompare:syncCompare()
-    if (not LoginUserInfo.IsSignedIn() or not LoginUserInfo.CheckoutVerified()) then
+function Compare:Init()
+    if (not UserInfo.IsSignedIn() or not UserInfo:CheckoutVerified()) then
         return false
     end
 
-    local IsEnterWorld = Store:get("world/IsEnterWorld")
-    local isShowLoginMainPage = LoginMain.isShowLoginMainPage()
+    local isEnterWorld = Store:Get("world/isEnterWorld")
+    local isShowUserConsolePage = UserConsole:IsShowUserConsole()
 
     self:SetFinish(false)
 
@@ -53,33 +53,31 @@ function SyncCompare:syncCompare()
         500
     )
 
-    self:compareRevision(
+    self:GetCompareResult(
         function(result)
-            if (IsEnterWorld and not isShowLoginMainPage) then
-                local IsShareMode = Store:get("world/ShareMode")
+            if (isEnterWorld and not isShowUserConsolePage) then
+                local isShareMode = Store:Get("world/shareMode")
 
-                if (IsShareMode) then
-                    ShareWorld:ShowShareWorldImp()
+                if (isShareMode) then
+                    ShareWorld:ShowPage()
                     MsgBox:Close()
                     return false
                 end
 
                 if (result == REMOTEBIGGER) then
                     SyncMain:ShowStartSyncPage()
-                elseif (result == TRYAGAIN) then
-                    Utils.SetTimeOut(SyncCompare.syncCompare, 1000)
                 end
 
                 MsgBox:Close()
             else
                 if (result == JUSTLOCAL) then
-                    SyncMain:syncToDataSource()
+                    SyncMain:SyncToDataSource()
                     MsgBox:Close()
                     return true
                 end
 
                 if (result == JUSTREMOTE) then
-                    SyncMain:syncToLocal()
+                    SyncMain:SyncToLocal()
                     MsgBox:Close()
                     return true
                 end
@@ -94,19 +92,18 @@ function SyncCompare:syncCompare()
     )
 end
 
-function SyncCompare:IsCompareFinish()
-    local compareFinish = Store:get('world/compareFinish')
+function Compare:IsCompareFinish()
+    local compareFinish = Store:Get('world/compareFinish')
 
     return compareFinish == true
 end
 
-function SyncCompare:SetFinish(value)
-    Store:set('world/compareFinish', value)
+function Compare:SetFinish(value)
+    Store:Set('world/compareFinish', value)
 end
 
-function SyncCompare:compareRevision(callback)
-    local IsEnterWorld = Store:get("world/IsEnterWorld")
-    local selectWorld = Store:get("world/selectWorld")
+function Compare:GetCompareResult(callback)
+    local selectWorld = Store:Get("world/selectWorld")
 
     if (selectWorld and selectWorld.status == 2) then
         if (type(callback) == "function") then
@@ -121,23 +118,22 @@ function SyncCompare:compareRevision(callback)
         return false
     end
 
-    if (LoginUserInfo.IsSignedIn()) then
-        self:compare(callback)
+    if (KeepworkService:IsSignedIn()) then
+        self:CompareRevision(callback)
     else
-        LoginUserInfo.LoginWithTokenApi(
+        KeepworkService:LoginWithTokenApi(
             function()
-                self:compareRevision(callback)
+                self:GetCompareResult(callback)
             end
         )
     end
 end
 
-function SyncCompare:compare(callback)
-    local IsEnterWorld = Store:get("world/IsEnterWorld")
-    local foldername = Store:get("world/foldername")
+function Compare:CompareRevision(callback)
+    local foldername = Store:Get("world/foldername")
 
-    local worldDir = Store:get("world/worldDir")
-    local remoteWorldsList = Store:get("world/remoteWorldsList")
+    local worldDir = Store:Get("world/worldDir")
+    local remoteWorldsList = Store:Get("world/remoteWorldsList")
     local remoteRevision = 0
 
     local currentRevision = WorldRevision:new():init(worldDir.default):Checkout()
@@ -147,7 +143,7 @@ function SyncCompare:compare(callback)
     end
 
     if (self:HasRevision()) then
-        local function handleRevision(data, err)
+        local function HandleRevision(data, err)
             if (err == 0 or err == 502) then
                 _guihelper.MessageBox(L"网络错误")
                 return false
@@ -156,8 +152,8 @@ function SyncCompare:compare(callback)
             currentRevision = tonumber(currentRevision) or 0
             remoteRevision = tonumber(data) or 0
 
-            Store:set("world/currentRevision", currentRevision)
-            Store:set("world/remoteRevision", remoteRevision)
+            Store:Set("world/currentRevision", currentRevision)
+            Store:Set("world/remoteRevision", remoteRevision)
 
             local result
 
@@ -184,7 +180,7 @@ function SyncCompare:compare(callback)
             end
         end
 
-        GitService:getWorldRevision(foldername, handleRevision)
+        GitService:GetWorldRevision(foldername, HandleRevision)
     else
         _guihelper.MessageBox(L"本地世界沒有版本信息")
         self:SetFinish(true)
@@ -198,8 +194,8 @@ function SyncCompare:compare(callback)
     end
 end
 
-function SyncCompare:HasRevision()
-    local worldDir = Store:get("world/worldDir")
+function Compare:HasRevision()
+    local worldDir = Store:Get("world/worldDir")
 
     if (not worldDir or not worldDir.default) then
         return false
@@ -208,7 +204,7 @@ function SyncCompare:HasRevision()
     local localFiles = LocalService:LoadFiles(worldDir.default)
     local hasRevision = false
 
-    Store:set("world/localFiles", localFiles)
+    Store:Set("world/localFiles", localFiles)
 
     for key, file in ipairs(localFiles) do
         if (string.lower(file.filename) == "revision.xml") then

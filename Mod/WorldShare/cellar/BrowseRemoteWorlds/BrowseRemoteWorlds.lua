@@ -25,10 +25,10 @@ local BrowseRemoteWorlds = NPL.export()
 
 BrowseRemoteWorlds.itemsPerLine = 3
 
-function BrowseRemoteWorlds.init()
+function BrowseRemoteWorlds.Init()
     InternetLoadWorld.OnStaticInit()
     InternetLoadWorld.OnChangeType(2)
-    Store:set('page/BrowseRemoteWorlds', document:GetPageCtrl())
+    Store:Set('page/BrowseRemoteWorlds', document:GetPageCtrl())
 
     InternetLoadWorld.GetEvents():AddEventListener(
         "dataChanged",
@@ -42,8 +42,8 @@ function BrowseRemoteWorlds.init()
     )
 end
 
-function BrowseRemoteWorlds.refreshPage()
-    local BrowseRemoteWorldsPage = Store:get('page/BrowseRemoteWorlds')
+function BrowseRemoteWorlds.Refresh()
+    local BrowseRemoteWorldsPage = Store:Get('page/BrowseRemoteWorlds')
 
     if (BrowseRemoteWorldsPage) then
         BrowseRemoteWorldsPage:Refresh()
@@ -69,7 +69,7 @@ function BrowseRemoteWorlds.ShowPage(callbackFunc)
     Screen:Connect("sizeChanged", BrowseRemoteWorlds, BrowseRemoteWorlds.OnScreenSizeChange, "UniqueConnection")
 
     params._page.OnClose = function()
-        Store:remove('page/BrowseRemoteWorlds')
+        Store:Remove('page/BrowseRemoteWorlds')
         InternetLoadWorld.OnChangeType(1)
         Screen:Disconnect("sizeChanged", BrowseRemoteWorlds, BrowseRemoteWorlds.OnScreenSizeChange)
     end
@@ -81,7 +81,7 @@ function BrowseRemoteWorlds:OnScreenSizeChange()
     local item_width = 255
     BrowseRemoteWorlds.itemsPerLine = math.floor((Screen:GetWidth() - 50) / item_width)
     BrowseRemoteWorlds.margin_left = math.floor((Screen:GetWidth() - BrowseRemoteWorlds.itemsPerLine * item_width) / 2)
-    BrowseRemoteWorlds.refreshPage()
+    BrowseRemoteWorlds.Refresh()
 end
 
 function BrowseRemoteWorlds.GetCurWorldInfo(info_type, world_index)
@@ -108,7 +108,7 @@ function BrowseRemoteWorlds.OnClickBack()
 end
 
 function BrowseRemoteWorlds.ClosePage(bHasEnteredWorld)
-    local BrowseRemoteWorldsPage = Store:get('page/BrowseRemoteWorlds')
+    local BrowseRemoteWorldsPage = Store:Get('page/BrowseRemoteWorlds')
 
     if (BrowseRemoteWorldsPage) then
         BrowseRemoteWorldsPage:CloseWindow()
@@ -120,7 +120,7 @@ function BrowseRemoteWorlds.ClosePage(bHasEnteredWorld)
 end
 
 function BrowseRemoteWorlds.RefreshCurrentServerList(callback)
-    local BrowseRemoteWorldsPage = Store:get('page/BrowseRemoteWorlds')
+    local BrowseRemoteWorldsPage = Store:Get('page/BrowseRemoteWorlds')
 
     if (BrowseRemoteWorldsPage) then
         local ServerPage = InternetLoadWorld.GetCurrentServerPage()
@@ -129,11 +129,11 @@ function BrowseRemoteWorlds.RefreshCurrentServerList(callback)
             InternetLoadWorld.FetchServerPage(ServerPage)
         end
 
-        BrowseRemoteWorlds.refreshPage()
+        BrowseRemoteWorlds.Refresh()
     end
 end
 
-function BrowseRemoteWorlds.enterWorld(index)
+function BrowseRemoteWorlds.EnterWorld(index)
     local index = tonumber(index)
 
     if (not index) then
@@ -150,11 +150,11 @@ function BrowseRemoteWorlds.enterWorld(index)
 
     enterWorld.is_zip = true
 
-    Store:set("world/enterWorld", enterWorld)
+    Store:Set("world/enterWorld", enterWorld)
     InternetLoadWorld.EnterWorld(index)
 end
 
-function BrowseRemoteWorlds.deleteWorld(index)
+function BrowseRemoteWorlds.DeleteWorld(index)
     local index = tonumber(index)
 
     if not index then
@@ -164,7 +164,7 @@ function BrowseRemoteWorlds.deleteWorld(index)
     InternetLoadWorld.selected_world_index = index
 
     local selectWorld = InternetLoadWorld.GetCurrentWorld()
-    local enterWorld = Store:get('world/enterWorld')
+    local enterWorld = Store:Get('world/enterWorld')
 
     if (enterWorld) then
         if (enterWorld.foldername == selectWorld.foldername) then

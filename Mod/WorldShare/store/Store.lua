@@ -10,29 +10,30 @@ local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 ]]
 NPL.load("./UserStore.lua")
 NPL.load("./PageStore.lua")
+NPL.load("./WorldStore.lua")
 
-local UserStore = commonlib.gettable('Mod.WorldShare.store.User')
-local PageStore = commonlib.gettable('Mod.WorldShare.store.Page')
-local WorldStore = commonlib.gettable('Mod.WorldShare.store.World')
+local UserStore = commonlib.gettable("Mod.WorldShare.store.User")
+local PageStore = commonlib.gettable("Mod.WorldShare.store.Page")
+local WorldStore = commonlib.gettable("Mod.WorldShare.store.World")
 
 local Store = NPL.export()
 
-local USER = 'user'
-local PAGE = 'page'
-local WORLD = 'world'
+local USER = "user"
+local PAGE = "page"
+local WORLD = "world"
 
-function Store:set(key, value)
+function Store:Set(key, value)
     if (not key) then
         return false
     end
 
-    local storeType = self:getStoreType(key)
-    local storeKey = self:getStoreKey(key)
+    local storeType = self:GetStoreType(key)
+    local storeKey = self:GetStoreKey(key)
 
     if (storeType == USER) then
         UserStore[storeKey] = commonlib.copy(value)
-        if(storeKey == "token") then
-            commonlib.setfield("System.User.keepworktoken", value);
+        if (storeKey == "token") then
+            commonlib.setfield("System.User.keepworktoken", value)
         end
     end
 
@@ -45,13 +46,13 @@ function Store:set(key, value)
     end
 end
 
-function Store:get(key)
+function Store:Get(key)
     if (not key) then
         return false
     end
 
-    local storeType = self:getStoreType(key)
-    local storeKey = self:getStoreKey(key)
+    local storeType = self:GetStoreType(key)
+    local storeKey = self:GetStoreKey(key)
 
     if (storeType == USER and UserStore[storeKey]) then
         return commonlib.copy(UserStore[storeKey])
@@ -68,12 +69,12 @@ function Store:get(key)
     return nil
 end
 
-function Store:remove(key)
-    self:set(key, nil)
+function Store:Remove(key)
+    self:Set(key, nil)
 end
 
-function Store:getStorePath(key)
-    if (type(key) ~= 'string') then
+function Store:GetStorePath(key)
+    if (type(key) ~= "string") then
         return false
     end
 
@@ -86,8 +87,8 @@ function Store:getStorePath(key)
     return keyTable
 end
 
-function Store:getStoreType(key)
-    local keyTable = self:getStorePath(key)
+function Store:GetStoreType(key)
+    local keyTable = self:GetStorePath(key)
 
     if (keyTable[1]) then
         return keyTable[1]
@@ -96,8 +97,8 @@ function Store:getStoreType(key)
     end
 end
 
-function Store:getStoreKey(key)
-    local keyTable = self:getStorePath(key)
+function Store:GetStoreKey(key)
+    local keyTable = self:GetStorePath(key)
 
     if (keyTable[2]) then
         return keyTable[2]
