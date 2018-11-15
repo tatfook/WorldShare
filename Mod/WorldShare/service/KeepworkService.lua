@@ -185,7 +185,7 @@ function KeepworkService:Login(account, password, callback)
         function()
             if (not timeout) then
                 timeout = true
-                _guihelper.MessageBox(L "链接超时")
+                _guihelper.MessageBox(L"链接超时")
                 MsgBox:Close()
             end
         end,
@@ -205,7 +205,7 @@ function KeepworkService:Login(account, password, callback)
         function(data, err)
             if (not timeout) then
                 if (err == 503) then
-                    _guihelper.MessageBox(L "keepwork正在维护中，我们马上回来")
+                    _guihelper.MessageBox(L"keepwork正在维护中，我们马上回来")
                     MsgBox:Close()
 
                     timeout = true

@@ -53,7 +53,7 @@ function DeleteWorld:DeleteWorld()
         local enterWorld = Store:Get("world/enterWorld")
 
         if (enterWorld.foldername == selectWorld.foldername) then
-            _guihelper.MessageBox(L "不能刪除正在编辑的世界")
+            _guihelper.MessageBox(L"不能刪除正在编辑的世界")
             return false
         end
     end
@@ -65,7 +65,7 @@ function DeleteWorld:DeleteLocal(callback)
     local selectWorld = Store:Get("world/selectWorld")
 
     if (not selectWorld) then
-        _guihelper.MessageBox(L "请先选择世界")
+        _guihelper.MessageBox(L"请先选择世界")
         return
     end
 
@@ -81,7 +81,7 @@ function DeleteWorld:DeleteLocal(callback)
                     WorldList:RefreshCurrentServerList()
                 end
             else
-                _guihelper.MessageBox(L "无法删除可能您没有足够的权限")
+                _guihelper.MessageBox(L"无法删除可能您没有足够的权限")
             end
         else
             if (GameLogic.RemoveWorldFileWatcher) then
@@ -96,7 +96,7 @@ function DeleteWorld:DeleteLocal(callback)
                     WorldList:RefreshCurrentServerList()
                 end
             else
-                _guihelper.MessageBox(L "无法删除可能您没有足够的权限")
+                _guihelper.MessageBox(L"无法删除可能您没有足够的权限")
             end
         end
     end
@@ -161,7 +161,7 @@ function DeleteWorld:DeleteGitlab()
     local foldername = Store:Get("world/foldername")
 
     _guihelper.MessageBox(
-        format(L "确定删除Gitlab远程世界:%s?", foldername.utf8 or ""),
+        format(L"确定删除Gitlab远程世界:%s?", foldername.utf8 or ""),
         function(res)
             self:ClosePage()
             WorldList:SetRefreshing(true)
