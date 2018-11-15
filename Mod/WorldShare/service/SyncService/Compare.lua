@@ -44,14 +44,9 @@ function Compare:Init()
 
     self:SetFinish(false)
 
-    Utils.SetTimeOut(
-        function()
-            if not self:IsCompareFinish() then
-                MsgBox:Show(L"请稍后...")
-            end
-        end,
-        500
-    )
+    if not self:IsCompareFinish() then
+        MsgBox:Show(L"请稍后...")
+    end
 
     self:GetCompareResult(
         function(result)

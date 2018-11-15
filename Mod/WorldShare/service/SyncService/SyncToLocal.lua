@@ -13,11 +13,13 @@ local Encoding = commonlib.gettable("commonlib.Encoding")
 local KeepworkService = NPL.load("../KeepworkService.lua")
 local Progress = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Progress/Progress.lua")
 local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
+local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")
+local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
 
 local SyncToLocal = NPL.export()
 
@@ -30,10 +32,7 @@ function SyncToLocal:Init(callback)
     self.finish = false
     self.worldDir = Store:Get("world/worldDir")
     self.foldername = Store:Get("world/foldername")
-
-    local selectWorld = Store:Get("world/selectWorld")
-    local commitId = Store:Get("world/commitId")
-
+    
     if (not self.worldDir or not self.worldDir.default or self.worldDir.default == "") then
         _guihelper.MessageBox(L"下载失败，原因：下载目录为空")
         return false
@@ -41,28 +40,34 @@ function SyncToLocal:Init(callback)
 
     MsgBox:Close()
 
-    Store:Set("world/selectWorld", selectWorld)
-
-    if (commitId or selectWorld.status == 2) then
-        -- down zip
-        self:DownloadZIP()
-        return false
-    end
-
-    -- 加载进度UI界面
-    Progress:Init(self)
-
     self:SetFinish(false)
     self:SyncToLocal()
 end
 
 function SyncToLocal:SyncToLocal()
+    local selectWorld = Store:Get("world/selectWorld")
+    local commitId = Store:Get("world/commitId")
+
     self.compareListIndex = 1
     self.compareListTotal = 0
 
-    Progress:UpdateDataBar(0, 0, L"正在对比文件列表...")
-
     local function Handle(data, err)
+        if (commitId or selectWorld.status == 2 and #data ~= 0) then
+            -- down zip
+            self:DownloadZIP()
+            return false
+        end
+
+        if (#data == 0) then
+            UserConsole:ClosePage()
+            CreateWorld:CreateNewWorld(selectWorld.foldername)
+            return false
+        end
+
+        -- 加载进度UI界面
+        Progress:Init(self)
+        Progress:UpdateDataBar(0, 0, L"正在对比文件列表...")
+
         self.localFiles = LocalService:LoadFiles(self.worldDir.default)
         self.dataSourceFiles = data
 
@@ -120,22 +125,28 @@ function SyncToLocal:GetCompareList()
 end
 
 function SyncToLocal:RefreshList()
-    WorldList:RefreshCurrentServerList(
+    Progress:SetFinish(true)
+    Progress:Refresh()
+
+    Store:Set(
+        "CloseProcess",
         function()
-            local willEnterWorld = Store:Get('world/willEnterWorld')
-
-            if(type(willEnterWorld) == 'function') then
-                local worldIndex = Store:Get("world/worldIndex")
-                WorldList:OnSwitchWorld(worldIndex)
-                willEnterWorld()
-
-                Store:Remove('world/willEnterWorld')
-            end
-
-            Progress:SetFinish(true)
-            Progress:Refresh()
+            WorldList:RefreshCurrentServerList(
+                function()
+                    local willEnterWorld = Store:Get('world/willEnterWorld')
+        
+                    if(type(willEnterWorld) == 'function') then
+                        local worldIndex = Store:Get("world/worldIndex")
+                        WorldList:OnSwitchWorld(worldIndex)
+                        willEnterWorld()
+        
+                        Store:Remove('world/willEnterWorld')
+                    end
+                end
+            )
         end
     )
+
 end
 
 function SyncToLocal:HandleCompareList()

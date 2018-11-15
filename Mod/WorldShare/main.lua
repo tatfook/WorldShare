@@ -34,6 +34,7 @@ local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
 local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
 local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
 local ShareWorld = NPL.load("(gl)Mod/WorldShare/cellar/ShareWorld/ShareWorld.lua")
+local HistoryManager = NPL.load("(gl)Mod/WorldShare/cellar/HistoryManager/HistoryManager.lua")
 local WorldExitDialog = NPL.load("(gl)Mod/WorldShare/cellar/WorldExitDialog/WorldExitDialog.lua")
 
 local GameLogic = commonlib.gettable("MyCompany.Aries.Game.GameLogic")
@@ -105,12 +106,18 @@ function WorldShare:OnWorldLoad()
     Store:Set("world/isEnterWorld", true)
 
     UserConsole:ClosePage()
+    HistoryManager:OnWorldLoad()
 
-    CreateWorld:CheckRevision(
-        function()
-            SyncMain:SyncWillEnterWorld()
-        end
-    )
+    local curLesson = Store:Getter("lesson/GetCurLesson")
+
+    -- if enter with lesson method, we will not check revision
+    if not curLesson then
+        CreateWorld:CheckRevision(
+            function()
+                SyncMain:SyncWillEnterWorld()
+            end
+        )
+    end
 end
 
 function WorldShare:OnLeaveWorld()

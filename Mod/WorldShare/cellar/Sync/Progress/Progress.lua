@@ -67,6 +67,13 @@ function Progress:ClosePage()
 
     if (ProgressPage) then
         ProgressPage:CloseWindow()
+
+        local callback = Store:Get("world/CloseProcess")
+
+        if type(callback) == 'function' then
+            callback()
+            Store:Remove("world/CloseProcess")
+        end
     end
 end
 
@@ -145,8 +152,8 @@ function Progress:UpdateDataBar(current, total, msg, finish)
     self:Refresh()
 end
 
-function Progress:Copy()
-    ParaMisc.CopyTextToClipboard(ShareWorld.getWorldUrl())
+function Progress:Copy(url)
+    ParaMisc.CopyTextToClipboard(url)
 end
 
 function Progress:GetCurrent()

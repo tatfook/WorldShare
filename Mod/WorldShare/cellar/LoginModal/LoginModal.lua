@@ -63,7 +63,7 @@ function LoginModal:ShowPage()
         LoginModalPage:SetValue('password', PWDInfo.password or '')
     end
 
-    local registerUrl = format("%s/wiki/join", KeepworkService:GetSite())
+    local registerUrl = format("%s/wiki/join", KeepworkService:GetKeepworkUrl())
 
     LoginModalPage:GetNode('register'):SetAttribute('href', registerUrl)
 

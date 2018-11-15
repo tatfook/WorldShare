@@ -69,7 +69,6 @@ function SyncToDataSource:Init()
 end
 
 function SyncToDataSource:IsProjectExist(callback)
-    echo(self.foldername.base32, true)
     GitService:GetSingleProject(
         self.foldername.base32,
         function(data, err)
@@ -215,11 +214,17 @@ end
 function SyncToDataSource:RefreshList()
     KeepworkService:UpdateRecord(
         function()
-            WorldList:RefreshCurrentServerList(
+            Progress:SetFinish(true)
+            Progress:Refresh()
+
+            Store:Set(
+                "world/CloseProcess",
                 function()
-                    Store:Set("world/shareMode", false)
-                    Progress:SetFinish(true)
-                    Progress:Refresh()
+                    WorldList:RefreshCurrentServerList(
+                        function()
+                            Store:Set("world/shareMode", false)
+                        end
+                    )
                 end
             )
         end
@@ -307,7 +312,8 @@ function SyncToDataSource:UploadOne(file, callback)
         self.foldername.base32,
         currentLocalItem.filename,
         currentLocalItem.file_content_t,
-        function(bIsUpload, filename)
+        function(bIsUpload, filename, data)
+            echo(data, true)
             if (bIsUpload) then
                 if (type(callback) == "function") then
                     callback()

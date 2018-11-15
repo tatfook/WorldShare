@@ -59,23 +59,24 @@ function UserConsole:ShowPage()
     -- load last selected avatar if world is not loaded before.
     UserInfo:OnChangeAvatar()
 
-    if (not KeepworkService:IsSignedIn() and KeepworkService:LoginWithTokenApi(function() WorldList:RefreshCurrentServerList() end)) then
-        return false
-    end
-
     local notFirstTimeShown = Store:Get('user/notFirstTimeShown')
 
     if (notFirstTimeShown) then
         Store:Set('user/ignoreAutoLogin', true)
     else
         Store:Set('user/notFirstTimeShown', true)
-
+        KeepworkService:GetUserTokenFromUrlProtocol()
+        
         local ignoreAutoLogin = Store:Get('user/ignoreAutoLogin')
 
         if (not ignoreAutoLogin) then
             -- auto sign in here
             UserInfo:CheckDoAutoSignin()
         end
+    end
+
+    if (not KeepworkService:IsSignedIn() and KeepworkService:LoginWithTokenApi(function() WorldList:RefreshCurrentServerList() end)) then
+        return false
     end
 
     WorldList:RefreshCurrentServerList()

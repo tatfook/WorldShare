@@ -18,27 +18,45 @@ local LocalService = NPL.load("./LocalService.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")
-local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsoleN/UserConsole.lua")
+local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
 local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
 local Config = NPL.load("(gl)Mod/WorldShare/config/Config.lua")
 
 local KeepworkService = NPL.export()
 
-function KeepworkService:GetSite()
-    local env = Store:Get("user/env")
+function KeepworkService:GetEnv()
+	local env = Store:Get("user/env")
 
-    if not env then
-        env = Config.env.ONLINE
-    end
+	if not env then
+		env = Config.env.ONLINE
+	end
+
+	return env
+end
+
+function KeepworkService:GetKeepworkUrl()
+	local env = self:GetEnv()
+
+	return Config.keepworkList[env]
+end
+
+function KeepworkService:GetCoreApi()
+    local env = self:GetEnv()
 
     return Config.keepworkServerList[env]
+end
+
+function KeepworkService:GetLessonApi()
+    local env = self:GetEnv()
+
+    return Config.lessonList[env]
 end
 
 function KeepworkService:GetServerList()
     if (LOG.level == "debug") then
         return {
-            {value = Config.env.ONLINE, name = Config.env.ONLINE, text = L"使用KEEPWORK登录"},
-            {value = Config.env.STAGE, name = Config.env.STAGE, text = L"使用STAGE登录", selected = true},
+            {value = Config.env.ONLINE, name = Config.env.ONLINE, text = L"使用KEEPWORK登录", selected = true},
+            {value = Config.env.STAGE, name = Config.env.STAGE, text = L"使用STAGE登录"},
             {value = Config.env.RELEASE, name = Config.env.RELEASE, text = L"使用RELEASE登录"},
             {value = Config.env.LOCAL, name = Config.env.LOCAL, text = L"使用本地服务登录"}
         }
@@ -54,7 +72,7 @@ function KeepworkService:GetApi(url)
         return ""
     end
 
-    return format("%s%s", self:GetSite(), url)
+    return format("%s%s", self:GetCoreApi(), url)
 end
 
 function KeepworkService:GetHeaders(selfDefined, notTokenRequest)
@@ -85,12 +103,6 @@ function KeepworkService:Request(url, method, params, headers, callback, noTrySt
     HttpRequest:GetUrl(params, callback, noTryStatus)
 end
 
-function KeepworkService:IsSignedIn()
-    local token = Store:Get("user/token")
-
-    return token ~= nil
-end
-
 function KeepworkService:LoginResponse(response, err, callback)
     if err == 400 then
         MsgBox:Close()
@@ -108,7 +120,9 @@ function KeepworkService:LoginResponse(response, err, callback)
     local userId = response["id"] or 0
     local username = response["username"] or ""
 
-    Store:Set("user/token", token)
+    local SetToken = Store:Action("user/SetToken")
+    SetToken(token)
+
     Store:Set("user/userId", userId)
     Store:Set("user/username", username)
 
@@ -146,6 +160,18 @@ function KeepworkService:LoginResponse(response, err, callback)
     end
 
     GitGatewayService:Accounts(HandleGetDataSource)
+end
+
+function KeepworkService:IsSignedIn()
+    local token = Store:Get("user/token")
+
+    return token ~= nil
+end
+
+function KeepworkService:GetToken()
+    local token = Store:Get('user/token')
+
+    return token or ''
 end
 
 function KeepworkService:Login(account, password, callback)
@@ -257,7 +283,7 @@ function KeepworkService:PushWorld(worldInfo, callback)
     local headers = self:GetHeaders()
 
     self:Request(
-        format("/worlds?worldName=%s", worldInfo.worldName or ''),
+        format("/worlds?worldName=%s", Encoding.url_encode(worldInfo.worldName or '')),
         "GET",
         nil,
         headers,
@@ -424,20 +450,29 @@ end
 function KeepworkService:GetUserTokenFromUrlProtocol()
     local cmdline = ParaEngine.GetAppCommandLine()
     local urlProtocol = string.match(cmdline or "", "paracraft://(.*)$")
-    urlProtocol = string.gsub(urlProtocol or "", "%%22", '"')
+    urlProtocol = Encoding.url_decode(urlProtocol or "")
 
+    local env = urlProtocol:match('env="([%S]+)"')
     local usertoken = urlProtocol:match('usertoken="([%S]+)"')
-    return usertoken
+
+    if env then
+        Store:Set("user/env", env)
+    end
+    
+    if usertoken then
+        Store:Set("user/token", usertoken)
+    end
 end
 
 function KeepworkService:GetCurrentUserToken()
     return System.User and System.User.keepworktoken
 end
 
+local tryTimes = 0
 function KeepworkService:LoginWithTokenApi(callback)
-    local usertoken = self:GetUserTokenFromUrlProtocol() or self:GetCurrentUserToken()
+    local usertoken = Store:Get("user/token") or self:GetCurrentUserToken()
 
-    if type(usertoken) == "string" and #usertoken > 0 then
+    if type(usertoken) == "string" and #usertoken > 0 and tryTimes <= 3 then
         MsgBox:Show(L"正在登陆，请稍后...")
 
         self:Profile(
@@ -448,9 +483,12 @@ function KeepworkService:LoginWithTokenApi(callback)
                     self:LoginResponse(data, err, callback)
                 else
                     System.User.keepworktoken = nil
+                    MsgBox:Close()
 
                     UserConsole:ClosePage()
                     UserConsole:ShowPage()
+
+                    tryTimes = tryTimes + 1
                 end
             end,
             usertoken

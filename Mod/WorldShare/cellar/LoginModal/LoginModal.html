@@ -3,6 +3,7 @@
         <script type="text/npl" refresh="false">
             <![CDATA[
                 LoginModal = NPL.load("./LoginModal.lua")
+                Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 
                 LoginModal:SetPage()
 
@@ -16,6 +17,14 @@
 
                 function set_auto_login()
                     LoginModal:SetAutoLogin()
+                end
+
+                function login_text()
+                    return Store:Get("user/loginText")
+                end
+
+                function close()
+                    LoginModal:ClosePage()
                 end
             ]]>
         </script>
@@ -45,8 +54,11 @@
                 },
             }
         </style>
-        <aries:window mode="thin" width="320" style="float:left;" title='<%=L"登陆" %>' onclose="UserConsole.closeLoginModalImp()">
+        <aries:window mode="thin" width="320" style="float:left;" title='<%=L"登陆" %>' onclose="close()">
             <div name="login" class="user_login">
+                <pe:if condition="<%= login_text() ~= nil%>">
+                    <div style="margin-bottom:15px;"><%= login_text()%></div>
+                </pe:if>
                 <div style="margin-bottom:12px;">
                     <div style="float:left;min-width:80px;"><%= L"服务器："%></div>
                     <select name="loginServer" DataSource="<%= get_server_list()%>" style="height: 30px;width: 185px;" class="text_field"></select>

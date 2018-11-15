@@ -6,8 +6,7 @@ place: Foshan
 Desc: 
 use the lib:
 ------------------------------------------------------------
-NPL.load("(gl)Mod/WorldShare/login/CreateWorld.lua")
-local CreateWorld = commonlib.gettable("Mod.WorldShare.login.CreateWorld")
+local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
 ------------------------------------------------------------
 ]]
 local CommandManager = commonlib.gettable("MyCompany.Aries.Game.CommandManager")
@@ -23,7 +22,11 @@ local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")
 
 local CreateWorld = NPL.export()
 
-function CreateWorld:CreateNewWorld()
+function CreateWorld:CreateNewWorld(foldername)
+    if type(foldername) == 'string' then
+        CreateNewWorld.LastWorldName = foldername
+    end
+
     CreateNewWorld.ShowPage()
 end
 

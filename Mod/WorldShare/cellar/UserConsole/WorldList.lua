@@ -23,7 +23,7 @@ local DeleteWorld = NPL.load("(gl)Mod/WorldShare/cellar/DeleteWorld/DeleteWorld.
 local VersionChange = NPL.load("(gl)Mod/WorldShare/cellar/VersionChange/VersionChange.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local GitEncoding = NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua")
-local SyncCompare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
+local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 
@@ -393,7 +393,7 @@ function WorldList:UnifiedTimestampFormat(data)
 end
 
 function WorldList:Sync(index)
-    SyncCompare:Init()
+    Compare:Init()
 end
 
 function WorldList.DeleteWorld(index)
@@ -491,7 +491,7 @@ function WorldList:EnterWorld(index)
     if (enterWorld.status == 2) then
         Store:Set("world/willEnterWorld", InternetLoadWorld.EnterWorld)
 
-        SyncCompare:Init()
+        Compare:Init()
     else
         InternetLoadWorld.EnterWorld()
     end

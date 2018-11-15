@@ -26,6 +26,7 @@ function WorldExitDialog.ShowPage(callback)
 
     local WorldExitDialogPage = Store:Get('page/WorldExitDialog')
     if(WorldExitDialogPage) then
+        WorldExitDialog.Snapshot()
         WorldExitDialogPage.callback = callback
     end
 end

@@ -41,6 +41,10 @@
                     Progress:ClosePage()
                 end
 
+                function copy()
+                    Progress:Copy(KeepworkService:GetShareUrl())
+                end
+
                 function get_window_style()
                     return Utils.FixCenter(500, 270)
                 end
@@ -93,7 +97,7 @@
                             <br />
                             <div>
                                 <%= get_world_url() %>
-                                <input type="button" class="common_button mc_light_grey_button_with_fillet" value='<%=L"复制" %>' onclick="Progress.copy()"/>
+                                <input type="button" class="common_button mc_light_grey_button_with_fillet" value='<%=L"复制" %>' onclick="copy()"/>
                                 <input type="button" class="common_button mc_light_grey_button_with_fillet" value='<%=L"打开" %>' onclick="open_url()" />
                             </div>
                         </div>

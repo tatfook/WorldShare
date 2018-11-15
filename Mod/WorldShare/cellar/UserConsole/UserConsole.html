@@ -165,7 +165,7 @@
                 end
 
                 function on_change_avatar(name)
-                    UserInfo.OnChangeAvatar(name)
+                    UserInfo:OnChangeAvatar(name)
                 end
 
                 function is_signed_in()
@@ -181,7 +181,7 @@
                 end
 
                 function sync(index)
-                    WorldList.Sync(index)
+                    WorldList:Sync(index)
                 end
 
                 function enter(index)

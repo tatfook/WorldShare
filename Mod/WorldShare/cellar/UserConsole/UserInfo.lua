@@ -161,6 +161,7 @@ function UserInfo:OnClickLogin()
     LoginModal:ShowPage()
 end
 
+local curIndex = 1
 -- cycle through
 -- @param btnName: if nil, we will load the default one if scene is not started.
 function UserInfo:OnChangeAvatar(btnName)
@@ -183,12 +184,14 @@ function UserInfo:OnChangeAvatar(btnName)
     end
 
     if (btnName == "pre") then
-        cur_index = cur_index - 1
+        curIndex = curIndex - 1
     else
-        cur_index = cur_index + 1
+        curIndex = curIndex + 1
     end
-    cur_index = ((cur_index - 1) % (#default_avatars)) + 1
-    local playerName = default_avatars[cur_index]
+
+    curIndex = ((curIndex - 1) % (#default_avatars)) + 1
+    
+    local playerName = default_avatars[curIndex]
 
     if (playerName and UserConsolePage) then
         local filename = UserInfo.GetValidAvatarFilename(playerName)
@@ -213,7 +216,8 @@ end
 
 function UserInfo:Logout()
     if (self.IsSignedIn()) then
-        Store:Remove("user/token")
+        local SetToken = Store:Action("user/SetToken")
+        SetToken(nil)
         WorldList:RefreshCurrentServerList()
     end
 end

@@ -10,6 +10,7 @@ local Bookmark = NPL.load("(gl)Mod/WorldShare/database/Bookmark.lua")
 ------------------------------------------------------------
 ]]
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
+local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 
 local Bookmark = NPL.export()
 
@@ -18,8 +19,16 @@ Bookmark.tag = {
 }
 
 function Bookmark:GetBookmark()
-    local playerController = GameLogic.GetPlayerController()
-    local bookmark = playerController:LoadLocalData("bookmark")
+    local playerController = Store:Getter("user/GetPlayerController")
+
+    if not playerController then
+        playerController = GameLogic.GetPlayerController()
+        local SetPlayerController = Store:Action("user/SetPlayerController")
+
+        SetPlayerController(playerController)
+    end
+
+    local bookmark = playerController:LoadLocalData("bookmark", nil, true)
 
     if type(bookmark) ~= "table" then
         return {}, {}
@@ -51,7 +60,7 @@ function Bookmark:SetBookmark(tree, items)
         items = items
     }
 
-    playerController:SaveLocalData("bookmark", list)
+    playerController:SaveLocalData("bookmark", list, true)
 end
 
 function Bookmark:GetItem(displayName)
@@ -91,6 +100,27 @@ function Bookmark:SetItem(displayName, curItem)
     end
 
     items:push_back(curItem)
+
+    self:SetBookmark(tree, items)
+end
+
+function Bookmark:RemoveItem(displayName)
+    local tree, items = self:GetBookmark()
+
+    if type(displayName) ~= "string" then
+        return false
+    end
+
+    for key, item in ipairs(items) do
+        if item['displayName'] and displayName then
+            if item['displayName'] == displayName then
+                for k=key, #items do
+                    items[k] = items[k+1]
+                end
+                break
+            end
+        end
+    end
 
     self:SetBookmark(tree, items)
 end
@@ -176,4 +206,18 @@ function Bookmark:IsTagExist(displayName, tagName)
     end
 
     return tagBeExist
+end
+
+function Bookmark:IsItemExist(displayName)
+    if type(displayName) ~= 'string' then
+        return false
+    end
+
+    local curItem = self:GetItem(displayName)
+
+    if not curItem then
+        return false
+    else
+        return true
+    end
 end
