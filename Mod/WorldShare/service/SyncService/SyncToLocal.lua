@@ -231,7 +231,7 @@ function SyncToLocal:DownloadOne(file, callback)
             Progress:UpdateDataBar(
                 self.compareListIndex,
                 self.compareListTotal,
-                format(L"%s （%s） 更新中", currentRemoteItem.path, Utils.formatFileSize(size, "KB"))
+                format(L"%s （%s） 更新中", currentRemoteItem.path, Utils.FormatFileSize(size, "KB"))
             )
 
             LocalService:write(self.foldername.default, Encoding.Utf8ToDefault(currentRemoteItem.path), content)
