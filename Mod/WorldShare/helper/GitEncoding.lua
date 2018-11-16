@@ -16,7 +16,7 @@ local GitEncoding = NPL.export()
 
 function GitEncoding.Base32(text)
     if (text) then
-        local notLetter = string.find(text, "[^a-zA-Z0-9]")
+        local notLetter = string.find(text, "[^a-zA-Z]")
 
         if (notLetter) then
             text = Encoding.to_base32(text)
