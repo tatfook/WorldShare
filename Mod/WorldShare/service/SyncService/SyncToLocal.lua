@@ -234,7 +234,7 @@ function SyncToLocal:DownloadOne(file, callback)
                 format(L"%s （%s） 更新中", currentRemoteItem.path, Utils.FormatFileSize(size, "KB"))
             )
 
-            LocalService:write(self.foldername.default, Encoding.Utf8ToDefault(currentRemoteItem.path), content)
+            LocalService:Write(self.foldername.default, Encoding.Utf8ToDefault(currentRemoteItem.path), content)
 
             if (type(callback) == "function") then
                 callback()
