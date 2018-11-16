@@ -10,6 +10,7 @@ local Bookmark = NPL.load("(gl)Mod/WorldShare/database/Bookmark.lua")
 ------------------------------------------------------------
 ]]
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
+local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 
 local Bookmark = NPL.export()
 
@@ -17,9 +18,17 @@ Bookmark.tag = {
     FAVORITE = "favorite"
 }
 
-function Bookmark:getBookmark()
-    local playerController = GameLogic.GetPlayerController()
-    local bookmark = playerController:LoadLocalData("bookmark")
+function Bookmark:GetBookmark()
+    local playerController = Store:Getter("user/GetPlayerController")
+
+    if not playerController then
+        playerController = GameLogic.GetPlayerController()
+        local SetPlayerController = Store:Action("user/SetPlayerController")
+
+        SetPlayerController(playerController)
+    end
+
+    local bookmark = playerController:LoadLocalData("bookmark", nil, true)
 
     if type(bookmark) ~= "table" then
         return {}, {}
@@ -39,7 +48,7 @@ function Bookmark:getBookmark()
     return tree or {}, items or {}
 end
 
-function Bookmark:setBookmark(tree, items)
+function Bookmark:SetBookmark(tree, items)
     if type(tree) ~= "table" or type(items) ~= "table" then
         return false
     end
@@ -51,15 +60,15 @@ function Bookmark:setBookmark(tree, items)
         items = items
     }
 
-    playerController:SaveLocalData("bookmark", list)
+    playerController:SaveLocalData("bookmark", list, true)
 end
 
-function Bookmark:getItem(displayName)
+function Bookmark:GetItem(displayName)
     if type(displayName) ~= "string" then
         return false
     end
 
-    local BookmarkTree, BookmarkItems = self:getBookmark()
+    local BookmarkTree, BookmarkItems = self:GetBookmark()
 
     if type(BookmarkItems) ~= "table" then
         return false
@@ -74,8 +83,8 @@ function Bookmark:getItem(displayName)
     return false
 end
 
-function Bookmark:setItem(displayName, curItem)
-    local tree, items = self:getBookmark()
+function Bookmark:SetItem(displayName, curItem)
+    local tree, items = self:GetBookmark()
 
     if type(curItem) ~= "table" and not curItem.displayName then
         return false
@@ -92,15 +101,36 @@ function Bookmark:setItem(displayName, curItem)
 
     items:push_back(curItem)
 
-    self:setBookmark(tree, items)
+    self:SetBookmark(tree, items)
 end
 
-function Bookmark:setTag(displayName, tagName)
+function Bookmark:RemoveItem(displayName)
+    local tree, items = self:GetBookmark()
+
+    if type(displayName) ~= "string" then
+        return false
+    end
+
+    for key, item in ipairs(items) do
+        if item['displayName'] and displayName then
+            if item['displayName'] == displayName then
+                for k=key, #items do
+                    items[k] = items[k+1]
+                end
+                break
+            end
+        end
+    end
+
+    self:SetBookmark(tree, items)
+end
+
+function Bookmark:SetTag(displayName, tagName)
     if type(displayName) ~= "string" or type(tagName) ~= "string" then
         return false
     end
 
-    local curItem = self:getItem(displayName)
+    local curItem = self:GetItem(displayName)
 
     if not curItem then
         return false
@@ -123,17 +153,17 @@ function Bookmark:setTag(displayName, tagName)
         tagArray:push_back(tagName)
     end
 
-    curItem["tag"] = Utils:implode(",", tagArray)
+    curItem["tag"] = Utils:Implode(",", tagArray)
 
-    self:setItem(displayName, curItem)
+    self:SetItem(displayName, curItem)
 end
 
-function Bookmark:removeTag(displayName, tagName)
+function Bookmark:RemoveTag(displayName, tagName)
     if type(displayName) ~= "string" or type(tagName) ~= "string" then
         return false
     end
 
-    local curItem = self:getItem(displayName)
+    local curItem = self:GetItem(displayName)
 
     if not curItem then
         return false
@@ -148,17 +178,17 @@ function Bookmark:removeTag(displayName, tagName)
         end
     end
 
-    curItem["tag"] = Utils:implode(",", tagArray)
+    curItem["tag"] = Utils:Implode(",", tagArray)
 
-    self:setItem(displayName, curItem)
+    self:SetItem(displayName, curItem)
 end
 
-function Bookmark:isTagExist(displayName, tagName)
+function Bookmark:IsTagExist(displayName, tagName)
     if type(displayName) ~= "string" or type(tagName) ~= "string" then
         return false
     end
 
-    local curItem = self:getItem(displayName)
+    local curItem = self:GetItem(displayName)
 
     if not curItem then
         return false
@@ -176,4 +206,18 @@ function Bookmark:isTagExist(displayName, tagName)
     end
 
     return tagBeExist
+end
+
+function Bookmark:IsItemExist(displayName)
+    if type(displayName) ~= 'string' then
+        return false
+    end
+
+    local curItem = self:GetItem(displayName)
+
+    if not curItem then
+        return false
+    else
+        return true
+    end
 end

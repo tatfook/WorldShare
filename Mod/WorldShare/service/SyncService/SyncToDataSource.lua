@@ -8,12 +8,13 @@ use the lib:
 local SyncToDataSource = NPL.load("(gl)Mod/WorldShare/cellar/Sync/SyncToDataSource.lua")
 ------------------------------------------------------------
 ]]
-local SyncMain = NPL.load("./SyncMain.lua")
-local SyncGUI = NPL.load("./SyncGUI.lua")
+local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/SyncMain.lua")
+local Progress = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Progress/Progress.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
-local LoginWorldList = NPL.load("(gl)Mod/WorldShare/cellar/Login/LoginWorldList.lua")
+local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
+local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local KeepworkGen = NPL.load("(gl)Mod/WorldShare/helper/KeepworkGen.lua")
 local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")
@@ -24,70 +25,89 @@ local UPDATE = "UPDATE"
 local UPLOAD = "UPLOAD"
 local DELETE = "DELETE"
 
-function SyncToDataSource:init()
-    self.worldDir = Store:get("world/worldDir")
-    self.foldername = Store:get("world/foldername")
-    local selectWorld = Store:get("world/selectWorld")
-
-    if (SyncMain:checkWorldSize()) then
-        return false
-    end
+function SyncToDataSource:Init()
+    self.worldDir = Store:Get("world/worldDir")
+    self.foldername = Store:Get("world/foldername")
+    local selectWorld = Store:Get("world/selectWorld")
 
     if (not self.worldDir or not self.worldDir.default or self.worldDir.default == "") then
         _guihelper.MessageBox(L"上传失败，将使用离线模式，原因：上传目录为空")
         return false
     end
 
-    -- 加载进度UI界面
-    SyncGUI:init(self)
+    -- 关闭进行中提示并加载进度UI界面
+    MsgBox:Close()
+    Progress:Init(self)
 
     self:SetFinish(false)
     self:SetBroke(false)
 
-    GitService:create(
-        self.foldername.base32,
-        function(projectId)
-            if (not projectId) then
-                _guihelper.MessageBox(L"数据源创建失败")
-                SyncGUI:closeWindow()
-                return false
+    self:IsProjectExist(
+        function(beExisted)
+            if beExisted then
+                self:SyncToDataSource()
+            else
+                KeepworkService:CreateProject(
+                    self.foldername.utf8,
+                    function(data, err)
+                        if err ~= 200 or not data or not data.id then
+                            _guihelper.MessageBox(L"数据源创建失败")
+                            Progress:ClosePage()
+                            return false
+                        end
+
+                        selectWorld.kpProjectId = data.id
+
+                        Store:Set("world/selectWorld", selectWorld)
+
+                        self:SyncToDataSource()
+                    end
+                )
             end
-
-            MsgBox:Close()
-
-            self.projectId = projectId
-            selectWorld.projectId = projectId
-            Store:set("world/selectWorld", selectWorld)
-
-            self:syncToDataSource()
         end
     )
 end
 
-function SyncToDataSource:syncToDataSource()
+function SyncToDataSource:IsProjectExist(callback)
+    GitService:GetSingleProject(
+        self.foldername.base32,
+        function(data, err)
+            if type(callback) ~= "function" then
+                return false
+            end
+
+            if err == 200 then
+                callback(true)    
+            else
+                callback(false)
+            end
+        end
+    )
+end
+
+function SyncToDataSource:SyncToDataSource()
     self.compareListIndex = 1
     self.compareListTotal = 0
 
-    SyncGUI:updateDataBar(0, 0, L"正在对比文件列表...")
+    Progress:UpdateDataBar(0, 0, L"正在对比文件列表...")
 
-    local function handleSyncToDataSource(data, err)
+    local function Handle(data, err)
         self.dataSourceFiles = data
         self.localFiles = commonlib.vector:new()
         self.localFiles:AddAll(LocalService:LoadFiles(self.worldDir.default)) --再次获取本地文件，保证上传的内容为最新
 
-        Store:set('world/localFiles', self.localFiles)
-        
+        Store:Set('world/localFiles', self.localFiles)
+
         self:IgnoreFiles()
         self:CheckReadmeFile()
         self:GetCompareList()
         self:HandleCompareList()
     end
 
-    GitService:getTree(
-        self.projectId, --projectId
+    GitService:GetTree(
         self.foldername.base32,
         nil, --commitId
-        handleSyncToDataSource
+        Handle
     )
 end
 
@@ -115,7 +135,7 @@ function SyncToDataSource:CheckReadmeFile()
             if (value.filename == "README.md") then
                 hasReadme = true
             else
-                LocalService:delete(self.foldername, value.filename)
+                LocalService:Delete(self.foldername, value.filename)
                 hasReadme = false
             end
         end
@@ -124,7 +144,7 @@ function SyncToDataSource:CheckReadmeFile()
     if (not hasReadme) then
         local filePath = format("%sREADME.md", self.worldDir.default)
         local file = ParaIO.open(filePath, "w")
-        local content = KeepworkGen:getReadmeFile()
+        local content = KeepworkGen:GetReadmeFile()
 
         file:write(content, #content)
         file:close()
@@ -192,13 +212,19 @@ function SyncToDataSource:GetCompareList()
 end
 
 function SyncToDataSource:RefreshList()
-    SyncMain:RefreshKeepworkList(
+    KeepworkService:UpdateRecord(
         function()
-            LoginWorldList.RefreshCurrentServerList(
+            Progress:SetFinish(true)
+            Progress:Refresh()
+
+            Store:Set(
+                "world/CloseProcess",
                 function()
-                    Store:set("world/ShareMode", false)
-                    SyncGUI:setFinish(true)
-                    SyncGUI:refresh()
+                    WorldList:RefreshCurrentServerList(
+                        function()
+                            Store:Set("world/shareMode", false)
+                        end
+                    )
                 end
             )
         end
@@ -223,8 +249,8 @@ function SyncToDataSource:HandleCompareList()
 
     local currentItem = self.compareList[self.compareListIndex]
 
-    local function retry()
-        SyncGUI:updateDataBar(
+    local function Retry()
+        Progress:UpdateDataBar(
             self.compareListIndex,
             self.compareListTotal,
             format(L"%s 处理完成", currentItem.file),
@@ -236,15 +262,15 @@ function SyncToDataSource:HandleCompareList()
     end
 
     if (currentItem.status == UPDATE) then
-        self:updateOne(currentItem.file, retry)
+        self:UpdateOne(currentItem.file, Retry)
     end
 
     if (currentItem.status == UPLOAD) then
-        self:uploadOne(currentItem.file, retry)
+        self:UploadOne(currentItem.file, Retry)
     end
 
     if (currentItem.status == DELETE) then
-        self:deleteOne(currentItem.file, retry)
+        self:DeleteOne(currentItem.file, Retry)
     end
 end
 
@@ -273,33 +299,33 @@ function SyncToDataSource:SetFinish(value)
 end
 
 -- 上传新文件
-function SyncToDataSource:uploadOne(file, callback)
-    local currentItem = self:GetLocalFileByFilename(file)
+function SyncToDataSource:UploadOne(file, callback)
+    local currentLocalItem = self:GetLocalFileByFilename(file)
 
-    SyncGUI:updateDataBar(
+    Progress:UpdateDataBar(
         self.compareListIndex,
         self.compareListTotal,
-        format(L"%s （%s） 上传中", currentItem.filename, Utils.formatFileSize(currentItem.filesize, "KB"))
+        format(L"%s （%s） 上传中", currentLocalItem.filename, Utils.FormatFileSize(currentLocalItem.filesize, "KB"))
     )
 
-    GitService:upload(
-        self.projectId,
-        nil,
-        currentItem.filename,
-        currentItem.file_content_t,
-        function(bIsUpload, filename)
+    GitService:Upload(
+        self.foldername.base32,
+        currentLocalItem.filename,
+        currentLocalItem.file_content_t,
+        function(bIsUpload, filename, data)
+            echo(data, true)
             if (bIsUpload) then
                 if (type(callback) == "function") then
                     callback()
                 end
             else
-                _guihelper.MessageBox(format("%s上传失败", currentItem.filename))
+                _guihelper.MessageBox(format("%s上传失败", currentLocalItem.filename))
                 self:SetBroke(true)
 
-                SyncGUI:updateDataBar(
+                Progress:UpdateDataBar(
                     self.compareListIndex,
                     self.compareListTotal,
-                    format(L"%s 上传失败", currentItem.filename)
+                    format(L"%s 上传失败", currentLocalItem.filename)
                 )
             end
         end
@@ -307,17 +333,17 @@ function SyncToDataSource:uploadOne(file, callback)
 end
 
 -- 更新数据源文件
-function SyncToDataSource:updateOne(file, callback)
+function SyncToDataSource:UpdateOne(file, callback)
     local currentLocalItem = self:GetLocalFileByFilename(file)
     local currentRemoteItem = self:GetRemoteFileByPath(file)
 
-    SyncGUI:updateDataBar(
+    Progress:UpdateDataBar(
         self.compareListIndex,
         self.compareListTotal,
-        format(L"%s （%s） 更新中", currentLocalItem.filename, Utils.formatFileSize(currentLocalItem.filesize, "KB"))
+        format(L"%s （%s） 更新中", currentLocalItem.filename, Utils.FormatFileSize(currentLocalItem.filesize, "KB"))
     )
 
-    if (currentLocalItem.sha1 == currentRemoteItem.sha and currentLocalItem.filename ~= "revision.xml") then
+    if (currentLocalItem.sha1 == currentRemoteItem.id and currentLocalItem.filename ~= "revision.xml") then
         if (type(callback) == "function") then
             Utils.SetTimeOut(callback)
         end
@@ -325,9 +351,8 @@ function SyncToDataSource:updateOne(file, callback)
         return false
     end
 
-    GitService:update(
-        self.projectId,
-        nil,
+    GitService:Update(
+        self.foldername.base32,
         currentLocalItem.filename,
         currentLocalItem.file_content_t,
         currentLocalItem.sha,
@@ -340,10 +365,10 @@ function SyncToDataSource:updateOne(file, callback)
                 _guihelper.MessageBox(L"更新失败")
                 self:SetBroke(true)
 
-                SyncGUI:updateDataBar(
+                Progress:UpdateDataBar(
                     self.compareListIndex,
                     self.compareListTotal,
-                    format(L"%s 更新失败", currentItem.filename)
+                    format(L"%s 更新失败", currentLocalItem.filename)
                 )
             end
         end
@@ -351,20 +376,19 @@ function SyncToDataSource:updateOne(file, callback)
 end
 
 -- 删除数据源文件
-function SyncToDataSource:deleteOne(file, callback)
-    local currentItem = self:GetRemoteFileByPath(file)
+function SyncToDataSource:DeleteOne(file, callback)
+    local currentRemoteItem = self:GetRemoteFileByPath(file)
 
-    SyncGUI:updateDataBar(
+    Progress:UpdateDataBar(
         self.compareListIndex,
         self.compareListTotal,
-        format(L"%s 删除中", currentItem.path)
+        format(L"%s 删除中", currentRemoteItem.path)
     )
 
-    GitService:new():deleteFile(
-        self.projectId,
-        nil,
-        currentItem.path,
-        currentItem.sha,
+    GitService:DeleteFile(
+        self.foldername.base32,
+        currentRemoteItem.path,
+        currentRemoteItem.sha,
         function(bIsDelete)
             if (bIsDelete) then
                 if (type(callback) == "function") then
@@ -374,10 +398,10 @@ function SyncToDataSource:deleteOne(file, callback)
                 _guihelper.MessageBox(L"删除失败")
                 self:SetBroke(true)
 
-                SyncGUI:updateDataBar(
+                Progress:UpdateDataBar(
                     self.compareListIndex,
                     self.compareListTotal,
-                    format(L"%s 删除失败", currentItem.filename)
+                    format(L"%s 删除失败", currentRemoteItem.name)
                 )
             end
         end

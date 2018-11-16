@@ -106,7 +106,7 @@ function KeepworkGen:getCommand(command, content)
     return params
 end
 
-function KeepworkGen:getReadmeFile()
+function KeepworkGen:GetReadmeFile()
     local root = "Mod/WorldShare/template/readme/"
 
     local file = ParaIO.open(format("%s%s", root, L"paracraft.readme.txt"), "r")
@@ -120,7 +120,7 @@ function KeepworkGen:getReadmeFile()
     return fileContent
 end
 
-function KeepworkGen:getParacraftCommand(params)
+function KeepworkGen:GetParacraftCommand(params)
     local template =
         [[
 ```@Paracraft

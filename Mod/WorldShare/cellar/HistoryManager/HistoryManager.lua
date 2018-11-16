@@ -15,11 +15,11 @@ local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local MdParser = NPL.load("(gl)Mod/WorldShare/parser/MdParser.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local HttpRequest = NPL.load("(gl)Mod/WorldShare/service/HttpRequest.lua")
+local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 local Bookmark = NPL.load("(gl)Mod/WorldShare/database/Bookmark.lua")
+local Config = NPL.load("(gl)Mod/WorldShare/config/Config.lua")
 
 local HistoryManager = NPL.export()
-
-HistoryManager.RecommendedWorldList = 'https://git.keepwork.com/gitlab_rls_official/keepworkdatasource/raw/master/official/paracraft/RecommendedWorldList.md'
 
 function HistoryManager:ShowPage()
     local params = Utils:ShowWindow(0, 0, "Mod/WorldShare/cellar/HistoryManager/HistoryManager.html", "HistoryManager", 0, 0, "_fi", false)
@@ -28,27 +28,27 @@ function HistoryManager:ShowPage()
     HistoryManager.OnScreenSizeChange()
 
     params._page.OnClose = function()
-        Store:remove('page/HistoryManager')
+        Store:Remove('page/HistoryManager')
         Screen:Disconnect("sizeChanged", HistoryManager, HistoryManager.OnScreenSizeChange)
     end
 
-    self:getRecommendedWorldList()
+    self:GetWorldList()
 end
 
-function HistoryManager:setPage()
-    Store:set("page/HistoryManager", document:GetPageCtrl())
+function HistoryManager:SetPage()
+    Store:Set("page/HistoryManager", document:GetPageCtrl())
 end
 
-function HistoryManager.refreshPage()
-    local HistoryManagerPage = Store:get('page/HistoryManager')
+function HistoryManager.Refresh()
+    local HistoryManagerPage = Store:Get('page/HistoryManager')
 
     if (HistoryManagerPage) then
         HistoryManagerPage:Refresh(0.01)
     end
 end
 
-function HistoryManager:closePage()
-    local HistoryManagerPage = Store:get('page/HistoryManager')
+function HistoryManager:ClosePage()
+    local HistoryManagerPage = Store:Get('page/HistoryManager')
 
     if (HistoryManagerPage) then
         HistoryManagerPage:CloseWindow()
@@ -56,7 +56,7 @@ function HistoryManager:closePage()
 end
 
 function HistoryManager.OnScreenSizeChange()
-    local HistoryManagerPage = Store:get('page/HistoryManager')
+    local HistoryManagerPage = Store:Get('page/HistoryManager')
 
     if (not HistoryManagerPage) then
         return false
@@ -79,14 +79,18 @@ function HistoryManager.OnScreenSizeChange()
 
     splitNode:SetCssStyle("height", height - 47)
 
-    HistoryManager.refreshPage()
+    HistoryManager.Refresh()
 end
 
-function HistoryManager:hasData()
+function HistoryManager:HasData()
+    local historyItems = Store:Get("user/historyItems")
+
+    -- echo(historyItems, true)
+
     return true
 end
 
-function HistoryManager:getLocalRecommendedWorldList()
+function HistoryManager:GetLocalRecommendedWorldList()
     local data = Utils:GetFileData('Mod/WorldShare/database/RecommendedWorldList.md')
 
     local tree, items = MdParser:MdToTable(data)
@@ -94,9 +98,9 @@ function HistoryManager:getLocalRecommendedWorldList()
     return tree or {}, items or {}
 end
 
-function HistoryManager:getRemoteRecommendedWorldList(callback)
+function HistoryManager:GetRemoteRecommendedWorldList(callback)
     HttpRequest:GetUrl(
-        self.RecommendedWorldList,
+        Config.RecommendedWorldList,
         function (data, err)
             if (not data or type(data) ~= 'string') then
                 return false
@@ -111,32 +115,31 @@ function HistoryManager:getRemoteRecommendedWorldList(callback)
     )
 end
 
-function HistoryManager:mergeRecommendedWorldList(RemoteTree, RemoteItems)
-    self:setRecommendKeyToItems(RemoteItems)
+function HistoryManager:MergeRecommendedWorldList(remoteTree, remoteItems)
+    self:SetRecommendKeyToItems(remoteItems)
 
-    local BookmarkTree, BookmarkItems = Bookmark:getBookmark()
+    local historyTree = Store:Get('user/historyTree')
+    local historyItems = Store:Get('user/historyItems')
 
-    local mergeTree = self:mergeTree(RemoteTree, BookmarkTree)
-    local mergeItems = self:mergeItems(RemoteItems, BookmarkItems)
+    local mergeTree = self:MergeTree(remoteTree, historyTree)
+    local mergeItems = self:MergeItems(remoteItems, historyItems)
 
-    Bookmark:setBookmark(mergeTree, mergeItems)
+    Store:Set('user/historyTree', mergeTree)
+    Store:Set('user/historyItems', mergeItems)
 
-    Store:set('user/historyTree', mergeTree)
-    Store:set('user/historyItems', mergeItems)
-
-    self:updateList()
-    self.refreshPage()
+    self:UpdateList()
+    self.Refresh()
 end
 
 -- It will be running when show page
-function HistoryManager:getRecommendedWorldList()
-    local LocalTree, LocalItems = self:getLocalRecommendedWorldList()
-    local BookmarkTree, BookmarkItems = Bookmark:getBookmark()
+function HistoryManager:GetWorldList()
+    local localTree, localItems = self:GetLocalRecommendedWorldList()
+    local bookmarkTree, bookmarkItems = Bookmark:GetBookmark()
 
-    self:setRecommendKeyToItems(LocalItems)
+    self:SetRecommendKeyToItems(localItems)
 
-    local mergeTree = self:mergeTree(LocalTree, BookmarkTree)
-    local mergeItems = self:mergeItems(LocalItems, BookmarkItems)
+    local mergeTree = self:MergeTree(localTree, bookmarkTree)
+    local mergeItems = self:MergeItems(localItems, bookmarkItems)
 
     mergeTree['favorite'] = {
         displayName = L"收藏",
@@ -144,23 +147,21 @@ function HistoryManager:getRecommendedWorldList()
         type = 'category'
     }
 
-    Bookmark:setBookmark(mergeTree, mergeItems)
+    Store:Set('user/historyTree', mergeTree)
+    Store:Set('user/historyItems', mergeItems)
 
-    Store:set('user/historyTree', mergeTree)
-    Store:set('user/historyItems', mergeItems)
-
-    self:getRemoteRecommendedWorldList(
-        function(RemoteTree, RemoteItems)
-            self:mergeRecommendedWorldList(RemoteTree, RemoteItems)
+    self:GetRemoteRecommendedWorldList(
+        function(remoteTree, remoteItems)
+            self:MergeRecommendedWorldList(remoteTree, remoteItems)
         end
     )
 
-    self:updateList()
-    self.refreshPage()
+    self:UpdateList()
+    self.Refresh()
 end
 
 -- set recommend key on items
-function HistoryManager:setRecommendKeyToItems(items)
+function HistoryManager:SetRecommendKeyToItems(items)
     if type(items) ~= 'table' then
         return false
     end
@@ -170,7 +171,7 @@ function HistoryManager:setRecommendKeyToItems(items)
     end
 end
 
-function HistoryManager:mergeTree(target, source)
+function HistoryManager:MergeTree(target, source)
     if type(target) ~= 'table' or type(source) ~= 'table' then
         return false
     end
@@ -192,7 +193,7 @@ function HistoryManager:mergeTree(target, source)
     return mergeList
 end
 
-function HistoryManager:mergeItems(target, source)
+function HistoryManager:MergeItems(target, source)
     local mergeItems = commonlib.copy(target)
 
     for sKey, sItem in ipairs(source) do
@@ -218,28 +219,32 @@ function HistoryManager:mergeItems(target, source)
     return mergeItems
 end
 
-function HistoryManager:updateList()
-    local tree = Store:get('user/historyTree')
-    local items = Store:get('user/historyItems')
-    local HistoryManagerPage = Store:get('page/HistoryManager')
+function HistoryManager:UpdateList()
+    local tree = Store:Get('user/historyTree')
+    local items = Store:Get('user/historyItems')
+    local HistoryManagerPage = Store:Get('page/HistoryManager')
 
     if type(tree) ~= 'table' or type(items) ~= 'table' then
         return false
     end
 
-    items = self:filterItems(items) or items
+    items = self:FilterItems(items) or items
 
-    local treeList = self:sortTree(tree)
-    local itemsList = self:sortItems(items)
+    local treeList = self:SortTree(tree)
+    local itemsList = self:SortItems(items)
 
-    Store:set('user/historyTreeList', treeList)
-    Store:set('user/historyItemsList', itemsList)
+    Store:Set('user/historyTreeList', treeList)
+    Store:Set('user/historyItemsList', itemsList)
+
+    if not HistoryManagerPage then
+        return false
+    end
 
     HistoryManagerPage:GetNode("historyTree"):SetAttribute('DataSource', treeList)
     HistoryManagerPage:GetNode('historyItems'):SetAttribute('DataSource', itemsList)
 end
 
-function HistoryManager:filterItems(items)
+function HistoryManager:FilterItems(items)
     if not self.selectTagName or self.selectTagName == 'all' or type(items) ~= 'table' then
         return false
     end
@@ -261,7 +266,7 @@ function HistoryManager:filterItems(items)
     return filterItems
 end
 
-function HistoryManager:sortTree(tree)
+function HistoryManager:SortTree(tree)
     if type(tree) ~= 'table' then
         return false
     end
@@ -281,7 +286,7 @@ function HistoryManager:sortTree(tree)
     return treeList
 end
 
-function HistoryManager:sortItems(items)
+function HistoryManager:SortItems(items)
     if type(items) ~= 'table' then
         return false
     end
@@ -340,12 +345,12 @@ function HistoryManager:sortItems(items)
     return itemsList
 end
 
-function HistoryManager:getItemsItemByIndex(index)
+function HistoryManager:GetItemsItemByIndex(index)
     if type(index) ~= 'number' then
         return false
     end
 
-    local itemsList = Store:get('user/historyItemsList')
+    local itemsList = Store:Get('user/historyItemsList')
 
     if not itemsList or
        not itemsList[index] or
@@ -358,61 +363,53 @@ function HistoryManager:getItemsItemByIndex(index)
     return itemsList[index]
 end
 
-function HistoryManager:collectItem(index)
-    local curItem = self:getItemsItemByIndex(index)
+function HistoryManager:CollectItem(index)
+    local curItem = self:GetItemsItemByIndex(index)
 
-    if not curItem then
+    if not curItem or not curItem.displayName then
         return false
     end
 
-    if Bookmark:isTagExist(curItem['displayName'], Bookmark.tag.FAVORITE) then
-        Bookmark:removeTag(curItem['displayName'], Bookmark.tag.FAVORITE)
+    local displayName = curItem.displayName
+
+    if not Bookmark:IsItemExist(displayName) then
+        Bookmark:SetItem(displayName, curItem)
+        Bookmark:SetTag(displayName, Bookmark.tag.FAVORITE)
     else
-        Bookmark:setTag(curItem['displayName'], Bookmark.tag.FAVORITE)
+        if Bookmark:IsTagExist(displayName, Bookmark.tag.FAVORITE) then
+            Bookmark:RemoveTag(displayName, Bookmark.tag.FAVORITE)
+        else
+            Bookmark:SetTag(displayName, Bookmark.tag.FAVORITE)
+        end
     end
 
-    self:updateList()
-    self.refreshPage()
+    self:UpdateList()
+    self.Refresh()
 end
 
-function HistoryManager:deleteItem(index)
-    local itemsList = Store:get('user/historyItemsList')
-    local BookmarkTree, BookmarkItems = Bookmark:getBookmark()
-
-    local function handleDelete()
-        local currentItem = itemsList[index]
-
-        if type(currentItem) ~= 'table' then
-            return false
-        end
-
-        for key, item in ipairs(BookmarkItems) do
-            if item['displayName'] and currentItem['displayName'] then
-                if currentItem['displayName'] == item['displayName'] then
-                    for k=key, #BookmarkItems do
-                        BookmarkItems[k] = BookmarkItems[k+1]
-                    end
-                    break
-                end
-            end
-        end
-
-        self:setBookmark(BookmarkTree, BookmarkItems)
-        self:getRecommendedWorldList()
-    end
+function HistoryManager:DeleteItem(index)
+    local itemsList = Store:Get('user/historyItemsList')
 
     _guihelper.MessageBox(
         L"是否删除此记录？",
         function(res)
             if (res and res == 6) then
-                handleDelete()
+                local currentItem = itemsList[index]
+
+                if type(currentItem) ~= 'table' or not currentItem.displayName then
+                    return false
+                end
+
+                Bookmark:RemoveItem(currentItem.displayName)
+
+                self:GetWorldList()
             end
         end
     )
 end
 
-function HistoryManager:selectCategory(index)
-    local tree = Store:get('user/historyTreeList')
+function HistoryManager:SelectCategory(index)
+    local tree = Store:Get('user/historyTreeList')
 
     if type(index) ~= 'number' or type(tree) ~= 'table' then
         return false
@@ -426,11 +423,18 @@ function HistoryManager:selectCategory(index)
 
     self.selectTagName = curItem.name
 
-    self:updateList()
-    self.refreshPage()
+    self:GetWorldList()
 end
 
-function HistoryManager.formatDate(date)
+-- clear all local storage data
+function HistoryManager:ClearHistory()
+    local bookmarkTree, bookmarkItems = Bookmark:GetBookmark()
+    Bookmark:SetBookmark(bookmarkTree, {})
+
+    self:GetWorldList()
+end
+
+function HistoryManager.FormatDate(date)
     if type(date) ~= 'string' then
         return false
     end
@@ -453,4 +457,73 @@ function HistoryManager.formatDate(date)
     local day = string.sub(date, 7, 8)
 
     return format("%s%s%s%s%s%s%s", formatDate, year or '', L"年", month or '', L"月", day or '', L"日")
+end
+
+function HistoryManager:OnWorldLoad()
+    local curLesson = Store:Getter("lesson/GetCurLesson")
+    local enterWorld = Store:Get("world/enterWorld")
+
+    if curLesson then
+        self:WriteLessonRecord(curLesson)
+        return true
+    end
+
+    if enterWorld then
+        self:WriteWorldRecord(enterWorld)
+    end
+end
+
+function HistoryManager:WriteLessonRecord(curLesson)
+    if not curLesson or not curLesson:GetName() then
+        return false
+    end
+
+    local curData = {
+        date = os.date("%Y%m%d", os.time()),
+        displayName = curLesson:GetName(),
+        revision = 0,
+        tag = "",
+        worldType="class" 
+    }
+
+    Bookmark:SetItem(displayName, curData)
+end
+
+function HistoryManager:WriteWorldRecord(enterWorld)
+    if type(enterWorld) ~= "table" then
+        return false
+    end
+
+    local curData
+
+    if KeepworkService:IsSignedIn() then
+        local username = Store:Get('user/username')
+
+        curData = {
+            author = username,
+            date = os.date("%Y%m%d", os.time()),
+            displayName = enterWorld.foldername,
+            revision = enterWorld.revision,
+            size = enterWorld.size,
+            tag = "",
+            worldType="world" 
+        }
+    else
+        curData = {
+            date = os.date("%Y%m%d", os.time()),
+            displayName = enterWorld.foldername,
+            revision = enterWorld.revision,
+            size = enterWorld.size,
+            tag = "",
+            worldType="world" 
+        }
+    end
+
+    local displayName = enterWorld.foldername
+
+    if not displayName then
+        return false
+    end
+
+    Bookmark:SetItem(displayName, curData)
 end

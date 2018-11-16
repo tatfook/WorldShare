@@ -18,8 +18,8 @@ local FileDownloader = commonlib.gettable("Mod.WorldShare.service.FileDownloader
 local GitlabService = NPL.load("./GitlabService")
 local GithubService = NPL.load("./GithubService")
 local GitEncoding = NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua")
-local LoginMain = NPL.load("(gl)Mod/WorldShare/cellar/Login/LoginMain.lua")
-local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/SyncMain.lua")
+local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/Login/UserConsole.lua")
+local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 
 local LocalService = NPL.export()
@@ -38,18 +38,18 @@ function LocalService:LoadFiles(worldDir)
 
     local result = Files.Find({}, self.worldDir, self.nMaxFileLevels, self.nMaxFilesNum, self.filter)
 
-    self:filesFind(result, self.worldDir)
+    self:FilesFind(result, self.worldDir)
 
     for _, item in ipairs(self.output) do
         item.filename = CommonlibEncoding.DefaultToUtf8(item.filename)
     end
 
-    Store:set('world/localFiles', self.output)
+    Store:Set('world/localFiles', self.output)
 
     return self.output
 end
 
-function LocalService:filesFind(result, path, subPath)
+function LocalService:FilesFind(result, path, subPath)
     local curResult = commonlib.copy(result)
     local curPath = commonlib.copy(path)
     local curSubPath = commonlib.copy(subPath)
@@ -74,17 +74,17 @@ function LocalService:filesFind(result, path, subPath)
                     local bConvert = false
 
                     if (convertLineEnding[sExt] and zipFile[sExt]) then
-                        bConvert = not self:isZip(item.file_path)
+                        bConvert = not self:IsZip(item.file_path)
                     elseif (convertLineEnding[sExt]) then
                         bConvert = true
                     end
 
                     if (bConvert) then
-                        item.file_content_t = self:getFileContent(item.file_path):gsub("\r\n", "\n")
+                        item.file_content_t = self:GetFileContent(item.file_path):gsub("\r\n", "\n")
                         item.filesize = #item.file_content_t
                         item.sha1 = SystemEncoding.sha1("blob " .. item.filesize .. "\0" .. item.file_content_t, "hex")
                     else
-                        item.file_content_t = self:getFileContent(item.file_path)
+                        item.file_content_t = self:GetFileContent(item.file_path)
                         item.sha1 = SystemEncoding.sha1("blob " .. item.filesize .. "\0" .. item.file_content_t, "hex")
                     end
 
@@ -103,13 +103,13 @@ function LocalService:filesFind(result, path, subPath)
                     newSubPath = item.filename
                 end
 
-                self:filesFind(newResult, newPath, newSubPath)
+                self:FilesFind(newResult, newPath, newSubPath)
             end
         end
     end
 end
 
-function LocalService:getFileContent(filePath)
+function LocalService:GetFileContent(filePath)
     local file = ParaIO.open(filePath, "r")
     if (file:IsValid()) then
         local fileContent = file:GetText(0, -1)
@@ -118,7 +118,7 @@ function LocalService:getFileContent(filePath)
     end
 end
 
-function LocalService:write(foldername, path, content)
+function LocalService:Write(foldername, path, content)
     local writePath = format("%s/%s/%s", SyncMain.GetWorldFolderFullPath(), foldername, path)
     local write = ParaIO.open(writePath, "w")
 
@@ -126,13 +126,13 @@ function LocalService:write(foldername, path, content)
     write:close()
 end
 
-function LocalService:delete(foldername, filename)
+function LocalService:Delete(foldername, filename)
     local deletePath = format("%s/%s/%s", SyncMain.GetWorldFolderFullPath(), foldername, filename)
 
     ParaIO.DeleteFile(deletePath)
 end
 
-function LocalService:isZip(path)
+function LocalService:IsZip(path)
     local file = ParaIO.open(path, "r")
     local fileType = nil
 
@@ -160,7 +160,7 @@ function LocalService:MoveZipToFolder(path)
         return false
     end
 
-    local foldername = Store:get("world/foldername")
+    local foldername = Store:Get("world/foldername")
 
     if (not foldername) then
         return false
@@ -188,7 +188,7 @@ function LocalService:MoveZipToFolder(path)
                 path = path:sub(#rootFolder, #path)
 
                 if (path == "/revision.xml") then
-                    Store:set('remoteRevision', binData)
+                    Store:Set('remoteRevision', binData)
                 end
 
                 for segmentation in string.gmatch(path, "[^/]+") do
@@ -219,18 +219,18 @@ function LocalService:MoveZipToFolder(path)
     ParaAsset.CloseArchive(path)
 end
 
-function LocalService:FileDownloader(_foldername, _path, _callback)
-    local foldername = GitEncoding.base32(SyncMain.foldername.utf8)
+function LocalService:FileDownloader(foldername, path, callback)
+    local foldername = GitEncoding.Base32(SyncMain.foldername.utf8)
 
     local url = ""
     local downloadDir = ""
 
-    if (LoginMain.dataSourceType == "github") then
-    elseif (LoginMain.dataSourceType == "gitlab") then
+    if (UserConsole.dataSourceType == "github") then
+    elseif (UserConsole.dataSourceType == "gitlab") then
         url =
-            LoginMain.rawBaseUrl ..
-            "/" .. LoginMain.dataSourceUsername .. "/" .. foldername .. "/raw/" .. SyncMain.commitId .. "/" .. _path
-        downloadDir = SyncMain.worldDir.default .. _path
+            UserConsole.rawBaseUrl ..
+            "/" .. UserConsole.dataSourceUsername .. "/" .. foldername .. "/raw/" .. SyncMain.commitId .. "/" .. path
+        downloadDir = SyncMain.worldDir.default .. path
     end
 
     local Files =
@@ -239,15 +239,13 @@ function LocalService:FileDownloader(_foldername, _path, _callback)
         url,
         downloadDir,
         function(bSuccess, downloadPath)
-            --LOG.std(nil,"debug","FileDownloader-downloadPath",downloadPath);
-
             local content = LocalService:getFileContent(downloadPath)
 
             if (bSuccess) then
                 local returnData = {filename = _path, content = content}
-                return _callback(bSuccess, returnData)
+                return callback(bSuccess, returnData)
             else
-                return _callback(bSuccess, nil)
+                return callback(bSuccess, nil)
             end
         end,
         "access plus 5 mins",
@@ -337,7 +335,7 @@ function LocalService:GetTag(foldername)
         return {}
     end
 
-    local filePath = format("%s/%s/tag.xml", SyncMain.GetWorldFolderFullPath() , foldername)
+    local filePath = format("%s/%s/tag.xml", SyncMain:GetWorldFolderFullPath() , foldername)
 
     local tag = ParaXML.LuaXML_ParseFile(filePath)
 

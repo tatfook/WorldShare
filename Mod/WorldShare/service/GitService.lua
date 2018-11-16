@@ -18,104 +18,112 @@ local GitService = NPL.export()
 local GITLAB = "GITLAB"
 local GITHUB = "GITHUB"
 
-function GitService:getDataSourceInfo()
-    return Store:get("user/dataSourceInfo")
+function GitService:GetDataSourceInfo()
+    return Store:Get("user/dataSourceInfo")
 end
 
-function GitService:getDataSourceType()
-    local dataSourceInfo = self:getDataSourceInfo()
+function GitService:GetDataSourceType()
+    local dataSourceInfo = self:GetDataSourceInfo()
 
     if (dataSourceInfo and dataSourceInfo.dataSourceType) then
         return string.upper(dataSourceInfo.dataSourceType)
     end
 end
 
-function GitService:create(foldername, callback)
-    if (self:getDataSourceType() == GITHUB) then
-        GithubService:create(foldername, callback)
-    elseif (self:getDataSourceType() == GITLAB) then
-        GitlabService:create(foldername, callback)
+function GitService:GetSingleProject(...)
+    if (self:GetDataSourceType() == GITHUB) then
+
+    elseif (self:GetDataSourceType() == GITLAB) then
+        GitlabService:GetSingleProject(...)
     end
 end
 
-function GitService:getContent(projectId, foldername, path, callback)
-    if (self:getDataSourceType() == GITHUB) then
-        GithubService:getContent(foldername, path, callback)
-    elseif (self:getDataSourceType() == GITLAB) then
-        GitlabService:getContent(projectId, path, callback)
+function GitService:Create(...)
+    if (self:GetDataSourceType() == GITHUB) then
+        -- GithubService:create(foldername, callback)
+    elseif (self:GetDataSourceType() == GITLAB) then
+        GitlabService:Create(...)
     end
 end
 
-function GitService:getContentWithRaw(foldername, path, commitId, callback)
-    if (self:getDataSourceType() == GITHUB) then
-    elseif (self:getDataSourceType() == GITLAB) then
-        GitlabService:getContentWithRaw(foldername, path, commitId, callback)
+function GitService:GetContent(...)
+    if (self:GetDataSourceType() == GITHUB) then
+        -- GithubService:getContent(...)
+    elseif (self:GetDataSourceType() == GITLAB) then
+        GitlabService:GetContent(...)
     end
 end
 
-function GitService:upload(projectId, foldername, filename, content, callback)
-    if (self:getDataSourceType() == GITHUB) then
-        GithubService:upload(foldername, filename, content, callback)
-    elseif (self:getDataSourceType() == GITLAB) then
-        GitlabService:upload(projectId, filename, content, callback)
+function GitService:GetContentWithRaw(...)
+    if (self:GetDataSourceType() == GITHUB) then
+    elseif (self:GetDataSourceType() == GITLAB) then
+        GitlabService:GetContentWithRaw(...)
     end
 end
 
-function GitService:update(projectId, foldername, filename, content, sha, callback)
-    if (self:getDataSourceType() == GITHUB) then
-        GithubService:update(foldername, filename, content, sha, callback)
-    elseif (self:getDataSourceType() == GITLAB) then
-        GitlabService:update(projectId, filename, content, callback)
+function GitService:Upload(...)
+    if (self:GetDataSourceType() == GITHUB) then
+        -- GithubService:upload(projectName, filename, content, callback)
+    elseif (self:GetDataSourceType() == GITLAB) then
+        GitlabService:Upload(...)
     end
 end
 
-function GitService:deleteFile(projectId, foldername, path, sha, callback)
-    if (self:getDataSourceType() == GITHUB) then
-        GithubService:deleteFile(foldername, path, sha, callback)
-    elseif (self:getDataSourceType() == GITLAB) then
-        GitlabService:deleteFile(projectId, path, callback)
+function GitService:Update(projectName, path, content, sha, callback)
+    if (self:GetDataSourceType() == GITHUB) then
+        -- GithubService:update(projectName, filename, content, sha, callback)
+    elseif (self:GetDataSourceType() == GITLAB) then
+        GitlabService:Update(projectName, path, content, callback)
     end
 end
 
-function GitService:DownloadZIP(foldername, commitId, callback)
-    if (self:getDataSourceType() == GITHUB) then
-        GithubService:DownloadZIP(foldername, commitId, callback)
-    elseif(self:getDataSourceType() == GITLAB) then
-        GitlabService:DownloadZIP(foldername, commitId, callback)
+function GitService:DeleteFile(projectName, path, sha, callback)
+    if (self:GetDataSourceType() == GITHUB) then
+        -- GithubService:deleteFile(projectName, path, sha, callback)
+    elseif (self:GetDataSourceType() == GITLAB) then
+        GitlabService:DeleteFile(projectName, path, callback)
     end
 end
 
-function GitService:getTree(projectId, foldername, commitId, callback)
-    if (self:getDataSourceType() == GITHUB) then
-        GithubService:getTree(foldername, callback)
-    elseif (self:getDataSourceType() == GITLAB) then
-        GitlabService:getTree(projectId, commitId, callback)
+function GitService:DownloadZIP(...)
+    if (self:GetDataSourceType() == GITHUB) then
+        -- GithubService:downloadZIP(...)
+    elseif(self:GetDataSourceType() == GITLAB) then
+        GitlabService:DownloadZIP(...)
     end
 end
 
-function GitService:getCommits(projectId, foldername, IsGetAll, callback)
-    if (self:getDataSourceType() == GITHUB) then
-        GithubService:getCommits(foldername, IsGetAll, callback)
-    elseif (self:getDataSourceType() == GITLAB) then
-        GitlabService:getCommits(projectId, IsGetAll, callback)
+function GitService:GetTree(...)
+    if (self:GetDataSourceType() == GITHUB) then
+        -- GithubService:getTree(...)
+    elseif (self:GetDataSourceType() == GITLAB) then
+        GitlabService:GetTree(...)
     end
 end
 
-function GitService:getWorldRevision(foldername, callback)
-    if (self:getDataSourceType() == GITHUB) then
-        GithubService:getWorldRevision(foldername, callback)
-    elseif (self:getDataSourceType() == GITLAB) then
-        GitlabService:getWorldRevision(foldername, callback)
+function GitService:GetCommits(...)
+    if (self:GetDataSourceType() == GITHUB) then
+        -- GithubService:GetCommits(...)
+    elseif (self:GetDataSourceType() == GITLAB) then
+        GitlabService:GetCommits(...)
     end
 end
 
-function GitService:getProjectIdByName(name, callback)
-    GitlabService:getProjectIdByName(name, callback)
+function GitService:GetWorldRevision(...)
+    if (self:GetDataSourceType() == GITHUB) then
+        -- GithubService:GetWorldRevision(projectName, callback)
+    elseif (self:GetDataSourceType() == GITLAB) then
+        GitlabService:GetWorldRevision(...)
+    end
 end
 
-function GitService:deleteResp(projectId, foldername, callback)
-    if (self:getDataSourceType() == GITHUB) then
-    elseif (self:getDataSourceType() == GITLAB) then
-        GitlabService:deleteResp(projectId, callback)
+function GitService:GetProjectIdByName(...)
+    GitlabService:GetProjectIdByName(...)
+end
+
+function GitService:DeleteResp(...)
+    if (self:GetDataSourceType() == GITHUB) then
+    elseif (self:GetDataSourceType() == GITLAB) then
+        GitlabService:DeleteResp(...)
     end
 end

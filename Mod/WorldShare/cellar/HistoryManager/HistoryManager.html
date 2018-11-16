@@ -5,30 +5,35 @@
             <![CDATA[
                 HistoryManager = NPL.load('./HistoryManager.lua')
                 Bookmark = NPL.load('(gl)Mod/WorldShare/database/Bookmark.lua')
-                HistoryManager:setPage()
+                
+                HistoryManager:SetPage()
 
                 function close()
-                    HistoryManager:closePage()
+                    HistoryManager:ClosePage()
+                end
+
+                function clear_history()
+                    HistoryManager:ClearHistory()
                 end
 
                 function has_data()
-                    return HistoryManager:hasData()
+                    return HistoryManager:HasData()
                 end
 
                 function collect(index)
-                    HistoryManager:collectItem(index)
+                    HistoryManager:CollectItem(index)
                 end
 
                 function delete(index)
-                    HistoryManager:deleteItem(index)
+                    HistoryManager:DeleteItem(index)
                 end
 
                 function select_category(index)
-                    HistoryManager:selectCategory(index)
+                    HistoryManager:SelectCategory(index)
                 end
 
                 function get_date_format(date)
-                    local formatDate = HistoryManager.formatDate(date)
+                    local formatDate = HistoryManager.FormatDate(date)
 
                     return formatDate
                 end
@@ -60,9 +65,9 @@
                 end
 
                 function get_favorite_status(index)
-                    local curItem = HistoryManager:getItemsItemByIndex(index)
+                    local curItem = HistoryManager:GetItemsItemByIndex(index)
 
-                    if Bookmark:isTagExist(curItem['displayName'], 'favorite') then
+                    if Bookmark:IsTagExist(curItem['displayName'], 'favorite') then
                         return L'已收藏'
                     else
                         return L'收藏'
@@ -163,12 +168,13 @@
         <div class="area">
             <div class="area_header" name="area_header">
                 <div style="float: left"><%=L"历史记录"%></div>
-                <input style="float: left;margin-left: 750px;" class="flat_button" type="button" onclick="close()" value="<%=L'关闭'%>"/>
+                <input style="float: left;margin-left: 615px;" class="flat_button" type="button" onclick="clear_history()" value="<%=L'清除历史'%>"/>
+                <input style="float: left;margin-left: 10px;" class="flat_button" type="button" onclick="close()" value="<%=L'关闭'%>"/>
             </div>
             <div style="height:2px;margin-top:5px;" width="100%" class="mc_line"></div>
             <div class="area_content" name="area_content">
                 <div class="area_content_menu">
-                    <pe:gridview name="historyTree" DefaultNodeHeight="32" pagesize="10" ItemsPerLine="1" AllowPaging="true">
+                    <pe:gridview name="historyTree" DefaultNodeHeight="32" pagesize="10" ItemsPerLine="1" AllowPaging="false">
                         <Columns>
                             <div>
                                 <pe:if condition="<%= is_selected_category(Eval('name'))%>">
@@ -192,7 +198,7 @@
                 <div class="area_split" name="area_split"></div>
                 <div class="area_content_list">
                     <pe:if condition="<%= has_data() %>">
-                        <pe:gridview name="historyItems" DefaultNodeHeight="32" pageSize="10" ItemsPerLine="1" AllowPaging="true">
+                        <pe:gridview name="historyItems" DefaultNodeHeight="32" pageSize="10" ItemsPerLine="1" AllowPaging="false">
                             <Columns>
                                 <pe:if condition="<%=Eval('type') == 'date'%>">
                                     <div name="dateTitle" style="color:white">
@@ -203,18 +209,19 @@
                                 <pe:if condition="<%=Eval('type') == 'world'%>">
                                     <div name="dateList" class="date_list">
                                         <div class="list_item" width="100%">
-                                            <div style="float:left;width: 600px">
+                                            <div style="float:left;width: 500px">
                                                 <pe:if condition="<%=get_world_type(Eval('worldType')) == 'server'%>">
                                                     [<%=get_world_type_desc(Eval('worldType'))%>] <%=Eval('ip')%>
                                                 </pe:if>
                                                 <pe:if condition="<%=get_world_type(Eval('worldType')) == 'class'%>">
-                                                    [<%=get_world_type_desc(Eval('worldType'))%>] <%=Eval('displayName')%> CLASS_ID: <%=Eval('classId')%>
+                                                    [<%=get_world_type_desc(Eval('worldType'))%>] <%=Eval('displayName')%>
+                                                    <!-- CLASS_ID: <%=Eval('classId')%> -->
                                                 </pe:if>
                                                 <pe:if condition="<%=get_world_type(Eval('worldType')) == 'world'%>">
                                                     [<%=get_world_type_desc(Eval('worldType'))%>] <%=Eval('displayName')%>
                                                 </pe:if>
                                             </div>
-                                            <div style="float:left;width: 100px;">
+                                            <div style="float:left;width: 200px;">
                                                 <pe:if condition="<%=not Eval('recommend')%>">
                                                     <input type="button" class="item_button" value="<%=L'删除'%>" name="<%=Eval('index')%>" onclick="delete"/>
                                                 </pe:if>

@@ -32,7 +32,7 @@ worldType 有 server, class, world
 - author: Taozi
 - revision: 1
 - size: 9.0
-- tag: microfilm,animation
+- tag: microfilm
 - date: 20180906
 
 ### 双马马

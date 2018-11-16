@@ -14,24 +14,17 @@ local Encoding = commonlib.gettable("System.Encoding.basexx")
 
 local GitEncoding = NPL.export()
 
--- =转成-equal  +转成-plus  /转成-slash
-function GitEncoding.base32(text)
+function GitEncoding.Base32(text)
     if (text) then
-        local notLetter = string.find(text, "%A%A")
+        local notLetter = string.find(text, "[^a-zA-Z]")
 
         if (notLetter) then
             text = Encoding.to_base32(text)
-
-            text = text:gsub("[=]", "-equal")
-            text = text:gsub("[%+]", "-plus")
-            text = text:gsub("[/]", "-slash")
 
             text = "world_base32_" .. text
         else
             text = "world_" .. text
         end
-
-        --LOG.std(nil,"debug","text",text);
 
         return text
     else
@@ -39,16 +32,12 @@ function GitEncoding.base32(text)
     end
 end
 
-function GitEncoding.unbase32(text)
+function GitEncoding.Unbase32(text)
     if (text) then
         local notLetter = string.find(text, "world_base32_")
 
         if (notLetter) then
             text = text:gsub("world_base32_", "")
-
-            text = text:gsub("[-equal]", "=")
-            text = text:gsub("[-plus]", "+")
-            text = text:gsub("[-slash]", "/")
 
             return Encoding.from_base32(text)
         else

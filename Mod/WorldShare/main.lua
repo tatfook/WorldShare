@@ -8,6 +8,14 @@ use the lib:
 NPL.load("(gl)Mod/WorldShare/main.lua")
 local WorldShare = commonlib.gettable("Mod.WorldShare")
 ------------------------------------------------------------
+
+CODE GUIDELINE
+
+1. all classes and functions use upper camel case
+2. all variables use lower camel case
+3. all files use use upper camel case
+4. all templates variables and functions use underscore case
+
 ]]
 NPL.load("(gl)script/ide/Files.lua")
 NPL.load("(gl)script/ide/Encoding.lua")
@@ -22,10 +30,11 @@ NPL.load("(gl)script/apps/Aries/Creator/Game/Login/RemoteServerList.lua")
 NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/ShareWorldPage.lua")
 
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
-local LoginMain = NPL.load("(gl)Mod/WorldShare/cellar/Login/LoginMain.lua")
-local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/Login/CreateWorld.lua")
-local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/SyncMain.lua")
+local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
+local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
+local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
 local ShareWorld = NPL.load("(gl)Mod/WorldShare/cellar/ShareWorld/ShareWorld.lua")
+local HistoryManager = NPL.load("(gl)Mod/WorldShare/cellar/HistoryManager/HistoryManager.lua")
 local WorldExitDialog = NPL.load("(gl)Mod/WorldShare/cellar/WorldExitDialog/WorldExitDialog.lua")
 
 local GameLogic = commonlib.gettable("MyCompany.Aries.Game.GameLogic")
@@ -52,7 +61,7 @@ function WorldShare:init()
     GameLogic.GetFilters():add_filter(
         "InternetLoadWorld.ShowPage",
         function(bEnable, bShow)
-            LoginMain:ShowLoginMainPage()
+            UserConsole:ShowPage()
             return false
         end
     )
@@ -72,12 +81,12 @@ function WorldShare:init()
     GameLogic.GetFilters():add_filter(
         "SaveWorldPage.ShowSharePage",
         function(bEnable)
-            ShareWorld:init()
+            ShareWorld:Init()
             return false
         end
     )
 
-    -- replca implement or replace create new world event
+    -- replace implement or replace create new world event
     GameLogic.GetFilters():add_filter(
         "OnClickCreateWorld",
         function()
@@ -94,12 +103,15 @@ function WorldShare:OnLogin()
 end
 
 function WorldShare:OnWorldLoad()
-    Store:set("world/IsEnterWorld", true)
+    Store:Set("world/isEnterWorld", true)
 
-    LoginMain.closeLoginMainPage()
+    UserConsole:ClosePage()
+    HistoryManager:OnWorldLoad()
 
-    local selectedWorld = Store:get("world/selectWorld")
-    if(selectedWorld) then
+    local curLesson = Store:Getter("lesson/GetCurLesson")
+
+    -- if enter with lesson method, we will not check revision
+    if not curLesson then
         CreateWorld:CheckRevision(
             function()
                 SyncMain:SyncWillEnterWorld()
@@ -109,9 +121,9 @@ function WorldShare:OnWorldLoad()
 end
 
 function WorldShare:OnLeaveWorld()
-    Store:set("world/selectWorld", nil)
-    Store:set("world/worldIndex", nil)
-    Store:set("world/ShareMode", nil)
-    Store:set("world/worldDir", nil)
-    Store:set("world/foldername", nil)
+    Store:Remove("world/selectWorld")
+    Store:Remove("world/worldIndex")
+    Store:Remove("world/shareMode")
+    Store:Remove("world/worldDir")
+    Store:Remove("world/foldername")
 end

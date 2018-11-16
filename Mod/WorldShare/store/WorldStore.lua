@@ -1,5 +1,5 @@
 --[[
-Title: User
+Title: world store
 Author(s): big
 Date: 2018.8.24
 City: Foshan 
@@ -12,12 +12,14 @@ local WorldStore = commonlib.gettable('Mod.WorldShare.store.World')
 
 local WorldStore = commonlib.gettable('Mod.WorldShare.store.World')
 
-local function setEmpty(value)
-    if (not value) then
-        value = nil
-    end
+function WorldStore:Action()
+    return {
+        ClearSelectWorld = function() end
+    }
 end
 
-setEmpty(WorldStore.worldDir)
-setEmpty(WorldStore.foldername)
-setEmpty(WorldStore.selectWorld)
+function WorldStore:Getter()
+    return {
+        
+    }
+end

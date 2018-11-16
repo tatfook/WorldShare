@@ -1,43 +1,48 @@
 <body>
     <pe:mcml>
-        <script type="text/npl" refresh="false" src="SyncGUI.lua">
+        <script type="text/npl" refresh="false" src="Progress.lua">
             <![CDATA[
-                SyncGUI = NPL.load('./SyncGUI.lua')
+                Progress = NPL.load('./Progress.lua')
                 ShareWorld = NPL.load('../ShareWorld/ShareWorld.lua')
+                KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
                 Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 
-                SyncGUI:setPage()
+                Progress:SetPage()
 
                 function current()
-                    return SyncGUI:getCurrent()
+                    return Progress:GetCurrent()
                 end
 
                 function total()
-                    return SyncGUI:getTotal()
+                    return Progress:GetTotal()
                 end
 
                 function msg()
-                    return SyncGUI:getMsg()
+                    return Progress:GetMsg()
                 end
 
                 function finish()
-                    return SyncGUI:getFinish()
+                    return Progress:GetFinish()
                 end
 
                 function broke()
-                    return SyncGUI:getBroke()
+                    return Progress:GetBroke()
                 end
 
                 function retry()
-                    SyncGUI:retry()
+                    Progress:Retry()
                 end
 
                 function cancel()
-                    SyncGUI:cancel()
+                    Progress:Cancel()
                 end
 
                 function close()
-                    SyncGUI:closeWindow()
+                    Progress:ClosePage()
+                end
+
+                function copy()
+                    Progress:Copy(KeepworkService:GetShareUrl())
                 end
 
                 function get_window_style()
@@ -45,13 +50,19 @@
                 end
 
                 function get_world_url()
-                    local worldUrl = ShareWorld.getWorldUrl()
+                    local worldUrl = KeepworkService:GetShareUrl()
 
                     if (worldUrl) then
                         return worldUrl
                     else
                         return ''
                     end
+                end
+
+                function open_url()
+                    local url = get_world_url()
+
+                    ParaGlobal.ShellExecute("open", url, "", "", 1)
                 end
              ]]>
         </script>
@@ -86,8 +97,8 @@
                             <br />
                             <div>
                                 <%= get_world_url() %>
-                                <input type="button" class="common_button mc_light_grey_button_with_fillet" value='<%=L"复制" %>' onclick="SyncGUI.copy()"/>
-                                <input type="button" class="common_button mc_light_grey_button_with_fillet" value='<%=L"打开" %>' onclick="ShareWorld.openWorldWebPage()" />
+                                <input type="button" class="common_button mc_light_grey_button_with_fillet" value='<%=L"复制" %>' onclick="copy()"/>
+                                <input type="button" class="common_button mc_light_grey_button_with_fillet" value='<%=L"打开" %>' onclick="open_url()" />
                             </div>
                         </div>
                     </pe:if>

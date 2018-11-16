@@ -6,41 +6,48 @@ place: Foshan
 Desc: 
 use the lib:
 ------------------------------------------------------------
-NPL.load("(gl)Mod/WorldShare/login/CreateWorld.lua")
-local CreateWorld = commonlib.gettable("Mod.WorldShare.login.CreateWorld")
+local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
 ------------------------------------------------------------
 ]]
 local CommandManager = commonlib.gettable("MyCompany.Aries.Game.CommandManager")
 local ShareWorldPage = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.Areas.ShareWorldPage")
+local CreateNewWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.CreateNewWorld")
 
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
-local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/SyncMain.lua")
-local SyncCompare = NPL.load("(gl)Mod/WorldShare/cellar/Sync/SyncCompare.lua")
-local LoginMain = NPL.load("(gl)Mod/WorldShare/cellar/Login/LoginMain.lua")
+local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
+local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
+local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")
 
 local CreateWorld = NPL.export()
 
+function CreateWorld:CreateNewWorld(foldername)
+    if type(foldername) == 'string' then
+        CreateNewWorld.LastWorldName = foldername
+    end
+
+    CreateNewWorld.ShowPage()
+end
+
 function CreateWorld.OnClickCreateWorld()
-    Store:remove("world/enterWorld")
+    Store:Remove("world/enterWorld")
 end
 
 function CreateWorld:CheckRevision(callback)
-    local enterWorld = Store:get("world/enterWorld")
+    local enterWorld = Store:Get("world/enterWorld")
 
     if (enterWorld and enterWorld.is_zip) then
         return false
     end
 
-    function handleCheck()
-        if (not SyncCompare:HasRevision()) then
+    function Handle()
+        if (not Compare:HasRevision()) then
             MsgBox:Show(L"正在初始化世界...")
 
             Utils.SetTimeOut(
                 function()
                     self:CreateRevisionXml()
-                    self:CreateSnapshot()
 
                     MsgBox:Close()
 
@@ -60,10 +67,10 @@ function CreateWorld:CheckRevision(callback)
         end
     end
 
-    if (SyncMain:isCommandEnter()) then
-        SyncMain:CommandEnter(handleCheck)
+    if (SyncMain:IsCommandEnter()) then
+        SyncMain:CommandEnter(Handle)
     else
-        handleCheck()
+        Handle()
     end
 end
 
@@ -78,8 +85,4 @@ function CreateWorld:CreateRevisionXml()
         file:WriteString("1")
         file:close();
     end
-end
-
-function CreateWorld:CreateSnapshot()
-    ShareWorldPage.TakeSharePageImage()
 end
