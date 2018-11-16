@@ -34,7 +34,7 @@ function BrowseRemoteWorlds.Init()
         "dataChanged",
         function(self, event)
             if (event.type_index ~= 1) then
-                BrowseRemoteWorlds.refreshPage()
+                BrowseRemoteWorlds.Refresh()
             end
         end,
         nil,

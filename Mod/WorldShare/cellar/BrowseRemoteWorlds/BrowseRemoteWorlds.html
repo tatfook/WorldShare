@@ -5,7 +5,7 @@
             <![CDATA[
                 InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
                 BrowseRemoteWorlds = NPL.load('./BrowseRemoteWorlds.lua')
-                BrowseRemoteWorlds.init()
+                BrowseRemoteWorlds.Init()
             ]]>
         </script>
         <style type="text/mcss">
@@ -108,7 +108,7 @@
                                         <input type="button" value='<%=L"下载中" %>' style="max-width:70px;height:32px;font-size:12px;font-weight:bold;" onclick="InternetLoadWorld.DownLoadWorld" name='<%=Eval("index")%>' class="mc_button_grey" />
                                     </pe:if>
                                     <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) < 0 %>'>
-                                        <input type="button" value='<%=L"下载" %>' style="max-width:70px;height:32px;font-size:12px;font-weight:bold;color:#333333" onclick="BrowseRemoteWorlds.enterWorld" name='<%=Eval("index")%>' class="mc_button_grey" />
+                                        <input type="button" value='<%=L"下载" %>' style="max-width:70px;height:32px;font-size:12px;font-weight:bold;color:#333333" onclick="BrowseRemoteWorlds.EnterWorld" name='<%=Eval("index")%>' class="mc_button_grey" />
                                     </pe:if>
                                 </pe:if>
                             </div>
