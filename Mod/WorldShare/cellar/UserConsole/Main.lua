@@ -65,18 +65,19 @@ function UserConsole:ShowPage()
         Store:Set('user/ignoreAutoLogin', true)
     else
         Store:Set('user/notFirstTimeShown', true)
-        KeepworkService:GetUserTokenFromUrlProtocol()
         
+        KeepworkService:GetUserTokenFromUrlProtocol()
+
+        if KeepworkService:LoginWithTokenApi(function() WorldList:RefreshCurrentServerList() end) then
+            return false
+        end
+
         local ignoreAutoLogin = Store:Get('user/ignoreAutoLogin')
 
         if (not ignoreAutoLogin) then
             -- auto sign in here
             UserInfo:CheckDoAutoSignin()
         end
-    end
-
-    if (not KeepworkService:IsSignedIn() and KeepworkService:LoginWithTokenApi(function() WorldList:RefreshCurrentServerList() end)) then
-        return false
     end
 
     WorldList:RefreshCurrentServerList()

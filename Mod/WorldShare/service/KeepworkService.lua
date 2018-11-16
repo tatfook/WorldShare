@@ -135,6 +135,7 @@ function KeepworkService:LoginResponse(response, err, callback)
         if (not data or not data.token) then
             _guihelper.MessageBox(L"Token过期了，请重新登陆")
             self:DeletePWDFile()
+            self:Logout()
             MsgBox:Close()
             return false
         end
@@ -174,6 +175,14 @@ function KeepworkService:GetToken()
     return token or ''
 end
 
+function KeepworkService:Logout()
+    if (self:IsSignedIn()) then
+        local SetToken = Store:Action("user/SetToken")
+        SetToken(nil)
+        WorldList:RefreshCurrentServerList()
+    end
+end
+
 function KeepworkService:Login(account, password, callback)
     if type(account) ~= "string" or type(password) ~= "string" then
         return false
@@ -185,7 +194,7 @@ function KeepworkService:Login(account, password, callback)
         function()
             if (not timeout) then
                 timeout = true
-                _guihelper.MessageBox(L"链接超时")
+                _guihelper.MessageBox(L "链接超时")
                 MsgBox:Close()
             end
         end,
@@ -205,7 +214,7 @@ function KeepworkService:Login(account, password, callback)
         function(data, err)
             if (not timeout) then
                 if (err == 503) then
-                    _guihelper.MessageBox(L"keepwork正在维护中，我们马上回来")
+                    _guihelper.MessageBox(L "keepwork正在维护中，我们马上回来")
                     MsgBox:Close()
 
                     timeout = true
@@ -460,7 +469,8 @@ function KeepworkService:GetUserTokenFromUrlProtocol()
     end
     
     if usertoken then
-        Store:Set("user/token", usertoken)
+        local SetToken = Store:Action("user/SetToken")
+        SetToken(usertoken)
     end
 end
 

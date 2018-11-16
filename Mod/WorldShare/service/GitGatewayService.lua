@@ -18,7 +18,7 @@ function GitGatewayService:GetBaseApi()
   local env = Store:Get("user/env")
 
   if not env then
-    env = Config.env.STAGE
+    env = Config.env.ONLINE
   end
 
   return Config.gitGatewayList[env] or ""

@@ -38,8 +38,6 @@ function SyncToLocal:Init(callback)
         return false
     end
 
-    MsgBox:Close()
-
     self:SetFinish(false)
     self:SyncToLocal()
 end
@@ -52,6 +50,8 @@ function SyncToLocal:SyncToLocal()
     self.compareListTotal = 0
 
     local function Handle(data, err)
+        MsgBox:Close()
+
         if (commitId or selectWorld.status == 2 and #data ~= 0) then
             -- down zip
             self:DownloadZIP()

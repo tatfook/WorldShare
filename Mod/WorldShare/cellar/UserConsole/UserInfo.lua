@@ -49,7 +49,7 @@ function UserInfo:CheckoutVerified()
 
     if (self.IsSignedIn() and not isVerified) then
         _guihelper.MessageBox(
-            L"您需要到keepwork官网进行实名认证，认证成功后需重启paracraft即可正常操作，是否现在认证？",
+            L "您需要到keepwork官网进行实名认证，认证成功后需重启paracraft即可正常操作，是否现在认证？",
             function(res)
                 if (res and res == _guihelper.DialogResult.Yes) then
                     ParaGlobal.ShellExecute("open", format("%s/wiki/user_center", self:Site()), "", "", 1)
@@ -106,7 +106,7 @@ function UserInfo.SaveQQ()
 end
 
 function UserInfo.GetUserNickName()
-    return System.User.NickName or L"匿名"
+    return System.User.NickName or L "匿名"
 end
 
 function UserInfo:GetUserName()
@@ -216,8 +216,6 @@ end
 
 function UserInfo:Logout()
     if (self.IsSignedIn()) then
-        local SetToken = Store:Action("user/SetToken")
-        SetToken(nil)
-        WorldList:RefreshCurrentServerList()
+        KeepworkService:Logout()
     end
 end
