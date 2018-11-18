@@ -68,11 +68,11 @@ function Progress:ClosePage()
     if (ProgressPage) then
         ProgressPage:CloseWindow()
 
-        local callback = Store:Get("world/CloseProcess")
+        local callback = Store:Get("world/CloseProgress")
 
         if type(callback) == 'function' then
             callback()
-            Store:Remove("world/CloseProcess")
+            Store:Remove("world/CloseProgress")
         end
     end
 end

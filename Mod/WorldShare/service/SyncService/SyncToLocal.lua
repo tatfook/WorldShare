@@ -124,29 +124,28 @@ function SyncToLocal:GetCompareList()
     self.compareListTotal = #self.compareList
 end
 
-function SyncToLocal:RefreshList()
-    Progress:SetFinish(true)
-    Progress:Refresh()
-
-    Store:Set(
-        "CloseProcess",
+function SyncToLocal:RefreshWorldList()
+    WorldList:RefreshCurrentServerList(
         function()
-            WorldList:RefreshCurrentServerList(
-                function()
-                    local willEnterWorld = Store:Get('world/willEnterWorld')
-        
-                    if(type(willEnterWorld) == 'function') then
-                        local worldIndex = Store:Get("world/worldIndex")
-                        WorldList:OnSwitchWorld(worldIndex)
-                        willEnterWorld()
-        
-                        Store:Remove('world/willEnterWorld')
-                    end
-                end
-            )
+            local willEnterWorld = Store:Get('world/willEnterWorld')
+
+            if(type(willEnterWorld) == 'function') then
+                local worldIndex = Store:Get("world/worldIndex")
+                WorldList:OnSwitchWorld(worldIndex)
+                willEnterWorld()
+
+                Store:Remove('world/willEnterWorld')
+            end
         end
     )
+end
 
+function SyncToLocal:RefreshList()
+    -- Please note, progress window can be nil, when downloading via zip file, so we will refresh before progress is closed. 
+    self:RefreshWorldList();
+    -- Store:Set("world/CloseProgress", function()    end)
+    Progress:SetFinish(true)
+    Progress:Refresh()
 end
 
 function SyncToLocal:HandleCompareList()

@@ -218,7 +218,7 @@ function SyncToDataSource:RefreshList()
             Progress:Refresh()
 
             Store:Set(
-                "world/CloseProcess",
+                "world/CloseProgress",
                 function()
                     WorldList:RefreshCurrentServerList(
                         function()
