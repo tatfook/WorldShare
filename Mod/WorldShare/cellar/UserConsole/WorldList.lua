@@ -49,7 +49,7 @@ function WorldList.GetCurWorldInfo(info_type, world_index)
     end
 end
 
-function WorldList:UpdateWorldList()
+function WorldList:UpdateWorldList(callbackFunc)
     local compareWorldList = Store:Get("world/compareWorldList") or {}
 
     self:GetInternetWorldList(
@@ -67,6 +67,9 @@ function WorldList:UpdateWorldList()
             end
 
             InternetLoadWorld.cur_ds = compareWorldList
+            if(callbackFunc) then
+                callbackFunc();
+            end
         end
     )
 
@@ -128,11 +131,7 @@ function WorldList:RefreshCurrentServerList(callback, isForce)
                 self:ChangeRevision(
                     function()
                         self:SetRefreshing(false)
-                        self:UpdateWorldList()
-
-                        if (type(callback) == "function") then
-                            callback()
-                        end
+                        self:UpdateWorldList(callback)
                     end
                 )
             end
@@ -147,11 +146,7 @@ function WorldList:RefreshCurrentServerList(callback, isForce)
                         self:SyncWorldsList(
                             function()
                                 self:SetRefreshing(false)
-                                self:UpdateWorldList()
-
-                                if type(callback) == "function" then
-                                    callback()
-                                end
+                                self:UpdateWorldList(callback)
                             end
                         )
                     end
@@ -498,13 +493,11 @@ function WorldList:EnterWorld(index)
 
     if (enterWorld.status == 2) then
         Store:Set("world/willEnterWorld", InternetLoadWorld.EnterWorld)
-
         Compare:Init()
     else
         InternetLoadWorld.EnterWorld()
+        UserConsole:ClosePage()
     end
-
-    UserConsole:ClosePage()
 end
 
 function WorldList.FormatStatus(status)
