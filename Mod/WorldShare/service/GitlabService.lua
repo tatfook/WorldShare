@@ -52,7 +52,7 @@ function GitlabService:GetProjectPath(projectName)
     return projectPath
 end
 
-function GitlabService:GheckSpecialCharacter(filename)
+function GitlabService:CheckSpecialCharacter(filename)
     local specialCharacter = {"【", "】", "《", "》", "·", " ", "，", "●"}
 
     for key, item in pairs(specialCharacter) do
@@ -305,13 +305,22 @@ function GitlabService:Create(projectName, callback)
 end
 
 -- get repository commits
-local commitPrePage = 100
-local commitPage = 1
-local commits = commonlib.vector:new()
-function GitlabService:GetCommits(projectName, isGetAll, callback)
+local commitsPerPage = 100
+
+-- @param isGetAll: fetch all commits or we will only fetch head
+-- @param callback: function(data, err) end
+-- @param commits: this can be nil or an array for holding output
+-- @param pageSize: pageSize default to 1 if isGetAll is false, or 100
+-- @param commitPage: current page index, default to 1
+function GitlabService:GetCommits(projectName, isGetAll, callback, commits, pageSize, commitPage)
+    commits = commits or commonlib.vector:new()
     local projectPath = self:GetProjectPath(projectName or '')
 
-    local url = format("projects/%s/repository/commits?per_page=%s&page=%s", projectPath, commitPrePage, commitPage)
+    if(not pageSize) then
+        pageSize = isGetAll and commitsPerPage or 1;
+    end
+    commitPage = commitPage or 1;
+    local url = format("projects/%s/repository/commits?per_page=%s&page=%s", projectPath, pageSize, commitPage)
 
     self:ApiGet(
         url,
@@ -321,28 +330,25 @@ function GitlabService:GetCommits(projectName, isGetAll, callback)
             end
 
             if err ~= 200 then
-                callback(commonlib.copy(commits), err)
+                callback(commits, err)
                 return false
             end
 
             if type(data) ~= 'table' or #data == 0 then
-                callback(commonlib.copy(commits), err)
-
+                callback(commits, err)
                 commitPage = 1
-                commits:clear()
-
                 return false
             end
 
             commits:AddAll(data)
 
-            if not isGetAll then
-                callback(commonlib.copy(commits), err)
+            if (isGetAll) then
+                commitPage = commitPage + 1
+                self:GetCommits(projectName, isGetAll, callback, commits, pageSize, commitPage)
+            else
+                callback(commits, err)
                 return false
             end
-
-            commitPage = commitPage + 1
-            self:GetCommits(projectName, isGetAll, callback)
         end
     )
 end

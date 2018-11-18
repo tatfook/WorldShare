@@ -5,7 +5,7 @@ Date:  2018.6.20
 Place: Foshan 
 use the lib:
 ------------------------------------------------------------
-local SyncToLocal = NPL.load("(gl)Mod/WorldShare/sync/SyncToLocal.lua")
+local SyncToLocal = NPL.load("(gl)Mod/WorldShare/service/SyncService/SyncToLocal.lua")
 ------------------------------------------------------------
 ]]
 local Encoding = commonlib.gettable("commonlib.Encoding")
@@ -303,8 +303,10 @@ function SyncToLocal:DownloadZIP()
         self.localFiles = LocalService:LoadFiles(self.worldDir.default)
 
         if (#self.localFiles ~= 0) then
-            _guihelper.MessageBox(L"本地数据错误")
-            return false
+            LOG.std(nil, "warn", "WorldShare", "target directory: %s is not empty, we will overwrite files in the folder", self.worldDir.ut8)
+            -- TODO: backup the files and perform overwrite
+            -- _guihelper.MessageBox(L"本地数据错误")
+            -- return false
         end
 
         GitService:DownloadZIP(
