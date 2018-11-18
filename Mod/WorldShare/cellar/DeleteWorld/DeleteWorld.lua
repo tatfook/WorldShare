@@ -52,7 +52,7 @@ function DeleteWorld:DeleteWorld()
         local selectWorld = Store:Get("world/selectWorld")
         local enterWorld = Store:Get("world/enterWorld")
 
-        if (enterWorld.foldername == selectWorld.foldername) then
+        if (enterWorld and enterWorld.foldername == selectWorld.foldername) then
             _guihelper.MessageBox(L"不能刪除正在编辑的世界")
             return false
         end
