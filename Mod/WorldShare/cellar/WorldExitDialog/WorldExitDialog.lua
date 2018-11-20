@@ -15,6 +15,7 @@ local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 
 local WorldExitDialog = NPL.export()
+local self = WorldExitDialog;
 
 -- @param callback: function(res) end.
 function WorldExitDialog.ShowPage(callback)
@@ -26,7 +27,9 @@ function WorldExitDialog.ShowPage(callback)
 
     local WorldExitDialogPage = Store:Get('page/WorldExitDialog')
     if(WorldExitDialogPage) then
-        WorldExitDialog.Snapshot()
+        if(not GameLogic.IsReadOnly() and not ParaIO.DoesFileExist(self.GetPreviewImagePath(), false)) then
+            WorldExitDialog.Snapshot()
+        end
         WorldExitDialogPage.callback = callback
     end
 end

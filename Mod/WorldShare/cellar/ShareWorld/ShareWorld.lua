@@ -38,7 +38,10 @@ function ShareWorld:Init()
         return false
     end
 
-    PackageShareWorld.TakeSharePageImage()
+    local filepath = self:GetPreviewImagePath()
+    if (not GameLogic.IsReadOnly() and not ParaIO.DoesFileExist(filepath, false)) then
+        PackageShareWorld.TakeSharePageImage()
+    end
 
     if (not KeepworkService:IsSignedIn()) then
         function Handle()
