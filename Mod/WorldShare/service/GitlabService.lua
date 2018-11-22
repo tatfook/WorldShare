@@ -319,6 +319,7 @@ function GitlabService:GetCommits(projectName, isGetAll, callback, commits, page
     if(not pageSize) then
         pageSize = isGetAll and commitsPerPage or 1;
     end
+
     commitPage = commitPage or 1;
     local url = format("projects/%s/repository/commits?per_page=%s&page=%s", projectPath, pageSize, commitPage)
 

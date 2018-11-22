@@ -73,7 +73,6 @@ function Compare:Init()
 
                 if (result == JUSTREMOTE) then
                     SyncMain:SyncToLocal()
-                    MsgBox:Close()
                     return true
                 end
 

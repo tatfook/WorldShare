@@ -50,13 +50,13 @@ function SyncToLocal:SyncToLocal()
     self.compareListTotal = 0
 
     local function Handle(data, err)
-        MsgBox:Close()
-
         if (commitId or selectWorld.status == 2 and #data ~= 0) then
             -- down zip
             self:DownloadZIP()
             return false
         end
+
+        MsgBox:Close()
 
         if (#data == 0) then
             UserConsole:ClosePage()
@@ -303,9 +303,7 @@ function SyncToLocal:DownloadZIP()
 
         if (#self.localFiles ~= 0) then
             LOG.std(nil, "warn", "WorldShare", "target directory: %s is not empty, we will overwrite files in the folder", self.worldDir.ut8)
-            -- TODO: backup the files and perform overwrite
-            -- _guihelper.MessageBox(L"本地数据错误")
-            -- return false
+            GameLogic.RunCommand(format("/menu %s", "file.worldrevision"))
         end
 
         GitService:DownloadZIP(

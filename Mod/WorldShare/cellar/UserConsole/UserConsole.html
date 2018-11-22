@@ -122,7 +122,14 @@
 
                 function go_to_url()
                     local url = Page:GetValue("content","");
-                    InternetLoadWorld.GotoUrl(url)
+
+                    local pid = UserConsole:GetProjectId(url)
+
+                    if pid then
+                        UserConsole:HandleWorldId(pid)
+                    else
+                        InternetLoadWorld.GotoUrl(url)
+                    end
                 end
 
                 function show_history()
