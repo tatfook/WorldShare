@@ -297,13 +297,16 @@ function KeepworkService:GetWorldByProjectId(pid, callback)
         nil,
         headers,
         function(data, err)
-            if err ~= 200 or not data or not data.world then
+            if type(callback) ~= 'function' then
                 return false
             end
 
-            if type(callback) == 'function' then
-                callback(data.world)
+            if err ~= 200 or not data or not data.world then
+                callback()
+                return false
             end
+
+            callback(data.world)
         end
     )
 end
