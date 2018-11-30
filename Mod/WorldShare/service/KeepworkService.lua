@@ -284,6 +284,30 @@ function KeepworkService:GetWorldsList(callback)
     self:Request("/worlds", 'GET', params, headers, callback)
 end
 
+function KeepworkService:GetWorldByProjectId(pid, callback)
+    if type(pid) ~= 'number' or pid == 0 then
+        return false
+    end
+
+    local headers = self:GetHeaders()
+
+    self:Request(
+        format("/projects/%d/detail", pid),
+        "GET",
+        nil,
+        headers,
+        function(data, err)
+            if err ~= 200 or not data or not data.world then
+                return false
+            end
+
+            if type(callback) == 'function' then
+                callback(data.world)
+            end
+        end
+    )
+end
+
 function KeepworkService:PushWorld(worldInfo, callback)
     if (type(worldInfo) ~= 'table' or not self:IsSignedIn()) then
         return false

@@ -12,6 +12,7 @@ local WorldShare = commonlib.gettable("Mod.WorldShare")
 local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
 local ShareWorldPage = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.Areas.ShareWorldPage")
 local LocalLoadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalLoadWorld")
+local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 
 local UserInfo = NPL.load("./UserInfo.lua")
 local WorldList = NPL.load("./WorldList.lua")
@@ -22,6 +23,8 @@ local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local BrowseRemoteWorlds = NPL.load("(gl)Mod/WorldShare/cellar/BrowseRemoteWorlds/BrowseRemoteWorlds.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
+local DownloadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.DownloadWorld")
+local RemoteWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.RemoteWorld")
 
 local UserConsole = NPL.export()
 
@@ -166,4 +169,79 @@ end
 
 function UserConsole:ShowHistoryManager()
     HistoryManager:ShowPage()
+end
+
+function UserConsole:GetProjectId(url)
+    local pid = string.match(url or '', "^p(%d+)$")
+
+    if not pid then
+        pid = string.match(url or '', "/pbl/project/(%d+)")
+    end
+
+    return pid or false
+end
+
+function UserConsole:HandleWorldId(pid)
+    if not pid then
+        return false
+    end
+
+    local function HandleLoadWorld(url)
+        if not url then
+            return false
+        end
+
+        local function LoadWorld(world, refreshMode)
+            if(world) then
+                local mytimer = commonlib.Timer:new(
+                    {
+                        callbackFunc = function(timer)
+                            InternetLoadWorld.LoadWorld(
+                                world,
+                                nil,
+                                refreshMode or "auto",
+                                function(bSucceed, localWorldPath)
+                                    DownloadWorld.Close()
+                                end
+                            );
+                        end
+                    }
+                );
+
+                -- prevent recursive calls.
+                mytimer:Change(1,nil);
+            else
+                _guihelper.MessageBox(L"无效的世界文件");
+            end
+        end
+
+        if(url:match("^https?://")) then
+            world = RemoteWorld.LoadFromHref(url, "self")
+            DownloadWorld.ShowPage(url)
+
+            local url = world:GetLocalFileName()
+
+            if(ParaIO.DoesFileExist(url)) then
+                _guihelper.MessageBox(L"世界已经存在，是否重新下载?", function()
+                    if(res and res == _guihelper.DialogResult.Yes) then
+                        LoadWorld(world, "auto")
+                    else
+                        LoadWorld(world, "never")
+                    end
+                end, _guihelper.MessageBoxButtons.YesNo);
+            else
+                LoadWorld(world, "auto")
+            end
+        end
+	end
+
+    KeepworkService:GetWorldByProjectId(
+        tonumber(pid),
+        function(worldInfo)
+            if worldInfo and worldInfo.archiveUrl then
+                HandleLoadWorld(worldInfo.archiveUrl)
+            end
+        end
+    )
+    
 end

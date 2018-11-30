@@ -313,7 +313,6 @@ function SyncToDataSource:UploadOne(file, callback)
         currentLocalItem.filename,
         currentLocalItem.file_content_t,
         function(bIsUpload, filename, data)
-            echo(data, true)
             if (bIsUpload) then
                 if (type(callback) == "function") then
                     callback()
