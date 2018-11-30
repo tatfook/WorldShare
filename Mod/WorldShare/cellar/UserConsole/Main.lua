@@ -172,6 +172,10 @@ function UserConsole:ShowHistoryManager()
 end
 
 function UserConsole:GetProjectId(url)
+    if (tonumber(url or '') or 99999) < 99999 then
+        return url
+    end
+
     local pid = string.match(url or '', "^p(%d+)$")
 
     if not pid then
@@ -240,6 +244,8 @@ function UserConsole:HandleWorldId(pid)
         function(worldInfo)
             if worldInfo and worldInfo.archiveUrl then
                 HandleLoadWorld(worldInfo.archiveUrl)
+            else
+                _guihelper.MessageBox(L"世界不存在")
             end
         end
     )
