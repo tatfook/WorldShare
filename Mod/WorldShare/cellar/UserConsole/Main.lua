@@ -38,7 +38,7 @@ function UserConsole:CheckShowUserWorlds()
         BrowseRemoteWorlds.ShowPage(
             function(bHasEnteredWorld)
                 System.options.showUserWorldsOnce = nil;
-                self:CloseUserConsole()
+                self:ClosePage()
             end
         )
         return true;
