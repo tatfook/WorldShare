@@ -226,7 +226,7 @@ function UserConsole:HandleWorldId(pid)
             local url = world:GetLocalFileName()
 
             if(ParaIO.DoesFileExist(url)) then
-                _guihelper.MessageBox(L"世界已经存在，是否重新下载?", function()
+                _guihelper.MessageBox(L"世界已经存在，是否重新下载?", function(res)
                     if(res and res == _guihelper.DialogResult.Yes) then
                         LoadWorld(world, "auto")
                     else
