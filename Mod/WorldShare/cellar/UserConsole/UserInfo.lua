@@ -106,7 +106,7 @@ function UserInfo.SaveQQ()
 end
 
 function UserInfo.GetUserNickName()
-    return System.User.NickName or L"匿名"
+    return System.User.nickname or L"匿名"
 end
 
 function UserInfo:GetUserName()
@@ -214,8 +214,12 @@ function UserInfo.LookPlayerInform()
     end
 end
 
+function UserInfo:CanSwitchUser()
+    return not (System.options and System.options.isFromQQHall);
+end
+
 function UserInfo:Logout()
-    if (self.IsSignedIn()) then
+    if (self.IsSignedIn() and self:CanSwitchUser()) then
         KeepworkService:Logout()
     end
 end
