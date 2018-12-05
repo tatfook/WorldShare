@@ -243,7 +243,7 @@ function KeepworkService:CreateProject(worldName, callback)
     local params = {
         name = worldName,
         siteId = 1,
-        visibility = 1,
+        visibility = 0,
         privilege = 0,
         type = 1,
         description = "no desc",
