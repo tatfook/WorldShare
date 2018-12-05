@@ -141,7 +141,7 @@ function KeepworkService:LoginResponse(response, err, callback)
         end
 
         local dataSourceType = 'gitlab'
-        local env = Store:Get("user/env")
+        local env = self:GetEnv()
 
         local dataSourceInfo = {
             dataSourceToken = data.token, -- 数据源Token
@@ -284,6 +284,43 @@ function KeepworkService:GetWorldsList(callback)
     self:Request("/worlds", 'GET', params, headers, callback)
 end
 
+function KeepworkService:GetProjectIdByWorldName(worldName, callback)
+    if (not self:IsSignedIn()) then
+        return false
+    end
+
+    local headers = self:GetHeaders()
+
+    self:Request(
+        format("/worlds?worldName=%s", Encoding.url_encode(worldName or '')),
+        'GET',
+        nil,
+        headers,
+        function(data)
+            if not data or #data ~= 1 or type(data[1]) ~= 'table' or not data[1].projectId then
+                if type(callback) == 'function' then
+                    callback()
+                end
+
+                return false
+            end
+
+            local selectWorld = Store:Get('world/selectWorld')
+            local enterWorld = Store:Get('world/enterWorld')
+
+            selectWorld.kpProjectId = data[1].projectId
+            enterWorld.kpProjectId = data[1].projectId
+
+            Store:Set('world/selectWorld', selectWorld)
+            Store:Set('world/enterWorld', enterWorld)
+
+            if type(callback) == 'function' then
+                callback(data[1].projectId)
+            end
+        end
+    )
+end
+
 function KeepworkService:GetWorldByProjectId(pid, callback)
     if type(pid) ~= 'number' or pid == 0 then
         return false
@@ -365,15 +402,11 @@ function KeepworkService:DeleteWorld(kpProjectId, callback)
 end
 
 function KeepworkService:GetShareUrl()
-    local env = Store:Get("user/env")
+    local env = self:GetEnv()
     local selectWorld = Store:Get("world/selectWorld")
 
     if not selectWorld or not selectWorld.kpProjectId then
         return ''
-    end
-
-    if not env then
-        env = Config.env.ONLINE
     end
 
     local baseUrl = Config.keepworkList[env]

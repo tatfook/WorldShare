@@ -45,16 +45,21 @@ function ShareWorld:Init()
 
     if (not KeepworkService:IsSignedIn()) then
         function Handle()
-            local isCommandEnter = Store:Get("world/isCommandEnter")
-            if isCommandEnter then
-                SyncMain:CommandEnter(
-                    function()
+            KeepworkService:GetProjectIdByWorldName(
+                enterWorld.foldername,
+                function()
+                    local isCommandEnter = Store:Get("world/isCommandEnter")
+                    if isCommandEnter then
+                        SyncMain:CommandEnter(
+                            function()
+                                Compare:Init()
+                            end
+                        )
+                    else
                         Compare:Init()
                     end
-                )
-            else
-                Compare:Init()
-            end
+                end
+            )
         end
 
         if (not UserInfo:CheckDoAutoSignin(Handle)) then
