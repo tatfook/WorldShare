@@ -254,8 +254,44 @@ function KeepworkService:CreateProject(worldName, callback)
     self:Request("/projects", "POST", params, headers, callback)
 end
 
-function KeepworkService:DeleteProject(worldName, callback)
-    self:Request("/")
+function KeepworkService:UpdateProject(pid, params, callback)
+    if not self:IsSignedIn() or
+       not pid or
+       type(pid) ~= 'number' or
+       type(params) ~= 'table' then
+        return false
+    end
+
+    local headers = self:GetHeaders()
+
+    self:Request(format("/projects/%d", pid), "PUT", params, headers, callback)
+end
+
+function KeepworkService:GetProject(pid, callback)
+    if type(pid) ~= 'number' or pid == 0 then
+        return false
+    end
+
+    local headers = self:GetHeaders()
+
+    self:Request(
+        format("/projects/%d/detail", pid),
+        "GET",
+        nil,
+        headers,
+        function(data, err)
+            if type(callback) ~= 'function' then
+                return false
+            end
+
+            if err ~= 200 or not data or not data.world then
+                callback()
+                return false
+            end
+
+            callback(data)
+        end
+    )
 end
 
 -- @param usertoken: keepwork user token
@@ -630,7 +666,30 @@ function KeepworkService:UpdateRecord(callback)
 
         WorldList.SetRefreshing(true)
 
-        KeepworkService:PushWorld(
+        if (selectWorld.kpProjectId) then
+            self:GetProject(
+                selectWorld.kpProjectId,
+                function(data)
+                    if data and data.extra and not data.extra.imageUrl then
+                        self:UpdateProject(
+                            selectWorld.kpProjectId,
+                            {
+                                extra = {
+                                    imageUrl = format(
+                                        "%s/%s/%s/raw/master/preview.jpg",
+                                        dataSourceInfo.rawBaseUrl,
+                                        dataSourceInfo.dataSourceUsername,
+                                        foldername.base32
+                                    )
+                                }
+                            }
+                        )
+                    end
+                end
+            )
+        end
+
+        self:PushWorld(
             worldInfo,
             function(data, err)
                 if (err ~= 200) then
