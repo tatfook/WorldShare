@@ -339,16 +339,28 @@ function SyncToDataSource:UpdateOne(file, callback)
     Progress:UpdateDataBar(
         self.compareListIndex,
         self.compareListTotal,
-        format(L"%s （%s） 更新中", currentLocalItem.filename, Utils.FormatFileSize(currentLocalItem.filesize, "KB"))
+        format(L"%s （%s） 对比中", currentLocalItem.filename, Utils.FormatFileSize(currentLocalItem.filesize, "KB"))
     )
 
     if (currentLocalItem.sha1 == currentRemoteItem.id and currentLocalItem.filename ~= "revision.xml") then
         if (type(callback) == "function") then
+            Progress:UpdateDataBar(
+                self.compareListIndex,
+                self.compareListTotal,
+                format(L"%s （%s） 文件一致，跳过", currentLocalItem.filename, Utils.FormatFileSize(currentLocalItem.filesize, "KB"))
+            )
+
             Utils.SetTimeOut(callback)
         end
 
         return false
     end
+
+    Progress:UpdateDataBar(
+        self.compareListIndex,
+        self.compareListTotal,
+        format(L"%s （%s） 更新中", currentLocalItem.filename, Utils.FormatFileSize(currentLocalItem.filesize, "KB"))
+    )
 
     GitService:Update(
         self.foldername.base32,
