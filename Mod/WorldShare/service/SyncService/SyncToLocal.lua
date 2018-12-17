@@ -230,7 +230,7 @@ function SyncToLocal:DownloadOne(file, callback)
             Progress:UpdateDataBar(
                 self.compareListIndex,
                 self.compareListTotal,
-                format(L"%s （%s） 更新中", currentRemoteItem.path, Utils.FormatFileSize(size, "KB"))
+                format(L"%s （%s） 下载中", currentRemoteItem.path, Utils.FormatFileSize(size, "KB"))
             )
 
             LocalService:Write(self.foldername.default, Encoding.Utf8ToDefault(currentRemoteItem.path), content)
@@ -279,7 +279,7 @@ function SyncToLocal:DeleteOne(file, callback)
     Progress:UpdateDataBar(
         self.compareListIndex,
         self.compareListTotal,
-        format(L"%s （%s） 更新中", currentLocalItem.filename, Utils.FormatFileSize(currentLocalItem.size, "KB"))
+        format(L"%s （%s） 删除中", currentLocalItem.filename, Utils.FormatFileSize(currentLocalItem.size, "KB"))
     )
 
     LocalService:Delete(self.foldername.default, Encoding.Utf8ToDefault(currentLocalItem.filename))
