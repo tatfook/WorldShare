@@ -26,6 +26,7 @@ local GitEncoding = NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua")
 local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
+local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 
 local WorldList = NPL.export()
 
@@ -75,7 +76,8 @@ function WorldList:UpdateWorldList(callbackFunc)
 
     local UserConsolePage = Store:Get('page/UserConsole')
 
-    if (UserConsolePage) then
+    if UserConsolePage then
+        Store:Set("world/compareWorldList", compareWorldList)
         UserConsolePage:GetNode("gw_world_ds"):SetAttribute("DataSource", compareWorldList)
         WorldList:OnSwitchWorld(1)
     end
@@ -183,14 +185,20 @@ function WorldList:ChangeRevision(callback)
 
             local tag = LocalService:GetTag(foldername.default)
 
-            if (tag.size) then
+            if type(tag) ~= 'table' then
+                return false
+            end
+
+            if tag.kpProjectId then
+                value.kpProjectId = tag.kpProjectId
+            end
+
+            if tag.size then
                 value.size = tag.size
             else
                 value.size = 0
             end
         else
-            value.revision = LocalService:GetZipRevision(value.worldpath)
-            value.size = LocalService:GetZipWorldSize(value.worldpath)
             value.foldername = value.Title
             value.text = value.Title
             value.is_zip = true
@@ -420,53 +428,62 @@ function WorldList.GetSelectWorldIndex()
     return Store:Get("world/worldIndex")
 end
 
-function WorldList:UpdateWorldInfo(worldIndex, callback)
+function WorldList:UpdateWorldInfo(worldIndex)
     local compareWorldList = Store:Get("world/compareWorldList")
 
-    if (not compareWorldList) then
+    if (not compareWorldList or type(worldIndex) ~= 'number' or  not compareWorldList[worldIndex]) then
         return false
     end
 
     local currentWorld = compareWorldList[worldIndex]
 
-    if (currentWorld and currentWorld.status ~= 2) then
-        local filesize = LocalService:GetWorldSize(currentWorld.worldpath)
-        local worldTag = LocalService:GetTag(Encoding.Utf8ToDefault(currentWorld.foldername))
+    if (currentWorld.status ~= 2) then
+        if not currentWorld.is_zip then
+            local filesize = LocalService:GetWorldSize(currentWorld.worldpath)
+            local worldTag = LocalService:GetTag(Encoding.Utf8ToDefault(currentWorld.foldername))
 
-        worldTag.size = filesize
-        LocalService:SetTag(currentWorld.worldpath, worldTag)
+            worldTag.size = filesize
+            LocalService:SetTag(currentWorld.worldpath, worldTag)
 
-        Store:Set("world/worldTag", worldTag)
+            Store:Set("world/worldTag", worldTag)
 
-        compareWorldList[worldIndex].size = filesize
+            compareWorldList[worldIndex].size = filesize
+        else
+            compareWorldList[worldIndex].revision = LocalService:GetZipRevision(currentWorld.worldpath)
+            compareWorldList[worldIndex].size = LocalService:GetZipWorldSize(currentWorld.worldpath)
+        end
     end
 
-    local selectWorld = compareWorldList[worldIndex]
+    Store:Set("world/selectWorld", currentWorld)
+    Store:Set("world/worldIndex", worldIndex)
 
-    if(selectWorld) then
-        Store:Set("world/selectWorld", selectWorld)
-        Store:Set("world/worldIndex", worldIndex)
+    local foldername = {}
 
-        local foldername = {}
+    foldername.utf8 = currentWorld.foldername
+    foldername.default = Encoding.Utf8ToDefault(foldername.utf8)
+    foldername.base32 = GitEncoding.Base32(foldername.utf8)
 
-        foldername.utf8 = selectWorld.foldername
-        foldername.default = Encoding.Utf8ToDefault(foldername.utf8)
-        foldername.base32 = GitEncoding.Base32(foldername.utf8)
-    
-        local worldDir = {}
+    local worldDir = {}
 
-        worldDir.utf8 = format("%s/%s/", SyncMain.GetWorldFolderFullPath(), foldername.utf8)
-        worldDir.default = format("%s/%s/", SyncMain.GetWorldFolderFullPath(), foldername.default)
+    worldDir.utf8 = format("%s/%s/", SyncMain.GetWorldFolderFullPath(), foldername.utf8)
+    worldDir.default = format("%s/%s/", SyncMain.GetWorldFolderFullPath(), foldername.default)
 
-        Store:Set("world/foldername", foldername)
-        Store:Set("world/worldDir", worldDir)
-    end
-
-    if (type(callback) == "function") then
-        callback()
-    end
+    Store:Set("world/foldername", foldername)
+    Store:Set("world/worldDir", worldDir)
+    Store:Set("world/compareWorldList", compareWorldList)
 
     UserConsole:Refresh()
+end
+
+function WorldList.GetLatestSize(index)
+    local compareWorldList = Store:Get("world/compareWorldList")
+
+    if (not compareWorldList or type(index) ~= 'number' or  not compareWorldList[index]) then
+        return 0
+    end
+
+    local currentWorld = compareWorldList[index]
+    return currentWorld.size or 0
 end
 
 function WorldList.GetDesForWorld()
@@ -543,4 +560,18 @@ function WorldList:IsRefreshing()
     else
         return false
     end
+end
+
+function WorldList:OpenProject(index)
+    if type(index) ~= 'number' then
+        return false
+    end
+
+    local compareWorldList = Store:Get("world/compareWorldList")
+
+    if not compareWorldList or type(compareWorldList[index]) ~= 'table' then
+        return false
+    end
+
+    ParaGlobal.ShellExecute("open", format("%s/pbl/project/%d/", KeepworkService:GetKeepworkUrl(), compareWorldList[index].kpProjectId or 0), "", "", 1)
 end

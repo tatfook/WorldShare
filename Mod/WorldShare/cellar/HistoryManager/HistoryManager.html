@@ -89,6 +89,10 @@
                         return false
                     end
                 end
+
+                function enter(index)
+                    HistoryManager:Enter(index)
+                end
             ]]>
         </script>
         <style type="text/mcss">
@@ -162,6 +166,14 @@
                     color = 'white',
                     ['margin-left'] = 5,
                     background = "Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#208 89 21 21:8 8 8 8"
+                },
+                click = {
+                    position = 'relative',
+                    width = 734,
+                    height = 30,
+                    ['margin-left'] = 5,
+                    ['margin-top'] = 5,
+                    background = ""
                 }
             }
         </style>
@@ -207,6 +219,7 @@
                                     </div>
                                 </pe:if>
                                 <pe:if condition="<%=Eval('type') == 'world'%>">
+                                    <input type="button" class="click" name="<%=Eval('index')%>" onclick="enter" />
                                     <div name="dateList" class="date_list">
                                         <div class="list_item" width="100%">
                                             <div style="float:left;width: 500px">

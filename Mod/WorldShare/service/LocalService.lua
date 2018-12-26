@@ -21,6 +21,7 @@ local GitEncoding = NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua")
 local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/Login/UserConsole.lua")
 local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
+local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 
 local LocalService = NPL.export()
 
@@ -336,12 +337,52 @@ function LocalService:GetTag(foldername)
     end
 
     local filePath = format("%s/%s/tag.xml", SyncMain:GetWorldFolderFullPath() , foldername)
-
     local tag = ParaXML.LuaXML_ParseFile(filePath)
 
     if (type(tag) == "table" and type(tag[1]) == "table" and type(tag[1][1]) == "table") then
         return tag[1][1]["attr"]
     else
         return {}
+    end
+end
+
+function LocalService:Save()
+    local enterWorld = Store:Get("world/enterWorld")
+    local foldername = Store:Get("world/enterFoldername")
+
+    if type(enterWorld) ~= 'table' and
+       not enterWorld.worldpath and
+       type(foldername) ~= 'table'
+       then
+        return false
+    end
+
+    local function Handle()
+        local tag = self:GetTag(foldername.default)
+
+        tag.clientversion = System and System.options and System.options.ClientVersion and System.options.ClientVersion or tag.clientversion
+        self:SetTag(enterWorld.worldpath, tag)
+    end
+
+    Utils.SetTimeOut(Handle, 0)
+end
+
+function LocalService:ClearUserWorlds()
+    local userworldsPath = format("%s/%s", SyncMain:GetWorldFolderFullPath(), "userworlds")
+
+    local fileLists = Files.Find(nil, userworldsPath, self.nMaxFileLevels, self.nMaxFilesNum, self.filter)
+
+    for key, item in ipairs(fileLists) do
+        if item.fileattr and item.fileattr == 16 then
+            if (GameLogic.RemoveWorldFileWatcher) then
+                GameLogic.RemoveWorldFileWatcher()
+            end
+
+            Files.DeleteFolder(format("%s/%s", userworldsPath, item.filename))
+        end
+
+        if item.fileattr and item.fileattr == 0 then
+            ParaIO.DeleteFile(format("%s/%s", userworldsPath, item.filename))
+        end
     end
 end

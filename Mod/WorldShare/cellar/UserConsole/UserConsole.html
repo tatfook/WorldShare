@@ -10,6 +10,7 @@
                 WorldList = NPL.load("./WorldList")
                 UserInfo = NPL.load("./UserInfo.lua")
                 Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
+                UniString = commonlib.gettable("System.Core.UniString");
 
                 UserConsole:SetPage()
 
@@ -101,7 +102,7 @@
                 end
 
                 function get_world_size()
-                    return Utils.FormatFileSize(Eval("size"))
+                    return Utils.FormatFileSize(WorldList.GetLatestSize(Eval("index")))
                 end
 
                 function can_be_sync(cmd)
@@ -206,6 +207,24 @@
                 function official_worlds()
                     UserConsole.OnClickOfficialWorlds()
                 end
+
+                function get_world_text(text)
+                    if type(text) ~= 'string' then
+                        return ''
+                    end
+
+                    local utf8Text = UniString:new(text)
+
+                    if _guihelper.GetTextWidth(text) > 150 then
+                        return utf8Text:sub(1, 12).text .. '...'
+                    else
+                        return text
+                    end
+                end
+
+                function open_project(index)
+                    WorldList:OpenProject(index)
+                end
             ]]>
         </script>
         <style type="text/mcss">
@@ -277,6 +296,18 @@
                     ["margin-top"] = 2,
                     ["text-align"] = "left",
                     color = "#ffffff",
+                },
+                project_id = {
+                    position = "relative",
+                    height = 17,
+                    width = 80,
+                    ["margin-left"] = 200,
+                    ["margin-top"] = -30,
+                    ["font-size"] = 11,
+                    ["base-font-size"] = 11,
+                    color = "#cccccc",
+                    ["text-align"] = "center",
+                    background = "Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;179 89 21 21:8 8 8 8"
                 },
                 share_world_info = {
                     ["text-singleline"] = "true",
@@ -355,6 +386,12 @@
                     ["margin-top"] = 4,
                     background = "Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#223 148 18 18"
                 },
+                click = {
+                    position = 'relative',
+                    width = 297,
+                    height = 70,
+                    background = ''
+                }
             }
         </style>
         <div class="default" style="<%= container() %>">
@@ -452,9 +489,17 @@
                                             <div style="float:left;width:9px;height:32px;background:#fff" />
                                         </pe:if>
                                         <div class="share_world_name">
-                                            <%= Eval("text") %>
+                                            <%= get_world_text(Eval("text")) %>
                                             <%= if_else( Eval("is_zip") == true, L".zip", "")%>
                                         </div>
+                                        <pe:if condition="<%= Eval('kpProjectId') and true or false %>">
+                                            <input type="button"
+                                                   class="project_id"
+                                                   tooltip="<%= '项目ID：' .. Eval('kpProjectId') .. '， 点击打开项目页' %>"
+                                                   name='<%=Eval("index")%>'
+                                                   onclick="open_project"
+                                                   value="<%= '项目ID:' .. (Eval('kpProjectId') or '') %>"/>
+                                        </pe:if>
                                     </div>
                                     <div name="worldinfo">
                                         <div class="share_world_info" style="position:relative;margin-top:2px;">
@@ -462,10 +507,18 @@
                                                 <pe:if condition='<%= is_signed_in() %>'>
                                                     <div style="float:left;width:25px;height:20px;background:#fff" />
                                                 </pe:if>
-                                                <%= selected_version() %>
-                                                <span style="float:left;margin-left:15px;">
-                                                    <%= get_world_size() %>
-                                                </span>
+                                                <pe:if condition='<%= not Eval("is_zip") %>'>
+                                                    <%= selected_version() %>
+                                                    <span style="float:left;margin-left:15px;">
+                                                        <%= get_world_size() %>
+                                                    </span>
+                                                </pe:if>
+                                                <pe:if condition='<%= type(Eval("is_zip")) == "boolean" and Eval("is_zip") %>'>
+                                                    <%= 'v' .. get_world_version() %>
+                                                    <span style="float:left;margin-left:15px;">
+                                                        <%= get_world_size() %>
+                                                    </span>
+                                                </pe:if>
                                             </div>
                                             <div>
                                                 <pe:if condition='<%= is_signed_in() %>'>
@@ -497,8 +550,7 @@
                             </pe:if>
                             <!--未选中的项-->
                             <pe:if condition='<%= not be_selected() %>'>
-                                <input type="button" style="position:relative;width:297px;height:70px;background:#000000"
-                                    name='<%=Eval("index")%>' onclick="switch_world" />
+                                <input type="button" class="click" name='<%=Eval("index")%>' onclick="switch_world" />
                                 <div name='<%=Eval("index")%>' class="share_unselect_item">
                                     <div style="position:relative;width:200px;">
                                         <div>
@@ -521,9 +573,12 @@
                                                 <div style="float:left;width:9px;height:32px;background:#fff" />
                                             </pe:if>
                                             <div class="share_world_name">
-                                                <%= Eval("text") %>
+                                                <%= get_world_text(Eval("text")) %>
                                                 <%= if_else( Eval("is_zip") == true, L".zip", "")%>
                                             </div>
+                                            <pe:if condition="<%= Eval('kpProjectId') and true or false %>">
+                                                <div class="project_id"><%= '项目ID:' .. (Eval('kpProjectId') or '') %></div>
+                                            </pe:if>
                                         </div>
                                         <div class="share_world_info" style="padding-top:5px;">
                                             <pe:if condition='<%= is_signed_in() %>'>
@@ -532,12 +587,14 @@
                                             <span style="float:left;margin-left:0px;">
                                                 <%= get_world_date() %>
                                             </span>
-                                            <span style="float:left;margin-left:10px;">v
-                                                <%= get_world_version() %>
-                                            </span>
-                                            <span style="float:left;margin-left:10px;">
-                                                <%= get_world_size() %>
-                                            </span>
+                                            <pe:if condition='<%= not Eval("is_zip") %>'>
+                                                <span style="float:left;margin-left:10px;">v
+                                                    <%= get_world_version() %>
+                                                </span>
+                                                <span style="float:left;margin-left:10px;">
+                                                    <%= get_world_size() %>
+                                                </span>
+                                            </pe:if>
                                         </div>
                                     </div>
                                     <div align="right" style="position:relative;width:30px;height:30px;margin-right:13px;margin-top:20px;">

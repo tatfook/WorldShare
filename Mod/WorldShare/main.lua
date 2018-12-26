@@ -30,6 +30,7 @@ NPL.load("(gl)script/apps/Aries/Creator/Game/Login/RemoteServerList.lua")
 NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/ShareWorldPage.lua")
 NPL.load("(gl)script/apps/Aries/Creator/Game/Login/DownloadWorld.lua")
 NPL.load("(gl)script/apps/Aries/Creator/Game/Login/RemoteWorld.lua")
+NPL.load("(gl)script/ide/System/Core/UniString.lua")
 
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
@@ -38,6 +39,7 @@ local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
 local ShareWorld = NPL.load("(gl)Mod/WorldShare/cellar/ShareWorld/ShareWorld.lua")
 local HistoryManager = NPL.load("(gl)Mod/WorldShare/cellar/HistoryManager/HistoryManager.lua")
 local WorldExitDialog = NPL.load("(gl)Mod/WorldShare/cellar/WorldExitDialog/WorldExitDialog.lua")
+local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 
 local GameLogic = commonlib.gettable("MyCompany.Aries.Game.GameLogic")
 
@@ -94,6 +96,14 @@ function WorldShare:init()
         function()
             CreateWorld.OnClickCreateWorld()
             return false
+        end
+    )
+
+    -- replace implement save world event
+    GameLogic.GetFilters():add_filter(
+        "save_world_info",
+        function(node)
+            LocalService:Save()
         end
     )
 end

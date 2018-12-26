@@ -63,8 +63,10 @@ function LoginModal:ShowPage()
         LoginModalPage:SetValue('password', PWDInfo.password or '')
     end
 
-    local registerUrl = format("%s/wiki/join", KeepworkService:GetKeepworkUrl())
+    local forgotUrl = format("%s/u/set", KeepworkService:GetKeepworkUrl())
+    local registerUrl = format("%s/u/r/register", KeepworkService:GetKeepworkUrl())
 
+    LoginModalPage:GetNode('forgot'):SetAttribute('href', forgotUrl)
     LoginModalPage:GetNode('register'):SetAttribute('href', registerUrl)
 
     self:Refresh()
