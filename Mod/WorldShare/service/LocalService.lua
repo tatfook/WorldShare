@@ -346,25 +346,25 @@ function LocalService:GetTag(foldername)
     end
 end
 
-function LocalService:Save()
-    local enterWorld = Store:Get("world/enterWorld")
-    local foldername = Store:Get("world/enterFoldername")
-
-    if type(enterWorld) ~= 'table' and
-       not enterWorld.worldpath and
-       type(foldername) ~= 'table'
-       then
+function LocalService:SaveWorldInfo(node)
+    if (type(node) ~= 'table' or type(node.attr) ~= 'table') then
         return false
     end
 
-    local function Handle()
-        local tag = self:GetTag(foldername.default)
+    node.attr.clientversion = self:GetClientVersion() or node.attr.clientversion
+end
 
-        tag.clientversion = System and System.options and System.options.ClientVersion and System.options.ClientVersion or tag.clientversion
-        self:SetTag(enterWorld.worldpath, tag)
+function LocalService:LoadWorldInfo(ctx, node)
+    if (type(node) ~= 'table' or type(node.attr) ~= 'table') then
+        return false
     end
 
-    Utils.SetTimeOut(Handle, 0)
+    ctx.clientversion = node.attr.clientversion
+    ctx.kpProjectId = node.attr.kpProjectId
+end
+
+function LocalService:GetClientVersion(node)
+    return System and System.options and System.options.ClientVersion and System.options.ClientVersion
 end
 
 function LocalService:ClearUserWorlds()

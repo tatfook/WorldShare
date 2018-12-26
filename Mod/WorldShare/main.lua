@@ -99,11 +99,19 @@ function WorldShare:init()
         end
     )
 
+    -- replcae implement local world event
+    GameLogic.GetFilters():add_filter(
+        "load_world_info",
+        function(ctx, node)
+            LocalService:LoadWorldInfo(ctx, node)
+        end
+    )
+
     -- replace implement save world event
     GameLogic.GetFilters():add_filter(
         "save_world_info",
-        function(node)
-            LocalService:Save()
+        function(ctx, node)
+            LocalService:SaveWorldInfo(node)
         end
     )
 end
