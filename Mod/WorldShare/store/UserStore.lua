@@ -14,9 +14,14 @@ local UserStore = commonlib.gettable('Mod.WorldShare.store.User')
 
 function UserStore:Action()
     return {
-        SetToken = function(token)
+        SetUserinfo = function(token, username, nickname)
             self.token = token
+            self.username = username
+            self.nickname = nickname
             commonlib.setfield("System.User.keepworktoken", token)
+            commonlib.setfield("System.User.username", username)
+            commonlib.setfield("System.User.keepworkUsername", username)
+            commonlib.setfield("System.User.NickName", nickname)
         end,
         SetPlayerController = function(playerController)
             self.playerController = playerController
