@@ -10,12 +10,14 @@ local HistoryManager = NPL.load("(gl)Mod/WorldShare/cellar/HistoryManager/Histor
 ------------------------------------------------------------
 ]]
 local Screen = commonlib.gettable("System.Windows.Screen")
+local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
 
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local MdParser = NPL.load("(gl)Mod/WorldShare/parser/MdParser.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local HttpRequest = NPL.load("(gl)Mod/WorldShare/service/HttpRequest.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
+local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local Bookmark = NPL.load("(gl)Mod/WorldShare/database/Bookmark.lua")
 local Config = NPL.load("(gl)Mod/WorldShare/config/Config.lua")
 
@@ -432,6 +434,7 @@ function HistoryManager:ClearHistory()
     Bookmark:SetBookmark(bookmarkTree, {})
 
     self:GetWorldList()
+    LocalService:ClearUserWorlds()
 end
 
 function HistoryManager.FormatDate(date)
@@ -526,4 +529,31 @@ function HistoryManager:WriteWorldRecord(enterWorld)
     end
 
     Bookmark:SetItem(displayName, curData)
+end
+
+function HistoryManager:Enter(index)
+    if type(index) ~= 'number' then
+        return false
+    end
+
+    local historyItemsList = Store:Get('user/historyItemsList')
+
+    if type(historyItemsList) ~= 'table' or type(historyItemsList[index]) ~= 'table' then
+        return false
+    end
+
+    local curItem = historyItemsList[index]
+
+    if curItem.worldType == 'world' and curItem.displayName then
+        local compareWorldList = Store:Get('world/compareWorldList')
+
+        for key, item in ipairs(compareWorldList) do
+            if item.foldername == curItem.displayName then
+                InternetLoadWorld.LoadWorld(item)
+                return true
+            end
+        end
+    end
+
+    _guihelper.MessageBox(L"本地世界已删除")
 end

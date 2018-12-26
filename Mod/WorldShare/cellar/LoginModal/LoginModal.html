@@ -34,23 +34,24 @@
                     ["base-font-size"] = 16,
                     ["font-size"] = 16,
                     color = "#ffffff",
-                    ["padding-right"] = 20,
-                    ["padding-left"] = 20,
+                    ["padding-right"] = 40,
+                    ["padding-left"] = 40,
                     ["padding-top"] = 20,
                     ["padding-bottom"] = 20,
                 },
                 text_field = {
                     background = "textures/worldshare_32bits.png;72 20 16 16:3 3 3 3",
                     border = "none",
-                    width = 185,
+                    width = 165,
                 },
                 login_button = {
-                        ["margin-left"] = 55,
-                        width           = 150,
-                        height          = 33,
-                        textcolor = "#ffffff",
-                        color = "#ffffff",
-                        background      = "textures/worldshare_32bits.png;20 20 16 16:4 4 4 4",
+                    ["margin-left"] = 0,
+                    width = 230,
+                    height = 33,
+                    textcolor = "#000000",
+                    color = "#000000",
+                    ["font-size"] = 18
+                    background = "textures/worldshare_32bits.png;149 104 16 16:4 4 4 4",
                 },
             }
         </style>
@@ -60,14 +61,14 @@
                     <div style="margin-bottom:15px;"><%= login_text()%></div>
                 </pe:if>
                 <div style="margin-bottom:12px;">
-                    <div style="float:left;min-width:80px;"><%= L"服务器："%></div>
-                    <select name="loginServer" DataSource="<%= get_server_list()%>" style="height: 30px;width: 185px;" class="text_field"></select>
+                    <div style="float:left;min-width:40px;"><%= L"服务器："%></div>
+                    <select name="loginServer" DataSource="<%= get_server_list()%>" style="height: 30px;width: 165px;" class="text_field"></select>
                 </div>
                 <div style="margin-bottom:12px;">
-                    <div style="float:left;min-width:80px"><%= L"账号：" %></div><input type="text" EmptyText='<%= L"账户名/邮箱/手机号" %>' class="bbs_text text_field" style="height: 30px;" name="account" />
+                    <div style="float:left;min-width:65px"><%= L"账号：" %></div><input type="text" EmptyText='<%= L"账户名/邮箱/手机号" %>' class="bbs_text text_field" style="height: 30px;" name="account" />
                 </div>
                 <div style="margin-bottom:12px;">
-                    <div style="float:left;min-width:80px"><%= L"密码：" %></div><input type="text" PasswordChar="*" class="bbs_text text_field" style="height: 30px;" name="password" />
+                    <div style="float:left;min-width:65px"><%= L"密码：" %></div><input type="text" PasswordChar="*" class="bbs_text text_field" style="height: 30px;" name="password" />
                 </div>
                 <div>
                     <div>
@@ -78,10 +79,11 @@
                     </div>
                 </div>
                 <div style="margin-top:30px;margin-bottom:15px;">
-                    <input type="button" DefaultButton="true" class="login_button" onclick="login()" value='<%= L"登   录"%>' />
+                    <input type="button" DefaultButton="true" class="login_button" onclick="login()" value='<%= L"登 录"%>' />
                 </div>
                 <div style="text-align:left;margin-left:55px;">
-                    <span style="color:#ffffff;"><%= L"还没有帐号？" %></span>
+                    <a name="forgot" style="background:url(textures/worldshare_32bits.png#399 76 64 30:0 0 0 0);height:30px;width:150px;font-size: 14px;color: #ffffff;"><%= L"忘记密码" %></a>
+                    <span style="color:#ffffff;">|</span>
                     <a name="register" style="background:url(textures/worldshare_32bits.png#399 76 64 30:0 0 0 0);height:30px;width:150px;font-size: 14px;color: #fe5927;"><%= L"点击注册" %></a>
                 </div>
             </div>

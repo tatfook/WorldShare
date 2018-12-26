@@ -667,6 +667,14 @@ function KeepworkService:UpdateRecord(callback)
         WorldList.SetRefreshing(true)
 
         if (selectWorld.kpProjectId) then
+            local tag = LocalService:GetTag(foldername.default)
+
+            if type(tag) == 'table' then
+                tag.kpProjectId = selectWorld.kpProjectId
+
+                LocalService:SetTag(selectWorld.worldpath, tag)
+            end
+
             self:GetProject(
                 selectWorld.kpProjectId,
                 function(data)

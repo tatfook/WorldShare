@@ -37,7 +37,7 @@ local default_avatars = {
 local cur_index = 1
 
 function UserInfo:Site()
-    return KeepworkService:GetSite()
+    return KeepworkService:GetKeepworkUrl()
 end
 
 function UserInfo.IsSignedIn()
