@@ -119,9 +119,10 @@ function KeepworkService:LoginResponse(response, err, callback)
     local token = response["token"] or ""
     local userId = response["id"] or 0
     local username = response["username"] or ""
+    local nickname = response["nickname"] or ""
 
-    local SetToken = Store:Action("user/SetToken")
-    SetToken(token)
+    local SetUserinfo = Store:Action("user/SetUserinfo")
+    SetUserinfo(token, username, nickname)
 
     Store:Set("user/userId", userId)
     Store:Set("user/username", username)
