@@ -495,10 +495,10 @@
                                         <pe:if condition="<%= Eval('kpProjectId') and true or false %>">
                                             <input type="button"
                                                    class="project_id"
-                                                   tooltip="<%= '项目ID：' .. Eval('kpProjectId') .. '， 点击打开项目页' %>"
+                                                   tooltip="<%= L'项目ID：' .. Eval('kpProjectId') .. L'， 点击打开项目页' %>"
                                                    name='<%=Eval("index")%>'
                                                    onclick="open_project"
-                                                   value="<%= '项目ID:' .. (Eval('kpProjectId') or '') %>"/>
+                                                   value="<%= L'项目ID:' .. (Eval('kpProjectId') or '') %>"/>
                                         </pe:if>
                                     </div>
                                     <div name="worldinfo">
@@ -577,7 +577,7 @@
                                                 <%= if_else( Eval("is_zip") == true, L".zip", "")%>
                                             </div>
                                             <pe:if condition="<%= Eval('kpProjectId') and true or false %>">
-                                                <div class="project_id"><%= '项目ID:' .. (Eval('kpProjectId') or '') %></div>
+                                                <div class="project_id"><%= L'项目ID:' .. (Eval('kpProjectId') or '') %></div>
                                             </pe:if>
                                         </div>
                                         <div class="share_world_info" style="padding-top:5px;">
