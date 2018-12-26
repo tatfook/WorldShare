@@ -352,15 +352,26 @@ function LocalService:SaveWorldInfo(node)
     end
 
     node.attr.clientversion = self:GetClientVersion() or node.attr.clientversion
+
+    local enterWorld = Store:Get('world/enterWorld')
+    node.attr.kpProjectId = enterWorld and enterWorld.kpProjectId or node.attr.kpProjectId
 end
 
 function LocalService:LoadWorldInfo(ctx, node)
-    if (type(node) ~= 'table' or type(node.attr) ~= 'table') then
+    if (type(ctx) ~= 'table' or
+        type(node) ~= 'table' or
+        type(node.attr) ~= 'table') then
         return false
     end
-
     ctx.clientversion = node.attr.clientversion
-    ctx.kpProjectId = node.attr.kpProjectId
+
+    local enterWorld = Store:Get('world/enterWorld')
+
+    if type(enterWorld) == 'table' and enterWorld.kpProjectId then
+        ctx.kpProjectId = enterWorld.kpProjectId
+    else 
+        ctx.kpProjectId = node.attr.kpProjectId
+    end
 end
 
 function LocalService:GetClientVersion(node)

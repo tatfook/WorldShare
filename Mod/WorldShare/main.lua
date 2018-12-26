@@ -138,6 +138,10 @@ function WorldShare:OnWorldLoad()
             end
         )
     end
+
+    NPL.load("(gl)script/apps/Aries/Creator/WorldCommon.lua");
+    local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
+    echo(WorldCommon.GetWorldTag("kpProjectId"))
 end
 
 function WorldShare:OnLeaveWorld()
