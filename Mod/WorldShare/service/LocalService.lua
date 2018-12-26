@@ -346,15 +346,17 @@ function LocalService:GetTag(foldername)
     end
 end
 
-function LocalService:SaveWorldInfo(node)
-    if (type(node) ~= 'table' or type(node.attr) ~= 'table') then
+function LocalService:SaveWorldInfo(ctx, node)
+    if (type(ctx) ~= 'table' or
+        type(node) ~= 'table' or
+        type(node.attr) ~= 'table') then
         return false
     end
 
-    node.attr.clientversion = self:GetClientVersion() or node.attr.clientversion
+    node.attr.clientversion = self:GetClientVersion() or ctx.clientversion
 
     local enterWorld = Store:Get('world/enterWorld')
-    node.attr.kpProjectId = enterWorld and enterWorld.kpProjectId or node.attr.kpProjectId
+    node.attr.kpProjectId = enterWorld and enterWorld.kpProjectId or ctx.kpProjectId
 end
 
 function LocalService:LoadWorldInfo(ctx, node)

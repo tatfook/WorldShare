@@ -111,7 +111,7 @@ function WorldShare:init()
     GameLogic.GetFilters():add_filter(
         "save_world_info",
         function(ctx, node)
-            LocalService:SaveWorldInfo(node)
+            LocalService:SaveWorldInfo(ctx, node)
         end
     )
 end
