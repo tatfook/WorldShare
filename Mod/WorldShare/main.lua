@@ -99,11 +99,19 @@ function WorldShare:init()
         end
     )
 
+    -- replcae implement local world event
+    GameLogic.GetFilters():add_filter(
+        "load_world_info",
+        function(ctx, node)
+            LocalService:LoadWorldInfo(ctx, node)
+        end
+    )
+
     -- replace implement save world event
     GameLogic.GetFilters():add_filter(
         "save_world_info",
-        function(node)
-            LocalService:Save()
+        function(ctx, node)
+            LocalService:SaveWorldInfo(ctx, node)
         end
     )
 end
@@ -130,6 +138,10 @@ function WorldShare:OnWorldLoad()
             end
         )
     end
+
+    NPL.load("(gl)script/apps/Aries/Creator/WorldCommon.lua");
+    local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
+    echo(WorldCommon.GetWorldTag("kpProjectId"))
 end
 
 function WorldShare:OnLeaveWorld()

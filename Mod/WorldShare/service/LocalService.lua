@@ -346,25 +346,38 @@ function LocalService:GetTag(foldername)
     end
 end
 
-function LocalService:Save()
-    local enterWorld = Store:Get("world/enterWorld")
-    local foldername = Store:Get("world/enterFoldername")
-
-    if type(enterWorld) ~= 'table' and
-       not enterWorld.worldpath and
-       type(foldername) ~= 'table'
-       then
+function LocalService:SaveWorldInfo(ctx, node)
+    if (type(ctx) ~= 'table' or
+        type(node) ~= 'table' or
+        type(node.attr) ~= 'table') then
         return false
     end
 
-    local function Handle()
-        local tag = self:GetTag(foldername.default)
+    node.attr.clientversion = self:GetClientVersion() or ctx.clientversion
 
-        tag.clientversion = System and System.options and System.options.ClientVersion and System.options.ClientVersion or tag.clientversion
-        self:SetTag(enterWorld.worldpath, tag)
+    local enterWorld = Store:Get('world/enterWorld')
+    node.attr.kpProjectId = enterWorld and enterWorld.kpProjectId or ctx.kpProjectId
+end
+
+function LocalService:LoadWorldInfo(ctx, node)
+    if (type(ctx) ~= 'table' or
+        type(node) ~= 'table' or
+        type(node.attr) ~= 'table') then
+        return false
     end
+    ctx.clientversion = node.attr.clientversion
 
-    Utils.SetTimeOut(Handle, 0)
+    local enterWorld = Store:Get('world/enterWorld')
+
+    if type(enterWorld) == 'table' and enterWorld.kpProjectId then
+        ctx.kpProjectId = enterWorld.kpProjectId
+    else 
+        ctx.kpProjectId = node.attr.kpProjectId
+    end
+end
+
+function LocalService:GetClientVersion(node)
+    return System and System.options and System.options.ClientVersion and System.options.ClientVersion
 end
 
 function LocalService:ClearUserWorlds()
