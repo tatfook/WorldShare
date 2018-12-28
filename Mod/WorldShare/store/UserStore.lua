@@ -14,6 +14,10 @@ local UserStore = commonlib.gettable('Mod.WorldShare.store.User')
 
 function UserStore:Action()
     return {
+        SetToken = function(token)
+            self.token = token
+            commonlib.setfield("System.User.keepworktoken", token)
+        end,
         SetUserinfo = function(token, username, nickname)
             self.token = token
             self.username = username
