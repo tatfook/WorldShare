@@ -139,7 +139,7 @@ function UserInfo:CheckDoAutoSignin(callback)
                         local AfterLogined = Store:Get('user/AfterLogined')
 
                         if type(AfterLogined) == 'function' then
-                            AfterLogined()
+                            AfterLogined(true)
                             Store:Remove('user/AfterLogined')
                         end
 

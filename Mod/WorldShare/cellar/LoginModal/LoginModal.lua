@@ -83,6 +83,13 @@ function LoginModal:ClosePage()
         return false
     end
 
+    local AfterLogined = Store:Get('user/AfterLogined')
+
+    if type(AfterLogined) == 'function' then
+        AfterLogined(false)
+        Store:Remove('user/AfterLogined')
+    end
+
     LoginModalPage:CloseWindow()
 end
 
@@ -160,13 +167,9 @@ function LoginModal:LoginAction()
         local AfterLogined = Store:Get('user/AfterLogined')
 
         if type(AfterLogined) == 'function' then
-            AfterLogined()
+            AfterLogined(true)
             Store:Remove('user/AfterLogined')
         end
-
-        -- if (type(callback) == "function") then
-        --     callback()
-        -- end
     end
 
     KeepworkService:Login(
