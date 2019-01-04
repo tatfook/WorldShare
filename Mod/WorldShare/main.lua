@@ -31,6 +31,9 @@ NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/ShareWorldPage.lua")
 NPL.load("(gl)script/apps/Aries/Creator/Game/Login/DownloadWorld.lua")
 NPL.load("(gl)script/apps/Aries/Creator/Game/Login/RemoteWorld.lua")
 NPL.load("(gl)script/ide/System/Core/UniString.lua")
+NPL.load("(gl)script/ide/System/Core/Event.lua")
+
+NPL.load("(gl)Mod/WorldShare/command/Command.lua")
 
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")

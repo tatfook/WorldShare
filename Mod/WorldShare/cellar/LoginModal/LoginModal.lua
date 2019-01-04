@@ -48,17 +48,16 @@ function LoginModal:ShowPage()
 
     local PWDInfo = KeepworkService:LoadSigninInfo()
 
-    if (PWDInfo) then
+    if PWDInfo then
         local rememberMeNode = LoginModalPage:GetNode('rememberPassword')
         local autoLoginNode = LoginModalPage:GetNode('autoLogin')
 
         rememberMeNode:SetAttribute('checked', 'checked')
 
-        if PWDInfo and PWDInfo.autoLogin then
+        if PWDInfo.autoLogin then
             autoLoginNode:SetAttribute('checked', 'checked')
         end
 
-        LoginModalPage:SetValue('loginServer', PWDInfo.loginServer or '')
         LoginModalPage:SetValue('account', PWDInfo.account or '')
         LoginModalPage:SetValue('password', PWDInfo.password or '')
     end
@@ -69,7 +68,11 @@ function LoginModal:ShowPage()
     LoginModalPage:GetNode('forgot'):SetAttribute('href', forgotUrl)
     LoginModalPage:GetNode('register'):SetAttribute('href', registerUrl)
 
-    self:Refresh()
+    self:Refresh(0)
+
+    if PWDInfo then
+        LoginModalPage:SetValue('loginServer', PWDInfo.loginServer or '')
+    end
 end
 
 function LoginModal:SetPage()
@@ -93,7 +96,7 @@ function LoginModal:ClosePage()
     LoginModalPage:CloseWindow()
 end
 
-function LoginModal:Refresh(time)
+function LoginModal:Refresh(time, callback)
     local LoginModalPage = Store:Get('page/LoginModal')
 
     if (LoginModalPage) then
