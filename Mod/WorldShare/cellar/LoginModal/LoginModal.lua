@@ -86,13 +86,6 @@ function LoginModal:ClosePage()
         return false
     end
 
-    local AfterLogined = Store:Get('user/AfterLogined')
-
-    if type(AfterLogined) == 'function' then
-        AfterLogined(false)
-        Store:Remove('user/AfterLogined')
-    end
-
     LoginModalPage:CloseWindow()
 end
 
@@ -102,6 +95,17 @@ function LoginModal:Refresh(time, callback)
     if (LoginModalPage) then
         LoginModalPage:Refresh(time or 0.01)
     end
+end
+
+function LoginModal:Close()
+    local AfterLogined = Store:Get('user/AfterLogined')
+
+    if type(AfterLogined) == 'function' then
+        AfterLogined(false)
+        Store:Remove('user/AfterLogined')
+    end
+
+    self:ClosePage()
 end
 
 function LoginModal:LoginAction()
