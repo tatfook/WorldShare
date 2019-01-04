@@ -385,15 +385,15 @@ function KeepworkService:GetWorldByProjectId(pid, callback)
     )
 end
 
-function KeepworkService:PushWorld(worldInfo, callback)
-    if (type(worldInfo) ~= 'table' or not self:IsSignedIn()) then
+function KeepworkService:GetWorld(worldName, callback)
+    if (type(worldName) ~= 'string' or not self:IsSignedIn()) then
         return false
     end
 
     local headers = self:GetHeaders()
 
     self:Request(
-        format("/worlds?worldName=%s", Encoding.url_encode(worldInfo.worldName or '')),
+        format("/worlds?worldName=%s", worldName or ''),
         "GET",
         nil,
         headers,
@@ -406,7 +406,22 @@ function KeepworkService:PushWorld(worldInfo, callback)
                 return false
             end
 
-            local worldId = data[1] and data[1].id or false
+            callback(data[1])
+        end
+    )
+end
+
+function KeepworkService:PushWorld(worldInfo, callback)
+    if (type(worldInfo) ~= 'table' or not self:IsSignedIn()) then
+        return false
+    end
+
+    local headers = self:GetHeaders()
+
+    self:GetWorld(
+        Encoding.url_encode(worldInfo.worldName or ''),
+        function(world)
+            local worldId = world and world.id or false
 
             if not worldId then
                 return false
@@ -414,10 +429,10 @@ function KeepworkService:PushWorld(worldInfo, callback)
 
             self:Request(
                 format("/worlds/%s", worldId),
-                 "PUT",
-                 worldInfo,
-                 headers,
-                 callback
+                    "PUT",
+                    worldInfo,
+                    headers,
+                    callback
             )
         end
     )
@@ -646,71 +661,94 @@ function KeepworkService:UpdateRecord(callback)
 
         local filesTotals = selectWorld and selectWorld.size or 0
 
-        local worldInfo = {}
+        local function HandleGetWorld(world)
+            local oldWorldInfo = world or false
 
-        worldInfo.worldName = foldername.utf8
-        worldInfo.revision = Store:Get("world/currentRevision")
-        worldInfo.fileSize = filesTotals
-        worldInfo.commitId = lastCommitSha
-        worldInfo.username = username
-        worldInfo.archiveUrl =
-            format(
-            "%s/%s/%s/repository/archive.zip?ref=%s",
-            dataSourceInfo.rawBaseUrl,
-            dataSourceInfo.dataSourceUsername,
-            foldername.base32,
-            worldInfo.commitId
-        )
-        worldInfo.extra = {
-            coverUrl = preview
-        }
-
-        WorldList.SetRefreshing(true)
-
-        if (selectWorld.kpProjectId) then
-            local tag = LocalService:GetTag(foldername.default)
-
-            if type(tag) == 'table' then
-                tag.kpProjectId = selectWorld.kpProjectId
-
-                LocalService:SetTag(selectWorld.worldpath, tag)
+            if not oldWorldInfo then
+                return false
             end
 
-            self:GetProject(
-                selectWorld.kpProjectId,
-                function(data)
-                    if data and data.extra and not data.extra.imageUrl then
-                        self:UpdateProject(
-                            selectWorld.kpProjectId,
-                            {
-                                extra = {
-                                    imageUrl = format(
-                                        "%s/%s/%s/raw/master/preview.jpg",
-                                        dataSourceInfo.rawBaseUrl,
-                                        dataSourceInfo.dataSourceUsername,
-                                        foldername.base32
-                                    )
+            local commitIds = {}
+
+            if oldWorldInfo.extra and oldWorldInfo.extra.commitIds then
+                commitIds = oldWorldInfo.extra.commitIds
+            end
+
+            commitIds[#commitIds + 1] = {
+                commitId = lastCommitSha,
+                revision = Store:Get("world/currentRevision"),
+                date = os.date("%Y%m%d", os.time())
+            }
+
+            local worldInfo = {}
+    
+            worldInfo.worldName = foldername.utf8
+            worldInfo.revision = Store:Get("world/currentRevision")
+            worldInfo.fileSize = filesTotals
+            worldInfo.commitId = lastCommitSha
+            worldInfo.username = username
+            worldInfo.archiveUrl =
+                format(
+                "%s/%s/%s/repository/archive.zip?ref=%s",
+                dataSourceInfo.rawBaseUrl,
+                dataSourceInfo.dataSourceUsername,
+                foldername.base32,
+                worldInfo.commitId
+            )
+            worldInfo.extra = {
+                coverUrl = preview,
+                commitIds = commitIds
+            }
+
+            WorldList.SetRefreshing(true)
+
+            if (selectWorld.kpProjectId) then
+                local tag = LocalService:GetTag(foldername.default)
+    
+                if type(tag) == 'table' then
+                    tag.kpProjectId = selectWorld.kpProjectId
+    
+                    LocalService:SetTag(selectWorld.worldpath, tag)
+                end
+    
+                self:GetProject(
+                    selectWorld.kpProjectId,
+                    function(data)
+                        if data and data.extra and not data.extra.imageUrl then
+                            self:UpdateProject(
+                                selectWorld.kpProjectId,
+                                {
+                                    extra = {
+                                        imageUrl = format(
+                                            "%s/%s/%s/raw/master/preview.jpg",
+                                            dataSourceInfo.rawBaseUrl,
+                                            dataSourceInfo.dataSourceUsername,
+                                            foldername.base32
+                                        )
+                                    }
                                 }
-                            }
-                        )
+                            )
+                        end
+                    end
+                )
+            end
+    
+            self:PushWorld(
+                worldInfo,
+                function(data, err)
+                    if (err ~= 200) then
+                        _guihelper.MessageBox(L"更新服务器列表失败")
+                        return false
+                    end
+    
+                    if type(callback) == 'function' then
+                        callback()
                     end
                 end
             )
         end
 
-        self:PushWorld(
-            worldInfo,
-            function(data, err)
-                if (err ~= 200) then
-                    _guihelper.MessageBox(L"更新服务器列表失败")
-                    return false
-                end
-
-                if type(callback) == 'function' then
-                    callback()
-                end
-            end
-        )
+        self:GetWorld(Encoding.url_encode(foldername.utf8 or ''), HandleGetWorld)
     end
 
     GitService:GetCommits(foldername.base32, false, Handle)

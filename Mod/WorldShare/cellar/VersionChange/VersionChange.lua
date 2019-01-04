@@ -16,6 +16,7 @@ local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")
+local Encoding = commonlib.gettable("commonlib.Encoding")
 
 local VersionChange = NPL.export()
 
@@ -70,80 +71,43 @@ function VersionChange:ShowPage()
 end
 
 function VersionChange:GetVersionSource(callback)
-    self.allRevision = commonlib.vector:new()
-
-    GitService:GetCommits(
-        self.foldername.base32,
-        true,
-        function(data, err)
-            for key, item in ipairs(data) do
-                local path = item.title:gsub("paracraft commit: ", "")
-
-                local date = {}
-                for v in string.gmatch(item.created_at, "[^T]+") do
-                    date[#date + 1] = v
-                end
-
-                if (path == "revision.xml") then
-                    local currentRevision = {
-                        path = path,
-                        commitId = item.id,
-                        date = date[1]
-                    }
-
-                    self.allRevision:push_back(currentRevision)
-                end
-            end
-
-            self:GetRevisionContent(callback)
-        end
-    )
-end
-
-local verCountIndex = 1
-function VersionChange:GetRevisionContent(callback)
-    if (verCountIndex > #self.allRevision) then
-        verCountIndex = 1
-
-        if (type(callback) == "function") then
-            callback()
-        end
-
-        return false
-    end
-
-    local currentItem = self.allRevision[verCountIndex]
     local selectWorld = Store:Get("world/selectWorld")
     local commitId = SyncMain:GetCurrentRevisionInfo()
 
-    commitId = commitId and commitId["id"] or ""
+    self.allRevision = commonlib.vector:new()
 
-    GitService:GetContentWithRaw(
-        self.foldername.base32,
-        currentItem.path,
-        currentItem.commitId,
-        function(content)
-            if (not content) then
+    KeepworkService:GetWorld(
+        Encoding.url_encode(self.foldername.utf8 or ''),
+        function(world)
+            if type(callback) ~= 'function' then
                 return false
             end
 
-            currentItem.revision = content
-            currentItem.shortId = string.sub(currentItem.commitId, 1, 5)
 
-            if (tonumber(selectWorld.revision) == tonumber(currentItem.revision)) then
-                currentItem.isActive = true
-            else
-                currentItem.isActive = false
+            if not world or not world.extra or not world.extra.commitIds then
+                callback()
+                return false
             end
 
-            if (currentItem.commitId == commitId) then
-                currentItem.isActiveFull = true
-            else
-                currentItem.isActiveFull = false
+            for key, item in ipairs(world.extra.commitIds) do
+                item.shortId = string.sub(item.commitId, 1, 5)
+
+                if (tonumber(selectWorld.revision) == tonumber(item.revision)) then
+                    item.isActive = true
+                else
+                    item.isActive = false
+                end
+
+                if (item.commitId == commitId.id) then
+                    item.isActiveFull = true
+                else
+                    item.isActiveFull = false
+                end
+
+                self.allRevision:push_back(item)
             end
 
-            verCountIndex = verCountIndex + 1
-            self:GetRevisionContent(callback)
+            callback()
         end
     )
 end
