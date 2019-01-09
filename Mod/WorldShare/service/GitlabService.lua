@@ -18,6 +18,7 @@ local UserConsole = NPL.load('(gl)Mod/WorldShare/cellar/UserConsole/Main.lua')
 local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
 local HttpRequest = NPL.load('./HttpRequest.lua')
 local Store = NPL.load('(gl)Mod/WorldShare/store/Store.lua')
+local Utils = NPL.load('(gl)Mod/WorldSHare/helper/Utils.lua')
 
 local GitlabService = NPL.export()
 
@@ -47,7 +48,7 @@ end
 
 function GitlabService:GetProjectPath(projectName)
     local dataSourceInfo = self:GetDataSourceInfo()
-    local projectPath = Encoding.url_encode(format("%s/%s", dataSourceInfo.dataSourceUsername or "", projectName or ""))
+    local projectPath = Utils:UrlEncode(format("%s/%s", dataSourceInfo.dataSourceUsername or "", projectName or ""))
 
     return projectPath
 end
@@ -357,7 +358,7 @@ end
 -- write a file
 function GitlabService:Upload(projectName, path, content, callback)
     local projectPath = self:GetProjectPath(projectName or '')
-    local url = format("%s%s", self:GetFileUrlPrefix(projectPath), Encoding.url_encode(path))
+    local url = format("%s%s", self:GetFileUrlPrefix(projectPath), Utils:UrlEncode(path))
 
     local params = {
         commit_message = format("%s%s", GitlabService:GetCommitMessagePrefix(), path),
@@ -383,7 +384,7 @@ end
 -- Update a file
 function GitlabService:Update(projectName, path, content, callback)
     local projectPath = self:GetProjectPath(projectName or '')
-    local url = format("%s%s", self:GetFileUrlPrefix(projectPath), Encoding.url_encode(path))
+    local url = format("%s%s", self:GetFileUrlPrefix(projectPath), Utils:UrlEncode(path))
 
     local params = {
         commit_message = format("%s%s", GitlabService:GetCommitMessagePrefix(), path),
@@ -444,7 +445,7 @@ function GitlabService:GetContentWithRaw(foldername, path, commitId, callback)
         dataSourceInfo.dataSourceUsername,
         foldername,
         commitId,
-        path
+        Utils:UrlEncode(path)
     )
 
     HttpRequest:GetUrl(
@@ -471,7 +472,7 @@ end
 -- remove a file
 function GitlabService:DeleteFile(projectName, path, callback)
     local projectPath = self:GetProjectPath(projectName or '')
-    local url = format("%s%s", self:GetFileUrlPrefix(projectPath), Encoding.url_encode(path))
+    local url = format("%s%s", self:GetFileUrlPrefix(projectPath), Utils:UrlEncode(path))
 
     local params = {
         commit_message = format("%s%s", self:GetCommitMessagePrefix(), path),
