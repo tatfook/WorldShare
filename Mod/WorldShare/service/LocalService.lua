@@ -25,7 +25,7 @@ local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 
 local LocalService = NPL.export()
 
-LocalService.filter = "*.*"
+LocalService.filter = "*"
 LocalService.nMaxFileLevels = 0
 LocalService.nMaxFilesNum = 500
 LocalService.output = {}
