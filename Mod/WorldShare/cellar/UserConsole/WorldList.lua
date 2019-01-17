@@ -254,8 +254,8 @@ function WorldList:SyncWorldsList(callback)
         for DKey, DItem in ipairs(remoteWorldsList) do
             local isExist = false
             local worldpath = ""
+            local revision = 0
             local status
-            local revision
 
             for LKey, LItem in ipairs(localWorlds) do
                 if (DItem["worldName"] == LItem["foldername"]) then
