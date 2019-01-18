@@ -32,6 +32,7 @@ NPL.load("(gl)script/apps/Aries/Creator/Game/Login/DownloadWorld.lua")
 NPL.load("(gl)script/apps/Aries/Creator/Game/Login/RemoteWorld.lua")
 NPL.load("(gl)script/ide/System/Core/UniString.lua")
 NPL.load("(gl)script/ide/System/Core/Event.lua")
+NPL.load("(gl)script/apps/Aries/Creator/Game/Login/TeacherAgent/TeacherAgent.lua");
 
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
@@ -41,6 +42,7 @@ local ShareWorld = NPL.load("(gl)Mod/WorldShare/cellar/ShareWorld/ShareWorld.lua
 local HistoryManager = NPL.load("(gl)Mod/WorldShare/cellar/HistoryManager/HistoryManager.lua")
 local WorldExitDialog = NPL.load("(gl)Mod/WorldShare/cellar/WorldExitDialog/WorldExitDialog.lua")
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
+local Grade = NPL.load("(gl)Mod/WorldShare/cellar/Grade/Grade.lua")
 
 local GameLogic = commonlib.gettable("MyCompany.Aries.Game.GameLogic")
 
@@ -128,6 +130,7 @@ function WorldShare:OnWorldLoad()
 
     UserConsole:ClosePage()
     HistoryManager:OnWorldLoad()
+    Grade:OnWorldLoad()
 
     local curLesson = Store:Getter("lesson/GetCurLesson")
 
@@ -142,7 +145,6 @@ function WorldShare:OnWorldLoad()
 
     NPL.load("(gl)script/apps/Aries/Creator/WorldCommon.lua");
     local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
-    echo(WorldCommon.GetWorldTag("kpProjectId"))
 end
 
 function WorldShare:OnLeaveWorld()
