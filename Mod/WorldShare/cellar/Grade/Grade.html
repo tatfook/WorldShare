@@ -1,0 +1,126 @@
+<html>
+<body>
+    <pe:mcml>
+        <script type="text/npl" refresh="false" src="Grade.lua">
+            <![CDATA[
+                Grade = NPL.load('./Grade.lua')
+                Utils = NPL.load('(gl)Mod/WorldShare/helper/Utils.lua')
+                Grade:SetPage()
+
+                local score = 0
+                local star_table = {{selected = false}, {selected = false}, {selected = false}, {selected = false}, {selected = false}}
+
+                function get_window_style()
+                    return Utils.FixCenter(360, 212)
+                end
+
+                function confirm()
+                    if score == 0 then
+                        _guihelper.MessageBox(L'请打分')
+                        return false
+                    end
+
+                    Grade:Confirm(score)
+                end
+
+                function later()
+                    Grade:Later()
+                end
+
+                function get_star()
+                    return star_table
+                end
+
+                function set_star(index)
+                    for key, item in ipairs(star_table) do
+                        if key > index then
+                            item.selected = false
+                        else
+                            item.selected = true
+                        end
+                    end
+
+                    update_score()
+                end
+
+                function update_score()
+                    local count_score = 0
+
+                    for key, item in ipairs(star_table) do
+                        if item.selected == true then
+                            count_score = count_score + 1
+                        end
+                    end
+
+                    score = count_score
+
+                    Grade:Refresh()
+                end
+
+                function get_star_info()
+                    if score == 0 then
+                        return L'请打分'
+                    elseif score == 1 then
+                        return L'不怎么样'
+                    elseif score == 2 then
+                        return L'十分普通'
+                    elseif score == 3 then
+                        return L'感觉还行'
+                    elseif score == 4 then
+                        return L'印象深刻'
+                    elseif score == 5 then
+                        return L'震撼人心'
+                    end
+                end
+            ]]>
+        </script>
+        <style type="text/mcss">
+            {
+                area = {
+                    padding = 20
+                },
+                title = {
+                    ['base-font-size'] = 20,
+                    ['font-size'] = 20
+                },
+                star_area = {
+                    ['margin-top'] = 10,
+                    ['margin-left'] = 65,
+                    height = 80
+                }
+            }
+        </style>
+        <div width="100%" height="100%">
+            <aries:window
+            class="default"
+            mode="thin"
+            width="360"
+            height="212"
+            style="<%=get_window_style()%>"
+            title='<%=L"作品评分" %>'
+            onclose="later()">
+                <div class="area">
+                    <div class="title"><%=L'请为该作品打分'%></div>
+                    <div class="star_area">
+                        <pe:repeat DataSource="<%=get_star()%>">
+                            <pe:repeatitem>
+                                <pe:if condition="<%=Eval('selected') == true %>">
+                                    <div style="float:left;margin-right: 10px;background:url(textures/worldshare_32bits.png#175 130 54 51:0 0 0 0);width: 25px;height: 25px;" name='<%=Eval("index")%>' onclick="set_star"></div>
+                                </pe:if>
+                                <pe:if condition="<%=Eval('selected') == false %>">
+                                    <div style="float:left;margin-right: 10px;background:url(textures/worldshare_32bits.png#110 130 54 51:0 0 0 0);width: 25px;height: 25px;" name='<%=Eval("index")%>' onclick="set_star"></div>
+                                </pe:if>
+                            </pe:repeatitem>
+                        </pe:repeat>
+                        <div style="base-font-size: 19px;font-size:18px;margin-top: 10px"><%= get_star_info() %></div>
+                    </div>
+                    <div width="100%">
+                        <button style="position:relative;align:right;margin-right: 95px;" class="common_button mc_light_grey_button_with_fillet" onclick="confirm()">确定</button>
+                        <button style="position:relative;align:right;margin-right: 20px;" class="common_button mc_light_grey_button_with_fillet" onclick="later()">稍后再说</button>
+                    </div>
+                </div>
+            </aries:window>
+        </div>
+    </pe:mcml>
+</body>
+</html>

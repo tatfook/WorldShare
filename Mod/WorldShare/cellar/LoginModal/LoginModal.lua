@@ -6,7 +6,7 @@ City: Foshan
 Desc: 
 use the lib:
 ------------------------------------------------------------
-local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/Login/LoginModal/LoginModal.lua")
+local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
 if(not UserConsole.IsSignedIn()) then
     UserConsole.ShowLoginModal(callbackFunc)
 end
