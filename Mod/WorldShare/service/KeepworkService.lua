@@ -477,14 +477,25 @@ function KeepworkService:SetRatedProject(kpProjectId, rate, callback)
         return false
     end
 
+    local headers = self:GetHeaders()
+
     local params = {
         projectId = kpProjectId,
         rate = rate
     }
 
-    local headers = self:GetHeaders()
+    self:GetRatedProject(
+        kpProjectId,
+        function(data, err)
+            if err ~= 200 or #data == 0 then
+                self:Request("/projectRates", "POST", params, headers, callback)
+            end
 
-    self:Request("/projectRates", "POST", params, headers, callback)
+            if err == 200 and type(data) == 'table' and #data == 1 and type(data[1].id) == 'number' then
+                self:Request(format("/projectRates/%d", data[1].id), "PUT", params, headers, callback)
+            end
+        end
+    )
 end
 
 function KeepworkService:GetShareUrl()
