@@ -17,6 +17,7 @@ local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua
 local Utils = NPL.load('(gl)Mod/WorldShare/helper/Utils.lua')
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
+local GradeLocalData = NPL.load("(gl)Mod/WorldShare/database/GradeLocaldata.lua")
 
 local Grade = NPL.export()
 
@@ -29,44 +30,20 @@ function Grade:SetPage()
 end
 
 function Grade:OnWorldLoad()
-    local tagInfor = WorldCommon.GetWorldInfo()
+    local tagInfo = WorldCommon.GetWorldInfo()
 
-    if not tagInfor or not tagInfor.kpProjectId then
+    if not tagInfo or not tagInfo.kpProjectId then
         return false
     end
-    
-    local function Handle()
-        KeepworkService:GetRatedProject(
-            tagInfor.kpProjectId,
-            function(data, err)
-                if err ~= 200 or #data == 0 then
-                    Utils.SetTimeOut(
-                        function()
-                            self:ShowNoticeButton()
-                        end,
-                        1000 * 60 * 3
-                    )
-                end
-            end
+
+    if not GradeLocalData:IsProjectIdExist(tagInfo.kpProjectId) then
+        Utils.SetTimeOut(
+            function()
+                self:ShowNoticeButton()
+            end,
+            (1000 * 60 * 3)
         )
     end
-
-    if not KeepworkService:IsSignedIn() then
-        KeepworkService:GetUserTokenFromUrlProtocol()
-
-        local token = Store:Get('user/token')
-
-        if not token then
-            LoginModal:ShowPage()
-            Store:Set('user/AfterLogined', Handle)
-            return false
-        end
-
-        KeepworkService:LoginWithTokenApi(Handle)
-        return false
-    end
-    
-    Handle()
 end
 
 function Grade:ClosePage()
@@ -78,12 +55,42 @@ function Grade:ClosePage()
 end
 
 function Grade:ShowNoticeButton()
+    if TeacherAgent:IsEnabled() then
+        TeacherAgent:SetEnabled()
+    end
+
     TeacherAgent:AddTaskButton(
         "GradeNotice",
         "textures/worldshare_32bits.png#20 130 80 80",
         function()
             self:CloseNoticeButton()
-            self:ShowPage()
+
+            local function Handle()
+                Store:Remove('user/loginText')
+                if KeepworkService:IsSignedIn() then
+                    self:ShowPage()
+                else
+                    self:ShowNoticeButton()
+                end
+            end
+
+            if not KeepworkService:IsSignedIn() then
+                KeepworkService:GetUserTokenFromUrlProtocol()
+
+                local token = Store:Get('user/token')
+
+                if not token then
+                    Store:Set("user/loginText", L"登录后，可为作品打分")
+                    LoginModal:ShowPage()
+                    Store:Set('user/AfterLogined', Handle)
+                    return false
+                end
+        
+                KeepworkService:LoginWithTokenApi(Handle)
+                return false
+            end
+            
+            Handle()
         end,
         0,
         100,
@@ -107,9 +114,9 @@ function Grade:Refresh(time, callback)
 end
 
 function Grade:Confirm(score)
-    local tagInfor = WorldCommon.GetWorldInfo()
+    local tagInfo = WorldCommon.GetWorldInfo()
 
-    if not tagInfor or not tagInfor.kpProjectId then
+    if not tagInfo or not tagInfo.kpProjectId then
         return false
     end
 
@@ -120,10 +127,11 @@ function Grade:Confirm(score)
     local rate = score * 20
 
     KeepworkService:SetRatedProject(
-        tagInfor.kpProjectId,
+        tagInfo.kpProjectId,
         rate,
         function(data, err)
             if err == 200 then
+                GradeLocalData:RecordProjectId(tagInfo.kpProjectId)
                 _guihelper.MessageBox(L"感谢您为该作品打分！")
             end
         end
@@ -139,6 +147,6 @@ function Grade:Later()
         function()
             self:ShowNoticeButton()
         end,
-        1000 * 60 * 5
+        (1000 * 60 * 5)
     )
 end

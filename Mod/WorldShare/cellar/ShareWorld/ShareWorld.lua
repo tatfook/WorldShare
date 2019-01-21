@@ -129,9 +129,9 @@ function ShareWorld:Refresh(times)
 end
 
 function ShareWorld:GetWorldSize()
-    local tagInfor = WorldCommon.GetWorldInfo()
+    local tagInfo = WorldCommon.GetWorldInfo()
 
-    return Utils.FormatFileSize(tagInfor.size)
+    return Utils.FormatFileSize(tagInfo.size)
 end
 
 function ShareWorld:GetRemoteRevision()
