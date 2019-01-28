@@ -19,6 +19,8 @@ Config.env = {
   LOCAL = "LOCAL"
 }
 
+Config.defaultEnv = Config.env.ONLINE
+
 Config.keepworkList = {
   ONLINE = "https://keepwork.com",
   STAGE = "https://stage.keepwork.com",

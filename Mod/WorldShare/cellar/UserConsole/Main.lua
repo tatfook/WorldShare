@@ -8,11 +8,14 @@ use the lib:
 local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
 ------------------------------------------------------------
 ]]
-local WorldShare = commonlib.gettable("Mod.WorldShare")
 local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
 local ShareWorldPage = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.Areas.ShareWorldPage")
 local LocalLoadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalLoadWorld")
 local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
+local RemoteWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.RemoteWorld")
+local DownloadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.DownloadWorld")
+
+local WorldShare = commonlib.gettable("Mod.WorldShare")
 
 local UserInfo = NPL.load("./UserInfo.lua")
 local WorldList = NPL.load("./WorldList.lua")
@@ -23,8 +26,6 @@ local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local BrowseRemoteWorlds = NPL.load("(gl)Mod/WorldShare/cellar/BrowseRemoteWorlds/BrowseRemoteWorlds.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
-local DownloadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.DownloadWorld")
-local RemoteWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.RemoteWorld")
 
 local UserConsole = NPL.export()
 
@@ -243,6 +244,7 @@ function UserConsole:HandleWorldId(pid)
         tonumber(pid),
         function(worldInfo)
             if worldInfo and worldInfo.archiveUrl then
+                Store:Set('world/openKpProjectId', pid)
                 HandleLoadWorld(worldInfo.archiveUrl)
             else
                 _guihelper.MessageBox(L"世界不存在")

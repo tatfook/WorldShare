@@ -28,7 +28,7 @@ function KeepworkService:GetEnv()
 	local env = Store:Get("user/env")
 
 	if not env then
-		env = Config.env.ONLINE
+		env = Config.defaultEnv
 	end
 
 	return env
@@ -290,7 +290,7 @@ function KeepworkService:GetProject(pid, callback)
                 return false
             end
 
-            callback(data)
+            callback(data, err)
         end
     )
 end
@@ -491,8 +491,8 @@ function KeepworkService:SetRatedProject(kpProjectId, rate, callback)
                 self:Request("/projectRates", "POST", params, headers, callback)
             end
 
-            if err == 200 and type(data) == 'table' and #data == 1 and type(data[1].id) == 'number' then
-                self:Request(format("/projectRates/%d", data[1].id), "PUT", params, headers, callback)
+            if err == 200 and type(data) == 'table' and #data == 1 and type(data[1].projectId) == 'number' then
+                self:Request(format("/projectRates/%d", data[1].projectId), "PUT", params, headers, callback)
             end
         end
     )
@@ -609,6 +609,18 @@ function KeepworkService:SaveSigninInfo(info)
         else
             LOG.std(nil, "error", "UserConsole", "failed to write file to %s", self:GetPasswordFile())
         end
+    end
+end
+
+function KeepworkService:GetProjectFromUrlProtocol()
+    local cmdline = ParaEngine.GetAppCommandLine()
+    local urlProtocol = string.match(cmdline or "", "paracraft://(.*)$")
+    urlProtocol = Encoding.url_decode(urlProtocol or "")
+
+    local kpProjectId = urlProtocol:match('kpProjectId="([%S]+)"')
+
+    if kpProjectId then
+        return kpProjectId
     end
 end
 
