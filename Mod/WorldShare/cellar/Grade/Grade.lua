@@ -30,6 +30,10 @@ function Grade:SetPage()
 end
 
 function Grade:OnWorldLoad()
+    if Store:Get("world/noGrade") then
+        return false
+    end
+
     if not GradeLocalData:IsProjectIdExist(self:GetProjectId()) then
         Utils.SetTimeOut(
             function()

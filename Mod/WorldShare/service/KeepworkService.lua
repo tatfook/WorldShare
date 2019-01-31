@@ -245,7 +245,7 @@ function KeepworkService:CreateProject(worldName, callback)
         name = worldName,
         siteId = 1,
         visibility = 0,
-        privilege = 0,
+        privilege = 165,
         type = 1,
         description = "no desc",
         tags = "paracraft",

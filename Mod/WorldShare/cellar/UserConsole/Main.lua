@@ -16,6 +16,7 @@ local RemoteWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.Remot
 local DownloadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.DownloadWorld")
 
 local WorldShare = commonlib.gettable("Mod.WorldShare")
+local ExplorerApp = commonlib.gettable("Mod.ExplorerApp")
 
 local UserInfo = NPL.load("./UserInfo.lua")
 local WorldList = NPL.load("./WorldList.lua")
@@ -154,13 +155,15 @@ function UserConsole.OnImportWorld()
 end
 
 function UserConsole.OnClickOfficialWorlds()
-    BrowseRemoteWorlds.ShowPage(
-        function(bHasEnteredWorld)
-            if (bHasEnteredWorld) then
-                self:ClosePage()
-            end
-        end
-    )
+    Store:Set("world/personalMode", true)
+    ExplorerApp:Init()
+    -- BrowseRemoteWorlds.ShowPage(
+    --     function(bHasEnteredWorld)
+    --         if (bHasEnteredWorld) then
+    --             self:ClosePage()
+    --         end
+    --     end
+    -- )
 end
 
 function UserConsole:CreateNewWorld()
