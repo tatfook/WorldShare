@@ -155,7 +155,7 @@ function UserConsole.OnImportWorld()
 end
 
 function UserConsole.OnClickOfficialWorlds()
-    if ParaUI.IsKeyPressed(DIK_SCANCODE.DIK_LCONTROL or DIK_SCANCODE.DIK_RCONTROL) then
+    if ParaUI.IsKeyPressed(DIK_SCANCODE.DIK_LCONTROL) or ParaUI.IsKeyPressed(DIK_SCANCODE.DIK_RCONTROL) then
         Store:Set("world/personalMode", true)
         ExplorerApp:Init()
 
