@@ -20,7 +20,7 @@ local LessonStore = commonlib.gettable("Mod.WorldShare.store.Lesson")
 
 local Store = NPL.export()
 
-local storeList = {
+Store.storeList = {
     user = UserStore,
     world = WorldStore,
     lesson = LessonStore
@@ -39,8 +39,8 @@ function Store:Set(key, value)
         return true
     end
 
-    if storeList[storeType] then
-        storeList[storeType][storeKey] = commonlib.copy(value)
+    if self.storeList[storeType] then
+        self.storeList[storeType][storeKey] = commonlib.copy(value)
     end
 end
 
@@ -56,8 +56,8 @@ function Store:Get(key)
         return PageStore[storeKey]
     end
 
-    if storeList[storeType] then
-        return commonlib.copy(storeList[storeType][storeKey])
+    if self.storeList[storeType] then
+        return commonlib.copy(self.storeList[storeType][storeKey])
     end
 
     return nil
@@ -71,8 +71,8 @@ function Store:Action(key)
     local storeType = self:GetStoreType(key)
     local storeKey = self:GetStoreKey(key)
 
-    if storeList[storeType] then
-        local CurStore = storeList[storeType]
+    if self.storeList[storeType] then
+        local CurStore = self.storeList[storeType]
         local CurFun = CurStore:Action()[storeKey]
 
         if type(CurFun) == 'function' then
@@ -89,8 +89,8 @@ function Store:Getter(key)
     local storeType = self:GetStoreType(key)
     local storeKey = self:GetStoreKey(key)
 
-    if storeList[storeType] then
-        local CurStore = storeList[storeType]
+    if self.storeList[storeType] then
+        local CurStore = self.storeList[storeType]
         local CurFun = CurStore:Getter()[storeKey]
 
         if type(CurFun) == 'function' then

@@ -30,13 +30,11 @@ function Grade:SetPage()
 end
 
 function Grade:OnWorldLoad()
-    local tagInfo = WorldCommon.GetWorldInfo()
-
-    if not tagInfo or not tagInfo.kpProjectId then
+    if Store:Get("world/noGrade") then
         return false
     end
 
-    if not GradeLocalData:IsProjectIdExist(tagInfo.kpProjectId) then
+    if not GradeLocalData:IsProjectIdExist(self:GetProjectId()) then
         Utils.SetTimeOut(
             function()
                 self:ShowNoticeButton()
@@ -51,6 +49,24 @@ function Grade:ClosePage()
 
     if (GradePage) then
         GradePage:CloseWindow()
+    end
+end
+
+function Grade:GetProjectId()
+    local tagInfo = WorldCommon.GetWorldInfo()
+    local openKpProjectId = Store:Get('world/openKpProjectId')
+    local urlKpProjectId = KeepworkService:GetProjectFromUrlProtocol()
+
+    if tagInfo and tagInfo.kpProjectId then
+        return tagInfo.kpProjectId
+    end
+
+    if urlKpProjectId then
+        return urlKpProjectId
+    end
+
+    if openKpProjectId then
+        return openKpProjectId
     end
 end
 
@@ -116,7 +132,7 @@ end
 function Grade:Confirm(score)
     local tagInfo = WorldCommon.GetWorldInfo()
 
-    if not tagInfo or not tagInfo.kpProjectId then
+    if not self:GetProjectId() then
         return false
     end
 
@@ -127,11 +143,11 @@ function Grade:Confirm(score)
     local rate = score * 20
 
     KeepworkService:SetRatedProject(
-        tagInfo.kpProjectId,
+        self:GetProjectId(),
         rate,
         function(data, err)
             if err == 200 then
-                GradeLocalData:RecordProjectId(tagInfo.kpProjectId)
+                GradeLocalData:RecordProjectId(self:GetProjectId())
                 _guihelper.MessageBox(L"感谢您为该作品打分！")
             end
         end

@@ -120,7 +120,29 @@ function LocalService:GetFileContent(filePath)
 end
 
 function LocalService:Write(foldername, path, content)
-    local writePath = format("%s/%s/%s", SyncMain.GetWorldFolderFullPath(), foldername, path)
+    local root = SyncMain.GetWorldFolderFullPath()
+    local allPath = {}
+
+    for segmentation in string.gmatch(path, "[^/]+") do
+        allPath[#allPath + 1] = segmentation
+    end
+
+    for key, item in ipairs(allPath) do
+        if key ~= #allPath then
+            local curFolderPath = ''
+
+            for i=1, key do
+                curFolderPath = format("%s/%s", curFolderPath, allPath[i] or '')
+            end
+
+            local curCreatePath = format("%s/%s%s/", root, foldername, curFolderPath)
+
+            ParaIO.CreateDirectory(curCreatePath)
+        end
+    end
+
+    local writePath = format("%s/%s/%s", root, foldername, path)
+
     local write = ParaIO.open(writePath, "w")
 
     write:write(content, #content)
