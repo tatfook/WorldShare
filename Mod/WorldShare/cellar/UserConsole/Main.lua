@@ -155,15 +155,20 @@ function UserConsole.OnImportWorld()
 end
 
 function UserConsole.OnClickOfficialWorlds()
-    Store:Set("world/personalMode", true)
-    ExplorerApp:Init()
-    -- BrowseRemoteWorlds.ShowPage(
-    --     function(bHasEnteredWorld)
-    --         if (bHasEnteredWorld) then
-    --             self:ClosePage()
-    --         end
-    --     end
-    -- )
+    if ParaUI.IsKeyPressed(DIK_SCANCODE.DIK_LCONTROL or DIK_SCANCODE.DIK_RCONTROL) then
+        Store:Set("world/personalMode", true)
+        ExplorerApp:Init()
+
+        return true
+    end
+
+    BrowseRemoteWorlds.ShowPage(
+        function(bHasEnteredWorld)
+            if (bHasEnteredWorld) then
+                self:ClosePage()
+            end
+        end
+    )
 end
 
 function UserConsole:CreateNewWorld()
