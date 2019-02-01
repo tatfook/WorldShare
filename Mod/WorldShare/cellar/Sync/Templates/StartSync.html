@@ -30,7 +30,7 @@
                     SyncMain:CloseStartSyncPage()
 
                     if(SyncMain.GetRemoteRevision() < SyncMain.GetCurrentRevision()) then
-                        SyncMain:ShowUseDataSourcePage();
+                        SyncMain:ShowStartSyncUseDataSourcePage();
                     elseif(SyncMain.GetRemoteRevision() >= SyncMain.GetCurrentRevision()) then
                         MsgBox:Show(L"正在处理中，请勿操作...")
                         SyncMain:SyncToLocal()

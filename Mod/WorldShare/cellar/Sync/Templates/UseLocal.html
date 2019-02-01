@@ -8,27 +8,23 @@
     <pe:mcml>
         <script type="text/npl" refresh="false">
             <![CDATA[
-                SyncMain = NPL.load("./SyncMain.lua")
+                SyncMain = NPL.load("../Main.lua")
                 MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")
                 Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
                 Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
                 
-                SyncMain:setStartSyncUseLocalPage();
+                SyncMain:SetStartSyncUseLocalPage();
 
             	function replace()
-                    SyncMain:closeStartSyncUseLocalPage()
+                    SyncMain:CloseStartSyncUseLocalPage()
                     MsgBox:Show(L"正在处理中，请勿操作...")
-                    SyncMain:syncToDataSource()
+                    SyncMain:SyncToDataSource()
             	end
 
             	function cancel()
-                    SyncMain:closeStartSyncUseLocalPage()
+                    SyncMain:CloseStartSyncUseLocalPage()
                     SyncMain:ShowStartSyncPage()
             	end
-
-            	function offline()
-                    SyncMain.closeSyncPage()
-                end
 
                 function get_window_style()
                     return Utils.FixCenter(500, 270)

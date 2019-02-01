@@ -8,22 +8,22 @@
     <pe:mcml>
         <script type="text/npl" refresh="false">
             <![CDATA[
-                SyncMain = NPL.load("./SyncMain.lua")
+                SyncMain = NPL.load("../Main.lua")
                 MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")
                 Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
                 Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 
-                SyncMain:setStartSyncUseDataSourcePage()
+                SyncMain:SetStartSyncUseDataSourcePage()
                 
                 function replace()
                     MsgBox:Show(L"正在处理中，请勿操作...")
-                    SyncMain:backupWorld()
-                    SyncMain:closeStartSyncUseDataSourcePage()
-                    SyncMain:syncToLocal()
+                    SyncMain:BackupWorld()
+                    SyncMain:CloseStartSyncUseDataSourcePage()
+                    SyncMain:SyncToLocal()
             	end
 
                 function cancel()
-                    SyncMain:closeStartSyncUseDataSourcePage()
+                    SyncMain:CloseStartSyncUseDataSourcePage()
                     SyncMain:ShowStartSyncPage()
                 end
 

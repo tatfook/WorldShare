@@ -5,7 +5,7 @@ Date:  2017.4.17
 Desc: 
 use the lib:
 ------------------------------------------------------------
-local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/SyncMain.lua")
+local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
 ------------------------------------------------------------
 ]]
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
@@ -180,7 +180,7 @@ function SyncMain:CloseBeyondVolumePage()
 end
 
 function SyncMain:ShowStartSyncUseLocalPage()
-    local params = SyncMain:ShowDialog("Mod/WorldShare/cellar/Sync/Templates/StartSyncUseLocal.html", "StartSyncUseLocal")
+    local params = SyncMain:ShowDialog("Mod/WorldShare/cellar/Sync/Templates/UseLocal.html", "StartSyncUseLocal")
 
     params._page.OnClose = function()
         Store.remove('page/StartSyncUseLocal')
@@ -200,7 +200,7 @@ function SyncMain:CloseStartSyncUseLocalPage()
 end
 
 function SyncMain:ShowStartSyncUseDataSourcePage()
-    local params = SyncMain:ShowDialog("Mod/WorldShare/cellar/Sync/Templates/StartSyncUseDataSource.html", "StartSyncUseDataSource")
+    local params = SyncMain:ShowDialog("Mod/WorldShare/cellar/Sync/Templates/UseDataSource.html", "StartSyncUseDataSource")
 
     params._page.OnClose = function()
         Store:Remove('page/StartSyncUseDataSource')
