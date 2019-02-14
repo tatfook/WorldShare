@@ -498,6 +498,7 @@ function KeepworkService:SetRatedProject(kpProjectId, rate, callback)
     )
 end
 
+-- get keepwork project url
 function KeepworkService:GetShareUrl()
     local env = self:GetEnv()
     local selectWorld = Store:Get("world/selectWorld")
@@ -679,6 +680,7 @@ function KeepworkService:LoginWithTokenApi(callback)
     end
 end
 
+-- update world info
 function KeepworkService:UpdateRecord(callback)
     local foldername = Store:Get("world/foldername")
     local username = Store:Get("user/username")

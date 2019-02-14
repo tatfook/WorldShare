@@ -59,6 +59,7 @@ function SyncToDataSource:Init()
                         selectWorld.kpProjectId = data.id
 
                         Store:Set("world/selectWorld", selectWorld)
+                        Store:Set("world/enterWorld", selectWorld)
 
                         self:SyncToDataSource()
                     end
