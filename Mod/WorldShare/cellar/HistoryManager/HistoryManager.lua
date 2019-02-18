@@ -17,6 +17,7 @@ local MdParser = NPL.load("(gl)Mod/WorldShare/parser/MdParser.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local HttpRequest = NPL.load("(gl)Mod/WorldShare/service/HttpRequest.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
+local KeepworkServiceProject = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Project.lua")
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local Bookmark = NPL.load("(gl)Mod/WorldShare/database/Bookmark.lua")
 local Config = NPL.load("(gl)Mod/WorldShare/config/Config.lua")
@@ -462,6 +463,7 @@ function HistoryManager.FormatDate(date)
     return format("%s%s%s%s%s%s%s", formatDate, year or '', L"年", month or '', L"月", day or '', L"日")
 end
 
+-- That will be execute when world loaded
 function HistoryManager:OnWorldLoad()
     local curLesson = Store:Getter("lesson/GetCurLesson")
     local enterWorld = Store:Get("world/enterWorld")
@@ -472,7 +474,14 @@ function HistoryManager:OnWorldLoad()
     end
 
     if enterWorld then
+        self:Visit(enterWorld)
         self:WriteWorldRecord(enterWorld)
+    end
+end
+
+function HistoryManager:Visit(enterWorld)
+    if enterWorld and enterWorld.kpProjectId then
+        KeepworkServiceProject:Visit(enterWorld.kpProjectId)
     end
 end
 
