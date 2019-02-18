@@ -370,7 +370,7 @@ function HistoryManager:CollectItem(index)
     local curItem = self:GetItemsItemByIndex(index)
 
     if not curItem or not curItem.displayName then
-        return falseOnWorldLoad
+        return false
     end
 
     local displayName = curItem.displayName
