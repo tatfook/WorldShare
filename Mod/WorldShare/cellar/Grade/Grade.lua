@@ -40,7 +40,7 @@ function Grade:OnWorldLoad()
             function()
                 self:ShowNoticeButton()
             end,
-            (5000)
+            (1000 * 60 * 3)
         )
     end
 end
