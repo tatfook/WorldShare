@@ -42,6 +42,13 @@ Config.gitGatewayList = {
   LOCAL = "https://api-stage.keepwork.com/git/v0"
 }
 
+Config.esGatewayList = {
+  ONLINE = "https://api.keepwork.com/es/v0",
+  STAGE = "https://api-stage.keepwork.com/es/v0",
+  RELEASE = "https://api-release.keepwork.com/es/v0",
+  LOCAL = "https://api-stage.keepwork.com/es/v0"
+}
+
 Config.lessonList = {
   ONLINE = "https://api.keepwork.com/lesson/v0",
   STAGE = "https://api-stage.keepwork.com/lesson/v0",
