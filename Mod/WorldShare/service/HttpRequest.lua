@@ -42,16 +42,17 @@ function HttpRequest:GetUrl(params, callback, noTryStatus)
 
     if (formatParams.method == "GET" and type(params) == "table") then
         local url = format("%s?", params.url or "")
+        local paramsString = ""
 
         for key, value in pairs(params.form or {}) do
-            if type(value) == 'string' then
-                url = url .. key .. "=" .. value .. "&"
+            if type(value) == 'string' or type(value) == 'number' then
+                paramsString = paramsString .. key .. "=" .. value .. "&"
             end
         end
 
-        url = string.sub(url, 1, -2)
+        paramsString = string.sub(paramsString, 1, -2)
 
-        formatParams.url = url
+        formatParams.url = format("%s%s", url, paramsString)
     end
 
     if (formatParams.method ~= "GET") then

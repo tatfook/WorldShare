@@ -474,15 +474,14 @@ function HistoryManager:OnWorldLoad()
     end
 
     if enterWorld then
-        self:Visit(enterWorld)
         self:WriteWorldRecord(enterWorld)
     end
+
+    self:Visit()
 end
 
-function HistoryManager:Visit(enterWorld)
-    if enterWorld and enterWorld.kpProjectId then
-        KeepworkServiceProject:Visit(enterWorld.kpProjectId)
-    end
+function HistoryManager:Visit()
+    KeepworkServiceProject:Visit(KeepworkServiceProject:GetProjectId())
 end
 
 function HistoryManager:WriteLessonRecord(curLesson)

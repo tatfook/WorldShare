@@ -268,7 +268,7 @@ function KeepworkService:UpdateProject(pid, params, callback)
     self:Request(format("/projects/%d", pid), "PUT", params, headers, callback)
 end
 
-function KeepworkService:GetProject(pid, callback)
+function KeepworkService:GetProject(pid, callback, noTryStatus)
     if type(pid) ~= 'number' or pid == 0 then
         return false
     end
@@ -291,7 +291,8 @@ function KeepworkService:GetProject(pid, callback)
             end
 
             callback(data, err)
-        end
+        end,
+        noTryStatus
     )
 end
 

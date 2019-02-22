@@ -515,6 +515,8 @@ function WorldList:EnterWorld(index)
         InternetLoadWorld.EnterWorld()
         UserConsole:ClosePage()
     end
+
+    Store:Set("explorer/mode", "mine")
 end
 
 function WorldList.FormatStatus(status)

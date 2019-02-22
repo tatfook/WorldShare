@@ -141,10 +141,7 @@ function WorldShare:OnWorldLoad()
                 SyncMain:SyncWillEnterWorld()
             end
         )
-    end
-
-    NPL.load("(gl)script/apps/Aries/Creator/WorldCommon.lua");
-    local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
+    end   
 end
 
 function WorldShare:OnLeaveWorld()
