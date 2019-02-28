@@ -56,38 +56,53 @@ function GradeLocalData:SetData(key, value)
     playerController:SaveLocalData("grade", allData, true)
 end
 
-function GradeLocalData:IsProjectIdExist(projectId)
+function GradeLocalData:IsProjectIdExist(projectId, username)
     projectId = tonumber(projectId) or false
 
-    if not projectId  then
+    if not projectId or not username then
         return false
     end
 
-    local projectIds = self:GetData('projectIds')
+    local userProjectIds = self:GetData('userProjectIds')
 
-    if type(projectIds) == 'table' and projectIds[projectId] then
-        return true
-    else
+    if type(userProjectIds) ~= 'table' then
         return false
     end
+
+    for key, item in ipairs(userProjectIds) do
+        if item and item.username and item.projectId then
+            if item.username == username and item.projectId == projectId then
+                return true
+            end
+        end
+    end
+
+    return false
 end
 
-function GradeLocalData:RecordProjectId(projectId)
+function GradeLocalData:RecordProjectId(projectId, username)
     projectId = tonumber(projectId) or false
 
-    if not projectId then
+    if not projectId or not username then
         return false
     end
 
-    local projectIds = self:GetData('projectIds')
+    local userProjectIds = self:GetData('userProjectIds')
 
-    if type(projectIds) ~= 'table' then
-        projectIds = {}
+    if type(userProjectIds) ~= 'table' then
+        userProjectIds = {}
     end
 
-    projectIds[projectId] = projectId
+    if self:IsProjectIdExist(projectId, username) then
+        return false
+    end
 
-    self:SetData('projectIds', projectIds)
+    userProjectIds[#userProjectIds + 1] = {
+        username = username,
+        projectId = projectId
+    }
+
+    self:SetData('userProjectIds', userProjectIds)
 
     return true
 end

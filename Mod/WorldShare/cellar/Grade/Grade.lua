@@ -31,11 +31,11 @@ function Grade:SetPage()
 end
 
 function Grade:OnWorldLoad()
-    if Store:Get("world/noGrade") then
+    if Store:Get("explorer/mode") and Store:Get("explorer/mode") == 'recommend' then
         return false
     end
 
-    if KeepworkServiceProject:GetProjectId() and not GradeLocalData:IsProjectIdExist(KeepworkServiceProject:GetProjectId()) then
+    if KeepworkServiceProject:GetProjectId() and not GradeLocalData:IsProjectIdExist(KeepworkServiceProject:GetProjectId(), Store:Get('user/username')) then
         Utils.SetTimeOut(
             function()
                 self:ShowNoticeButton()
@@ -67,6 +67,10 @@ function Grade:ShowNoticeButton()
             local function Handle()
                 Store:Remove('user/loginText')
                 if KeepworkService:IsSignedIn() then
+                    if GradeLocalData:IsProjectIdExist(KeepworkServiceProject:GetProjectId(), Store:Get('user/username')) then
+                        _guihelper.MessageBox(L"您已评过分了！")
+                        return false
+                    end
                     self:ShowPage()
                 else
                     self:ShowNoticeButton()
@@ -114,8 +118,13 @@ end
 
 function Grade:Confirm(score)
     local tagInfo = WorldCommon.GetWorldInfo()
+    local username = Store:Get('user/username')
 
     if not KeepworkServiceProject:GetProjectId() then
+        return false
+    end
+
+    if not username then
         return false
     end
 
@@ -130,7 +139,7 @@ function Grade:Confirm(score)
         rate,
         function(data, err)
             if err == 200 then
-                GradeLocalData:RecordProjectId(KeepworkServiceProject:GetProjectId())
+                GradeLocalData:RecordProjectId(KeepworkServiceProject:GetProjectId(), username)
                 _guihelper.MessageBox(L"感谢您为该作品打分！")
             end
         end

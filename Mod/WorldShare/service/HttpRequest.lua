@@ -41,18 +41,18 @@ function HttpRequest:GetUrl(params, callback, noTryStatus)
     end
 
     if (formatParams.method == "GET" and type(params) == "table") then
-        if(params.form) then
-            local url = params.url;
-            local paramsString = ""
-            for key, value in pairs(params.form or {}) do
-                if type(value) == 'string' or type(value) == 'number' then
-                    paramsString = paramsString .. key .. "=" .. value .. "&"
-                end
+        local url = params.url
+        local paramsString = ""
+
+        for key, value in pairs(params.form or {}) do
+            if type(value) == 'string' or type(value) == 'number' then
+                paramsString = paramsString .. key .. "=" .. value .. "&"
             end
-            paramsString = string.sub(paramsString, 1, -2)
-            if(paramsString and paramsString~="") then
-                formatParams.url = format("%s?%s", url, paramsString)
-            end
+        end
+
+        paramsString = string.sub(paramsString, 1, -2)
+        if(paramsString and paramsString~="") then
+            formatParams.url = format("%s?%s", url, paramsString)
         end
     end
 

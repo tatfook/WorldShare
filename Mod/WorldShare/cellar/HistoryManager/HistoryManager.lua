@@ -88,8 +88,6 @@ end
 function HistoryManager:HasData()
     local historyItems = Store:Get("user/historyItems")
 
-    -- echo(historyItems, true)
-
     return true
 end
 
