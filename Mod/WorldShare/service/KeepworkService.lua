@@ -319,7 +319,7 @@ function KeepworkService:GetWorldsList(callback)
 
     local headers = self:GetHeaders()
 
-    self:Request("/worlds", 'GET', params, headers, callback)
+    self:Request("/worlds", 'GET', {}, headers, callback)
 end
 
 function KeepworkService:GetProjectIdByWorldName(worldName, callback)
