@@ -37,12 +37,8 @@ end
 -- this is called from ParaWorld Login App
 function UserConsole:CheckShowUserWorlds()
     if(System.options.showUserWorldsOnce) then
-        BrowseRemoteWorlds.ShowPage(
-            function(bHasEnteredWorld)
-                System.options.showUserWorldsOnce = nil;
-                self:ClosePage()
-            end
-        )
+        System.options.showUserWorldsOnce = nil;
+        UserConsole.OnClickOfficialWorlds();
         return true;
     end
 end
