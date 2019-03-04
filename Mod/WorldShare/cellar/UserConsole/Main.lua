@@ -37,8 +37,18 @@ end
 -- this is called from ParaWorld Login App
 function UserConsole:CheckShowUserWorlds()
     if(System.options.showUserWorldsOnce) then
-        System.options.showUserWorldsOnce = nil;
-        UserConsole.OnClickOfficialWorlds();
+        BrowseRemoteWorlds.ShowPage(
+            function(bHasEnteredWorld)
+                System.options.showUserWorldsOnce = nil;
+                self:ClosePage()
+            end
+        )
+
+        -- TODO: for Big: ExplorerApp should provide a close callback that calls self:ClosePage()
+        --UserConsole.OnClickOfficialWorlds(function()
+        --    System.options.showUserWorldsOnce = nil;
+        --    self:ClosePage()
+        -- end);
         return true;
     end
 end
