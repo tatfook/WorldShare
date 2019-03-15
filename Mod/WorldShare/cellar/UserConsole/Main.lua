@@ -37,19 +37,11 @@ end
 -- this is called from ParaWorld Login App
 function UserConsole:CheckShowUserWorlds()
     if(System.options.showUserWorldsOnce) then
-        BrowseRemoteWorlds.ShowPage(
-            function(bHasEnteredWorld)
-                System.options.showUserWorldsOnce = nil;
-                self:ClosePage()
-            end
-        )
-
-        -- TODO: for Big: ExplorerApp should provide a close callback that calls self:ClosePage()
-        --UserConsole.OnClickOfficialWorlds(function()
-        --    System.options.showUserWorldsOnce = nil;
-        --    self:ClosePage()
-        -- end);
-        return true;
+        UserConsole.OnClickOfficialWorlds(function()
+            System.options.showUserWorldsOnce = nil
+            self:ClosePage()
+        end)
+        return true
     end
 end
 
@@ -160,23 +152,16 @@ function UserConsole.OnImportWorld()
     ParaGlobal.ShellExecute("open", LocalLoadWorld.GetWorldFolderFullPath(), "", "", 1)
 end
 
-function UserConsole.OnClickOfficialWorlds()
+function UserConsole.OnClickOfficialWorlds(callback)
     if ParaUI.IsKeyPressed(DIK_SCANCODE.DIK_LCONTROL) or ParaUI.IsKeyPressed(DIK_SCANCODE.DIK_RCONTROL) then
-        BrowseRemoteWorlds.ShowPage(
-            function(bHasEnteredWorld)
-                if (bHasEnteredWorld) then
-                    self:ClosePage()
-                end
-            end
-        )
-
+        BrowseRemoteWorlds.ShowPage(callback)
         return true
     end
 
     Store:Set("world/personalMode", true)
 
     if ExplorerApp then
-        ExplorerApp:Init()
+        ExplorerApp:Init(callback)
     end
 end
 
