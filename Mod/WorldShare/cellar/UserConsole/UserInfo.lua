@@ -128,7 +128,7 @@ function UserInfo:CheckDoAutoSignin(callback)
 
     KeepworkService:Profile(
         function(data, err)
-            if (data and data.username) then
+            if (type(data) == 'table' and data.username) then
                 data.token = info.token
                 KeepworkService:LoginResponse(
                     data,
@@ -148,6 +148,9 @@ function UserInfo:CheckDoAutoSignin(callback)
                         end
                     end
                 )
+            else
+                MsgBox:Close()
+                KeepworkService:DeletePWDFile()
             end
         end,
         info.token

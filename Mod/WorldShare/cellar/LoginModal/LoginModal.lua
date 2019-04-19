@@ -148,7 +148,7 @@ function LoginModal:LoginAction()
 
     Store:Set("user/env", env)
 
-    MsgBox:Show(L"正在登陆，请稍后...")
+    MsgBox:Show(L"正在登陆，请稍后...", 8000, L"链接超时")
 
     local function HandleLogined()
         local token = Store:Get("user/token") or ""

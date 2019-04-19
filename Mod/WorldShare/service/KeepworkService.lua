@@ -189,19 +189,6 @@ function KeepworkService:Login(account, password, callback)
         return false
     end
 
-    local timeout = false
-
-    Utils.SetTimeOut(
-        function()
-            if (not timeout) then
-                timeout = true
-                _guihelper.MessageBox(L"链接超时")
-                MsgBox:Close()
-            end
-        end,
-        8000
-    )
-
     local params = {
         username = account,
         password = password
@@ -213,20 +200,15 @@ function KeepworkService:Login(account, password, callback)
         params,
         {},
         function(data, err)
-            if (not timeout) then
-                if (err == 503) then
-                    _guihelper.MessageBox(L"keepwork正在维护中，我们马上回来")
-                    MsgBox:Close()
+            if (err == 503) then
+                MsgBox:Close()
+                -- _guihelper.MessageBox(L"keepwork正在维护中，我们马上回来")
 
-                    timeout = true
-                    return false
-                end
+                return false
+            end
 
-                if (type(callback) == "function") then
-                    callback(data, err)
-                end
-
-                timeout = true
+            if (type(callback) == "function") then
+                callback(data, err)
             end
         end,
         {503, 400}

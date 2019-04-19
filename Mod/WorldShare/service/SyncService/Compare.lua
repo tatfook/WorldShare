@@ -126,6 +126,10 @@ end
 function Compare:CompareRevision(callback)
     local foldername = Store:Get("world/foldername")
 
+    if (not foldername and not foldername.utf8) then
+        return false
+    end
+
     local worldDir = Store:Get("world/worldDir")
     local remoteWorldsList = Store:Get("world/remoteWorldsList")
     local remoteRevision = 0
@@ -145,6 +149,8 @@ function Compare:CompareRevision(callback)
 
             currentRevision = tonumber(currentRevision) or 0
             remoteRevision = tonumber(data) or 0
+
+            self:UpdateSelectWorldInRemoteWorldsList(foldername.utf8, remoteRevision)
 
             Store:Set("world/currentRevision", currentRevision)
             Store:Set("world/remoteRevision", remoteRevision)
@@ -186,6 +192,22 @@ function Compare:CompareRevision(callback)
 
         return false
     end
+end
+
+function Compare:UpdateSelectWorldInRemoteWorldsList(worldName, remoteRevision)
+    local remoteWorldsList = Store:Get('world/remoteWorldsList')
+
+    if not remoteWorldsList or not worldName then
+        return false
+    end
+
+    for key, item in ipairs(remoteWorldsList) do
+        if item.worldName == worldName then
+            item.revision = remoteRevision
+        end
+    end
+
+    Store:Set('world/remoteWorldsList', remoteWorldsList)
 end
 
 function Compare:HasRevision()
