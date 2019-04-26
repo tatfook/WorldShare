@@ -26,18 +26,6 @@
                 function close()
                     LoginModal:Close()
                 end
-
-                function is_english()
-                    return LoginModal:IsEnglish()
-                end
-
-                function get_english_style(styleStr)
-                    if is_english() then
-                        return styleStr
-                    else
-                        return ''
-                    end
-                end
             ]]>
         </script>
         <style type="text/mcss">
@@ -73,11 +61,11 @@
                     <div style="margin-bottom:15px;"><%= login_text()%></div>
                 </pe:if>
                 <div style="margin-bottom:12px;">
-                    <div style="<%='float:left;min-width:40px;' .. get_english_style('min-width:73px;') %>"><%= L"服务器："%></div>
+                    <div style="float:left;min-width:40px;"><%= L"服务器："%></div>
                     <select name="loginServer" DataSource="<%= get_server_list()%>" style="height: 30px;width: 165px;" class="text_field"></select>
                 </div>
                 <div style="margin-bottom:12px;">
-                    <div style="<%='float:left;min-width:65px;' .. get_english_style('min-width:73px;') %>"><%= L"账号：" %></div><input type="text" EmptyText='<%= L"账户名/邮箱/手机号" %>' class="bbs_text text_field" style="height: 30px;" name="account" />
+                    <div style="float:left;min-width:65px"><%= L"账号：" %></div><input type="text" EmptyText='<%= L"账户名/邮箱/手机号" %>' class="bbs_text text_field" style="height: 30px;" name="account" />
                 </div>
                 <div style="margin-bottom:12px;">
                     <div style="float:left;min-width:65px"><%= L"密码：" %></div><input type="text" PasswordChar="*" class="bbs_text text_field" style="height: 30px;" name="password" />
@@ -93,7 +81,7 @@
                 <div style="margin-top:30px;margin-bottom:15px;">
                     <input type="button" DefaultButton="true" class="login_button" onclick="login()" value='<%= L"登 录"%>' />
                 </div>
-                <div style="<%='text-align:left;margin-left:55px;' .. get_english_style('margin-left:15px;')%>">
+                <div style="text-align:left;margin-left:55px;">
                     <a name="forgot" style="background:url(textures/worldshare_32bits.png#399 76 64 30:0 0 0 0);height:30px;width:150px;font-size: 14px;color: #ffffff;"><%= L"忘记密码" %></a>
                     <span style="color:#ffffff;">|</span>
                     <a name="register" style="background:url(textures/worldshare_32bits.png#399 76 64 30:0 0 0 0);height:30px;width:150px;font-size: 14px;color: #fe5927;"><%= L"点击注册" %></a>

@@ -20,7 +20,6 @@ local UserConsole = NPL.load("../UserConsole.lua")
 local LoginUserInfo = NPL.load("../LoginUserInfo.lua")
 local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")
 local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
-local Translation = commonlib.gettable("MyCompany.Aries.Game.Common.Translation")
 
 local LoginModal = NPL.export()
 
@@ -219,12 +218,4 @@ function LoginModal:SetAutoLogin()
     LoginModalPage:SetValue("password", password)
 
     self:Refresh()
-end
-
-function LoginModal:IsEnglish()
-    if Translation.GetCurrentLanguage() == 'enUS' then
-        return true
-    else
-        return false
-    end
 end
