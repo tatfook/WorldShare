@@ -67,7 +67,7 @@ function HttpRequest:GetUrl(params, callback, noTryStatus)
             local debugUrl = type(params) == "string" and params or formatParams.url
             local method = type(params) == "table" and params.method and params.method or "GET"
 
-            LOG.std("HttpRequest", "debug", "Request", "Status Code: %s, Method: %s, URL: %s", err, method, debugUrl)
+            LOG.std("HttpRequest", "debug", "Request", "Status Code: %s, Method: %s, URL: %s, Params: %s", err, method, debugUrl, NPL.ToJson(formatParams, true))
             ---- debug code ----
 
             -- no try status code, return directly
