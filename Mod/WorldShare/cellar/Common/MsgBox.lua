@@ -40,7 +40,6 @@ function MsgBox:Show(msg, sec, overtimeMsg)
                 if (item == curIndex) then
                     _guihelper.MessageBox(overtimeMsg)
 
-                    self.allMsgBox:remove(key)
                     local MessageInfoPage = Store:Get("page/MsgBox")
 
                     if (MessageInfoPage) then
