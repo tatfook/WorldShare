@@ -18,7 +18,7 @@ local UserConsole = NPL.load('(gl)Mod/WorldShare/cellar/UserConsole/Main.lua')
 local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
 local HttpRequest = NPL.load('./HttpRequest.lua')
 local Store = NPL.load('(gl)Mod/WorldShare/store/Store.lua')
-local Utils = NPL.load('(gl)Mod/WorldSHare/helper/Utils.lua')
+local Utils = NPL.load('(gl)Mod/WorldShare/helper/Utils.lua')
 
 local GitlabService = NPL.export()
 

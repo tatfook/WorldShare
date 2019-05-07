@@ -18,7 +18,7 @@ local Utils = NPL.load('(gl)Mod/WorldShare/helper/Utils.lua')
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 local KeepworkServiceProject = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Project.lua")
-local GradeLocalData = NPL.load("(gl)Mod/WorldShare/database/GradeLocaldata.lua")
+local GradeLocalData = NPL.load("(gl)Mod/WorldShare/database/GradeLocalData.lua")
 
 local Grade = NPL.export()
 
