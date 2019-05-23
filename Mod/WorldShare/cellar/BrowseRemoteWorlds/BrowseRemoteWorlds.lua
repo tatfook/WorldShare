@@ -17,7 +17,6 @@ local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login
 local RemoteServerList = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.RemoteServerList")
 local GameLogic = commonlib.gettable("MyCompany.Aries.Game.GameLogic")
 
-local SyncMain = NPL.load("(gl)Mod/WorldShare/sync/SyncMain.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 

@@ -9,6 +9,7 @@ local KeepworkServiceProject = NPL.load("(gl)Mod/WorldShare/service/KeepworkServ
 ------------------------------------------------------------
 ]]
 local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
+local Encoding = commonlib.gettable("commonlib.Encoding")
 
 local KeepworkService = NPL.load("../KeepworkService.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
@@ -33,19 +34,30 @@ function KeepworkServiceProject:Visit(projectId)
 end
 
 function KeepworkServiceProject:GetProjectId()
-    local tagInfo = WorldCommon.GetWorldInfo()
-    local openKpProjectId = Store:Get('world/openKpProjectId')
-    local urlKpProjectId = KeepworkService:GetProjectFromUrlProtocol()
-
-    if tagInfo and tagInfo.kpProjectId then
-        return tagInfo.kpProjectId
-    end
-
+    local urlKpProjectId = self:GetProjectFromUrlProtocol()
     if urlKpProjectId then
         return urlKpProjectId
     end
-
+    
+    local openKpProjectId = Store:Get('world/openKpProjectId')
     if openKpProjectId then
         return openKpProjectId
+    end
+
+    local tagInfo = WorldCommon.GetWorldInfo()
+    if tagInfo and tagInfo.kpProjectId then
+        return tagInfo.kpProjectId
+    end
+end
+
+function KeepworkServiceProject:GetProjectFromUrlProtocol()
+    local cmdline = ParaEngine.GetAppCommandLine()
+    local urlProtocol = string.match(cmdline or "", "paracraft://(.*)$")
+    urlProtocol = Encoding.url_decode(urlProtocol or "")
+
+    local kpProjectId = urlProtocol:match('kpProjectId="([%S]+)"')
+
+    if kpProjectId then
+        return kpProjectId
     end
 end

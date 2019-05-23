@@ -325,14 +325,21 @@ function KeepworkService:GetProjectIdByWorldName(worldName, callback)
                 return false
             end
 
-            local selectWorld = Store:Get('world/selectWorld')
-            local enterWorld = Store:Get('world/enterWorld')
+            local world
 
-            selectWorld.kpProjectId = data[1].projectId
-            enterWorld.kpProjectId = data[1].projectId
+            if Store:Get("world/isEnterWorld") then
+                world = Store:Get('world/enterWorld')
+            else
+                world = Store:Get('world/selectWorld')
+            end
 
-            Store:Set('world/selectWorld', selectWorld)
-            Store:Set('world/enterWorld', enterWorld)
+            world.kpProjectId = data[1].projectId
+
+            if Store:Get("world/isEnterWorld") then
+                Store:Set('world/enterWorld', world)
+            else
+                Store:Set('world/selectWorld', world)
+            end
 
             if type(callback) == 'function' then
                 callback(data[1].projectId)
@@ -436,57 +443,12 @@ function KeepworkService:DeleteWorld(kpProjectId, callback)
     self:Request(url, "DELETE", {}, headers, callback)
 end
 
-function KeepworkService:GetRatedProject(kpProjectId, callback)
-    if not kpProjectId then
-        return false
-    end
-
-    if not self:IsSignedIn() then
-        return false
-    end
-
-    local url = format("/projectRates?projectId=%d", kpProjectId)
-    local headers = self:GetHeaders()
-
-    self:Request(url, "GET", {}, headers, callback)
-end
-
-function KeepworkService:SetRatedProject(kpProjectId, rate, callback)
-    if not kpProjectId then
-        return false
-    end
-
-    if not self:IsSignedIn() then
-        return false
-    end
-
-    local headers = self:GetHeaders()
-
-    local params = {
-        projectId = kpProjectId,
-        rate = rate
-    }
-
-    self:GetRatedProject(
-        kpProjectId,
-        function(data, err)
-            if err ~= 200 or #data == 0 then
-                self:Request("/projectRates", "POST", params, headers, callback)
-            end
-
-            if err == 200 and type(data) == 'table' and #data == 1 and type(data[1].projectId) == 'number' then
-                self:Request(format("/projectRates/%d", data[1].projectId), "PUT", params, headers, callback)
-            end
-        end
-    )
-end
-
 -- get keepwork project url
 function KeepworkService:GetShareUrl()
     local env = self:GetEnv()
-    local selectWorld = Store:Get("world/selectWorld")
+    local enterWorld = Store:Get("world/enterWorld")
 
-    if not selectWorld or not selectWorld.kpProjectId then
+    if not enterWorld or not enterWorld.kpProjectId then
         return ''
     end
 
@@ -494,7 +456,7 @@ function KeepworkService:GetShareUrl()
     local foldername = Store:Get("world/foldername")
     local username = Store:Get("user/username")
 
-    return format("%s/pbl/project/%d/", baseUrl, selectWorld.kpProjectId)
+    return format("%s/pbl/project/%d/", baseUrl, enterWorld.kpProjectId)
 end
 
 function KeepworkService:PWDValidation()
@@ -596,18 +558,6 @@ function KeepworkService:SaveSigninInfo(info)
     end
 end
 
-function KeepworkService:GetProjectFromUrlProtocol()
-    local cmdline = ParaEngine.GetAppCommandLine()
-    local urlProtocol = string.match(cmdline or "", "paracraft://(.*)$")
-    urlProtocol = Encoding.url_decode(urlProtocol or "")
-
-    local kpProjectId = urlProtocol:match('kpProjectId="([%S]+)"')
-
-    if kpProjectId then
-        return kpProjectId
-    end
-end
-
 -- return nil or user token in url protocol
 function KeepworkService:GetUserTokenFromUrlProtocol()
     local cmdline = ParaEngine.GetAppCommandLine()
@@ -665,8 +615,13 @@ end
 
 -- update world info
 function KeepworkService:UpdateRecord(callback)
-    local foldername = Store:Get("world/foldername")
     local username = Store:Get("user/username")
+    local foldername
+    if Store:Get("world/isEnterWorld") then
+        foldername = Store:Get("world/enterFoldername")
+    else
+        foldername = Store:Get("world/foldername")
+    end
 
     local function Handle(data, err)
         if type(data) ~= "table" or #data == 0 then
@@ -683,8 +638,17 @@ function KeepworkService:UpdateRecord(callback)
             return false
         end
 
-        local worldDir = Store:Get("world/worldDir")
-        local selectWorld = Store:Get("world/selectWorld")
+        local worldDir
+        local world
+        if Store:Get("world/isEnterWorld") then
+            worldDir = Store:Get("world/enterWorldDir")
+            world = Store:Get("world/enterWorld")
+        else
+            worldDir = Store:Get("world/worldDir")
+            world = Store:Get("world/selectWorld")
+        end
+
+
         local worldTag = Store:Get("world/worldTag")
         local dataSourceInfo = Store:Get("user/dataSourceInfo")
         local localFiles = LocalService:LoadFiles(worldDir.default)
@@ -701,10 +665,10 @@ function KeepworkService:UpdateRecord(callback)
             foldername.base32
         )
 
-        local filesTotals = selectWorld and selectWorld.size or 0
+        local filesTotals = world and world.size or 0
 
-        local function HandleGetWorld(world)
-            local oldWorldInfo = world or false
+        local function HandleGetWorld(data)
+            local oldWorldInfo = data or false
 
             if not oldWorldInfo then
                 return false
@@ -744,37 +708,27 @@ function KeepworkService:UpdateRecord(callback)
 
             WorldList.SetRefreshing(true)
 
-            if (selectWorld.kpProjectId) then
-                local tag = LocalService:GetTag(foldername.default)
-    
-                if type(tag) == 'table' then
-                    tag.kpProjectId = selectWorld.kpProjectId
-    
-                    LocalService:SetTag(selectWorld.worldpath, tag)
-                end
-    
-                self:GetProject(
-                    selectWorld.kpProjectId,
-                    function(data)
-                        if data and data.extra and not data.extra.imageUrl then
-                            self:UpdateProject(
-                                selectWorld.kpProjectId,
-                                {
-                                    extra = {
-                                        imageUrl = format(
-                                            "%s/%s/%s/raw/master/preview.jpg",
-                                            dataSourceInfo.rawBaseUrl,
-                                            dataSourceInfo.dataSourceUsername,
-                                            foldername.base32
-                                        )
-                                    }
+            self:GetProject(
+                world.kpProjectId,
+                function(data)
+                    if data and data.extra and not data.extra.imageUrl then
+                        self:UpdateProject(
+                            world.kpProjectId,
+                            {
+                                extra = {
+                                    imageUrl = format(
+                                        "%s/%s/%s/raw/master/preview.jpg",
+                                        dataSourceInfo.rawBaseUrl,
+                                        dataSourceInfo.dataSourceUsername,
+                                        foldername.base32
+                                    )
                                 }
-                            )
-                        end
+                            }
+                        )
                     end
-                )
-            end
-    
+                end
+            )
+
             self:PushWorld(
                 worldInfo,
                 function(data, err)
@@ -797,7 +751,12 @@ function KeepworkService:UpdateRecord(callback)
 end
 
 function KeepworkService:SetCurrentCommidId(commitId)
-    local worldDir = Store:Get("world/worldDir")
+    local worldDir
+    if Store:Get('world/isEnterWorld') then
+        worldDir = Store:Get("world/enterWorldDir")
+    else
+        worldDir = Store:Get("world/worldDir")
+    end
 
     WorldShare:SetWorldData("revision", {id = commitId}, worldDir.default)
 

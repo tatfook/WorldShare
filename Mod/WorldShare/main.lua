@@ -130,7 +130,6 @@ function WorldShare:OnWorldLoad()
 
     UserConsole:ClosePage()
     HistoryManager:OnWorldLoad()
-    Grade:OnWorldLoad()
 
     local curLesson = Store:Getter("lesson/GetCurLesson")
 

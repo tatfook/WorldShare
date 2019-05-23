@@ -8,6 +8,7 @@ local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 -------------------------------------------------------
 ]]
 local Encoding = commonlib.gettable("commonlib.Encoding")
+local Translation = commonlib.gettable("MyCompany.Aries.Game.Common.Translation")
 
 local Utils = NPL.export()
 
@@ -168,4 +169,12 @@ function Utils:UrlEncode(str)
 		str = string.gsub(str, " ", "%%20")
 	end
 	return str
+end
+
+function Utils:IsEnglish()
+    if Translation.GetCurrentLanguage() == 'enUS' then
+        return true
+    else
+        return false
+    end
 end

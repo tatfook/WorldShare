@@ -26,11 +26,6 @@ local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua
 local ShareWorld = NPL.export()
 
 function ShareWorld:Init()
-    Store:Set("world/shareMode", true)
-    Store:Set("world/worldDir", self:GetEnterWorldDir())
-    Store:Set("world/foldername", self:GetEnterFoldername())
-    Store:Set("world/selectWorld", self:GetEnterWorld())
-
     local enterWorld = self:GetEnterWorld()
 
     if(not enterWorld or enterWorld.is_zip) then
@@ -52,11 +47,19 @@ function ShareWorld:Init()
                     if isCommandEnter then
                         SyncMain:CommandEnter(
                             function()
-                                Compare:Init()
+                                Compare:Init(
+                                    function()
+                                        self:ShowPage()
+                                    end
+                                )
                             end
                         )
                     else
-                        Compare:Init()
+                        Compare:Init(
+                            function()
+                                self:ShowPage()
+                            end
+                        )
                     end
                 end
             )
@@ -70,7 +73,11 @@ function ShareWorld:Init()
         return false
     end
 
-    Compare:Init()
+    Compare:Init(
+        function()
+            self:ShowPage()
+        end
+    )
 end
 
 function ShareWorld:ShowPage()
@@ -78,6 +85,7 @@ function ShareWorld:ShowPage()
 
     params._page.OnClose = function()
         Store:Remove('page/ShareWorld')
+        Store:Remove("world/shareMode")
     end
 
     local ShareWorldImp = Store:Get('page/ShareWorld')
