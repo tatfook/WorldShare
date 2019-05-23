@@ -35,7 +35,7 @@ function LoginModal:ShowPage()
         return true
     end
 
-    local params = Utils:ShowWindow(320, 470, "Mod/WorldShare/cellar/LoginModal/LoginModal.html", "LoginModal", nil, nil, nil, nil, 999)
+    local params = Utils:ShowWindow(320, 470, "Mod/WorldShare/cellar/LoginModal/LoginModal.html", "LoginModal", nil, nil, nil, nil)
 
     params._page.OnClose = function()
         Store:Remove('page/LoginModal')

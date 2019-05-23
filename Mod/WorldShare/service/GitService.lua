@@ -27,6 +27,8 @@ function GitService:GetDataSourceType()
 
     if (dataSourceInfo and dataSourceInfo.dataSourceType) then
         return string.upper(dataSourceInfo.dataSourceType)
+    else
+        return GITLAB
     end
 end
 

@@ -9,19 +9,20 @@ NPL.load("(gl)Mod/WorldShare/service/GithubService.lua");
 local GithubService = commonlib.gettable("Mod.WorldShare.service.GithubService");
 ------------------------------------------------------------
 ]]
-
-NPL.load("(gl)Mod/WorldShare/login.lua");
-NPL.load("(gl)script/ide/System/Encoding/base64.lua");
-NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua");
-NPL.load("(gl)Mod/WorldShare/services/HttpRequest.lua");
-
-local login         = commonlib.gettable("Mod.WorldShare.login");
-local Encoding      = commonlib.gettable("System.Encoding");
-local GitEncoding   = commonlib.gettable("Mod.WorldShare.helper.GitEncoding");
-local HttpRequest   = commonlib.gettable("Mod.WorldShare.service.HttpRequest");
+--[[
+	NPL.load("(gl)Mod/WorldShare/login.lua");
+	NPL.load("(gl)script/ide/System/Encoding/base64.lua");
+	NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua");
+	NPL.load("(gl)Mod/WorldShare/services/HttpRequest.lua");
+	
+	local login         = commonlib.gettable("Mod.WorldShare.login");
+	local Encoding      = commonlib.gettable("System.Encoding");
+	local GitEncoding   = commonlib.gettable("Mod.WorldShare.helper.GitEncoding");
+	local HttpRequest   = commonlib.gettable("Mod.WorldShare.service.HttpRequest");
+]]
 
 local GithubService = commonlib.gettable("Mod.WorldShare.service.GithubService");
-
+--[[
 function GithubService:apiGet(_url, _callback)
 	local github_token = login.github_token;
 
@@ -190,3 +191,4 @@ end
 function GithubService:getWorldRevison()
 	local contentUrl = format("%s/%s/%s/master/revision.xml", UserConsole.rawBaseUrl, UserConsole.dataSourceUsername, foldername.base32)
 end
+]]

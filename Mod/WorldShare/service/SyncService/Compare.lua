@@ -15,7 +15,6 @@ local WorldRevision = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevi
 
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
-local ShareWorld = NPL.load("(gl)Mod/WorldShare/cellar/ShareWorld/ShareWorld.lua")
 local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
 local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua")
 local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
@@ -34,11 +33,7 @@ local JUSTREMOTE = "JUSTREMOTE"
 local LOCALBIGGER = "LOCALBIGGER"
 local EQUAL = "EQUAL"
 
-function Compare:Init()
-    if (not UserInfo.IsSignedIn() or not UserInfo:CheckoutVerified()) then
-        return false
-    end
-
+function Compare:Init(callback)
     local isEnterWorld = Store:Get("world/isEnterWorld")
     local isShowUserConsolePage = UserConsole:IsShowUserConsole()
 
@@ -51,10 +46,8 @@ function Compare:Init()
     self:GetCompareResult(
         function(result)
             if (isEnterWorld and not isShowUserConsolePage) then
-                local isShareMode = Store:Get("world/shareMode")
-
-                if (isShareMode) then
-                    ShareWorld:ShowPage()
+                if type(callback) == 'function' then
+                    callback()
                     MsgBox:Close()
                     return false
                 end
@@ -97,50 +90,89 @@ function Compare:SetFinish(value)
 end
 
 function Compare:GetCompareResult(callback)
-    local selectWorld = Store:Get("world/selectWorld")
+    local world
 
-    if (selectWorld and selectWorld.status == 2) then
+    if Store:Get("world/isEnterWorld") then
+        world = Store:Get('world/enterWorld')
+    else
+        world = Store:Get('world/selectWorld')
+    end
+
+    if (world and world.status == 2) then
         if (type(callback) == "function") then
             callback(JUSTREMOTE)
             return true
         end
     end
 
-    if (not selectWorld or selectWorld.is_zip) then
+    if (not world or world.is_zip) then
         self:SetFinish(true)
         MsgBox:Close()
         return false
     end
 
-    if (KeepworkService:IsSignedIn()) then
-        self:CompareRevision(callback)
-    else
-        KeepworkService:LoginWithTokenApi(
-            function()
-                self:GetCompareResult(callback)
-            end
-        )
-    end
+    self:CompareRevision(callback)
 end
 
 function Compare:CompareRevision(callback)
-    local foldername = Store:Get("world/foldername")
+    local foldername
+    local worldDir
+    local world
 
-    if (not foldername and not foldername.utf8) then
+    if Store:Get("world/isEnterWorld") then
+        foldername = Store:Get("world/enterFoldername")
+        worldDir = Store:Get("world/enterWorldDir")
+        world = Store:Get('world/enterWorld')
+    else
+        foldername = Store:Get("world/foldername")
+        worldDir = Store:Get("world/worldDir")
+        world = Store:Get('world/selectWorld')
+    end
+
+    if (not foldername or not worldDir or not world) then
         return false
     end
 
-    local worldDir = Store:Get("world/worldDir")
     local remoteWorldsList = Store:Get("world/remoteWorldsList")
     local remoteRevision = 0
-
-    local currentRevision = WorldRevision:new():init(worldDir.default):Checkout()
-
-    if (not worldDir) then
-        return false
-    end
-
+    
     if (self:HasRevision()) then
+        local function CompareRevision(currentRevision, remoteRevision)
+            if (remoteRevision == 0) then
+                return JUSTLOCAL
+            end
+
+            if (currentRevision < remoteRevision) then
+                return REMOTEBIGGER
+            end
+
+            if (currentRevision > remoteRevision) then
+                return LOCALBIGGER
+            end
+
+            if (currentRevision == remoteRevision) then
+                return EQUAL
+            end
+        end
+
+        local currentRevision = WorldRevision:new():init(worldDir.default):Checkout()
+
+        if (world and not world.kpProjectId) then
+            currentRevision = tonumber(currentRevision) or 0
+            remoteRevision = tonumber(data) or 0
+
+            Store:Set("world/currentRevision", currentRevision)
+            Store:Set("world/remoteRevision", remoteRevision)
+
+            self:SetFinish(true)
+
+            if (type(callback) == "function") then
+                callback(CompareRevision(currentRevision, remoteRevision))
+            end
+
+            return true
+        end
+
         local function HandleRevision(data, err)
             if (err == 0 or err == 502) then
                 _guihelper.MessageBox(L"网络错误")
@@ -155,23 +187,7 @@ function Compare:CompareRevision(callback)
             Store:Set("world/currentRevision", currentRevision)
             Store:Set("world/remoteRevision", remoteRevision)
 
-            local result
-
-            if (remoteRevision == 0) then
-                result = JUSTLOCAL
-            end
-
-            if (currentRevision < remoteRevision) then
-                result = REMOTEBIGGER
-            end
-
-            if (currentRevision > remoteRevision) then
-                result = LOCALBIGGER
-            end
-
-            if (currentRevision == remoteRevision) then
-                result = EQUAL
-            end
+            local result = CompareRevision(currentRevision, remoteRevision)
 
             self:SetFinish(true)
 
@@ -180,7 +196,7 @@ function Compare:CompareRevision(callback)
             end
         end
 
-        GitService:GetWorldRevision(foldername, HandleRevision)
+        GitService:GetWorldRevision(world.kpProjectId, foldername, HandleRevision)
     else
         _guihelper.MessageBox(L"本地世界沒有版本信息")
         self:SetFinish(true)
@@ -211,7 +227,13 @@ function Compare:UpdateSelectWorldInRemoteWorldsList(worldName, remoteRevision)
 end
 
 function Compare:HasRevision()
-    local worldDir = Store:Get("world/worldDir")
+    local worldDir
+
+    if Store:Get("world/isEnterWorld") then
+        worldDir = Store:Get("world/enterWorldDir")
+    else
+        worldDir = Store:Get("world/worldDir")
+    end
 
     if (not worldDir or not worldDir.default) then
         return false

@@ -19,8 +19,24 @@ local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
 local HttpRequest = NPL.load('./HttpRequest.lua')
 local Store = NPL.load('(gl)Mod/WorldShare/store/Store.lua')
 local Utils = NPL.load('(gl)Mod/WorldShare/helper/Utils.lua')
+local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
+local Config = NPL.load('(gl)Mod/WorldShare/config/Config.lua')
 
 local GitlabService = NPL.export()
+
+function GitlabService:GetEnv()
+	local env = Store:Get("user/env")
+
+	if not env then
+		env = Config.defaultEnv
+	end
+
+	return env
+end
+
+function GitlabService:GetRawBaseUrl()
+    return Config.dataSourceRawList.gitlab[self:GetEnv()]
+end
 
 function GitlabService:GetDataSourceInfo()
     return Store:Get("user/dataSourceInfo")
@@ -538,43 +554,34 @@ function GitlabService:DeleteResp(projectId, callback)
     self:ApiDelete(url, {}, callback)
 end
 
-function GitlabService:GetWorldRevision(foldername, callback)
-    if (type(foldername) == "function") then
-        return false
-    end
+function GitlabService:GetWorldRevision(projectId, foldername, callback)
+    KeepworkService:GetProject(tonumber(projectId), function(data, err)
+        if not data or not data.world or not data.world.worldName or not data.world.archiveUrl then
+            return false
+        end
 
-    local contentUrl = ""
-    local commitId = self:GetCommitIdByFoldername(foldername.utf8)
-    local dataSourceInfo = self:GetDataSourceInfo()
+        local commitId = self:GetCommitIdByFoldername(foldername.utf8)
+        local gitlabUsername = string.match(data.world.archiveUrl, "keepwork.com/([%w_]+)/")
 
-    if (commitId) then
-        contentUrl =
+        local contentUrl =
             format(
             "%s/%s/%s/raw/%s/revision.xml",
-            dataSourceInfo.rawBaseUrl,
-            dataSourceInfo.dataSourceUsername,
+            self:GetRawBaseUrl(),
+            gitlabUsername,
             foldername.base32,
-            commitId
+            commitId or 'master'
         )
-    else
-        contentUrl =
-            format(
-            "%s/%s/%s/raw/master/revision.xml",
-            dataSourceInfo.rawBaseUrl,
-            dataSourceInfo.dataSourceUsername,
-            foldername.base32
-        )
-    end
 
-    HttpRequest:GetUrl(
-        contentUrl,
-        function(data, err)
-            if type(callback) == "function" then
-                callback(tonumber(data) or 0)
-            end
-        end,
-        {0, 502}
-    )
+        HttpRequest:GetUrl(
+            contentUrl,
+            function(data, err)
+                if type(callback) == "function" then
+                    callback(tonumber(data) or 0)
+                end
+            end,
+            {0, 502}
+        )
+    end)
 end
 
 function GitlabService:GetSingleProject(projectName, callback)

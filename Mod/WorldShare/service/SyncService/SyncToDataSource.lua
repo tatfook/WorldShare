@@ -8,7 +8,6 @@ use the lib:
 local SyncToDataSource = NPL.load("(gl)Mod/WorldShare/cellar/Sync/SyncToDataSource.lua")
 ------------------------------------------------------------
 ]]
-local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/SyncMain.lua")
 local Progress = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Progress/Progress.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
@@ -26,9 +25,18 @@ local UPLOAD = "UPLOAD"
 local DELETE = "DELETE"
 
 function SyncToDataSource:Init()
-    self.worldDir = Store:Get("world/worldDir")
-    self.foldername = Store:Get("world/foldername")
-    local selectWorld = Store:Get("world/selectWorld")
+    local world
+
+    if Store:Get("world/isEnterWorld") then
+        self.worldDir = Store:Get("world/enterWorldDir")
+        self.foldername = Store:Get("world/enterFoldername")
+        world = Store:Get("world/enterWorld")
+    else
+        self.worldDir = Store:Get("world/worldDir")
+        self.foldername = Store:Get("world/foldername")
+        world = Store:Get("world/selectWorld")
+    end
+
 
     if (not self.worldDir or not self.worldDir.default or self.worldDir.default == "") then
         _guihelper.MessageBox(L"上传失败，将使用离线模式，原因：上传目录为空")
@@ -45,7 +53,27 @@ function SyncToDataSource:Init()
     self:IsProjectExist(
         function(beExisted)
             if beExisted then
-                self:SyncToDataSource()
+                -- update world
+                KeepworkService:GetProjectIdByWorldName(self.foldername.utf8, function()
+                    if Store:Get('world/isEnterWorld') then
+                        world = Store:Get('world/enterWorld') 
+                    else
+                        world = Store:Get('world/selectWorld')
+                    end
+
+                    if world and world.kpProjectId then
+                        local tag = LocalService:GetTag(self.foldername.utf8)
+
+                        if type(tag) == 'table' then
+                            tag.kpProjectId = world.kpProjectId
+
+                            LocalService:SetTag(world.worldpath, tag)
+                        end
+                    end
+
+                    self:SyncToDataSource()
+                end)
+
             else
                 KeepworkService:CreateProject(
                     self.foldername.utf8,
@@ -56,10 +84,23 @@ function SyncToDataSource:Init()
                             return false
                         end
 
-                        selectWorld.kpProjectId = data.id
+                        world.kpProjectId = data.id
 
-                        Store:Set("world/selectWorld", selectWorld)
-                        Store:Set("world/enterWorld", selectWorld)
+                        if (world and world.kpProjectId) then
+                            local tag = LocalService:GetTag(self.foldername.utf8)
+
+                            if type(tag) == 'table' then
+                                tag.kpProjectId = world.kpProjectId
+
+                                LocalService:SetTag(world.worldpath, tag)
+                            end
+                        end
+
+                        if Store:Get("world/isEnterWorld") then
+                            Store:Set("world/enterWorld", world)
+                        else
+                            Store:Set("world/selectWorld", world)
+                        end
 
                         self:SyncToDataSource()
                     end
@@ -221,11 +262,7 @@ function SyncToDataSource:RefreshList()
             Store:Set(
                 "world/CloseProgress",
                 function()
-                    WorldList:RefreshCurrentServerList(
-                        function()
-                            Store:Set("world/shareMode", false)
-                        end
-                    )
+                    WorldList:RefreshCurrentServerList()
                 end
             )
         end
