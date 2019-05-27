@@ -325,21 +325,9 @@ function KeepworkService:GetProjectIdByWorldName(worldName, callback)
                 return false
             end
 
-            local world
-
-            if Store:Get("world/isEnterWorld") then
-                world = Store:Get('world/enterWorld')
-            else
-                world = Store:Get('world/selectWorld')
-            end
-
-            world.kpProjectId = data[1].projectId
-
-            if Store:Get("world/isEnterWorld") then
-                Store:Set('world/enterWorld', world)
-            else
-                Store:Set('world/selectWorld', world)
-            end
+            local currentWorld = Store:Get('world/currentWorld')
+            currentWorld.kpProjectId = data[1].projectId
+            Store:Set('world/currentWorld', currentWorld)
 
             if type(callback) == 'function' then
                 callback(data[1].projectId)
@@ -446,9 +434,9 @@ end
 -- get keepwork project url
 function KeepworkService:GetShareUrl()
     local env = self:GetEnv()
-    local enterWorld = Store:Get("world/enterWorld")
+    local currentWorld = Store:Get("world/currentWorld")
 
-    if not enterWorld or not enterWorld.kpProjectId then
+    if not currentWorld or not currentWorld.kpProjectId then
         return ''
     end
 
@@ -456,7 +444,7 @@ function KeepworkService:GetShareUrl()
     local foldername = Store:Get("world/foldername")
     local username = Store:Get("user/username")
 
-    return format("%s/pbl/project/%d/", baseUrl, enterWorld.kpProjectId)
+    return format("%s/pbl/project/%d/", baseUrl, currentWorld.kpProjectId)
 end
 
 function KeepworkService:PWDValidation()
@@ -616,12 +604,7 @@ end
 -- update world info
 function KeepworkService:UpdateRecord(callback)
     local username = Store:Get("user/username")
-    local foldername
-    if Store:Get("world/isEnterWorld") then
-        foldername = Store:Get("world/enterFoldername")
-    else
-        foldername = Store:Get("world/foldername")
-    end
+    local foldername = Store:Get("world/foldername")
 
     local function Handle(data, err)
         if type(data) ~= "table" or #data == 0 then
@@ -638,20 +621,11 @@ function KeepworkService:UpdateRecord(callback)
             return false
         end
 
-        local worldDir
-        local world
-        if Store:Get("world/isEnterWorld") then
-            worldDir = Store:Get("world/enterWorldDir")
-            world = Store:Get("world/enterWorld")
-        else
-            worldDir = Store:Get("world/worldDir")
-            world = Store:Get("world/selectWorld")
-        end
-
+        local currentWorld = Store:Get('world/currentWorld')
 
         local worldTag = Store:Get("world/worldTag")
         local dataSourceInfo = Store:Get("user/dataSourceInfo")
-        local localFiles = LocalService:LoadFiles(worldDir.default)
+        local localFiles = LocalService:LoadFiles(currentWorld and currentWorld.worldpath)
 
         self:SetCurrentCommidId(lastCommitSha)
 
@@ -665,7 +639,7 @@ function KeepworkService:UpdateRecord(callback)
             foldername.base32
         )
 
-        local filesTotals = world and world.size or 0
+        local filesTotals = currentWorld and currentWorld.size or 0
 
         local function HandleGetWorld(data)
             local oldWorldInfo = data or false
@@ -709,11 +683,11 @@ function KeepworkService:UpdateRecord(callback)
             WorldList.SetRefreshing(true)
 
             self:GetProject(
-                world.kpProjectId,
+                currentWorld.kpProjectId,
                 function(data)
                     if data and data.extra and not data.extra.imageUrl then
                         self:UpdateProject(
-                            world.kpProjectId,
+                            currentWorld.kpProjectId,
                             {
                                 extra = {
                                     imageUrl = format(
@@ -751,15 +725,10 @@ function KeepworkService:UpdateRecord(callback)
 end
 
 function KeepworkService:SetCurrentCommidId(commitId)
-    local worldDir
-    if Store:Get('world/isEnterWorld') then
-        worldDir = Store:Get("world/enterWorldDir")
-    else
-        worldDir = Store:Get("world/worldDir")
-    end
+    local currentWorld = Store:Get("world/currentWorld")
+    local saveUrl = format("%s/", currentWorld.worldpath)
 
-    WorldShare:SetWorldData("revision", {id = commitId}, worldDir.default)
-
-    ParaIO.CreateDirectory(format("%smod/", worldDir.default))
-    WorldShare:SaveWorldData(worldDir.default)
+    WorldShare:SetWorldData("revision", {id = commitId}, saveUrl)
+    ParaIO.CreateDirectory(saveUrl)
+    WorldShare:SaveWorldData(saveUrl)
 end

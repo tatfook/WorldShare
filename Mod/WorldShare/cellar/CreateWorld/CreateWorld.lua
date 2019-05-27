@@ -31,52 +31,33 @@ function CreateWorld:CreateNewWorld(foldername)
 end
 
 function CreateWorld.OnClickCreateWorld()
-    Store:Remove("world/enterWorld")
+    Store:Remove("world/currentWorld")
 end
 
 function CreateWorld:CheckRevision(callback)
-    local enterWorld = Store:Get("world/enterWorld")
+    if (not GameLogic.IsReadOnly() and not Compare:HasRevision()) then
+        MsgBox:Show(L"正在初始化世界...")
+        self:CreateRevisionXml()
+        MsgBox:Close()
 
-    if (enterWorld and enterWorld.is_zip) then
-        return false
-    end
-
-    function Handle()
-        if (not Compare:HasRevision()) then
-            MsgBox:Show(L"正在初始化世界...")
-
-            Utils.SetTimeOut(
-                function()
-                    self:CreateRevisionXml()
-
-                    MsgBox:Close()
-
-                    if (type(callback) == "function") then
-                        callback()
-                    end
-                end,
-                1000
-            )
-
-            MsgBox:Close()
-        else
-
-            if (type(callback) == "function") then
-                callback()
-            end
+        if type(callback) == "function" then
+            callback()
         end
-    end
-
-    if (SyncMain:IsCommandEnter()) then
-        SyncMain:CommandEnter(Handle)
     else
-        Handle()
+        if type(callback) == "function" then
+            callback()
+        end
     end
 end
 
 function CreateWorld:CreateRevisionXml()
-    local path = ParaWorld.GetWorldDirectory()
-    local revisionPath = format("%srevision.xml", path)
+    local currentWorld = Store:Get('world/currentWorld')
+
+    if not currentWorld or not currentWorld.worldpath then
+        return false
+    end
+
+    local revisionPath = format("%s/revision.xml", currentWorld.worldpath)
 
     local exist = ParaIO.DoesFileExist(revisionPath)
 

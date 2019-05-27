@@ -14,7 +14,7 @@
                 UserConsole:SetPage()
 
                 function be_selected()
-                    return Eval("index") == WorldList.GetSelectWorldIndex()
+                    return Eval("index") == WorldList.worldIndex
                 end
 
                 function get_world_status(index)
@@ -112,12 +112,10 @@
                     return WorldList.FormatDatetime(WorldList.GetCurWorldInfo("modifyTime", Eval("index")))
                 end
 
-                function selected_version()
-                    return '<input type="button" \
-                             class="common_button login_button" \
-                             onclick="WorldList:SelectVersion()" \
-                             style="float:left;margin-left:0px;base-font-size:6px;font-size:6px;height:15px;width:50px" \
-                             value="v' .. get_world_version() .. '"/>'
+                function selected_version(index)
+                    local index = tonumber(index)
+
+                    WorldList:SelectVersion(index)
                 end
 
                 function go_to_url()
@@ -184,7 +182,7 @@
                 end
 
                 function delete_world(index)
-                    WorldList.DeleteWorld(index)
+                    WorldList:DeleteWorld(index)
                 end
 
                 function sync(index)
@@ -507,7 +505,12 @@
                                                     <div style="float:left;width:25px;height:20px;background:#fff" />
                                                 </pe:if>
                                                 <pe:if condition='<%= not Eval("is_zip") %>'>
-                                                    <%= selected_version() %>
+                                                    <input type="button"
+                                                           class="common_button login_button"
+                                                           name='<%=Eval("index")%>'
+                                                           onclick="selected_version"
+                                                           style="float:left;margin-left:0px;base-font-size:6px;font-size:6px;height:15px;width:50px"
+                                                           value="<%='v' .. get_world_version() %>"/>
                                                     <span style="float:left;margin-left:15px;">
                                                         <%= get_world_size() %>
                                                     </span>

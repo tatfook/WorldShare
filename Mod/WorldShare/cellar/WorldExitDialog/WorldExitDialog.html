@@ -49,10 +49,10 @@
                 end
 
                 function open_keepwork_project()
-                    local enterWorld = Store:Get('world/enterWorld')
+                    local currentWorld = Store:Get('world/currentWorld')
 
-                    if enterWorld and enterWorld.kpProjectId then
-                        ParaGlobal.ShellExecute("open", format("%s/pbl/project/%d/", KeepworkService:GetKeepworkUrl(), enterWorld.kpProjectId or 0), "", "", 1)
+                    if currentWorld and currentWorld.kpProjectId then
+                        ParaGlobal.ShellExecute("open", format("%s/pbl/project/%d/", KeepworkService:GetKeepworkUrl(), currentWorld.kpProjectId or 0), "", "", 1)
                     end
                 end
 
@@ -118,19 +118,19 @@
                 end
 
                 function get_project_id()
-                    local enterWorld = Store:Get('world/enterWorld')
+                    local currentWorld = Store:Get('world/currentWorld')
 
-                    if enterWorld and enterWorld.kpProjectId then
-                        return enterWorld.kpProjectId
+                    if currentWorld and currentWorld.kpProjectId then
+                        return currentWorld.kpProjectId
                     end
 
                     return L"分享到Keepwork后获得"
                 end
 
                 function has_project_id()
-                    local enterWorld = Store:Get('world/enterWorld')
+                    local currentWorld = Store:Get('world/currentWorld')
 
-                    if enterWorld and enterWorld.kpProjectId then
+                    if currentWorld and currentWorld.kpProjectId then
                         return true
                     else
                         return false

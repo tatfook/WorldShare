@@ -44,7 +44,9 @@ function KeepworkServiceProject:GetProjectId()
         return openKpProjectId
     end
 
+    WorldCommon.LoadWorldTag()
     local tagInfo = WorldCommon.GetWorldInfo()
+
     if tagInfo and tagInfo.kpProjectId then
         return tagInfo.kpProjectId
     end

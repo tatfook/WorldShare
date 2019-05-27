@@ -20,6 +20,7 @@ local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local SyncToLocal = NPL.load("(gl)Mod/WorldShare/service/SyncService/SyncToLocal.lua")
 local SyncToDataSource = NPL.load("(gl)Mod/WorldShare/service/SyncService/SyncToDataSource.lua")
 local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
+local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
 
 local WorldShare = commonlib.gettable("Mod.WorldShare")
 local Encoding = commonlib.gettable("commonlib.Encoding")
@@ -28,70 +29,72 @@ local WorldRevision = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevi
 
 local SyncMain = NPL.export()
 
-function SyncMain:SyncWillEnterWorld()
+function SyncMain:OnWorldLoad()
     function Handle()
         -- 没有登陆则直接使用离线模式
         if (KeepworkService:IsSignedIn()) then
-            Store:Remove("world/shareMode")
             Compare:Init()
         end
     end
 
-    if (self:IsCommandEnter()) then
-        self:CommandEnter(Handle)
-    else
-        Handle()
-    end
+    self:GetCurrentWorldInfo(function()
+        CreateWorld:CheckRevision(function()
+            Handle()
+        end)
+    end)
 end
 
-function SyncMain:SyncWillLeavaWorld()
-    Store:Remove("world/enterWorld")
-end
+function SyncMain:GetCurrentWorldInfo(callback)
+    local folderDefauleName = self:GetWorldDefaultName()
+    local foldername = {
+        default = folderDefauleName,
+        utf8 = Encoding.DefaultToUtf8(folderDefauleName),
+        base32 = GitEncoding.Base32(Encoding.DefaultToUtf8(folderDefauleName))
+    }
 
-function SyncMain:IsCommandEnter()
-    local enterWorld = Store:Get("world/enterWorld")
+    Store:Set("world/foldername", foldername)
 
-    if (not enterWorld) then
-        return true
-    else
-        return false
-    end
-end
-
-function SyncMain:CommandEnter(callback)
-    Store:Set("world/isCommandEnter", true)
-    Store:Set("world/isEnterWorld", true)
-
-    local worldName = self:GetWorldDefaultName()
-    local foldername = {}
-
-    foldername.default = worldName
-    foldername.utf8 = Encoding.DefaultToUtf8(foldername.default)
-    foldername.base32 = GitEncoding.Base32(foldername.utf8)
-
-    Store:Set("world/enterFoldername", foldername)
+    local currentWorld = Store:Get("world/currentWorld")
 
     if GameLogic.IsReadOnly() then
         local originWorldPath = ParaWorld.GetWorldDirectory()
-
-        local worldDir = {
-            default = originWorldPath,
-            utf8 = Encoding.DefaultToUtf8(originWorldPath)
-        }
-
-        Store:Set("world/enterWorldDir", worldDir)
-
         local worldTag = WorldCommon.GetWorldInfo() or {}
 
         Store:Set("world/worldTag", worldTag)
-        Store:Set("world/enterWorld", {
+        Store:Set("world/currentWorld", {
             IsFolder = false,
             is_zip = true,
             Title = worldTag.name,
             author = "None",
             costTime = "0:0:0",
             filesize = 0,
-            foldername = foldername.default,
+            foldername = foldername.utf8,
+            grade = "primary",
+            icon = "Texture/3DMapSystem/common/page_world.png",
+            ip = "127.0.0.1",
+            mode = "survival",
+            modifyTime = 0,
+            nid = "",
+            order = 0,
+            preview = "",
+            progress = "0",
+            size = 0,
+            worldpath = originWorldPath,
+            kpProjectId = worldTag.kpProjectId
+        })
+    elseif not currentWorld then -- new world
+        local originWorldPath = ParaWorld.GetWorldDirectory()
+        local worldTag = WorldCommon.GetWorldInfo() or {}
+
+        Store:Set("world/worldTag", worldTag)
+        Store:Set("world/currentWorld", {
+            IsFolder = true,
+            is_zip = false,
+            Title = worldTag.name,
+            author = "None",
+            costTime = "0:0:0",
+            filesize = 0,
+            foldername = foldername.utf8,
             grade = "primary",
             icon = "Texture/3DMapSystem/common/page_world.png",
             ip = "127.0.0.1",
@@ -106,43 +109,27 @@ function SyncMain:CommandEnter(callback)
             kpProjectId = worldTag.kpProjectId
         })
     else
-        local function Handle()
-            local compareWorldList = Store:Get("world/compareWorldList")
-    
-            local currentWorld = nil
-            local worldDir = {}
-    
-            for key, item in ipairs(compareWorldList) do
-                if (item.foldername == foldername.utf8) then
-                    currentWorld = item
-                end
-            end
-    
-            if (currentWorld) then
-                worldDir.default = format("%s/", currentWorld.worldpath)
-                worldDir.utf8 = Encoding.DefaultToUtf8(worldDir.default)
-    
-                Store:Set("world/enterWorldDir", worldDir)
-    
-                local worldTag = LocalService:GetTag(foldername.default)
-    
-                worldTag.size = filesize
-                LocalService:SetTag(worldDir.default, worldTag)
-                Store:Set("world/worldTag", worldTag)
-                Store:Set("world/enterWorld", currentWorld)
+        local compareWorldList = Store:Get("world/compareWorldList")
+        local currentWorld = nil
+
+        for key, item in ipairs(compareWorldList) do
+            if (item.foldername == foldername.utf8) then
+                currentWorld = item
             end
         end
 
-        WorldList:RefreshCurrentServerList(
-            function()
-                Handle()
-    
-                if type(callback) == "function" then
-                    callback()
-                end
-            end,
-            true
-        )
+        if (currentWorld) then
+            local worldTag = LocalService:GetTag(currentWorld.worldpath)
+            worldTag.size = filesize
+            LocalService:SetTag(format("%s/", currentWorld.worldpath), worldTag)
+
+            Store:Set("world/worldTag", worldTag)
+            Store:Set("world/currentWorld", currentWorld)
+        end
+    end
+
+    if type(callback) == 'function' then
+        callback()
     end
 end
 
@@ -256,10 +243,10 @@ function SyncMain:ShowDialog(url, name)
 end
 
 function SyncMain:BackupWorld()
-    local worldDir = Store:Get("world/worldDir")
+    local currentWorld = Store:Get("world/currentWorld")
 
-    local world_revision = WorldRevision:new():init(worldDir.default)
-    world_revision:Backup()
+    local worldRevision = WorldRevision:new():init(currentWorld and currentWorld.worldpath)
+    worldRevision:Backup()
 end
 
 function SyncMain:SyncToLocal()
@@ -287,23 +274,20 @@ function SyncMain.GetRemoteRevision()
 end
 
 function SyncMain:GetCurrentRevisionInfo()
-    local worldDir = Store:Get("world/worldDir")
+    local currentWorld = Store:Get("world/currentWorld")
 
-    return WorldShare:GetWorldData("revision", worldDir.default)
+    return WorldShare:GetWorldData("revision", currentWorld and currentWorld.worldpath .. '/')
 end
 
 function SyncMain:CheckWorldSize()
-    local worldDir
-
-    if Store:Get("world/isEnterWorld") then
-        worldDir = Store:Get("world/enterWorldDir")
-    else
-        worldDir = Store:Get("world/worldDir")
-    end
-
+    local currentWorld = Store:Get("world/currentWorld")
     local userType = Store:Get("user/userType")
 
-    local filesTotal = LocalService:GetWorldSize(worldDir.default)
+    if not currentWorld or not currentWorld.worldpath  or #currentWorld.worldpath == 0 then
+        return false
+    end
+
+    local filesTotal = LocalService:GetWorldSize(currentWorld.worldpath)
     local maxSize = 0
 
     if (userType == "vip") then
@@ -313,7 +297,7 @@ function SyncMain:CheckWorldSize()
     end
 
     if (filesTotal > maxSize) then
-        SyncMain:showBeyondVolume()
+        self:ShowBeyondVolume()
 
         return true
     else
@@ -322,11 +306,11 @@ function SyncMain:CheckWorldSize()
 end
 
 function SyncMain:GetWorldDateTable()
-    local selectWorld = Store:Get("world/selectWorld")
+    local currentWorld = Store:Get("world/currentWorld")
     local date = {}
 
-    if (selectWorld and selectWorld.tooltip) then
-        for item in string.gmatch(selectWorld.tooltip, "[^:]+") do
+    if (currentWorld and currentWorld.tooltip) then
+        for item in string.gmatch(currentWorld.tooltip, "[^:]+") do
             date[#date + 1] = item
         end
 

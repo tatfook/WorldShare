@@ -31,10 +31,7 @@ LocalService.output = {}
 
 function LocalService:LoadFiles(worldDir)
     self.output = {}
-
-    if (string.sub(worldDir, -1, -1) == "/") then
-        self.worldDir = string.sub(worldDir, 1, -2)
-    end
+    self.worldDir = worldDir
 
     local result = Files.Find({}, self.worldDir, self.nMaxFileLevels, self.nMaxFilesNum, self.filter)
 
@@ -241,47 +238,12 @@ function LocalService:MoveZipToFolder(path)
     ParaAsset.CloseArchive(path)
 end
 
---[[
-    function LocalService:FileDownloader(foldername, path, callback)
-        local foldername = GitEncoding.Base32(SyncMain.foldername.utf8)
-    
-        local url = ""
-        local downloadDir = ""
-    
-        if (UserConsole.dataSourceType == "github") then
-        elseif (UserConsole.dataSourceType == "gitlab") then
-            url =
-                UserConsole.rawBaseUrl ..
-                "/" .. UserConsole.dataSourceUsername .. "/" .. foldername .. "/raw/" .. SyncMain.commitId .. "/" .. path
-            downloadDir = SyncMain.worldDir.default .. path
-        end
-    
-        local Files =
-            FileDownloader:new():Init(
-            _path,
-            url,
-            downloadDir,
-            function(bSuccess, downloadPath)
-                local content = LocalService:getFileContent(downloadPath)
-    
-                if (bSuccess) then
-                    local returnData = {filename = _path, content = content}
-                    return callback(bSuccess, returnData)
-                else
-                    return callback(bSuccess, nil)
-                end
-            end,
-            "access plus 5 mins",
-            true
-        )
-    end
-]]
-
-function LocalService:GetWorldSize(WorldDir)
+-- get all world total files size
+function LocalService:GetWorldSize(worldDir)
     local files =
         commonlib.Files.Find(
         {},
-        WorldDir,
+        worldDir,
         5,
         5000,
         function(item)
@@ -354,12 +316,12 @@ function LocalService:SetTag(worldDir, newTag)
     end
 end
 
-function LocalService:GetTag(foldername)
-    if (not foldername) then
+function LocalService:GetTag(worldDir)
+    if (not worldDir) then
         return {}
     end
 
-    local filePath = format("%s/%s/tag.xml", SyncMain:GetWorldFolderFullPath() , foldername)
+    local filePath = format("%s/tag.xml", worldDir)
     local tag = ParaXML.LuaXML_ParseFile(filePath)
 
     if (type(tag) == "table" and type(tag[1]) == "table" and type(tag[1][1]) == "table") then
@@ -378,8 +340,8 @@ function LocalService:SaveWorldInfo(ctx, node)
 
     node.attr.clientversion = self:GetClientVersion() or ctx.clientversion
 
-    local enterWorld = Store:Get('world/enterWorld')
-    node.attr.kpProjectId = enterWorld and enterWorld.kpProjectId or ctx.kpProjectId
+    local currentWorld = Store:Get('world/currentWorld')
+    node.attr.kpProjectId = currentWorld and currentWorld.kpProjectId or ctx.kpProjectId
 end
 
 function LocalService:LoadWorldInfo(ctx, node)

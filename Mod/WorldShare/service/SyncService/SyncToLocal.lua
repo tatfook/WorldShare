@@ -20,6 +20,7 @@ local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")
 local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
+local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
 
 local SyncToLocal = NPL.export()
 
@@ -28,12 +29,19 @@ local DELETE = "DELETE"
 local DOWNLOAD = "DOWNLOAD"
 
 function SyncToLocal:Init(callback)
+    local currentWorld = Store:Get('world/currentWorld')
+
     self.broke = false
     self.finish = false
-    self.worldDir = Store:Get("world/worldDir")
     self.foldername = Store:Get("world/foldername")
-    
-    if (not self.worldDir or not self.worldDir.default or self.worldDir.default == "") then
+    self.worldDir = currentWorld and currentWorld.worldpath
+
+    -- we build a world folder path if worldpath is not exit
+    if (not self.worldDir or self.worldDir == "") then
+        self.worldDir = format("%s/%s/", SyncMain.GetWorldFolderFullPath(), self.foldername.default)
+    end
+
+    if (not self.worldDir or self.worldDir == "") then
         _guihelper.MessageBox(L"下载失败，原因：下载目录为空")
         return false
     end
@@ -43,14 +51,14 @@ function SyncToLocal:Init(callback)
 end
 
 function SyncToLocal:SyncToLocal()
-    local selectWorld = Store:Get("world/selectWorld")
+    local currentWorld = Store:Get("world/currentWorld")
     local commitId = Store:Get("world/commitId")
 
     self.compareListIndex = 1
     self.compareListTotal = 0
 
     local function Handle(data, err)
-        if (commitId or selectWorld.status == 2 and #data ~= 0) then
+        if (commitId or currentWorld.status == 2 and #data ~= 0) then
             -- down zip
             self:DownloadZIP()
             return false
@@ -60,7 +68,7 @@ function SyncToLocal:SyncToLocal()
 
         if (#data == 0) then
             UserConsole:ClosePage()
-            CreateWorld:CreateNewWorld(selectWorld.foldername)
+            CreateWorld:CreateNewWorld(currentWorld.foldername)
             return false
         end
 
@@ -68,7 +76,7 @@ function SyncToLocal:SyncToLocal()
         Progress:Init(self)
         Progress:UpdateDataBar(0, 0, L"正在对比文件列表...")
 
-        self.localFiles = LocalService:LoadFiles(self.worldDir.default)
+        self.localFiles = LocalService:LoadFiles(self.worldDir)
         self.dataSourceFiles = data
 
         Store:Set("world/localFiles", localFiles)
@@ -130,8 +138,7 @@ function SyncToLocal:RefreshWorldList()
             local willEnterWorld = Store:Get('world/willEnterWorld')
 
             if(type(willEnterWorld) == 'function') then
-                local worldIndex = Store:Get("world/worldIndex")
-                WorldList:OnSwitchWorld(worldIndex)
+                WorldList:OnSwitchWorld(1)
                 willEnterWorld()
 
                 Store:Remove('world/willEnterWorld')
@@ -154,8 +161,8 @@ function SyncToLocal:HandleCompareList()
         self:SetFinish(true)
         self:RefreshList()
 
-        local selectWorld = Store:Get("world/selectWorld")
-        KeepworkService:SetCurrentCommidId(selectWorld.lastCommitId)
+        local currentWorld = Store:Get("world/currentWorld")
+        KeepworkService:SetCurrentCommidId(currentWorld.lastCommitId)
 
         self.compareListIndex = 1
         return false
@@ -297,12 +304,12 @@ function SyncToLocal:DownloadZIP()
             return false
         end
 
-        ParaIO.CreateDirectory(self.worldDir.default)
+        ParaIO.CreateDirectory(self.worldDir)
 
-        self.localFiles = LocalService:LoadFiles(self.worldDir.default)
+        self.localFiles = LocalService:LoadFiles(self.worldDir)
 
         if (#self.localFiles ~= 0) then
-            LOG.std(nil, "warn", "WorldShare", "target directory: %s is not empty, we will overwrite files in the folder", self.worldDir.ut8)
+            LOG.std(nil, "warn", "WorldShare", "target directory: %s is not empty, we will overwrite files in the folder", Encoding.DefaultToUtf8(self.worldDir))
             GameLogic.RunCommand(format("/menu %s", "file.worldrevision"))
         end
 

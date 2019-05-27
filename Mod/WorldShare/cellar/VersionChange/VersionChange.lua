@@ -9,7 +9,8 @@ use the lib:
 local VersionChange = NPL.load("(gl)Mod/WorldShare/cellar/VersionChange/VersionChange.lua")
 ------------------------------------------------------------
 ]]
-local DeleteWorld = NPL.load("(gl)Mod/WorldShare/cellar/DeleteWorld/DeleteWorld.lua")
+local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
+
 local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
 local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
@@ -20,27 +21,26 @@ local Encoding = commonlib.gettable("commonlib.Encoding")
 
 local VersionChange = NPL.export()
 
-function VersionChange:Init()
+function VersionChange:Init(foldername)
     if (not KeepworkService:IsSignedIn()) then
         _guihelper.MessageBox(L"登录后才能继续")
         return false
     end
 
-    self.foldername = Store:Get("world/foldername")
-
     local isEnterWorld = Store:Get("world/isEnterWorld")
 
     if (isEnterWorld) then
-        local selectWorld = Store:Get("world/selectWorld")
-        local enterWorld = Store:Get("world/enterWorld")
+        local worldTag = WorldCommon.GetWorldInfo()
 
-        if(enterWorld.foldername == selectWorld.foldername) then
+        if(foldername == worldTag.name) then
             _guihelper.MessageBox(L"不能切换当前编辑的世界")
             return
         end
     end
 
     MsgBox:Show(L"请稍后...")
+
+    self.foldername = foldername
 
     self:GetVersionSource(
         function()
@@ -71,18 +71,21 @@ function VersionChange:ShowPage()
 end
 
 function VersionChange:GetVersionSource(callback)
-    local selectWorld = Store:Get("world/selectWorld")
+    local currentWorld = Store:Get("world/currentWorld")
     local commitId = SyncMain:GetCurrentRevisionInfo()
+
+    if not currentWorld or not commitId then
+        return false
+    end
 
     self.allRevision = commonlib.vector:new()
 
     KeepworkService:GetWorld(
-        Encoding.url_encode(self.foldername.utf8 or ''),
+        Encoding.url_encode(self.foldername or ''),
         function(world)
             if type(callback) ~= 'function' then
                 return false
             end
-
 
             if not world or not world.extra or not world.extra.commitIds then
                 callback()
@@ -92,7 +95,7 @@ function VersionChange:GetVersionSource(callback)
             for key, item in ipairs(world.extra.commitIds) do
                 item.shortId = string.sub(item.commitId, 1, 5)
 
-                if (tonumber(selectWorld.revision) == tonumber(item.revision)) then
+                if (tonumber(currentWorld.revision) == tonumber(item.revision)) then
                     item.isActive = true
                 else
                     item.isActive = false
@@ -117,7 +120,7 @@ function VersionChange:GetAllRevision()
 end
 
 function VersionChange:SelectVersion(index)
-    local selectWorld = Store:Get("world/selectWorld")
+    local currentWorld = Store:Get("world/currentWorld")
     local foldername = Store:Get("world/foldername")
     local commitId = self.allRevision[index]["commitId"]
 

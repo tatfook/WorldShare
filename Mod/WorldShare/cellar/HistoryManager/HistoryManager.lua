@@ -464,15 +464,15 @@ end
 -- That will be execute when world loaded
 function HistoryManager:OnWorldLoad()
     local curLesson = Store:Getter("lesson/GetCurLesson")
-    local enterWorld = Store:Get("world/enterWorld")
+    local currentWorld = Store:Get("world/currentWorld")
 
     if curLesson then
         self:WriteLessonRecord(curLesson)
         return true
     end
 
-    if enterWorld then
-        self:WriteWorldRecord(enterWorld)
+    if currentWorld then
+        self:WriteWorldRecord(currentWorld)
     end
 
     self:Visit()
@@ -498,8 +498,8 @@ function HistoryManager:WriteLessonRecord(curLesson)
     Bookmark:SetItem(displayName, curData)
 end
 
-function HistoryManager:WriteWorldRecord(enterWorld)
-    if type(enterWorld) ~= "table" then
+function HistoryManager:WriteWorldRecord(currentWorld)
+    if type(currentWorld) ~= "table" then
         return false
     end
 
@@ -511,24 +511,24 @@ function HistoryManager:WriteWorldRecord(enterWorld)
         curData = {
             author = username,
             date = os.date("%Y%m%d", os.time()),
-            displayName = enterWorld.foldername,
-            revision = enterWorld.revision,
-            size = enterWorld.size,
+            displayName = currentWorld.foldername,
+            revision = currentWorld.revision,
+            size = currentWorld.size,
             tag = "",
             worldType="world" 
         }
     else
         curData = {
             date = os.date("%Y%m%d", os.time()),
-            displayName = enterWorld.foldername,
-            revision = enterWorld.revision,
-            size = enterWorld.size,
+            displayName = currentWorld.foldername,
+            revision = currentWorld.revision,
+            size = currentWorld.size,
             tag = "",
             worldType="world" 
         }
     end
 
-    local displayName = enterWorld.foldername
+    local displayName = currentWorld.foldername
 
     if not displayName then
         return false
