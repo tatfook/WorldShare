@@ -183,11 +183,11 @@
                             <span style="color: #b2b2b2">项目ID：</span>
                             <div style="float:left" onclick="open_keepwork_project()"><%= get_project_id() %>&nbsp;</div>
                             <pe:if condition="<%= not has_project_id() %>">
-                                <input type="button" class="mc_light_grey_button_with_fillet" style="font-size: 12px;" value="上传" onclick="on_click_share_world()"/>
+                                <input type="button" class="mc_light_grey_button_with_fillet" style="font-size: 12px;" value="<%= L'上传' %>" onclick="on_click_share_world()"/>
                             </pe:if>
                         </div>
                         <div>
-                            <div style="float:right;width: 105px;">
+                            <div style="float:right;width: 110px;">
                                 <div style="color: #b2b2b2">
                                     <%= L'本地版本'%>：<%= get_current_revision() %>
                                 </div>
@@ -205,11 +205,11 @@
                         </div>
                         <pe:if condition="<%= not GameLogic.IsReadOnly() and (not has_project_id() or is_user_world()) %>">
                             <div>
-                                <div style="float:right;width: 105px;">
+                                <div style="float:right;width: 110px;">
                                     <div style="color: #b2b2b2">
                                         <%= L'在线版本'%>：<%= get_remote_revision()%>
                                     </div>
-                                    <div style="margin-top: 23px;">
+                                    <div style="<%= 'margin-top: 23px;'  .. get_english_style('margin-top: 3px;') %>'">
                                         <input type="button" style="<%='font-size:12px;color:#ffffff;max-width:95px;text-singleline:false;' .. get_english_style('height:40px;') %>" class="mc_blue_button_with_fillet" value='<%=L"重新截图" %>' onclick="snapshot()" />
                                     </div>
                                 </div>
