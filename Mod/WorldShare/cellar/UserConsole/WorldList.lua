@@ -14,6 +14,7 @@ local LocalLoadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalL
 local WorldRevision = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision")
 local RemoteServerList = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.RemoteServerList")
 local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
+local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 local Encoding = commonlib.gettable("commonlib.Encoding")
 
 local UserConsole = NPL.load("./Main.lua")
@@ -27,17 +28,17 @@ local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
+local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
 
 local WorldList = NPL.export()
 
-function WorldList.GetCurWorldInfo(info_type, world_index)
-    local index = tonumber(world_index)
-    local compareWorldList = Store:Get("world/compareWorldList")
-    local selected_world = compareWorldList[world_index]
+function WorldList.GetCurWorldInfo(infoType, worldIndex)
+    local index = tonumber(worldIndex)
+    local selectedWorld = WorldList:GetSelectWorld(index)
 
-    if (selected_world) then
-        if (info_type == "mode") then
-            local mode = selected_world["world_mode"]
+    if (selectedWorld) then
+        if (infoType == "mode") then
+            local mode = selectedWorld["world_mode"]
 
             if (mode == "edit") then
                 return L"创作"
@@ -45,12 +46,22 @@ function WorldList.GetCurWorldInfo(info_type, world_index)
                 return L"参观"
             end
         else
-            return selected_world[info_type]
+            return selectedWorld[infoType]
         end
     end
 end
 
-function WorldList:UpdateWorldList(callbackFunc)
+function WorldList:GetSelectWorld(index)
+    local compareWorldList = Store:Get("world/compareWorldList")
+
+    if compareWorldList then
+        return compareWorldList[index]
+    else
+        return nil
+    end
+end
+
+function WorldList:UpdateWorldListFromInternetLoadWorld(callbackFunc)
     local compareWorldList = Store:Get("world/compareWorldList") or {}
 
     self:GetInternetWorldList(
@@ -130,10 +141,14 @@ function WorldList:RefreshCurrentServerList(callback, isForce)
     if (not KeepworkService:IsSignedIn()) then
         self:GetLocalWorldList(
             function()
-                self:ChangeRevision(
+                self:UpdateRevision(
                     function()
+                        local localWorlds = Store:Get("world/localWorlds")
+                        Store:Set("world/compareWorldList", localWorlds)
+
                         self:SetRefreshing(false)
-                        self:UpdateWorldList(callback)
+                        self:UpdateWorldListFromInternetLoadWorld(callback)
+                        WorldCommon.LoadWorldTag() -- reset default world tag
                     end
                 )
             end
@@ -143,12 +158,13 @@ function WorldList:RefreshCurrentServerList(callback, isForce)
     if (KeepworkService:IsSignedIn()) then
         self:GetLocalWorldList(
             function()
-                self:ChangeRevision(
+                self:UpdateRevision(
                     function()
                         self:SyncWorldsList(
                             function()
                                 self:SetRefreshing(false)
-                                self:UpdateWorldList(callback)
+                                self:UpdateWorldListFromInternetLoadWorld(callback)
+                                WorldCommon.LoadWorldTag() -- reset default world tag
                             end
                         )
                     end
@@ -167,7 +183,7 @@ function WorldList:GetLocalWorldList(callback)
     end
 end
 
-function WorldList:ChangeRevision(callback)
+function WorldList:UpdateRevision(callback)
     local localWorlds = Store:Get("user/localWorlds")
 
     if (not localWorlds) then
@@ -176,14 +192,10 @@ function WorldList:ChangeRevision(callback)
 
     for key, value in ipairs(localWorlds) do
         if (value.IsFolder) then
-            local foldername = {}
-            foldername.utf8 = value.foldername
-            foldername.default = Encoding.Utf8ToDefault(value.foldername)
+            local worldRevision = WorldRevision:new():init(value.worldpath)
+            value.revision = worldRevision:GetDiskRevision()
 
-            local WorldRevisionCheckOut = WorldRevision:new():init(SyncMain.GetWorldFolderFullPath() .. "/" .. foldername.default .. "/")
-            value.revision = WorldRevisionCheckOut:GetDiskRevision()
-
-            local tag = LocalService:GetTag(foldername.default)
+            local tag = WorldCommon.LoadWorldTag(value.worldpath)
 
             if type(tag) ~= 'table' then
                 return false
@@ -209,7 +221,6 @@ function WorldList:ChangeRevision(callback)
     end
 
     Store:Set("world/localWorlds", localWorlds)
-    Store:Set("world/compareWorldList", localWorlds)
     
     UserConsole:Refresh()
 
@@ -218,15 +229,15 @@ function WorldList:ChangeRevision(callback)
     end
 end
 
-function WorldList:SelectVersion()
-    local selectWorld = Store:Get('world/selectWorld')
+function WorldList:SelectVersion(index)
+    local selectedWorld = self:GetSelectWorld(index)
 
-    if(selectWorld.status == 1) then
-        _guihelper.MessageBox(L"此世界仅在本地，无法切换版本")
+    if(selectedWorld and selectedWorld.status == 1) then
+        _guihelper.MessageBox(L"此世界仅在本地，无需切换版本")
         return false
     end
 
-    VersionChange:Init()
+    VersionChange:Init(selectedWorld and selectedWorld.foldername)
 end
 
 --[[
@@ -272,6 +283,14 @@ function WorldList:SyncWorldsList(callback)
 
                     isExist = true
                     worldpath = LItem["worldpath"]
+
+                    if tonumber(LItem["kpProjectId"]) ~= tonumber(DItem["projectId"]) then
+                        local tag = WorldCommon.LoadWorldTag(worldpath)
+
+                        tag.kpProjectId = DItem['projectId']
+                        LocalService:SetTag(worldpath, tag)
+                    end
+
                     break
                 end
             end
@@ -343,7 +362,6 @@ function WorldList:SyncWorldsList(callback)
             end
         end
 
-        Store:Set("world/localWorlds", localWorlds)
         Store:Set("world/remoteWorldsList", remoteWorldsList)
         Store:Set("world/compareWorldList", compareWorldList)
 
@@ -404,11 +422,17 @@ function WorldList:UnifiedTimestampFormat(data)
 end
 
 function WorldList:Sync(index)
-    Compare:Init()
+    CreateWorld:CheckRevision(function()
+        Compare:Init()
+    end)
 end
 
-function WorldList.DeleteWorld(index)
-    DeleteWorld:DeleteWorld(index)
+function WorldList:DeleteWorld(index)
+    local compareWorldList = Store:Get('world/compareWorldList')
+
+    local selectedWorld = self:GetSelectWorld(index)
+
+    DeleteWorld:DeleteWorld(selectedWorld and selectedWorld.foldername)
 end
 
 function WorldList.GetWorldType()
@@ -424,23 +448,16 @@ function WorldList:OnSwitchWorld(index)
     self:UpdateWorldInfo(index)
 end
 
-function WorldList.GetSelectWorldIndex()
-    return Store:Get("world/worldIndex")
-end
-
 function WorldList:UpdateWorldInfo(worldIndex)
+    self.worldIndex = worldIndex
+    local currentWorld = self:GetSelectWorld(worldIndex)
     local compareWorldList = Store:Get("world/compareWorldList")
 
-    if (not compareWorldList or type(worldIndex) ~= 'number' or  not compareWorldList[worldIndex]) then
-        return false
-    end
+    if currentWorld and currentWorld.status ~= 2 then
 
-    local currentWorld = compareWorldList[worldIndex]
-
-    if (currentWorld.status ~= 2) then
         if not currentWorld.is_zip then
             local filesize = LocalService:GetWorldSize(currentWorld.worldpath)
-            local worldTag = LocalService:GetTag(Encoding.Utf8ToDefault(currentWorld.foldername))
+            local worldTag = LocalService:GetTag(currentWorld.worldpath)
 
             worldTag.size = filesize
             LocalService:SetTag(currentWorld.worldpath, worldTag)
@@ -454,22 +471,18 @@ function WorldList:UpdateWorldInfo(worldIndex)
         end
     end
 
-    Store:Set("world/selectWorld", currentWorld)
-    Store:Set("world/worldIndex", worldIndex)
+    if not currentWorld then
+        return false
+    end
 
-    local foldername = {}
-
-    foldername.utf8 = currentWorld.foldername
-    foldername.default = Encoding.Utf8ToDefault(foldername.utf8)
-    foldername.base32 = GitEncoding.Base32(foldername.utf8)
-
-    local worldDir = {}
-
-    worldDir.utf8 = format("%s/%s/", SyncMain.GetWorldFolderFullPath(), foldername.utf8)
-    worldDir.default = format("%s/%s/", SyncMain.GetWorldFolderFullPath(), foldername.default)
+    local foldername = {
+        default = Encoding.Utf8ToDefault(currentWorld.foldername),
+        utf8 = currentWorld.foldername,
+        base32 = GitEncoding.Base32(currentWorld.foldername),
+    }
 
     Store:Set("world/foldername", foldername)
-    Store:Set("world/worldDir", worldDir)
+    Store:Set("world/currentWorld", currentWorld)
     Store:Set("world/compareWorldList", compareWorldList)
 
     UserConsole:Refresh()
@@ -494,21 +507,15 @@ end
 function WorldList:EnterWorld(index)
     self:OnSwitchWorld(index)
 
-    local enterWorld = Store:Get("world/selectWorld")
-    local enterWorldDir = Store:Get("world/worldDir")
-    local enterFoldername = Store:Get("world/foldername")
+    local selectedWorld = self:GetSelectWorld(index)
     local compareWorldList = Store:Get("world/compareWorldList")
-
-    Store:Set("world/enterWorld", enterWorld)
-    Store:Set("world/enterWorldDir", enterWorldDir)
-    Store:Set("world/enterFoldername", enterFoldername)
 
     if (not KeepworkService:IsSignedIn()) then
         InternetLoadWorld.EnterWorld()
         return
     end
 
-    if (enterWorld.status == 2) then
+    if (selectedWorld.status == 2) then
         Store:Set("world/willEnterWorld", InternetLoadWorld.EnterWorld)
         Compare:Init()
     else

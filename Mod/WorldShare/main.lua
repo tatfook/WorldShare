@@ -45,6 +45,7 @@ local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local Grade = NPL.load("(gl)Mod/WorldShare/cellar/Grade/Grade.lua")
 
 local GameLogic = commonlib.gettable("MyCompany.Aries.Game.GameLogic")
+local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 
 local WorldShare = commonlib.inherit(commonlib.gettable("Mod.ModBase"), commonlib.gettable("Mod.WorldShare"))
 
@@ -126,7 +127,7 @@ function WorldShare:OnLogin()
 end
 
 function WorldShare:OnWorldLoad()
-    Store:Set("world/isEnterWorld", true)
+    Store:Set('world/isEnterWorld', true)
 
     UserConsole:ClosePage()
     HistoryManager:OnWorldLoad()
@@ -135,18 +136,11 @@ function WorldShare:OnWorldLoad()
 
     -- if enter with lesson method, we will not check revision
     if not curLesson then
-        CreateWorld:CheckRevision(
-            function()
-                SyncMain:SyncWillEnterWorld()
-            end
-        )
+        SyncMain:OnWorldLoad()
     end   
 end
 
 function WorldShare:OnLeaveWorld()
-    Store:Remove("world/selectWorld")
-    Store:Remove("world/worldIndex")
-    Store:Remove("world/shareMode")
-    Store:Remove("world/worldDir")
+    Store:Remove("world/currentWorld")
     Store:Remove("world/foldername")
 end

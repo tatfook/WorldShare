@@ -18,6 +18,7 @@ local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
+local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
 local Grade = NPL.load("./Grade.lua")
 
 local WorldExitDialog = NPL.export()
@@ -25,6 +26,7 @@ local self = WorldExitDialog
 
 -- @param callback: function(res) end.
 function WorldExitDialog.ShowPage(callback)
+    UserConsole:ClosePage()
     local function Handle()
         local params = Utils:ShowWindow(610, 400, "Mod/WorldShare/cellar/WorldExitDialog/WorldExitDialog.html", "WorldExitDialog")
 
@@ -42,13 +44,13 @@ function WorldExitDialog.ShowPage(callback)
     end
 
     if GameLogic.IsReadOnly() then
-        local enterWorld = Store:Get('world/enterWorld')
+        local currentWorld = Store:Get('world/currentWorld')
 
-        if not enterWorld or not enterWorld.worldpath then
+        if not currentWorld or not currentWorld.worldpath then
             return false
         end
 
-        local worldRevision = WorldRevision:new():init(enterWorld.worldpath)
+        local worldRevision = WorldRevision:new():init(currentWorld.worldpath)
         local currentRevision = worldRevision:GetRevision()
 
         Store:Set('world/currentRevision', currentRevision)
@@ -63,10 +65,10 @@ function WorldExitDialog.ShowPage(callback)
         end
     else
         Compare:Init(function()
-            local enterWorld = Store:Get('world/enterWorld')
-    
-            if enterWorld and enterWorld.kpProjectId then
-                KeepworkService:GetProject(tonumber(enterWorld.kpProjectId), function(data)
+            local currentWorld = Store:Get('world/currentWorld')
+
+            if currentWorld and currentWorld.kpProjectId then
+                KeepworkService:GetProject(tonumber(currentWorld.kpProjectId), function(data)
                     if data and data.world and data.world.worldName then
                         self.currentWorldKeepworkInfo = data
                     end
@@ -79,7 +81,7 @@ function WorldExitDialog.ShowPage(callback)
                     else
                         Handle()
                     end
-                end)
+                end, {0})
 
                 return true
             end
@@ -90,10 +92,10 @@ function WorldExitDialog.ShowPage(callback)
 end
 
 function WorldExitDialog:IsUserWorld()
-    local enterWorld = Store:Get('world/enterWorld')
+    local currentWorld = Store:Get('world/currentWorld')
     local userId = Store:Get('user/userId')
 
-    if enterWorld and enterWorld.kpProjectId and userId then
+    if currentWorld and currentWorld.kpProjectId and userId then
         if self.currentWorldKeepworkInfo and self.currentWorldKeepworkInfo.userId and self.currentWorldKeepworkInfo.userId == userId then
             return true
         else
@@ -156,10 +158,10 @@ end
 function WorldExitDialog:CanSetStart()
     if not KeepworkService:IsSignedIn() then
         LoginModal:Init(function()
-            local enterWorld = Store:Get('world/enterWorld')
+            local currentWorld = Store:Get('world/currentWorld')
 
-            if enterWorld and enterWorld.kpProjectId then
-                KeepworkService:GetProject(tonumber(enterWorld.kpProjectId), function(data)
+            if currentWorld and currentWorld.kpProjectId then
+                KeepworkService:GetProject(tonumber(currentWorld.kpProjectId), function(data)
                     if data and data.world and data.world.worldName then
                         self.currentWorldKeepworkInfo = data
                     end

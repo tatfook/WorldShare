@@ -25,20 +25,12 @@ local UPLOAD = "UPLOAD"
 local DELETE = "DELETE"
 
 function SyncToDataSource:Init()
-    local world
+    self.foldername = Store:Get("world/foldername")
+    local currentWorld = Store:Get('world/currentWorld')
 
-    if Store:Get("world/isEnterWorld") then
-        self.worldDir = Store:Get("world/enterWorldDir")
-        self.foldername = Store:Get("world/enterFoldername")
-        world = Store:Get("world/enterWorld")
-    else
-        self.worldDir = Store:Get("world/worldDir")
-        self.foldername = Store:Get("world/foldername")
-        world = Store:Get("world/selectWorld")
-    end
+    self.worldDir = currentWorld.worldpath
 
-
-    if (not self.worldDir or not self.worldDir.default or self.worldDir.default == "") then
+    if (not self.worldDir or self.worldDir == "") then
         _guihelper.MessageBox(L"上传失败，将使用离线模式，原因：上传目录为空")
         return false
     end
@@ -55,19 +47,14 @@ function SyncToDataSource:Init()
             if beExisted then
                 -- update world
                 KeepworkService:GetProjectIdByWorldName(self.foldername.utf8, function()
-                    if Store:Get('world/isEnterWorld') then
-                        world = Store:Get('world/enterWorld') 
-                    else
-                        world = Store:Get('world/selectWorld')
-                    end
+                    currentWorld = Store:Get('world/currentWorld') 
 
-                    if world and world.kpProjectId then
-                        local tag = LocalService:GetTag(self.foldername.utf8)
+                    if currentWorld and currentWorld.kpProjectId then
+                        local tag = LocalService:GetTag(currentWorld.worldpath)
 
                         if type(tag) == 'table' then
-                            tag.kpProjectId = world.kpProjectId
-
-                            LocalService:SetTag(world.worldpath, tag)
+                            tag.kpProjectId = currentWorld.kpProjectId
+                            LocalService:SetTag(currentWorld.worldpath, tag)
                         end
                     end
 
@@ -84,24 +71,19 @@ function SyncToDataSource:Init()
                             return false
                         end
 
-                        world.kpProjectId = data.id
+                        currentWorld.kpProjectId = data.id
 
-                        if (world and world.kpProjectId) then
-                            local tag = LocalService:GetTag(self.foldername.utf8)
+                        if (currentWorld and currentWorld.kpProjectId) then
+                            local tag = LocalService:GetTag(currentWorld.worldpath)
 
                             if type(tag) == 'table' then
-                                tag.kpProjectId = world.kpProjectId
+                                tag.kpProjectId = currentWorld.kpProjectId
 
-                                LocalService:SetTag(world.worldpath, tag)
+                                LocalService:SetTag(currentWorld.worldpath, tag)
                             end
                         end
 
-                        if Store:Get("world/isEnterWorld") then
-                            Store:Set("world/enterWorld", world)
-                        else
-                            Store:Set("world/selectWorld", world)
-                        end
-
+                        Store:Set("world/currentWorld", currentWorld)
                         self:SyncToDataSource()
                     end
                 )
@@ -136,7 +118,7 @@ function SyncToDataSource:SyncToDataSource()
     local function Handle(data, err)
         self.dataSourceFiles = data
         self.localFiles = commonlib.vector:new()
-        self.localFiles:AddAll(LocalService:LoadFiles(self.worldDir.default)) --再次获取本地文件，保证上传的内容为最新
+        self.localFiles:AddAll(LocalService:LoadFiles(self.worldDir)) --再次获取本地文件，保证上传的内容为最新
 
         Store:Set('world/localFiles', self.localFiles)
 
@@ -184,7 +166,7 @@ function SyncToDataSource:CheckReadmeFile()
     end
 
     if (not hasReadme) then
-        local filePath = format("%sREADME.md", self.worldDir.default)
+        local filePath = format("%s/README.md", self.worldDir)
         local file = ParaIO.open(filePath, "w")
         local content = KeepworkGen:GetReadmeFile()
 

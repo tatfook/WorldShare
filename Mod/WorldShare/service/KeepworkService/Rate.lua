@@ -14,6 +14,7 @@ local KeepworkServiceRate = NPL.export()
 
 -- get project rate
 function KeepworkServiceRate:GetRatedProject(kpProjectId, callback)
+
   if not kpProjectId then
       return false
   end

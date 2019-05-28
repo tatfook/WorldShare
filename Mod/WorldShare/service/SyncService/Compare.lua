@@ -39,10 +39,6 @@ function Compare:Init(callback)
 
     self:SetFinish(false)
 
-    if not self:IsCompareFinish() then
-        MsgBox:Show(L"请稍后...")
-    end
-
     self:GetCompareResult(
         function(result)
             if (isEnterWorld and not isShowUserConsolePage) then
@@ -90,22 +86,16 @@ function Compare:SetFinish(value)
 end
 
 function Compare:GetCompareResult(callback)
-    local world
+    local currentWorld = Store:Get('world/currentWorld')
 
-    if Store:Get("world/isEnterWorld") then
-        world = Store:Get('world/enterWorld')
-    else
-        world = Store:Get('world/selectWorld')
-    end
-
-    if (world and world.status == 2) then
+    if (currentWorld and currentWorld.status == 2) then
         if (type(callback) == "function") then
             callback(JUSTREMOTE)
             return true
         end
     end
 
-    if (not world or world.is_zip) then
+    if (not currentWorld or currentWorld.is_zip) then
         self:SetFinish(true)
         MsgBox:Close()
         return false
@@ -115,27 +105,16 @@ function Compare:GetCompareResult(callback)
 end
 
 function Compare:CompareRevision(callback)
-    local foldername
-    local worldDir
-    local world
+    local foldername = Store:Get("world/foldername")
+    local currentWorld = Store:Get('world/currentWorld')
 
-    if Store:Get("world/isEnterWorld") then
-        foldername = Store:Get("world/enterFoldername")
-        worldDir = Store:Get("world/enterWorldDir")
-        world = Store:Get('world/enterWorld')
-    else
-        foldername = Store:Get("world/foldername")
-        worldDir = Store:Get("world/worldDir")
-        world = Store:Get('world/selectWorld')
-    end
-
-    if (not foldername or not worldDir or not world) then
+    if (not foldername or not currentWorld or not currentWorld.worldpath) then
         return false
     end
 
     local remoteWorldsList = Store:Get("world/remoteWorldsList")
     local remoteRevision = 0
-    
+
     if (self:HasRevision()) then
         local function CompareRevision(currentRevision, remoteRevision)
             if (remoteRevision == 0) then
@@ -155,9 +134,9 @@ function Compare:CompareRevision(callback)
             end
         end
 
-        local currentRevision = WorldRevision:new():init(worldDir.default):Checkout()
+        local currentRevision = WorldRevision:new():init(currentWorld.worldpath):Checkout()
 
-        if (world and not world.kpProjectId) then
+        if (currentWorld and not currentWorld.kpProjectId) then
             currentRevision = tonumber(currentRevision) or 0
             remoteRevision = tonumber(data) or 0
 
@@ -196,7 +175,11 @@ function Compare:CompareRevision(callback)
             end
         end
 
-        GitService:GetWorldRevision(world.kpProjectId, foldername, HandleRevision)
+        if not self:IsCompareFinish() then
+            MsgBox:Show(L"请稍后...")
+        end
+
+        GitService:GetWorldRevision(currentWorld.kpProjectId, foldername, HandleRevision)
     else
         _guihelper.MessageBox(L"本地世界沒有版本信息")
         self:SetFinish(true)
@@ -227,19 +210,9 @@ function Compare:UpdateSelectWorldInRemoteWorldsList(worldName, remoteRevision)
 end
 
 function Compare:HasRevision()
-    local worldDir
+    local currentWorld = Store:Get("world/currentWorld")
 
-    if Store:Get("world/isEnterWorld") then
-        worldDir = Store:Get("world/enterWorldDir")
-    else
-        worldDir = Store:Get("world/worldDir")
-    end
-
-    if (not worldDir or not worldDir.default) then
-        return false
-    end
-
-    local localFiles = LocalService:LoadFiles(worldDir.default)
+    local localFiles = LocalService:LoadFiles(currentWorld and currentWorld.worldpath)
     local hasRevision = false
 
     Store:Set("world/localFiles", localFiles)

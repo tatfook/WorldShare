@@ -141,15 +141,15 @@ function BrowseRemoteWorlds.EnterWorld(index)
 
     InternetLoadWorld.selected_world_index = index
 
-    local enterWorld = InternetLoadWorld.GetCurrentWorld()
+    local currentRemoteWorld = InternetLoadWorld.GetCurrentWorld()
 
-    if not enterWorld then
+    if not currentRemoteWorld then
         return false
     end
 
-    enterWorld.is_zip = true
+    currentRemoteWorld.is_zip = true
 
-    Store:Set("world/enterWorld", enterWorld)
+    Store:Set("world/currentWorld", currentRemoteWorld)
     InternetLoadWorld.EnterWorld(index)
 end
 
@@ -162,11 +162,11 @@ function BrowseRemoteWorlds.DeleteWorld(index)
 
     InternetLoadWorld.selected_world_index = index
 
-    local selectWorld = InternetLoadWorld.GetCurrentWorld()
-    local enterWorld = Store:Get('world/enterWorld')
+    local currentRemoteWorld = InternetLoadWorld.GetCurrentWorld()
+    local currentWorld = Store:Get('world/currentWorld')
 
-    if (enterWorld) then
-        if (enterWorld.foldername == selectWorld.foldername) then
+    if (currentWorld) then
+        if (currentWorld.foldername == currentRemoteWorld.foldername) then
             _guihelper.MessageBox(L"不能刪除正在编辑的世界")
             return
         end
