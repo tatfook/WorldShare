@@ -23,11 +23,12 @@ local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")
 local CreateWorld = NPL.export()
 
 function CreateWorld:CreateNewWorld(foldername)
-    if type(foldername) == 'string' then
-        CreateNewWorld.LastWorldName = foldername
-    end
-
     CreateNewWorld.ShowPage()
+
+    if type(foldername) == 'string' then
+        CreateNewWorld.page:SetValue('new_world_name', foldername)
+        CreateNewWorld.page:Refresh(0.01)
+    end
 end
 
 function CreateWorld.OnClickCreateWorld()

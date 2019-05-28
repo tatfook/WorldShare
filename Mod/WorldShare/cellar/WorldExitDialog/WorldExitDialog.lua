@@ -64,30 +64,30 @@ function WorldExitDialog.ShowPage(callback)
             Handle()
         end
     else
-        Compare:Init(function()
-            local currentWorld = Store:Get('world/currentWorld')
+        if KeepworkService:IsSignedIn() then
+            Compare:Init(function()
+                local currentWorld = Store:Get('world/currentWorld')
+    
+                if currentWorld and currentWorld.kpProjectId then
+                    KeepworkService:GetProject(tonumber(currentWorld.kpProjectId), function(data)
+                        if data and data.world and data.world.worldName then
+                            self.currentWorldKeepworkInfo = data
+                        end
 
-            if currentWorld and currentWorld.kpProjectId then
-                KeepworkService:GetProject(tonumber(currentWorld.kpProjectId), function(data)
-                    if data and data.world and data.world.worldName then
-                        self.currentWorldKeepworkInfo = data
-                    end
-
-                    if KeepworkService:IsSignedIn() then
                         Grade:IsRated(function(isRated)
                             self.isRated = isRated
                             Handle()
                         end)
-                    else
-                        Handle()
-                    end
-                end, {0})
-
-                return true
-            end
-
+                    end, {0})
+    
+                    return true
+                end
+    
+                Handle()
+            end)
+        else
             Handle()
-        end)
+        end
     end
 end
 
