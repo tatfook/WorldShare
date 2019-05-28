@@ -179,9 +179,12 @@
                         <img name="ShareWorldImage" zorder="1" width="280" height="185" onclick="snapshot()" tooltip='<%= L"重新截图" %>' />
                     </div>
                     <div style="float:right;padding-left:28px;">
-                        <div style="margin-top:-5px;margin-bottom: 20px;" onclick="open_keepwork_project()">
+                        <div style="margin-top:-5px;margin-bottom: 20px;">
                             <span style="color: #b2b2b2">项目ID：</span>
-                            <%= get_project_id() %>
+                            <div style="float:left" onclick="open_keepwork_project()"><%= get_project_id() %>&nbsp;</div>
+                            <pe:if condition="<%= not has_project_id() %>">
+                                <input type="button" class="mc_light_grey_button_with_fillet" style="font-size: 12px;" value="上传" onclick="on_click_share_world()"/>
+                            </pe:if>
                         </div>
                         <div>
                             <div style="float:right;width: 105px;">
@@ -193,9 +196,11 @@
                                 <div style="margin-bottom: 12px;">
                                     <input type="button" class="button1 mc_light_grey_button_with_fillet" value="<%= L'本地目录' %>" onclick="on_open_world_dir()"/>
                                 </div>
-                                <div style="margin-bottom: 12px;">
-                                    <input type="button" class="button1 mc_light_grey_button_with_fillet" value="<%= L'历史版本' %>" onclick="on_click_revision()" />
-                                </div>
+                                <pe:if condition="<%= not GameLogic.IsReadOnly() %>">
+                                    <div style="margin-bottom: 12px;">
+                                        <input type="button" class="button1 mc_light_grey_button_with_fillet" value="<%= L'历史版本' %>" onclick="on_click_revision()" />
+                                    </div>
+                                </pe:if>
                             </div>
                         </div>
                         <pe:if condition="<%= not GameLogic.IsReadOnly() and (not has_project_id() or is_user_world()) %>">
@@ -246,10 +251,10 @@
                     <%= L"您上次保存世界是:"%> <span style="color:#ff6a00"><%=format(L"%d秒前", get_elapsed_unsaved_seconds())%></span>
                 </div>
                 <div style="margin-top:25x;">
-                    <pe:if condition="<%= not is_user_world() %>">
+                    <pe:if condition="<%= GameLogic.IsReadOnly() %>">
                         <input type="button" onclick="save_as()" value='<%=L"另存为" %>' class="mc_big_button" style="min-width:155px;height:35px;" />
                     </pe:if>
-                    <pe:if condition="<%= is_user_world() %>">
+                    <pe:if condition="<%= not GameLogic.IsReadOnly() %>">
                         <input type="button" onclick="on_click_save_and_exit()" value='<%=L"保存并退出" %>' class="mc_big_button" style="min-width:155px;height:35px;" />
                     </pe:if>
                     <input type="button" onclick="on_click_exit_without_save()" value='<%=L"直接退出" %>' class="mc_big_button" style="margin-left:45px;min-width:155px;height:35px;" />

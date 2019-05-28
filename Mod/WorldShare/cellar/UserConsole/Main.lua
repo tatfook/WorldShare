@@ -245,7 +245,7 @@ function UserConsole:HandleWorldId(pid)
     KeepworkService:GetWorldByProjectId(
         tonumber(pid),
         function(worldInfo)
-            if worldInfo and worldInfo.archiveUrl then
+            if worldInfo and worldInfo.archiveUrl and #worldInfo.archiveUrl > 0 then
                 Store:Set('world/openKpProjectId', pid)
                 HandleLoadWorld(worldInfo.archiveUrl)
             else

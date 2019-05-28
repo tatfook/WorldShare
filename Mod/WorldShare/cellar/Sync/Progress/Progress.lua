@@ -9,7 +9,6 @@ local Progress = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Progress.lua")
 ------------------------------------------------------------
 ]]
 local SyncMain = NPL.load("../Main.lua")
-local ShareWorld = NPL.load("../ShareWorld/ShareWorld.lua")
 local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")

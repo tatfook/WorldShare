@@ -12,7 +12,7 @@ local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/Login/UserInfo.lua")
 local GameLogic = commonlib.gettable("MyCompany.Aries.Game.GameLogic")
 local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
 
-local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/UserConsole.lua")
+local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
 local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
 local LoginModal = NPL.load("../LoginModal/LoginModal.lua")
 local HttpRequest = NPL.load("(gl)Mod/WorldShare/service/HttpRequest.lua")
