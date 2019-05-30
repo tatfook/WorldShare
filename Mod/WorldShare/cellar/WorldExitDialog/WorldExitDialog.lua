@@ -104,6 +104,10 @@ function WorldExitDialog.ShowPage(callback)
                 Handle()
             end)
         else
+            local currentWorld = Store:Get('world/currentWorld')
+            local currentRevision = WorldRevision:new():init(currentWorld.worldpath):Checkout()
+
+            Store:Set('world/currentRevision', currentRevision)
             Handle()
         end
     end
