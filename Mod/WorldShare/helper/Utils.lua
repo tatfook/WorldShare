@@ -2,7 +2,7 @@
 Title: Utils
 Author(s): big
 Date: 2018.06.21
-Desc: generate KeepWork documentation 
+Desc: 
 -------------------------------------------------------
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 -------------------------------------------------------
@@ -12,33 +12,51 @@ local Translation = commonlib.gettable("MyCompany.Aries.Game.Common.Translation"
 
 local Utils = NPL.export()
 
-function Utils:ShowWindow(width, height, url, name, x, y, align, allowDrag, zorder)
-    if (not x) then
-        x = width
+-- show one page
+-- @param option window width or selfdefined params
+-- @param height window height
+-- @param url page url
+-- @param x window x position
+-- @param y window y position
+-- @param align align method
+-- @param allowDrag Is allow window drag
+-- @param window z-axis order
+-- @return table
+function Utils:ShowWindow(option, height, url, name, x, y, align, allowDrag, zorder)
+    local params
+ 
+    if type(option) == 'table' then
+        params = option
+    else
+        local width = option
+    
+        if (not x) then
+            x = width
+        end
+    
+        if (not y) then
+            y = height
+        end
+    
+        params = {
+            url = url,
+            name = name,
+            isShowTitleBar = false,
+            DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
+            style = CommonCtrl.WindowFrame.ContainerStyle,
+            zorder = zorder or 0,
+            allowDrag = allowDrag == nil and true or allowDrag,
+            bShow = nil,
+            directPosition = true,
+            align = align or "_ct",
+            x = -x / 2,
+            y = -y / 2,
+            width = width,
+            height = height,
+            cancelShowAnimation = true,
+            bToggleShowHide = true
+        }
     end
-
-    if (not y) then
-        y = height
-    end
-
-    local params = {
-        url = url,
-        name = name,
-        isShowTitleBar = false,
-        DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
-        style = CommonCtrl.WindowFrame.ContainerStyle,
-        zorder = zorder or 0,
-        allowDrag = allowDrag == nil and true or allowDrag,
-        bShow = bShow,
-        directPosition = true,
-        align = align or "_ct",
-        x = -x / 2,
-        y = -y / 2,
-        width = width,
-        height = height,
-        cancelShowAnimation = true,
-        bToggleShowHide = true
-    }
 
     System.App.Commands.Call("File.MCMLWindowFrame", params)
 

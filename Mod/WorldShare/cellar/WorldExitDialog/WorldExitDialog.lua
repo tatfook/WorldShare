@@ -24,11 +24,29 @@ local Grade = NPL.load("./Grade.lua")
 local WorldExitDialog = NPL.export()
 local self = WorldExitDialog
 
+-- show exit world dialog page
 -- @param callback: function(res) end.
+-- @return void or boolean
 function WorldExitDialog.ShowPage(callback)
     UserConsole:ClosePage()
     local function Handle()
-        local params = Utils:ShowWindow(610, 400, "Mod/WorldShare/cellar/WorldExitDialog/WorldExitDialog.html", "WorldExitDialog")
+        local params = Utils:ShowWindow({
+            url = "Mod/WorldShare/cellar/WorldExitDialog/WorldExitDialog.html",
+            name = "WorldExitDialog",
+            isShowTitleBar = false,
+            DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
+            style = CommonCtrl.WindowFrame.ContainerStyle,
+            allowDrag = true,
+            directPosition = true,
+            align = "_ct",
+            x = -610 / 2,
+            y = -400 / 2,
+            width = 610,
+            height = 400,
+            cancelShowAnimation = true,
+            bToggleShowHide = true,
+            enable_esc_key = true
+        })
 
         params._page.OnClose = function()
             Store:Remove('page/WorldExitDialog')

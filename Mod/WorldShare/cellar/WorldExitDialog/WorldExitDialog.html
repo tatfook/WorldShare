@@ -181,8 +181,8 @@
                     <div style="float:right;padding-left:28px;">
                         <div style="margin-top:-5px;margin-bottom: 20px;">
                             <span style="color: #b2b2b2">项目ID：</span>
-                            <div style="float:left" onclick="open_keepwork_project()"><%= get_project_id() %>&nbsp;</div>
-                            <pe:if condition="<%= not has_project_id() %>">
+                            <input type="button" style="float:left;color:#FFFFFF;" class="mc_blue_button_with_fillet" value="<%= get_project_id() %>" onclick="open_keepwork_project()" />&nbsp;
+                            <pe:if condition="<%= not GameLogic.IsReadOnly() and not has_project_id() %>">
                                 <input type="button" class="mc_light_grey_button_with_fillet" style="font-size: 12px;" value="<%= L'上传' %>" onclick="on_click_share_world()"/>
                             </pe:if>
                         </div>
@@ -252,7 +252,7 @@
                 </div>
                 <div style="margin-top:25x;">
                     <pe:if condition="<%= GameLogic.IsReadOnly() %>">
-                        <input type="button" onclick="save_as()" value='<%=L"另存为" %>' class="mc_big_button" style="min-width:155px;height:35px;" />
+                        <input type="button" onclick="save_as()" value='<%=L"另存为..." %>' class="mc_big_button" style="min-width:155px;height:35px;" />
                     </pe:if>
                     <pe:if condition="<%= not GameLogic.IsReadOnly() %>">
                         <input type="button" onclick="on_click_save_and_exit()" value='<%=L"保存并退出" %>' class="mc_big_button" style="min-width:155px;height:35px;" />
