@@ -124,7 +124,7 @@
                         return currentWorld.kpProjectId
                     end
 
-                    return L"分享到Keepwork后获得"
+                    return L"上传世界后获得"
                 end
 
                 function has_project_id()
@@ -173,15 +173,18 @@
             }
         </style>
         <aries:window mode="thin" width="610" height="400" title='<%=format("%s", get_cur_world_name() or "") %>' title_height="40" close_height="25" onclose="on_click_cancel">
-            <div style="padding:20px;padding-bottom:25px;color:#ffffff">
+            <div style="padding:20px;padding-bottom:5px;color:#ffffff">
                 <div>
                     <div style="float:left">
                         <img name="ShareWorldImage" zorder="1" width="280" height="185" onclick="snapshot()" tooltip='<%= L"重新截图" %>' />
+                        <div style="margin-top:3px;">
+                            <input type="button" style="font-size:12px;color:#ffffff;max-width:120px;text-singleline:false;" class="mc_blue_button_with_fillet" value='<%=L"重新截图" %>' onclick="snapshot()" />
+                        </div>
                     </div>
                     <div style="float:right;padding-left:28px;">
                         <div style="margin-top:-5px;margin-bottom: 20px;">
                             <span style="color: #b2b2b2">项目ID：</span>
-                            <input type="button" style="float:left;color:#FFFFFF;" class="mc_blue_button_with_fillet" value="<%= get_project_id() %>" onclick="open_keepwork_project()" />&nbsp;
+                            <input type="button" style="float:left;color:#FFFFFF;" class="mc_blue_button_with_fillet" value="<%= get_project_id() %>" onclick="open_keepwork_project()" tooltip='<%= L"点击访问作品项目页面" %>' />&nbsp;
                             <pe:if condition="<%= not GameLogic.IsReadOnly() and not has_project_id() %>">
                                 <input type="button" class="mc_light_grey_button_with_fillet" style="font-size: 12px;" value="<%= L'上传' %>" onclick="on_click_share_world()"/>
                             </pe:if>
@@ -198,30 +201,22 @@
                                 </div>
                                 <pe:if condition="<%= not GameLogic.IsReadOnly() %>">
                                     <div style="margin-bottom: 12px;">
-                                        <input type="button" class="button1 mc_light_grey_button_with_fillet" value="<%= L'历史版本' %>" onclick="on_click_revision()" />
+                                        <input type="button" class="button1 mc_light_grey_button_with_fillet" tooltip='<%=L"点击查看历史版本目录, 解压可恢复到最近几天的版本"%>' value="<%= L'历史版本' %>" onclick="on_click_revision()" />
                                     </div>
                                 </pe:if>
                             </div>
                         </div>
-                        <pe:if condition="<%= not GameLogic.IsReadOnly() and (not has_project_id() or is_user_world()) %>">
+                        <pe:if condition="<%= not GameLogic.IsReadOnly() and (not has_project_id() or is_user_world()) and has_project_id() %>">
                             <div>
                                 <div style="float:right;width: 110px;">
                                     <div style="color: #b2b2b2">
                                         <%= L'在线版本'%>：<%= get_remote_revision()%>
                                     </div>
-                                    <div style="<%= 'margin-top: 23px;'  .. get_english_style('margin-top: 3px;') %>'">
-                                        <input type="button" style="<%='font-size:12px;color:#ffffff;max-width:95px;text-singleline:false;' .. get_english_style('height:40px;') %>" class="mc_blue_button_with_fillet" value='<%=L"重新截图" %>' onclick="snapshot()" />
-                                    </div>
                                 </div>
                                 <div style="float:right">
-                                    <div style="margin-bottom: 12px;">
-                                        <input type="button" class="button2" value="上传到Keepwork" onclick="on_click_share_world()"/>
+                                    <div>
+                                        <input type="button" class="button1 mc_light_grey_button_with_fillet" value="项目网站" onclick="open_keepwork_project()"/>
                                     </div>
-                                    <pe:if condition="<%= has_project_id() %>">
-                                        <div>
-                                            <input type="button" class="button1 mc_light_grey_button_with_fillet" value="项目网站" onclick="open_keepwork_project()"/>
-                                        </div>
-                                    </pe:if>
                                 </div>
                             </div>
                         </pe:if>
