@@ -104,6 +104,7 @@ function WorldExitDialog.ShowPage(callback)
                 Handle()
             end)
         else
+            Store:Set('world/currentRevision', GameLogic.options:GetRevision())
             Handle()
         end
     end
