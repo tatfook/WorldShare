@@ -177,8 +177,10 @@
                 <div>
                     <div style="float:left">
                         <img name="ShareWorldImage" zorder="1" width="280" height="185" onclick="snapshot()" tooltip='<%= L"重新截图" %>' />
-                        <div style="margin-top:3px;">
-                            <input type="button" style="font-size:12px;color:#ffffff;max-width:120px;text-singleline:false;" class="mc_blue_button_with_fillet" value='<%=L"重新截图" %>' onclick="snapshot()" />
+                        <div style="margin-top:3px;height:20px;">
+                            <pe:if condition="<%= not GameLogic.IsReadOnly() %>">
+                                <input type="button" style="font-size:12px;color:#ffffff;max-width:120px;text-singleline:false;" class="mc_blue_button_with_fillet" value='<%=L"重新截图" %>' onclick="snapshot()" />
+                            </pe:if>
                         </div>
                     </div>
                     <div style="float:right;padding-left:28px;">
