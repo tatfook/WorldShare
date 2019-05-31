@@ -121,7 +121,7 @@
                     local currentWorld = Store:Get('world/currentWorld')
 
                     if currentWorld and currentWorld.kpProjectId then
-                        return currentWorld.kpProjectId
+                        return tostring(currentWorld.kpProjectId)
                     end
 
                     return L"上传世界后获得"
@@ -213,11 +213,6 @@
                                 <div style="float:right;width: 110px;">
                                     <div style="color: #b2b2b2">
                                         <%= L'在线版本'%>：<%= get_remote_revision()%>
-                                    </div>
-                                </div>
-                                <div style="float:right">
-                                    <div>
-                                        <input type="button" class="button1 mc_light_grey_button_with_fillet" value="项目网站" onclick="open_keepwork_project()"/>
                                     </div>
                                 </div>
                             </div>

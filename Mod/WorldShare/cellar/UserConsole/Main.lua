@@ -112,6 +112,10 @@ function UserConsole:ClosePage()
     if (UserConsolePage) then
         UserConsolePage:CloseWindow()
     end
+
+    if Store:Get('world/isEnterWorld') then
+        SyncMain:GetCurrentWorldInfo(callback)
+    end
 end
 
 function UserConsole:Refresh(time)

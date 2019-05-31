@@ -192,6 +192,8 @@ function WorldList:UpdateRevision(callback)
 
     for key, value in ipairs(localWorlds) do
         if (value.IsFolder) then
+            value.worldpath = value.worldpath .. '/'
+
             local worldRevision = WorldRevision:new():init(value.worldpath)
             value.revision = worldRevision:GetDiskRevision()
 
