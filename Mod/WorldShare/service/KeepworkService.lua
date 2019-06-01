@@ -726,7 +726,7 @@ end
 
 function KeepworkService:SetCurrentCommidId(commitId)
     local currentWorld = Store:Get("world/currentWorld")
-    local saveUrl = format("%s/", currentWorld.worldpath)
+    local saveUrl = currentWorld.worldpath
 
     WorldShare:SetWorldData("revision", {id = commitId}, saveUrl)
     ParaIO.CreateDirectory(saveUrl)

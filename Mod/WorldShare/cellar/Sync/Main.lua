@@ -82,7 +82,29 @@ function SyncMain:GetCurrentWorldInfo(callback)
             worldpath = originWorldPath,
             kpProjectId = worldTag.kpProjectId
         })
-    elseif not currentWorld then -- new world
+    else
+        local compareWorldList = Store:Get("world/compareWorldList")
+        local searchCurrentWorld = nil
+
+        for key, item in ipairs(compareWorldList) do
+            if (item.foldername == foldername.utf8) then
+                searchCurrentWorld = item
+            end
+        end
+
+        if (searchCurrentWorld) then
+            currentWorld = searchCurrentWorld
+
+            local worldTag = LocalService:GetTag(currentWorld.worldpath)
+            worldTag.size = filesize
+            LocalService:SetTag(format("%s/", currentWorld.worldpath), worldTag)
+
+            Store:Set("world/worldTag", worldTag)
+            Store:Set("world/currentWorld", currentWorld)
+        end
+    end
+
+    if not currentWorld then -- new world
         local originWorldPath = ParaWorld.GetWorldDirectory()
         local worldTag = WorldCommon.GetWorldInfo() or {}
 
@@ -105,27 +127,9 @@ function SyncMain:GetCurrentWorldInfo(callback)
             preview = "",
             progress = "0",
             size = 0,
-            worldpath = originWorldPath,
+            worldpath = originWorldPath, 
             kpProjectId = worldTag.kpProjectId
         })
-    else
-        local compareWorldList = Store:Get("world/compareWorldList")
-        local currentWorld = nil
-
-        for key, item in ipairs(compareWorldList) do
-            if (item.foldername == foldername.utf8) then
-                currentWorld = item
-            end
-        end
-
-        if (currentWorld) then
-            local worldTag = LocalService:GetTag(currentWorld.worldpath)
-            worldTag.size = filesize
-            LocalService:SetTag(format("%s/", currentWorld.worldpath), worldTag)
-
-            Store:Set("world/worldTag", worldTag)
-            Store:Set("world/currentWorld", currentWorld)
-        end
     end
 
     if type(callback) == 'function' then
