@@ -84,23 +84,26 @@ function SyncMain:GetCurrentWorldInfo(callback)
         })
     else
         local compareWorldList = Store:Get("world/compareWorldList")
-        local searchCurrentWorld = nil
 
-        for key, item in ipairs(compareWorldList) do
-            if (item.foldername == foldername.utf8) then
-                searchCurrentWorld = item
+        if compareWorldList then
+            local searchCurrentWorld = nil
+    
+            for key, item in ipairs(compareWorldList) do
+                if (item.foldername == foldername.utf8) then
+                    searchCurrentWorld = item
+                end
             end
-        end
-
-        if (searchCurrentWorld) then
-            currentWorld = searchCurrentWorld
-
-            local worldTag = LocalService:GetTag(currentWorld.worldpath)
-            worldTag.size = filesize
-            LocalService:SetTag(format("%s/", currentWorld.worldpath), worldTag)
-
-            Store:Set("world/worldTag", worldTag)
-            Store:Set("world/currentWorld", currentWorld)
+    
+            if (searchCurrentWorld) then
+                currentWorld = searchCurrentWorld
+    
+                local worldTag = LocalService:GetTag(currentWorld.worldpath)
+                worldTag.size = filesize
+                LocalService:SetTag(format("%s/", currentWorld.worldpath), worldTag)
+    
+                Store:Set("world/worldTag", worldTag)
+                Store:Set("world/currentWorld", currentWorld)
+            end
         end
     end
 
