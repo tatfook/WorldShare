@@ -54,7 +54,7 @@ WorldShare:Property({"Name", "WorldShare"})
 WorldShare.version = '0.0.2'
 
 -- LOG.SetLogLevel("DEBUG");
-LOG.std("WorldShare", "info", "world share version", WorldShare.version)
+LOG.std(nil, "info", "world share version", WorldShare.version)
 
 function WorldShare:ctor()
 end
