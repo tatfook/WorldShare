@@ -30,6 +30,10 @@ LocalService.nMaxFilesNum = 500
 LocalService.output = {}
 
 function LocalService:LoadFiles(worldDir)
+    if not worldDir or #worldDir == 0 then
+        return {}
+    end
+
     self.output = {}
     self.worldDir = worldDir
 

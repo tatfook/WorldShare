@@ -14,6 +14,7 @@
                 local ShareWorld = NPL.load('(gl)Mod/WorldShare/cellar/ShareWorld/ShareWorld.lua')
                 local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
                 local Grade = NPL.load('./Grade.lua')
+                local os = commonlib.gettable("System.os")
 
                 WorldExitDialog:OnInit()
 
@@ -152,6 +153,10 @@
                 function is_user_world()
                     return WorldExitDialog:IsUserWorld()
                 end
+
+                function get_platform()
+                    return os.GetPlatform()
+                end
             ]]>
         </script>
         <style type="text/mcss">
@@ -187,7 +192,7 @@
                         <div style="margin-top:-5px;margin-bottom: 20px;">
                             <span style="color: #b2b2b2">项目ID：</span>
                             <input type="button" style="float:left;color:#FFFFFF;" class="mc_blue_button_with_fillet" value="<%= get_project_id() %>" onclick="open_keepwork_project()" tooltip='<%= L"点击访问作品项目页面" %>' />&nbsp;
-                            <pe:if condition="<%= not GameLogic.IsReadOnly() and not has_project_id() %>">
+                            <pe:if condition="<%= not GameLogic.IsReadOnly() and (not has_project_id() or is_user_world()) %>">
                                 <input type="button" class="mc_light_grey_button_with_fillet" style="font-size: 12px;" value="<%= L'上传' %>" onclick="on_click_share_world()"/>
                             </pe:if>
                         </div>
@@ -197,16 +202,18 @@
                                     <%= L'本地版本'%>：<%= get_current_revision() %>
                                 </div>
                             </div>
-                            <div style="float:right;">
-                                <div style="margin-bottom: 12px;">
-                                    <input type="button" class="button1 mc_light_grey_button_with_fillet" value="<%= L'本地目录' %>" onclick="on_open_world_dir()"/>
-                                </div>
-                                <pe:if condition="<%= not GameLogic.IsReadOnly() %>">
+                            <pe:if condition="<%= get_platform() ~= 'android' and get_platform() ~= 'ios' %>">
+                                <div style="float:right;">
                                     <div style="margin-bottom: 12px;">
-                                        <input type="button" class="button1 mc_light_grey_button_with_fillet" tooltip='<%=L"点击查看历史版本目录, 解压可恢复到最近几天的版本"%>' value="<%= L'历史版本' %>" onclick="on_click_revision()" />
+                                        <input type="button" class="button1 mc_light_grey_button_with_fillet" value="<%= L'本地目录' %>" onclick="on_open_world_dir()"/>
                                     </div>
-                                </pe:if>
-                            </div>
+                                    <pe:if condition="<%= not GameLogic.IsReadOnly() %>">
+                                        <div style="margin-bottom: 12px;">
+                                            <input type="button" class="button1 mc_light_grey_button_with_fillet" tooltip='<%=L"点击查看历史版本目录, 解压可恢复到最近几天的版本"%>' value="<%= L'历史版本' %>" onclick="on_click_revision()" />
+                                        </div>
+                                    </pe:if>
+                                </div>
+                            </pe:if>
                         </div>
                         <pe:if condition="<%= not GameLogic.IsReadOnly() and (not has_project_id() or is_user_world()) and has_project_id() %>">
                             <div>

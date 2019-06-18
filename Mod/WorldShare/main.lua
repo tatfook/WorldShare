@@ -33,6 +33,7 @@ NPL.load("(gl)script/apps/Aries/Creator/Game/Login/RemoteWorld.lua")
 NPL.load("(gl)script/ide/System/Core/UniString.lua")
 NPL.load("(gl)script/ide/System/Core/Event.lua")
 NPL.load("(gl)script/apps/Aries/Creator/Game/Login/TeacherAgent/TeacherAgent.lua")
+NPL.load("(gl)script/ide/System/os/os.lua")
 
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
@@ -50,7 +51,7 @@ local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 local WorldShare = commonlib.inherit(commonlib.gettable("Mod.ModBase"), commonlib.gettable("Mod.WorldShare"))
 
 WorldShare:Property({"Name", "WorldShare"})
-WorldShare.version = '0.0.1'
+WorldShare.version = '0.0.2'
 
 -- LOG.SetLogLevel("DEBUG");
 LOG.std(nil, "info", "world share version", WorldShare.version)
