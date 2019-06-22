@@ -209,7 +209,7 @@ function SyncMain:ShowStartSyncUseLocalPage()
     local params = SyncMain:ShowDialog("Mod/WorldShare/cellar/Sync/Templates/UseLocal.html", "StartSyncUseLocal")
 
     params._page.OnClose = function()
-        Store.remove('page/StartSyncUseLocal')
+        Store:remove('page/StartSyncUseLocal')
     end
 end
 
