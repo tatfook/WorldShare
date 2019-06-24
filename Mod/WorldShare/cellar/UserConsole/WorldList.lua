@@ -276,7 +276,7 @@ function WorldList:SyncWorldsList(callback)
             local status
 
             for LKey, LItem in ipairs(localWorlds) do
-                if DItem["worldName"] == LItem["foldername"] then
+                if DItem["worldName"] == LItem["foldername"] and not LItem.is_zip then
                     if (tonumber(LItem["revision"] or 0) == tonumber(DItem["revision"] or 0)) then
                         status = 3 --本地网络一致
                         revision = LItem['revision']
@@ -317,7 +317,8 @@ function WorldList:SyncWorldsList(callback)
                 lastCommitId = DItem["commitId"], 
                 worldpath = worldpath,
                 status = status,
-                kpProjectId = DItem["projectId"]
+                kpProjectId = DItem["projectId"],
+                is_zip = false,
             }
 
             compareWorldList:push_back(currentWorld)
@@ -328,17 +329,18 @@ function WorldList:SyncWorldsList(callback)
             local isExist = false
 
             for DKey, DItem in ipairs(remoteWorldsList) do
-                if (LItem["foldername"] == DItem["worldName"]) then
+                if LItem["foldername"] == DItem["worldName"] and not LItem.is_zip then
                     isExist = true
                     break
                 end
             end
 
-            if (not isExist) then
+            if not isExist then
                 currentWorld = LItem
                 currentWorld.modifyTime = self:UnifiedTimestampFormat(currentWorld.writedate)
                 currentWorld.text = currentWorld.foldername
                 currentWorld.status = 1 --仅本地
+                currentWorld.is_zip = LItem['is_zip'] or false
                 compareWorldList:push_back(currentWorld)
             end
         end
@@ -523,8 +525,7 @@ function WorldList:EnterWorld(index)
     end
 
     if (selectedWorld.status == 2) then
-        Store:Set("world/willEnterWorld", InternetLoadWorld.EnterWorld)
-        Compare:Init()
+        Compare:Init(InternetLoadWorld.EnterWorld)
     else
         InternetLoadWorld.EnterWorld()
         UserConsole:ClosePage()
