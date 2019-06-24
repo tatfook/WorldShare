@@ -104,8 +104,8 @@
                     return Utils.FormatFileSize(WorldList.GetLatestSize(Eval("index")))
                 end
 
-                function can_be_sync(cmd)
-                    return UserInfo.IsSignedIn() and not WorldList.GetCurWorldInfo(cmd, Eval("index"))
+                function can_be_sync()
+                    return UserInfo.IsSignedIn() and not WorldList.GetCurWorldInfo("is_zip", Eval("index"))
                 end
 
                 function get_world_date()
@@ -482,7 +482,7 @@
                                         <pe:if condition='<%= get_world_status(5)%>'>
                                             <div class="status" style="<%= get_world_status_icon(5) %>" tooltip='<%= get_world_status_tips()%>' />
                                         </pe:if>
-                                        <pe:if condition='<%= not can_be_sync("is_zip")%>'>
+                                        <pe:if condition='<%= not can_be_sync()%>'>
                                             <div style="float:left;width:9px;height:32px;background:#fff" />
                                         </pe:if>
                                         <div class="share_world_name">
@@ -532,13 +532,13 @@
                                             </div>
                                         </div>
                                         <div class="share_world_info_button">
-                                            <pe:if condition='<%= not can_be_sync("is_zip")%>'>
+                                            <pe:if condition='<%= not can_be_sync()%>'>
                                                 <div class="share_button" style="float:left" />
                                             </pe:if>
                                             <!-- 删除 -->
                                             <input type="button" class="share_button" style="<%= get_share_button('delete') %>"
                                                 onclick='delete_world' tooltip='<%=L"删除"%>' name='<%=Eval("index")%>' />
-                                            <pe:if condition='<%= can_be_sync("is_zip")%>'>
+                                            <pe:if condition='<%= can_be_sync()%>'>
                                                 <!-- 手动同步 -->
                                                 <input type="button" class="share_button" style="<%= get_share_button('sync') %>"
                                                     onclick="sync" tooltip='<%=L"同步"%>' name='<%=Eval("index")%>' />
@@ -571,7 +571,7 @@
                                             <pe:if condition='<%= get_world_status(5) %>'>
                                                 <div class="status" style="<%= get_world_status_icon(5) %>" tooltip='<%= get_world_status_tips()%>' />
                                             </pe:if>
-                                            <pe:if condition='<%= not can_be_sync("is_zip")%>'>
+                                            <pe:if condition='<%= not can_be_sync()%>'>
                                                 <div style="float:left;width:9px;height:32px;background:#fff" />
                                             </pe:if>
                                             <div class="share_world_name">

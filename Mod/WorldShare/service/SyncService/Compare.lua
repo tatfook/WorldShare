@@ -24,6 +24,7 @@ local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")
+local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
 
 local Compare = NPL.export()
 
@@ -104,6 +105,9 @@ function Compare:GetCompareResult(callback)
     self:CompareRevision(callback)
 end
 
+-- create revision try times
+Compare.createRevisionTimes = 0
+
 function Compare:CompareRevision(callback)
     local foldername = Store:Get("world/foldername")
     local currentWorld = Store:Get('world/currentWorld')
@@ -116,6 +120,8 @@ function Compare:CompareRevision(callback)
     local remoteRevision = 0
 
     if (self:HasRevision()) then
+        self.createRevisionTimes = 0
+
         local function CompareRevision(currentRevision, remoteRevision)
             if (remoteRevision == 0) then
                 return JUSTLOCAL
@@ -181,15 +187,17 @@ function Compare:CompareRevision(callback)
 
         GitService:GetWorldRevision(currentWorld.kpProjectId, foldername, HandleRevision)
     else
-        _guihelper.MessageBox(L"本地世界沒有版本信息")
-        self:SetFinish(true)
-        MsgBox:Close()
+        self.createRevisionTimes = self.createRevisionTimes + 1
 
-        if (type(callback) == "function") then
-            callback()
+        if self.createRevisionTimes > 3 then
+            self.createRevisionTimes = 0
+            _guihelper.MessageBox(L'创建版本信息失败')
+            return false
         end
 
-        return false
+        CreateWorld:CheckRevision(function()
+            self:CompareRevision(callback)
+        end)
     end
 end
 
