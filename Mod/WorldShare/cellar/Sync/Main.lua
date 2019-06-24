@@ -89,8 +89,9 @@ function SyncMain:GetCurrentWorldInfo(callback)
             local searchCurrentWorld = nil
     
             for key, item in ipairs(compareWorldList) do
-                if (item.foldername == foldername.utf8) then
+                if item.foldername == foldername.utf8 and not item.is_zip then
                     searchCurrentWorld = item
+                    break
                 end
             end
     

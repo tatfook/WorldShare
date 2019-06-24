@@ -68,11 +68,14 @@ function WorldList:UpdateWorldListFromInternetLoadWorld(callbackFunc)
         function(InternetWorldList)
             for CKey, CItem in ipairs(compareWorldList) do
                 for IKey, IItem in ipairs(InternetWorldList) do
-                    if (IItem.foldername == CItem.foldername) then
-                        for key, value in pairs(IItem) do
-                            if(key ~= "revision") then
-                                CItem[key] = value
+                    if IItem.foldername == CItem.foldername then
+                        if IItem.is_zip == CItem.is_zip then 
+                            for key, value in pairs(IItem) do
+                                if(key ~= "revision") then
+                                    CItem[key] = value
+                                end
                             end
+                            break
                         end
                     end
                 end
@@ -212,6 +215,8 @@ function WorldList:UpdateRevision(callback)
             else
                 value.size = 0
             end
+
+            value.is_zip = false
         else
             value.foldername = value.Title
             value.text = value.Title
@@ -271,16 +276,16 @@ function WorldList:SyncWorldsList(callback)
             local status
 
             for LKey, LItem in ipairs(localWorlds) do
-                if (DItem["worldName"] == LItem["foldername"]) then
-                    if (tonumber(LItem["revision"]) == tonumber(DItem["revision"])) then
+                if DItem["worldName"] == LItem["foldername"] then
+                    if (tonumber(LItem["revision"] or 0) == tonumber(DItem["revision"] or 0)) then
                         status = 3 --本地网络一致
                         revision = LItem['revision']
-                    elseif (tonumber(LItem["revision"]) > tonumber(DItem["revision"])) then
+                    elseif (tonumber(LItem["revision"] or 0) > tonumber(DItem["revision"] or 0)) then
                         status = 4 --网络更新
                         revision = LItem['revision']
-                    elseif (tonumber(LItem["revision"]) < tonumber(DItem["revision"])) then
+                    elseif (tonumber(LItem["revision"] or 0) < tonumber(DItem["revision"] or 0)) then
                         status = 5 --本地更新
-                        revision = LItem['revision']
+                        revision = LItem['revision'] or 0
                     end
 
                     isExist = true
