@@ -525,8 +525,7 @@ function WorldList:EnterWorld(index)
     end
 
     if (selectedWorld.status == 2) then
-        Store:Set("world/willEnterWorld", InternetLoadWorld.EnterWorld)
-        Compare:Init()
+        Compare:Init(InternetLoadWorld.EnterWorld)
     else
         InternetLoadWorld.EnterWorld()
         UserConsole:ClosePage()

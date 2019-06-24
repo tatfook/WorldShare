@@ -9,6 +9,7 @@ local SyncToLocal = NPL.load("(gl)Mod/WorldShare/service/SyncService/SyncToLocal
 ------------------------------------------------------------
 ]]
 local Encoding = commonlib.gettable("commonlib.Encoding")
+local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
 
 local KeepworkService = NPL.load("../KeepworkService.lua")
 local Progress = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Progress/Progress.lua")
@@ -35,10 +36,17 @@ function SyncToLocal:Init(callback)
     self.finish = false
     self.foldername = Store:Get("world/foldername")
     self.worldDir = currentWorld and currentWorld.worldpath
+    self.callback = callback
 
     -- we build a world folder path if worldpath is not exit
     if (not self.worldDir or self.worldDir == "") then
         self.worldDir = format("%s/%s/", SyncMain.GetWorldFolderFullPath(), self.foldername.default)
+        currentWorld.worldpath = self.worldDir
+        currentWorld.remotefile = "local://" .. currentWorld.worldpath
+
+        InternetLoadWorld.cur_ds[InternetLoadWorld.selected_world_index] = currentWorld
+
+        Store:Set('world/currentWorld', currentWorld)
     end
 
     if (not self.worldDir or self.worldDir == "") then
@@ -59,7 +67,6 @@ function SyncToLocal:SyncToLocal()
 
     local function Handle(data, err)
         if (commitId or currentWorld.status == 2 and #data ~= 0) then
-            -- down zip
             self:DownloadZIP()
             return false
         end
@@ -132,25 +139,9 @@ function SyncToLocal:GetCompareList()
     self.compareListTotal = #self.compareList
 end
 
-function SyncToLocal:RefreshWorldList()
-    WorldList:RefreshCurrentServerList(
-        function()
-            local willEnterWorld = Store:Get('world/willEnterWorld')
-
-            if(type(willEnterWorld) == 'function') then
-                WorldList:OnSwitchWorld(1)
-                willEnterWorld()
-
-                Store:Remove('world/willEnterWorld')
-            end
-        end
-    )
-end
 
 function SyncToLocal:RefreshList()
-    -- Please note, progress window can be nil, when downloading via zip file, so we will refresh before progress is closed. 
-    self:RefreshWorldList();
-    -- Store:Set("world/CloseProgress", function()    end)
+    WorldList:RefreshCurrentServerList()
     Progress:SetFinish(true)
     Progress:Refresh()
 end
@@ -165,6 +156,12 @@ function SyncToLocal:HandleCompareList()
         KeepworkService:SetCurrentCommidId(currentWorld.lastCommitId)
 
         self.compareListIndex = 1
+        
+        if type(self.callback) == 'function' then
+            self.callback()
+            self.callback = nil
+        end
+
         return false
     end
 
@@ -318,6 +315,12 @@ function SyncToLocal:DownloadZIP()
             commitId,
             function(bSuccess, downloadPath)
                 LocalService:MoveZipToFolder(downloadPath)
+
+                if type(self.callback) == 'function' then
+                    self.callback()
+                    self.callback = nil
+                end
+
                 self:RefreshList()
                 MsgBox:Close()
 

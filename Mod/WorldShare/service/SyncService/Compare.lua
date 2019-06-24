@@ -62,7 +62,7 @@ function Compare:Init(callback)
                 end
 
                 if (result == JUSTREMOTE) then
-                    SyncMain:SyncToLocal()
+                    SyncMain:SyncToLocal(callback)
                     return true
                 end
 

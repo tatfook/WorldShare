@@ -257,12 +257,12 @@ function SyncMain:BackupWorld()
     worldRevision:Backup()
 end
 
-function SyncMain:SyncToLocal()
+function SyncMain:SyncToLocal(callback)
     if (self:CheckWorldSize()) then
         return false
     end
 
-    SyncToLocal:Init()
+    SyncToLocal:Init(callback)
 end
 
 function SyncMain:SyncToDataSource()
