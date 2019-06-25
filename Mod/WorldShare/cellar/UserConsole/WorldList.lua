@@ -430,7 +430,7 @@ function WorldList:UnifiedTimestampFormat(data)
     end
 end
 
-function WorldList:Sync(index)
+function WorldList:Sync()
     CreateWorld:CheckRevision(function()
         Compare:Init()
     end)
@@ -527,8 +527,19 @@ function WorldList:EnterWorld(index)
     if (selectedWorld.status == 2) then
         Compare:Init(InternetLoadWorld.EnterWorld)
     else
-        InternetLoadWorld.EnterWorld()
-        UserConsole:ClosePage()
+        Compare:Init(function(result, callback)
+            if result == 'REMOTEBIGGER' then
+                if type(callback) == 'function' then
+                    callback(function()
+                        InternetLoadWorld.EnterWorld()
+                        UserConsole:ClosePage()
+                    end)
+                end
+            else
+                InternetLoadWorld.EnterWorld()
+                UserConsole:ClosePage()
+            end
+        end)
     end
 
     Store:Set("explorer/mode", "mine")

@@ -24,11 +24,12 @@ local UPDATE = "UPDATE"
 local UPLOAD = "UPLOAD"
 local DELETE = "DELETE"
 
-function SyncToDataSource:Init()
+function SyncToDataSource:Init(callback)
     self.foldername = Store:Get("world/foldername")
     local currentWorld = Store:Get('world/currentWorld')
 
     self.worldDir = currentWorld.worldpath
+    self.callback = callback
 
     if (not self.worldDir or self.worldDir == "") then
         _guihelper.MessageBox(L"上传失败，将使用离线模式，原因：上传目录为空")
@@ -255,6 +256,12 @@ function SyncToDataSource:HandleCompareList()
     if (self.compareListTotal < self.compareListIndex) then
         -- sync finish
         self:SetFinish(true)
+
+        if type(self.callback) == 'function' then
+            self.callback()
+            self.callback = nil
+        end
+
         self:RefreshList()
 
         self.compareListIndex = 1
