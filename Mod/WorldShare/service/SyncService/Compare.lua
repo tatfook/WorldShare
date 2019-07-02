@@ -49,9 +49,9 @@ function Compare:Init(callback)
                     return false
                 end
 
-                if (result == REMOTEBIGGER) then
-                    SyncMain:ShowStartSyncPage()
-                end
+                -- if (result == REMOTEBIGGER) then
+                --     SyncMain:ShowStartSyncPage()
+                -- end
 
                 MsgBox:Close()
             else
@@ -67,7 +67,12 @@ function Compare:Init(callback)
                 end
 
                 if (result == REMOTEBIGGER or result == LOCALBIGGER or result == EQUAL) then
-                    SyncMain:ShowStartSyncPage()
+                    if type(callback) == 'function' then
+                        callback(result, function(callback) SyncMain:ShowStartSyncPage(callback) end)
+                    else
+                        SyncMain:ShowStartSyncPage()
+                    end
+
                     MsgBox:Close()
                     return true
                 end

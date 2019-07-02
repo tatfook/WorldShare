@@ -13,7 +13,7 @@
                 MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")
                 Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 
-                SyncMain:SetStartSyncPage();
+                SyncMain:SetStartSyncPage()
 
                 function use_local()
                     SyncMain:CloseStartSyncPage()
@@ -50,6 +50,11 @@
                 end
 
                 function close()
+                    if type(SyncMain.callback) == 'function' then
+                        SyncMain.callback()
+                        SyncMain.callback = nil
+                    end
+
                     SyncMain:CloseStartSyncPage()
                 end
 
