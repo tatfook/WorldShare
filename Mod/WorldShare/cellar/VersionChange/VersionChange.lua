@@ -72,9 +72,9 @@ end
 
 function VersionChange:GetVersionSource(callback)
     local currentWorld = Store:Get("world/currentWorld")
-    local commitId = SyncMain:GetCurrentRevisionInfo()
+    local commitId = SyncMain:GetCurrentRevisionInfo() or {}
 
-    if not currentWorld or not commitId then
+    if not currentWorld then
         return false
     end
 
