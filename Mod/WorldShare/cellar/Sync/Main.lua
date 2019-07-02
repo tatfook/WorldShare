@@ -289,6 +289,7 @@ function SyncMain.GetRemoteRevision()
 end
 
 function SyncMain:GetCurrentRevisionInfo()
+    WorldShare.worldData = nil
     local currentWorld = Store:Get("world/currentWorld")
 
     return WorldShare:GetWorldData("revision", currentWorld and currentWorld.worldpath .. '/')
