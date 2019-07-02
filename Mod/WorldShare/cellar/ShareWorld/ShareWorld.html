@@ -9,8 +9,7 @@
                 ShareWorld:SetPage();
 
                 function open_world()
-                    local url = KeepworkService:GetShareUrl()
-                    ParaGlobal.ShellExecute("open", url, "", "", 1)
+                    GameLogic.RunCommand("/menu file.openworlddir");
                 end
 
                 function foldername()
