@@ -8,6 +8,9 @@
     <pe:mcml>
         <script type="text/npl" refresh="false">
             <![CDATA[
+                page_ctrl = document:GetPageCtrl()
+                use_offline = page_ctrl:GetRequestParam("useOffline")
+
                 SyncMain = NPL.load("../Main.lua")
                 Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
                 MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")
@@ -38,10 +41,6 @@
                     end
                 end
 
-                function use_offline()
-                    SyncMain:CloseStartSyncPage()
-                end
-
                 function be_show_use_remote()
                     return Compare:IsCompareFinish() and SyncMain.GetRemoteRevision() ~= 0
                 end
@@ -67,8 +66,12 @@
                     SyncMain:CloseStartSyncPage()
                 end
 
-                function is_compare_finish()
-                    return Compare:IsCompareFinish()
+                function enter_offline_world()
+                    if type(SyncMain.callback) == 'function' then
+                        SyncMain.callback()
+                        SyncMain.callback = nil
+                        SyncMain:CloseStartSyncPage()
+                    end
                 end
              ]]>
         </script>
@@ -84,10 +87,10 @@
 	                </div>
 	                <div style="margin-left:80px;margin-top:30px;">
                         <%=L"本地版本号：" %><%= SyncMain.GetCurrentRevision() %>
-	                	<pe:if condition="<%=not is_compare_finish()%>">
-	                		<input onclick="use_offline()" class="button_highlight" style="margin-left:10px;height:30px;" type="button" value='<%=L"使用本地离线版本" %>' />
+	                	<pe:if condition="<%=use_offline == 'true' %>">
+	                		<input onclick="enter_offline_world()" class="button_highlight" style="margin-left:10px;height:30px;" type="button" value='<%=L"使用本地离线版本" %>' />
 	                	</pe:if>
-	                	<pe:if condition="<%=is_compare_finish()%>">
+	                	<pe:if condition="<%=use_offline == 'false' %>">
 	                		<input onclick="use_local()" class="button_highlight" style="margin-left:10px;width: 130px;height:30px;" type="button" value='<%=L"使用本地版本" %>' />
 	                	</pe:if>
 	                </div>
