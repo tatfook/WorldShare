@@ -170,9 +170,9 @@ function SyncMain:GetWorldDefaultName()
     return world
 end
 
-function SyncMain:ShowStartSyncPage(callback)
+function SyncMain:ShowStartSyncPage(callback, useOffline)
     self.callback = callback
-    local params = SyncMain:ShowDialog("Mod/WorldShare/cellar/Sync/Templates/StartSync.html", "StartSync")
+    local params = SyncMain:ShowDialog("Mod/WorldShare/cellar/Sync/Templates/StartSync.html?useOffline=" .. (useOffline and "true" or "false"), "StartSync")
 
     params._page.OnClose = function()
         Store:Remove('page/StartSync')
