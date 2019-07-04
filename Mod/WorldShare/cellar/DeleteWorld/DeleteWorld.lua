@@ -46,15 +46,21 @@ function DeleteWorld.GetSelectWorld()
     return Store:Get("world/currentWorld")
 end
 
-function DeleteWorld:DeleteWorld(foldername)
+function DeleteWorld:DeleteWorld(selectedWorld)
+    if not selectedWorld then
+        return false
+    end
+
     local isEnterWorld = Store:Get("world/isEnterWorld")
 
     if (isEnterWorld) then
         local worldTag = WorldCommon.GetWorldInfo()
 
-        if (foldername == worldTag.name) then
-            _guihelper.MessageBox(L"不能刪除正在编辑的世界")
-            return false
+        if GameLogic.IsReadOnly() and selectedWorld.is_zip then
+            if (selectedWorld.foldername == worldTag.name) then
+                _guihelper.MessageBox(L"不能刪除正在编辑的世界")
+                return false
+            end
         end
     end
 
@@ -66,14 +72,16 @@ function DeleteWorld:DeleteLocal(callback)
 
     if (not currentWorld) then
         _guihelper.MessageBox(L"请先选择世界")
-        return
+        return false
     end
 
     local function Delete()
-        local worldDir = currentWorld.worldpath
+        if not currentWorld.worldpath then
+            return false
+        end
 
         if (currentWorld.is_zip) then
-            if (ParaIO.DeleteFile(worldDir)) then
+            if (ParaIO.DeleteFile(currentWorld.worldpath)) then
                 if (type(callback) == "function") then
                     callback()
                 else
@@ -88,7 +96,7 @@ function DeleteWorld:DeleteLocal(callback)
                 GameLogic.RemoveWorldFileWatcher() -- file watcher may make folder deletion of current world directory not working.
             end
 
-            if (commonlib.Files.DeleteFolder(worldDir)) then
+            if (commonlib.Files.DeleteFolder(currentWorld.worldpath)) then
                 if (type(callback) == "function") then
                     callback()
                 else

@@ -441,7 +441,7 @@ function WorldList:DeleteWorld(index)
 
     local selectedWorld = self:GetSelectWorld(index)
 
-    DeleteWorld:DeleteWorld(selectedWorld and selectedWorld.foldername)
+    DeleteWorld:DeleteWorld(selectedWorld)
 end
 
 function WorldList.GetWorldType()
