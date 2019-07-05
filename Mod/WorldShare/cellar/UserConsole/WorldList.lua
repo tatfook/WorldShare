@@ -529,7 +529,9 @@ function WorldList:EnterWorld(index)
     else
         if (selectedWorld.status == 1) then
             InternetLoadWorld.EnterWorld()	
-            UserConsole:ClosePage()	
+            UserConsole:ClosePage()
+
+            return true
         end
 
         Compare:Init(function(result, callback)
