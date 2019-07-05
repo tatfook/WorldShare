@@ -527,6 +527,11 @@ function WorldList:EnterWorld(index)
     if (selectedWorld.status == 2) then
         Compare:Init(InternetLoadWorld.EnterWorld)
     else
+        if (selectedWorld.status == 1) then
+            InternetLoadWorld.EnterWorld()	
+            UserConsole:ClosePage()	
+        end
+
         Compare:Init(function(result, callback)
             if result == 'REMOTEBIGGER' then
                 if type(callback) == 'function' then	

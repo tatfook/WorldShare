@@ -56,11 +56,9 @@ function DeleteWorld:DeleteWorld(selectedWorld)
     if (isEnterWorld) then
         local worldTag = WorldCommon.GetWorldInfo()
 
-        if GameLogic.IsReadOnly() and selectedWorld.is_zip then
-            if (selectedWorld.foldername == worldTag.name) then
-                _guihelper.MessageBox(L"不能刪除正在编辑的世界")
-                return false
-            end
+        if (selectedWorld.foldername == worldTag.name and GameLogic.IsReadOnly() == selectedWorld.is_zip) then
+            _guihelper.MessageBox(L"不能刪除正在编辑的世界")
+            return false
         end
     end
 
