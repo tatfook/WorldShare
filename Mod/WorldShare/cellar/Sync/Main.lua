@@ -141,10 +141,6 @@ function SyncMain:GetCurrentWorldInfo(callback)
     end
 end
 
-function SyncMain:GetWorldFolder()
-    return LocalLoadWorld.GetWorldFolder()
-end
-
 function SyncMain:GetWorldFolderFullPath()
     return LocalLoadWorld.GetWorldFolderFullPath()
 end
