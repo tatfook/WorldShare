@@ -148,9 +148,6 @@ function UserInfo:CheckDoAutoSignin(callback)
                         end
                     end
                 )
-            else
-                MsgBox:Close()
-                KeepworkService:DeletePWDFile()
             end
         end,
         info.token
