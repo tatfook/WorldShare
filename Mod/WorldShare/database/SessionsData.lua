@@ -91,6 +91,8 @@ function SessionsData:SaveSession(session)
         return false
     end
 
+    session.account = string.lower(session.account)
+
     local sessionsData = self:GetSessions()
     sessionsData.selectedUser = session.account
 

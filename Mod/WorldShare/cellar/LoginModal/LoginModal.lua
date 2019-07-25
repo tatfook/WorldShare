@@ -193,7 +193,7 @@ function LoginModal:SetAutoLogin()
     local rememberMe = LoginModalPage:GetValue("rememberMe")
     local password = LoginModalPage:GetValue("password")
     self.loginServer = LoginModalPage:GetValue("loginServer")
-    self.account = LoginModalPage:GetValue("account")
+    self.account = string.lower(LoginModalPage:GetValue("account"))
 
     if autoLogin then
         LoginModalPage:SetValue("rememberMe", true)
@@ -218,7 +218,7 @@ function LoginModal:SetRememberMe()
     local password = LoginModalPage:GetValue("password")
     local rememberMe = LoginModalPage:GetValue("rememberMe")
     self.loginServer = LoginModalPage:GetValue("loginServer")
-    self.account = LoginModalPage:GetValue("account")
+    self.account = string.lower(LoginModalPage:GetValue("account"))
 
     if rememberMe then
         LoginModalPage:SetValue("autoLogin", autoLogin)
