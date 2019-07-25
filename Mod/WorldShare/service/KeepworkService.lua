@@ -656,6 +656,11 @@ end
 
 function KeepworkService:SetCurrentCommidId(commitId)
     local currentWorld = Store:Get("world/currentWorld")
+
+    if not currentWorld or not currentWorld.worldpath then
+        return false
+    end
+
     local saveUrl = currentWorld.worldpath
 
     WorldShare:SetWorldData("revision", {id = commitId}, saveUrl)
