@@ -21,6 +21,7 @@ local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")
 local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
 local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
 local Config = NPL.load("(gl)Mod/WorldShare/config/Config.lua")
+local SessionsData = NPL.load("(gl)Mod/WorldShare/database/SessionsData.lua")
 
 local KeepworkService = NPL.export()
 
@@ -135,7 +136,6 @@ function KeepworkService:LoginResponse(response, err, callback)
     local function HandleGetDataSource(data, err)
         if (not data or not data.token) then
             _guihelper.MessageBox(L"Token过期了，请重新登陆")
-            self:DeletePWDFile()
             self:Logout()
             MsgBox:Close()
             return false
@@ -180,6 +180,7 @@ function KeepworkService:Logout()
     if (self:IsSignedIn()) then
         local SetToken = Store:Action("user/SetToken")
         SetToken(nil)
+        Store:Remove('user/username')
         WorldList:RefreshCurrentServerList()
     end
 end
@@ -447,103 +448,32 @@ function KeepworkService:GetShareUrl()
     return format("%s/pbl/project/%d/", baseUrl, currentWorld.kpProjectId)
 end
 
-function KeepworkService:PWDValidation()
-    local info = self:LoadSigninInfo()
-    local isDataCorrect = false
-
-    --check site data
-    if (info and info.loginServer) then
-        for key, item in ipairs(self:GetServerList()) do
-            if (item.value == info.loginServer) then
-                isDataCorrect = true
-            end
-        end
-    end
-
-    if (not isDataCorrect) then
-        self:DeletePWDFile()
-    end
-end
-
-function KeepworkService:DeletePWDFile()
-    ParaIO.DeleteFile(self:GetPasswordFile())
-end
-
 -- @return nil if not found or {account, password, loginServer, autoLogin}
 function KeepworkService:LoadSigninInfo()
-    local file = ParaIO.open(self:GetPasswordFile(), "r")
-    local fileContent = ""
+    local sessionsData = SessionsData:GetSessions()
 
-    if (file:IsValid()) then
-        fileContent = file:GetText(0, -1)
-        file:close()
-
-        local PWD = {}
-
-        for value in string.gmatch(fileContent, "[^|]+") do
-            PWD[#PWD + 1] = value
+    if sessionsData and sessionsData.selectedUser then
+        for key, item in ipairs(sessionsData.allUsers) do
+            if item.value == sessionsData.selectedUser then
+                return item.session
+            end
         end
-
-        local info = {}
-
-        if (PWD[1]) then
-            info.account = PWD[1]
-        end
-
-        if (PWD[2]) then
-            info.password = Encoding.PasswordDecodeWithMac(PWD[2])
-        end
-
-        if (PWD[3]) then
-            info.loginServer = PWD[3]
-        end
-
-        if (PWD[4]) then
-            info.token = Encoding.PasswordDecodeWithMac(PWD[4])
-        end
-
-        info.autoLogin = (not PWD[5] or PWD[5] == "true")
-
-        return info
+    else
+        return nil
     end
-end
-
--- get save password and others info file path
--- path: /PWD
-function KeepworkService:GetPasswordFile()
-    local writeAblePath = ParaIO.GetWritablePath()
-
-    if (not writeAblePath) then
-        return false
-    end
-
-    return format("%sPWD", writeAblePath)
 end
 
 -- @param info: if nil, we will delete the login info.
 function KeepworkService:SaveSigninInfo(info)
-    if (not info) then
-        ParaIO.DeleteFile(self:GetPasswordFile())
-    else
-        local newStr =
-            format(
-            "%s|%s|%s|%s|%s",
-            info.account or "",
-            Encoding.PasswordEncodeWithMac(info.password or ""),
-            (info.loginServer or ""),
-            Encoding.PasswordEncodeWithMac(info.token or ""),
-            (info.autoLogin and "true" or "false")
-        )
-
-        local file = ParaIO.open(self:GetPasswordFile(), "w")
-        if (file) then
-            LOG.std(nil, "info", "UserConsole", "save signin info to %s", self:GetPasswordFile())
-            file:write(newStr, #newStr)
-            file:close()
-        else
-            LOG.std(nil, "error", "UserConsole", "failed to write file to %s", self:GetPasswordFile())
-        end
+    if not info then
+        return false
     end
+
+    if not info.rememberMe then
+        info.password = nil
+    end
+
+    SessionsData:SaveSession(info)
 end
 
 -- return nil or user token in url protocol

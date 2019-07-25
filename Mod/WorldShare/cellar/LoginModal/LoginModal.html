@@ -4,11 +4,16 @@
             <![CDATA[
                 LoginModal = NPL.load("./LoginModal.lua")
                 Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
+                page = document:GetPageCtrl()
 
                 LoginModal:SetPage()
 
                 function get_server_list()
                     return LoginModal:GetServerList()
+                end
+
+                function get_history_users()
+                    return LoginModal:GetHistoryUsers()
                 end
 
                 function login()
@@ -17,6 +22,10 @@
 
                 function set_auto_login()
                     LoginModal:SetAutoLogin()
+                end
+
+                function set_remember_me()
+                    LoginModal:SetRememberMe()
                 end
 
                 function login_text()
@@ -37,6 +46,14 @@
                     else
                         return ''
                     end
+                end
+
+                function remove_account(username)
+                    LoginModal:RemoveAccount(username)
+                end
+
+                function select_account(name, username)
+                    LoginModal:SelectAccount(username)
                 end
             ]]>
         </script>
@@ -77,14 +94,15 @@
                     <select name="loginServer" DataSource="<%= get_server_list()%>" style="height: 30px;width: 165px;" class="text_field"></select>
                 </div>
                 <div style="margin-bottom:12px;">
-                    <div style="<%='float:left;min-width:65px;' .. get_english_style('min-width:73px;') %>"><%= L"账号：" %></div><input type="text" EmptyText='<%= L"账户名/邮箱/手机号" %>' class="bbs_text text_field" style="height: 30px;" name="account" />
+                    <div style="<%='float:left;min-width:65px;' .. get_english_style('min-width:73px;') %>"><%= L"账号：" %></div>
+                    <select  name="account" DataSource="<%= get_history_users() %>" EmptyText='<%= L"账户名/邮箱/手机号" %>' onselect="<%= select_account %>" onremove="<%= remove_account %>" class="bbs_text text_field" style="height: 30px;"></select>
                 </div>
                 <div style="margin-bottom:12px;">
                     <div style="float:left;min-width:65px"><%= L"密码：" %></div><input type="text" PasswordChar="*" class="bbs_text text_field" style="height: 30px;" name="password" />
                 </div>
                 <div>
                     <div>
-                        <input type="checkbox" style="float:left;margin-top:3px;min-width:90px;" name="rememberPassword" /><div style="float:left" for="rememberPassword"><%= L"记住密码?" %></div>
+                        <input type="checkbox" style="float:left;margin-top:3px;min-width:90px;" name="rememberMe" onclick="set_remember_me()"/><div style="float:left" for="rememberMe"><%= L"记住密码?" %></div>
                     </div>
                     <div>
                         <input type="checkbox" style="float:left;margin-top:3px;min-width:90px;" name="autoLogin" onclick="set_auto_login()"/><div style="float:left" for="autoLogin"><%= L"自动登录" %></div>    

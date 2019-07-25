@@ -56,9 +56,6 @@ function UserConsole:ShowPage()
         Store:Remove('page/UserConsole')
     end
 
-    -- checkout wrong PWD
-    KeepworkService:PWDValidation()
-
     -- load last selected avatar if world is not loaded before.
     UserInfo:OnChangeAvatar()
 
@@ -68,7 +65,7 @@ function UserConsole:ShowPage()
         Store:Set('user/ignoreAutoLogin', true)
     else
         Store:Set('user/notFirstTimeShown', true)
-        
+
         KeepworkService:GetUserTokenFromUrlProtocol()
 
         if KeepworkService:LoginWithTokenApi(function() WorldList:RefreshCurrentServerList() end) then
