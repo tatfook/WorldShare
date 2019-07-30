@@ -81,11 +81,11 @@ function LocalService:FilesFind(result, path, subPath)
                     end
 
                     if (bConvert) then
-                        item.file_content_t = self:GetFileContent(item.file_path):gsub("\r\n", "\n")
-                        item.filesize = #item.file_content_t
+                        item.file_content_t = self:GetFileContent(item.file_path):gsub("\r\n", "\n") or ""
+                        item.filesize = #item.file_content_t or 0
                         item.sha1 = SystemEncoding.sha1("blob " .. item.filesize .. "\0" .. item.file_content_t, "hex")
                     else
-                        item.file_content_t = self:GetFileContent(item.file_path)
+                        item.file_content_t = self:GetFileContent(item.file_path) or ""
                         item.sha1 = SystemEncoding.sha1("blob " .. item.filesize .. "\0" .. item.file_content_t, "hex")
                     end
 
