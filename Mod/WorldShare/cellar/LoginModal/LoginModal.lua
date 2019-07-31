@@ -270,8 +270,8 @@ function LoginModal:SelectAccount(username)
 
     local session = SessionsData:GetSessionByUsername(username)
 
-    self.loginServer = session.loginServer
-    self.account = session.account
+    self.loginServer = session and session.loginServer or 'ONLINE'
+    self.account = session and session.account or ''
 
     LoginModalPage:SetValue("autoLogin", session.autoLogin)
     LoginModalPage:SetValue("rememberMe", session.rememberMe)
