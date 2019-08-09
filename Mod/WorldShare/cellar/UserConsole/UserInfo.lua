@@ -122,7 +122,7 @@ function UserInfo:CheckDoAutoSignin(callback)
         return false
     end
 
-    MsgBox:Show(L"正在登陆，请稍后...")
+    MsgBox:Show(L"正在登陆，请稍后...", 8000, L"链接超时")
 
     Store:Set("user/env", info.loginServer)
 

@@ -37,7 +37,7 @@ function MsgBox:Show(msg, sec, overtimeMsg)
             for key, item in ipairs(self.allMsgBox) do
                 if (item == msgId) then
                     if overtimeMsg then
-                        _guihelper.MessageBox(overtimeMsg)
+                        GameLogic.AddBBS(nil, overtimeMsg, 3000, "255 0 0");
                     end
 
                     self:Close(msgId)
