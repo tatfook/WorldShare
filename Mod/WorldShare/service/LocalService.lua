@@ -226,11 +226,29 @@ function LocalService:MoveZipToFolder(path)
                     folderCreate = folderCreate .. pathArray[i] .. "/"
                     ParaIO.CreateDirectory(folderCreate)
                 end
+                
+                -- tricky: we do not know which encoding the filename in the zip archive is,
+				-- so we will assume it is utf8, we will convert it to default and then back to utf8.
+				-- if the file does not change, it might be utf8. 
+				local dest_path;
+				local defaultEncodingFilename = commonlib.Encoding.Utf8ToDefault(path)
+				if(defaultEncodingFilename == path) then
+					dest_path = bashPath..path;
+				else
+					if(commonlib.Encoding.DefaultToUtf8(defaultEncodingFilename) == path) then
+						dest_path = bashPath..defaultEncodingFilename;
+					else
+						dest_path = bashPath..path;
+					end
+                end
 
-                local writeFile = ParaIO.open(format("%s%s", bashPath, path), "w")
-
-                writeFile:write(binData, #binData)
-                writeFile:close()
+                local writeFile = ParaIO.open(dest_path, "w")
+                if(writeFile:IsValid()) then
+                    writeFile:write(binData, #binData)
+                    writeFile:close()
+                else
+                    LOG.std(nil, "info", "LocalService", "failed to write to %s", dest_path);
+                end
 
                 file:close()
             end
