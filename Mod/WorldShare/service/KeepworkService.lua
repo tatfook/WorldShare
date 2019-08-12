@@ -107,13 +107,13 @@ end
 function KeepworkService:LoginResponse(response, err, callback)
     if err == 400 then
         MsgBox:Close()
-        _guihelper.MessageBox(L"用户名或者密码错误")
+        GameLogic.AddBBS(nil, L"用户名或者密码错误", 3000, "255 0 0")
         return false
     end
 
     if (type(response) ~= "table") then
         MsgBox:Close()
-        _guihelper.MessageBox(L"服务器连接失败")
+        GameLogic.AddBBS(nil, L"服务器连接失败", 3000, "255 0 0")
         return false
     end
 
@@ -135,7 +135,7 @@ function KeepworkService:LoginResponse(response, err, callback)
 
     local function HandleGetDataSource(data, err)
         if (not data or not data.token) then
-            _guihelper.MessageBox(L"Token过期了，请重新登陆")
+            GameLogic.AddBBS(nil, L"Token已过期，请重新登录", 3000, "255 0 0")
             self:Logout()
             MsgBox:Close()
             return false
