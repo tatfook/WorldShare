@@ -205,7 +205,7 @@
                             <pe:if condition="<%= get_platform() ~= 'android' and get_platform() ~= 'ios' %>">
                                 <div style="float:right;">
                                     <div style="margin-bottom: 12px;">
-                                        <input type="button" class="button1 mc_light_grey_button_with_fillet" value="<%= L'本地目录' %>" onclick="on_open_world_dir()"/>
+                                        <input type="button" class="button1 mc_light_grey_button_with_fillet" value="<%= L'本地目录' %>" onclick="on_open_world_dir()" tooltip='<%= L"点击打开所在目录" %>'/>
                                     </div>
                                     <pe:if condition="<%= not GameLogic.IsReadOnly() %>">
                                         <div style="margin-bottom: 12px;">
