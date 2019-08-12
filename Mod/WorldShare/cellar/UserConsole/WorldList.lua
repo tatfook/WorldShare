@@ -32,6 +32,8 @@ local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.
 
 local WorldList = NPL.export()
 
+WorldList.zipDownloadFinished = true
+
 function WorldList.GetCurWorldInfo(infoType, worldIndex)
     local index = tonumber(worldIndex)
     local selectedWorld = WorldList:GetSelectWorld(index)
@@ -525,7 +527,16 @@ function WorldList:EnterWorld(index)
     end
 
     if (selectedWorld.status == 2) then
-        Compare:Init(InternetLoadWorld.EnterWorld)
+        if not self.zipDownloadFinished then
+            return false
+        end
+
+        self.zipDownloadFinished = false
+
+        Compare:Init(function(result, callback)
+            InternetLoadWorld.EnterWorld()
+            self.zipDownloadFinished = true
+        end)
     else
         if (selectedWorld.status == 1) then
             InternetLoadWorld.EnterWorld()	
