@@ -20,7 +20,7 @@ MsgBox.allMsgBox = commonlib.Array:new()
 
 function MsgBox:Show(msg, sec, overtimeMsg)
     self.msgIdCount = self.msgIdCount + 1
-    
+
     local msgId = self.msgIdCount
 
     self.allMsgBox:push_back(msgId)
@@ -37,7 +37,7 @@ function MsgBox:Show(msg, sec, overtimeMsg)
             for key, item in ipairs(self.allMsgBox) do
                 if (item == msgId) then
                     if overtimeMsg then
-                        GameLogic.AddBBS(nil, overtimeMsg, 3000, "255 0 0");
+                        GameLogic.AddBBS(nil, overtimeMsg, 3000, "255 0 0")
                     end
 
                     self:Close(msgId)
