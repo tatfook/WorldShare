@@ -9,6 +9,7 @@
                 WorldList = NPL.load("./WorldList")
                 UserInfo = NPL.load("./UserInfo.lua")
                 Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
+                MySchool = NPL.load("(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua")
                 UniString = commonlib.gettable("System.Core.UniString")
 
                 UserConsole:SetPage()
@@ -222,13 +223,24 @@
                 function open_project(index)
                     WorldList:OpenProject(index)
                 end
+
+                function my_school()
+                    UserConsole:ClosePage()
+                    MySchool:Show()
+                end
             ]]>
         </script>
         <style type="text/mcss">
             {
+                my_school_button = {
+                    ["min-width"] = 100,
+                    height  = 28,
+                    color = '#ffffff',
+                    background = "Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#208 89 21 21:8 8 8 8",
+                },
                 login_button = {
-                    ["min-width"]   = 100,
-                    height          = 28,
+                    ["min-width"] = 100,
+                    height = 28,
                     color = "#cccccc",
                     background = "Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;179 89 21 21:8 8 8 8",
                 },
@@ -402,7 +414,7 @@
                 <div style="float:left;margin-left:5px;margin-top:2px;">
                     <div style="float:left" class="add_server_text_field">
                         <input type="text" name="content" style="width:400px;height:30px;background:url();textcolor:#ffffff"
-                            spacing="4" EmptyText='<%=L"输入项目ID或课程ID或服务器地址或命令"%>' rows="1" CaretColor="#FFFFFFFF" />
+                            spacing="4" EmptyText='<%=L"输入项目ID或课程ID或服务器地址"%>' rows="1" CaretColor="#FFFFFFFF" />
                         <input class="flat_button" onclick="show_history()" style="height:26px;margin-top:2px;margin:2px;min-width:32px"
                             type="button" value="..." tooltip='<%=L"管理访问历史"%>' />
                     </div>
@@ -445,6 +457,10 @@
                             <div style="text-align:center;width:140px;color:#ff6666" onclick="share_person_page()"
                                 tooltip='<%= string.format(L"点击打开:%s", share_person_page()) %>'>
                                 <%= username() %>
+                            </div>
+                            <div style="margin-top:10px">
+                                <input type="button" style="margin-left:20px" onclick="my_school()" class="my_school_button"
+                                    value='<%= L"我的学校" %>' />
                             </div>
                             <div style="margin-top:10px">
                                 <input type="button" style="margin-left:20px" onclick="logout()" class="login_button"
