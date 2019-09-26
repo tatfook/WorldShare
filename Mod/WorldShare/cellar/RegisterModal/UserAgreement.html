@@ -24,8 +24,8 @@
                     }
                 }
             </style>
-            <aries:window mode="thin" width="800" style="float:left;" title_height="40" close_height="25" title='<%=L"Paracraft用户协议" %>' onclose="close()">
-                <pe:treeview name="user_agreement" class="user_agreement" style="background:;" VerticalScrollBarOffsetX="10">
+            <aries:window mode="thin" width="400" style="float:left;" title_height="40" close_height="25" title='<%=L"Paracraft用户协议" %>' onclose="close()">
+                <pe:treeview name="user_agreement" class="user_agreement" style="background:;" VerticalScrollBarOffsetX="10" VerticalScrollBarStep=“20”>
                     <div style="color: #ffffff">
                         <div style="height: 15px;width: 15px;"></div>
                         1.特别提示<br />
@@ -91,10 +91,9 @@
                         12.1 本协议构成双方对本协议之约定事项及其他有关事宜的完整协议，除本协议规定的之外，未赋予本协议各方其他权利。<br />
                         12.2 如本协议中的任何条款无论因何种原因完全或部分无效或不具有执行力，本协议的其余条款仍应有效并且有约束力。<br />
                         12.3 本协议中的标题仅为方便而设，在解释本协议时应被忽略。<br />
-                        <br />
-                        <br />
-                        <br />
-                        .
+                        <div style="height: 300px;width: 350px;">
+                            <input type="button" DefaultButton="true" class="mc_light_grey_button_with_fillet" style="margin-top: 20px;margin-left:100px;width: 140px;height: 30px;" onclick="close()" value='<%= L"关闭"%>' />
+                        </div>
                     </div>
                 </pe:treeview>
             </aries:window>

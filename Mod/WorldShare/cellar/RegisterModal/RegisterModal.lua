@@ -23,7 +23,7 @@ function RegisterModal:ShowPage()
 end
 
 function RegisterModal:ShowUserAgreementPage()
-    Mod.WorldShare.Utils:ShowWindow(800, 580, "Mod/WorldShare/cellar/RegisterModal/UserAgreement.html", "UserAgreement")
+    Mod.WorldShare.Utils:ShowWindow(400, 580, "Mod/WorldShare/cellar/RegisterModal/UserAgreement.html", "UserAgreement")
 end
 
 function RegisterModal:ShowBindingPage()
