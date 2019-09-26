@@ -40,5 +40,10 @@ end
 
 function MySchool.GetUrl()
     local token = Store:Get("user/token") or ''
-    return KeepworkService:GetKeepworkUrl() .. '/p/org/home?port=8099&token=' .. token
+
+    if System.os.GetPlatform() == 'mac' then
+        return KeepworkService:GetKeepworkUrl() .. '/p/org/home?type=protocol&port=8099&token=' .. token
+    else
+        return KeepworkService:GetKeepworkUrl() .. '/p/org/home?port=8099&token=' .. token
+    end
 end
