@@ -1,0 +1,224 @@
+<html>
+    <body>
+        <pe:mcml>
+            <script type="text/npl" refresh="false">
+                <![CDATA[
+                    Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
+                    Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
+                    KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
+                    RegisterModal = NPL.load("./RegisterModal.lua")
+
+                    page = document:GetPageCtrl()
+                    Store:Set('page/RegisterModal', page)
+
+                    KeepworkServiceSession:FetchCaptcha(function() page:Refresh(0.01) end)
+
+                    function close()
+                        page:CloseWindow()
+                    end
+
+                    function get_server_list()
+                        return RegisterModal:GetServerList()
+                    end
+
+                    function is_english()
+                        return Utils:IsEnglish()
+                    end
+
+                    function get_english_style(styleStr)
+                        if is_english() then
+                            return styleStr
+                        else
+                            return ''
+                        end
+                    end
+
+                    function register()
+                        RegisterModal:Register()
+                    end
+
+                    function get_captcha()
+                        return KeepworkServiceSession:GetCaptcha()
+                    end
+
+                    function update_captcha()
+                        KeepworkServiceSession:FetchCaptcha(function()
+                            local account = page:GetValue('account')
+                            local password = page:GetValue('password')
+                            local phone = page:GetValue('phone')
+                            local phonecaptcha = page:GetValue('phonecaptcha')
+                            page:Refresh(0.01)
+                            page:SetValue('account', account)
+                            page:SetValue('password', password)
+                            page:SetValue('phone', phone)
+                            page:SetValue('phonecaptcha', phonecaptcha)
+                        end)
+                    end
+
+                    local isClickedGetPhoneCaptcha = false
+
+                    function get_phone_captcha()
+                        if #page:GetValue("phone") ~= 11 then
+                            GameLogic.AddBBS(nil, L"手机号码位数不对", 3000, "255 0 0")
+                            return false
+                        end
+
+                        if isClickedGetPhoneCaptcha then
+                           return false 
+                        end
+
+                        isClickedGetPhoneCaptcha = true
+
+                        local times = 60
+
+                        local timer = commonlib.Timer:new({
+                            callbackFunc = function(timer)
+                                page:SetValue("getPhonecaptcha", format("%s(%ds)", L"重新发送", times))
+
+                                if times == 0 then
+                                    isClickedGetPhoneCaptcha = false
+                                    page:SetValue("getPhonecaptcha", L"获取验证码")
+                                    timer:Change(nil, nil)
+                                end
+
+                                times = times - 1
+                            end
+                        })
+
+                        KeepworkServiceSession:GetPhoneCaptcha(page:GetValue("phone"), function(data, err)
+                            if err == 500 then
+                                isClickedGetPhoneCaptcha = false
+                                page:SetValue("getPhonecaptcha", L"获取验证码")
+                                GameLogic.AddBBS(nil, L"发送验证码失败", 3000, "255 0 0")
+                                timer:Change(nil, nil)
+                            end
+                        end)
+
+                        timer:Change(1000, 1000)
+                    end
+
+                    local beShowPassword = false
+
+                    function set_show_password()
+                        local account = page:GetValue('account')
+                        local password = page:GetValue('password')
+                        local phone = page:GetValue('phone')
+                        local captcha = page:GetValue('captcha')
+                        local phonecaptcha = page:GetValue('phonecaptcha')
+                        local checkboxPassword = page:GetNode('checkboxPassword'):GetAttribute("checked")
+                        
+                        if checkboxPassword == "false" then
+                            checkboxPassword = "true"
+                        elseif checkboxPassword == "true" then
+                            checkboxPassword = "false"
+                        end
+
+                        beShowPassword = not beShowPassword
+
+                        if beShowPassword then
+                            page:GetNode('password'):SetAttribute('PasswordChar', nil)
+                        else
+                            page:GetNode('password'):SetAttribute('PasswordChar', "*")
+                        end
+                        page:Refresh(0.01)
+                        page:SetValue('account', account)
+                        page:SetValue('password', password)
+                        page:SetValue('phone', phone)
+                        page:SetValue('captcha', captcha)
+                        page:SetValue('phonecaptcha', phonecaptcha)
+                        echo(checkboxPassword, true)
+                        page:GetNode('checkboxPassword'):SetAttribute('checked', checkboxPassword)
+                    end
+
+                    function user_agreement()
+                        RegisterModal:ShowUserAgreementPage()
+                    end
+                ]]>
+            </script>
+            <style type="text/mcss">
+                {
+                    user_register = {
+                        ["base-font-size"] = 16,
+                        ["font-size"] = 16,
+                        ["padding-right"] = 30,
+                        ["padding-left"] = 30,
+                        ["padding-top"] = 10,
+                        ["padding-bottom"] = 20,
+                        color = '#ffffff'
+                        textcolor = '#ffffff'
+                    },
+                    text_field = {
+                        background = "textures/worldshare_32bits.png;72 20 16 16:3 3 3 3",
+                        border = "none",
+                        width = 205
+                    },
+                    common_button = {
+                        width = 130,
+                        height = 33,
+                        textcolor = "#000000",
+                        color = "#000000",
+                        ["font-size"] = 18
+                    },
+                }
+            </style>
+            <aries:window mode="thin" width="360" style="float:left;" title_height="40" close_height="25" title='<%=L"注册" %>' onclose="close()">
+                <div name="register" class="user_register">
+                    <div style="margin-bottom:12px;"><%=L"填写基本注册信息"%></div>
+                    <!-- <div style="margin-bottom:12px;">
+                        <div style="<%='float:left;min-width:40px;' .. get_english_style('min-width:73px;') %>"><%= L"服务器："%></div>
+                        <select name="registerServer" DataSource="<%= get_server_list()%>" style="height: 30px;width: 205px;" class="text_field"></select>
+                    </div> -->
+                    <div style="margin-bottom:12px;">
+                        <div style="<%='float:left;min-width:65px;' .. get_english_style('min-width:73px;') %>"><%= L"账号：" %></div>
+                        <input type="text" class="bbs_text text_field" EmptyText='<%= L"请输入账号" %>' style="height: 30px;" name="account" />
+                    </div>
+                    <div style="margin-bottom:12px;">
+                        <div style="float:left;min-width:65px"><%= L"密码：" %></div>
+                        <input type="text" PasswordChar="*" class="bbs_text text_field" EmptyText='<%= L"请输入密码" %>' style="height: 30px;" name="password" />
+                        <input name="checkboxPassword" type="checkbox" checked="false" iconsize="22" style="position: relative;margin-left: -25px;margin-top: 5px;" CheckedBG="Texture/Aries/Common/Teen/map/players_shown_32bits.png;0 0 22 22" UncheckedBG="Texture/Aries/Common/Teen/map/players_hidden_32bits.png;0 0 22 22" onclick="set_show_password"/>
+                    </div>
+                    <div style="margin-bottom:12px;">
+                        <div style="float:left;min-width:65px"><%= L"验证码：" %></div>
+                        <input type="text" class="bbs_text text_field" EmptyText='<%= L"请输入验证码" %>' style="height: 30px;width: 100px;" name="captcha" />
+                        <div style="float:left;background-color: #e9f4ff;margin-left: 5px;width: 60px; height: 30px;padding: 4px;">
+                            <img style="height: 26px;width: 56px;" src="<%= get_captcha() %>" onclick="update_captcha()"/>
+                        </div>
+                    </div>
+                    <div style="margin-bottom:12px;"><%=L"实名验证（推荐）"%></div>
+                    <div style="margin-bottom:12px;">
+                        <div style="float:left;min-width:65px"><%= L"手机号：" %></div>
+                        <input type="text" class="bbs_text text_field" EmptyText='<%= L"请输入密码" %>' style="height: 30px;" name="phone" />
+                    </div>
+                    <div style="margin-bottom:12px;">
+                        <div style="float:left;min-width:65px"><%= L"验证码：" %></div>
+                        <input type="text" class="bbs_text text_field" EmptyText='<%= L"请输入验证码" %>' style="height: 30px;width: 100px;" name="phonecaptcha" />
+                        <input
+                            type="button"
+                            name="getPhonecaptcha"
+                            DefaultButton="true"
+                            class="mc_light_grey_button_with_fillet"
+                            style="margin-left:5px;width: 100px;height:30px;"
+                            onclick="get_phone_captcha()"
+                            disabled="disabled"
+                            value='<%= L"获取验证码"%>'
+                        />
+                    </div>
+                    <div style="margin-top: 5px;margin-bottom: 5px;">
+                        <input type="checkbox" style="float:left;margin-top:3px;min-width:90px;" name="agree" onclick="set_remember_me()" checked="checked"/>
+                        <div style="float:left; color: white;font-size: 12px;" onclick="">
+                            <%= L"我同意" %>
+                            <div style="float:left;color: #fe5927" onclick="user_agreement()"><%= L"《Paracraft用户协议》" %></div>
+                            <%= L"中的内容" %>
+                        </div>
+                    </div>
+                    <div>
+                        <input type="button" DefaultButton="true" class="common_button mc_light_grey_button_with_fillet" style="margin-top: 10px;margin-left:70px;width: 140px;" onclick="register()" value='<%= L"注册"%>' />
+                    </div>
+                    <div style="margin-top: 10px;margin-left: 50px">
+                        <a style="font-size: 11px;color: #fe5927;background:url(textures/worldshare_32bits.png#176 0 64 21);" isbuttonstyle="true" tooltip="" href="https://keepwork.com/u/r/register">如果出现问题，点击此处去官网注册</a>
+                    </div>
+                </div>
+            </aries:window>
+        </pe:mcml>
+    </body>
+</html>

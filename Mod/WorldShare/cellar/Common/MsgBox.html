@@ -4,15 +4,25 @@
             <![CDATA[
                 local MsgBox = NPL.load("./MsgBox.lua")
 
-                local pageCtrl = document:GetPageCtrl()
-                local msgId = pageCtrl:GetRequestParam("msgId")
+                local page = document:GetPageCtrl()
+                local msgId = page:GetRequestParam("msgId")
+                width = tonumber(page:GetRequestParam("width"))
+                height = tonumber(page:GetRequestParam("height"))
+
+                if width == 0 then
+                    width = 300
+                end
+
+                if height == 0 then
+                    height = 150
+                end
 
                 MsgBox.SetPage(msgId)
 
                 function get_window_style()
                     Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 
-                    return Utils.FixCenter(300, 150)
+                    return "width: " .. width .. "px;height: " .. height .. "px;" .. Utils.FixCenter(width, height)
                 end
 
                 function get_msg()
@@ -21,8 +31,8 @@
             ]]>
         </script>
         <div width="100%" height="100%">
-            <aries:window mode="thin" width="300" height="150" style="<%= get_window_style() %>" title='<%=L"提示" %>'>
-                <div style="padding:20px;font-size:18px;base-font-size:18px;color:#ffffff;margin-top:20px;">
+            <aries:window mode="thin" style="<%= get_window_style() %>" title='<%=L"提示" %>'>
+                <div style="<%= 'padding:20px;font-size:18px;base-font-size:18px;color:#ffffff;margin-top:10px;height: ' .. height .. 'px;' %>">
                     <div style="margin-right:60px;">
                        <%= get_msg() %>
                     </div>

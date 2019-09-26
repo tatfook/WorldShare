@@ -17,6 +17,7 @@ local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")
 local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
 local SessionsData = NPL.load("(gl)Mod/WorldShare/database/SessionsData.lua")
+local RegisterModal = NPL.load("(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua")
 
 local Translation = commonlib.gettable("MyCompany.Aries.Game.Common.Translation")
 
@@ -35,10 +36,6 @@ function LoginModal:ShowPage()
 
     local params = Utils:ShowWindow(320, 470, "Mod/WorldShare/cellar/LoginModal/LoginModal.html", "LoginModal", nil, nil, nil, nil)
 
-    params._page.OnClose = function()
-        Store:Remove('page/LoginModal')
-    end
-
     local LoginModalPage = Store:Get('page/LoginModal')
 
     if not LoginModalPage then
@@ -56,17 +53,13 @@ function LoginModal:ShowPage()
         self.account = PWDInfo.account
     end
 
-    local forgotUrl = format("%s/u/set", KeepworkService:GetKeepworkUrl())
-    local registerUrl = format("%s/u/r/register", KeepworkService:GetKeepworkUrl())
+    -- local forgotUrl = format("%s/u/set", KeepworkService:GetKeepworkUrl())
+    -- local registerUrl = format("%s/u/r/register", KeepworkService:GetKeepworkUrl())
 
-    LoginModalPage:GetNode('forgot'):SetAttribute('href', forgotUrl)
-    LoginModalPage:GetNode('register'):SetAttribute('href', registerUrl)
+    -- LoginModalPage:GetNode('forgot'):SetAttribute('href', forgotUrl)
+    -- LoginModalPage:GetNode('register'):SetAttribute('onclick', registerUrl)
 
     self:Refresh(0.01)
-end
-
-function LoginModal:SetPage()
-    Store:Set('page/LoginModal', document:GetPageCtrl())
 end
 
 function LoginModal:ClosePage()
@@ -110,28 +103,28 @@ function LoginModal:LoginAction()
 
     local account = LoginModalPage:GetValue("account")
     local password = LoginModalPage:GetValue("password")
-    local loginServer = LoginModalPage:GetValue("loginServer")
+    local loginServer = 'ONLINE' -- LoginModalPage:GetValue("loginServer")
     local autoLogin = LoginModalPage:GetValue("autoLogin")
     local rememberMe = LoginModalPage:GetValue("rememberMe")
 
     if (not account or account == "") then
-        _guihelper.MessageBox(L"账号不能为空")
+        GameLogic.AddBBS(nil, L"账号不能为空", 3000, "255 0 0")
         return false
     end
-
+    
     if (not password or password == "") then
-        _guihelper.MessageBox(L"密码不能为空")
+        GameLogic.AddBBS(nil, L"密码不能为空", 3000, "255 0 0")
         return false
     end
-
+    
     if (not loginServer) then
-        _guihelper.MessageBox(L"登陆站点不能为空")
+        GameLogic.AddBBS(nil, L"登陆站点不能为空", 3000, "255 0 0")
         return false
     end
 
     Store:Set("user/env", loginServer)
 
-    MsgBox:Show(L"正在登陆，请稍后...", 8000, L"链接超时")
+    MsgBox:Show(L"正在登陆，请稍后...", 8000, L"链接超时", 300, 120)
 
     local function HandleLogined()
         local token = Store:Get("user/token") or ""
@@ -162,6 +155,10 @@ function LoginModal:LoginAction()
         account,
         password,
         function(response, err)
+            if err == 200 and type(response) == 'table' and not response.cellphone and not response.email then
+                RegisterModal:ShowBindingPage()
+            end
+
             KeepworkService:LoginResponse(response, err, HandleLogined)
         end
     )
@@ -192,7 +189,7 @@ function LoginModal:SetAutoLogin()
     local autoLogin = LoginModalPage:GetValue("autoLogin")
     local rememberMe = LoginModalPage:GetValue("rememberMe")
     local password = LoginModalPage:GetValue("password")
-    self.loginServer = LoginModalPage:GetValue("loginServer")
+    self.loginServer = 'ONLINE' -- LoginModalPage:GetValue("loginServer")
     self.account = string.lower(LoginModalPage:GetValue("account"))
 
     if autoLogin then
@@ -214,10 +211,10 @@ function LoginModal:SetRememberMe()
         return false
     end
 
-    local loginServer = LoginModalPage:GetValue("loginServer")
+    local loginServer = 'ONLINE' -- LoginModalPage:GetValue("loginServer")
     local password = LoginModalPage:GetValue("password")
     local rememberMe = LoginModalPage:GetValue("rememberMe")
-    self.loginServer = LoginModalPage:GetValue("loginServer")
+    self.loginServer = 'ONLINE' -- LoginModalPage:GetValue("loginServer")
     self.account = string.lower(LoginModalPage:GetValue("account"))
 
     if rememberMe then
@@ -230,14 +227,6 @@ function LoginModal:SetRememberMe()
     LoginModalPage:SetValue("password", password)
 
     self:Refresh()
-end
-
-function LoginModal:IsEnglish()
-    if Translation.GetCurrentLanguage() == 'enUS' then
-        return true
-    else
-        return false
-    end
 end
 
 function LoginModal:RemoveAccount(username)

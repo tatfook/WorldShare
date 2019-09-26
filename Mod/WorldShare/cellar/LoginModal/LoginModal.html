@@ -1,123 +1,138 @@
-﻿<body>
-    <pe:mcml>
-        <script type="text/npl" refresh="false">
-            <![CDATA[
-                LoginModal = NPL.load("./LoginModal.lua")
-                Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
-                page = document:GetPageCtrl()
+﻿<html>
+    <body>
+        <pe:mcml>
+            <script type="text/npl" refresh="false">
+                <![CDATA[
+                    Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
+                    Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
+                    LoginModal = NPL.load("./LoginModal.lua")
+                    RegisterModal = NPL.load("(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua")
+                    ForgetPassword = NPL.load("(gl)Mod/WorldShare/cellar/ForgetPassword/ForgetPassword.lua")
 
-                LoginModal:SetPage()
+                    page = document:GetPageCtrl()
+                    Store:Set('page/LoginModal', page)
 
-                function get_server_list()
-                    return LoginModal:GetServerList()
-                end
-
-                function get_history_users()
-                    return LoginModal:GetHistoryUsers()
-                end
-
-                function login()
-                    LoginModal:LoginAction()
-                end
-
-                function set_auto_login()
-                    LoginModal:SetAutoLogin()
-                end
-
-                function set_remember_me()
-                    LoginModal:SetRememberMe()
-                end
-
-                function login_text()
-                    return Store:Get("user/loginText")
-                end
-
-                function close()
-                    LoginModal:Close()
-                end
-
-                function is_english()
-                    return LoginModal:IsEnglish()
-                end
-
-                function get_english_style(styleStr)
-                    if is_english() then
-                        return styleStr
-                    else
-                        return ''
+                    function get_server_list()
+                        return LoginModal:GetServerList()
                     end
-                end
 
-                function remove_account(username)
-                    LoginModal:RemoveAccount(username)
-                end
+                    function get_history_users()
+                        return LoginModal:GetHistoryUsers()
+                    end
 
-                function select_account(name, username)
-                    LoginModal:SelectAccount(username)
-                end
-            ]]>
-        </script>
-        <style type="text/mcss">
-            {
-                user_login = {
-                    ["base-font-size"] = 16,
-                    ["font-size"] = 16,
-                    color = "#ffffff",
-                    ["padding-right"] = 40,
-                    ["padding-left"] = 40,
-                    ["padding-top"] = 20,
-                    ["padding-bottom"] = 20,
-                },
-                text_field = {
-                    background = "textures/worldshare_32bits.png;72 20 16 16:3 3 3 3",
-                    border = "none",
-                    width = 165,
-                },
-                login_button = {
-                    ["margin-left"] = 0,
-                    width = 230,
-                    height = 33,
-                    textcolor = "#000000",
-                    color = "#000000",
-                    ["font-size"] = 18
-                    background = "textures/worldshare_32bits.png;149 104 16 16:4 4 4 4",
-                },
-            }
-        </style>
-        <aries:window mode="thin" width="320" style="float:left;" title='<%=L"登陆" %>' onclose="close()">
-            <div name="login" class="user_login">
-                <pe:if condition="<%= login_text() ~= nil%>">
-                    <div style="margin-bottom:15px;"><%= login_text()%></div>
-                </pe:if>
-                <div style="margin-bottom:12px;">
-                    <div style="<%='float:left;min-width:40px;' .. get_english_style('min-width:73px;') %>"><%= L"服务器："%></div>
-                    <select name="loginServer" DataSource="<%= get_server_list()%>" style="height: 30px;width: 165px;" class="text_field"></select>
-                </div>
-                <div style="margin-bottom:12px;">
-                    <div style="<%='float:left;min-width:65px;' .. get_english_style('min-width:73px;') %>"><%= L"账号：" %></div>
-                    <select  name="account" DataSource="<%= get_history_users() %>" EmptyText='<%= L"账户名/邮箱/手机号" %>' onselect="<%= select_account %>" onremove="<%= remove_account %>" class="bbs_text text_field" style="height: 30px;"></select>
-                </div>
-                <div style="margin-bottom:12px;">
-                    <div style="float:left;min-width:65px"><%= L"密码：" %></div><input type="text" PasswordChar="*" class="bbs_text text_field" style="height: 30px;" name="password" />
-                </div>
-                <div>
-                    <div>
-                        <input type="checkbox" style="float:left;margin-top:3px;min-width:90px;" name="rememberMe" onclick="set_remember_me()"/><div style="float:left" for="rememberMe"><%= L"记住密码?" %></div>
+                    function login()
+                        LoginModal:LoginAction()
+                    end
+
+                    function set_auto_login()
+                        LoginModal:SetAutoLogin()
+                    end
+
+                    function set_remember_me()
+                        LoginModal:SetRememberMe()
+                    end
+
+                    function login_text()
+                        return Store:Get("user/loginText")
+                    end
+
+                    function close()
+                        LoginModal:Close()
+                    end
+
+                    function is_english()
+                        return Utils:IsEnglish()
+                    end
+
+                    function get_english_style(styleStr)
+                        if is_english() then
+                            return styleStr
+                        else
+                            return ''
+                        end
+                    end
+
+                    function remove_account(username)
+                        LoginModal:RemoveAccount(username)
+                    end
+
+                    function select_account(name, username)
+                        LoginModal:SelectAccount(username)
+                    end
+
+                    function register()
+                        LoginModal:Close()
+                        RegisterModal:ShowPage()
+                    end
+
+                    function forget_password()
+                        LoginModal:Close()
+                        ForgetPassword:ShowPage()
+                    end
+                ]]>
+            </script>
+            <style type="text/mcss">
+                {
+                    user_login = {
+                        ["base-font-size"] = 16,
+                        ["font-size"] = 16,
+                        color = "#ffffff",
+                        ["padding-right"] = 40,
+                        ["padding-left"] = 40,
+                        ["padding-top"] = 20,
+                        ["padding-bottom"] = 20,
+                    },
+                    text_field = {
+                        background = "textures/worldshare_32bits.png;72 20 16 16:3 3 3 3",
+                        border = "none",
+                        width = 165,
+                    },
+                    login_button = {
+                        ["margin-left"] = 0,
+                        width = 230,
+                        height = 33,
+                        textcolor = "#000000",
+                        color = "#000000",
+                        ["font-size"] = 18
+                        background = "textures/worldshare_32bits.png;149 104 16 16:4 4 4 4",
+                    },
+                }
+            </style>
+            <aries:window mode="thin" width="320" style="float:left;" title_height="40" close_height="25" title='<%=L"登陆" %>' onclose="close()">
+                <div name="login" class="user_login">
+                    <pe:if condition="<%= login_text() ~= nil%>">
+                        <div style="margin-bottom:15px;"><%= login_text()%></div>
+                    </pe:if>
+                    <!-- <div style="margin-bottom:12px;">
+                        <div style="<%='float:left;min-width:40px;' .. get_english_style('min-width:73px;') %>"><%= L"服务器："%></div>
+                        <select name="loginServer" DataSource="<%= get_server_list()%>" style="height: 30px;width: 165px;" class="text_field"></select>
+                    </div> -->
+                    <div style="margin-bottom:12px;">
+                        <div style="<%='float:left;min-width:65px;' .. get_english_style('min-width:73px;') %>"><%= L"账号：" %></div>
+                        <select  name="account" DataSource="<%= get_history_users() %>" EmptyText='<%= L"账户名/邮箱/手机号" %>' onselect="<%= select_account %>" onremove="<%= remove_account %>" class="bbs_text text_field" style="height: 30px;"></select>
+                    </div>
+                    <div style="margin-bottom:12px;">
+                        <div style="float:left;min-width:65px"><%= L"密码：" %></div>
+                        <input type="text" PasswordChar="*" class="bbs_text text_field" style="height: 30px;" name="password" />
                     </div>
                     <div>
-                        <input type="checkbox" style="float:left;margin-top:3px;min-width:90px;" name="autoLogin" onclick="set_auto_login()"/><div style="float:left" for="autoLogin"><%= L"自动登录" %></div>    
+                        <div>
+                            <input type="checkbox" style="float:left;margin-top:3px;min-width:90px;" name="rememberMe" onclick="set_remember_me()"/><div style="float:left" for="rememberMe"><%= L"记住密码?" %></div>
+                        </div>
+                        <div>
+                            <input type="checkbox" style="float:left;margin-top:3px;min-width:90px;" name="autoLogin" onclick="set_auto_login()"/><div style="float:left" for="autoLogin"><%= L"自动登录" %></div>    
+                        </div>
+                    </div>
+                    <div style="margin-top:30px;margin-bottom:15px;">
+                        <input type="button" DefaultButton="true" class="login_button" onclick="login()" value='<%= L"登 录"%>' />
+                    </div>
+                    <div style="<%='text-align:left;margin-left:55px;' .. get_english_style('margin-left:15px;')%>">
+                        <a name="forgot" onclick="forget_password()" style="background:url(textures/worldshare_32bits.png#399 76 64 30:0 0 0 0);height:30px;width:150px;font-size: 14px;color: #ffffff;"><%= L"忘记密码" %></a>
+                        <span style="color:#ffffff;">|</span>
+                        <a name="register" onclick="register()" style="background:url(textures/worldshare_32bits.png#399 76 64 30:0 0 0 0);height:30px;width:150px;font-size: 14px;color: #fe5927;"><%= L"点击注册" %></a>
                     </div>
                 </div>
-                <div style="margin-top:30px;margin-bottom:15px;">
-                    <input type="button" DefaultButton="true" class="login_button" onclick="login()" value='<%= L"登 录"%>' />
-                </div>
-                <div style="<%='text-align:left;margin-left:55px;' .. get_english_style('margin-left:15px;')%>">
-                    <a name="forgot" style="background:url(textures/worldshare_32bits.png#399 76 64 30:0 0 0 0);height:30px;width:150px;font-size: 14px;color: #ffffff;"><%= L"忘记密码" %></a>
-                    <span style="color:#ffffff;">|</span>
-                    <a name="register" style="background:url(textures/worldshare_32bits.png#399 76 64 30:0 0 0 0);height:30px;width:150px;font-size: 14px;color: #fe5927;"><%= L"点击注册" %></a>
-                </div>
-            </div>
-        </aries:window>
-    </pe:mcml>
-</body>
+            </aries:window>
+        </pe:mcml>
+    </body>
 </html>
