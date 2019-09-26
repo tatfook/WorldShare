@@ -169,28 +169,28 @@
                         <select name="registerServer" DataSource="<%= get_server_list()%>" style="height: 30px;width: 205px;" class="text_field"></select>
                     </div> -->
                     <div style="margin-bottom:12px;">
-                        <div style="<%='float:left;min-width:65px;' .. get_english_style('min-width:73px;') %>"><%= L"账号：" %></div>
+                        <div style="<%='float:left;min-width:65px;' .. get_english_style('min-width:80px;') %>"><%= L"账号：" %></div>
                         <input type="text" class="bbs_text text_field" EmptyText='<%= L"请输入账号" %>' style="height: 30px;" name="account" />
                     </div>
                     <div style="margin-bottom:12px;">
-                        <div style="float:left;min-width:65px"><%= L"密码：" %></div>
+                        <div style="<%='float:left;min-width:65px;' .. get_english_style('min-width:80px;') %>"><%= L"密码：" %></div>
                         <input type="text" PasswordChar="*" class="bbs_text text_field" EmptyText='<%= L"请输入密码" %>' style="height: 30px;" name="password" />
                         <input name="checkboxPassword" type="checkbox" checked="false" iconsize="22" style="position: relative;margin-left: -25px;margin-top: 5px;" CheckedBG="Texture/Aries/Common/Teen/map/players_shown_32bits.png;0 0 22 22" UncheckedBG="Texture/Aries/Common/Teen/map/players_hidden_32bits.png;0 0 22 22" onclick="set_show_password"/>
                     </div>
                     <div style="margin-bottom:12px;">
-                        <div style="float:left;min-width:65px"><%= L"验证码：" %></div>
-                        <input type="text" class="bbs_text text_field" EmptyText='<%= L"请输入验证码" %>' style="height: 30px;width: 100px;" name="captcha" />
+                        <div style="<%='float:left;min-width:65px;' .. get_english_style('min-width:80px;') %>"><%= L"验证码：" %></div>
+                        <input type="text" class="bbs_text text_field" EmptyText='<%= L"请输入验证码" %>' style="<%= 'height: 30px;width: 100px;' .. get_english_style('width:140px;') %>" name="captcha" />
                         <div style="float:left;background-color: #e9f4ff;margin-left: 5px;width: 60px; height: 30px;padding: 4px;">
                             <img style="height: 26px;width: 56px;" src="<%= get_captcha() %>" onclick="update_captcha()"/>
                         </div>
                     </div>
                     <div style="margin-bottom:12px;"><%=L"实名验证（推荐）"%></div>
                     <div style="margin-bottom:12px;">
-                        <div style="float:left;min-width:65px"><%= L"手机号：" %></div>
-                        <input type="text" class="bbs_text text_field" EmptyText='<%= L"请输入密码" %>' style="height: 30px;" name="phone" />
+                        <div style="<%='float:left;min-width:65px;' .. get_english_style('min-width:120px;') %>"><%= L"手机号：" %></div>
+                        <input type="text" class="bbs_text text_field" EmptyText='<%= L"请输入密码" %>' style="<%= 'height: 30px;'  .. get_english_style('width:160px;') %>" name="phone" />
                     </div>
                     <div style="margin-bottom:12px;">
-                        <div style="float:left;min-width:65px"><%= L"验证码：" %></div>
+                        <div style="<%='float:left;min-width:65px;' .. get_english_style('min-width:75px;') %>"><%= L"验证码：" %></div>
                         <input type="text" class="bbs_text text_field" EmptyText='<%= L"请输入验证码" %>' style="height: 30px;width: 100px;" name="phonecaptcha" />
                         <input
                             type="button"
@@ -215,7 +215,7 @@
                     <div>
                         <input type="button" DefaultButton="true" class="common_button mc_light_grey_button_with_fillet" style="margin-top: 10px;margin-left:70px;width: 140px;" onclick="register()" value='<%= L"注册"%>' />
                     </div>
-                    <div style="margin-top: 10px;margin-left: 50px">
+                    <div style="<%= 'margin-top: 10px;margin-left: 50px;' .. get_english_style('margin-left: 10px;') %>">
                         <a style="font-size: 11px;color: #fe5927;background:url(textures/worldshare_32bits.png#176 0 64 21);" isbuttonstyle="true" tooltip="" href="https://keepwork.com/u/r/register"><%= L"如果出现问题，点击此处去官网注册" %></a>
                     </div>
                 </div>

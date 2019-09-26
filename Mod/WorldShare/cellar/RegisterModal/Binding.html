@@ -101,6 +101,18 @@
                     function bind(m)
                         RegisterModal:Bind(m)
                     end
+
+                    function is_english()
+                        return Mod.WorldShare.Utils:IsEnglish()
+                    end
+
+                    function get_english_style(styleStr)
+                        if is_english() then
+                            return styleStr
+                        else
+                            return ''
+                        end
+                    end
                 ]]>
             </script>
             <style type="type/mcss">
@@ -135,8 +147,8 @@
                         <pe:tabs name="bindinfo" class="tabs" style="height: 200px;" ItemSpacing="0">
                             <pe:tab-item name="phonetab" text="<%= L'手机号码' %>" selected="true" style="padding-top: 12px;">
                                 <div style="margin-bottom:12px;">
-                                    <div style="float:left;min-width:65px"><%= L"手机号：" %></div>
-                                    <input type="text" class="bbs_text text_field" EmptyText='<%= L"请输入手机号" %>' style="height: 30px;width: 220px;" name="phone" />
+                                    <div style="<%= 'float:left;min-width:65px;' .. get_english_style('min-width: 120px;') %>"><%= L"手机号：" %></div>
+                                    <input type="text" class="bbs_text text_field" EmptyText='<%= L"请输入手机号" %>' style="<%= 'height: 30px;width: 220px;' .. get_english_style('width: 165px;')" name="phone" />
                                 </div>
                                 <div style="margin-bottom:12px;">
                                     <div style="float:left;min-width:65px"><%= L"验证码：" %></div>
