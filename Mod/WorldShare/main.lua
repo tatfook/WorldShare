@@ -34,6 +34,7 @@ NPL.load("(gl)script/ide/System/Core/UniString.lua")
 NPL.load("(gl)script/ide/System/Core/Event.lua")
 NPL.load("(gl)script/apps/Aries/Creator/Game/Login/TeacherAgent/TeacherAgent.lua")
 NPL.load("(gl)script/ide/System/os/os.lua")
+NPL.load("(gl)script/apps/Aries/Creator/Game/Network/NPLWebServer.lua")
 
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")
@@ -74,7 +75,7 @@ function WorldShare:GetDesc()
     return self.Desc
 end
 
-function WorldShare:init()
+function WorldShare:init()    
     -- replace load world page
     GameLogic.GetFilters():add_filter(
         "InternetLoadWorld.ShowPage",
