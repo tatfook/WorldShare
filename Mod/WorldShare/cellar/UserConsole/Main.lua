@@ -150,7 +150,7 @@ function UserConsole.IsMCVersion()
 end
 
 function UserConsole.OnImportWorld()
-    ParaGlobal.ShellExecute("open", LocalLoadWorld.GetWorldFolderFullPath(), "", "", 1)
+    Map3DSystem.App.Commands.Call("File.WinExplorer", LocalLoadWorld.GetWorldFolderFullPath());
 end
 
 function UserConsole.OnClickOfficialWorlds(callback)
