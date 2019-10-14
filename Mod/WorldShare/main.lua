@@ -129,6 +129,19 @@ function WorldShare:init()
             LocalService:SaveWorldInfo(ctx, node)
         end
     )
+
+    GameLogic.GetFilters():add_filter(
+        "cmd_loadworld", 
+        function(url, options)
+            local pid = UserConsole:GetProjectId(url)
+            if pid then
+                UserConsole:HandleWorldId(pid)
+                return
+            else
+                return url
+            end
+        end
+    )
 end
 
 function WorldShare:OnInitDesktop()
