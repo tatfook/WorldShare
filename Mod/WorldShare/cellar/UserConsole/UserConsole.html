@@ -150,6 +150,11 @@
                     return UserInfo:GetUserName()
                 end
 
+                function register()
+                    local RegisterModal = NPL.load("(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua")
+                    RegisterModal:ShowPage()
+                end
+
                 function login()
                     UserInfo:OnClickLogin()
                 end
@@ -445,6 +450,10 @@
                         <div style="margin-top:10px">
                             <input type="button" style="margin-left:20px" class="login_button" onclick="login()" value='<%= L"登录"%>' />
                         </div>
+                        <div style="margin-top:10px">
+                            <input type="button" style="margin-left:20px" onclick="register()" class="login_button"
+                                value='<%= L"注册" %>' />
+                        </div>
                     </pe:if>
                     <pe:if condition="<%= is_signed_in() %>">
                         <div name="loginsuccess" class="user_login" style="width:290px;">
@@ -665,14 +674,14 @@
                         </div>
                     </div>
                 </a>
-                <a onclick="on_click_lesson" class="link_big_event">
+                <!--<a onclick="on_click_lesson" class="link_big_event">
                     <div class="big_event_item">
                         <div style="float:left;margin-left:5px;background:url(Texture/3DMapSystem/AppIcons/png/Intro_64.png);width:48px;height:48px;"></div>
                         <div style="float:left;margin-left:5px;" class="event_title">
                             <%=L"动画与编程在线课程"%>
                         </div>
                     </div>
-                </a>
+                </a>-->
                 <a href="https://keepwork.com/NPL" class="link_big_event">
                     <div class="big_event_item">
                         <div style="float:left;margin-left:5px;" class="event_title">
