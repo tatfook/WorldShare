@@ -34,8 +34,11 @@ NPL.load("(gl)script/ide/System/Core/UniString.lua")
 NPL.load("(gl)script/ide/System/Core/Event.lua")
 NPL.load("(gl)script/apps/Aries/Creator/Game/Login/TeacherAgent/TeacherAgent.lua")
 NPL.load("(gl)script/ide/System/os/os.lua")
+NPL.load("(gl)script/apps/Aries/Creator/Game/Network/NPLWebServer.lua")
 
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
+local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")
+local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
 local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
 local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
@@ -51,7 +54,12 @@ local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 local WorldShare = commonlib.inherit(commonlib.gettable("Mod.ModBase"), commonlib.gettable("Mod.WorldShare"))
 
 WorldShare:Property({"Name", "WorldShare"})
-WorldShare.version = '0.0.5'
+WorldShare.version = '0.0.6'
+
+-- register mod global variable
+WorldShare.Store = Store
+WorldShare.MsgBox = MsgBox
+WorldShare.Utils = Utils
 
 -- LOG.SetLogLevel("DEBUG");
 LOG.std(nil, "info", "WorldShare", "world share version %s", WorldShare.version)
@@ -67,7 +75,7 @@ function WorldShare:GetDesc()
     return self.Desc
 end
 
-function WorldShare:init()
+function WorldShare:init()    
     -- replace load world page
     GameLogic.GetFilters():add_filter(
         "InternetLoadWorld.ShowPage",
@@ -119,6 +127,19 @@ function WorldShare:init()
         "save_world_info",
         function(ctx, node)
             LocalService:SaveWorldInfo(ctx, node)
+        end
+    )
+
+    GameLogic.GetFilters():add_filter(
+        "cmd_loadworld", 
+        function(url, options)
+            local pid = UserConsole:GetProjectId(url)
+            if pid then
+                UserConsole:HandleWorldId(pid)
+                return
+            else
+                return url
+            end
         end
     )
 end

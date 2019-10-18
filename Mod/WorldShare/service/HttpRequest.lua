@@ -13,7 +13,7 @@ local HttpRequest = NPL.export()
 HttpRequest.tryTimes = 1
 HttpRequest.maxTryTimes = 3
 HttpRequest.defaultSuccessCode = {200, 201, 202, 204}
-HttpRequest.defaultFailCode = {401, 404, 409, 422, 500}
+HttpRequest.defaultFailCode = {400, 401, 404, 409, 422, 500}
 
 function HttpRequest:GetUrl(params, callback, noTryStatus)
     if type(params) ~= "table" and type(params) ~= "string" then
