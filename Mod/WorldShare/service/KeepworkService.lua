@@ -561,14 +561,6 @@ function KeepworkService:UpdateRecord(callback)
 
         Store:Set("world/localFiles", localFiles)
 
-        local preview =
-            format(
-            "%s/%s/%s/raw/master/preview.jpg",
-            dataSourceInfo.rawBaseUrl,
-            dataSourceInfo.dataSourceUsername,
-            foldername.base32
-        )
-
         local filesTotals = currentWorld and currentWorld.size or 0
 
         local function HandleGetWorld(data)
@@ -605,6 +597,15 @@ function KeepworkService:UpdateRecord(callback)
                 foldername.base32,
                 worldInfo.commitId
             )
+
+            local preview = format(
+                "%s/%s/%s/raw/master/preview.jpg?ref=%s",
+                dataSourceInfo.rawBaseUrl,
+                dataSourceInfo.dataSourceUsername,
+                foldername.base32,
+                worldInfo.commitId
+            )
+
             worldInfo.extra = {
                 coverUrl = preview,
                 commitIds = commitIds
@@ -615,21 +616,18 @@ function KeepworkService:UpdateRecord(callback)
             self:GetProject(
                 currentWorld.kpProjectId,
                 function(data)
-                    if data and data.extra and not data.extra.imageUrl then
+                    if Mod.WorldShare.Store:Get('world/isPreviewUpdated') then
                         self:UpdateProject(
                             currentWorld.kpProjectId,
                             {
                                 extra = {
-                                    imageUrl = format(
-                                        "%s/%s/%s/raw/master/preview.jpg",
-                                        dataSourceInfo.rawBaseUrl,
-                                        dataSourceInfo.dataSourceUsername,
-                                        foldername.base32
-                                    )
+                                    imageUrl = preview
                                 }
                             }
                         )
                     end
+
+                    Mod.WorldShare.Store:Remove('world/isPreviewUpdated')
                 end
             )
 
