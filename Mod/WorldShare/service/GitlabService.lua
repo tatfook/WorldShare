@@ -564,7 +564,7 @@ function GitlabService:GetWorldRevision(projectId, foldername, callback)
             return callback()
         end
 
-        local commitId = self:GetCommitIdByFoldername(foldername.utf8)
+        local commitId = data.world and data.world.commitId or 'master'
         local gitlabUsername = string.match(data.world.archiveUrl, "keepwork.com/([%w_]+)/")
 
         if not gitlabUsername then
@@ -577,7 +577,7 @@ function GitlabService:GetWorldRevision(projectId, foldername, callback)
             self:GetRawBaseUrl(),
             gitlabUsername,
             foldername.base32,
-            commitId or 'master'
+            commitId
         )
 
         HttpRequest:GetUrl(

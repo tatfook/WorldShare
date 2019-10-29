@@ -149,7 +149,7 @@ function SyncToDataSource:IgnoreFiles()
 end
 
 function SyncToDataSource:CheckReadmeFile()
-    if (not self.localFiles) then
+    if not self.localFiles then
         return false
     end
 
@@ -329,6 +329,11 @@ end
 function SyncToDataSource:UploadOne(file, callback)
     local currentLocalItem = self:GetLocalFileByFilename(file)
 
+    -- These line give a feedback on update record method
+    if string.lower(currentLocalItem.filename) == 'preview.jpg' then
+        Mod.WorldShare.Store:Set('world/isPreviewUpdated', true)
+    end
+
     Progress:UpdateDataBar(
         self.compareListIndex,
         self.compareListTotal,
@@ -369,7 +374,16 @@ function SyncToDataSource:UpdateOne(file, callback)
         format(L"%s （%s） 对比中", currentLocalItem.filename, Utils.FormatFileSize(currentLocalItem.filesize, "KB"))
     )
 
-    if (currentLocalItem.sha1 == currentRemoteItem.id and currentLocalItem.filename ~= "revision.xml") then
+    -- These line give a feedback on update record method
+    if string.lower(currentLocalItem.filename) == 'preview.jpg' then
+        if currentLocalItem.sha1 == currentRemoteItem.id then
+            Mod.WorldShare.Store:Set('world/isPreviewUpdated', false)
+        else
+            Mod.WorldShare.Store:Set('world/isPreviewUpdated', true)
+        end
+    end
+
+    if currentLocalItem.sha1 == currentRemoteItem.id and string.lower(currentLocalItem.filename) ~= "revision.xml" then
         if (type(callback) == "function") then
             Progress:UpdateDataBar(
                 self.compareListIndex,
@@ -416,6 +430,11 @@ end
 -- 删除数据源文件
 function SyncToDataSource:DeleteOne(file, callback)
     local currentRemoteItem = self:GetRemoteFileByPath(file)
+
+    -- These line give a feedback on update record method
+    if string.lower(currentRemoteItem.name) == 'preview.jpg' then
+        Mod.WorldShare.Store:Set('world/isPreviewUpdated', false)
+    end
 
     Progress:UpdateDataBar(
         self.compareListIndex,
