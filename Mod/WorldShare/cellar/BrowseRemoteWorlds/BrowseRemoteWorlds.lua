@@ -165,7 +165,7 @@ function BrowseRemoteWorlds.DeleteWorld(index)
     local currentRemoteWorld = InternetLoadWorld.GetCurrentWorld()
     local currentWorld = Store:Get('world/currentWorld')
 
-    if (currentWorld) then
+    if currentWorld then
         if (currentWorld.foldername == currentRemoteWorld.foldername) then
             _guihelper.MessageBox(L"不能刪除正在编辑的世界")
             return

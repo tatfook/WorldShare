@@ -9,7 +9,6 @@ local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
 ------------------------------------------------------------
 ]]
 local Encoding = commonlib.gettable("commonlib.Encoding")
-local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 local WorldRevision = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision")
 
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")

@@ -83,22 +83,6 @@ function UserConsole:ShowPage()
     WorldList:RefreshCurrentServerList()
 end
 
-function UserConsole:SetPage()
-    Store:Set('page/UserConsole', document:GetPageCtrl())
-
-    InternetLoadWorld.OnStaticInit()
-    InternetLoadWorld.GetEvents():AddEventListener(
-        "dataChanged",
-        function(that, event)
-            if (event.type_index == 1) then
-                self:Refresh()
-            end
-        end,
-        nil,
-        "UserConsole"
-    )
-end
-
 function UserConsole:ClosePage()
     if (UserConsole.IsMCVersion()) then
         InternetLoadWorld.ReturnLastStep()
@@ -255,4 +239,78 @@ function UserConsole:HandleWorldId(pid)
         end
     )
     
+end
+
+function UserConsole:WorldRename(currentItemIndex, tempModifyWorldname, callback)
+    local UserConsolePage = Mod.WorldShare.Store:Get('page/UserConsole')
+
+    if not UserConsolePage then
+        return false
+    end
+
+    local currentWorld = WorldList:GetSelectWorld(currentItemIndex)
+
+    if currentWorld.is_zip then
+        _guihelper.MessageBox(L"暂不支持重命名zip世界")
+        return false
+    end
+
+    if tempModifyWorldname == "" then
+        return false
+    end
+
+    local tag
+
+    if currentWorld.worldpath and currentWorld.worldpath ~= "" then
+        tag = WorldCommon.LoadWorldTag(currentWorld.worldpath)
+    
+        if tag.name == tempModifyWorldname then
+            return false
+        end
+
+        -- update local tag name
+        tag.name = tempModifyWorldname
+
+        WorldCommon.SaveWorldTag()
+        WorldCommon.LoadWorldTag()
+    end
+
+    if KeepworkService:IsSignedIn() and currentWorld.kpProjectId then
+        -- update project info
+        KeepworkService:UpdateProject(
+            currentWorld.kpProjectId,
+            {
+                extra = {
+                    worldTagName = tempModifyWorldname
+                }
+            },
+            function()
+                -- update world info
+                KeepworkService:PushWorld(
+                    {
+                        worldName = currentWorld.foldername,
+                        extra = {
+                            worldTagName = tempModifyWorldname
+                        }
+                    },
+                    function()
+                        if tag then
+                            -- update sync world
+                            SyncMain:SyncToDataSource()
+                        end
+
+                        if type(callback) == 'function' then
+                            callback()
+                        end
+                    end
+                )
+            end
+        )
+    else
+        if type(callback) == 'function' then
+            callback()
+        end
+    end
+
+    return true
 end

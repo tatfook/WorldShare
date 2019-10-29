@@ -390,15 +390,15 @@ function KeepworkService:GetWorld(worldName, callback)
     )
 end
 
-function KeepworkService:PushWorld(worldInfo, callback)
-    if (type(worldInfo) ~= 'table' or not self:IsSignedIn()) then
+function KeepworkService:PushWorld(params, callback)
+    if type(params) ~= 'table' or not self:IsSignedIn() then
         return false
     end
 
     local headers = self:GetHeaders()
 
     self:GetWorld(
-        Encoding.url_encode(worldInfo.worldName or ''),
+        Encoding.url_encode(params.worldName or ''),
         function(world)
             local worldId = world and world.id or false
 
@@ -408,10 +408,10 @@ function KeepworkService:PushWorld(worldInfo, callback)
 
             self:Request(
                 format("/worlds/%s", worldId),
-                    "PUT",
-                    worldInfo,
-                    headers,
-                    callback
+                "PUT",
+                params,
+                headers,
+                callback
             )
         end
     )
@@ -611,17 +611,43 @@ function KeepworkService:UpdateRecord(callback)
                 commitIds = commitIds
             }
 
+            
+            if worldTag and worldTag.name ~= foldername.utf8 then
+                worldInfo.extra.worldTagName = worldTag.name
+            end
+
             WorldList.SetRefreshing(true)
 
             self:GetProject(
                 currentWorld.kpProjectId,
                 function(data)
-                    if Mod.WorldShare.Store:Get('world/isPreviewUpdated') then
+                    if Mod.WorldShare.Store:Get('world/isPreviewUpdated') and
+                       worldTag and worldTag.name ~= foldername.utf8 then
+
                         self:UpdateProject(
                             currentWorld.kpProjectId,
                             {
                                 extra = {
-                                    imageUrl = preview
+                                    imageUrl = preview,
+                                    worldTagName = worldTag.name
+                                }
+                            }
+                        )
+                    elseif Mod.WorldShare.Store:Get('world/isPreviewUpdated') then
+                        self:UpdateProject(
+                            currentWorld.kpProjectId,
+                            {
+                                extra = {
+                                    imageUrl = preview,
+                                }
+                            }
+                        )
+                    elseif worldTag and worldTag.name ~= foldername.utf8 then
+                        self:UpdateProject(
+                            currentWorld.kpProjectId,
+                            {
+                                extra = {
+                                    worldTagName = worldTag.name,
                                 }
                             }
                         )

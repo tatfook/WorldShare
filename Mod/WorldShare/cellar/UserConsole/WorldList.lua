@@ -84,19 +84,20 @@ function WorldList:UpdateWorldListFromInternetLoadWorld(callbackFunc)
             end
 
             InternetLoadWorld.cur_ds = compareWorldList
+
+            local UserConsolePage = Store:Get('page/UserConsole')
+
+            if UserConsolePage then
+                Store:Set("world/compareWorldList", compareWorldList)
+                UserConsolePage:GetNode("gw_world_ds"):SetAttribute("DataSource", compareWorldList)
+                WorldList:OnSwitchWorld(1)
+            end
+
             if(callbackFunc) then
                 callbackFunc();
             end
         end
     )
-
-    local UserConsolePage = Store:Get('page/UserConsole')
-
-    if UserConsolePage then
-        Store:Set("world/compareWorldList", compareWorldList)
-        UserConsolePage:GetNode("gw_world_ds"):SetAttribute("DataSource", compareWorldList)
-        WorldList:OnSwitchWorld(1)
-    end
 end
 
 function WorldList:GetInternetWorldList(callback)
@@ -218,6 +219,7 @@ function WorldList:UpdateRevision(callback)
                 value.size = 0
             end
 
+            value.tagname = tag.name
             value.is_zip = false
         else
             value.foldername = value.Title
@@ -274,6 +276,7 @@ function WorldList:SyncWorldsList(callback)
         for DKey, DItem in ipairs(remoteWorldsList) do
             local isExist = false
             local worldpath = ""
+            local tagname = ""
             local revision = 0
             local status
 
@@ -292,6 +295,7 @@ function WorldList:SyncWorldsList(callback)
 
                     isExist = true
                     worldpath = LItem["worldpath"]
+                    tagname = LItem["tagname"]
 
                     if tonumber(LItem["kpProjectId"]) ~= tonumber(DItem["projectId"]) then
                         local tag = WorldCommon.LoadWorldTag(worldpath)
@@ -304,14 +308,21 @@ function WorldList:SyncWorldsList(callback)
                 end
             end
 
+            local text = DItem["worldName"]
+
             if (not isExist) then
                 --仅网络
                 status = 2
                 revision = DItem['revision']
+                tagname = DItem['extra'] and DItem['extra']['worldTagName'] or DItem['worldName']
+
+                if DItem['extra'] and DItem['extra']['worldTagName'] and DItem['worldName'] ~= DItem['extra']['worldTagName'] then
+                    text = tagname .. '(' .. DItem['worldName'] .. ')'
+                end
             end
 
             local currentWorld = {
-                text = DItem["worldName"],
+                text = text,
                 foldername = DItem["worldName"],
                 revision = revision,
                 size = DItem["fileSize"],
@@ -320,6 +331,7 @@ function WorldList:SyncWorldsList(callback)
                 worldpath = worldpath,
                 status = status,
                 kpProjectId = DItem["projectId"],
+                tagname = tagname,
                 is_zip = false,
             }
 
@@ -341,6 +353,7 @@ function WorldList:SyncWorldsList(callback)
                 currentWorld = LItem
                 currentWorld.modifyTime = self:UnifiedTimestampFormat(currentWorld.writedate)
                 currentWorld.text = currentWorld.foldername
+                currentWorld.tagname = LItem['tagname']
                 currentWorld.status = 1 --仅本地
                 currentWorld.is_zip = LItem['is_zip'] or false
                 compareWorldList:push_back(currentWorld)

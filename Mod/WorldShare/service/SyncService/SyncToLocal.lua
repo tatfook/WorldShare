@@ -22,6 +22,7 @@ local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")
 local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
 local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
+local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 
 local SyncToLocal = NPL.export()
 
@@ -315,6 +316,17 @@ function SyncToLocal:DownloadZIP()
             commitId,
             function(bSuccess, downloadPath)
                 LocalService:MoveZipToFolder(downloadPath)
+
+                local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+
+                if currentWorld and currentWorld.foldername ~= currentWorld.tagname and currentWorld.worldpath then
+                    local tag = WorldCommon.LoadWorldTag(currentWorld.worldpath)
+
+                    tag.name = currentWorld.tagname
+
+                    WorldCommon.SaveWorldTag()
+                    WorldCommon.LoadWorldTag()
+                end
 
                 if type(self.callback) == 'function' then
                     self.callback()
