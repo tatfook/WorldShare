@@ -275,7 +275,7 @@ function UserConsole:WorldRename(currentItemIndex, tempModifyWorldname, callback
         WorldCommon.LoadWorldTag()
     end
 
-    if KeepworkService:IsSignedIn() and currentWorld.kpProjectId then
+    if KeepworkService:IsSignedIn() and currentWorld.kpProjectId and currentWorld.status ~= 1 then
         -- update project info
         KeepworkService:UpdateProject(
             currentWorld.kpProjectId,
