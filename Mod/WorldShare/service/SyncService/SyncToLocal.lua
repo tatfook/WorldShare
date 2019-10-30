@@ -10,6 +10,7 @@ local SyncToLocal = NPL.load("(gl)Mod/WorldShare/service/SyncService/SyncToLocal
 ]]
 local Encoding = commonlib.gettable("commonlib.Encoding")
 local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
+local SaveWorldHandler = commonlib.gettable("MyCompany.Aries.Game.SaveWorldHandler")
 
 local KeepworkService = NPL.load("../KeepworkService.lua")
 local Progress = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Progress/Progress.lua")
@@ -22,7 +23,6 @@ local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")
 local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
 local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
-local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 
 local SyncToLocal = NPL.export()
 
@@ -320,12 +320,12 @@ function SyncToLocal:DownloadZIP()
                 local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
                 if currentWorld and currentWorld.foldername ~= currentWorld.tagname and currentWorld.worldpath then
-                    local tag = WorldCommon.LoadWorldTag(currentWorld.worldpath)
+                    local saveWorldHandler = SaveWorldHandler:new():Init(currentWorld.worldpath);
+                    local tag = saveWorldHandler:LoadWorldInfo()
 
                     tag.name = currentWorld.tagname
 
-                    WorldCommon.SaveWorldTag()
-                    WorldCommon.LoadWorldTag()
+                    saveWorldHandler:SaveWorldInfo(tag)
                 end
 
                 if type(self.callback) == 'function' then
