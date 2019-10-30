@@ -14,6 +14,7 @@ local LocalLoadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalL
 local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 local RemoteWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.RemoteWorld")
 local DownloadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.DownloadWorld")
+local SaveWorldHandler = commonlib.gettable("MyCompany.Aries.Game.SaveWorldHandler")
 
 local WorldShare = commonlib.gettable("Mod.WorldShare")
 local ExplorerApp = commonlib.gettable("Mod.ExplorerApp")
@@ -262,8 +263,9 @@ function UserConsole:WorldRename(currentItemIndex, tempModifyWorldname, callback
     local tag
 
     if currentWorld.worldpath and currentWorld.worldpath ~= "" then
-        tag = WorldCommon.LoadWorldTag(currentWorld.worldpath)
-    
+        local saveWorldHandler = SaveWorldHandler:new():Init(currentWorld.worldpath);
+        tag = saveWorldHandler:LoadWorldInfo()
+
         if tag.name == tempModifyWorldname then
             return false
         end
@@ -271,8 +273,7 @@ function UserConsole:WorldRename(currentItemIndex, tempModifyWorldname, callback
         -- update local tag name
         tag.name = tempModifyWorldname
 
-        WorldCommon.SaveWorldTag()
-        WorldCommon.LoadWorldTag()
+        saveWorldHandler:SaveWorldInfo(tag);
     end
 
     if KeepworkService:IsSignedIn() and currentWorld.kpProjectId and currentWorld.status ~= 1 then
