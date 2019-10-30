@@ -14,6 +14,7 @@ local LocalLoadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalL
 local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 local RemoteWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.RemoteWorld")
 local DownloadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.DownloadWorld")
+local SaveWorldHandler = commonlib.gettable("MyCompany.Aries.Game.SaveWorldHandler")
 
 local WorldShare = commonlib.gettable("Mod.WorldShare")
 local ExplorerApp = commonlib.gettable("Mod.ExplorerApp")
@@ -81,22 +82,6 @@ function UserConsole:ShowPage()
     end
 
     WorldList:RefreshCurrentServerList()
-end
-
-function UserConsole:SetPage()
-    Store:Set('page/UserConsole', document:GetPageCtrl())
-
-    InternetLoadWorld.OnStaticInit()
-    InternetLoadWorld.GetEvents():AddEventListener(
-        "dataChanged",
-        function(that, event)
-            if (event.type_index == 1) then
-                self:Refresh()
-            end
-        end,
-        nil,
-        "UserConsole"
-    )
 end
 
 function UserConsole:ClosePage()
@@ -255,4 +240,78 @@ function UserConsole:HandleWorldId(pid)
         end
     )
     
+end
+
+function UserConsole:WorldRename(currentItemIndex, tempModifyWorldname, callback)
+    local UserConsolePage = Mod.WorldShare.Store:Get('page/UserConsole')
+
+    if not UserConsolePage then
+        return false
+    end
+
+    local currentWorld = WorldList:GetSelectWorld(currentItemIndex)
+
+    if currentWorld.is_zip then
+        _guihelper.MessageBox(L"暂不支持重命名zip世界")
+        return false
+    end
+
+    if tempModifyWorldname == "" then
+        return false
+    end
+
+    local tag
+
+    if currentWorld.worldpath and currentWorld.worldpath ~= "" then
+        local saveWorldHandler = SaveWorldHandler:new():Init(currentWorld.worldpath);
+        tag = saveWorldHandler:LoadWorldInfo()
+
+        if tag.name == tempModifyWorldname then
+            return false
+        end
+
+        -- update local tag name
+        tag.name = tempModifyWorldname
+
+        saveWorldHandler:SaveWorldInfo(tag);
+    end
+
+    if KeepworkService:IsSignedIn() and currentWorld.kpProjectId and currentWorld.status ~= 1 then
+        -- update project info
+        KeepworkService:UpdateProject(
+            currentWorld.kpProjectId,
+            {
+                extra = {
+                    worldTagName = tempModifyWorldname
+                }
+            },
+            function()
+                -- update world info
+                KeepworkService:PushWorld(
+                    {
+                        worldName = currentWorld.foldername,
+                        extra = {
+                            worldTagName = tempModifyWorldname
+                        }
+                    },
+                    function()
+                        if tag then
+                            -- update sync world
+                            SyncMain:SyncToDataSource()
+                        end
+
+                        if type(callback) == 'function' then
+                            callback()
+                        end
+                    end
+                )
+            end
+        )
+    else
+        if type(callback) == 'function' then
+            callback()
+        end
+    end
+
+    return true
 end

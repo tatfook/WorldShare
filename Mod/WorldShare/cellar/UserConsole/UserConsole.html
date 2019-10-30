@@ -4,6 +4,7 @@
         <script type="text/npl" refresh="false">
             <![CDATA[
                 InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
+                WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 
                 UserConsole = NPL.load("./Main.lua")
                 WorldList = NPL.load("./WorldList")
@@ -12,7 +13,55 @@
                 MySchool = NPL.load("(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua")
                 UniString = commonlib.gettable("System.Core.UniString")
 
-                UserConsole:SetPage()
+                InternetLoadWorld.OnStaticInit()
+                InternetLoadWorld.GetEvents():AddEventListener(
+                    "dataChanged",
+                    function(that, event)
+                        if (event.type_index == 1) then
+                            UserConsole:Refresh()
+                        end
+                    end,
+                    nil,
+                    "UserConsole"
+                )
+
+                local page = document:GetPageCtrl()
+                Mod.WorldShare.Store:Set('page/UserConsole', page)
+
+                local do_modify = false
+                local current_item_index = 1
+                local temp_modify_worldname = ''
+
+                function is_modifying()
+                    return do_modify
+                end
+
+                function covert_status()
+                    if do_modify then
+                        -- update world name
+
+                        if UserConsole:WorldRename(
+                            current_item_index,
+                            temp_modify_worldname,
+                            function()
+                                WorldList:RefreshCurrentServerList(function()
+                                    switch_world(current_item_index)
+                                end)
+                            end
+                        ) then
+                            temp_modify_worldname = ''
+                        else
+                            temp_modify_worldname = ''
+                            do_modify = not do_modify
+                            page:Refresh(0.01)
+                        end
+
+                        return true
+                    end
+
+                    do_modify = not do_modify
+                    page:Refresh(0.01)
+                end
 
                 function be_selected()
                     return Eval("index") == WorldList.worldIndex
@@ -114,9 +163,7 @@
                 end
 
                 function selected_version(index)
-                    local index = tonumber(index)
-
-                    WorldList:SelectVersion(index)
+                    WorldList:SelectVersion(tonumber(index))
                 end
 
                 function go_to_url()
@@ -172,6 +219,8 @@
                 end
 
                 function switch_world(index)
+                    do_modify = false
+                    current_item_index = index
                     WorldList:OnSwitchWorld(index)
                 end
 
@@ -219,7 +268,7 @@
                     local utf8Text = UniString:new(text)
 
                     if _guihelper.GetTextWidth(text) > 150 then
-                        return utf8Text:sub(1, 12).text .. '...'
+                        return utf8Text:sub(1, 10).text .. '...'
                     else
                         return text
                     end
@@ -232,6 +281,10 @@
                 function my_school()
                     UserConsole:ClosePage()
                     MySchool:Show()
+                end
+
+                function update_temp_modify_worldname(name, mcmlNode)
+                    temp_modify_worldname = mcmlNode:GetUIValue()
                 end
             ]]>
         </script>
@@ -425,8 +478,9 @@
                     </div>
                     <input type="button" DefaultButton="true" value='<%=L"打开" %>' class="flat_button" style="margin-left:3px;height:30px" onclick="go_to_url" />
                 </div>
-                <input onclick="close()" style="margin-top:0px;float:left;background:url(Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#363 59 26 26:7 7 7 7);width:26px;height:26px"
-                    type="button" align="right" />
+                <input onclick="close()"
+                       style="margin-top:0px;float:left;background:url(Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#363 59 26 26:7 7 7 7);width:26px;height:26px"
+                       type="button" align="right" />
             </div>
             <div style="height:2px;" width="100%" class="mc_line"></div>
             <div class="user_area">
@@ -505,8 +559,15 @@
                                             <div style="float:left;width:9px;height:32px;background:#fff" />
                                         </pe:if>
                                         <div class="share_world_name">
-                                            <%= get_world_text(Eval("text")) %>
-                                            <%= if_else( Eval("is_zip") == true, L".zip", "")%>
+                                            <pe:if condition='<%= is_modifying() %>'>
+                                                <input type="text" onchange="update_temp_modify_worldname" style="width: 120px;height: 25px;textcolor: #ffffff;background: url(textures/worldshare_32bits.png#285 21 16 16:2 2 2 2);" value='<%= Eval("tagname") %>' />
+                                                <input type="button" onclick="covert_status" style="margin-left:4px;width: 40px;height: 25px;font-size: 12px;color: #ffffff" class="common_button mc_light_grey_button_with_fillet" value="<%=L'保存'%>" />
+                                            </pe:if>
+                                            <pe:if condition='<%= not is_modifying() %>'>
+                                                <%= get_world_text(Eval("text")) %>
+                                                <%= if_else( Eval("is_zip") == true, L".zip", "")%>
+                                                <div onclick="covert_status" style="float:left;margin-top:5px;margin-left:5px;background: url(textures/worldshare_32bits.png#237 49 14 14);width: 14px;height: 14px;"></div>
+                                            </pe:if>
                                         </div>
                                         <pe:if condition="<%= Eval('kpProjectId') and true or false %>">
                                             <input type="button"

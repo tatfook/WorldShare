@@ -71,18 +71,22 @@ function HttpRequest:GetUrl(params, callback, noTryStatus)
             ---- debug code ----
 
             -- no try status code, return directly
-            if (type(noTryStatus) == "table") then
+            if type(noTryStatus) == "table" then
                 for _, code in pairs(noTryStatus) do
-                    if (err == code and type(callback) == "function") then
-                        callback(data, err)
+                    if err == code then
+                        if type(callback) == "function" then
+                            callback(data, err)
+                        end
 
                         HttpRequest.tryTimes = 1
                         return false
                     end
                 end
-            elseif (type(noTryStatus) == "number") then
-                if (err == noTryStatus and type(callback) == "function") then
-                    callback(data, err)
+            elseif type(noTryStatus) == "number" then
+                if err == noTryStatus then
+                    if type(callback) == "function" then
+                        callback(data, err)
+                    end
 
                     HttpRequest.tryTimes = 1
                     return false
@@ -91,8 +95,10 @@ function HttpRequest:GetUrl(params, callback, noTryStatus)
 
             -- fail return
             for _, code in pairs(HttpRequest.defaultFailCode) do
-                if (err == code and type(callback) == "function") then
-                    callback(data, err)
+                if err == code then
+                    if type(callback) == "function" then
+                        callback(data, err)
+                    end
 
                     HttpRequest.tryTimes = 1
                     return false
@@ -101,8 +107,10 @@ function HttpRequest:GetUrl(params, callback, noTryStatus)
 
             -- success return
             for _, code in pairs(HttpRequest.defaultSuccessCode) do
-                if (err == code and type(callback) == "function") then
-                    callback(data, err)
+                if err == code then
+                    if type(callback) == "function" then
+                        callback(data, err)
+                    end
 
                     HttpRequest.tryTimes = 1
                     return true
