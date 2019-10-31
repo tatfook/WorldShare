@@ -10,7 +10,6 @@ local SyncToLocal = NPL.load("(gl)Mod/WorldShare/service/SyncService/SyncToLocal
 ]]
 local Encoding = commonlib.gettable("commonlib.Encoding")
 local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
-local SaveWorldHandler = commonlib.gettable("MyCompany.Aries.Game.SaveWorldHandler")
 
 local KeepworkService = NPL.load("../KeepworkService.lua")
 local Progress = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Progress/Progress.lua")
@@ -20,7 +19,6 @@ local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
-local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")
 local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
 local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
 
@@ -72,7 +70,7 @@ function SyncToLocal:SyncToLocal()
             return false
         end
 
-        MsgBox:Close()
+        Mod.WorldShare.MsgBox:Close()
 
         if (#data == 0) then
             UserConsole:ClosePage()
@@ -317,24 +315,13 @@ function SyncToLocal:DownloadZIP()
             function(bSuccess, downloadPath)
                 LocalService:MoveZipToFolder(downloadPath)
 
-                local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
-
-                if currentWorld and currentWorld.foldername ~= currentWorld.tagname and currentWorld.worldpath then
-                    local saveWorldHandler = SaveWorldHandler:new():Init(currentWorld.worldpath);
-                    local tag = saveWorldHandler:LoadWorldInfo()
-
-                    tag.name = currentWorld.tagname
-
-                    saveWorldHandler:SaveWorldInfo(tag)
-                end
-
                 if type(self.callback) == 'function' then
                     self.callback()
                     self.callback = nil
                 end
 
                 self:RefreshList()
-                MsgBox:Close()
+                Mod.WorldShare.MsgBox:Close()
 
                 KeepworkService:SetCurrentCommidId(commitId)
                 Store:Remove("world/commitId")

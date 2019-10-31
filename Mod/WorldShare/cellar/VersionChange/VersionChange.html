@@ -30,7 +30,9 @@
             end
 
             function get_value()
-                return format("%s： %s  %s：%s ID: %s", L"日期", tostring(Eval("date")), L"版本", tostring(Eval("revision")), tostring(Eval("shortId")))
+                local currentRevision = Eval("revision")
+                revision = nil
+                return format("%s： %s  %s：%s ID: %s", L"日期", tostring(Eval("date")), L"版本", tostring(currentRevision), tostring(Eval("shortId")))
             end
 
             function get_window_style()

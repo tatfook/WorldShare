@@ -286,6 +286,14 @@
                 function update_temp_modify_worldname(name, mcmlNode)
                     temp_modify_worldname = mcmlNode:GetUIValue()
                 end
+
+                function get_tagname()
+                    if Eval("local_tagname") and Eval("local_tagname") ~= "" then
+                        return Eval("local_tagname")
+                    else
+                        return Eval("remote_tagname")
+                    end
+                end
             ]]>
         </script>
         <style type="text/mcss">
@@ -560,13 +568,13 @@
                                         </pe:if>
                                         <div class="share_world_name">
                                             <pe:if condition='<%= is_modifying() %>'>
-                                                <input type="text" onchange="update_temp_modify_worldname" style="width: 120px;height: 25px;textcolor: #ffffff;background: url(textures/worldshare_32bits.png#285 21 16 16:2 2 2 2);" value='<%= Eval("tagname") %>' />
+                                                <input type="text" onchange="update_temp_modify_worldname" style="width: 120px;height: 25px;textcolor: #ffffff;background: url(textures/worldshare_32bits.png#285 21 16 16:2 2 2 2);" value='<%= get_tagname() %>' />
                                                 <input type="button" onclick="covert_status" style="margin-left:4px;width: 40px;height: 25px;font-size: 12px;color: #ffffff" class="common_button mc_light_grey_button_with_fillet" value="<%=L'保存'%>" />
                                             </pe:if>
                                             <pe:if condition='<%= not is_modifying() %>'>
                                                 <%= get_world_text(Eval("text")) %>
                                                 <%= if_else( Eval("is_zip") == true, L".zip", "")%>
-                                                <div onclick="covert_status" style="float:left;margin-top:5px;margin-left:5px;background: url(textures/worldshare_32bits.png#237 49 14 14);width: 14px;height: 14px;"></div>
+                                                <div onclick="covert_status" tooltip="<%=Eval('text')%>" style="float:left;margin-top:5px;margin-left:5px;background: url(textures/worldshare_32bits.png#237 49 14 14);width: 14px;height: 14px;"></div>
                                             </pe:if>
                                         </div>
                                         <pe:if condition="<%= Eval('kpProjectId') and true or false %>">

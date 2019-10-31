@@ -26,6 +26,7 @@ local WorldShare = commonlib.gettable("Mod.WorldShare")
 local Encoding = commonlib.gettable("commonlib.Encoding")
 local LocalLoadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalLoadWorld")
 local WorldRevision = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision")
+local SaveWorldHandler = commonlib.gettable("MyCompany.Aries.Game.SaveWorldHandler")
 
 local SyncMain = NPL.export()
 
@@ -182,7 +183,7 @@ end
 function SyncMain:CloseStartSyncPage()
     local StartSyncPage = Store:Get('page/StartSync')
 
-    if (StartSyncPage) then
+    if StartSyncPage then
         StartSyncPage:CloseWindow()
     end
 end
@@ -268,12 +269,56 @@ function SyncMain:SyncToLocal(callback)
 end
 
 function SyncMain:SyncToDataSource()
-    if (self:CheckWorldSize()) then
+    if self:CheckWorldSize() then
         return false
     end
 
+    -- close the notice
+    Mod.WorldShare.MsgBox:Close()
+
     SyncToDataSource:Init(self.callback)
     self.callback = nil
+end
+
+function SyncMain:CheckTagName(callback)
+    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+
+    if currentWorld and currentWorld.remote_tagname and currentWorld.worldpath then
+        if currentWorld.remote_tagname ~= currentWorld.local_tagname then
+            local params = Mod.WorldShare.Utils:ShowWindow(
+                500,
+                190,
+                "Mod/WorldShare/cellar/Sync/Templates/CheckTagName.html?remote_tagname=" .. currentWorld.remote_tagname .. "&local_tagname=" .. currentWorld.local_tagname,
+                "CheckTagName"
+            )
+            params._page.callback = function(params)
+                if params ~= 'local' and params ~= 'remote' then
+                    return false
+                end
+
+                if params == 'remote' then
+                    local saveWorldHandler = SaveWorldHandler:new():Init(currentWorld.worldpath)
+                    local taginfo = saveWorldHandler:LoadWorldInfo()
+
+                    taginfo.name = currentWorld.remote_tagname
+                    saveWorldHandler:SaveWorldInfo(taginfo)
+
+                    currentWorld.local_tagname = currentWorld.remote_tagname
+                    Mod.WorldShare.Store:Set('world/currentWorld', currentWorld)
+                end
+
+                if type(callback) == 'function' then
+                    callback()
+                end
+            end
+
+            return false
+        end
+    end
+
+    if type(callback) == 'function' then
+        callback()
+    end
 end
 
 function SyncMain.GetCurrentRevision()

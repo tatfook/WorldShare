@@ -16,7 +16,6 @@ local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua
 local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local KeepworkGen = NPL.load("(gl)Mod/WorldShare/helper/KeepworkGen.lua")
-local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")
 
 local SyncToDataSource = NPL.export()
 
@@ -36,8 +35,7 @@ function SyncToDataSource:Init(callback)
         return false
     end
 
-    -- 关闭进行中提示并加载进度UI界面
-    MsgBox:Close()
+    -- 加载进度UI界面
     Progress:Init(self)
 
     self:SetFinish(false)
@@ -61,7 +59,6 @@ function SyncToDataSource:Init(callback)
 
                     self:SyncToDataSource()
                 end)
-
             else
                 KeepworkService:CreateProject(
                     self.foldername.utf8,
@@ -245,6 +242,17 @@ function SyncToDataSource:RefreshList()
             Store:Set(
                 "world/CloseProgress",
                 function()
+                    if type(self.callback) == 'function' then
+                        self.callback(function(noRefresh)
+                            if not noRefresh then
+                                WorldList:RefreshCurrentServerList()
+                            end
+                        end)
+                        self.callback = nil
+
+                        return false
+                    end
+
                     WorldList:RefreshCurrentServerList()
                 end
             )
@@ -256,11 +264,6 @@ function SyncToDataSource:HandleCompareList()
     if (self.compareListTotal < self.compareListIndex) then
         -- sync finish
         self:SetFinish(true)
-
-        if type(self.callback) == 'function' then
-            self.callback()
-            self.callback = nil
-        end
 
         self:RefreshList()
 
