@@ -141,7 +141,6 @@ function LoginModal:LoginAction()
         )
 
         self:ClosePage()
-        WorldList:RefreshCurrentServerList()
 
         local AfterLogined = Store:Get('user/AfterLogined')
 

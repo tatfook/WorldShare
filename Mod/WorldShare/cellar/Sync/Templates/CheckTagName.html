@@ -1,0 +1,35 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>CheckoutTagName,by big,2019.10.30</title>
+</head>
+<body>
+    <pe:mcml>
+        <script type="text/npl">
+            local page = document:GetPageCtrl()
+
+            remote_tagname = page:GetRequestParam("remote_tagname")
+            local_tagname = page:GetRequestParam("local_tagname")
+
+            function close(params)
+                if type(page.callback) == 'function' then
+                    page.callback(params)
+                end
+
+                page:CloseWindow()
+            end
+        </script>
+        <div width="100%" height="100%">
+            <aries:window mode="thin" width="500" height="190" style="color:#ffffff;font-size:18px;" title='<%=L"世界名称冲突" %>' onclose="close()">
+                <div style="margin-top:30px;margin-left:45px;"><%= L"远程名字与本地名字冲突，请选择你要使用的名字" %></div>
+                <div style="margin-top:10px;margin-left: 45px;">
+                    <%= L"远程名字："%><%= remote_tagname %>
+                    <input type="button" style="margin-left: 60px;width: 80px;height: 30px;" class="mc_light_grey_button_with_fillet" name="remote" onclick="close" value="<%= L'使用' %>"/>
+                </div>
+                <div style="margin-top:10px;margin-left: 45px;">
+                    <%= L"本地名字："%><%= local_tagname %>
+                    <input type="button" style="margin-left: 60px;width: 80px;height: 30px;" class="mc_light_grey_button_with_fillet" name="local" onclick="close" value="<%= L'使用' %>"/>
+                </div>
+            </aries:window>
+        </div>
+    </pe:mcml>
+</body>

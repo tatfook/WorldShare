@@ -17,7 +17,6 @@ local GitGatewayService = NPL.load("./GitGatewayService.lua")
 local LocalService = NPL.load("./LocalService.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
-local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")
 local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
 local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
 local Config = NPL.load("(gl)Mod/WorldShare/config/Config.lua")
@@ -106,13 +105,13 @@ end
 
 function KeepworkService:LoginResponse(response, err, callback)
     if err == 400 then
-        MsgBox:Close()
+        Mod.WorldShare.MsgBox:Close()
         GameLogic.AddBBS(nil, L"用户名或者密码错误", 3000, "255 0 0")
         return false
     end
 
     if (type(response) ~= "table") then
-        MsgBox:Close()
+        Mod.WorldShare.MsgBox:Close()
         GameLogic.AddBBS(nil, L"服务器连接失败", 3000, "255 0 0")
         return false
     end
@@ -137,7 +136,7 @@ function KeepworkService:LoginResponse(response, err, callback)
         if (not data or not data.token) then
             GameLogic.AddBBS(nil, L"Token已过期，请重新登录", 3000, "255 0 0")
             self:Logout()
-            MsgBox:Close()
+            Mod.WorldShare.MsgBox:Close()
             return false
         end
 
@@ -158,7 +157,7 @@ function KeepworkService:LoginResponse(response, err, callback)
             callback()
         end
 
-        MsgBox:Close()
+        Mod.WorldShare.MsgBox:Close()
     end
 
     GitGatewayService:Accounts(HandleGetDataSource)
@@ -202,7 +201,7 @@ function KeepworkService:Login(account, password, callback)
         {},
         function(data, err)
             if (err == 503) then
-                MsgBox:Close()
+                Mod.WorldShare.MsgBox:Close()
                 -- _guihelper.MessageBox(L"keepwork正在维护中，我们马上回来")
 
                 return false
@@ -504,7 +503,7 @@ function KeepworkService:LoginWithTokenApi(callback)
     local usertoken = Store:Get("user/token") or self:GetCurrentUserToken()
 
     if type(usertoken) == "string" and #usertoken > 0 and tryTimes <= 3 then
-        MsgBox:Show(L"正在登陆，请稍后...")
+        Mod.WorldShare.MsgBox:Show(L"正在登陆，请稍后...")
 
         self:Profile(
             function(data)
@@ -514,7 +513,7 @@ function KeepworkService:LoginWithTokenApi(callback)
                     self:LoginResponse(data, err, callback)
                 else
                     System.User.keepworktoken = nil
-                    MsgBox:Close()
+                    Mod.WorldShare.MsgBox:Close()
 
                     UserConsole:ClosePage()
                     UserConsole:ShowPage()
@@ -535,6 +534,11 @@ end
 function KeepworkService:UpdateRecord(callback)
     local username = Store:Get("user/username")
     local foldername = Store:Get("world/foldername")
+    local currentWorld = Store:Get('world/currentWorld')
+
+    if not currentWorld then
+        return false
+    end
 
     local function Handle(data, err)
         if type(data) ~= "table" or #data == 0 then
@@ -551,17 +555,14 @@ function KeepworkService:UpdateRecord(callback)
             return false
         end
 
-        local currentWorld = Store:Get('world/currentWorld')
-
-        local worldTag = Store:Get("world/worldTag")
         local dataSourceInfo = Store:Get("user/dataSourceInfo")
-        local localFiles = LocalService:LoadFiles(currentWorld and currentWorld.worldpath)
+        local localFiles = LocalService:LoadFiles(currentWorld.worldpath)
 
         self:SetCurrentCommidId(lastCommitSha)
 
         Store:Set("world/localFiles", localFiles)
 
-        local filesTotals = currentWorld and currentWorld.size or 0
+        local filesTotals = currentWorld.size or 0
 
         local function HandleGetWorld(data)
             local oldWorldInfo = data or false
@@ -611,51 +612,11 @@ function KeepworkService:UpdateRecord(callback)
                 commitIds = commitIds
             }
 
-            
-            if worldTag and worldTag.name ~= foldername.utf8 then
-                worldInfo.extra.worldTagName = worldTag.name
+            if currentWorld.local_tagname and currentWorld.local_tagname ~= foldername.utf8 then
+                worldInfo.extra.worldTagName = currentWorld.local_tagname
             end
 
             WorldList.SetRefreshing(true)
-
-            self:GetProject(
-                currentWorld.kpProjectId,
-                function(data)
-                    if Mod.WorldShare.Store:Get('world/isPreviewUpdated') and
-                       worldTag and worldTag.name ~= foldername.utf8 then
-
-                        self:UpdateProject(
-                            currentWorld.kpProjectId,
-                            {
-                                extra = {
-                                    imageUrl = preview,
-                                    worldTagName = worldTag.name
-                                }
-                            }
-                        )
-                    elseif Mod.WorldShare.Store:Get('world/isPreviewUpdated') then
-                        self:UpdateProject(
-                            currentWorld.kpProjectId,
-                            {
-                                extra = {
-                                    imageUrl = preview,
-                                }
-                            }
-                        )
-                    elseif worldTag and worldTag.name ~= foldername.utf8 then
-                        self:UpdateProject(
-                            currentWorld.kpProjectId,
-                            {
-                                extra = {
-                                    worldTagName = worldTag.name,
-                                }
-                            }
-                        )
-                    end
-
-                    Mod.WorldShare.Store:Remove('world/isPreviewUpdated')
-                end
-            )
 
             self:PushWorld(
                 worldInfo,
@@ -668,6 +629,49 @@ function KeepworkService:UpdateRecord(callback)
                     if type(callback) == 'function' then
                         callback()
                     end
+                end
+            )
+
+            self:GetProject(
+                currentWorld.kpProjectId,
+                function(data)
+                    local extra = data and data.extra or {}
+
+                    if Mod.WorldShare.Store:Get('world/isPreviewUpdated') and
+                        currentWorld.local_tagname and
+                        currentWorld.local_tagname ~= foldername.utf8 then
+
+                        extra.imageUrl = preview
+                        extra.worldTagName = currentWorld.local_tagname
+
+                        self:UpdateProject(
+                            currentWorld.kpProjectId,
+                            {
+                                extra = extra
+                            }
+                        )
+                    elseif Mod.WorldShare.Store:Get('world/isPreviewUpdated') then
+                        extra.imageUrl = preview
+
+                        self:UpdateProject(
+                            currentWorld.kpProjectId,
+                            {
+                                extra = extra
+                            }
+                        )
+                    elseif currentWorld.local_tagname and
+                           currentWorld.local_tagname ~= foldername.utf8 then
+                        extra.worldTagName = currentWorld.local_tagname
+
+                        self:UpdateProject(
+                            currentWorld.kpProjectId,
+                            {
+                                extra = extra
+                            }
+                        )
+                    end
+
+                    Mod.WorldShare.Store:Remove('world/isPreviewUpdated')
                 end
             )
         end

@@ -29,6 +29,7 @@ local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
+local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
 
 local WorldList = NPL.export()
 
@@ -54,7 +55,7 @@ function WorldList.GetCurWorldInfo(infoType, worldIndex)
 end
 
 function WorldList:GetSelectWorld(index)
-    local compareWorldList = Store:Get("world/compareWorldList")
+    local compareWorldList = Mod.WorldShare.Store:Get("world/compareWorldList")
 
     if compareWorldList then
         return compareWorldList[index]
@@ -63,8 +64,18 @@ function WorldList:GetSelectWorld(index)
     end
 end
 
+function WorldList:GetWorldIndexByFoldername(foldername)
+    local compareWorldList = Mod.WorldShare.Store:Get("world/compareWorldList")
+
+    for index, item in ipairs(compareWorldList) do
+        if foldername == item.foldername then
+            return index
+        end
+    end
+end
+
 function WorldList:UpdateWorldListFromInternetLoadWorld(callbackFunc)
-    local compareWorldList = Store:Get("world/compareWorldList") or {}
+    local compareWorldList = Mod.WorldShare.Store:Get("world/compareWorldList") or {}
 
     self:GetInternetWorldList(
         function(InternetWorldList)
@@ -84,11 +95,11 @@ function WorldList:UpdateWorldListFromInternetLoadWorld(callbackFunc)
             end
 
             InternetLoadWorld.cur_ds = compareWorldList
+            Store:Set("world/compareWorldList", compareWorldList)
 
             local UserConsolePage = Store:Get('page/UserConsole')
 
             if UserConsolePage then
-                Store:Set("world/compareWorldList", compareWorldList)
                 UserConsolePage:GetNode("gw_world_ds"):SetAttribute("DataSource", compareWorldList)
                 WorldList:OnSwitchWorld(1)
             end
@@ -219,7 +230,7 @@ function WorldList:UpdateRevision(callback)
                 value.size = 0
             end
 
-            value.tagname = tag.name
+            value.local_tagname = tag.name
             value.is_zip = false
         else
             value.foldername = value.Title
@@ -276,7 +287,8 @@ function WorldList:SyncWorldsList(callback)
         for DKey, DItem in ipairs(remoteWorldsList) do
             local isExist = false
             local worldpath = ""
-            local tagname = ""
+            local localTagname = ""
+            local remoteTagname = ""
             local revision = 0
             local status
 
@@ -295,7 +307,9 @@ function WorldList:SyncWorldsList(callback)
 
                     isExist = true
                     worldpath = LItem["worldpath"]
-                    tagname = LItem["tagname"]
+
+                    localTagname = LItem["local_tagname"]
+                    remoteTagname = DItem["extra"] and DItem["extra"]["worldTagName"]
 
                     if tonumber(LItem["kpProjectId"]) ~= tonumber(DItem["projectId"]) then
                         local tag = WorldCommon.LoadWorldTag(worldpath)
@@ -314,10 +328,10 @@ function WorldList:SyncWorldsList(callback)
                 --仅网络
                 status = 2
                 revision = DItem['revision']
-                tagname = DItem['extra'] and DItem['extra']['worldTagName'] or DItem['worldName']
+                remoteTagname = DItem['extra'] and DItem['extra']['worldTagName'] or DItem['worldName']
 
                 if DItem['extra'] and DItem['extra']['worldTagName'] and DItem['worldName'] ~= DItem['extra']['worldTagName'] then
-                    text = tagname .. '(' .. DItem['worldName'] .. ')'
+                    text = remoteTagname .. '(' .. DItem['worldName'] .. ')'
                 end
             end
 
@@ -331,7 +345,8 @@ function WorldList:SyncWorldsList(callback)
                 worldpath = worldpath,
                 status = status,
                 kpProjectId = DItem["projectId"],
-                tagname = tagname,
+                local_tagname = localTagname,
+                remote_tagname = remoteTagname,
                 is_zip = false,
             }
 
@@ -353,7 +368,7 @@ function WorldList:SyncWorldsList(callback)
                 currentWorld = LItem
                 currentWorld.modifyTime = self:UnifiedTimestampFormat(currentWorld.writedate)
                 currentWorld.text = currentWorld.foldername
-                currentWorld.tagname = LItem['tagname']
+                currentWorld.local_tagname = LItem['local_tagname']
                 currentWorld.status = 1 --仅本地
                 currentWorld.is_zip = LItem['is_zip'] or false
                 compareWorldList:push_back(currentWorld)
@@ -530,48 +545,64 @@ end
 
 function WorldList:EnterWorld(index)
     self:OnSwitchWorld(index)
+    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
-    local selectedWorld = self:GetSelectWorld(index)
-    local compareWorldList = Store:Get("world/compareWorldList")
+    local function Handle()
+        if not KeepworkService:IsSignedIn() then
+            self:OnSwitchWorld(index)
 
-    if (not KeepworkService:IsSignedIn()) then
-        InternetLoadWorld.EnterWorld()
-        return
-    end
-
-    if (selectedWorld.status == 2) then
-        if not self.zipDownloadFinished then
+            InternetLoadWorld.EnterWorld()
             return false
         end
 
-        self.zipDownloadFinished = false
+        -- compare list is not the same before login
+        local index = self:GetWorldIndexByFoldername(currentWorld.foldername)
 
-        Compare:Init(function(result, callback)
-            InternetLoadWorld.EnterWorld()
-            self.zipDownloadFinished = true
-        end)
-    else
-        if (selectedWorld.status == 1) then
-            InternetLoadWorld.EnterWorld()	
-            UserConsole:ClosePage()	
-        end
+        self:OnSwitchWorld(index)
+        local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
-        Compare:Init(function(result, callback)
-            if result == 'REMOTEBIGGER' then
-                if type(callback) == 'function' then	
-                    callback(function()	
-                        InternetLoadWorld.EnterWorld()	
-                        UserConsole:ClosePage()	
-                    end)
-                end	
-            else	
+        if currentWorld.status == 2 then
+            if not self.zipDownloadFinished then
+                return false
+            end
+    
+            self.zipDownloadFinished = false
+    
+            Compare:Init(function(result, callback)
+                InternetLoadWorld.EnterWorld()
+                self.zipDownloadFinished = true
+            end)
+        else
+            if (currentWorld.status == 1) then
                 InternetLoadWorld.EnterWorld()	
                 UserConsole:ClosePage()	
-            end	
-        end)
+            end
+    
+            Compare:Init(function(result, callback)
+                if result == 'REMOTEBIGGER' then
+                    if type(callback) == 'function' then	
+                        callback(function()	
+                            InternetLoadWorld.EnterWorld()	
+                            UserConsole:ClosePage()	
+                        end)
+                    end	
+                else	
+                    InternetLoadWorld.EnterWorld()	
+                    UserConsole:ClosePage()	
+                end	
+            end)
+        end
+    
+        Store:Set("explorer/mode", "mine")
     end
 
-    Store:Set("explorer/mode", "mine")
+    if not KeepworkService:IsSignedIn() then
+        LoginModal:Init(function()
+            self:RefreshCurrentServerList(Handle)
+        end)
+    else
+        Handle()
+    end
 end
 
 function WorldList.FormatStatus(status)

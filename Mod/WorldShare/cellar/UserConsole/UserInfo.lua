@@ -175,7 +175,9 @@ end
 function UserInfo:OnClickLogin()
     Store:Set("user/ignoreAutoLogin", true)
     Store:Set("user/loginText", L"请先登录")
-    LoginModal:ShowPage()
+    LoginModal:Init(function()
+        WorldList:RefreshCurrentServerList()
+    end)
 end
 
 local curIndex = 1

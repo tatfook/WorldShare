@@ -21,7 +21,6 @@ local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
-local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")
 local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
 
 local Compare = NPL.export()
@@ -43,7 +42,7 @@ function Compare:Init(callback)
             if (isEnterWorld and not isShowUserConsolePage) then
                 if type(callback) == 'function' then
                     callback()
-                    MsgBox:Close()
+                    Mod.WorldShare.MsgBox:Close()
                     return false
                 end
 
@@ -51,11 +50,11 @@ function Compare:Init(callback)
                 --     SyncMain:ShowStartSyncPage()
                 -- end
 
-                MsgBox:Close()
+                Mod.WorldShare.MsgBox:Close()
             else
                 if (result == JUSTLOCAL) then
                     SyncMain:SyncToDataSource()
-                    MsgBox:Close()
+                    Mod.WorldShare.MsgBox:Close()
                     return true
                 end
 
@@ -71,7 +70,7 @@ function Compare:Init(callback)
                         SyncMain:ShowStartSyncPage()
                     end
 
-                    MsgBox:Close()
+                    Mod.WorldShare.MsgBox:Close()
                     return true
                 end
             end
@@ -90,18 +89,26 @@ function Compare:SetFinish(value)
 end
 
 function Compare:GetCompareResult(callback)
+    if not self:IsCompareFinish() then
+        Mod.WorldShare.MsgBox:Show(L"请稍后...")
+    end
+
     local currentWorld = Store:Get('world/currentWorld')
 
-    if (currentWorld and currentWorld.status == 2) then
+    if not currentWorld then
+        Mod.WorldShare.MsgBox:Close()
+    end
+
+    if currentWorld.status == 2 then
         if (type(callback) == "function") then
             callback(JUSTREMOTE)
             return true
         end
     end
 
-    if (not currentWorld or currentWorld.is_zip) then
+    if currentWorld.is_zip then
         self:SetFinish(true)
-        MsgBox:Close()
+        Mod.WorldShare.MsgBox:Close()
         return false
     end
 
@@ -115,14 +122,14 @@ function Compare:CompareRevision(callback)
     local foldername = Store:Get("world/foldername")
     local currentWorld = Store:Get('world/currentWorld')
 
-    if (not foldername or not currentWorld or not currentWorld.worldpath) then
+    if not foldername or not currentWorld or not currentWorld.worldpath then
         return false
     end
 
     local remoteWorldsList = Store:Get("world/remoteWorldsList")
     local remoteRevision = 0
 
-    if (self:HasRevision()) then
+    if self:HasRevision() then
         self.createRevisionTimes = 0
 
         local function CompareRevision(currentRevision, remoteRevision)
@@ -145,7 +152,7 @@ function Compare:CompareRevision(callback)
 
         local currentRevision = WorldRevision:new():init(currentWorld.worldpath):Checkout()
 
-        if (currentWorld and not currentWorld.kpProjectId) then
+        if currentWorld and not currentWorld.kpProjectId then
             currentRevision = tonumber(currentRevision) or 0
             remoteRevision = tonumber(data) or 0
 
@@ -182,10 +189,6 @@ function Compare:CompareRevision(callback)
             if (type(callback) == "function") then
                 callback(result)
             end
-        end
-
-        if not self:IsCompareFinish() then
-            MsgBox:Show(L"请稍后...")
         end
 
         GitService:GetWorldRevision(currentWorld.kpProjectId, foldername, HandleRevision)

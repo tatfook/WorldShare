@@ -10,7 +10,7 @@ WorldExitDialog.ShowPage();
 ------------------------------------------------------------
 ]]
 local ShareWorldPage = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.Areas.ShareWorldPage")
-local WorldRevision = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision");
+local WorldRevision = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision")
 
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
