@@ -96,12 +96,10 @@ function SyncMain:GetCurrentWorldInfo(callback)
                 end
             end
     
-            if (searchCurrentWorld) then
+            if searchCurrentWorld then
                 currentWorld = searchCurrentWorld
     
                 local worldTag = LocalService:GetTag(currentWorld.worldpath)
-                worldTag.size = filesize
-                LocalService:SetTag(format("%s/", currentWorld.worldpath), worldTag)
     
                 Store:Set("world/worldTag", worldTag)
                 Store:Set("world/currentWorld", currentWorld)
