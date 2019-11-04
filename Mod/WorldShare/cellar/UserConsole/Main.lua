@@ -188,6 +188,8 @@ function UserConsole:HandleWorldId(pid)
 
         local function LoadWorld(world, refreshMode)
             if(world) then
+                local url = world:GetLocalFileName()
+                DownloadWorld.ShowPage(url)
                 local mytimer = commonlib.Timer:new(
                     {
                         callbackFunc = function(timer)
@@ -212,8 +214,6 @@ function UserConsole:HandleWorldId(pid)
 
         if(url:match("^https?://")) then
             world = RemoteWorld.LoadFromHref(url, "self")
-            DownloadWorld.ShowPage(url)
-
             local url = world:GetLocalFileName()
 
             if(ParaIO.DoesFileExist(url)) then
