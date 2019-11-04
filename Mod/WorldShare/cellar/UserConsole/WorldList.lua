@@ -547,6 +547,10 @@ function WorldList:EnterWorld(index)
     self:OnSwitchWorld(index)
     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
+    if not currentWorld then
+        return false
+    end
+
     local function Handle()
         if not KeepworkService:IsSignedIn() then
             self:OnSwitchWorld(index)
@@ -596,7 +600,7 @@ function WorldList:EnterWorld(index)
         Store:Set("explorer/mode", "mine")
     end
 
-    if not KeepworkService:IsSignedIn() then
+    if not KeepworkService:IsSignedIn() and currentWorld.kpProjectId then
         LoginModal:Init(function()
             self:RefreshCurrentServerList(Handle)
         end)
