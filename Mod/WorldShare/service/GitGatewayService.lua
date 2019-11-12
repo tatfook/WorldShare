@@ -9,19 +9,14 @@ local GitGatewayService = NPL.load("(gl)Mod/WorldShare/service/GitGatewayService
 ------------------------------------------------------------
 ]]
 local HttpRequest = NPL.load("./HttpRequest.lua")
+local KeepworkService = NPL.load("./KeepworkService.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local Config = NPL.load("(gl)Mod/WorldShare/config/Config.lua")
 
 local GitGatewayService = NPL.export()
 
 function GitGatewayService:GetBaseApi()
-  local env = Store:Get("user/env")
-
-  if not env then
-    env = Config.env.ONLINE
-  end
-
-  return Config.gitGatewayList[env] or ""
+  return Config.gitGatewayList[KeepworkService:GetEnv()] or ""
 end
 
 function GitGatewayService:GetHeaders()

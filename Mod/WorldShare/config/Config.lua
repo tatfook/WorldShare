@@ -19,58 +19,58 @@ Config.env = {
   LOCAL = "LOCAL"
 }
 
-Config.defaultEnv = Config.env.ONLINE
+Config.defaultEnv = (ParaEngine.GetAppCommandLineByParam("worldshareenv", nil) or Config.env.ONLINE)
 
 Config.keepworkList = {
   ONLINE = "https://keepwork.com",
-  STAGE = "http://dev.kp",
-  RELEASE = "http://rls.kp",
-  LOCAL = "http://dev.kp"
+  STAGE = "http://dev.kp-para.cn",
+  RELEASE = "http://rls.kp-para.cn",
+  LOCAL = "http://dev.kp-para.cn"
 }
 
 Config.keepworkServerList = {
   ONLINE = "https://api.keepwork.com/core/v0",
-  STAGE = "https://api.dev.kp/core/v0",
-  RELEASE = "http://api.rls.kp/core/v0",
-  LOCAL = "http://api.dev.kp/core/v0",
+  STAGE = "http://api-dev.kp-para.cn/core/v0",
+  RELEASE = "http://api-rls.kp-para.cn/core/v0",
+  LOCAL = "http://api-dev.kp-para.cn/core/v0",
 }
 
 Config.gitGatewayList = {
   ONLINE = "https://api.keepwork.com/git/v0",
-  STAGE = "http://api.dev.kp/git/v0",
-  RELEASE = "http://api.rls.kp/git/v0",
-  LOCAL = "http://api.dev.kp/git/v0"
+  STAGE = "http://api-dev.kp-para.cn/git/v0",
+  RELEASE = "http://api-rls.kp-para.cn/git/v0",
+  LOCAL = "http://api-dev.kp-para.cn/git/v0"
 }
 
 Config.esGatewayList = {
   ONLINE = "https://api.keepwork.com/es/v0",
-  STAGE = "https://api.dev.kp/es/v0",
-  RELEASE = "https://api.rls.kp/es/v0",
-  LOCAL = "https://api.dev.kp/es/v0"
+  STAGE = "http://api-dev.kp-para.cn/es/v0",
+  RELEASE = "http://api-rls.kp-para.cn/es/v0",
+  LOCAL = "http://api-dev.kp-para.cn/es/v0"
 }
 
 Config.lessonList = {
   ONLINE = "https://api.keepwork.com/lesson/v0",
-  STAGE = "https://api.dev.kp/lesson/v0",
-  RELEASE = "https://api.rls.kp/lesson/v0",
-  LOCAL = "https://api.dev.kp/lesson/v0"
+  STAGE = "http://api-dev.kp-para.cn/lesson/v0",
+  RELEASE = "http://api-rls.kp-para.cn/lesson/v0",
+  LOCAL = "http://api-dev.kp-para.cn/lesson/v0"
 }
 
 Config.dataSourceApiList = {
   gitlab = {
     ONLINE = "https://git.keepwork.com/api/v4",
-    STAGE = "https://git.dev.kp/api/v4",
-    RELEASE = "https://git.rls.kp/api/v4",
-    LOCAL = "https://git.dev.kp/api/v4"
+    STAGE = "http://git-dev.kp-para.cn/api/v4",
+    RELEASE = "http://git-rls.kp-para.cn/api/v4",
+    LOCAL = "http://git-dev.kp-para.cn/api/v4"
   }
 }
 
 Config.dataSourceRawList = {
   gitlab = {
     ONLINE = "https://git.keepwork.com",
-    STAGE = "https://git.dev.kp",
-    RELEASE = "https://git.rls.kp",
-    LOCAL = "https://git.dev.kp"
+    STAGE = "http://git-dev.kp-para.cn",
+    RELEASE = "http://git-rls.kp-para.cn",
+    LOCAL = "http://git-dev.kp-para.cn"
   }
 }
 

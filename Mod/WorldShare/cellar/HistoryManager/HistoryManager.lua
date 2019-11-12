@@ -12,7 +12,6 @@ local HistoryManager = NPL.load("(gl)Mod/WorldShare/cellar/HistoryManager/Histor
 local Screen = commonlib.gettable("System.Windows.Screen")
 local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
 
-local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local MdParser = NPL.load("(gl)Mod/WorldShare/parser/MdParser.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local HttpRequest = NPL.load("(gl)Mod/WorldShare/service/HttpRequest.lua")
@@ -25,7 +24,7 @@ local Config = NPL.load("(gl)Mod/WorldShare/config/Config.lua")
 local HistoryManager = NPL.export()
 
 function HistoryManager:ShowPage()
-    local params = Utils:ShowWindow(0, 0, "Mod/WorldShare/cellar/HistoryManager/HistoryManager.html", "HistoryManager", 0, 0, "_fi", false)
+    local params = Mod.WorldShare.Utils:ShowWindow(0, 0, "Mod/WorldShare/cellar/HistoryManager/HistoryManager.html", "HistoryManager", 0, 0, "_fi", false)
 
     Screen:Connect("sizeChanged", HistoryManager, HistoryManager.OnScreenSizeChange, "UniqueConnection")
     HistoryManager.OnScreenSizeChange()
@@ -92,7 +91,7 @@ function HistoryManager:HasData()
 end
 
 function HistoryManager:GetLocalRecommendedWorldList()
-    local data = Utils:GetFileData('Mod/WorldShare/database/RecommendedWorldList.md')
+    local data = Mod.WorldShare.Utils:GetFileData('Mod/WorldShare/database/RecommendedWorldList.md')
 
     local tree, items = MdParser:MdToTable(data)
 
@@ -183,8 +182,8 @@ function HistoryManager:MergeTree(target, source)
         if not mergeList[key] then
             mergeList[key] = item
         else
-            if not Utils:IsEquivalent(mergeList[key], item) then
-                local mergeItem = Utils:MergeTable(mergeList[key], item)
+            if not Mod.WorldShare.Utils:IsEquivalent(mergeList[key], item) then
+                local mergeItem = Mod.WorldShare.Utils:MergeTable(mergeList[key], item)
 
                 mergeList[key] = mergeItem
             end
@@ -204,8 +203,8 @@ function HistoryManager:MergeItems(target, source)
             if mItem['displayName'] == sItem['displayName'] then
                 beExist = true
 
-                if not Utils:IsEquivalent(mItem, sItem) then
-                    mergeItems[mKey] = Utils:MergeTable(mItem, sItem)
+                if not Mod.WorldShare.Utils:IsEquivalent(mItem, sItem) then
+                    mergeItems[mKey] = Mod.WorldShare.Utils:MergeTable(mItem, sItem)
                 end
 
                 break

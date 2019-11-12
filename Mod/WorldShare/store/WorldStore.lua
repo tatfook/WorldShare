@@ -20,6 +20,12 @@ end
 
 function WorldStore:Getter()
     return {
-        
+        GetWorldTextName = function()
+            if self.currentWorld and self.currentWorld.text then
+                return self.currentWorld.text
+            else
+                return ""
+            end
+        end
     }
 end

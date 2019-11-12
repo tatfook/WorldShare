@@ -24,8 +24,8 @@ local UPLOAD = "UPLOAD"
 local DELETE = "DELETE"
 
 function SyncToDataSource:Init(callback)
-    self.foldername = Store:Get("world/foldername")
-    local currentWorld = Store:Get('world/currentWorld')
+    self.foldername = Mod.WorldShare.Store:Get("world/foldername")
+    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
     self.worldDir = currentWorld.worldpath
     self.callback = callback
@@ -46,7 +46,7 @@ function SyncToDataSource:Init(callback)
             if beExisted then
                 -- update world
                 KeepworkService:GetProjectIdByWorldName(self.foldername.utf8, function()
-                    currentWorld = Store:Get('world/currentWorld') 
+                    currentWorld = Mod.WorldShare.Store:Get('world/currentWorld') 
 
                     if currentWorld and currentWorld.kpProjectId then
                         local tag = LocalService:GetTag(currentWorld.worldpath)

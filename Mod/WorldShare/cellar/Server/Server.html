@@ -1,0 +1,152 @@
+<html>
+<body>
+    <pe:mcml>
+        <script type="text/npl" refresh="false" src="Server.lua">
+            <![CDATA[
+                InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
+
+                Server = NPL.load('./Server.lua')
+
+                local page = document.GetPageCtrl()
+                Mod.WorldShare.Store:Set('page/Server', page)
+
+                function close()
+                    page:CloseWindow()
+                end
+
+                function join()
+                    Server:Connect(Eval('ip'), Eval('port'))
+                end
+
+                function refresh()
+                    Server:GetOnlineList()
+                end
+
+                function is_seach_finished()
+                    return Server:IsSeachFinished()
+                end
+
+                function open_url()
+                    local url = Page:GetValue("server_url","");
+
+                    InternetLoadWorld.GotoUrl(url)
+                end
+            ]]>
+        </script>
+        <style type="text/mcss">
+            {
+                area = {
+                    ["padding-top"] = 10,
+                    ["padding-left"] = 0,
+                    ["padding-right"] = 0,
+                    ["background-color"] = "#222222",
+                    color = 'white'
+                },
+                area_header = {
+                    height = 30
+                },
+                area_content = {
+                    width = 600
+                },
+                flat_button = {
+                    color = "#cccccc",
+                    ["margin-top"] = 0,
+                    background = "Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;179 89 21 21:8 8 8 8"
+                },
+                server_text_field = {
+                    textcolor = "#ffffff",
+                    float = "left",
+                    height = 30,
+                    background = "Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;263 346 36 36:15 15 15 15",
+                },
+                server_name = {
+                    float = "left",
+                    width = 120,
+                    ["text-align"] = "center"
+                },
+                owner = {
+                    float = "left",
+                    width = 120,
+                    ["text-align"] = "center"
+                },
+                ip = {
+                    float = "left",
+                    width = 240,
+                    ["text-align"] = "center"
+                },
+                operate = {
+                    float = "left",
+                    width = 120,
+                    ["text-align"] = "center"
+                }
+            }
+        </style>
+        <div class="area">
+            <div class="area_header" name="area_header">
+                <div style="float:left;width: 100px;"><%=L"加入服务器"%></div>
+                <input style="float:left;width: 50px;margin-left: 450px;" name="close_button" class="flat_button" type="button" onclick="close()" value="<%=L'关闭'%>"/>
+            </div>
+            <div style="height:2px;margin-top:5px;" width="100%" class="mc_line"></div>
+            <div class="area_content" name="area_content">
+                <div style="margin-top: 80px;">
+                    <div class="server_text_field">
+                        <input type="text" name="server_url" EmptyText="<%= L'输入服务器地址' %>" style="width: 550px;height: 30px;background:url();textcolor:white"/>
+                        <input type="button" class="flat_button" style="width: 45px;margin-left: 0px;margin-top: 2px;margin-right: 2px;height: 26px" value="加入" onclick="open_url" />
+                    </div>
+                    <div style="margin-top: 10px;margin-bottom: 30px;">
+                        <div>可通过输入以下三种服务器信息搜索对应服务器</div>
+                        <div>1 局域网服务器地址，示例：192.168.0.1:8099</div>
+                        <div>2 互联网代理服务器地址，示例：t1.tunnel.keepwork.com:8099</div>
+                        <div>3 使用@用户名的方式加入服务器</div>
+                    </div>
+                    <div style="height:2px;margin-top:5px;" width="100%" class="mc_line"></div>
+                    <div style="text-align: center;margin-top: 30px;margin-bottom: 30px;">
+                        附近局域网服务器
+                        <input type="button" class="mc_light_grey_button_with_fillet" style="margin-left: 193px;width: 50px; height: 30px;" value="刷新" onclick="refresh()"/>
+                    </div>
+                    <pe:if condition="<%= not is_seach_finished() %>">
+                        <div style="text-align: center;margin-top: 60px;margin-bottom: 60px">
+                            正在搜索附近局域网服务器...
+                        </div>
+                    </pe:if>
+                    <pe:if condition="<%= is_seach_finished() %>">
+                        <div>
+                            <div>
+                                <div>
+                                    <div class="server_name">服务器名</div>
+                                    <div class="owner">创建人</div>
+                                    <div class="ip">服务器地址</div>
+                                    <div class="operate">操作</div>
+                                </div>
+                                <div style="height:2px;margin-top:5px;" width="100%" class="mc_line"></div>
+                            </div>
+                            <pe:gridview RememberScrollPos="true"
+                                         AllowPaging="false"
+                                         VerticalScrollBarStep="50"
+                                         DefaultNodeHeight="30"
+                                         ItemsPerLine="1"
+                                         name="udp_server_list">
+                                <Columns>
+                                    <div style="color: white">
+                                        <div>
+                                            <div class="server_name" style="padding-top: 5px;"><%= Eval('serverName') %></div>
+                                            <div class="owner" style="padding-top: 5px;"><%= Eval('username') %></div>
+                                            <div class="ip" style="padding-top: 5px;">
+                                                <%= Eval('ip') .. ':' ..  Eval('port') %>
+                                            </div>
+                                            <div class="operate">
+                                                <input type="button" class="mc_light_grey_button_with_fillet" style="margin-left: 45px;margin-top: 5px;" value="加入" onclick="join"/>
+                                            </div>
+                                        </div>
+                                        <div style="height:1px;margin-top:5px;" width="100%" class="mc_line"></div>
+                                    </div>
+                                </Columns>
+                            </pe:gridview>
+                        </div>
+                    </pe:if>
+                </div>
+            </div>
+        </div>
+    </pe:mcml>
+</body>
+</html>

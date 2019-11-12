@@ -25,7 +25,7 @@ local LoginModal = NPL.export()
 
 -- @param callbackFunc: called after successfully signed in. 
 function LoginModal:Init(callbackFunc)
-    Store:Set('user/AfterLogined', callbackFunc)
+    Mod.WorldShare.Store:Set('user/AfterLogined', callbackFunc)
     self:ShowPage()
 end
 
@@ -36,7 +36,7 @@ function LoginModal:ShowPage()
 
     local params = Utils:ShowWindow(320, 470, "Mod/WorldShare/cellar/LoginModal/LoginModal.html", "LoginModal", nil, nil, nil, nil)
 
-    local LoginModalPage = Store:Get('page/LoginModal')
+    local LoginModalPage = Mod.WorldShare.Store:Get('page/LoginModal')
 
     if not LoginModalPage then
         return false
@@ -63,7 +63,7 @@ function LoginModal:ShowPage()
 end
 
 function LoginModal:ClosePage()
-    local LoginModalPage = Store:Get('page/LoginModal')
+    local LoginModalPage = Mod.WorldShare.Store:Get('page/LoginModal')
 
     if(not LoginModalPage) then
         return false
@@ -76,7 +76,7 @@ function LoginModal:ClosePage()
 end
 
 function LoginModal:Refresh(time, callback)
-    local LoginModalPage = Store:Get('page/LoginModal')
+    local LoginModalPage = Mod.WorldShare.Store:Get('page/LoginModal')
 
     if (LoginModalPage) then
         LoginModalPage:Refresh(time or 0.01)
@@ -84,50 +84,50 @@ function LoginModal:Refresh(time, callback)
 end
 
 function LoginModal:Close()
-    local AfterLogined = Store:Get('user/AfterLogined')
+    local AfterLogined = Mod.WorldShare.Store:Get('user/AfterLogined')
 
     if type(AfterLogined) == 'function' then
         AfterLogined(false)
-        Store:Remove('user/AfterLogined')
+        Mod.WorldShare.Store:Remove('user/AfterLogined')
     end
 
     self:ClosePage()
 end
 
 function LoginModal:LoginAction()
-    local LoginModalPage = Store:Get("page/LoginModal")
+    local LoginModalPage = Mod.WorldShare.Store:Get("page/LoginModal")
 
-    if (not LoginModalPage) then
+    if not LoginModalPage then
         return false
     end
 
     local account = LoginModalPage:GetValue("account")
     local password = LoginModalPage:GetValue("password")
-    local loginServer = 'ONLINE' -- LoginModalPage:GetValue("loginServer")
+    local loginServer = KeepworkService:GetEnv()
     local autoLogin = LoginModalPage:GetValue("autoLogin")
     local rememberMe = LoginModalPage:GetValue("rememberMe")
 
-    if (not account or account == "") then
+    if not account or account == "" then
         GameLogic.AddBBS(nil, L"账号不能为空", 3000, "255 0 0")
         return false
     end
-    
-    if (not password or password == "") then
+
+    if not password or password == "" then
         GameLogic.AddBBS(nil, L"密码不能为空", 3000, "255 0 0")
         return false
     end
-    
-    if (not loginServer) then
-        GameLogic.AddBBS(nil, L"登陆站点不能为空", 3000, "255 0 0")
+
+    if not loginServer then
+        -- GameLogic.AddBBS(nil, L"登陆站点不能为空", 3000, "255 0 0")
         return false
     end
 
-    Store:Set("user/env", loginServer)
+    -- Mod.WorldShare.Store:Set("user/env", loginServer)
 
-    MsgBox:Show(L"正在登陆，请稍后...", 8000, L"链接超时", 300, 120)
+    Mod.WorldShare.MsgBox:Show(L"正在登陆，请稍后...", 8000, L"链接超时", 300, 120)
 
     local function HandleLogined()
-        local token = Store:Get("user/token") or ""
+        local token = Mod.WorldShare.Store:Get("user/token") or ""
 
         KeepworkService:SaveSigninInfo(
             {
@@ -142,11 +142,11 @@ function LoginModal:LoginAction()
 
         self:ClosePage()
 
-        local AfterLogined = Store:Get('user/AfterLogined')
+        local AfterLogined = Mod.WorldShare.Store:Get('user/AfterLogined')
 
         if type(AfterLogined) == 'function' then
             AfterLogined(true)
-            Store:Remove('user/AfterLogined')
+            Mod.WorldShare.Store:Remove('user/AfterLogined')
         end
     end
 
@@ -179,7 +179,7 @@ function LoginModal:GetServerList()
 end
 
 function LoginModal:SetAutoLogin()
-    local LoginModalPage = Store:Get("page/LoginModal")
+    local LoginModalPage = Mod.WorldShare.Store:Get("page/LoginModal")
 
     if (not LoginModalPage) then
         return false
@@ -204,7 +204,7 @@ function LoginModal:SetAutoLogin()
 end
 
 function LoginModal:SetRememberMe()
-    local LoginModalPage = Store:Get("page/LoginModal")
+    local LoginModalPage = Mod.WorldShare.Store:Get("page/LoginModal")
 
     if (not LoginModalPage) then
         return false
@@ -229,7 +229,7 @@ function LoginModal:SetRememberMe()
 end
 
 function LoginModal:RemoveAccount(username)
-    local LoginModalPage = Store:Get('page/LoginModal')
+    local LoginModalPage = Mod.WorldShare.Store:Get('page/LoginModal')
 
     if not LoginModalPage then
         return false
@@ -250,13 +250,17 @@ function LoginModal:RemoveAccount(username)
 end
 
 function LoginModal:SelectAccount(username)
-    local LoginModalPage = Store:Get('page/LoginModal')
+    local LoginModalPage = Mod.WorldShare.Store:Get('page/LoginModal')
 
     if not LoginModalPage then
         return false
     end
 
     local session = SessionsData:GetSessionByUsername(username)
+
+    if not session then
+        return false
+    end
 
     self.loginServer = session and session.loginServer or 'ONLINE'
     self.account = session and session.account or ''

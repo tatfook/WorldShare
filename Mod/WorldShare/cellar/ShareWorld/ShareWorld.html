@@ -12,12 +12,8 @@
                     GameLogic.RunCommand("/menu file.openworlddir");
                 end
 
-                function foldername()
-                    local foldername = ShareWorld:GetEnterFoldername()
-
-                    if (type(foldername) == 'table') then
-                        return foldername.utf8
-                    end
+                function worldname()
+                    return Mod.WorldShare.Store:Getter('world/GetWorldTextName')
                 end
 
                 function snapshot()
@@ -53,6 +49,20 @@
                         return KeepworkService:GetShareUrl()
                     end
                 end
+
+                function has_url()
+                    local url = KeepworkService:GetShareUrl()
+
+                    if #url == 0 then
+                        return false
+                    else
+                        return true
+                    end
+                end
+
+                function open_url()
+                    ParaGlobal.ShellExecute("open", get_world_url(), "", "", 1)
+                end
              ]]>
         </script>
         <style type="text/mcss">
@@ -80,7 +90,7 @@
                         </div>
                         <div style="float:right;padding-left:28px;">
                             <div style="font-size:18px;base-font-size:18;margin-bottom:25px;">
-                                <%= foldername() %>
+                                <%= worldname() %>
                                 <input type="button" value='...' style="margin-left:3px;margin-top:4px;font-size:11px;height:18px;color:#ffffff;" class="mc_button_blue" onclick="open_world()"/>
                             </div>
 
@@ -94,7 +104,9 @@
 
                     <div style="margin-top:20px;">
                         <input type="text" value="<%= get_world_url() %>" class="text_field"/>
-                        <input type="button" width="75" height="30" style="margin-left:10px;" class="mc_light_grey_button_with_fillet" value='<%=L"浏览" %>' onclick="open_world()" />
+                        <pe:if condition="<%= has_url() %>">
+                            <input type="button" width="75" height="30" style="margin-left:10px;" class="mc_light_grey_button_with_fillet" value='<%=L"浏览" %>' onclick="open_url()" />
+                        </pe:if>
                     </div>
                 </div>
                 <hr style="margin-left:-4px;"/>

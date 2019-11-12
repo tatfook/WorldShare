@@ -17,25 +17,15 @@ local Encoding = commonlib.gettable("commonlib.Encoding")
 local UserConsole = NPL.load('(gl)Mod/WorldShare/cellar/UserConsole/Main.lua')
 local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
 local HttpRequest = NPL.load('./HttpRequest.lua')
+local KeepworkService = NPL.load('./KeepworkService.lua')
 local Store = NPL.load('(gl)Mod/WorldShare/store/Store.lua')
 local Utils = NPL.load('(gl)Mod/WorldShare/helper/Utils.lua')
-local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
 local Config = NPL.load('(gl)Mod/WorldShare/config/Config.lua')
 
 local GitlabService = NPL.export()
 
-function GitlabService:GetEnv()
-	local env = Store:Get("user/env")
-
-	if not env then
-		env = Config.defaultEnv
-	end
-
-	return env
-end
-
 function GitlabService:GetRawBaseUrl()
-    return Config.dataSourceRawList.gitlab[self:GetEnv()]
+    return Config.dataSourceRawList.gitlab[KeepworkService:GetEnv()]
 end
 
 function GitlabService:GetDataSourceInfo()
@@ -561,24 +551,33 @@ function GitlabService:GetWorldRevision(projectId, foldername, callback)
 
     KeepworkService:GetProject(tonumber(projectId), function(data, err)
         if not data or not data.world or not data.world.worldName or not data.world.archiveUrl then
-            return callback()
+            callback()
+            return false
+        end
+
+        if data.userId ~= Mod.WorldShare.Store:Get('user/userId') then
+            callback()
+            return false
         end
 
         local commitId = data.world and data.world.commitId or 'master'
-        local gitlabUsername = string.match(data.world.archiveUrl, "keepwork.com/([%w_]+)/")
+        local rawBaseUrl = self:GetRawBaseUrl()
+        local pattern = rawBaseUrl:gsub("%-", "%%%-")
+        pattern = pattern .. "/([%w_]+)/"
+        local gitlabUsername = string.match(data.world.archiveUrl, pattern)
 
         if not gitlabUsername then
-            callback()
+            return false
         end
 
         local contentUrl =
             format(
-            "%s/%s/%s/raw/%s/revision.xml",
-            self:GetRawBaseUrl(),
-            gitlabUsername,
-            foldername.base32,
-            commitId
-        )
+                "%s/%s/%s/raw/%s/revision.xml",
+                self:GetRawBaseUrl(),
+                gitlabUsername,
+                foldername.base32,
+                commitId
+            )
 
         HttpRequest:GetUrl(
             contentUrl,

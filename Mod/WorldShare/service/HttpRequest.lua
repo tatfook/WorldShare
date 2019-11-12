@@ -155,7 +155,7 @@ function HttpRequest:Get(url, params, headers, callback, error)
         url = url,
         json = true,
         headers = headers or {},
-        params = params or {}
+        form = params or {}
     }
 
     self:GetUrl(
@@ -180,7 +180,7 @@ function HttpRequest:Post(url, params, headers, callback, error)
         url = url,
         json = true,
         headers = headers or {},
-        params = params or {}
+        form = params or {}
     }
 
     self:GetUrl(
@@ -206,7 +206,7 @@ function HttpRequest:Put(url, params, headers, callback, error)
         url = url,
         json = true,
         headers = headers or {},
-        params = params or {}
+        form = params or {}
     }
 
     self:GetUrl(
@@ -231,7 +231,7 @@ function HttpRequest:Delete(url, params, headers, callback, error)
         url = url,
         json = true,
         headers = headers or {},
-        params = params or {}
+        form = params or {}
     }
 
     self:GetUrl(

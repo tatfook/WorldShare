@@ -5,13 +5,13 @@
             <![CDATA[
                 InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
                 WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
+                UniString = commonlib.gettable("System.Core.UniString")
 
                 UserConsole = NPL.load("./Main.lua")
                 WorldList = NPL.load("./WorldList")
                 UserInfo = NPL.load("./UserInfo.lua")
-                Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
+                Server = NPL.load('../Server/Server.lua')
                 MySchool = NPL.load("(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua")
-                UniString = commonlib.gettable("System.Core.UniString")
 
                 InternetLoadWorld.OnStaticInit()
                 InternetLoadWorld.GetEvents():AddEventListener(
@@ -151,7 +151,7 @@
                 end
 
                 function get_world_size()
-                    return Utils.FormatFileSize(WorldList.GetLatestSize(Eval("index")))
+                    return Mod.WorldShare.Utils.FormatFileSize(WorldList.GetLatestSize(Eval("index")))
                 end
 
                 function can_be_sync()
@@ -260,18 +260,22 @@
                     UserConsole.OnClickOfficialWorlds()
                 end
 
-                function get_world_text(text)
-                    if type(text) ~= 'string' then
+                function get_world_text()
+                    if type(Eval("text")) ~= 'string' then
                         return ''
                     end
 
-                    local utf8Text = UniString:new(text)
+                    local text = Eval("text")
 
                     if _guihelper.GetTextWidth(text) > 150 then
-                        return utf8Text:sub(1, 10).text .. '...'
-                    else
-                        return text
+                        text = UniString:new(text):sub(1, 10).text .. '...'
                     end
+
+                    if Eval("is_zip") == true then
+                        text = text .. '.zip'
+                    end
+
+                    return text
                 end
 
                 function open_project(index)
@@ -293,6 +297,10 @@
                     else
                         return Eval("remote_tagname")
                     end
+                end
+
+                function show_servers()
+                    Server:ShowPage()
                 end
             ]]>
         </script>
@@ -477,14 +485,34 @@
                     <input class="nav_button" style="<%=header_forward()%>" type="button" tooltip='<%=L"前进"%>' />
                     <input class="nav_button" style="<%=header_refresh()%>" type="button" onclick="refresh()" tooltip='<%=L"刷新本地目录或远程网址"%>' />
                 </div>
-                <div style="float:left;margin-left:5px;margin-top:2px;">
+                <div style="float:left;margin-left: 4px;margin-top: -1px;">
                     <div style="float:left" class="add_server_text_field">
-                        <input type="text" name="content" style="width:400px;height:30px;background:url();textcolor:#ffffff"
-                            spacing="4" EmptyText='<%=L"输入项目ID或课程ID或服务器地址"%>' rows="1" CaretColor="#FFFFFFFF" />
-                        <input class="flat_button" onclick="show_history()" style="height:26px;margin-top:2px;margin:2px;min-width:32px"
-                            type="button" value="..." tooltip='<%=L"管理访问历史"%>' />
+                        <input type="text"
+                               name="content"
+                               style="width:400px;height:30px;background:url();textcolor:#ffffff"
+                               spacing="4"
+                               EmptyText='<%=L"输入项目ID或课程ID或服务器地址"%>'
+                               rows="1"
+                               CaretColor="#FFFFFFFF" />
+                        <input type="button"
+                               DefaultButton="true"
+                               value='<%=L"打开" %>'
+                               class="flat_button"
+                               style="margin-left:3px;margin-top:2px;margin-right: 2px;height:26px"
+                               onclick="go_to_url" />
                     </div>
-                    <input type="button" DefaultButton="true" value='<%=L"打开" %>' class="flat_button" style="margin-left:3px;height:30px" onclick="go_to_url" />
+                    <input class="flat_button mc_light_grey_button_with_fillet"
+                           onclick="show_history()"
+                           style="height:30px;width:60px;margin-left:4px;min-width:32px"
+                           type="button"
+                           value="历史..."
+                           tooltip='<%=L"管理访问历史"%>' />
+                    <input class="flat_button mc_light_grey_button_with_fillet"
+                           onclick="show_servers()"
+                           style="height:30px;width:70px;margin-left:4px;min-width:32px"
+                           type="button"
+                           value="服务器..." />
+                    
                 </div>
                 <input onclick="close()"
                        style="margin-top:0px;float:left;background:url(Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#363 59 26 26:7 7 7 7);width:26px;height:26px"
@@ -572,8 +600,7 @@
                                                 <input type="button" onclick="covert_status" style="margin-left:4px;width: 40px;height: 25px;font-size: 12px;color: #ffffff" class="common_button mc_light_grey_button_with_fillet" value="<%=L'保存'%>" />
                                             </pe:if>
                                             <pe:if condition='<%= not is_modifying() %>'>
-                                                <%= get_world_text(Eval("text")) %>
-                                                <%= if_else( Eval("is_zip") == true, L".zip", "")%>
+                                                <%= get_world_text() %>
                                                 <div onclick="covert_status" tooltip="<%=Eval('text')%>" style="float:left;margin-top:5px;margin-left:5px;background: url(textures/worldshare_32bits.png#237 49 14 14);width: 14px;height: 14px;"></div>
                                             </pe:if>
                                         </div>
@@ -663,8 +690,7 @@
                                                 <div style="float:left;width:9px;height:32px;background:#fff" />
                                             </pe:if>
                                             <div class="share_world_name">
-                                                <%= get_world_text(Eval("text")) %>
-                                                <%= if_else( Eval("is_zip") == true, L".zip", "")%>
+                                                <%= get_world_text() %>
                                             </div>
                                             <pe:if condition="<%= Eval('kpProjectId') and true or false %>">
                                                 <div class="project_id"><%= L'项目ID:' .. (Eval('kpProjectId') or '') %></div>
