@@ -119,13 +119,13 @@ end
 function UserInfo:CheckDoAutoSignin(callback)
     local info = KeepworkService:LoadSigninInfo()
 
-    if (not info or not info.autoLogin or not info.account or not info.password) then
+    if not info or not info.autoLogin or not info.account or not info.password then
         return false
     end
 
-    MsgBox:Show(L"正在登陆，请稍后...", 8000, L"链接超时")
+    Mod.WorldShare.MsgBox:Show(L"正在登陆，请稍后...", 8000, L"链接超时")
 
-    Store:Set("user/env", info.loginServer)
+    -- Store:Set("user/env", info.loginServer)
 
     KeepworkService:Profile(
         function(data, err)
@@ -133,12 +133,12 @@ function UserInfo:CheckDoAutoSignin(callback)
                 info.token = nil
                 info.autoLogin = false
                 SessionsData:SaveSession(info)
-                MsgBox:Close()
+                Mod.WorldShare.MsgBox:Close()
                 GameLogic.AddBBS(nil, L"Token已过期，请重新登录", 3000, "255 0 0")
 
                 return false
             elseif err ~= 200 then
-                MsgBox:Close()
+                Mod.WorldShare.MsgBox:Close()
                 GameLogic.AddBBS(nil, format("%s%d", L"登陆失败了， 错误码：", err), 3000, "255 0 0")
 
                 return false

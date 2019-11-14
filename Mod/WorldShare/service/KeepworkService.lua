@@ -25,13 +25,13 @@ local SessionsData = NPL.load("(gl)Mod/WorldShare/database/SessionsData.lua")
 local KeepworkService = NPL.export()
 
 function KeepworkService:GetEnv()
-	local env = Store:Get("user/env")
+    for key, item in pairs(Config.env) do
+        if key == Config.defaultEnv then
+            return Config.defaultEnv
+        end
+    end
 
-	if not env then
-		env = Config.defaultEnv
-	end
-
-	return env
+	return Config.env.ONLINE
 end
 
 function KeepworkService:GetKeepworkUrl()
@@ -305,7 +305,7 @@ function KeepworkService:GetWorldsList(callback)
 end
 
 function KeepworkService:GetProjectIdByWorldName(worldName, callback)
-    if (not self:IsSignedIn()) then
+    if not self:IsSignedIn() then
         return false
     end
 
@@ -325,9 +325,9 @@ function KeepworkService:GetProjectIdByWorldName(worldName, callback)
                 return false
             end
 
-            local currentWorld = Store:Get('world/currentWorld')
+            local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
             currentWorld.kpProjectId = data[1].projectId
-            Store:Set('world/currentWorld', currentWorld)
+            Mod.WorldShare.Store:Set('world/currentWorld', currentWorld)
 
             if type(callback) == 'function' then
                 callback(data[1].projectId)
@@ -481,12 +481,12 @@ function KeepworkService:GetUserTokenFromUrlProtocol()
     local urlProtocol = string.match(cmdline or "", "paracraft://(.*)$")
     urlProtocol = Encoding.url_decode(urlProtocol or "")
 
-    local env = urlProtocol:match('env="([%S]+)"')
+    -- local env = urlProtocol:match('env="([%S]+)"')
     local usertoken = urlProtocol:match('usertoken="([%S]+)"')
 
-    if env then
-        Store:Set("user/env", env)
-    end
+    -- if env then
+    --     Store:Set("user/env", env)
+    -- end
     
     if usertoken then
         local SetToken = Store:Action("user/SetToken")

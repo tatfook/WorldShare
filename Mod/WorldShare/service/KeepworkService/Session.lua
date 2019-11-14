@@ -64,7 +64,7 @@ function KeepworkServiceSession:Register(username, password, captcha, cellphone,
                                     account = username,
                                     password = password,
                                     token = loginData["token"] or "",
-                                    loginServer = Mod.WorldShare.Store:Get('user/env'),
+                                    loginServer = KeepworkService:GetEnv(), -- Mod.WorldShare.Store:Get('user/env'),
                                     autoLogin = false,
                                     rememberMe = false
                                 }

@@ -74,13 +74,7 @@
                 end
 
                 function get_current_world_name()
-                    local currentWorld = Store:Get("world/currentWorld")
-
-                    if currentWorld and currentWorld.foldername then
-                        return currentWorld.foldername
-                    else
-                        return ''
-                    end
+                    return Mod.WorldShare.Store:Getter("world/GetWorldTextName")
                 end
 
                 function get_bigger_style(type)

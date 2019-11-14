@@ -91,10 +91,6 @@ function ShareWorld:ShowPage()
     self:Refresh()
 end
 
-function ShareWorld:GetEnterFoldername()
-    return Store:Get("world/foldername")
-end
-
 function ShareWorld:GetEnterWorld()
     return Store:Get("world/currentWorld")
 end

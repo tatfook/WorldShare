@@ -14,8 +14,8 @@ local LocalLoadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalL
 local WorldRevision = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision")
 local RemoteServerList = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.RemoteServerList")
 local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
-local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 local Encoding = commonlib.gettable("commonlib.Encoding")
+local SaveWorldHandler = commonlib.gettable("MyCompany.Aries.Game.SaveWorldHandler")
 
 local UserConsole = NPL.load("./Main.lua")
 local UserInfo = NPL.load("./UserInfo.lua")
@@ -64,11 +64,11 @@ function WorldList:GetSelectWorld(index)
     end
 end
 
-function WorldList:GetWorldIndexByFoldername(foldername)
+function WorldList:GetWorldIndexByFoldername(foldername, is_zip)
     local compareWorldList = Mod.WorldShare.Store:Get("world/compareWorldList")
 
     for index, item in ipairs(compareWorldList) do
-        if foldername == item.foldername then
+        if foldername == item.foldername and is_zip == item.is_zip then
             return index
         end
     end
@@ -165,7 +165,6 @@ function WorldList:RefreshCurrentServerList(callback, isForce)
 
                         self:SetRefreshing(false)
                         self:UpdateWorldListFromInternetLoadWorld(callback)
-                        WorldCommon.LoadWorldTag() -- reset default world tag
                     end
                 )
             end
@@ -181,7 +180,6 @@ function WorldList:RefreshCurrentServerList(callback, isForce)
                             function()
                                 self:SetRefreshing(false)
                                 self:UpdateWorldListFromInternetLoadWorld(callback)
-                                WorldCommon.LoadWorldTag() -- reset default world tag
                             end
                         )
                     end
@@ -214,7 +212,7 @@ function WorldList:UpdateRevision(callback)
             local worldRevision = WorldRevision:new():init(value.worldpath)
             value.revision = worldRevision:GetDiskRevision()
 
-            local tag = WorldCommon.LoadWorldTag(value.worldpath)
+            local tag = SaveWorldHandler:new():Init(value.worldpath):LoadWorldInfo()
 
             if type(tag) ~= 'table' then
                 return false
@@ -312,7 +310,7 @@ function WorldList:SyncWorldsList(callback)
                     remoteTagname = DItem["extra"] and DItem["extra"]["worldTagName"]
 
                     if tonumber(LItem["kpProjectId"]) ~= tonumber(DItem["projectId"]) then
-                        local tag = WorldCommon.LoadWorldTag(worldpath)
+                        local tag = SaveWorldHandler:new():Init(worldpath):LoadWorldInfo()
 
                         tag.kpProjectId = DItem['projectId']
                         LocalService:SetTag(worldpath, tag)
@@ -560,7 +558,7 @@ function WorldList:EnterWorld(index)
         end
 
         -- compare list is not the same before login
-        local index = self:GetWorldIndexByFoldername(currentWorld.foldername)
+        local index = self:GetWorldIndexByFoldername(currentWorld.foldername, currentWorld.is_zip)
 
         self:OnSwitchWorld(index)
         local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')

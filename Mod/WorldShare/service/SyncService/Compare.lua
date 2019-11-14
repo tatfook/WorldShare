@@ -93,14 +93,14 @@ function Compare:GetCompareResult(callback)
         Mod.WorldShare.MsgBox:Show(L"请稍后...")
     end
 
-    local currentWorld = Store:Get('world/currentWorld')
+    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
     if not currentWorld then
         Mod.WorldShare.MsgBox:Close()
     end
 
     if currentWorld.status == 2 then
-        if (type(callback) == "function") then
+        if type(callback) == "function" then
             callback(JUSTREMOTE)
             return true
         end
@@ -133,19 +133,19 @@ function Compare:CompareRevision(callback)
         self.createRevisionTimes = 0
 
         local function CompareRevision(currentRevision, remoteRevision)
-            if (remoteRevision == 0) then
+            if remoteRevision == 0 then
                 return JUSTLOCAL
             end
 
-            if (currentRevision < remoteRevision) then
+            if currentRevision < remoteRevision then
                 return REMOTEBIGGER
             end
 
-            if (currentRevision > remoteRevision) then
+            if currentRevision > remoteRevision then
                 return LOCALBIGGER
             end
 
-            if (currentRevision == remoteRevision) then
+            if currentRevision == remoteRevision then
                 return EQUAL
             end
         end
@@ -169,7 +169,7 @@ function Compare:CompareRevision(callback)
         end
 
         local function HandleRevision(data, err)
-            if (err == 0 or err == 502) then
+            if err == 0 or err == 502 then
                 _guihelper.MessageBox(L"网络错误")
                 return false
             end

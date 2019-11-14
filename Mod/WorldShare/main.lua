@@ -36,6 +36,8 @@ NPL.load("(gl)script/apps/Aries/Creator/Game/Login/TeacherAgent/TeacherAgent.lua
 NPL.load("(gl)script/ide/System/os/os.lua")
 NPL.load("(gl)script/apps/Aries/Creator/Game/Network/NPLWebServer.lua")
 NPL.load("(gl)script/apps/Aries/Creator/Game/World/SaveWorldHandler.lua")
+NPL.load("(gl)Mod/WorldShare/service/SocketService.lua")
+NPL.load("(gl)script/apps/Aries/Creator/Game/Network/NetworkMain.lua")
 
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")
@@ -48,35 +50,25 @@ local HistoryManager = NPL.load("(gl)Mod/WorldShare/cellar/HistoryManager/Histor
 local WorldExitDialog = NPL.load("(gl)Mod/WorldShare/cellar/WorldExitDialog/WorldExitDialog.lua")
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local Grade = NPL.load("(gl)Mod/WorldShare/cellar/Grade/Grade.lua")
+local SocketService = commonlib.gettable("Mod.WorldShare.service.SocketService")
 
 local GameLogic = commonlib.gettable("MyCompany.Aries.Game.GameLogic")
 local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 
 local WorldShare = commonlib.inherit(commonlib.gettable("Mod.ModBase"), commonlib.gettable("Mod.WorldShare"))
 
-WorldShare:Property({"Name", "WorldShare"})
-WorldShare.version = '0.0.7'
+WorldShare:Property({"Name", "WorldShare", "GetName", "SetName", { auto = true }})
+WorldShare:Property({"Desc", "world share mod can share world to keepwork online", "GetDesc", "SetDesc", { auto = true }})
+WorldShare.version = '0.0.9'
 
 -- register mod global variable
 WorldShare.Store = Store
 WorldShare.MsgBox = MsgBox
 WorldShare.Utils = Utils
 
--- LOG.SetLogLevel("DEBUG");
 LOG.std(nil, "info", "WorldShare", "world share version %s", WorldShare.version)
 
-function WorldShare:ctor()
-end
-
-function WorldShare:GetName()
-    return self.Name
-end
-
-function WorldShare:GetDesc()
-    return self.Desc
-end
-
-function WorldShare:init()    
+function WorldShare:init()
     -- replace load world page
     GameLogic.GetFilters():add_filter(
         "InternetLoadWorld.ShowPage",
@@ -143,6 +135,9 @@ function WorldShare:init()
             end
         end
     )
+
+    -- send udp online msg
+    SocketService:StartUDPService()
 end
 
 function WorldShare:OnInitDesktop()
