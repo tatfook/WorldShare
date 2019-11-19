@@ -354,11 +354,11 @@ function KeepworkService:GetWorldByProjectId(pid, callback)
             end
 
             if err ~= 200 or not data or not data.world then
-                callback()
+                callback(nil, err)
                 return false
             end
 
-            callback(data.world)
+            callback(data.world, err)
         end
     )
 end

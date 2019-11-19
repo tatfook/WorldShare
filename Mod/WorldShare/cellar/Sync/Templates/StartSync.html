@@ -11,8 +11,6 @@
 
                 SyncMain = NPL.load("../Main.lua")
                 Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
-                Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
-                Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 
                 SyncMain:SetStartSyncPage()
 
@@ -45,11 +43,11 @@
                 end
 
                 function get_window_style()
-                    return Utils.FixCenter(500, 270)
+                    return Mod.WorldShare.Utils.FixCenter(500, 270)
                 end
 
                 function close()
-                    local isEnterWorld = Store:Get("world/isEnterWorld")
+                    local isEnterWorld = Mod.WorldShare.Store:Get("world/isEnterWorld")
 
                     if isEnterWorld then
                         SyncMain.callback = nil
