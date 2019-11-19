@@ -21,6 +21,7 @@ local KeepworkService = NPL.load('./KeepworkService.lua')
 local Store = NPL.load('(gl)Mod/WorldShare/store/Store.lua')
 local Utils = NPL.load('(gl)Mod/WorldShare/helper/Utils.lua')
 local Config = NPL.load('(gl)Mod/WorldShare/config/Config.lua')
+local GitEncoding = NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua")
 
 local GitlabService = NPL.export()
 
@@ -544,7 +545,7 @@ function GitlabService:DeleteResp(projectId, callback)
     self:ApiDelete(url, {}, callback)
 end
 
-function GitlabService:GetWorldRevision(projectId, foldername, callback)
+function GitlabService:GetWorldRevision(projectId, isGetMine, callback)
     if type(callback) ~= "function" then
         return false
     end
@@ -555,7 +556,7 @@ function GitlabService:GetWorldRevision(projectId, foldername, callback)
             return false
         end
 
-        if data.userId ~= Mod.WorldShare.Store:Get('user/userId') then
+        if isGetMine and data.userId ~= Mod.WorldShare.Store:Get('user/userId') then
             callback()
             return false
         end
@@ -575,7 +576,7 @@ function GitlabService:GetWorldRevision(projectId, foldername, callback)
                 "%s/%s/%s/raw/%s/revision.xml",
                 self:GetRawBaseUrl(),
                 gitlabUsername,
-                foldername.base32,
+                GitEncoding.Base32(data.world.worldName),
                 commitId
             )
 

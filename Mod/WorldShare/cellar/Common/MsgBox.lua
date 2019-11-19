@@ -8,9 +8,6 @@ use the lib:
 local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")
 ------------------------------------------------------------
 ]]
-local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
-local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
-
 local MsgBox = NPL.export()
 local self = MsgBox
 
@@ -26,7 +23,7 @@ function MsgBox:Show(msg, sec, overtimeMsg, witdh, height)
     self.allMsgBox:push_back(msgId)
     self.allMsg[msgId] = msg
 
-    local params = Utils:ShowWindow(
+    local params = Mod.WorldShare.Utils:ShowWindow(
         0,
         0,
         "Mod/WorldShare/cellar/Common/MsgBox.html?msgId=" .. msgId .. "&width=" .. (witdh or 0) .. "&height=" .. (height or 0),
@@ -38,10 +35,10 @@ function MsgBox:Show(msg, sec, overtimeMsg, witdh, height)
     )
 
     params._page.OnClose = function()
-        Store:Remove("page/MsgBox" .. msgId)
+        Mod.WorldShare.Store:Remove("page/MsgBox" .. msgId)
     end
 
-    Utils.SetTimeOut(
+    Mod.WorldShare.Utils.SetTimeOut(
         function()
             for key, item in ipairs(self.allMsgBox) do
                 if (item == msgId) then
@@ -68,7 +65,7 @@ function MsgBox:Close(msgId)
 
     for key, value in ipairs(self.allMsgBox) do
         if value == msgId then
-            MessageInfoPage = Store:Get("page/MsgBox" .. msgId)
+            MessageInfoPage = Mod.WorldShare.Store:Get("page/MsgBox" .. msgId)
             self.allMsgBox:remove(key)
         end
     end
@@ -79,7 +76,7 @@ function MsgBox:Close(msgId)
 end
 
 function MsgBox.SetPage(msgId)
-    Store:Set("page/MsgBox" .. msgId, document:GetPageCtrl())
+    Mod.WorldShare.Store:Set("page/MsgBox" .. msgId, document:GetPageCtrl())
 end
 
 function MsgBox.GetMsg(msgId)

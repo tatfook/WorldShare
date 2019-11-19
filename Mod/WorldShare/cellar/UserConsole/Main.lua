@@ -9,13 +9,10 @@ local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
 ------------------------------------------------------------
 ]]
 local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
-local ShareWorldPage = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.Areas.ShareWorldPage")
 local LocalLoadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalLoadWorld")
-local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 local RemoteWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.RemoteWorld")
 local DownloadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.DownloadWorld")
 local SaveWorldHandler = commonlib.gettable("MyCompany.Aries.Game.SaveWorldHandler")
-local WorldRevision = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision")
 
 local WorldShare = commonlib.gettable("Mod.WorldShare")
 local ExplorerApp = commonlib.gettable("Mod.ExplorerApp")
@@ -30,6 +27,9 @@ local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local BrowseRemoteWorlds = NPL.load("(gl)Mod/WorldShare/cellar/BrowseRemoteWorlds/BrowseRemoteWorlds.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
+local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
+local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
+local CacheProjectId = NPL.load("(gl)Mod/WorldShare/database/CacheProjectId.lua")
 
 local UserConsole = NPL.export()
 
@@ -39,7 +39,7 @@ end
 
 -- this is called from ParaWorld Login App
 function UserConsole:CheckShowUserWorlds()
-    if(System.options.showUserWorldsOnce) then
+    if System.options.showUserWorldsOnce then
         UserConsole.OnClickOfficialWorlds(function()
             System.options.showUserWorldsOnce = nil
             self:ClosePage()
@@ -49,14 +49,14 @@ function UserConsole:CheckShowUserWorlds()
 end
 
 function UserConsole:ShowPage()
-    if(self:CheckShowUserWorlds()) then
+    if self:CheckShowUserWorlds() then
         return false
     end
 
     local params = Utils:ShowWindow(850, 470, "Mod/WorldShare/cellar/UserConsole/UserConsole.html", "UserConsole")
 
     params._page.OnClose = function()
-        Store:Remove('page/UserConsole')
+        Mod.WorldShare.Store:Remove('page/UserConsole')
     end
 
     -- load last selected avatar if world is not loaded before.
@@ -181,13 +181,15 @@ function UserConsole:HandleWorldId(pid)
         return false
     end
 
-    local function HandleLoadWorld(url)
+    pid = tonumber(pid)
+
+    local function HandleLoadWorld(url, worldInfo, offlineMode)
         if not url then
             return false
         end
 
         local function LoadWorld(world, refreshMode)
-            if(world) then
+            if world then
                 local url = world:GetLocalFileName()
                 DownloadWorld.ShowPage(url)
                 local mytimer = commonlib.Timer:new(
@@ -212,32 +214,88 @@ function UserConsole:HandleWorldId(pid)
             end
         end
 
-        if(url:match("^https?://")) then
+        if url:match("^https?://") then
             world = RemoteWorld.LoadFromHref(url, "self")
             local url = world:GetLocalFileName()
 
-            if(ParaIO.DoesFileExist(url)) then
-                _guihelper.MessageBox(L"世界已经存在，是否重新下载?", function(res)
-                    if(res and res == _guihelper.DialogResult.Yes) then
-                        LoadWorld(world, "auto")
-                    else
+            if ParaIO.DoesFileExist(url) then
+                if offlineMode then
+                    LoadWorld(world, "never")
+                    return false
+                end
+
+                Mod.WorldShare.MsgBox:Show(L"请稍后...")
+                GitService:GetWorldRevision(pid, false, function(data, err)
+                    local localRevision = tonumber(LocalService:GetZipRevision(url)) or 0
+                    local remoteRevision = tonumber(data) or 0
+
+                    Mod.WorldShare.MsgBox:Close()
+
+                    if localRevision == remoteRevision then
                         LoadWorld(world, "never")
+
+                        return
                     end
-                end, _guihelper.MessageBoxButtons.YesNo);
+
+                    local params = Mod.WorldShare.Utils:ShowWindow(
+                        0,
+                        0,
+                        "Mod/WorldShare/cellar/UserConsole/ProjectIdEnter.html?project_id=" 
+                            .. pid
+                            .. "&remote_revision=" .. remoteRevision
+                            .. "&local_revision=" .. localRevision
+                            .. "&world_name=" .. (worldInfo and worldInfo.worldName or ""),
+                        "ProjectIdEnter",
+                        0,
+                        0,
+                        "_fi",
+                        false
+                    )
+
+                    params._page.callback = function(data)
+                        if data == 'local' then
+                            LoadWorld(world, "never")
+                        elseif data == 'remote' then
+                            LoadWorld(world, "auto")
+                        end
+                    end
+                end)
             else
                 LoadWorld(world, "auto")
             end
         end
 	end
 
+    Mod.WorldShare.MsgBox:Show(L"请稍后...")
+
     KeepworkService:GetWorldByProjectId(
-        tonumber(pid),
-        function(worldInfo)
+        pid,
+        function(worldInfo, err)
+            Mod.WorldShare.MsgBox:Close()
+
+            if err == 0 then
+                local cacheWorldInfo = CacheProjectId:GetProjectIdInfo(pid)
+
+                if not cacheWorldInfo or not cacheWorldInfo.worldInfo then
+                    GameLogic.AddBBS(nil, L"网络环境差，或离线中，请联网后再试", 3000, "255 0 0")
+                    return false
+                end
+
+                Mod.WorldShare.Store:Set('world/openKpProjectId', pid)
+                HandleLoadWorld(cacheWorldInfo.worldInfo.archiveUrl, cacheWorldInfo.worldInfo, true)
+
+                return false
+            end
+
+            if err == 404 then
+                GameLogic.AddBBS(nil, L"世界不存在", 3000, "255 0 0")
+                return false
+            end
+
             if worldInfo and worldInfo.archiveUrl and #worldInfo.archiveUrl > 0 then
-                Store:Set('world/openKpProjectId', pid)
-                HandleLoadWorld(worldInfo.archiveUrl)
-            else
-                _guihelper.MessageBox(L"世界不存在")
+                Mod.WorldShare.Store:Set('world/openKpProjectId', pid)
+                HandleLoadWorld(worldInfo.archiveUrl, worldInfo)
+                CacheProjectId:SetProjectIdInfo(pid, worldInfo)
             end
         end
     )

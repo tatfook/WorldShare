@@ -38,6 +38,7 @@ NPL.load("(gl)script/apps/Aries/Creator/Game/Network/NPLWebServer.lua")
 NPL.load("(gl)script/apps/Aries/Creator/Game/World/SaveWorldHandler.lua")
 NPL.load("(gl)Mod/WorldShare/service/SocketService.lua")
 NPL.load("(gl)script/apps/Aries/Creator/Game/Network/NetworkMain.lua")
+NPL.load("(gl)script/ide/System/Encoding/guid.lua")
 
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")

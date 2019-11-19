@@ -549,7 +549,11 @@ function WorldList:EnterWorld(index)
         return false
     end
 
-    local function Handle()
+    local function Handle(result)
+        if result == 'REGISTER' or result == 'FORGET' then
+            return false
+        end
+
         if not KeepworkService:IsSignedIn() then
             self:OnSwitchWorld(index)
 
@@ -599,8 +603,12 @@ function WorldList:EnterWorld(index)
     end
 
     if not KeepworkService:IsSignedIn() and currentWorld.kpProjectId then
-        LoginModal:Init(function()
-            self:RefreshCurrentServerList(Handle)
+        LoginModal:Init(function(result)
+            self:RefreshCurrentServerList(
+                function()
+                    Handle(result)
+                end
+            )
         end)
     else
         Handle()

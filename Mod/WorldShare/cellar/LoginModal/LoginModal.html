@@ -61,12 +61,12 @@
                     end
 
                     function register()
-                        LoginModal:Close()
+                        LoginModal:Close('REGISTER')
                         RegisterModal:ShowPage()
                     end
 
                     function forget_password()
-                        LoginModal:Close()
+                        LoginModal:Close('FORGET')
                         ForgetPassword:ShowPage()
                     end
                 ]]>

@@ -83,11 +83,11 @@ function LoginModal:Refresh(time, callback)
     end
 end
 
-function LoginModal:Close()
+function LoginModal:Close(params)
     local AfterLogined = Mod.WorldShare.Store:Get('user/AfterLogined')
 
     if type(AfterLogined) == 'function' then
-        AfterLogined(false)
+        AfterLogined(params or false)
         Mod.WorldShare.Store:Remove('user/AfterLogined')
     end
 

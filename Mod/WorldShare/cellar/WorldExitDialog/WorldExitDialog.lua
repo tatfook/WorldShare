@@ -53,8 +53,8 @@ function WorldExitDialog.ShowPage(callback)
         end
 
         local WorldExitDialogPage = Store:Get('page/WorldExitDialog')
-        if(WorldExitDialogPage) then
-            if(not GameLogic.IsReadOnly() and not ParaIO.DoesFileExist(self.GetPreviewImagePath(), false)) then
+        if WorldExitDialogPage then
+            if not GameLogic.IsReadOnly() and not ParaIO.DoesFileExist(self.GetPreviewImagePath(), false) then
                 WorldExitDialog.Snapshot()
             end
             WorldExitDialogPage.callback = callback
@@ -62,17 +62,6 @@ function WorldExitDialog.ShowPage(callback)
     end
 
     if GameLogic.IsReadOnly() then
-        local currentWorld = Store:Get('world/currentWorld')
-
-        if not currentWorld or not currentWorld.worldpath then
-            return false
-        end
-
-        local worldRevision = WorldRevision:new():init(currentWorld.worldpath)
-        local currentRevision = worldRevision:GetRevision()
-
-        Store:Set('world/currentRevision', currentRevision)
-
         if KeepworkService:IsSignedIn() then
             Grade:IsRated(function(isRated)
                 self.isRated = isRated
@@ -104,7 +93,7 @@ function WorldExitDialog.ShowPage(callback)
                 Handle()
             end)
         else
-            Store:Set('world/currentRevision', GameLogic.options:GetRevision())
+            Mod.WorldShare.Store:Set('world/currentRevision', GameLogic.options:GetRevision())
             Handle()
         end
     end

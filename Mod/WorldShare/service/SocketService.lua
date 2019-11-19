@@ -18,6 +18,7 @@ SocketService:Property({"isStartedUDPService", false, "IsUDPStarted", "SetUDPSta
 SocketService:Signal("SocketServiceStarted")
 
 SocketService.externalIPList = nil
+SocketService.uuid = ''
 
 -- start socket service
 function SocketService:StartUDPService()
@@ -42,6 +43,8 @@ function SocketService:StartUDPService()
 	ipList = commonlib.split(ipList, ",")
 	self.externalIPList = ipList
 
+	self.uuid = System.Encoding.guid.uuid()
+
 	self:SetUDPStarted(true)
 	self:SocketServiceStarted()
 end
@@ -63,7 +66,7 @@ function SocketService:SendUDPWhoOnlineMsg()
 		local serverAddrList = { "(gl)*" .. port .. ":Mod/WorldShare/service/SocketService.lua" }
 
 		for key, value in pairs(broadcastAddressList) do
-			table.insert(serverAddrList, string.format("(gl)\\\\%s %s:script/apps/Aries/Creator/Game/Network/LobbyService/LobbyServer.lua", value, port))
+			table.insert(serverAddrList, string.format("(gl)\\\\%s %d:Mod/WorldShare/service/SocketService.lua", value, port))
 		end
 
 		for key, value in pairs(serverAddrList) do
@@ -74,11 +77,11 @@ function SocketService:SendUDPWhoOnlineMsg()
 end
 
 function SocketService:SendUDPIamOnlineMsg(ip, port)
-	if not NetworkMain:IsServerStarted() then
+	if not NetworkMain:IsServerStarted() or NetworkMain.tunnelClient then
 		return false
 	end
 
-	self:SendUDPMsg({ type = "ONLINE", result = "IAM", username = "nil", serverName = "nil" }, ip, port)
+	self:SendUDPMsg({ type = "ONLINE", result = "IAM", username = "nil", serverName = "nil", uuid = self.uuid }, ip, port)
 end
 
 -- send udp msg
@@ -110,21 +113,30 @@ function SocketService:ReceiveUDPMsg(msg)
 		end
 
 		if msg.result == "IAM" then
+			if not msg.uuid then
+				return false
+			end
+
 			local ip, port = string.match(msg.nid, "~udp(.+)_(%d+)")
 
 			if not ip or not port then
 				return false
 			end
 
+			-- exclude self
+			if msg.uuid == self.uuid then
+				return false
+			end
+
 			local udpServerList = Mod.WorldShare.Store:Get('user/udpServerList') or {}
 
 			for key, item in ipairs(udpServerList) do
-				if item.ip == ip then
+				if item.uuid == msg.uuid then
 					return false
 				end
 			end
 
-			udpServerList[#udpServerList + 1] = { ip = ip, port = "8099", username = msg.username, serverName = msg.serverName }
+			udpServerList[#udpServerList + 1] = { ip = ip, port = port, username = msg.username, serverName = msg.serverName, uuid = msg.uuid }
 
 			Mod.WorldShare.Store:Set('user/udpServerList', udpServerList)
 		end

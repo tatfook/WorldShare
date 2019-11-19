@@ -11,7 +11,6 @@ local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
 local Encoding = commonlib.gettable("commonlib.Encoding")
 local WorldRevision = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision")
 
-local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
 local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
 local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua")
@@ -32,7 +31,7 @@ local LOCALBIGGER = "LOCALBIGGER"
 local EQUAL = "EQUAL"
 
 function Compare:Init(callback)
-    local isEnterWorld = Store:Get("world/isEnterWorld")
+    local isEnterWorld = Mod.WorldShare.Store:Get("world/isEnterWorld")
     local isShowUserConsolePage = UserConsole:IsShowUserConsole()
 
     self:SetFinish(false)
@@ -79,13 +78,13 @@ function Compare:Init(callback)
 end
 
 function Compare:IsCompareFinish()
-    local compareFinish = Store:Get('world/compareFinish')
+    local compareFinish = Mod.WorldShare.Store:Get('world/compareFinish')
 
     return compareFinish == true
 end
 
 function Compare:SetFinish(value)
-    Store:Set('world/compareFinish', value)
+    Mod.WorldShare.Store:Set('world/compareFinish', value)
 end
 
 function Compare:GetCompareResult(callback)
@@ -97,6 +96,7 @@ function Compare:GetCompareResult(callback)
 
     if not currentWorld then
         Mod.WorldShare.MsgBox:Close()
+        return false
     end
 
     if currentWorld.status == 2 then
@@ -119,14 +119,14 @@ end
 Compare.createRevisionTimes = 0
 
 function Compare:CompareRevision(callback)
-    local foldername = Store:Get("world/foldername")
-    local currentWorld = Store:Get('world/currentWorld')
+    local foldername = Mod.WorldShare.Store:Get("world/foldername")
+    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
     if not foldername or not currentWorld or not currentWorld.worldpath then
         return false
     end
 
-    local remoteWorldsList = Store:Get("world/remoteWorldsList")
+    local remoteWorldsList = Mod.WorldShare.Store:Get("world/remoteWorldsList")
     local remoteRevision = 0
 
     if self:HasRevision() then
@@ -156,8 +156,8 @@ function Compare:CompareRevision(callback)
             currentRevision = tonumber(currentRevision) or 0
             remoteRevision = tonumber(data) or 0
 
-            Store:Set("world/currentRevision", currentRevision)
-            Store:Set("world/remoteRevision", remoteRevision)
+            Mod.WorldShare.Store:Set("world/currentRevision", currentRevision)
+            Mod.WorldShare.Store:Set("world/remoteRevision", remoteRevision)
 
             self:SetFinish(true)
 
@@ -179,8 +179,8 @@ function Compare:CompareRevision(callback)
 
             self:UpdateSelectWorldInRemoteWorldsList(foldername.utf8, remoteRevision)
 
-            Store:Set("world/currentRevision", currentRevision)
-            Store:Set("world/remoteRevision", remoteRevision)
+            Mod.WorldShare.Store:Set("world/currentRevision", currentRevision)
+            Mod.WorldShare.Store:Set("world/remoteRevision", remoteRevision)
 
             local result = CompareRevision(currentRevision, remoteRevision)
 
@@ -191,7 +191,7 @@ function Compare:CompareRevision(callback)
             end
         end
 
-        GitService:GetWorldRevision(currentWorld.kpProjectId, foldername, HandleRevision)
+        GitService:GetWorldRevision(currentWorld.kpProjectId, true, HandleRevision)
     else
         self.createRevisionTimes = self.createRevisionTimes + 1
 
@@ -208,7 +208,7 @@ function Compare:CompareRevision(callback)
 end
 
 function Compare:UpdateSelectWorldInRemoteWorldsList(worldName, remoteRevision)
-    local remoteWorldsList = Store:Get('world/remoteWorldsList')
+    local remoteWorldsList = Mod.WorldShare.Store:Get('world/remoteWorldsList')
 
     if not remoteWorldsList or not worldName then
         return false
@@ -220,16 +220,16 @@ function Compare:UpdateSelectWorldInRemoteWorldsList(worldName, remoteRevision)
         end
     end
 
-    Store:Set('world/remoteWorldsList', remoteWorldsList)
+    Mod.WorldShare.Store:Set('world/remoteWorldsList', remoteWorldsList)
 end
 
 function Compare:HasRevision()
-    local currentWorld = Store:Get("world/currentWorld")
+    local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
 
     local localFiles = LocalService:LoadFiles(currentWorld and currentWorld.worldpath)
     local hasRevision = false
 
-    Store:Set("world/localFiles", localFiles)
+    Mod.WorldShare.Store:Set("world/localFiles", localFiles)
 
     for key, file in ipairs(localFiles) do
         if (string.lower(file.filename) == "revision.xml") then

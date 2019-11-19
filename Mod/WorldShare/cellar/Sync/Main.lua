@@ -53,7 +53,7 @@ function SyncMain:GetCurrentWorldInfo(callback)
         base32 = GitEncoding.Base32(Encoding.DefaultToUtf8(folderDefauleName))
     }
 
-    Store:Set("world/foldername", foldername)
+    Mod.WorldShare.Store:Set("world/foldername", foldername)
 
     local currentWorld = Store:Get("world/currentWorld")
 
@@ -61,8 +61,8 @@ function SyncMain:GetCurrentWorldInfo(callback)
         local originWorldPath = ParaWorld.GetWorldDirectory()
         local worldTag = WorldCommon.GetWorldInfo() or {}
 
-        Store:Set("world/worldTag", worldTag)
-        Store:Set("world/currentWorld", {
+        Mod.WorldShare.Store:Set("world/worldTag", worldTag)
+        Mod.WorldShare.Store:Set("world/currentWorld", {
             IsFolder = false,
             is_zip = true,
             Title = worldTag.name,
@@ -83,6 +83,7 @@ function SyncMain:GetCurrentWorldInfo(callback)
             worldpath = originWorldPath,
             kpProjectId = worldTag.kpProjectId
         })
+        Mod.WorldShare.Store:Set("world/currentRevision", GameLogic.options:GetRevision())
     else
         local compareWorldList = Store:Get("world/compareWorldList")
 
@@ -226,7 +227,7 @@ function SyncMain:ShowStartSyncUseDataSourcePage()
     local params = SyncMain:ShowDialog("Mod/WorldShare/cellar/Sync/Templates/UseDataSource.html", "StartSyncUseDataSource")
 
     params._page.OnClose = function()
-        Store:Remove('page/StartSyncUseDataSource')
+        Mod.WorldShare.Store:Remove('page/StartSyncUseDataSource')
     end
 end
 
@@ -247,10 +248,9 @@ function SyncMain:ShowDialog(url, name)
 end
 
 function SyncMain:BackupWorld()
-    local currentWorld = Store:Get("world/currentWorld")
+    local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
 
-    local worldRevision = WorldRevision:new():init(currentWorld and currentWorld.worldpath)
-    worldRevision:Backup()
+    WorldRevision:new():init(currentWorld and currentWorld.worldpath):Backup()
 end
 
 function SyncMain:SyncToLocal(callback)
