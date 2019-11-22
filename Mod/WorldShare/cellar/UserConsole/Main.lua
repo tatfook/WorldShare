@@ -231,10 +231,16 @@ function UserConsole:HandleWorldId(pid)
 
                     Mod.WorldShare.MsgBox:Close()
 
+                    if localRevision == 0 then
+                        LocalLoadWorld(world, "auto")
+
+                        return false
+                    end
+
                     if localRevision == remoteRevision then
                         LoadWorld(world, "never")
 
-                        return
+                        return false
                     end
 
                     local params = Mod.WorldShare.Utils:ShowWindow(
