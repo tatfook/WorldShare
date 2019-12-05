@@ -184,6 +184,7 @@ function UserConsole:HandleWorldId(pid)
     pid = tonumber(pid)
 
     local world
+    local overtimeEnter = false
     local fetchSuccess = false
 
     local function HandleLoadWorld(url, worldInfo, offlineMode)
@@ -191,7 +192,7 @@ function UserConsole:HandleWorldId(pid)
             return false
         end
 
-        if Mod.WorldShare.Store:Get('world/isEnterWorld') then
+        if overtimeEnter and Mod.WorldShare.Store:Get('world/isEnterWorld') then
             return false
         end
 
@@ -364,6 +365,7 @@ function UserConsole:HandleWorldId(pid)
 
         params._page.callback = function(data)
             if data == 'local' then
+                overtimeEnter = true
                 LoadWorld(world, "never")
             end
         end
