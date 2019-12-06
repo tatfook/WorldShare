@@ -35,6 +35,14 @@ function MySchool:Show()
                 return false
             end
             
+            NPL.load("(gl)script/apps/Aries/Creator/Game/NplBrowser/NplBrowserLoaderPage.lua");	
+            local NplBrowserLoaderPage = commonlib.gettable("NplBrowser.NplBrowserLoaderPage");	
+            NplBrowserLoaderPage.Check()
+            if not NplBrowserLoaderPage.IsLoaded() then	
+                ParaGlobal.ShellExecute("open", MySchool.GetUrl(), "", "", 1);	
+                return	
+            end
+
             showpage()
         end)
     else
