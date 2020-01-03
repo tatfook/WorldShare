@@ -8,21 +8,18 @@ NPL.load("(gl)Mod/WorldShare/service/FileDownloader/ResourceStore.lua")
 local ResourceStore = commonlib.gettable("Mod.WorldShare.service.FileDownloader.ResourceStore")
 -------------------------------------------------------
 ]]
-NPL.load("(gl)Mod/WorldShare/service/FileDownloader/localserver.lua")
-NPL.load("(gl)Mod/WorldShare/service/FileDownloader/capture_task.lua")
+NPL.load("./localserver.lua")
+NPL.load("./capture_task.lua")
 
 local localserver = commonlib.gettable("Mod.WorldShare.service.FileDownloader.localserver")
-
 local TaskManager = commonlib.gettable("Mod.WorldShare.service.FilDownloader.TaskManager")
 local CaptureTask = commonlib.gettable("Mod.WorldShare.service.FilDownloader.CaptureTask")
-
 local WebCacheDB = commonlib.gettable("System.localserver.WebCacheDB")
-local LOG = LOG
+
 ------------------------------------------
 -- ResourceStore : public <localserver>
 ------------------------------------------
-local ResourceStore =
-	commonlib.inherit(
+local ResourceStore = commonlib.inherit(
 	commonlib.gettable("Mod.WorldShare.service.FileDownloader.localserver"),
 	commonlib.gettable("Mod.WorldShare.service.FileDownloader.localserver.ResourceStore")
 )
@@ -66,26 +63,25 @@ end
 function ResourceStore:GetFile(Cache_policy, urls, callbackFunc, callbackContext, callbackProgressFunc)
 	Cache_policy = Cache_policy or self.Cache_policy
 
-	if (type(urls) == "string") then
-		urls = {urls}
+	if type(urls) == "string" then
+		urls = { urls }
 	end
 
-	--
 	-- First, check if the url is in the local server database, if so, serve immediately from local store
-	--
 	-- never retrieve from local server if ExpireTime is 0.
-	if (Cache_policy.ExpireTime > 0) then
+	if Cache_policy.ExpireTime > 0 then
 		local i = 1
 		local url = urls[i]
+
 		while url do
 			local entry = self:GetItem(url)
 
-			if (entry) then
-				if (not Cache_policy:IsExpired(entry.payload.creation_date)) then
+			if entry then
+				if not Cache_policy:IsExpired(entry.payload.creation_date) then
 					commonlib.removeArrayItem(urls, i)
-					log("Unexpired local version is used for " .. url .. "\n")
+					LOG.std(nil, "info", "ResourceStore", "Unexpired local version is used for " .. url .. "\n")
 
-					if (callbackFunc) then
+					if callbackFunc then
 						entry.IsFromCache = true
 						callbackFunc(entry, callbackContext)
 					end
@@ -95,21 +91,22 @@ function ResourceStore:GetFile(Cache_policy, urls, callbackFunc, callbackContext
 			else
 				i = i + 1
 			end
+
 			url = urls[i]
 		end
-		if (table.getn(urls) == 0) then
+
+		if table.getn(urls) == 0 then
 			return true
 		end
 	end
 
-	--
 	-- Second, download and save the result to local server database
-	--
 	-- never retrieve from remote server if ExpireTime is over 1 year.
-	if (Cache_policy.ExpireTime < 47959200) then
+	if Cache_policy.ExpireTime < 47959200 then
 		-- download and save the result to local server and invoke callback.
 		local request = TaskManager:new_request(urls)
-		if (request) then
+
+		if request then
 			-- add message
 			request.callbackFunc = callbackFunc
 			request.callbackContext = callbackContext
@@ -117,11 +114,12 @@ function ResourceStore:GetFile(Cache_policy, urls, callbackFunc, callbackContext
 			--request.OnTaskComplete = nil;
 
 			local task = CaptureTask:new(self, request)
-			if (task) then
+
+			if task then
 				task:Run()
 			end
 		else
-			log("warning: update ignored, since there is already a same request being processed. \n")
+			LOG.std(nil, "info", "FileDownloader", "warning: update ignored, since there is already a same request being processed. \n")
 			return false
 		end
 	end
@@ -139,7 +137,7 @@ function ResourceStore:CreateOrOpen(security_origin, name, required_cookie)
 	-- We start a transaction here to guard against two threads calling InsertServer with the same ServerInfo.
 	web_db:Begin(nil, "deferred")
 
-	if (not localserver.CreateOrOpen(self, security_origin, name, required_cookie)) then
+	if not localserver.CreateOrOpen(self, security_origin, name, required_cookie) then
 		web_db:End(true)
 		return
 	end
@@ -148,7 +146,8 @@ function ResourceStore:CreateOrOpen(security_origin, name, required_cookie)
 	self.is_initialized_ = true
 
 	local version = self:GetVersion(WebCacheDB.VersionReadyState.VERSION_CURRENT)
-	if (not version) then
+
+	if not version then
 		version = WebCacheDB.VersionInfo:new()
 		version.ready_state = WebCacheDB.VersionReadyState.VERSION_CURRENT
 		version.server_id = self.server_id_
@@ -158,6 +157,7 @@ function ResourceStore:CreateOrOpen(security_origin, name, required_cookie)
 			return
 		end
 	end
+
 	self.version_id_ = version.id
 
 	-- tricky here, we will flush immediately.
@@ -190,16 +190,16 @@ end
 -- @param info_only: If info_only is true, the response body of it is not retrieved.
 -- @return the localserver.Item {entry, payload}is returned or nil if not found.
 function ResourceStore:GetItem(url, info_only)
-	if (not url) then
+	if not url then
 		return
 	end
 
-	if (not self.is_initialized_) then
-		log("warning: localserver instance uninitialized.\n")
+	if not self.is_initialized_ then
+		LOG.std(nil, "info", "WorldShare", "warning: localserver instance uninitialized.\n")
 		return
 	end
 
-	if (self.is_memory_mode) then
+	if self.is_memory_mode then
 		local mem_db = self:GetMemDB()
 		-- LOG.std("", "debug","localserver",{"DBGetURL", url})
 		return mem_db[url]
@@ -209,20 +209,20 @@ function ResourceStore:GetItem(url, info_only)
 
 	local entry = web_db:FindEntry(self.version_id_, url)
 
-	if (not entry) then
+	if not entry then
 		return
 	end
 
 	-- All entries in a ResourceStore are expected to have a payload
-	if (entry.payload_id == nil or entry.payload_id == 0) then
-		log("warning: ResourceStore item " .. url .. " are expected to have a payload. But it does not.\n")
+	if entry.payload_id == nil or entry.payload_id == 0 then
+		LOG.std(nil, "info", "WorldShare", "warning: ResourceStore item " .. url .. " are expected to have a payload. But it does not.\n")
 		return
 	end
 
 	local payload = web_db:FindPayload(entry.payload_id, info_only)
 
 	-- TODO: lxz 2008.2.27 shall we cache a copy of this table in memory?
-	return {entry = entry, payload = payload}
+	return { entry = entry, payload = payload }
 end
 
 -- Gets an item from the store without retrieving the response body

@@ -24,7 +24,7 @@ local Config = NPL.load("(gl)Mod/WorldShare/config/Config.lua")
 local HistoryManager = NPL.export()
 
 function HistoryManager:ShowPage()
-    local params = Mod.WorldShare.Utils:ShowWindow(0, 0, "Mod/WorldShare/cellar/HistoryManager/HistoryManager.html", "HistoryManager", 0, 0, "_fi", false)
+    local params = Mod.WorldShare.Utils.ShowWindow(0, 0, "Mod/WorldShare/cellar/HistoryManager/HistoryManager.html", "HistoryManager", 0, 0, "_fi", false)
 
     Screen:Connect("sizeChanged", HistoryManager, HistoryManager.OnScreenSizeChange, "UniqueConnection")
     HistoryManager.OnScreenSizeChange()
@@ -91,7 +91,7 @@ function HistoryManager:HasData()
 end
 
 function HistoryManager:GetLocalRecommendedWorldList()
-    local data = Mod.WorldShare.Utils:GetFileData('Mod/WorldShare/database/RecommendedWorldList.md')
+    local data = Mod.WorldShare.Utils.GetFileData('Mod/WorldShare/database/RecommendedWorldList.md')
 
     local tree, items = MdParser:MdToTable(data)
 
@@ -183,7 +183,7 @@ function HistoryManager:MergeTree(target, source)
             mergeList[key] = item
         else
             if not Mod.WorldShare.Utils:IsEquivalent(mergeList[key], item) then
-                local mergeItem = Mod.WorldShare.Utils:MergeTable(mergeList[key], item)
+                local mergeItem = Mod.WorldShare.Utils.MergeTable(mergeList[key], item)
 
                 mergeList[key] = mergeItem
             end
@@ -204,7 +204,7 @@ function HistoryManager:MergeItems(target, source)
                 beExist = true
 
                 if not Mod.WorldShare.Utils:IsEquivalent(mItem, sItem) then
-                    mergeItems[mKey] = Mod.WorldShare.Utils:MergeTable(mItem, sItem)
+                    mergeItems[mKey] = Mod.WorldShare.Utils.MergeTable(mItem, sItem)
                 end
 
                 break

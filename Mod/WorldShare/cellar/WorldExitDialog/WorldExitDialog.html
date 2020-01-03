@@ -9,7 +9,6 @@
         <script type="text/npl" src="WorldExitDialog.lua" refresh="false">
             <![CDATA[
                 local WorldExitDialog = NPL.load('./WorldExitDialog.lua')
-                local Utils = NPL.load('(gl)Mod/WorldShare/helper/Utils.lua')
                 local Store = NPL.load('(gl)Mod/WorldShare/store/Store.lua')
                 local ShareWorld = NPL.load('(gl)Mod/WorldShare/cellar/ShareWorld/ShareWorld.lua')
                 local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
@@ -75,7 +74,7 @@
                 end
 
                 function get_english_style(styleStr)
-                    if Utils:IsEnglish() then
+                    if Mod.WorldShare.Utils.IsEnglish() then
                         return styleStr
                     else
                         return ''

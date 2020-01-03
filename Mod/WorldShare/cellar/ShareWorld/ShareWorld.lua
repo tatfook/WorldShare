@@ -18,39 +18,39 @@ local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
 local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua")
 local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
 local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
-local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
-local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
+local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
+local KeepworkServiceProject = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Project.lua")
 
 local ShareWorld = NPL.export()
 
 function ShareWorld:Init()
-    local currentWorld = self:GetEnterWorld()
+    local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
 
-    if(not currentWorld or currentWorld.is_zip) then
+    if not currentWorld or currentWorld.is_zip then
         _guihelper.MessageBox(L"此世界不支持分享")
         return false
     end
 
     local filepath = self:GetPreviewImagePath()
-    if (not GameLogic.IsReadOnly() and not ParaIO.DoesFileExist(filepath, false)) then
+    if not GameLogic.IsReadOnly() and not ParaIO.DoesFileExist(filepath, false) then
         PackageShareWorld.TakeSharePageImage()
     end
 
     if not KeepworkService:IsSignedIn() then
         function Handle()
-            KeepworkService:GetProjectIdByWorldName(
+            KeepworkServiceProject:GetProjectIdByWorldName(
                 currentWorld.foldername,
                 function()
                     WorldList:RefreshCurrentServerList(function()
-                        SyncMain:GetCurrentWorldInfo(
+                        Compare:GetCurrentWorldInfo(
                             function()
-                                Compare:Init(
-                                    function()
+                                Compare:Init(function(result)
+                                    if result then
                                         self:ShowPage()
                                     end
-                                )
+                                end)
                             end
                         )
                     end, true)
@@ -58,80 +58,82 @@ function ShareWorld:Init()
             )
         end
 
-        if (not UserInfo:CheckDoAutoSignin(Handle)) then
+        if not UserInfo:CheckDoAutoSignin(Handle) then
             LoginModal:ShowPage()
-            Store:Set('user/AfterLogined', Handle)
+            Mod.WorldShare.Store:Set('user/AfterLogined', Handle)
         end
 
         return false
     end
 
-    Compare:Init(
-        function()
+    Compare:Init(function(result)
+        if result then
             self:ShowPage()
         end
-    )
+    end)
 end
 
 function ShareWorld:ShowPage()
-    local params = Utils:ShowWindow(640, 415, "Mod/WorldShare/cellar/ShareWorld/ShareWorld.html", "ShareWorld")
+    local params = Mod.WorldShare.Utils.ShowWindow(640, 415, "Mod/WorldShare/cellar/ShareWorld/ShareWorld.html", "ShareWorld")
 
     params._page.OnClose = function()
-        Store:Remove('page/ShareWorld')
-        Store:Remove("world/shareMode")
+        Mod.WorldShare.Store:Remove('page/ShareWorld')
+        Mod.WorldShare.Store:Remove("world/shareMode")
     end
 
-    local ShareWorldImp = Store:Get('page/ShareWorld')
+    local ShareWorldImp = Mod.WorldShare.Store:Get('page/ShareWorld')
     local filepath = self:GetPreviewImagePath()
 
-    if (ParaIO.DoesFileExist(filepath) and ShareWorldImp) then
+    if ParaIO.DoesFileExist(filepath) and ShareWorldImp then
         ShareWorldImp:SetNodeValue("ShareWorldImage", filepath)
     end
 
     self:Refresh()
 end
 
-function ShareWorld:GetEnterWorld()
-    return Store:Get("world/currentWorld")
-end
-
 function ShareWorld:GetPreviewImagePath()
-    local currentWorld = Store:Get("world/currentWorld")
-    return format("%s/preview.jpg", currentWorld and currentWorld.worldpath)
+    local worldpath = ParaWorld.GetWorldDirectory() or ""
+    return format("%spreview.jpg", worldpath)
 end
 
 function ShareWorld:SetPage()
-    Store:Set('page/ShareWorld', document:GetPageCtrl())
+    Mod.WorldShare.Store:Set('page/ShareWorld', document:GetPageCtrl())
 end
 
 function ShareWorld:ClosePage()
-    local ShareWorldPage = Store:Get('page/ShareWorld')
+    local ShareWorldPage = Mod.WorldShare.Store:Get('page/ShareWorld')
 
-    if (ShareWorldPage) then
+    if ShareWorldPage then
         ShareWorldPage:CloseWindow()
     end
 end
 
 function ShareWorld:Refresh(times)
-    local ShareWorldPage = Store:Get('page/ShareWorld')
+    local ShareWorldPage = Mod.WorldShare.Store:Get('page/ShareWorld')
 
-    if (ShareWorldPage) then
+    if ShareWorldPage then
         ShareWorldPage:Refresh(times or 0.01)
     end
 end
 
 function ShareWorld:GetWorldSize()
-    local tagInfo = WorldCommon.GetWorldInfo()
+    local worldpath = ParaWorld.GetWorldDirectory()
 
-    return Utils.FormatFileSize(tagInfo.size)
+    if not worldpath then
+        return false
+    end
+
+    local filesTotal = LocalService:GetWorldSize(worldpath)
+
+    return Mod.WorldShare.Utils.FormatFileSize(filesTotal)
 end
 
 function ShareWorld:GetRemoteRevision()
-    return tonumber(Store:Get("world/remoteRevision")) or 0
+    return tonumber(Mod.WorldShare.Store:Get("world/remoteRevision")) or 0
 end
 
 function ShareWorld:GetCurrentRevision()
-    return tonumber(Store:Get("world/currentRevision")) or 0
+    return tonumber(Mod.WorldShare.Store:Get("world/currentRevision")) or 0
 end
 
 function ShareWorld:OnClick()
@@ -155,7 +157,7 @@ function ShareWorld:OnClick()
         end)
     end
 
-    if (not canBeShare) then
+    if not canBeShare then
         _guihelper.MessageBox(
             msg,
             function(res)
@@ -172,7 +174,7 @@ function ShareWorld:OnClick()
 end
 
 function ShareWorld:Snapshot()
-    local ShareWorldPage = Store:Get('page/ShareWorld')
+    local ShareWorldPage = Mod.WorldShare.Store:Get('page/ShareWorld')
     PackageShareWorld.TakeSharePageImage()
     self:UpdateImage(true)
 
@@ -184,7 +186,7 @@ function ShareWorld:Snapshot()
 end
 
 function ShareWorld:UpdateImage(bRefreshAsset)
-    local ShareWorldPage = Store:Get('page/ShareWorld')
+    local ShareWorldPage = Mod.WorldShare.Store:Get('page/ShareWorld')
 
     if (ShareWorldPage) then
         local filepath = self:GetPreviewImagePath()

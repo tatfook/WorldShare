@@ -12,6 +12,7 @@ LoginModal:ShowPage()
 ]]
 
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
+local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")
@@ -30,11 +31,11 @@ function LoginModal:Init(callbackFunc)
 end
 
 function LoginModal:ShowPage()
-    if KeepworkService:LoginWithTokenApi() then
-        return true
+    if KeepworkServiceSession:GetCurrentUserToken() then
+        return false
     end
 
-    local params = Utils:ShowWindow(320, 470, "Mod/WorldShare/cellar/LoginModal/LoginModal.html", "LoginModal", nil, nil, nil, nil)
+    local params = Mod.WorldShare.Utils.ShowWindow(320, 470, "Mod/WorldShare/cellar/LoginModal/LoginModal.html", "LoginModal", nil, nil, nil, nil)
 
     local LoginModalPage = Mod.WorldShare.Store:Get('page/LoginModal')
 
@@ -42,7 +43,7 @@ function LoginModal:ShowPage()
         return false
     end
 
-    local PWDInfo = KeepworkService:LoadSigninInfo()
+    local PWDInfo = KeepworkServiceSession:LoadSigninInfo()
 
     if PWDInfo then
         LoginModalPage:SetValue('autoLogin', PWDInfo.autoLogin or false)
@@ -52,12 +53,6 @@ function LoginModal:ShowPage()
         self.loginServer = PWDInfo.loginServer
         self.account = PWDInfo.account
     end
-
-    -- local forgotUrl = format("%s/u/set", KeepworkService:GetKeepworkUrl())
-    -- local registerUrl = format("%s/u/r/register", KeepworkService:GetKeepworkUrl())
-
-    -- LoginModalPage:GetNode('forgot'):SetAttribute('href', forgotUrl)
-    -- LoginModalPage:GetNode('register'):SetAttribute('onclick', registerUrl)
 
     self:Refresh(0.01)
 end
@@ -118,18 +113,17 @@ function LoginModal:LoginAction()
     end
 
     if not loginServer then
-        -- GameLogic.AddBBS(nil, L"登陆站点不能为空", 3000, "255 0 0")
         return false
     end
-
-    -- Mod.WorldShare.Store:Set("user/env", loginServer)
 
     Mod.WorldShare.MsgBox:Show(L"正在登陆，请稍后...", 8000, L"链接超时", 300, 120)
 
     local function HandleLogined()
+        Mod.WorldShare.MsgBox:Close()
+
         local token = Mod.WorldShare.Store:Get("user/token") or ""
 
-        KeepworkService:SaveSigninInfo(
+        KeepworkServiceSession:SaveSigninInfo(
             {
                 account = account,
                 password = password,
@@ -142,6 +136,10 @@ function LoginModal:LoginAction()
 
         self:ClosePage()
 
+        if not Mod.WorldShare.Store:Get('user/isVerified') then
+            RegisterModal:ShowBindingPage()
+        end
+
         local AfterLogined = Mod.WorldShare.Store:Get('user/AfterLogined')
 
         if type(AfterLogined) == 'function' then
@@ -150,15 +148,16 @@ function LoginModal:LoginAction()
         end
     end
 
-    KeepworkService:Login(
+    KeepworkServiceSession:Login(
         account,
         password,
         function(response, err)
-            if err == 200 and type(response) == 'table' and not response.cellphone and not response.email then
-                RegisterModal:ShowBindingPage()
+            if err == 503 then
+                Mod.WorldShare.MsgBox:Close()
+                return false
             end
 
-            KeepworkService:LoginResponse(response, err, HandleLogined)
+            KeepworkServiceSession:LoginResponse(response, err, HandleLogined)
         end
     )
 end
@@ -181,7 +180,7 @@ end
 function LoginModal:SetAutoLogin()
     local LoginModalPage = Mod.WorldShare.Store:Get("page/LoginModal")
 
-    if (not LoginModalPage) then
+    if not LoginModalPage then
         return false
     end
 

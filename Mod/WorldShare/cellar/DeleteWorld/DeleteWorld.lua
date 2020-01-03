@@ -11,52 +11,49 @@ local DeleteWorld = NPL.load("(gl)Mod/WorldShare/cellar/DeleteWorld/DeleteWorld.
 ]]
 local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 
-local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
 local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
+local KeepworkServiceProject = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Project.lua")
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
 
 local DeleteWorld = NPL.export()
 
 function DeleteWorld:ShowPage()
-    local params =
-        Utils:ShowWindow(0, 0, "Mod/WorldShare/cellar/DeleteWorld/DeleteWorld.html", "DeleteWorld", 0, 0, "_fi", false)
-
-    params._page.OnClose = function()
-        Store:Remove("page/DeleteWorld")
-    end
+    local params = Mod.WorldShare.Utils.ShowWindow(0, 0, "Mod/WorldShare/cellar/DeleteWorld/DeleteWorld.html", "DeleteWorld", 0, 0, "_fi", false)
 end
 
 function DeleteWorld:SetPage()
-    Store:Set("page/DeleteWorld", document:GetPageCtrl())
+    Mod.WorldShare.Store:Set("page/DeleteWorld", document:GetPageCtrl())
 end
 
 function DeleteWorld:ClosePage()
-    local DeleteWorldPage = Store:Get("page/DeleteWorld")
+    local DeleteWorldPage = Mod.WorldShare.Store:Get("page/DeleteWorld")
 
-    if (DeleteWorldPage) then
+    if DeleteWorldPage then
         DeleteWorldPage:CloseWindow()
     end
 end
 
 function DeleteWorld.GetSelectWorld()
-    return Store:Get("world/currentWorld")
+    return Mod.WorldShare.Store:Get("world/currentWorld")
 end
 
-function DeleteWorld:DeleteWorld(selectedWorld)
-    if not selectedWorld then
+function DeleteWorld:DeleteWorld()
+    local isEnterWorld = Mod.WorldShare.Store:Get("world/isEnterWorld")
+    local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
+
+    if not currentWorld then
         return false
     end
 
-    local isEnterWorld = Store:Get("world/isEnterWorld")
-
-    if (isEnterWorld) then
+    if isEnterWorld then
         local worldTag = WorldCommon.GetWorldInfo()
 
-        if (selectedWorld.foldername == worldTag.name and GameLogic.IsReadOnly() == selectedWorld.is_zip) then
+        if currentWorld.foldername == worldTag.name and
+           GameLogic.IsReadOnly() == currentWorld.is_zip then
             _guihelper.MessageBox(L"不能刪除正在编辑的世界")
             return false
         end
@@ -66,10 +63,10 @@ function DeleteWorld:DeleteWorld(selectedWorld)
 end
 
 function DeleteWorld:DeleteLocal(callback)
-    local currentWorld = Store:Get("world/currentWorld")
+    local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
 
-    if (not currentWorld) then
-        _guihelper.MessageBox(L"请先选择世界")
+    if not currentWorld then
+        GameLogic.AddBBS(nil, L"删除失败", 3000, "255 0 0")
         return false
     end
 
@@ -78,40 +75,40 @@ function DeleteWorld:DeleteLocal(callback)
             return false
         end
 
-        if (currentWorld.is_zip) then
-            if (ParaIO.DeleteFile(currentWorld.worldpath)) then
-                if (type(callback) == "function") then
+        if currentWorld.is_zip then
+            if ParaIO.DeleteFile(currentWorld.worldpath) then
+                if type(callback) == "function" then
                     callback()
                 else
                     self:ClosePage()
                     WorldList:RefreshCurrentServerList()
                 end
             else
-                _guihelper.MessageBox(L"无法删除可能您没有足够的权限")
+                GameLogic.AddBBS(nil, L"无法删除可能您没有足够的权限", 3000, "255 0 0")
             end
         else
-            if (GameLogic.RemoveWorldFileWatcher) then
+            if GameLogic.RemoveWorldFileWatcher then
                 GameLogic.RemoveWorldFileWatcher() -- file watcher may make folder deletion of current world directory not working.
             end
 
-            if (commonlib.Files.DeleteFolder(currentWorld.worldpath)) then
-                if (type(callback) == "function") then
+            if commonlib.Files.DeleteFolder(currentWorld.worldpath) then
+                if type(callback) == "function" then
                     callback()
                 else
                     self:ClosePage()
                     WorldList:RefreshCurrentServerList()
                 end
             else
-                _guihelper.MessageBox(L"无法删除可能您没有足够的权限")
+                GameLogic.AddBBS(nil, L"无法删除可能您没有足够的权限", 3000, "255 0 0")
             end
         end
     end
 
-    if (currentWorld.status ~= 2) then
+    if currentWorld.status ~= 2 then
         _guihelper.MessageBox(
             format(L"确定删除本地世界:%s?", currentWorld.text or ""),
             function(res)
-                if (res and res == _guihelper.DialogResult.Yes) then
+                if res and res == _guihelper.DialogResult.Yes then
                     Delete()
                 end
             end,
@@ -121,91 +118,36 @@ function DeleteWorld:DeleteLocal(callback)
 end
 
 function DeleteWorld:DeleteRemote()
-    local dataSourceInfo = Store:Get("user/dataSourceInfo")
-    local foldername = Store:Get("world/foldername")
-
-    if (not dataSourceInfo) then
-        return false
-    end
+    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
     _guihelper.MessageBox(
-        format(L"确定删除远程世界:%s?", foldername.utf8 or ""),
+        format(L"确定删除远程世界(项目):%s?", currentWorld.foldername or ""),
         function(res)
-            if (res and res == 6) then
-                if (dataSourceInfo.dataSourceType == "github") then
-                    self:DeleteGithub()
-                elseif (dataSourceInfo.dataSourceType == "gitlab") then
-                    self:ClosePage()
-                    WorldList:SetRefreshing(true)
-                    self:DeleteRecord()
-                end
-            end
-        end
-    )
-end
+            if res and res == 6 then
+                KeepworkServiceProject:RemoveProject(
+                    currentWorld.kpProjectId,
+                    function(data, err)
+                        self:ClosePage()
 
-function DeleteWorld:DeleteRecord(world)
-    local currentWorld = world or Store:Get("world/currentWorld")
-
-    if (not currentWorld) then
-        return false
-    end
-
-    local kpProjectId = currentWorld.kpProjectId
-
-    KeepworkService:DeleteWorld(
-        kpProjectId,
-        function(data, err)
-            if (err ~= 204 and err ~= 200) then
-                _guihelper.MessageBox(format("%s:%d", L"服务器返回错误状态码", err))
-            end
-
-            if currentWorld and currentWorld.worldpath and #currentWorld.worldpath > 0 then
-                local tag = LocalService:GetTag(currentWorld.worldpath)
-
-                tag.kpProjectId = nil
-                LocalService:SetTag(currentWorld.worldpath, tag)
-            end
-
-            WorldList:RefreshCurrentServerList()
-        end
-    )
-end
-
-function DeleteWorld.DeleteWorldMd()
-    local currentWorld = Store:Get("world/currentWorld")
-    local userinfo = Store:Get("user/userinfo")
-    local dataSourceInfo = Store:Get("user/dataSourceInfo")
-
-    if (not currentWorld or not userinfo or not dataSourceInfo) then
-        return false
-    end
-
-    local foldername = currentWorld.foldername
-
-    if (dataSourceInfo.dataSourceType == "github") then
-    elseif (dataSourceInfo.dataSourceType == "gitlab") then
-        GitService:GetProjectIdByName(
-            foldername,
-            function(projectId)
-                if (projectId) then
-                    local path = format("%s/paracraft/world_%s.md", userinfo.username, foldername)
-
-                    GitService:DeleteFile(
-                        projectId,
-                        nil,
-                        path,
-                        nil,
-                        function()
-                            WorldList:RefreshCurrentServerList()
+                        if err ~= 204 and err ~= 200 then
+                            GameLogic.AddBBS(nil, format("%s:%d", L"服务器返回错误状态码", err), 3000, "255 0 0")
                         end
-                    )
-                else
-                    WorldList:RefreshCurrentServerList()
-                end
+
+                        if currentWorld and currentWorld.worldpath and #currentWorld.worldpath > 0 then
+                            local tag = LocalService:GetTag(currentWorld.worldpath)
+
+                            tag.kpProjectId = nil
+                            LocalService:SetTag(currentWorld.worldpath, tag)
+                            currentWorld.kpProjectId = nil
+                            Mod.WorldShare.Store:Set('world/currentWorld')
+                        end
+
+                        WorldList:RefreshCurrentServerList()
+                    end
+                )
             end
-        )
-    end
+        end
+    )
 end
 
 function DeleteWorld:DeleteAll()

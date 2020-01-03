@@ -14,9 +14,8 @@
                 Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 
                 SyncMain:SetStartSyncUseDataSourcePage()
-                
+
                 function replace()
-                    MsgBox:Show(L"正在处理中，请勿操作...")
                     SyncMain:BackupWorld()
                     SyncMain:CloseStartSyncUseDataSourcePage()
                     SyncMain:SyncToLocal()

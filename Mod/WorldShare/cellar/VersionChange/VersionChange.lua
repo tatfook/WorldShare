@@ -14,64 +14,62 @@ local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
 local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
-local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
-local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
-local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")
+local KeepworkServiceWorld = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/World.lua")
 local Encoding = commonlib.gettable("commonlib.Encoding")
 
 local VersionChange = NPL.export()
 
 function VersionChange:Init(foldername)
-    if (not KeepworkService:IsSignedIn()) then
+    if not KeepworkService:IsSignedIn() then
         _guihelper.MessageBox(L"登录后才能继续")
         return false
     end
 
-    local isEnterWorld = Store:Get("world/isEnterWorld")
+    local isEnterWorld = Mod.WorldShare.Store:Get("world/isEnterWorld")
 
-    if (isEnterWorld) then
+    if isEnterWorld then
         local worldTag = WorldCommon.GetWorldInfo()
 
-        if(foldername == worldTag.name) then
-            _guihelper.MessageBox(L"不能切换当前编辑的世界")
+        if foldername == worldTag.name then
+            GameLogic.AddBBS(nil, L"不能切换当前编辑的世界", 3000, "255 0 0")
             return
         end
     end
 
-    MsgBox:Show(L"请稍后...")
+    Mod.WorldShare.MsgBox:Show(L"请稍后...")
 
     self.foldername = foldername
 
     self:GetVersionSource(
         function()
-            MsgBox:Close()
+            Mod.WorldShare.MsgBox:Close()
             self:ShowPage()
         end
     )
 end
 
 function VersionChange:SetPage()
-    Store:Set('page/VersionChange', document:GetPageCtrl())
+    Mod.WorldShare.Store:Set('page/VersionChange', document:GetPageCtrl())
 end
 
 function VersionChange:ClosePage()
-    local VersionChangePage = Store:Get('page/VersionChange')
+    local VersionChangePage = Mod.WorldShare.Store:Get('page/VersionChange')
 
-    if (VersionChangePage) then
+    if VersionChangePage then
         VersionChangePage:CloseWindow()
     end
 end
 
 function VersionChange:ShowPage()
-    local params = Utils:ShowWindow(0, 0, "Mod/WorldShare/cellar/VersionChange/VersionChange.html", "VersionChange", 0, 0, "_fi", false)
+    local params = Mod.WorldShare.Utils.ShowWindow(0, 0, "Mod/WorldShare/cellar/VersionChange/VersionChange.html", "VersionChange", 0, 0, "_fi", false)
 
     params._page.OnClose = function()
-        Store:Remove('page/VersionChange')
+        Mod.WorldShare.Store:Remove('page/VersionChange')
     end
 end
 
 function VersionChange:GetVersionSource(callback)
-    local currentWorld = Store:Get("world/currentWorld")
+    local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
     local commitId = SyncMain:GetCurrentRevisionInfo() or {}
 
     if not currentWorld then
@@ -80,8 +78,8 @@ function VersionChange:GetVersionSource(callback)
 
     self.allRevision = commonlib.vector:new()
 
-    KeepworkService:GetWorld(
-        Encoding.url_encode(self.foldername or ''),
+    KeepworkServiceWorld:GetWorld(
+        self.foldername,
         function(world)
             if type(callback) ~= 'function' then
                 return false
@@ -95,13 +93,13 @@ function VersionChange:GetVersionSource(callback)
             for key, item in ipairs(world.extra.commitIds) do
                 item.shortId = string.sub(item.commitId, 1, 5)
 
-                if (tonumber(currentWorld.revision) == tonumber(item.revision)) then
+                if tonumber(currentWorld.revision) == tonumber(item.revision) then
                     item.isActive = true
                 else
                     item.isActive = false
                 end
 
-                if (item.commitId == commitId.id) then
+                if item.commitId == commitId.id then
                     item.isActiveFull = true
                 else
                     item.isActiveFull = false
@@ -120,20 +118,17 @@ function VersionChange:GetAllRevision()
 end
 
 function VersionChange:SelectVersion(index)
-    local currentWorld = Store:Get("world/currentWorld")
-    local foldername = Store:Get("world/foldername")
+    local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
     local commitId = self.allRevision[index]["commitId"]
 
-    Store:Set("world/commitId", commitId)
-    KeepworkService:SetCurrentCommidId(commitId)
-
-    local targetDir = format("%s/%s/", SyncMain.GetWorldFolderFullPath(), foldername.default)
+    local targetDir = format("%s/%s/", Mod.WorldShare.Utils.GetWorldFolderFullPath(), commonlib.Encoding.Utf8ToDefault(currentWorld.foldername))
 
     commonlib.Files.DeleteFolder(targetDir)
+    ParaIO.CreateDirectory(targetDir)
 
-    MsgBox:Show(L'请稍后...')
+    currentWorld.lastCommitId = commitId
+    Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
 
     SyncMain:SyncToLocal()
-
     self:ClosePage()
 end

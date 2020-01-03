@@ -41,3 +41,6 @@ function BaseApi:Delete(...)
     HttpRequest:Delete(...)
 end
 
+function BaseApi:PostFields(...)
+    HttpRequest:PostFields(...)
+end

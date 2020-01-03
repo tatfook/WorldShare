@@ -55,7 +55,7 @@ end
 
 function GitlabService:GetProjectPath(projectName)
     local dataSourceInfo = self:GetDataSourceInfo()
-    local projectPath = Utils:UrlEncode(format("%s/%s", dataSourceInfo.dataSourceUsername or "", projectName or ""))
+    local projectPath = Mod.WorldShare.Utils.UrlEncode(format("%s/%s", dataSourceInfo.dataSourceUsername or "", projectName or ""))
 
     return projectPath
 end
@@ -365,7 +365,7 @@ end
 -- write a file
 function GitlabService:Upload(projectName, path, content, callback)
     local projectPath = self:GetProjectPath(projectName or '')
-    local url = format("%s%s", self:GetFileUrlPrefix(projectPath), Utils:UrlEncode(path))
+    local url = format("%s%s", self:GetFileUrlPrefix(projectPath), Mod.WorldShare.Utils.UrlEncode(path))
 
     local params = {
         commit_message = format("%s%s", GitlabService:GetCommitMessagePrefix(), path),
@@ -391,7 +391,7 @@ end
 -- Update a file
 function GitlabService:Update(projectName, path, content, callback)
     local projectPath = self:GetProjectPath(projectName or '')
-    local url = format("%s%s", self:GetFileUrlPrefix(projectPath), Utils:UrlEncode(path))
+    local url = format("%s%s", self:GetFileUrlPrefix(projectPath), Mod.WorldShare.Utils.UrlEncode(path))
 
     local params = {
         commit_message = format("%s%s", GitlabService:GetCommitMessagePrefix(), path),
@@ -452,7 +452,7 @@ function GitlabService:GetContentWithRaw(foldername, path, commitId, callback)
         dataSourceInfo.dataSourceUsername,
         foldername,
         commitId,
-        Utils:UrlEncode(path)
+        Mod.WorldShare.Utils.UrlEncode(path)
     )
 
     HttpRequest:GetUrl(
@@ -479,7 +479,7 @@ end
 -- remove a file
 function GitlabService:DeleteFile(projectName, path, callback)
     local projectPath = self:GetProjectPath(projectName or '')
-    local url = format("%s%s", self:GetFileUrlPrefix(projectPath), Utils:UrlEncode(path))
+    local url = format("%s%s", self:GetFileUrlPrefix(projectPath), Mod.WorldShare.Utils.UrlEncode(path))
 
     local params = {
         commit_message = format("%s%s", self:GetCommitMessagePrefix(), path),

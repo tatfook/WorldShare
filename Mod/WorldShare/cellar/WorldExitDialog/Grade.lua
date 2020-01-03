@@ -13,9 +13,6 @@ local Grade = NPL.load("(gl)Mod/WorldShare/cellar/WorldExitDialog/Grade.lua")
 local TeacherAgent = commonlib.gettable("MyCompany.Aries.Creator.Game.Teacher.TeacherAgent")
 local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 
-local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
-local Utils = NPL.load('(gl)Mod/WorldShare/helper/Utils.lua')
-local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local KeepworkServiceRate = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Rate.lua")
 local KeepworkServiceProject = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Project.lua")
 local GradeLocalData = NPL.load("(gl)Mod/WorldShare/database/GradeLocalData.lua")
@@ -31,13 +28,10 @@ function Grade:Init()
 end
 
 function Grade:UpdateScore(score, callback)
-    local username = Store:Get('user/username')
+    local username = Mod.WorldShare.Store:Get('user/username')
+    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
-    if not KeepworkServiceProject:GetProjectId() then
-        return false
-    end
-
-    if not username then
+    if not username or not currentWorld.kpProjectId then
         return false
     end
 
@@ -48,7 +42,7 @@ function Grade:UpdateScore(score, callback)
     local rate = score * 20
 
     KeepworkServiceRate:SetRatedProject(
-        KeepworkServiceProject:GetProjectId(),
+        currentWorld.kpProjectId,
         rate,
         function(data, err)
             if err == 200 then
@@ -61,9 +55,13 @@ function Grade:UpdateScore(score, callback)
     )
 end
 
-function Grade:IsRated(callback)
+function Grade:IsRated(kpProjectId, callback)
+    if not kpProjectId then
+        return false
+    end
+
     KeepworkServiceRate:GetRatedProject(
-        KeepworkServiceProject:GetProjectId(),
+        tonumber(kpProjectId),
         function(data, err)
             if type(callback) ~= 'function' then
                 return false

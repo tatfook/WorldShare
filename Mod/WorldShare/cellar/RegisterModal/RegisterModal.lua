@@ -19,15 +19,15 @@ local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkServ
 local RegisterModal = NPL.export()
 
 function RegisterModal:ShowPage()
-    Mod.WorldShare.Utils:ShowWindow(360, 480, "Mod/WorldShare/cellar/RegisterModal/RegisterModal.html", "RegisterModal")
+    Mod.WorldShare.Utils.ShowWindow(360, 480, "Mod/WorldShare/cellar/RegisterModal/RegisterModal.html", "RegisterModal")
 end
 
 function RegisterModal:ShowUserAgreementPage()
-    Mod.WorldShare.Utils:ShowWindow(400, 580, "Mod/WorldShare/cellar/RegisterModal/UserAgreement.html", "UserAgreement")
+    Mod.WorldShare.Utils.ShowWindow(400, 580, "Mod/WorldShare/cellar/RegisterModal/UserAgreement.html", "UserAgreement")
 end
 
 function RegisterModal:ShowBindingPage()
-    Mod.WorldShare.Utils:ShowWindow(360, 480, "Mod/WorldShare/cellar/RegisterModal/Binding.html", "Binding")
+    Mod.WorldShare.Utils.ShowWindow(360, 480, "Mod/WorldShare/cellar/RegisterModal/Binding.html", "Binding")
 end
 
 function RegisterModal:GetServerList()
@@ -89,8 +89,6 @@ function RegisterModal:Register()
         GameLogic.AddBBS(nil, L"手机验证码不能为空", 3000, "255 0 0")
         return false
     end
-
-    -- Mod.WorldShare.Store:Set("user/env", loginServer)
 
     Mod.WorldShare.MsgBox:Show(L"正在注册，可能需要10-15秒的时间，请稍后...", 20000, L"链接超时", 500, 120)
 

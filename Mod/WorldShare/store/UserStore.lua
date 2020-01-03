@@ -18,10 +18,12 @@ function UserStore:Action()
             self.token = token
             commonlib.setfield("System.User.keepworktoken", token)
         end,
-        SetUserinfo = function(token, username, nickname)
+        SetUserinfo = function(token, userId, username, nickname)
             self.token = token
+            self.userId = userId
             self.username = username
             self.nickname = nickname
+
             commonlib.setfield("System.User.keepworktoken", token)
             commonlib.setfield("System.User.username", username)
             commonlib.setfield("System.User.keepworkUsername", username)
@@ -29,6 +31,18 @@ function UserStore:Action()
         end,
         SetPlayerController = function(playerController)
             self.playerController = playerController
+        end,
+        Logout = function()
+            self.token = nil
+            self.userId = nil
+            self.username = nil
+            self.nickname = nil
+            self.myOrg = nil
+
+            commonlib.setfield("System.User.keepworktoken", nil)
+            commonlib.setfield("System.User.username", nil)
+            commonlib.setfield("System.User.keepworkUsername", nil)
+            commonlib.setfield("System.User.NickName", nil)
         end
     }
 end
