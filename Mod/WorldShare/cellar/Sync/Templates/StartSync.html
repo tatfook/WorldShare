@@ -8,6 +8,8 @@
             <![CDATA[
                 page_ctrl = document:GetPageCtrl()
                 use_offline = page_ctrl:GetRequestParam("useOffline")
+                local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
+                local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
 
                 SyncMain = NPL.load("../Main.lua")
                 Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
@@ -21,7 +23,6 @@
                         if SyncMain.GetCurrentRevision() < SyncMain.GetRemoteRevision() then
                             SyncMain:ShowStartSyncUseLocalPage()
                         elseif SyncMain.GetCurrentRevision() >= SyncMain.GetRemoteRevision() then
-                            Mod.WorldShare.MsgBox:Show(L"正在处理中，请勿操作...")
                             SyncMain:SyncToDataSource()
                         end
                     end)
@@ -33,7 +34,6 @@
                     if SyncMain.GetRemoteRevision() < SyncMain.GetCurrentRevision() then
                         SyncMain:ShowStartSyncUseDataSourcePage();
                     elseif SyncMain.GetRemoteRevision() >= SyncMain.GetCurrentRevision() then
-                        Mod.WorldShare.MsgBox:Show(L"正在处理中，请勿操作...")
                         SyncMain:SyncToLocal()
                     end
                 end
@@ -50,25 +50,17 @@
                     local isEnterWorld = Mod.WorldShare.Store:Get("world/isEnterWorld")
 
                     if isEnterWorld then
-                        SyncMain.callback = nil
                         SyncMain:CloseStartSyncPage()
                         return true
-                    end
-
-                    if type(SyncMain.callback) == 'function' then
-                        SyncMain.callback()
-                        SyncMain.callback = nil
                     end
 
                     SyncMain:CloseStartSyncPage()
                 end
 
                 function enter_offline_world()
-                    if type(SyncMain.callback) == 'function' then
-                        SyncMain.callback()
-                        SyncMain.callback = nil
-                        SyncMain:CloseStartSyncPage()
-                    end
+                    InternetLoadWorld.EnterWorld()
+                    UserConsole:ClosePage()
+                    SyncMain:CloseStartSyncPage()
                 end
 
                 function get_current_world_name()

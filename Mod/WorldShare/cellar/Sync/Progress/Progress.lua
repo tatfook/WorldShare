@@ -17,15 +17,15 @@ local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")
 local Progress = NPL.export()
 
 function Progress:Init(instance)
-    local params = Utils:ShowWindow(0, 0, "Mod/WorldShare/cellar/Sync/Progress/Progress.html", "Progress", 0, 0, "_fi", false)
+    local params = Mod.WorldShare.Utils.ShowWindow(0, 0, "Mod/WorldShare/cellar/Sync/Progress/Progress.html", "Progress", 0, 0, "_fi", false)
 
     params._page.OnClose = function()
         Store:Remove("page/Progress")
     end
 
-    local ProgressPage = Store:Get("page/Progress")
+    local ProgressPage = Mod.WorldShare.Store:Get("page/Progress")
 
-    if (not ProgressPage) then
+    if not ProgressPage then
         return false
     end
 
@@ -40,13 +40,13 @@ function Progress:Init(instance)
 end
 
 function Progress:SetPage()
-    Store:Set("page/Progress", document:GetPageCtrl())
+    Mod.WorldShare.Store:Set("page/Progress", document:GetPageCtrl())
 end
 
 function Progress:GetProgressBar()
     local ProgressPage = Store:Get("page/Progress")
 
-    if (not ProgressPage) then
+    if not ProgressPage then
         return false
     end
 
@@ -54,32 +54,32 @@ function Progress:GetProgressBar()
 end
 
 function Progress:Refresh(delayTimeMs)
-    local ProgressPage = Store:Get("page/Progress")
+    local ProgressPage = Mod.WorldShare.Store:Get("page/Progress")
 
-    if (ProgressPage) then
+    if ProgressPage then
         ProgressPage:Refresh(delayTimeMs or 0.01)
     end
 end
 
 function Progress:ClosePage()
-    local ProgressPage = Store:Get("page/Progress")
+    local ProgressPage = Mod.WorldShare.Store:Get("page/Progress")
 
-    if (ProgressPage) then
+    if ProgressPage then
         ProgressPage:CloseWindow()
 
-        local callback = Store:Get("world/CloseProgress")
+        local callback = Mod.WorldShare.Store:Get("world/CloseProgress")
 
         if type(callback) == 'function' then
             callback()
-            Store:Remove("world/CloseProgress")
+            Mod.WorldShare.Store:Remove("world/CloseProgress")
         end
     end
 end
 
 function Progress:Cancel(callback)
-    local ProgressPage = Store:Get("page/Progress")
+    local ProgressPage = Mod.WorldShare.Store:Get("page/Progress")
 
-    if (not ProgressPage or not ProgressPage.instance) then
+    if not ProgressPage or not ProgressPage.instance then
         return false
     end
 
@@ -91,17 +91,18 @@ function Progress:Cancel(callback)
     Progress:Refresh()
 
     local function CheckFinish()
-        Utils.SetTimeOut(
+        Mod.WorldShare.Utils.SetTimeOut(
             function()
-                if (not ProgressPage.finish) then
-                    checkFinish()
+                if not ProgressPage.finish then
+                    CheckFinish()
                     return false
                 end
 
+                ProgressPage.instance:SetFinish(true)
                 self:ClosePage()
-                MsgBox:Close()
+                Mod.WorldShare.MsgBox:Close()
 
-                if (type(callback) == "function") then
+                if type(callback) == "function" then
                     callback()
                 end
             end,
@@ -113,11 +114,27 @@ function Progress:Cancel(callback)
 end
 
 function Progress:Retry()
-    self:Cancel(
-        function()
-            Compare:Init()
-        end
-    )
+    self:Cancel(function()
+        Compare:Init(function(result)
+            if not result then
+                GameLogic.AddBBS(nil, L"同步失败", 3000, "255 0 0")
+                Mod.WorldShare.MsgBox:Close()
+                return false
+            end
+
+            if result == Compare.JUSTLOCAL then
+                SyncMain:SyncToDataSource()
+            end
+
+            if result == Compare.JUSTREMOTE then
+                SyncMain:SyncToLocal()
+            end
+
+            if result == Compare.REMOTEBIGGER or result == Compare.LOCALBIGGER or result == Compare.EQUAL then
+                SyncMain:ShowStartSyncPage()
+            end
+        end)
+    end)
 end
 
 function Progress:UpdateDataBar(current, total, msg, finish)

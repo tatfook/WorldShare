@@ -153,7 +153,7 @@ function Bookmark:SetTag(displayName, tagName)
         tagArray:push_back(tagName)
     end
 
-    curItem["tag"] = Utils:Implode(",", tagArray)
+    curItem["tag"] = Mod.WorldShare.Utils.Implode(",", tagArray)
 
     self:SetItem(displayName, curItem)
 end
@@ -178,7 +178,7 @@ function Bookmark:RemoveTag(displayName, tagName)
         end
     end
 
-    curItem["tag"] = Utils:Implode(",", tagArray)
+    curItem["tag"] = Mod.WorldShare.Utils.Implode(",", tagArray)
 
     self:SetItem(displayName, curItem)
 end

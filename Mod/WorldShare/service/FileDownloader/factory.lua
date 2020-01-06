@@ -24,50 +24,52 @@ local _Stores_pools = {}
 -- return the ResourceStore local server instance. or nil if failed.
 function localserver.CreateStore(name, serverType, db_name)
     serverType = serverType or 1
-    if (not name) then
+
+    if not name then
         name = "_default_" .. serverType
     end
+
     local serverStore
 
     -- we cache the result in memory, so that this function can be called repeatedly
     local serverStore = localserver.GetStore(name, db_name)
-    if (serverStore) then
+    if serverStore then
         return serverStore
     end
 
-    if (serverType == 1) then
-        NPL.load("(gl)Mod/WorldShare/service/FileDownloader/ResourceStore.lua")
+    if serverType == 1 then
+        NPL.load("./ResourceStore.lua")
 
         serverStore = localserver.ResourceStore:new({db_name = db_name})
         -- TODO: using origin of the login user's server domain, currently it is just paraengine.com
         -- TODO: use user info for cookies.
-        if (serverStore:CreateOrOpen("http://paraengine.com", name, "")) then
-        end
-    elseif (serverType == 2) then
+        if serverStore:CreateOrOpen("http://paraengine.com", name, "") then end
+    elseif serverType == 2 then
         NPL.load("(gl)script/ide/System/localserver/WebserviceStore.lua")
+
         serverStore = localserver.WebserviceStore:new({db_name = db_name})
-        if (serverStore:CreateOrOpen("http://paraengine.com", name, "")) then
-        end
-    elseif (serverType == 3) then
+        if serverStore:CreateOrOpen("http://paraengine.com", name, "") then end
+    elseif serverType == 3 then
         NPL.load("(gl)script/ide/System/localserver/URLResourceStore.lua")
+
         serverStore = localserver.URLResourceStore:new({db_name = db_name})
-        if (serverStore:CreateOrOpen("http://paraengine.com", name, "")) then
-        end
-    elseif (serverType == 0) then
+        if serverStore:CreateOrOpen("http://paraengine.com", name, "") then end
+    elseif serverType == 0 then
         NPL.load("(gl)script/ide/System/localserver/ManagedResourceStore.lua")
+
         serverStore = localserver.ManagedResourceStore:new({db_name = db_name})
-        if (serverStore:CreateOrOpen("http://paraengine.com", name, "")) then
-        end
+        if serverStore:CreateOrOpen("http://paraengine.com", name, "") then end
     end
 
-    if (serverStore and serverStore.is_initialized_) then
+    if serverStore and serverStore.is_initialized_ then
         -- add to memory cache, so that the next time the store is returned from the cache.
-        if (db_name == nil) then
+        if db_name == nil then
             _Stores[name] = serverStore
         else
             _Stores_pools[db_name] = _Stores_pools[db_name] or {}
             _Stores_pools[db_name][name] = serverStore
         end
+
         return serverStore
     end
 end

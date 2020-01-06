@@ -17,6 +17,7 @@ local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua"
 local LoginModal = NPL.load("../LoginModal/LoginModal.lua")
 local HttpRequest = NPL.load("(gl)Mod/WorldShare/service/HttpRequest.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
+local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")
 local Config = NPL.load("(gl)Mod/WorldShare/config/Config.lua")
@@ -46,9 +47,9 @@ function UserInfo.IsSignedIn()
 end
 
 function UserInfo:CheckoutVerified()
-    local isVerified = Store:Get("user/isVerified")
+    local isVerified = Mod.WorldShare.Store:Get("user/isVerified")
 
-    if (self.IsSignedIn() and not isVerified) then
+    if self.IsSignedIn() and not isVerified then
         _guihelper.MessageBox(
             L"您需要到keepwork官网进行实名认证，认证成功后需重启paracraft即可正常操作，是否现在认证？",
             function(res)
@@ -116,8 +117,54 @@ function UserInfo:GetUserName()
     return username
 end
 
+-- for restart game
+function UserInfo:LoginWithToken()
+    local usertoken = KeepworkServiceSession:GetCurrentUserToken()
+
+    if type(usertoken) ~= "string" or #usertoken <= 0 then
+        GameLogic.AddBBS(nil, L"Token不存在", 3000, "255 0 0")
+        return false
+    end
+
+    Mod.WorldShare.MsgBox:Show(L"正在登陆，请稍后...", 8000, L"链接超时")
+
+    KeepworkServiceSession:Profile(
+        function(data, err)
+            if err == 401 then
+                Mod.WorldShare.MsgBox:Close()
+                GameLogic.AddBBS(nil, L"Token已过期，请重新登录", 3000, "255 0 0")
+
+                return false
+            elseif err ~= 200 then
+                Mod.WorldShare.MsgBox:Close()
+                GameLogic.AddBBS(nil, format("%s%d", L"登陆失败了， 错误码：", err), 3000, "255 0 0")
+
+                return false
+            end
+
+            if type(data) == 'table' and data.username then
+                data.token = usertoken
+                KeepworkServiceSession:LoginResponse(
+                    data,
+                    err,
+                    function()
+                        Mod.WorldShare.MsgBox:Close()
+
+                        WorldList:RefreshCurrentServerList()
+
+                        if type(callback) == "function" then
+                            callback()
+                        end
+                    end
+                )
+            end
+        end,
+        usertoken
+    )
+end
+
 function UserInfo:CheckDoAutoSignin(callback)
-    local info = KeepworkService:LoadSigninInfo()
+    local info = KeepworkServiceSession:LoadSigninInfo()
 
     if not info or not info.autoLogin or not info.account or not info.password then
         return false
@@ -125,9 +172,7 @@ function UserInfo:CheckDoAutoSignin(callback)
 
     Mod.WorldShare.MsgBox:Show(L"正在登陆，请稍后...", 8000, L"链接超时")
 
-    -- Store:Set("user/env", info.loginServer)
-
-    KeepworkService:Profile(
+    KeepworkServiceSession:Profile(
         function(data, err)
             if err == 401 then
                 info.token = nil
@@ -144,22 +189,24 @@ function UserInfo:CheckDoAutoSignin(callback)
                 return false
             end
 
-            if (type(data) == 'table' and data.username) then
+            if type(data) == 'table' and data.username then
                 data.token = info.token
-                KeepworkService:LoginResponse(
+                KeepworkServiceSession:LoginResponse(
                     data,
                     err,
-                    function()
+                    function(gitGateWayData, gitGateWayErr)
+                        Mod.WorldShare.MsgBox:Close()
+
                         WorldList:RefreshCurrentServerList()
 
-                        local AfterLogined = Store:Get('user/AfterLogined')
+                        local AfterLogined = Mod.WorldShare.Store:Get('user/AfterLogined')
 
                         if type(AfterLogined) == 'function' then
                             AfterLogined(true)
-                            Store:Remove('user/AfterLogined')
+                            Mod.WorldShare.Store:Remove('user/AfterLogined')
                         end
 
-                        if (type(callback) == "function") then
+                        if type(callback) == "function" then
                             callback()
                         end
                     end
@@ -173,8 +220,7 @@ function UserInfo:CheckDoAutoSignin(callback)
 end
 
 function UserInfo:OnClickLogin()
-    Store:Set("user/ignoreAutoLogin", true)
-    Store:Set("user/loginText", L"请先登录")
+    Mod.WorldShare.Store:Set("user/loginText", L"请先登录")
     LoginModal:Init(function()
         WorldList:RefreshCurrentServerList()
     end)
@@ -186,17 +232,17 @@ local curIndex = 1
 function UserInfo:OnChangeAvatar(btnName)
     local UserConsolePage = Store:Get("page/UserConsole")
 
-    if (not btnName) then
+    if not btnName then
         local filename = GameLogic.options:GetMainPlayerAssetName()
-        if (not GameLogic.IsStarted) then
+        if not GameLogic.IsStarted then
             GameLogic.options:SetMainPlayerAssetName()
             filename = GameLogic.options:GetMainPlayerAssetName()
-            if (not filename) then
+            if not filename then
                 filename = UserInfo.GetValidAvatarFilename(default_avatars[cur_index])
                 GameLogic.options:SetMainPlayerAssetName(filename)
             end
         end
-        if (filename and UserConsolePage) then
+        if filename and UserConsolePage then
             UserConsolePage:CallMethod("MyPlayer", "SetAssetFile", filename)
         end
         return
@@ -212,7 +258,7 @@ function UserInfo:OnChangeAvatar(btnName)
     
     local playerName = default_avatars[curIndex]
 
-    if (playerName and UserConsolePage) then
+    if playerName and UserConsolePage then
         local filename = UserInfo.GetValidAvatarFilename(playerName)
         if (filename) then
             if (GameLogic.RunCommand) then
@@ -228,7 +274,7 @@ function UserInfo.LookPlayerInform()
     local cur_page = InternetLoadWorld.GetCurrentServerPage()
     local nid = cur_page.player_nid
 
-    if (nid) then
+    if nid then
         Map3DSystem.App.Commands.Call(Map3DSystem.options.ViewProfileCommand, nid)
     end
 end
@@ -238,7 +284,7 @@ function UserInfo:CanSwitchUser()
 end
 
 function UserInfo:Logout()
-    if (self.IsSignedIn() and self:CanSwitchUser()) then
-        KeepworkService:Logout()
+    if self.IsSignedIn() and self:CanSwitchUser() then
+        KeepworkServiceSession:Logout()
     end
 end

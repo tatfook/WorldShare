@@ -11,20 +11,18 @@ local MySchool = NPL.load("(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua")
 
 local NPLWebServer = commonlib.gettable("MyCompany.Aries.Game.Network.NPLWebServer")
 
-local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
-local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 
 local MySchool = NPL.export()
 
 function MySchool:Show()
     local function showpage()
-        local params = Utils:ShowWindow(870, 650, "Mod/WorldShare/cellar/MySchool/MySchool.html", "MySchool")
-    
+        local params = Mod.WorldShare.Utils.ShowWindow(870, 650, "Mod/WorldShare/cellar/MySchool/MySchool.html", "MySchool")
+
         params._page:CallMethod("nplbrowser_instance", "SetVisible", true)
     
         params._page.OnClose = function()
-            Store:Remove('page/MySchoolPage')
+            Mod.WorldShare.Store:Remove('page/MySchoolPage')
             params._page:CallMethod("nplbrowser_instance", "SetVisible", false)
         end
     end
@@ -34,15 +32,15 @@ function MySchool:Show()
             if not bStarted then
                 return false
             end
-            
+
             NPL.load("(gl)script/apps/Aries/Creator/Game/NplBrowser/NplBrowserLoaderPage.lua");	
             local NplBrowserLoaderPage = commonlib.gettable("NplBrowser.NplBrowserLoaderPage");	
             NplBrowserLoaderPage.Check()
-            if not NplBrowserLoaderPage.IsLoaded() then	
+            if not NplBrowserLoaderPage.IsLoaded() then
                 ParaGlobal.ShellExecute("open", MySchool.GetUrl(), "", "", 1);	
-                return	
+                return
             end
-
+            
             showpage()
         end)
     else
@@ -51,11 +49,11 @@ function MySchool:Show()
 end
 
 function MySchool:SetPage()
-    Store:Set('page/MySchoolPage', document:GetPageCtrl())
+    Mod.WorldShare.Store:Set('page/MySchoolPage', document:GetPageCtrl())
 end
 
 function MySchool:Close()
-    local MySchoolPage = Store:Get('page/MySchoolPage')
+    local MySchoolPage = Mod.WorldShare.Store:Get('page/MySchoolPage')
 
     if MySchoolPage then
         MySchoolPage:CloseWindow()
@@ -63,7 +61,7 @@ function MySchool:Close()
 end
 
 function MySchool.GetUrl()
-    local token = Store:Get("user/token") or ''
+    local token = Mod.WorldShare.Store:Get("user/token") or ''
 
     if System.os.GetPlatform() == 'mac' then
         return KeepworkService:GetKeepworkUrl() .. '/p/org/home?type=protocol&port=8099&token=' .. token

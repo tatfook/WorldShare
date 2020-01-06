@@ -17,7 +17,7 @@ local Server = NPL.export()
 Server.seachFinished = false
 
 function Server:ShowPage()
-    local params = Mod.WorldShare.Utils:ShowWindow(0, 0, "Mod/WorldShare/cellar/Server/Server.html", "Server", 0, 0, "_fi", false)
+    local params = Mod.WorldShare.Utils.ShowWindow(0, 0, "Mod/WorldShare/cellar/Server/Server.html", "Server", 0, 0, "_fi", false)
 
     Screen:Connect("sizeChanged", self, self.OnScreenSizeChange, "UniqueConnection")
     self.OnScreenSizeChange()

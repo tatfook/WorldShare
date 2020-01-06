@@ -9,12 +9,12 @@ local KeepworkServiceRate = NPL.load("(gl)Mod/WorldShare/service/KeepworkService
 ------------------------------------------------------------
 ]]
 local KeepworkService = NPL.load("../KeepworkService.lua")
+local KeepworkProjectRatesApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/ProjectRates.lua')
 
 local KeepworkServiceRate = NPL.export()
 
 -- get project rate
 function KeepworkServiceRate:GetRatedProject(kpProjectId, callback)
-
   if not kpProjectId then
       return false
   end
@@ -23,10 +23,7 @@ function KeepworkServiceRate:GetRatedProject(kpProjectId, callback)
       return false
   end
 
-  local url = format("/projectRates?projectId=%d", kpProjectId)
-  local headers = KeepworkService:GetHeaders()
-
-  KeepworkService:Request(url, "GET", {}, headers, callback)
+  KeepworkProjectRatesApi:GetRatedProject(tonumber(kpProjectId), callback)
 end
 
 -- set project rate
@@ -39,8 +36,6 @@ function KeepworkServiceRate:SetRatedProject(kpProjectId, rate, callback)
       return false
   end
 
-  local headers = KeepworkService:GetHeaders()
-
   local params = {
       projectId = kpProjectId,
       rate = rate
@@ -49,12 +44,13 @@ function KeepworkServiceRate:SetRatedProject(kpProjectId, rate, callback)
   self:GetRatedProject(
       kpProjectId,
       function(data, err)
+
           if err ~= 200 or #data == 0 then
-            KeepworkService:Request("/projectRates", "POST", params, headers, callback)
+            KeepworkProjectRatesApi:CreateProjectRates(params, callback)
           end
 
           if err == 200 and type(data) == 'table' and #data == 1 and type(data[1].projectId) == 'number' then
-            KeepworkService:Request(format("/projectRates/%d", data[1].projectId), "PUT", params, headers, callback)
+            KeepworkProjectRatesApi:UpdateProjectRates(data[1].projectId, params, callback)
           end
       end
   )

@@ -38,9 +38,14 @@ function HttpRequest:GetUrl(params, callback, noTryStatus)
             json = params.json,
             headers = params.headers
         }
+
+        if formatParams.headers['Content-Type'] or
+           formatParams.headers['content-type'] then
+            formatParams.json = false
+        end
     end
 
-    if (formatParams.method == "GET" and type(params) == "table") then
+    if formatParams.method == "GET" and type(params) == "table" then
         local url = params.url
         local paramsString = ""
 
@@ -51,12 +56,13 @@ function HttpRequest:GetUrl(params, callback, noTryStatus)
         end
 
         paramsString = string.sub(paramsString, 1, -2)
-        if(paramsString and paramsString~="") then
+
+        if paramsString and paramsString ~= "" then
             formatParams.url = format("%s?%s", url, paramsString)
         end
     end
 
-    if (formatParams.method ~= "GET") then
+    if formatParams.method ~= "GET" then
         formatParams.form = params.form or {}
     end
 
@@ -125,7 +131,7 @@ end
 
 function HttpRequest:Retry(err, msg, data, params, callback)
     -- beyond the max try times, must be return
-    if (HttpRequest.tryTimes >= HttpRequest.maxTryTimes) then
+    if HttpRequest.tryTimes >= HttpRequest.maxTryTimes then
         if (type(callback) == "function") then
             callback(data, err)
         end
@@ -145,7 +151,7 @@ function HttpRequest:Retry(err, msg, data, params, callback)
     )
 end
 
-function HttpRequest:Get(url, params, headers, callback, error)
+function HttpRequest:Get(url, params, headers, success, error, noTryStatus)
     if not url then
         return false
     end
@@ -162,15 +168,16 @@ function HttpRequest:Get(url, params, headers, callback, error)
         getParams,
         function(data, err)
             if err == 200 then
-                if type(callback) == 'function' then callback(data, err) end
+                if type(success) == 'function' then success(data, err) end
             else
                 if type(error) == 'function' then error(data, err) end
             end
-        end
+        end,
+        noTryStatus
     )
 end
 
-function HttpRequest:Post(url, params, headers, callback, error)
+function HttpRequest:Post(url, params, headers, success, error, noTryStatus)
     if not url then
         return false
     end
@@ -187,16 +194,17 @@ function HttpRequest:Post(url, params, headers, callback, error)
         getParams,
         function(data, err)
             if err == 200 then
-                if type(callback) == 'function' then callback(data, err) end
+                if type(success) == 'function' then success(data, err) end
             else
                 if type(error) == 'function' then error(data, err) end
             end
-        end
+        end,
+        noTryStatus
     )
 
 end
 
-function HttpRequest:Put(url, params, headers, callback, error)
+function HttpRequest:Put(url, params, headers, success, error, noTryStatus)
     if not url then
         return false
     end
@@ -213,15 +221,16 @@ function HttpRequest:Put(url, params, headers, callback, error)
         getParams,
         function(data, err)
             if err == 200 then
-                if type(callback) == 'function' then callback(data, err) end
+                if type(success) == 'function' then success(data, err) end
             else
                 if type(error) == 'function' then error(data, err) end
             end
-        end
+        end,
+        noTryStatus
     )
 end
 
-function HttpRequest:Delete(url, params, headers, callback, error)
+function HttpRequest:Delete(url, params, headers, success, error, noTryStatus)
     if not url then
         return false
     end
@@ -238,10 +247,27 @@ function HttpRequest:Delete(url, params, headers, callback, error)
         getParams,
         function(data, err)
             if err == 200 then
-                if type(callback) == 'function' then callback(data, err) end
+                if type(success) == 'function' then success(data, err) end
             else
                 if type(error) == 'function' then error(data, err) end
             end
-        end
+        end,
+        noTryStatus
     )
+end
+
+function HttpRequest:PostFields(url, headers, content, success, error)
+    System.os.GetUrl({ url = url, headers = headers, postfields = content }, function(err, msg, data)
+        LOG.std("HttpRequest", "debug", "Request", "Status Code: %s, Method: %s, URL: %s", err, "POST", url)
+
+        if err == 200 then
+            if type(success) == 'function' then
+                success(data, err)
+            end
+        else
+            if type(error) == 'function' then
+                error(data, err)
+            end
+        end
+    end)
 end

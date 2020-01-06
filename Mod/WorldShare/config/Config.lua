@@ -20,12 +20,27 @@ Config.env = {
 }
 
 Config.defaultEnv = (ParaEngine.GetAppCommandLineByParam("worldshareenv", nil) or Config.env.ONLINE)
+Config.defaultGit = "KEEPWORK"
 
 Config.keepworkList = {
   ONLINE = "https://keepwork.com",
   STAGE = "http://dev.kp-para.cn",
   RELEASE = "http://rls.kp-para.cn",
   LOCAL = "http://dev.kp-para.cn"
+}
+
+Config.storageList = {
+  ONLINE = "https://api.keepwork.com/storage/v0",
+  STAGE = "http://api-dev.kp-para.cn/storage/v0",
+  RELEASE = "http://api-rls.kp-para.cn/storage/v0",
+  LOCAL = "http://api-dev.kp-para.cn/storage/v0",
+}
+
+Config.qiniuList = {
+  ONLINE = "https://upload-z2.qiniup.com",
+  STAGE = "https://upload-z2.qiniup.com",
+  RELEASE = "https://upload-z2.qiniup.com",
+  LOCAL = "https://upload-z2.qiniup.com"
 }
 
 Config.keepworkServerList = {
@@ -50,10 +65,10 @@ Config.esGatewayList = {
 }
 
 Config.lessonList = {
-  ONLINE = "https://api.keepwork.com/lesson/v0",
-  STAGE = "http://api-dev.kp-para.cn/lesson/v0",
-  RELEASE = "http://api-rls.kp-para.cn/lesson/v0",
-  LOCAL = "http://api-dev.kp-para.cn/lesson/v0"
+  ONLINE = "https://api.keepwork.com/lessonapi/v0",
+  STAGE = "http://api-dev.kp-para.cn/lessonapi/v0",
+  RELEASE = "http://api-rls.kp-para.cn/lessonapi/v0",
+  LOCAL = "http://api-dev.kp-para.cn/lessonapi/v0"
 }
 
 Config.dataSourceApiList = {

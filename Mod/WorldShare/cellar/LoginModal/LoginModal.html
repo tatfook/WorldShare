@@ -3,14 +3,12 @@
         <pe:mcml>
             <script type="text/npl" refresh="false">
                 <![CDATA[
-                    Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
-                    Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
-                    LoginModal = NPL.load("./LoginModal.lua")
-                    RegisterModal = NPL.load("(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua")
-                    ForgetPassword = NPL.load("(gl)Mod/WorldShare/cellar/ForgetPassword/ForgetPassword.lua")
+                    local LoginModal = NPL.load("./LoginModal.lua")
+                    local RegisterModal = NPL.load("(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua")
+                    local ForgetPassword = NPL.load("(gl)Mod/WorldShare/cellar/ForgetPassword/ForgetPassword.lua")
 
                     page = document:GetPageCtrl()
-                    Store:Set('page/LoginModal', page)
+                    Mod.WorldShare.Store:Set('page/LoginModal', page)
 
                     function get_server_list()
                         return LoginModal:GetServerList()
@@ -33,19 +31,15 @@
                     end
 
                     function login_text()
-                        return Store:Get("user/loginText")
+                        return Mod.WorldShare.Store:Get("user/loginText")
                     end
 
                     function close()
                         LoginModal:Close()
                     end
 
-                    function is_english()
-                        return Utils:IsEnglish()
-                    end
-
                     function get_english_style(styleStr)
-                        if is_english() then
+                        if Mod.WorldShare.Utils.IsEnglish() then
                             return styleStr
                         else
                             return ''

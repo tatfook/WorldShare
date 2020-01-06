@@ -17,7 +17,7 @@ local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/Service/KeepworkServ
 local ForgetPassword = NPL.export()
 
 function ForgetPassword:ShowPage()
-    local params = Mod.WorldShare.Utils:ShowWindow(360, 480, "Mod/WorldShare/cellar/ForgetPassword/ForgetPassword.html", "ForgetPassword", nil, nil, nil, nil)
+    local params = Mod.WorldShare.Utils.ShowWindow(360, 480, "Mod/WorldShare/cellar/ForgetPassword/ForgetPassword.html", "ForgetPassword", nil, nil, nil, nil)
 end
 
 function ForgetPassword:Reset()

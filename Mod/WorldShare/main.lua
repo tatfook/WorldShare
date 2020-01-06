@@ -39,10 +39,12 @@ NPL.load("(gl)script/apps/Aries/Creator/Game/World/SaveWorldHandler.lua")
 NPL.load("(gl)Mod/WorldShare/service/SocketService.lua")
 NPL.load("(gl)script/apps/Aries/Creator/Game/Network/NetworkMain.lua")
 NPL.load("(gl)script/ide/System/Encoding/guid.lua")
+NPL.load("(gl)script/apps/Aries/Creator/Game/Login/ParaWorldLessons.lua")
 
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
+local MainLogin = NPL.load("(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua")
 local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
 local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
 local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
@@ -60,7 +62,7 @@ local WorldShare = commonlib.inherit(commonlib.gettable("Mod.ModBase"), commonli
 
 WorldShare:Property({"Name", "WorldShare", "GetName", "SetName", { auto = true }})
 WorldShare:Property({"Desc", "world share mod can share world to keepwork online", "GetDesc", "SetDesc", { auto = true }})
-WorldShare.version = '0.0.9'
+WorldShare.version = '0.0.11'
 
 -- register mod global variable
 WorldShare.Store = Store
@@ -74,25 +76,7 @@ function WorldShare:init()
     GameLogic.GetFilters():add_filter(
         "ShowLoginModePage",
         function()
-
-            echo("@big, please create a brand new login mcml page here. and return false to replace old one")
-
-            System.App.Commands.Call("File.MCMLWindowFrame", {
-                url = "script/apps/Aries/Creator/Game/Login/SelectLoginModePage.html", 
-                name = "ShowLoginModePage", 
-                isShowTitleBar = false,
-                DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
-                style = CommonCtrl.WindowFrame.ContainerStyle,
-                zorder = -1,
-                allowDrag = false,
-                directPosition = true,
-                    align = "_fi",
-                    x = 0,
-                    y = 0,
-                    width = 0,
-                    height = 0,
-                cancelShowAnimation = true,
-            });
+            MainLogin:Show()
             return false
         end
     )
@@ -190,5 +174,4 @@ end
 
 function WorldShare:OnLeaveWorld()
     Store:Remove("world/currentWorld")
-    Store:Remove("world/foldername")
 end
