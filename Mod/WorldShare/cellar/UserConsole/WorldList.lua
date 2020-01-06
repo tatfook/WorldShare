@@ -8,6 +8,14 @@ use the lib:
 ------------------------------------------------------------
 local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
 ------------------------------------------------------------
+
+status代码含义:
+1:仅本地
+2:仅网络
+3:本地网络一致
+4:网络更新
+5:本地更新
+
 ]]
 local CreateNewWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.CreateNewWorld")
 local LocalLoadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalLoadWorld")
@@ -26,6 +34,7 @@ local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local GitEncoding = NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua")
 local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
+local KeepworkServiceWorld = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/World.lua")
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
@@ -260,26 +269,19 @@ function WorldList:SelectVersion(index)
     VersionChange:Init(selectedWorld and selectedWorld.foldername)
 end
 
---[[
-status代码含义:
-1:仅本地
-2:仅网络
-3:本地网络一致
-4:网络更新
-5:本地更新
-]]
 function WorldList:SyncWorldsList(callback)
     local function HandleWorldList(data, err)
-        if (type(data) ~= "table") then
+        if type(data) ~= "table" then
             _guihelper.MessageBox(L"获取服务器世界列表错误")
             self:SetRefreshing(false)
             UserConsole:Refresh()
             return false
         end
 
-        local localWorlds = Store:Get("world/localWorlds") or {}
+        local localWorlds = Mod.WorldShare.Store:Get("world/localWorlds") or {}
         local remoteWorldsList = data
         local compareWorldList = commonlib.vector:new()
+        local currentWorld
 
         -- 处理 本地网络同时存在/本地不存在/网络存在 的世界
         for DKey, DItem in ipairs(remoteWorldsList) do
@@ -288,17 +290,18 @@ function WorldList:SyncWorldsList(callback)
             local localTagname = ""
             local remoteTagname = ""
             local revision = 0
+            local commitId = ""
             local status
 
             for LKey, LItem in ipairs(localWorlds) do
                 if DItem["worldName"] == LItem["foldername"] and not LItem.is_zip then
-                    if (tonumber(LItem["revision"] or 0) == tonumber(DItem["revision"] or 0)) then
+                    if tonumber(LItem["revision"] or 0) == tonumber(DItem["revision"] or 0) then
                         status = 3 --本地网络一致
                         revision = LItem['revision']
-                    elseif (tonumber(LItem["revision"] or 0) > tonumber(DItem["revision"] or 0)) then
+                    elseif tonumber(LItem["revision"] or 0) > tonumber(DItem["revision"] or 0) then
                         status = 4 --网络更新
-                        revision = LItem['revision']
-                    elseif (tonumber(LItem["revision"] or 0) < tonumber(DItem["revision"] or 0)) then
+                        revision = DItem['revision'] -- use remote revision beacause remote is newest
+                    elseif tonumber(LItem["revision"] or 0) < tonumber(DItem["revision"] or 0) then
                         status = 5 --本地更新
                         revision = LItem['revision'] or 0
                     end
@@ -322,7 +325,7 @@ function WorldList:SyncWorldsList(callback)
 
             local text = DItem["worldName"]
 
-            if (not isExist) then
+            if not isExist then
                 --仅网络
                 status = 2
                 revision = DItem['revision']
@@ -333,7 +336,7 @@ function WorldList:SyncWorldsList(callback)
                 end
             end
 
-            local currentWorld = {
+            currentWorld = {
                 text = text,
                 foldername = DItem["worldName"],
                 revision = revision,
@@ -399,8 +402,8 @@ function WorldList:SyncWorldsList(callback)
             end
         end
 
-        Store:Set("world/remoteWorldsList", remoteWorldsList)
-        Store:Set("world/compareWorldList", compareWorldList)
+        Mod.WorldShare.Store:Set("world/remoteWorldsList", remoteWorldsList)
+        Mod.WorldShare.Store:Set("world/compareWorldList", compareWorldList)
 
         UserConsole:Refresh()
 
@@ -409,7 +412,7 @@ function WorldList:SyncWorldsList(callback)
         end
     end
 
-    KeepworkService:GetWorldsList(HandleWorldList)
+    KeepworkServiceWorld:GetWorldsList(HandleWorldList)
 end
 
 function WorldList:UnifiedTimestampFormat(data)
@@ -459,17 +462,33 @@ function WorldList:UnifiedTimestampFormat(data)
 end
 
 function WorldList:Sync()
-    CreateWorld:CheckRevision(function()
-        Compare:Init()
+    Mod.WorldShare.MsgBox:Show(L"请稍后...")
+
+    Compare:Init(function(result)
+        if not result then
+            GameLogic.AddBBS(nil, L"同步失败", 3000, "255 0 0")
+            Mod.WorldShare.MsgBox:Close()
+            return false
+        end
+
+        if result == Compare.JUSTLOCAL then
+            SyncMain:SyncToDataSource()
+        end
+
+        if result == Compare.JUSTREMOTE then
+            SyncMain:SyncToLocal()
+        end
+
+        if result == Compare.REMOTEBIGGER or result == Compare.LOCALBIGGER or result == Compare.EQUAL then
+            SyncMain:ShowStartSyncPage()
+        end
+
+        Mod.WorldShare.MsgBox:Close()
     end)
 end
 
-function WorldList:DeleteWorld(index)
-    local compareWorldList = Store:Get('world/compareWorldList')
-
-    local selectedWorld = self:GetSelectWorld(index)
-
-    DeleteWorld:DeleteWorld(selectedWorld)
+function WorldList:DeleteWorld()
+    DeleteWorld:DeleteWorld()
 end
 
 function WorldList.GetWorldType()
@@ -488,7 +507,7 @@ end
 function WorldList:UpdateWorldInfo(worldIndex)
     self.worldIndex = worldIndex
     local currentWorld = self:GetSelectWorld(worldIndex)
-    local compareWorldList = Store:Get("world/compareWorldList")
+    local compareWorldList = Mod.WorldShare.Store:Get("world/compareWorldList")
 
     if currentWorld and currentWorld.status ~= 2 then
 
@@ -499,7 +518,7 @@ function WorldList:UpdateWorldInfo(worldIndex)
             worldTag.size = filesize
             LocalService:SetTag(currentWorld.worldpath, worldTag)
 
-            Store:Set("world/worldTag", worldTag)
+            Mod.WorldShare.Store:Set("world/worldTag", worldTag)
 
             compareWorldList[worldIndex].size = filesize
         else
@@ -512,15 +531,8 @@ function WorldList:UpdateWorldInfo(worldIndex)
         return false
     end
 
-    local foldername = {
-        default = Encoding.Utf8ToDefault(currentWorld.foldername),
-        utf8 = currentWorld.foldername,
-        base32 = GitEncoding.Base32(currentWorld.foldername),
-    }
-
-    Store:Set("world/foldername", foldername)
-    Store:Set("world/currentWorld", currentWorld)
-    Store:Set("world/compareWorldList", compareWorldList)
+    Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
+    Mod.WorldShare.Store:Set("world/compareWorldList", compareWorldList)
 
     UserConsole:Refresh()
 end
@@ -568,15 +580,21 @@ function WorldList:EnterWorld(index)
         local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
         if currentWorld.status == 2 then
-            if not self.zipDownloadFinished then
-                return false
-            end
-    
-            self.zipDownloadFinished = false
-    
-            Compare:Init(function(result, callback)
-                InternetLoadWorld.EnterWorld()
-                self.zipDownloadFinished = true
+            Mod.WorldShare.MsgBox:Show(L"请稍后...")
+
+            Compare:Init(function(result)
+                if result ~= Compare.JUSTREMOTE then
+                    return false
+                end
+
+                SyncMain:SyncToLocal(function(result, msg)
+                    if not result then
+                        return false
+                    end
+
+                    InternetLoadWorld.EnterWorld()
+                    Mod.WorldShare.MsgBox:Close()
+                end)
             end)
         else
             if currentWorld.status == 1 then
@@ -585,31 +603,24 @@ function WorldList:EnterWorld(index)
                 return true
             end
     
-            Compare:Init(function(result, callback)
-                if result == 'REMOTEBIGGER' then
-                    if type(callback) == 'function' then	
-                        callback(function()	
-                            InternetLoadWorld.EnterWorld()	
-                            UserConsole:ClosePage()	
-                        end)
-                    end	
-                else	
+            Compare:Init(function(result)
+                if result == Compare.REMOTEBIGGER then
+                    SyncMain:ShowStartSyncPage(true)
+                else
                     InternetLoadWorld.EnterWorld()	
                     UserConsole:ClosePage()	
                 end	
             end)
         end
-    
-        Store:Set("explorer/mode", "mine")
+
+        Mod.WorldShare.Store:Set("explorer/mode", "mine")
     end
 
     if not KeepworkService:IsSignedIn() and currentWorld.kpProjectId then
         LoginModal:Init(function(result)
-            self:RefreshCurrentServerList(
-                function()
-                    Handle(result)
-                end
-            )
+            self:RefreshCurrentServerList(function()
+                Handle(result)
+            end)
         end)
     else
         Handle()
@@ -617,15 +628,15 @@ function WorldList:EnterWorld(index)
 end
 
 function WorldList.FormatStatus(status)
-    if (status == 1) then
+    if status == 1 then
         return L"仅本地"
-    elseif (status == 2) then
+    elseif status == 2 then
         return L"仅网络"
-    elseif (status == 3) then
+    elseif status == 3 then
         return L"本地版本与远程数据源一致"
-    elseif (status == 4) then
+    elseif status == 4 then
         return L"本地版本更加新"
-    elseif (status == 5) then
+    elseif status == 5 then
         return L"远程版本更加新"
     else
         return L"获取状态中"
@@ -652,9 +663,9 @@ function WorldList:SetRefreshing(status)
 end
 
 function WorldList:IsRefreshing()
-    UserConsolePage = Store:Get('page/UserConsole')
+    UserConsolePage = Mod.WorldShare.Store:Get('page/UserConsole')
 
-    if (UserConsolePage and UserConsolePage.refreshing) then
+    if UserConsolePage and UserConsolePage.refreshing then
         return true
     else
         return false
@@ -666,7 +677,7 @@ function WorldList:OpenProject(index)
         return false
     end
 
-    local compareWorldList = Store:Get("world/compareWorldList")
+    local compareWorldList = Mod.WorldShare.Store:Get("world/compareWorldList")
 
     if not compareWorldList or type(compareWorldList[index]) ~= 'table' then
         return false

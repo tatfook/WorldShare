@@ -1,0 +1,234 @@
+<html>
+    <head>
+        <title>2019.12.25</title>
+    </head>
+    <body> 
+        <pe:mcml>
+            <script type="text/npl">
+                <![CDATA[
+                    NPL.load("(gl)script/apps/Aries/Creator/Game/Login/Rebranding.lua")
+                    Rebranding = commonlib.gettable("MyCompany.Aries.Creator.Game.Rebranding")
+                    local GameMainLogin = commonlib.gettable("MyCompany.Aries.Game.MainLogin")
+
+                    local MainLogin = NPL.load("./MainLogin.lua")
+                    local LoginModal = NPL.load("../LoginModal/LoginModal.lua")
+                    local RegisterModal = NPL.load("(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua")
+                    local ForgetPassword = NPL.load("(gl)Mod/WorldShare/cellar/ForgetPassword/ForgetPassword.lua")
+
+                    local page = document:GetPageCtrl()
+                    Mod.WorldShare.Store:Set("page/MainLogin", page)
+
+                    -- @param name: "local", "internet"
+                    function use_offline()
+                        MainLogin:EnterUserConsole()
+                    end
+
+                    function OnOpenModulePage()
+                        NPL.load("(gl)script/apps/Aries/Creator/Game/Login/SelectModulePage.lua");
+                        local SelectModulePage = commonlib.gettable("MyCompany.Aries.Game.MainLogin.SelectModulePage")
+                        SelectModulePage.ShowPage()
+                    end
+
+                    function OnChangeLanguagePage()
+                        NPL.load("(gl)script/apps/Aries/Creator/Game/Common/Translation.lua")
+
+                        local Translation = commonlib.gettable("MyCompany.Aries.Game.Common.Translation")
+                        Translation.ShowPage(function()
+                            page:Refresh(0.01)
+                        end)
+                    end
+
+                    function GetModDes()
+                        local modname = ParaEngine.GetAppCommandLineByParam("mod","")
+                        local s = string.format(L"当前Mod:%s",modname)
+                        return s
+                    end
+
+                    function OnCustomCharacter()
+                    end
+
+                    function OnClickDonate()
+                        GameMainLogin.donate_window = GameMainLogin.donate_window or System.Windows.Window:new()
+                        GameMainLogin.donate_window:Show({url="script/apps/Aries/Creator/Game/Login/DonatePage.html", alignment="_rb", left=-210, top=-200, width=200, height=200, zorder=10, allowDrag=true})
+                        ParaGlobal.ShellExecute("open", L"http://www.nplproject.com/paracraft-donation", "", "", 1)
+                    end
+
+                    function OnClickCredits()
+                        ParaGlobal.ShellExecute("open", L"https://keepwork.com/official/paracraft/credits", "", "", 1)
+                    end
+                        
+                    function GetModCountAsString()
+                        NPL.load("(gl)script/apps/Aries/Creator/Game/Mod/ModManager.lua")
+                        local ModManager = commonlib.gettable("Mod.ModManager")
+                        local pluginloader = ModManager:GetLoader()
+                        local nCount = pluginloader:GetActiveModCount()
+
+                        if nCount > 0 then
+                            return format("(%d)", nCount)
+                        else
+                            return ""
+                        end
+                    end
+
+                    function OnClickCustomerService()
+                        ParaGlobal.ShellExecute("open", L"https://keepwork.com/official/docs/FAQ/questions", "", "", 1)
+                    end
+
+                    function login_text()
+                        return Mod.WorldShare.Store:Get("user/loginText")
+                    end
+
+                    function get_english_style(styleStr)
+                        if Mod.WorldShare.Utils.IsEnglish() then
+                            return styleStr
+                        else
+                            return ''
+                        end
+                    end
+
+                    function get_history_users()
+                        return MainLogin:GetHistoryUsers()
+                    end
+
+                    function login()
+                        MainLogin:LoginAction()
+                    end
+
+                    function forget_password()
+                        ForgetPassword:ShowPage()
+                    end
+
+                    function register()
+                        RegisterModal:ShowPage(function()
+                            MainLogin:EnterUserConsole()
+                        end)
+                    end
+
+                    function set_remember_me()
+                        MainLogin:SetRememberMe()
+                    end
+
+                    function set_auto_login()
+                        MainLogin:SetAutoLogin()
+                    end
+
+                    function select_account(name, username)
+                        MainLogin:SelectAccount(username)
+                    end
+
+                    function remove_account(username)
+                        MainLogin:RemoveAccount(username)
+                    end
+                ]]>
+            </script>
+            <style type="text/mcss">
+                {
+                    user_login = {
+                        width = 320,
+                        ["base-font-size"] = 16,
+                        ["font-size"] = 16,
+                        color = "#ffffff",
+                        ["padding-right"] = 40,
+                        ["padding-left"] = 40,
+                        ["padding-top"] = 20,
+                        ["padding-bottom"] = 20,
+                    },
+                    text_field = {
+                        background = "textures/worldshare_32bits.png;72 20 16 16:3 3 3 3",
+                        border = "none",
+                        width = 165,
+                    },
+                    offline_button = {
+                        ["margin-left"] = 0,
+                        width = 75,
+                        height = 33,
+                        ["font-size"] = 14,
+                    },
+                    login_button = {
+                        ["margin-left"] = 5,
+                        width = 150,
+                        height = 33,
+                        textcolor = "#000000",
+                        color = "#000000",
+                        ["font-size"] = 18
+                        background = "textures/worldshare_32bits.png;149 104 17 16:4 4 4 4",
+                    },
+                }
+            </style>
+            <!-- <pe:container alignment="_fi" zorder="-1" width="100%" height="100%" style="position:relative;background:" onclick="OnSelect"></pe:container> -->
+            <pe:container alignment="_ctt" ClickThrough="true" style="position:relative;width:960px;height:64px;background:url()">
+                <iframe ClickThrough="true" src="Mod/WorldShare/cellar/MainLogin/ParaWorldLoginDocker/ParaWorldLoginDocker.html"></iframe>
+            </pe:container>
+            <pe:container alignment="_ct" ClickThrough="true" style="position:relative;background:;margin-left:-260px;margin-top:-250px;width:520px;height:500px;">
+                <div style='<%="position:relative;margin-left:145px;margin-top: 40px;width: 231px;height: 98px;background:url(textures/worldshare_32bits.png#12 345 231 98);"%>'></div>
+                <pe:if condition='<%=Rebranding:GetValue("companylogo") ~= nil %>'>
+                    <div style='<%=format("position:relative;margin-top:15px;margin-left:-220px;width:256px;height:64px;background:url(%s)", Rebranding:GetValue("companylogo"))%>'></div>
+                </pe:if>
+                <pe:if condition='<%=Rebranding:GetValue("company")~=nil and not Rebranding:GetValue("companylogo")%>'>
+                    <div style="position:relative;margin-top:15px;margin-left:-220px;color:#572712"><%=Rebranding:GetValue("company")%></div>
+                </pe:if>
+                <div style="position:relative;margin-left:0px;width:520px;margin-top:150px;font-size:14px;font-weight:bold;color:#572712;shadow-quality:8;shadow-color:#f0cec8c4;text-shadow:true;text-align:center">
+                    <%=Rebranding:GetValue("titleaddon")%>
+                </div>
+                <div style="position:relative;margin-left:100px;margin-top: 80px;padding-top: 50px;background:url(Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#267 89 34 34:8 8 8 8)">
+                    <div name="login" class="user_login">
+                        <pe:if condition="<%= login_text() ~= nil %>">
+                            <div style="margin-bottom:15px;"><%= login_text()%></div>
+                        </pe:if>
+                        <div style="margin-bottom:12px;">
+                            <div style="<%='float:left;min-width:65px;' .. get_english_style('min-width:73px;') %>"><%= L"账号：" %></div>
+                            <select  name="account" DataSource="<%= get_history_users() %>" EmptyText='<%= L"账户名/邮箱/手机号" %>' onselect="<%= select_account %>" onremove="<%= remove_account %>" class="bbs_text text_field" style="height: 30px;"></select>
+                        </div>
+                        <div style="margin-bottom:12px;">
+                            <div style="float:left;min-width:65px"><%= L"密码：" %></div>
+                            <input type="text" PasswordChar="*" class="bbs_text text_field" style="height: 30px;" name="password" />
+                        </div>
+                        <div>
+                            <div>
+                                <input type="checkbox" style="float:left;margin-top:3px;min-width:90px;" name="rememberMe" onclick="set_remember_me()"/><div style="float:left" for="rememberMe"><%= L"记住密码?" %></div>
+                            </div>
+                            <div>
+                                <input type="checkbox" style="float:left;margin-top:3px;min-width:90px;" name="autoLogin" onclick="set_auto_login()"/><div style="float:left" for="autoLogin"><%= L"自动登录" %></div>    
+                            </div>
+                        </div>
+                        <div style="margin-top:30px;margin-bottom:15px;">
+                            <input type="button" class="offline_button mc_light_grey_button_with_fillet" onclick="use_offline()" value="<%= L'离线模式' %>" />
+                            <input type="button" DefaultButton="true" class="login_button" onclick="login()" value='<%= L"登 录"%>' />
+                        </div>
+                        <div style="<%='text-align:left;margin-left:55px;' .. get_english_style('margin-left:15px;')%>">
+                            <a name="forgot" onclick="forget_password()" style="background:url(textures/worldshare_32bits.png#399 76 64 30:0 0 0 0);height:30px;width:150px;font-size: 14px;color: #ffffff;"><%= L"忘记密码" %></a>
+                            <span style="color:#ffffff;">|</span>
+                            <a name="register" onclick="register()" style="background:url(textures/worldshare_32bits.png#399 76 64 30:0 0 0 0);height:30px;width:150px;font-size: 14px;color: #fe5927;"><%= L"点击注册" %></a>
+                        </div>
+                    </div>
+                </div>
+            </pe:container>
+            <!--persistent setting button-->
+            <pe:container alignment="_ctb" ClickThrough="true" style="position:relative;background:;margin-left:70px;width:400px;height:105px;">
+                <pe:if condition='<%= System.options.isDevEnv == false %>'>
+                    <pe:if  condition='<%= System.os.GetPlatform() ~= "ios" %>'>
+                        <input type="button" value='<%=L"MOD加载..."..GetModCountAsString() %>' class="mc_big_button" style="margin-top:16px;color:#572712;font-size:14px;width:256px;height:36px;" onclick="OnOpenModulePage" />    
+                    </pe:if>        
+                </pe:if>
+                <!--<input type="button" enabled="false" value='<%=L"更多设定..." %>' class="mc_big_button" style="margin-top:16px;font-size:14px;width:256px;height:36px;" onclick="OnCustomCharacter" />-->
+                <pe:if condition='<%= System.options.isDevEnv == true %>'>
+                    <div style="margin-left:-40px;margin-top:6px;font-size:14px;width:336px;height:36px;color:#FF3030;text-align:center;font-weight:bold">
+                        <%=L"开发者模式" %><br/>
+                        <%= GetModDes()%>
+                    </div>
+                </pe:if>
+            </pe:container>
+            <pe:container alignment="_rb" ClickThrough="true" style="position:relative;background:;width:300px;height:90px;">
+                <input type="button" value='<%=L"语言..." %>' spacing="20" align="right" class="mc_big_button" style="position:relative;margin-top:1px;margin-right:10px;color:#572712;font-size:14px;height:36px;" onclick="OnChangeLanguagePage" />
+                <input type="button" value='<%=L"客服"%>' align="right" style="position:relative;margin-right:10px;margin-top:45px;padding:5px;padding-left:10px;padding-right:10px;font-size:14px;font-weight:bold;color:#ffffffcc;background:url(Texture/whitedot.png);background-color:#00000080" onclick="OnClickCustomerService" />
+                <!-- <input type="button" value='<%=L"致谢"%>' align="right" style="position:relative;margin-right:10px;margin-top:45px;padding:5px;padding-left:10px;padding-right:10px;font-size:14px;font-weight:bold;color:#ffffffcc;background:url(Texture/whitedot.png);background-color:#00000080" onclick="OnClickCredits" /> -->
+                <!--<pe:if condition='<%=Rebranding:GetValue("donation")~="false"%>'>
+                    <input type="button" value='<%=L"捐赠" %>' align="right" spacing="20" class="mc_light_grey_button_with_fillet" style="font-size:14px;height:36px;margin-right:20px" onclick="OnClickDonate" />
+                </pe:if>-->
+                <!--<div style="position:relative;margin-left:0px;margin-top:5px;padding:5px;padding-left:10px;padding-right:10px;font-size:14px;font-weight:bold;color:#ffffffcc;background:url(Texture/whitedot.png);background-color:#00000080">
+                    <%=L"点击任意位置继续"%>
+                </div>-->
+            </pe:container>
+        </pe:mcml>
+    </body>
+</html>

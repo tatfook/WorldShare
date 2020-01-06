@@ -9,6 +9,7 @@ local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 ]]
 local Encoding = commonlib.gettable("commonlib.Encoding")
 local Translation = commonlib.gettable("MyCompany.Aries.Game.Common.Translation")
+local LocalLoadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalLoadWorld")
 
 local Utils = NPL.export()
 
@@ -22,7 +23,7 @@ local Utils = NPL.export()
 -- @param allowDrag Is allow window drag
 -- @param window z-axis order
 -- @return table
-function Utils:ShowWindow(option, height, url, name, x, y, align, allowDrag, zorder)
+function Utils.ShowWindow(option, height, url, name, x, y, align, allowDrag, zorder)
     local params
  
     if type(option) == 'table' then
@@ -30,11 +31,11 @@ function Utils:ShowWindow(option, height, url, name, x, y, align, allowDrag, zor
     else
         local width = option
     
-        if (not x) then
+        if not x then
             x = width
         end
     
-        if (not y) then
+        if not y then
             y = height
         end
     
@@ -111,7 +112,7 @@ function Utils.FixCenter(width, height)
     return format("margin-left:%s;margin-top: %s", marginLeft - width / 2, marginTop - height / 2)
 end
 
-function Utils:GetFileData(url)
+function Utils.GetFileData(url)
     local file = ParaIO.open(url, "r")
     local fileContent = ""
 
@@ -151,7 +152,7 @@ function Utils:IsEquivalent(a, b)
     return true
 end
 
-function Utils:MergeTable(target, source)
+function Utils.MergeTable(target, source)
     if type(target) ~= "table" or type(source) ~= "table" then
         return false
     end
@@ -166,7 +167,7 @@ function Utils:MergeTable(target, source)
     return target
 end
 
-function Utils:Implode(glue, pieces)
+function Utils.Implode(glue, pieces)
     glue = glue or ""
 
     local k, v
@@ -183,20 +184,46 @@ function Utils:Implode(glue, pieces)
     return result
 end
 
-function Utils:UrlEncode(str)
+function Utils.UrlEncode(str)
     if (str) then
 		str = string.gsub(str, "\n", "\r\n")
-		str = string.gsub(str, "([^%w ])",
+		str = string.gsub(str, "([^%w _ %- . ~])",
 			function (c) return string.format ("%%%02X", string.byte(c)) end)
-		str = string.gsub(str, " ", "%%20")
+		str = string.gsub(str, " ", "+")
 	end
 	return str
 end
 
-function Utils:IsEnglish()
+function Utils.IsEnglish()
     if Translation.GetCurrentLanguage() == 'enUS' then
         return true
     else
         return false
     end
+end
+
+function Utils.GetWorldFolderFullPath()
+    return LocalLoadWorld.GetWorldFolderFullPath()
+end
+
+function Utils:GetFolderName()
+    local originWorldPath = ParaWorld.GetWorldDirectory()
+
+    local foldername = string.match(originWorldPath, "worlds/DesignHouse/.+")
+
+    if not foldername then
+        foldername = string.match(originWorldPath, "worlds\\DesignHouse\\.+")
+    end
+
+    if not foldername then
+        return ''
+    end
+
+    foldername = string.gsub(foldername, "worlds/DesignHouse/", "")
+    foldername = string.gsub(foldername, "worlds\\DesignHouse\\", "")
+    foldername = string.gsub(foldername, "/", "")
+    foldername = string.gsub(foldername, "\\", "")
+    foldername = Encoding.DefaultToUtf8(foldername)
+
+    return foldername
 end

@@ -32,27 +32,19 @@ function CreateWorld:CreateNewWorld(foldername)
 end
 
 function CreateWorld.OnClickCreateWorld()
-    Store:Remove("world/currentWorld")
+    Mod.WorldShare.Store:Remove("world/currentWorld")
 end
 
 function CreateWorld:CheckRevision(callback)
-    if (not GameLogic.IsReadOnly() and not Compare:HasRevision()) then
-        MsgBox:Show(L"正在初始化世界...")
+    if not GameLogic.IsReadOnly() and not Compare:HasRevision() then
+        Mod.WorldShare.MsgBox:Show(L"正在初始化世界...")
         self:CreateRevisionXml()
-        MsgBox:Close()
-
-        if type(callback) == "function" then
-            callback()
-        end
-    else
-        if type(callback) == "function" then
-            callback()
-        end
+        Mod.WorldShare.MsgBox:Close()
     end
 end
 
 function CreateWorld:CreateRevisionXml()
-    local currentWorld = Store:Get('world/currentWorld')
+    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
     if not currentWorld or not currentWorld.worldpath then
         return false

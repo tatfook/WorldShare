@@ -27,27 +27,29 @@ local Item = {
 	payload = nil,
 }
 
-local localserver = commonlib.createtable("Mod.WorldShare.service.FileDownloader.localserver", {
-	-- the web database name. if nil, it will use the default database file at "Database/localserver.db"
-	-- otherwise, it will use "Database/[db_name].db"
-	db_name,
-	-- true
-	is_initialized_,
-	-- type of SecurityOrigin
-	security_origin_,
-	-- string: server store name
-	name_,
-	-- string: 
-	required_cookie_,
-	-- type of WebCacheDB.ServerType
-	server_type_ = WebCacheDB.ServerType.RESOURCE_STORE,
-	-- service id in database
-	server_id_,
-	-- boolean
-	store_might_exist_ = true,
-	-- Represents an item in the store
-	Item = Item,
-});
+local localserver = commonlib.createtable(
+	"Mod.WorldShare.service.FileDownloader.localserver", 
+	{
+		-- the web database name. if nil, it will use the default database file at "Database/localserver.db"
+		-- otherwise, it will use "Database/[db_name].db"
+		db_name,
+		-- true
+		is_initialized_,
+		-- type of SecurityOrigin
+		security_origin_,
+		-- string: server store name
+		name_,
+		-- string: 
+		required_cookie_,
+		-- type of WebCacheDB.ServerType
+		server_type_ = WebCacheDB.ServerType.RESOURCE_STORE,
+		-- service id in database
+		server_id_,
+		-- boolean
+		store_might_exist_ = true,
+		-- Represents an item in the store
+		Item = Item,
+	})
 
 -- default policy
 localserver.CachePolicy = System.localserver.CachePolicy
@@ -87,13 +89,14 @@ end
 -- Returns true if our server_id_ still exists in the DB.
 function localserver:StillExistsInDB() 
 	assert(self.is_initialized_);
-    
+
 	-- This is an optimization to avoid hitting the database.
 	-- Once a store is removed, it can never come back with the same server id,
 	-- so we cache this value and if it goes to false we don't hit the db on subsequent calls.
-	if (self.store_might_exist_)  then 
+	if self.store_might_exist_  then 
 		self.store_might_exist_ = self:GetServer();
 	end
+
     return self.store_might_exist_;
 end
 
@@ -117,8 +120,9 @@ end
 
 -- Returns true if local serving of entries in this LocalServer is enabled
 function localserver:IsEnabled()
-	local server = self:GetServer();
-	if(server) then
+	local server = self:GetServer()
+
+	if server then
 		return server.enabled
 	end
 end
@@ -160,8 +164,9 @@ end
 -- @param server:  nil or a ServerInfo table. 
 -- @return: nil or the ServerInfo table is returned. 
 function localserver:GetServer(server)
-	if(not self.is_initialized_) then 	return false end
-	local web_db = self:GetDB();
+	if not self.is_initialized_ then return false end
+
+	local web_db = self:GetDB()
 	return web_db:FindServer(server_id_, server)
 end
 
