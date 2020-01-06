@@ -144,8 +144,9 @@ function LocalService:Write(foldername, path, content)
     local writePath = format("%s/%s/%s", root, foldername, path)
 
     local write = ParaIO.open(writePath, "w")
-
-    write:write(content, #content)
+    if(content) then
+        write:write(content, #content)
+    end
     write:close()
 end
 
