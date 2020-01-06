@@ -175,6 +175,13 @@ function UserConsole:HandleWorldId(pid)
         return false
     end
 
+    local token = Mod.WorldShare.Store:Get("user/token")
+
+    if not token then
+        GameLogic.AddBBS(nil, L"请登录后进入世界", 3000, "255 0 0")
+        return false
+    end
+
     pid = tonumber(pid)
 
     local world
@@ -204,7 +211,7 @@ function UserConsole:HandleWorldId(pid)
                                 function(bSucceed, localWorldPath)
                                     DownloadWorld.Close()
                                 end
-                            );
+                            )
                         end
                     }
                 );
@@ -218,6 +225,9 @@ function UserConsole:HandleWorldId(pid)
 
         if url:match("^https?://") then
             world = RemoteWorld.LoadFromHref(url, "self")
+            if token then
+                world:SetHttpHeaders({Authorization = format("Bearer %s", token)})
+            end
             local fileUrl = world:GetLocalFileName()
 
             if ParaIO.DoesFileExist(fileUrl) then
@@ -314,6 +324,7 @@ function UserConsole:HandleWorldId(pid)
             if world then
                 local url = world:GetLocalFileName()
                 DownloadWorld.ShowPage(url)
+
                 local mytimer = commonlib.Timer:new(
                     {
                         callbackFunc = function(timer)
@@ -323,6 +334,7 @@ function UserConsole:HandleWorldId(pid)
                                 refreshMode or "auto",
                                 function(bSucceed, localWorldPath)
                                     DownloadWorld.Close()
+                                    return true
                                 end
                             )
                         end

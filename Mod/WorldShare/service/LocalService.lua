@@ -15,6 +15,8 @@ local SystemEncoding = commonlib.gettable("System.Encoding")
 local CommonlibEncoding = commonlib.gettable("commonlib.Encoding")
 local FileDownloader = commonlib.gettable("Mod.WorldShare.service.FileDownloader.FileDownloader")
 
+local GitEncoding = NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua")
+
 local LocalService = NPL.export()
 
 LocalService.filter = "*"
@@ -189,8 +191,16 @@ function LocalService:MoveZipToFolder(foldername, zipPath)
     local parentDir = zipPath:gsub("[^/\\]+$", "")
 
     local fileList = {}
+    local rootFolder
     -- ":.", any regular expression after : is supported. `.` match to all strings.
     commonlib.Files.Find(fileList, "", 0, 10000, ":.", zipPath)
+
+    for key, item in ipairs(fileList) do
+        if string.match(item.filename, ".+/$") then
+            rootFolder = item.filename
+            break
+        end
+    end
 
     local worldpath = format("%s/%s", Mod.WorldShare.Utils.GetWorldFolderFullPath(), CommonlibEncoding.Utf8ToDefault(foldername))
 
@@ -219,12 +229,16 @@ function LocalService:MoveZipToFolder(foldername, zipPath)
 					end
                 end
 
-                if trueFilename == "revision.xml" then
+                if string.match(trueFilename, "revision.xml") then
                     Mod.WorldShare.Store:Set('remoteRevision', content)
                 end
 
+                local buildFolderStr = ""
                 for segmentation in string.gmatch(trueFilename, "[^/]+") do
-                    folderArray[#folderArray + 1] = segmentation
+                    if not string.match(rootFolder, segmentation) then
+                        buildFolderStr = buildFolderStr .. segmentation
+                        folderArray[#folderArray + 1] = buildFolderStr
+                    end
                 end
 
                 -- remove file path
@@ -238,7 +252,15 @@ function LocalService:MoveZipToFolder(foldername, zipPath)
                 end
 
                 -- create file
-                local writeFile = ParaIO.open(format("%s/%s", worldpath, trueFilename), "w")
+                local writeFilename
+
+                if rootFolder then
+                    writeFilename = trueFilename:gsub(rootFolder, "")
+                else
+                    writeFilename = trueFilename
+                end
+
+                local writeFile = ParaIO.open(format("%s/%s", worldpath, writeFilename), "w")
 
                 if writeFile:IsValid() then
                     writeFile:write(content, #content)

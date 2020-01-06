@@ -60,7 +60,9 @@ function MainLogin:Show()
         self.notFirstTimeShown = true
 
         if PWDInfo.autoLogin then
-            self:EnterUserConsole()
+            Mod.WorldShare.Utils.SetTimeOut(function()
+                self:EnterUserConsole()
+            end, 100)
         end
     end
 end
