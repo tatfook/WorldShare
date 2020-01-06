@@ -361,7 +361,7 @@ function UserConsole:HandleWorldId(pid)
 
     Mod.WorldShare.MsgBox:Show(L"请稍后...", 20000)
 
-    KeepworkService:GetWorldByProjectId(
+    KeepworkServiceWorld:GetWorldByProjectId(
         pid,
         function(worldInfo, err)
             Mod.WorldShare.MsgBox:Close()
