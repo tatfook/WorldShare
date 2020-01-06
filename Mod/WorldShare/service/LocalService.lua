@@ -260,8 +260,6 @@ function LocalService:MoveZipToFolder(foldername, zipPath)
                     writeFilename = trueFilename
                 end
 
-                echo(format("%s/%s", worldpath, writeFilename), true)
-
                 local writeFile = ParaIO.open(format("%s/%s", worldpath, writeFilename), "w")
 
                 if writeFile:IsValid() then
