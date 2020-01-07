@@ -9,7 +9,6 @@ local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
 ------------------------------------------------------------
 ]]
 local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
-local LocalLoadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalLoadWorld")
 local RemoteWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.RemoteWorld")
 local DownloadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.DownloadWorld")
 local SaveWorldHandler = commonlib.gettable("MyCompany.Aries.Game.SaveWorldHandler")
@@ -244,7 +243,7 @@ function UserConsole:HandleWorldId(pid)
                     Mod.WorldShare.MsgBox:Close()
 
                     if localRevision == 0 then
-                        LocalLoadWorld(world, "auto")
+                        LoadWorld(world, "auto")
 
                         return false
                     end
@@ -397,6 +396,8 @@ function UserConsole:HandleWorldId(pid)
                 GameLogic.AddBBS(nil, L"未找到对应内容", 3000, "255 0 0")
                 return false
             end
+
+            echo(worldInfo, true)
 
             if worldInfo and worldInfo.archiveUrl and #worldInfo.archiveUrl > 0 then
                 Mod.WorldShare.Store:Set('world/openKpProjectId', pid)
