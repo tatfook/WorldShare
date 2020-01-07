@@ -218,8 +218,7 @@ function Compare:GetCurrentWorldInfo(callback)
         local originWorldPath = ParaWorld.GetWorldDirectory()
         local worldTag = WorldCommon.GetWorldInfo() or {}
 
-        Mod.WorldShare.Store:Set("world/worldTag", worldTag)
-        Mod.WorldShare.Store:Set("world/currentWorld", {
+        currentWorld = {
             IsFolder = false,
             is_zip = true,
             Title = worldTag.name,
@@ -240,7 +239,10 @@ function Compare:GetCurrentWorldInfo(callback)
             size = 0,
             worldpath = originWorldPath,
             kpProjectId = worldTag.kpProjectId
-        })
+        }
+
+        Mod.WorldShare.Store:Set("world/worldTag", worldTag)
+        Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
         Mod.WorldShare.Store:Set("world/currentRevision", GameLogic.options:GetRevision())
     else
         local compareWorldList = Mod.WorldShare.Store:Get("world/compareWorldList")
