@@ -15,8 +15,6 @@ local SystemEncoding = commonlib.gettable("System.Encoding")
 local CommonlibEncoding = commonlib.gettable("commonlib.Encoding")
 local FileDownloader = commonlib.gettable("Mod.WorldShare.service.FileDownloader.FileDownloader")
 
-local GitEncoding = NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua")
-
 local LocalService = NPL.export()
 
 LocalService.filter = "*"
@@ -113,7 +111,7 @@ function LocalService:GetFileContent(filePath)
 end
 
 function LocalService:Write(foldername, path, content)
-    if not foldername or not path then
+    if not foldername or not path or type(content) ~= 'string' then
         return false
     end
 
@@ -144,9 +142,8 @@ function LocalService:Write(foldername, path, content)
     local writePath = format("%s/%s/%s", root, foldername, path)
 
     local write = ParaIO.open(writePath, "w")
-    if(content) then
-        write:write(content, #content)
-    end
+
+    write:write(content, #content)
     write:close()
 end
 

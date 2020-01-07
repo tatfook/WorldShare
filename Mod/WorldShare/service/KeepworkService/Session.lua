@@ -15,7 +15,6 @@ local KeepworkKeepworksApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Keepworks
 local LessonOrganizationsApi = NPL.load("(gl)Mod/WorldShare/api/Lesson/LessonOrganizations.lua")
 local SessionsData = NPL.load("(gl)Mod/WorldShare/database/SessionsData.lua")
 local GitGatewayService = NPL.load("../GitGatewayService.lua")
-local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
 local Config = NPL.load("(gl)Mod/WorldShare/config/Config.lua")
 
 local Encoding = commonlib.gettable("commonlib.Encoding")
@@ -87,7 +86,6 @@ function KeepworkServiceSession:Logout()
     if KeepworkService:IsSignedIn() then
         local Logout = Mod.WorldShare.Store:Action("user/Logout")
         Logout()
-        WorldList:RefreshCurrentServerList()
     end
 end
 

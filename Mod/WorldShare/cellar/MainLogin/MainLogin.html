@@ -14,12 +14,14 @@
                     local LoginModal = NPL.load("../LoginModal/LoginModal.lua")
                     local RegisterModal = NPL.load("(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua")
                     local ForgetPassword = NPL.load("(gl)Mod/WorldShare/cellar/ForgetPassword/ForgetPassword.lua")
+                    local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepWorkService/Session.lua")
 
                     local page = document:GetPageCtrl()
                     Mod.WorldShare.Store:Set("page/MainLogin", page)
 
                     -- @param name: "local", "internet"
                     function use_offline()
+                        KeepworkServiceSession:Logout()
                         MainLogin:EnterUserConsole()
                     end
 

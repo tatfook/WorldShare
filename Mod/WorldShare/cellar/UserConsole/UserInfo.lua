@@ -286,5 +286,6 @@ end
 function UserInfo:Logout()
     if self.IsSignedIn() and self:CanSwitchUser() then
         KeepworkServiceSession:Logout()
+        WorldList:RefreshCurrentServerList()
     end
 end
