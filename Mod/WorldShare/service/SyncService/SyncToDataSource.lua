@@ -536,7 +536,7 @@ function SyncToDataSource:UpdateRecord(callback)
             worldInfo.fileSize = filesTotals
             worldInfo.commitId = lastCommitSha
             worldInfo.username = username
-            worldInfo.archiveUrl = format('%s/repos/%s/download?ref=%s', KeepworkService:GetCoreApi(), repoPath, lastCommitSha)
+            worldInfo.archiveUrl = format('%s/repos/%s/archive.zip?ref=%s', KeepworkService:GetCoreApi(), repoPath, lastCommitSha)
 
             local function AfterHandlePreview(preview)
                 preview = preview or ""
