@@ -45,6 +45,9 @@ function Compare:Init(callback)
 
     self.callback = callback
 
+    Mod.WorldShare.Store:Set("world/currentRevision", 0)
+    Mod.WorldShare.Store:Set("world/remoteRevision", 0)
+
     if not self:IsCompareFinish() then
         return false
     end
