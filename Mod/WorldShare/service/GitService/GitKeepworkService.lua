@@ -24,6 +24,7 @@ end
 
 function GitKeepworkService:GetContentWithRaw(foldername, path, commitId, callback)
     KeepworkReposApi:Raw(
+        nil,
         foldername,
         path,
         commitId,
@@ -164,11 +165,12 @@ function GitKeepworkService:GetWorldRevision(kpProjectId, isGetMine, callback)
                 end
             end
 
-            if type(data) ~= 'table' or not data.name or not data.world then
+            if type(data) ~= 'table' or not data.username or not data.name or not data.world then
                 return false
             end
 
             KeepworkReposApi:Raw(
+                data.username,
                 data.name,
                 'revision.xml',
                 data.world.commitId,

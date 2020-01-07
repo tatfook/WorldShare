@@ -18,7 +18,7 @@ QiniuRootApi.boundary = ParaMisc.md5('')
 -- url: /
 -- method: POST FIELDS
 -- return: object
-function QiniuRootApi:Upload(token, key, filename, content, success, error)
+function QiniuRootApi:Upload(token, key, filename, content, callback)
     local boundary = QiniuRootApi.boundary
     local boundaryLine = "--WebKitFormBoundary" .. boundary .. "\n"
 
@@ -50,7 +50,7 @@ function QiniuRootApi:Upload(token, key, filename, content, success, error)
             ['Connection'] = "keep-alive",
         },
         postFieldsString,
-        success,
-        error
+        callback,
+        callback
     )
 end
