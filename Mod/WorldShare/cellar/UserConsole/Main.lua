@@ -32,6 +32,7 @@ local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
 local CacheProjectId = NPL.load("(gl)Mod/WorldShare/database/CacheProjectId.lua")
 local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
+local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
 
 local UserConsole = NPL.export()
 
@@ -174,13 +175,6 @@ function UserConsole:HandleWorldId(pid)
         return false
     end
 
-    local token = Mod.WorldShare.Store:Get("user/token")
-
-    if not token then
-        GameLogic.AddBBS(nil, L"请登录后进入世界", 3000, "255 0 0")
-        return false
-    end
-
     pid = tonumber(pid)
 
     local world
@@ -191,7 +185,7 @@ function UserConsole:HandleWorldId(pid)
         if not url then
             return false
         end
-
+        
         if overtimeEnter and Mod.WorldShare.Store:Get('world/isEnterWorld') then
             return false
         end
@@ -373,45 +367,61 @@ function UserConsole:HandleWorldId(pid)
         end
     end, 5000)
 
-    Mod.WorldShare.MsgBox:Show(L"请稍后...", 20000)
-
-    KeepworkServiceWorld:GetWorldByProjectId(
-        pid,
-        function(worldInfo, err)
-            Mod.WorldShare.MsgBox:Close()
-            fetchSuccess = true
-
-            if err == 0 then
-                local cacheWorldInfo = CacheProjectId:GetProjectIdInfo(pid)
-
-                if not cacheWorldInfo or not cacheWorldInfo.worldInfo then
-                    GameLogic.AddBBS(nil, L"网络环境差，或离线中，请联网后再试", 3000, "255 0 0")
+    local function HanldeGetWorldByProjectId()
+        Mod.WorldShare.MsgBox:Show(L"请稍后...", 20000)
+        KeepworkServiceWorld:GetWorldByProjectId(
+            pid,
+            function(worldInfo, err)
+                Mod.WorldShare.MsgBox:Close()
+                fetchSuccess = true
+    
+                if err == 0 then
+                    local cacheWorldInfo = CacheProjectId:GetProjectIdInfo(pid)
+    
+                    if not cacheWorldInfo or not cacheWorldInfo.worldInfo then
+                        GameLogic.AddBBS(nil, L"网络环境差，或离线中，请联网后再试", 3000, "255 0 0")
+                        return false
+                    end
+    
+                    Mod.WorldShare.Store:Set('world/openKpProjectId', pid)
+                    HandleLoadWorld(cacheWorldInfo.worldInfo.archiveUrl, cacheWorldInfo.worldInfo, true)
+    
                     return false
                 end
-
-                Mod.WorldShare.Store:Set('world/openKpProjectId', pid)
-                HandleLoadWorld(cacheWorldInfo.worldInfo.archiveUrl, cacheWorldInfo.worldInfo, true)
-
-                return false
-            end
-
-            if err == 404 then
-                GameLogic.AddBBS(nil, L"未找到对应内容", 3000, "255 0 0")
-                return false
-            end
-
-            echo(worldInfo, true)
-
-            if worldInfo and worldInfo.archiveUrl and #worldInfo.archiveUrl > 0 then
-                Mod.WorldShare.Store:Set('world/openKpProjectId', pid)
-                HandleLoadWorld(worldInfo.archiveUrl, worldInfo)
-                CacheProjectId:SetProjectIdInfo(pid, worldInfo)
-            else
-                GameLogic.AddBBS(nil, L"未找到对应内容", 3000, "255 0 0")
-            end
-        end
-    )
     
+                if err == 404 then
+                    GameLogic.AddBBS(nil, L"未找到对应内容", 3000, "255 0 0")
+                    return false
+                end
+    
+                if worldInfo and worldInfo.archiveUrl and #worldInfo.archiveUrl > 0 then
+                    Mod.WorldShare.Store:Set('world/openKpProjectId', pid)
+                    HandleLoadWorld(worldInfo.archiveUrl, worldInfo)
+                    CacheProjectId:SetProjectIdInfo(pid, worldInfo)
+                else
+                    GameLogic.AddBBS(nil, L"未找到对应内容", 3000, "255 0 0")
+                end
+            end
+        )
+    end
+    if not KeepworkService:IsSignedIn() then
+        local cacheWorldInfo = CacheProjectId:GetProjectIdInfo(pid)
+
+        if cacheWorldInfo then
+            Mod.WorldShare.Store:Set('world/openKpProjectId', pid)
+            HandleLoadWorld(cacheWorldInfo.worldInfo.archiveUrl, cacheWorldInfo.worldInfo, true)
+            return false
+        end
+
+        LoginModal:Init(function()
+            WorldList:RefreshCurrentServerList()
+            HanldeGetWorldByProjectId()
+        end)
+
+        return false
+    else
+        HanldeGetWorldByProjectId()
+    end
 end
 
 function UserConsole:WorldRename(currentItemIndex, tempModifyWorldname, callback)
