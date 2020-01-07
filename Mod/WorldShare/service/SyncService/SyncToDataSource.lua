@@ -631,7 +631,7 @@ function SyncToDataSource:UpdateRecord(callback)
                     data.key,
                     self.currentWorld.kpProjectId .. '-preview-' .. lastCommitSha .. '.jpg',
                     content,
-                    function(data, err)
+                    function( _, err)
                         if err ~= 200 then
                             AfterHandlePreview()
                             return false
@@ -647,9 +647,12 @@ function SyncToDataSource:UpdateRecord(callback)
                                 if item.key == data.key then
                                     if item.downloadUrl then
                                         AfterHandlePreview(item.downloadUrl)
+                                        return true
                                     end
                                 end
                             end
+
+                            AfterHandlePreview()
                         end)
                     end
                 )
