@@ -367,7 +367,7 @@ function UserConsole:HandleWorldId(pid)
         end
     end, 5000)
 
-    local function HanldeGetWorldByProjectId()
+    local function HandleGetWorldByProjectId()
         Mod.WorldShare.MsgBox:Show(L"请稍后...", 20000)
         KeepworkServiceWorld:GetWorldByProjectId(
             pid,
@@ -405,22 +405,10 @@ function UserConsole:HandleWorldId(pid)
         )
     end
     if not KeepworkService:IsSignedIn() then
-        local cacheWorldInfo = CacheProjectId:GetProjectIdInfo(pid)
-
-        if cacheWorldInfo then
-            Mod.WorldShare.Store:Set('world/openKpProjectId', pid)
-            HandleLoadWorld(cacheWorldInfo.worldInfo.archiveUrl, cacheWorldInfo.worldInfo, true)
-            return false
-        end
-
-        LoginModal:Init(function()
-            WorldList:RefreshCurrentServerList()
-            HanldeGetWorldByProjectId()
-        end)
-
+        HandleGetWorldByProjectId()
         return false
     else
-        HanldeGetWorldByProjectId()
+        HandleGetWorldByProjectId()
     end
 end
 
