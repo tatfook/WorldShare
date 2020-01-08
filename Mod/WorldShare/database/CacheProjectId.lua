@@ -12,45 +12,33 @@ local CacheProjectId = NPL.load("(gl)Mod/WorldShare/database/CacheProjectId.lua"
 
 local CacheProjectId = NPL.export()
 
-function CacheProjectId:GetCache()
-    return GameLogic.GetPlayerController():LoadLocalData("projectIds", {}, true)
-end
+local projects = {}
+
 
 function CacheProjectId:SetProjectIdInfo(pid, worldInfo)
-    local projectIds = self:GetCache()
-
     if type(pid) ~= 'number' or type(worldInfo) ~= 'table' then
         return false
     end
-
-    for key, item in pairs(projectIds) do
-        if item.pid == pid then
-            return false
-        end
-    end
-
-    projectIds[#projectIds + 1] = {
+    local project = {
         pid = pid,
         worldInfo = worldInfo
     }
-
-    GameLogic.GetPlayerController():SaveLocalData("projectIds", projectIds, true)
-
+    projects[pid] = project;
+    GameLogic.GetPlayerController():SaveLocalData("pid"..pid, project, true)
     return true
 end
 
 function CacheProjectId:GetProjectIdInfo(pid)
-    local projectIds = self:GetCache()
-
     if type(pid) ~= 'number' then
         return false
     end
- 
-    for key, item in pairs(projectIds) do
-        if item.pid == pid then
-            return item
+    if(projects[pid]) then
+        return projects[pid];
+    else
+        local project = GameLogic.GetPlayerController():LoadLocalData("pid"..pid, nil, true)
+        if(project) then
+            projects[pid] = project;
         end
+        return project
     end
-
-    return false
 end

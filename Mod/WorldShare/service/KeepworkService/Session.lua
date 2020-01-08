@@ -27,6 +27,10 @@ function KeepworkServiceSession:Login(account, password, callback)
     KeepworkUsersApi:Login(account, password, callback, callback)
 end
 
+function KeepworkServiceSession:LoginWithToken(token, callback)
+    KeepworkUsersApi:Profile(token, callback, callback)
+end
+
 function KeepworkServiceSession:LoginResponse(response, err, callback)
     if err == 400 then
         Mod.WorldShare.MsgBox:Close()
@@ -40,7 +44,7 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
         return false
     end
 
-    local token = response["token"] or ""
+    local token = response["token"] or System.User.keepworktoken
     local userId = response["id"] or 0
     local username = response["username"] or ""
     local nickname = response["nickname"] or ""
