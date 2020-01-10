@@ -404,7 +404,9 @@ function UserConsole:HandleWorldId(pid)
             end
         )
     end
+
     if not KeepworkService:IsSignedIn() then
+        -- TODO:// fix private enter
         HandleGetWorldByProjectId()
         return false
     else

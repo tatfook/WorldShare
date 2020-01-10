@@ -42,7 +42,7 @@
         <div width="100%" height="100%">
             <aries:window mode="thin" width="500" height="270" style="<%=get_window_style()%>" title='<%=L"与数据源同步" %>'>
             	<div style="padding:40px;font-size:18px;base-font-size:18px;color:#ffffff">
-            		<div><%=format("%s%s%s%s%s", L"你是否确定用远程的更低的版本", get_current_revision(), L", 替换本地更高的版本", get_remote_revision(), L"？")%></div>
+            		<div><%=format("%s%s%s%s%s", L"你是否确定用远程的更低的版本", get_remote_revision(), L", 替换本地更高的版本", get_current_revision(), L"？")%></div>
             		<div style="margin-top:30px;">
             			<input type="button" onclick="replace" class="button_highlight" style="margin-left:130px;width: 60px;height: 30px;" name="" value='<%=L"替换" %>' />
             			<input type="button" onclick="cancel" class="button_highlight" style="margin-left:20px;width: 60px;height: 30px;"  name="" value='<%=L"取消" %>' />
