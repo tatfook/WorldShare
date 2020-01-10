@@ -117,7 +117,9 @@ end
 function SyncMain:BackupWorld()
     local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
 
-    WorldRevision:new():init(currentWorld and currentWorld.worldpath):Backup()
+    local revision = WorldRevision:new():init(currentWorld and currentWorld.worldpath)
+    revision:Checkout()
+    revision:Backup()
 end
 
 function SyncMain:SyncToLocal(callback)
