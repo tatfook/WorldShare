@@ -10,8 +10,6 @@ local Progress = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Progress.lua")
 ]]
 local SyncMain = NPL.load("../Main.lua")
 local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
-local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
-local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")
 
 local Progress = NPL.export()
@@ -20,7 +18,7 @@ function Progress:Init(instance)
     local params = Mod.WorldShare.Utils.ShowWindow(0, 0, "Mod/WorldShare/cellar/Sync/Progress/Progress.html", "Progress", 0, 0, "_fi", false)
 
     params._page.OnClose = function()
-        Store:Remove("page/Progress")
+        Mod.WorldShare.Store:Remove("page/Progress")
     end
 
     local ProgressPage = Mod.WorldShare.Store:Get("page/Progress")
@@ -44,7 +42,7 @@ function Progress:SetPage()
 end
 
 function Progress:GetProgressBar()
-    local ProgressPage = Store:Get("page/Progress")
+    local ProgressPage = Mod.WorldShare.Store:Get("page/Progress")
 
     if not ProgressPage then
         return false
@@ -138,7 +136,7 @@ function Progress:Retry()
 end
 
 function Progress:UpdateDataBar(current, total, msg, finish)
-    local ProgressPage = Store:Get("page/Progress")
+    local ProgressPage = Mod.WorldShare.Store:Get("page/Progress")
 
     if (not ProgressPage) then
         return false
@@ -173,7 +171,7 @@ function Progress:Copy(url)
 end
 
 function Progress:GetCurrent()
-    local ProgressPage = Store:Get("page/Progress")
+    local ProgressPage = Mod.WorldShare.Store:Get("page/Progress")
 
     if (not ProgressPage) then
         return false
@@ -183,7 +181,7 @@ function Progress:GetCurrent()
 end
 
 function Progress:GetTotal()
-    local ProgressPage = Store:Get("page/Progress")
+    local ProgressPage = Mod.WorldShare.Store:Get("page/Progress")
 
     if (not ProgressPage) then
         return false
@@ -193,7 +191,7 @@ function Progress:GetTotal()
 end
 
 function Progress:GetMsg()
-    local ProgressPage = Store:Get("page/Progress")
+    local ProgressPage = Mod.WorldShare.Store:Get("page/Progress")
 
     if (not ProgressPage) then
         return false
@@ -203,7 +201,7 @@ function Progress:GetMsg()
 end
 
 function Progress:GetFinish()
-    local ProgressPage = Store:Get("page/Progress")
+    local ProgressPage = Mod.WorldShare.Store:Get("page/Progress")
 
     if (not ProgressPage) then
         return false
@@ -213,7 +211,7 @@ function Progress:GetFinish()
 end
 
 function Progress:GetBroke()
-    local ProgressPage = Store:Get("page/Progress")
+    local ProgressPage = Mod.WorldShare.Store:Get("page/Progress")
 
     if (not ProgressPage) then
         return false
@@ -223,7 +221,7 @@ function Progress:GetBroke()
 end
 
 function Progress:SetBroke(value)
-    local ProgressPage = Store:Get("page/Progress")
+    local ProgressPage = Mod.WorldShare.Store:Get("page/Progress")
 
     if (not ProgressPage) then
         return false
@@ -233,7 +231,7 @@ function Progress:SetBroke(value)
 end
 
 function Progress:SetFinish(value)
-    local ProgressPage = Store:Get("page/Progress")
+    local ProgressPage = Mod.WorldShare.Store:Get("page/Progress")
 
     if (not ProgressPage) then
         return false

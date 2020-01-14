@@ -50,8 +50,6 @@ function SyncToLocal:Init(callback)
         self.currentWorld.remotefile = "local://" .. self.currentWorld.worldpath
 
         InternetLoadWorld.cur_ds[InternetLoadWorld.selected_world_index] = self.currentWorld
-
-        Mod.WorldShare.Store:Set('world/currentWorld', self.currentWorld)
     end
 
     if not self.currentWorld.worldpath or self.currentWorld.worldpath == "" then
@@ -61,6 +59,13 @@ function SyncToLocal:Init(callback)
     end
 
     self:SetFinish(false)
+
+    if not self.currentWorld.lastCommitId then
+        self.callback(false, L"commitId不存在")
+        self.callback = nil
+        return false
+    end
+
     self:Start()
 end
 
@@ -148,6 +153,7 @@ end
 
 function SyncToLocal:HandleCompareList()
     if self.compareListTotal < self.compareListIndex then
+        Mod.WorldShare.Store:Set('world/currentWorld', self.currentWorld)
         KeepworkService:SetCurrentCommitId()
 
         self.compareListIndex = 1
@@ -234,6 +240,15 @@ function SyncToLocal:DownloadOne(file, callback)
         currentRemoteItem.path,
         self.currentWorld.lastCommitId,
         function(content, size)
+            if not content then
+                self.compareListIndex = 1
+                self:SetFinish(true)
+                self.callback(false, format(L'同步失败，原因： %s 下载失败', currentRemoteItem.path))
+                self.callback = nil
+                Progress:ClosePage()
+                return false
+            end
+
             Progress:UpdateDataBar(
                 self.compareListIndex,
                 self.compareListTotal,
@@ -263,6 +278,15 @@ function SyncToLocal:UpdateOne(file, callback)
     end
 
     local function Handle(content, size)
+        if not content then
+            self.compareListIndex = 1
+            self:SetFinish(true)
+            self.callback(false, format(L'同步失败，原因： %s 更新失败', currentRemoteItem.path))
+            self.callback = nil
+            Progress:ClosePage()
+            return false
+        end
+
         Progress:UpdateDataBar(
             self.compareListIndex,
             self.compareListTotal,

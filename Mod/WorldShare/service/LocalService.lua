@@ -232,9 +232,10 @@ function LocalService:MoveZipToFolder(foldername, zipPath)
                 end
 
                 local buildFolderStr = ""
+
                 for segmentation in string.gmatch(trueFilename, "[^/]+") do
                     if not string.match(rootFolder, segmentation) then
-                        buildFolderStr = buildFolderStr .. segmentation
+                        buildFolderStr = buildFolderStr .. segmentation .. "/"
                         folderArray[#folderArray + 1] = buildFolderStr
                     end
                 end
