@@ -240,7 +240,7 @@ function SyncToLocal:DownloadOne(file, callback)
         currentRemoteItem.path,
         self.currentWorld.lastCommitId,
         function(content, size)
-            if not content then
+            if content == false then
                 self.compareListIndex = 1
                 self:SetFinish(true)
                 self.callback(false, format(L'同步失败，原因： %s 下载失败', currentRemoteItem.path))
@@ -278,7 +278,7 @@ function SyncToLocal:UpdateOne(file, callback)
     end
 
     local function Handle(content, size)
-        if not content then
+        if content == false then
             self.compareListIndex = 1
             self:SetFinish(true)
             self.callback(false, format(L'同步失败，原因： %s 更新失败', currentRemoteItem.path))
