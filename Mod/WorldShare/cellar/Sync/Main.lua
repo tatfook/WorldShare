@@ -19,6 +19,7 @@ local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local SyncToLocal = NPL.load("(gl)Mod/WorldShare/service/SyncService/SyncToLocal.lua")
 local SyncToDataSource = NPL.load("(gl)Mod/WorldShare/service/SyncService/SyncToDataSource.lua")
 local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
+local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
 
 local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 local WorldShare = commonlib.gettable("Mod.WorldShare")
@@ -127,25 +128,46 @@ function SyncMain:SyncToLocal(callback)
         return false
     end
 
-    SyncToLocal:Init(function(result, msg)
-        if result == false then
-            if msg == 'NEWWORLD' then
-                UserConsole:ClosePage()
-                GameLogic.AddBBS(nil, L"服务器未找到世界数据，请新建", 3000, "255 255 0")
-                local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
-                CreateWorld:CreateNewWorld(currentWorld.foldername)
-                return false
+    local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
+
+    if not currentWorld.kpProjectId then
+        return false
+    end
+
+    -- get latest commidId
+    KeepworkServiceProject:GetProject(
+        currentWorld.kpProjectId,
+        function(data, err)
+            if data and data.world and data.world.commitId then
+                currentWorld.lastCommitId = data.world.commitId
             end
 
-            GameLogic.AddBBS(nil, msg, 3000, "255 0 0")
-        end
+            Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
 
-        if type(callback) == 'function' then
-            callback(result, msg)
+            SyncToLocal:Init(function(result, msg)
+                if result == false then
+                    if msg == 'NEWWORLD' then
+                        UserConsole:ClosePage()
+                        GameLogic.AddBBS(nil, L"服务器未找到世界数据，请新建", 3000, "255 255 0")
+                        local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+                        CreateWorld:CreateNewWorld(currentWorld.foldername)
+                        return false
+                    end
+        
+                    GameLogic.AddBBS(nil, msg, 3000, "255 0 0")
+                end
+        
+                if type(callback) == 'function' then
+                    callback(result, msg)
+                end
+        
+                WorldList:RefreshCurrentServerList()
+            end)
+        end,
+        function()
+            GameLogic.AddBBS(nil, L"获取项目信息失败", 3000, "255 0 0")
         end
-
-        WorldList:RefreshCurrentServerList()
-    end)
+    )
 end
 
 function SyncMain:SyncToDataSource(callback)

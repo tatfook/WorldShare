@@ -35,7 +35,7 @@ function GitKeepworkService:GetContentWithRaw(foldername, path, commitId, callba
         end,
         function()
             if type(callback) == 'function' then
-                callback(nil)
+                callback(false)
             end
         end
     )

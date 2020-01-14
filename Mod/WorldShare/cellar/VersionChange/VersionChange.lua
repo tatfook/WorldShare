@@ -15,6 +15,9 @@ local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
 local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 local KeepworkServiceWorld = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/World.lua")
+local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
+local SyncToLocal = NPL.load("(gl)Mod/WorldShare/service/SyncService/SyncToLocal.lua")
+
 local Encoding = commonlib.gettable("commonlib.Encoding")
 
 local VersionChange = NPL.export()
@@ -129,6 +132,17 @@ function VersionChange:SelectVersion(index)
     currentWorld.lastCommitId = commitId
     Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
 
-    SyncMain:SyncToLocal()
+    SyncToLocal:Init(function(result, msg)
+        if result == false then
+            if msg == 'NEWWORLD' then
+                return false
+            end
+
+            GameLogic.AddBBS(nil, msg, 3000, "255 0 0")
+        end
+
+        WorldList:RefreshCurrentServerList()
+    end)
+
     self:ClosePage()
 end
