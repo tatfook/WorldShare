@@ -165,9 +165,7 @@ function SyncMain:SyncToLocal(callback)
             end)
         end,
         function()
-            self.callback(false, L"获取porject信息失败")
-            self.callback = nil
-            return false
+            GameLogic.AddBBS(nil, L"获取项目信息失败", 3000, "255 0 0")
         end
     )
 end
