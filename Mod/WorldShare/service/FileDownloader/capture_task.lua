@@ -442,7 +442,7 @@ function CaptureTask:Run(index)
 
                 -- download to temp directory.
                 NPL.AsyncDownload(
-                    { url = url, headers = { Authorization = format("Bearer %s", token) } },
+                    { url = url, headers = { Authorization = format("Bearer %s", token or "") } },
                     filename,
                     string.format("Mod.WorldShare.service.FileDownloader.localserver.ProcessFile_result(%d, %d)", self.capture_request_.id, i),
                     tostring(self.capture_request_.id)
