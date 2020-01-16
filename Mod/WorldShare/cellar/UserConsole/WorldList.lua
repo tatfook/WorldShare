@@ -309,8 +309,8 @@ function WorldList:SyncWorldsList(callback)
                     isExist = true
                     worldpath = LItem["worldpath"]
 
-                    localTagname = LItem["local_tagname"]
-                    remoteTagname = DItem["extra"] and DItem["extra"]["worldTagName"]
+                    localTagname = LItem["local_tagname"] or LItem["foldername"]
+                    remoteTagname = DItem["extra"] and DItem["extra"]["worldTagName"] or DItem["worldName"]
 
                     if tonumber(LItem["kpProjectId"]) ~= tonumber(DItem["projectId"]) then
                         local tag = SaveWorldHandler:new():Init(worldpath):LoadWorldInfo()
@@ -323,16 +323,16 @@ function WorldList:SyncWorldsList(callback)
                 end
             end
 
-            local text = DItem["worldName"]
+            local text = DItem["worldName"] or ""
 
             if not isExist then
                 --仅网络
                 status = 2
                 revision = DItem['revision']
-                remoteTagname = DItem['extra'] and DItem['extra']['worldTagName'] or DItem['worldName']
+                remoteTagname = DItem['extra'] and DItem['extra']['worldTagName'] or text
 
-                if DItem['extra'] and DItem['extra']['worldTagName'] and DItem['worldName'] ~= DItem['extra']['worldTagName'] then
-                    text = remoteTagname .. '(' .. DItem['worldName'] .. ')'
+                if remoteTagname ~= "" and text ~= remoteTagname then
+                    text = remoteTagname .. '(' .. text .. ')'
                 end
             end
 

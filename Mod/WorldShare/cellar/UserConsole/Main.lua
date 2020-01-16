@@ -448,11 +448,9 @@ function UserConsole:WorldRename(currentItemIndex, tempModifyWorldname, callback
 
         -- update local tag name
         tag.name = tempModifyWorldname
-
-        saveWorldHandler:SaveWorldInfo(tag)
-
         currentWorld.local_tagname = tempModifyWorldname
 
+        saveWorldHandler:SaveWorldInfo(tag)
         Mod.WorldShare.Store:Set('world/currentWorld', currentWorld)
     end
 

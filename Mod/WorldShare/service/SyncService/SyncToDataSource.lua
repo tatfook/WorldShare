@@ -570,39 +570,26 @@ function SyncToDataSource:UpdateRecord(callback)
                     function(data)
                         local extra = data and data.extra or {}
 
-                        if Mod.WorldShare.Store:Get('world/isPreviewUpdated') and
-                            self.currentWorld.local_tagname and
-                            self.currentWorld.local_tagname ~= self.currentWorld.foldername then
-
+                        if Mod.WorldShare.Store:Get('world/isPreviewUpdated') then
                             extra.imageUrl = preview
-                            extra.worldTagName = self.currentWorld.local_tagname
-
-                            KeepworkServiceProject:UpdateProject(
-                                self.currentWorld.kpProjectId,
-                                {
-                                    extra = extra
-                                }
-                            )
-                        elseif Mod.WorldShare.Store:Get('world/isPreviewUpdated') then
-                            extra.imageUrl = preview
-
-                            KeepworkServiceProject:UpdateProject(
-                                self.currentWorld.kpProjectId,
-                                {
-                                    extra = extra
-                                }
-                            )
-                        elseif self.currentWorld.local_tagname and
-                            self.currentWorld.local_tagname ~= self.currentWorld.foldername then
-                            extra.worldTagName = self.currentWorld.local_tagname
-
-                            KeepworkServiceProject:UpdateProject(
-                                self.currentWorld.kpProjectId,
-                                {
-                                    extra = extra
-                                }
-                            )
                         end
+
+                        if self.currentWorld.local_tagname and
+                           self.currentWorld.local_tagname ~= self.currentWorld.foldername then
+                            extra.worldTagName = self.currentWorld.local_tagname
+                        end
+
+                        if self.currentWorld.local_tagname and
+                           self.currentWorld.local_tagname == self.currentWorld.foldername then
+                            extra.worldTagName = nil
+                        end
+
+                        KeepworkServiceProject:UpdateProject(
+                            self.currentWorld.kpProjectId,
+                            {
+                                extra = extra
+                            }
+                        )
 
                         Mod.WorldShare.Store:Remove('world/isPreviewUpdated')
                     end

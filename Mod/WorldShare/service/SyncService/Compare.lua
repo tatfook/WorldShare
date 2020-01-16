@@ -261,7 +261,13 @@ function Compare:GetCurrentWorldInfo(callback)
                 currentWorld = searchCurrentWorld
     
                 local worldTag = LocalService:GetTag(currentWorld.worldpath)
-    
+
+                if currentWorld.status == 2 then
+                    currentWorld.status = 3
+                    currentWorld.worldpath = ParaWorld.GetWorldDirectory()
+                    currentWorld.local_tagname = currentWorld.remote_tagname
+                end
+
                 Mod.WorldShare.Store:Set("world/worldTag", worldTag)
                 Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
             end
@@ -269,7 +275,6 @@ function Compare:GetCurrentWorldInfo(callback)
     end
 
     if not currentWorld then
-        local originWorldPath = ParaWorld.GetWorldDirectory()
         local worldTag = WorldCommon.GetWorldInfo() or {}
 
         currentWorld = {
@@ -291,7 +296,7 @@ function Compare:GetCurrentWorldInfo(callback)
             preview = "",
             progress = "0",
             size = 0,
-            worldpath = originWorldPath, 
+            worldpath = ParaWorld.GetWorldDirectory(), 
         }
 
         if worldTag.kpProjectId then
@@ -303,7 +308,7 @@ function Compare:GetCurrentWorldInfo(callback)
         Mod.WorldShare.Store:Set("world/worldTag", worldTag)
         Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
     end
-
+echo(currentWorld, true)
     if type(callback) == 'function' then
         callback()
     end
