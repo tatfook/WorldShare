@@ -308,7 +308,7 @@ function Compare:GetCurrentWorldInfo(callback)
         Mod.WorldShare.Store:Set("world/worldTag", worldTag)
         Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
     end
-echo(currentWorld, true)
+
     if type(callback) == 'function' then
         callback()
     end
