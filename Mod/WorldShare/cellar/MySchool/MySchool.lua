@@ -63,7 +63,7 @@ end
 function MySchool.GetUrl()
     local token = Mod.WorldShare.Store:Get("user/token") or ''
 
-    if System.os.GetPlatform() == 'mac' then
+    if System.os.GetPlatform() == 'mac' or System.os.GetPlatform() == 'android' then
         return KeepworkService:GetKeepworkUrl() .. '/p/org/home?type=protocol&port=8099&token=' .. token
     else
         return KeepworkService:GetKeepworkUrl() .. '/p/org/home?port=8099&token=' .. token
