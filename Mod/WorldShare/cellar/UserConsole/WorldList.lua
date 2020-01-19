@@ -152,7 +152,7 @@ function WorldList:GetInternetWorldList(callback)
 end
 
 function WorldList:RefreshCurrentServerList(callback, isForce)
-    local UserConsolePage = Store:Get('page/UserConsole')
+    local UserConsolePage = Mod.WorldShare.Store:Get('page/UserConsole')
 
     if not UserConsolePage and not isForce then
         if type(callback) == 'function' then
@@ -164,13 +164,13 @@ function WorldList:RefreshCurrentServerList(callback, isForce)
 
     self:SetRefreshing(true)
 
-    if (not KeepworkService:IsSignedIn()) then
+    if not KeepworkService:IsSignedIn() then
         self:GetLocalWorldList(
             function()
                 self:UpdateRevision(
                     function()
-                        local localWorlds = Store:Get("world/localWorlds")
-                        Store:Set("world/compareWorldList", localWorlds)
+                        local localWorlds = Mod.WorldShare.Store:Get("world/localWorlds")
+                        Mod.WorldShare.Store:Set("world/compareWorldList", localWorlds)
 
                         self:SetRefreshing(false)
                         self:UpdateWorldListFromInternetLoadWorld(callback)
@@ -180,7 +180,7 @@ function WorldList:RefreshCurrentServerList(callback, isForce)
         )
     end
 
-    if (KeepworkService:IsSignedIn()) then
+    if KeepworkService:IsSignedIn() then
         self:GetLocalWorldList(
             function()
                 self:UpdateRevision(
@@ -200,7 +200,7 @@ end
 
 function WorldList:GetLocalWorldList(callback)
     local localWorldList = LocalLoadWorld.BuildLocalWorldList(true)
-    Store:Set("user/localWorlds", localWorldList)
+    Mod.WorldShare.Store:Set("world/localWorlds", localWorldList)
 
     if type(callback) == 'function' then
         callback()
@@ -208,14 +208,14 @@ function WorldList:GetLocalWorldList(callback)
 end
 
 function WorldList:UpdateRevision(callback)
-    local localWorlds = Store:Get("user/localWorlds")
+    local localWorlds = Mod.WorldShare.Store:Get("world/localWorlds")
 
-    if (not localWorlds) then
+    if not localWorlds then
         return false
     end
 
     for key, value in ipairs(localWorlds) do
-        if (value.IsFolder) then
+        if value.IsFolder then
             value.worldpath = value.worldpath .. '/'
 
             local worldRevision = WorldRevision:new():init(value.worldpath)
@@ -249,11 +249,11 @@ function WorldList:UpdateRevision(callback)
         value.modifyTime = self:UnifiedTimestampFormat(value.writedate)
     end
 
-    Store:Set("world/localWorlds", localWorlds)
+    Mod.WorldShare.Store:Set("world/localWorlds", localWorlds)
     
     UserConsole:Refresh()
 
-    if (callback) then
+    if type(callback) == 'function' then
         callback()
     end
 end
