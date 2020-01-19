@@ -231,7 +231,7 @@ function KeepworkServiceSession:BindPhone(cellphone, captcha, callback)
         cellphone = cellphone,
         captcha = captcha,
         isBind = true
-    }, callback)
+    }, callback, callback)
 end
 
 function KeepworkServiceSession:GetEmailCaptcha(email, callback)

@@ -115,7 +115,7 @@ end
 ]]
 -- return: object
 function KeepworkUsersApi:BindPhone(params, success, error)
-    KeepworkBaseApi:Post('/users/cellphone_captcha', params , { notTokenRequest = true }, success, error)
+    KeepworkBaseApi:Post('/users/cellphone_captcha', params , { notTokenRequest = false }, success, error)
 end
 
 -- url: /users/email_captcha
