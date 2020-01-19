@@ -143,6 +143,11 @@ function RegisterModal:Bind(method)
         KeepworkServiceSession:BindPhone(phone, phonecaptcha, function(data, err)
             BindingPage:CloseWindow()
 
+            if err == 409 then
+                GameLogic.AddBBS(nil, L"手机已被绑定", 3000, "255 0 0")
+                return false
+            end
+
             if data == 'true' and err == 200 then
                 GameLogic.AddBBS(nil, L"绑定成功", 3000, "0 255 0")
                 return true
