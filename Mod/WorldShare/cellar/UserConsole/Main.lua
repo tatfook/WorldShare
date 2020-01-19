@@ -219,6 +219,7 @@ function UserConsole:HandleWorldId(pid)
         if url:match("^https?://") then
             world = RemoteWorld.LoadFromHref(url, "self")
             world:SetProjectId(pid)
+            local token = Mod.WorldShare.Store:Get("user/token")
             if token then
                 world:SetHttpHeaders({Authorization = format("Bearer %s", token)})
             end
@@ -367,51 +368,62 @@ function UserConsole:HandleWorldId(pid)
         end
     end, 5000)
 
-    local function HandleGetWorldByProjectId()
-        Mod.WorldShare.MsgBox:Show(L"请稍后...", 20000)
-        KeepworkServiceWorld:GetWorldByProjectId(
-            pid,
-            function(worldInfo, err)
-                Mod.WorldShare.MsgBox:Close()
-                fetchSuccess = true
-    
-                if err == 0 then
-                    local cacheWorldInfo = CacheProjectId:GetProjectIdInfo(pid)
-    
-                    if not cacheWorldInfo or not cacheWorldInfo.worldInfo then
-                        GameLogic.AddBBS(nil, L"网络环境差，或离线中，请联网后再试", 3000, "255 0 0")
+    Mod.WorldShare.MsgBox:Show(L"请稍后...", 20000)
+    KeepworkServiceProject:GetProject(
+        pid,
+        function(data, err)
+            Mod.WorldShare.MsgBox:Close()
+            fetchSuccess = true
+
+            if err == 0 then
+                local cacheWorldInfo = CacheProjectId:GetProjectIdInfo(pid)
+
+                if not cacheWorldInfo or not cacheWorldInfo.worldInfo then
+                    GameLogic.AddBBS(nil, L"网络环境差，或离线中，请联网后再试", 3000, "255 0 0")
+                    return false
+                end
+
+                Mod.WorldShare.Store:Set('world/openKpProjectId', pid)
+                HandleLoadWorld(cacheWorldInfo.worldInfo.archiveUrl, cacheWorldInfo.worldInfo, true)
+
+                return false
+            end
+
+            if err == 404 then
+                GameLogic.AddBBS(nil, L"未找到对应内容", 3000, "255 0 0")
+                return false
+            end
+
+            if data and data.visibility == 1 then
+                if not KeepworkService:IsSignedIn() then
+                    GameLogic.AddBBS(nil, L"该项目需要登录后访问", 3000, "255 0 0")
+                    return false
+                else
+                    local userId = Mod.WorldShare.Store:Get("user/userId")
+
+                    if userId and data and data.userId and userId == data.userId then
+                        if not data.world or not data.world.archiveUrl then
+                            return false
+                        end
+
+                        Mod.WorldShare.Store:Set('world/openKpProjectId', pid)
+                        HandleLoadWorld(data.world.archiveUrl .. "&private=true", data.world)
+                    else
+                        GameLogic.AddBBS(nil, L"您未获得该项目的访问权限", 3000, "255 0 0")
                         return false
                     end
-    
-                    Mod.WorldShare.Store:Set('world/openKpProjectId', pid)
-                    HandleLoadWorld(cacheWorldInfo.worldInfo.archiveUrl, cacheWorldInfo.worldInfo, true)
-    
-                    return false
                 end
-    
-                if err == 404 then
-                    GameLogic.AddBBS(nil, L"未找到对应内容", 3000, "255 0 0")
-                    return false
-                end
-    
-                if worldInfo and worldInfo.archiveUrl and #worldInfo.archiveUrl > 0 then
+            else
+                if data.world and data.world.archiveUrl and #data.world.archiveUrl > 0 then
                     Mod.WorldShare.Store:Set('world/openKpProjectId', pid)
-                    HandleLoadWorld(worldInfo.archiveUrl, worldInfo)
-                    CacheProjectId:SetProjectIdInfo(pid, worldInfo)
+                    HandleLoadWorld(data.world.archiveUrl, data.world)
+                    CacheProjectId:SetProjectIdInfo(pid, data.world)
                 else
                     GameLogic.AddBBS(nil, L"未找到对应内容", 3000, "255 0 0")
                 end
             end
-        )
-    end
-
-    if not KeepworkService:IsSignedIn() then
-        -- TODO:// fix private enter
-        HandleGetWorldByProjectId()
-        return false
-    else
-        HandleGetWorldByProjectId()
-    end
+        end
+    )
 end
 
 function UserConsole:WorldRename(currentItemIndex, tempModifyWorldname, callback)
