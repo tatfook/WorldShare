@@ -139,7 +139,7 @@ end
 ]]
 -- return: object
 function KeepworkUsersApi:BindEmail(params, success, error)
-    KeepworkBaseApi:Post('/users/reset_password', params, { notTokenRequest = true }, success, error)
+    KeepworkBaseApi:Post('/users/email_captcha', params, { notTokenRequest = false }, success, error)
 end
 
 -- url: /users/reset_password

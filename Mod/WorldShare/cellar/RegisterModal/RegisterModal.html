@@ -3,12 +3,11 @@
         <pe:mcml>
             <script type="text/npl" refresh="false">
                 <![CDATA[
-                    Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
                     KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
                     RegisterModal = NPL.load("./RegisterModal.lua")
 
                     page = document:GetPageCtrl()
-                    Store:Set('page/RegisterModal', page)
+                    Mod.WorldShare.Store:Set('page/RegisterModal', page)
 
                     KeepworkServiceSession:FetchCaptcha(function() page:Refresh(0.01) end)
 

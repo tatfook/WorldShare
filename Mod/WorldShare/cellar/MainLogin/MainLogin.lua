@@ -59,12 +59,14 @@ function MainLogin:Show()
     if not self.notFirstTimeShown then
         self.notFirstTimeShown = true
 
-        if(System.User.keepworktoken) then
+        if System.User.keepworktoken then
             Mod.WorldShare.MsgBox:Show(L"正在登陆，请稍后...", 8000, L"链接超时", 300, 120)
 
             KeepworkServiceSession:LoginWithToken(
                 System.User.keepworktoken,
                 function(response, err)
+                    Mod.WorldShare.MsgBox:Close()
+
                     if(err == 200 and type(response) == "table" and response.username) then
                         self:EnterUserConsole()
                     else
@@ -73,7 +75,8 @@ function MainLogin:Show()
                     end
                 end
             )
-            return;
+
+            return
         end
 
         if PWDInfo and PWDInfo.autoLogin then
