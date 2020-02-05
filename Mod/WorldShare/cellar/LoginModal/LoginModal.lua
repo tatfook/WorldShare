@@ -31,6 +31,12 @@ function LoginModal:Init(callbackFunc)
 end
 
 function LoginModal:ShowPage()
+    local RegisterModalPage = Mod.WorldShare.Store:Get("page/RegisterModal")
+
+    if RegisterModalPage then
+        RegisterModalPage:CloseWindow()
+    end
+
     if KeepworkServiceSession:GetCurrentUserToken() then
         return false
     end

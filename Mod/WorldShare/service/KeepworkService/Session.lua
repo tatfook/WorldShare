@@ -251,7 +251,7 @@ function KeepworkServiceSession:BindEmail(email, captcha, callback)
         email = email,
         captcha = captcha,
         isBind = true
-    }, callback)
+    }, callback, callback)
 end
 
 function KeepworkServiceSession:ResetPassword(key, password, captcha, callback)
