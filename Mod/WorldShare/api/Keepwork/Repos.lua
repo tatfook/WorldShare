@@ -17,8 +17,8 @@ local Encoding = commonlib.gettable("System.Encoding")
 
 local KeepworkReposApi = NPL.export()
 
-function KeepworkReposApi:GetRepoPath(foldername)
-    local username = Mod.WorldShare.Store:Get('user/username')
+function KeepworkReposApi:GetRepoPath(foldername, username)
+    username = username or Mod.WorldShare.Store:Get('user/username')
 
     if type(username) ~= 'string' or type(foldername) ~= 'string' then
         return ''
@@ -35,8 +35,8 @@ end
     ref string 必须 ref
 ]]
 -- return: object
-function KeepworkReposApi:Download(foldername, commitId, success, error)
-    local url = format('%s/repos/%s/download?ref=%s', KeepworkBaseApi:GetApi(), self:GetRepoPath(foldername), commitId)
+function KeepworkReposApi:Download(foldername, username, commitId, success, error)
+    local url = format('%s/repos/%s/download?ref=%s', KeepworkBaseApi:GetApi(), self:GetRepoPath(foldername, username), commitId)
 
     FileDownloader:new():Init(
         foldername,
@@ -63,18 +63,18 @@ end
 -- method: GET
 -- params:
 --[[
-    repoPath string 必须 仓库路径
-    recursive string 选填 是否递归获取文件
-    ref string 必须 commitId
+    repoPath string necessary repo path
+    ref string necessary commitId
+    recursive string not necessary Is get recursive files
 ]]
 -- return: object
-function KeepworkReposApi:Tree(foldername, commitId, success, error)
+function KeepworkReposApi:Tree(foldername, username, commitId, success, error)
     local url = ''
 
     if type(foldername) ~= 'string' or type(commitId) ~= 'string' or commitId == 'master' then
-        url = format('/repos/%s/tree?recursive=true', self:GetRepoPath(foldername))
+        url = format('/repos/%s/tree?recursive=true', self:GetRepoPath(foldername, username))
     else
-        url = format('/repos/%s/tree?recursive=true&commitId=%s', self:GetRepoPath(foldername), commitId)
+        url = format('/repos/%s/tree?recursive=true&commitId=%s', self:GetRepoPath(foldername, username), commitId)
     end
 
     KeepworkBaseApi:Get(url, nil, nil, success, error)

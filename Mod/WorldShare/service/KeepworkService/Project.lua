@@ -40,47 +40,77 @@ function KeepworkServiceProject:GetProject(kpProjectId, callback, noTryStatus)
     KeepworkProjectsApi:GetProject(kpProjectId, callback, nil, noTryStatus)
 end
 
-function KeepworkServiceProject:GetProjectByWorldName(foldername, callback)
-    if not KeepworkService:IsSignedIn() then
-        return false
-    end
+-- function KeepworkServiceProject:GetProjectByWorldName(foldername, callback)
+--     if not KeepworkService:IsSignedIn() then
+--         return false
+--     end
 
-    KeepworkProjectsApi:GetProjectByWorldName(
-        foldername,
-        function(data, err)
-            if type(callback) == 'function' then
-                callback(data)
-            end
-        end,
-        function()
-            if type(callback) == 'function' then
-                callback()
-            end
-        end
-    )
-end
+--     KeepworkProjectsApi:GetProjectByWorldName(
+--         foldername,
+--         function(data, err)
+--             if type(callback) == 'function' then
+--                 callback(data)
+--             end
+--         end,
+--         function()
+--             if type(callback) == 'function' then
+--                 callback()
+--             end
+--         end
+--     )
+-- end
 
 -- get project id by worldname
-function KeepworkServiceProject:GetProjectIdByWorldName(foldername, callback)
+function KeepworkServiceProject:GetProjectIdByWorldName(foldername, shared, callback)
+    if type(callback) ~= 'function' then
+        return false
+    end
+
     if not KeepworkService:IsSignedIn() then
         return false
     end
 
-    KeepworkWorldsApi:GetWorldByName(foldername, function(data, err)
-        if not data or #data ~= 1 or type(data[1]) ~= 'table' or not data[1].projectId then
-            if type(callback) == 'function' then
-                callback()
-            end
+    local userId = tonumber(Mod.WorldShare.Store:Get("user/userId"))
 
+    KeepworkWorldsApi:GetWorldByName(foldername, function(data, err)
+        if type(data) ~= 'table' then
             return false
         end
 
-        local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
-        currentWorld.kpProjectId = data[1].projectId
-        Mod.WorldShare.Store:Set('world/currentWorld', currentWorld)
+        local bIsExist = false
+        local world
 
-        if type(callback) == 'function' then
-            callback(data[1].projectId)
+        for key, item in ipairs(data) do
+            if item.user and item.user.id == userId then
+                -- remote world info mine
+                if not shared then
+                    bIsExist = true
+                    world = item
+                    break
+                end
+            else
+                -- remote world info shared
+                if shared then
+                    bIsExist = true
+                    world = tiem
+                    break
+                end
+            end
+        end
+
+        if bIsExist then
+            if type(world) ~= 'table' or not world.projectId then
+                callback()
+                return false
+            end
+
+            local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+            currentWorld.kpProjectId = world.projectId
+            Mod.WorldShare.Store:Set('world/currentWorld', currentWorld)
+    
+            callback(world.projectId)
+        else
+            callback()
         end
     end)
 end

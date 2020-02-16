@@ -65,32 +65,32 @@ function KeepworkProjectsApi:GetProject(kpProjectId, success, error, noTryStatus
     KeepworkBaseApi:Get(url, nil, nil, success, error, noTryStatus)
 end
 
--- url: 
-function KeepworkProjectsApi:GetProjectByWorldName(foldername, success, error)
-    if type(foldername) ~= 'string' then
-        return false
-    end
+-- -- url: 
+-- function KeepworkProjectsApi:GetProjectByWorldName(foldername, success, error)
+--     if type(foldername) ~= 'string' then
+--         return false
+--     end
 
-    local url = format("/worlds?worldName=%s", Encoding.url_encode(foldername or ''))
+--     local url = format("/worlds?worldName=%s", Encoding.url_encode(foldername or ''))
 
-    KeepworkBaseApi:Get(
-        url,
-        nil,
-        nil,
-        function(data, err)
-            if type(data) == 'table' and #data == 1 then
-                if type(success) == 'function' then
-                    success(data, err)
-                end
-            else
-                if type(error) == 'function' then
-                    error()
-                end
-            end
-        end,
-        error
-    )
-end
+--     KeepworkBaseApi:Get(
+--         url,
+--         nil,
+--         nil,
+--         function(data, err)
+--             if type(data) == 'table' then
+--                 if type(success) == 'function' then
+--                     success(data, err)
+--                 end
+--             else
+--                 if type(error) == 'function' then
+--                     error()
+--                 end
+--             end
+--         end,
+--         error
+--     )
+-- end
 
 -- url: /projects/%d/visit
 -- method: GET

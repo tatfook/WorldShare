@@ -10,7 +10,6 @@ local Progress = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Progress.lua")
 ]]
 local SyncMain = NPL.load("../Main.lua")
 local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
-local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")
 
 local Progress = NPL.export()
 

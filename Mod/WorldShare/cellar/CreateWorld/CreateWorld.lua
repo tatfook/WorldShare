@@ -18,7 +18,6 @@ local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
 local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
 local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
-local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")
 
 local CreateWorld = NPL.export()
 

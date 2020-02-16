@@ -52,7 +52,7 @@ function SyncToDataSource:Init(callback)
         function(beExisted)
             if beExisted then
                 -- update world
-                KeepworkServiceProject:GetProjectIdByWorldName(self.currentWorld.foldername, function()
+                KeepworkServiceProject:GetProjectIdByWorldName(self.currentWorld.foldername, self.currentWorld.shared, function(pid)
                     currentWorld = Mod.WorldShare.Store:Get('world/currentWorld') 
 
                     if currentWorld and currentWorld.kpProjectId then
@@ -106,13 +106,14 @@ function SyncToDataSource:Init(callback)
 end
 
 function SyncToDataSource:IsProjectExist(callback)
-    KeepworkServiceProject:GetProjectByWorldName(
-        self.currentWorld.foldername,
-        function(data)
-            if type(callback) ~= "function" then
-                return false
-            end
+    if type(callback) ~= "function" then
+        return false
+    end
 
+    KeepworkServiceWorld:GetWorld(
+        self.currentWorld.foldername,
+        self.currentWorld.shared,
+        function(data)
             if type(data) == 'table' then
                 callback(true)
             else
@@ -139,7 +140,7 @@ function SyncToDataSource:Start()
 
         self.dataSourceFiles = data
         self.localFiles = commonlib.vector:new()
-        self.localFiles:AddAll(LocalService:LoadFiles(self.currentWorld.worldpath)) --再次获取本地文件，保证上传的内容为最新
+        self.localFiles:AddAll(LocalService:LoadFiles(self.currentWorld.worldpath)) --get latest files content
 
         self:IgnoreFiles()
         self:CheckReadmeFile()
@@ -147,14 +148,30 @@ function SyncToDataSource:Start()
         self:HandleCompareList()
     end
 
-    GitService:GetTree(self.currentWorld.foldername, self.currentWorld.lastCommitId, Handle)
+    GitService:GetTree(
+        self.currentWorld.foldername,
+        self.currentWorld.user and self.currentWorld.user.username or nil,
+        self.currentWorld.lastCommitId,
+        Handle
+    )
 end
 
 function SyncToDataSource:IgnoreFiles()
-    local fileList = { "mod/" }
+    local filePath = format("%s/.paraignore", self.currentWorld.worldpath)
+    local file = ParaIO.open(filePath, "r")
+    local content = file:GetText(0, -1)
+    file:close()
+
+    local ignoreFiles = { "mod/" }
+
+    if #content > 0 then
+        for item in string.gmatch(content, "[^\r\n]+") do
+            ignoreFiles[#ignoreFiles + 1] = item
+        end
+    end
 
     for LKey, LItem in ipairs(self.localFiles) do
-        for FKey, FItem in ipairs(fileList) do
+        for FKey, FItem in ipairs(ignoreFiles) do
             if string.find(LItem.filename, FItem) then
                 self.localFiles:remove(LKey)
             end
@@ -552,6 +569,7 @@ function SyncToDataSource:UpdateRecord(callback)
 
                 KeepworkServiceWorld:PushWorld(
                     worldInfo,
+                    self.currentWorld.shared,
                     function(data, err)
                         if (err ~= 200) then
                             self.callback(false, L"更新服务器列表失败")
@@ -646,7 +664,7 @@ function SyncToDataSource:UpdateRecord(callback)
             end)
         end
 
-        KeepworkServiceWorld:GetWorld(self.currentWorld.foldername, HandleGetWorld)
+        KeepworkServiceWorld:GetWorld(self.currentWorld.foldername, self.currentWorld.shared, HandleGetWorld)
     end
 
     GitService:GetCommits(self.currentWorld.foldername, Handle)

@@ -363,6 +363,16 @@
                         end
                     end
                 end
+
+                function is_multiplayer_edit()
+                    local project = WorldList.GetCurWorldInfo("project",Eval("index"))
+                    
+                    if project and project.memberCount > 1 then
+                        return "background: url(Texture/whitedot.png);background-color: #644c98;"
+                    else
+                        return ""
+                    end
+                end
             ]]>
         </script>
         <style type="text/mcss">
@@ -638,9 +648,9 @@
                     <pe:gridview RememberScrollPos="true" AllowPaging="false" VerticalScrollBarStep="50"
                         DefaultNodeHeight="85" ItemsPerLine="1" name="gw_world_ds">
                         <Columns>
-                            <!--选中的项-->
+                            <!--selected-->
                             <pe:if condition='<%= be_selected()%>'>
-                                <div name='<%=Eval("index")%>' class="share_selected_item">
+                                <div name='<%=Eval("index")%>' class="share_selected_item" style="<%= is_multiplayer_edit() %>">
                                     <div name="status">
                                         <pe:if condition='<%= get_world_status(1)%>'>
                                             <div class="status" style="<%= get_world_status_icon(1) %>" tooltip='<%= get_world_status_tips()%>' />
@@ -667,7 +677,7 @@
                                             </pe:if>
                                             <pe:if condition='<%= not is_modifying() %>'>
                                                 <%= get_world_text() %>
-                                                <pe:if condition='<%= Eval("visibility") == 1 %>'>
+                                                <pe:if condition='<%= Eval("project") and tonumber(Eval("project")["visibility"]) == 1 %>'>
                                                     <div style="float:left;margin-top:5px;margin-left:5px;background: url(textures/worldshare_32bits.png#223 309 20 20);width: 14px;height: 14px;"></div>
                                                 </pe:if>
                                                 <div onclick="covert_status" tooltip="<%=Eval('text')%>" style="float:left;margin-top:5px;margin-left:5px;background: url(textures/worldshare_32bits.png#237 49 14 14);width: 14px;height: 14px;"></div>
@@ -719,25 +729,25 @@
                                             <pe:if condition='<%= not can_be_sync()%>'>
                                                 <div class="share_button" style="float:left" />
                                             </pe:if>
-                                            <!-- 删除 -->
+                                            <!-- delete -->
                                             <input type="button" class="share_button" style="<%= get_share_button('delete') %>"
                                                 onclick='delete_world' tooltip='<%=L"删除"%>' name='<%=Eval("index")%>' />
                                             <pe:if condition='<%= can_be_sync()%>'>
-                                                <!-- 手动同步 -->
+                                                <!-- sync -->
                                                 <input type="button" class="share_button" style="<%= get_share_button('sync') %>"
                                                     onclick="sync" tooltip='<%=L"同步"%>' name='<%=Eval("index")%>' />
                                             </pe:if>
-                                            <!-- 进入 -->
+                                            <!-- enter -->
                                             <input type="button" class="share_button" style="<%= get_share_button('enter') %>"
                                                 onclick="enter" tooltip='<%=L"进入"%>' name='<%=Eval("index")%>' />
                                         </div>
                                     </div>
                                 </div>
                             </pe:if>
-                            <!--未选中的项-->
+                            <!--not selected-->
                             <pe:if condition='<%= not be_selected() %>'>
                                 <input type="button" class="click" name='<%=Eval("index")%>' onclick="switch_world" />
-                                <div name='<%=Eval("index")%>' class="share_unselect_item">
+                                <div name='<%=Eval("index")%>' class="share_unselect_item" style="<%= is_multiplayer_edit() %>">
                                     <div style="position:relative;width:200px;">
                                         <div>
                                             <pe:if condition='<%= get_world_status(1) %>'>
@@ -760,7 +770,7 @@
                                             </pe:if>
                                             <div class="share_world_name">
                                                 <%= get_world_text() %>
-                                                <pe:if condition='<%= Eval("visibility") == 1 %>'>
+                                                <pe:if condition='<%= Eval("project") and tonumber(Eval("project")["visibility"]) == 1 %>'>
                                                     <div style="float:left;margin-top:5px;margin-left:5px;background: url(textures/worldshare_32bits.png#223 309 20 20);width: 14px;height: 14px;"></div>
                                                 </pe:if>
                                             </div>
@@ -792,7 +802,6 @@
                                     </div>
                                 </div>
                             </pe:if>
-
                         </Columns>
                         <EmptyDataTemplate>
                             <div style="margin:10px;font-weight:bold;color:#ffffff">

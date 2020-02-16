@@ -46,7 +46,20 @@ function SyncToLocal:Init(callback)
 
     -- we build a world folder path if worldpath is not exit
     if not self.currentWorld.worldpath or self.currentWorld.worldpath == "" then
-        self.currentWorld.worldpath = Encoding.Utf8ToDefault(format("%s/%s/", Mod.WorldShare.Utils.GetWorldFolderFullPath(), self.currentWorld.foldername))
+        local userId = Mod.WorldShare.Store:Get("user/userId")
+        -- update shared world path
+        if self.currentWorld.user and self.currentWorld.user.id and tonumber(self.currentWorld.user.id) ~= tonumber(userId) then
+            self.currentWorld.worldpath = Encoding.Utf8ToDefault(
+                format(
+                    "%s/_shared/%s/%s/",
+                    Mod.WorldShare.Utils.GetWorldFolderFullPath(),
+                    self.currentWorld.user.username,
+                    self.currentWorld.foldername
+                )
+            )
+        else
+            self.currentWorld.worldpath = Encoding.Utf8ToDefault(format("%s/%s/", Mod.WorldShare.Utils.GetWorldFolderFullPath(), self.currentWorld.foldername))
+        end
         self.currentWorld.remotefile = "local://" .. self.currentWorld.worldpath
 
         InternetLoadWorld.cur_ds[InternetLoadWorld.selected_world_index] = self.currentWorld
@@ -97,14 +110,44 @@ function SyncToLocal:Start()
             return false
         end
 
-        self.localFiles = LocalService:LoadFiles(self.currentWorld.worldpath)
+        self.localFiles = commonlib.vector:new()
+        self.localFiles:AddAll(LocalService:LoadFiles(self.currentWorld.worldpath))
         self.dataSourceFiles = data
 
+        self:IgnoreFiles()
         self:GetCompareList()
         self:HandleCompareList()
     end
 
-    GitService:GetTree(self.currentWorld.foldername, self.currentWorld.lastCommitId, Handle)
+    GitService:GetTree(
+        self.currentWorld.foldername,
+        self.currentWorld.user and self.currentWorld.user.username or nil,
+        self.currentWorld.lastCommitId,
+        Handle
+    )
+end
+
+function SyncToLocal:IgnoreFiles()
+    local filePath = format("%s/.paraignore", self.currentWorld.worldpath)
+    local file = ParaIO.open(filePath, "r")
+    local content = file:GetText(0, -1)
+    file:close()
+
+    local ignoreFiles = { "mod/" }
+
+    if #content > 0 then
+        for item in string.gmatch(content, "[^\r\n]+") do
+            ignoreFiles[#ignoreFiles + 1] = item
+        end
+    end
+    
+    for LKey, LItem in ipairs(self.localFiles) do
+        for FKey, FItem in ipairs(ignoreFiles) do
+            if string.find(LItem.filename, FItem) then
+                self.localFiles:remove(LKey)
+            end
+        end
+    end
 end
 
 function SyncToLocal:GetCompareList()
@@ -235,6 +278,12 @@ end
 function SyncToLocal:DownloadOne(file, callback)
     local currentRemoteItem = self:GetRemoteFileByPath(file)
 
+    Progress:UpdateDataBar(
+        self.compareListIndex,
+        self.compareListTotal,
+        format(L"%s （%s） 下载中", currentRemoteItem.path, Utils.FormatFileSize(size, "KB"))
+    )
+
     GitService:GetContentWithRaw(
         self.currentWorld.foldername,
         currentRemoteItem.path,
@@ -248,12 +297,6 @@ function SyncToLocal:DownloadOne(file, callback)
                 Progress:ClosePage()
                 return false
             end
-
-            Progress:UpdateDataBar(
-                self.compareListIndex,
-                self.compareListTotal,
-                format(L"%s （%s） 下载中", currentRemoteItem.path, Utils.FormatFileSize(size, "KB"))
-            )
 
             LocalService:Write(self.currentWorld.foldername, currentRemoteItem.path, content)
 
@@ -277,6 +320,12 @@ function SyncToLocal:UpdateOne(file, callback)
         return false
     end
 
+    Progress:UpdateDataBar(
+        self.compareListIndex,
+        self.compareListTotal,
+        format(L"%s （%s） 更新中", currentRemoteItem.path, Utils.FormatFileSize(size, "KB"))
+    )
+
     local function Handle(content, size)
         if content == false then
             self.compareListIndex = 1
@@ -286,12 +335,6 @@ function SyncToLocal:UpdateOne(file, callback)
             Progress:ClosePage()
             return false
         end
-
-        Progress:UpdateDataBar(
-            self.compareListIndex,
-            self.compareListTotal,
-            format(L"%s （%s） 更新中", currentRemoteItem.path, Utils.FormatFileSize(size, "KB"))
-        )
 
         LocalService:Write(self.currentWorld.foldername, currentRemoteItem.path, content)
 
@@ -336,9 +379,10 @@ function SyncToLocal:DownloadZIP()
 
     GitService:DownloadZIP(
         self.currentWorld.foldername,
+        self.currentWorld.user and self.currentWorld.user.username or nil,
         self.currentWorld.lastCommitId,
         function(bSuccess, downloadPath)
-            LocalService:MoveZipToFolder(self.currentWorld.foldername, downloadPath)
+            LocalService:MoveZipToFolder(self.currentWorld.worldpath, downloadPath)
 
             if type(self.callback) == 'function' then
                 self.callback(true, 'success')

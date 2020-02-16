@@ -209,21 +209,69 @@ end
 function Utils:GetFolderName()
     local originWorldPath = ParaWorld.GetWorldDirectory()
 
-    local foldername = string.match(originWorldPath, "worlds/DesignHouse/.+")
+    originWorldPath = string.gsub(originWorldPath, "\\", "/")
 
-    if not foldername then
-        foldername = string.match(originWorldPath, "worlds\\DesignHouse\\.+")
+    if string.sub(originWorldPath, -1, -1) == "/" then
+        originWorldPath = string.sub(originWorldPath, 0, -2)
     end
 
-    if not foldername then
+    local pathArray = {}
+
+    for item in string.gmatch(originWorldPath, "[^/]+") do
+        pathArray[#pathArray + 1] = item
+    end
+
+    local foldernameDefault = pathArray[#pathArray]
+
+    if not foldernameDefault then
         return ''
     end
 
-    foldername = string.gsub(foldername, "worlds/DesignHouse/", "")
-    foldername = string.gsub(foldername, "worlds\\DesignHouse\\", "")
-    foldername = string.gsub(foldername, "/", "")
-    foldername = string.gsub(foldername, "\\", "")
-    foldername = Encoding.DefaultToUtf8(foldername)
+    return Encoding.DefaultToUtf8(foldernameDefault)
+end
 
-    return foldername
+function Utils:UnifiedTimestampFormat(data)
+    if not data then
+        return 0
+    end
+
+    local years = 0
+    local months = 0
+    local days = 0
+    local hours = 0
+    local minutes = 0
+
+    if string.find(data, "T") then
+        local date = string.match(data or "", "^%d+-%d+-%d+")
+        local time = string.match(data or "", "%d+:%d+")
+
+        years = string.match(date or "", "^(%d+)-")
+        months = string.match(date or "", "-(%d+)-")
+        days = string.match(date or "", "-(%d+)$")
+
+        hours = string.match(time or "", "^(%d+):")
+        minutes = string.match(time or "", ":(%d+)")
+
+        local timestamp = os.time{ year = years, month = months, day = days, hour = hours, min = minutes }
+
+        if timestamp then
+            return timestamp + 8 * 3600
+        else
+            return 0
+        end
+    else
+        local date = string.match(data or "", "^%d+-%d+-%d+")
+        local time = string.match(data or "", "%d+-%d+$")
+
+        years = string.match(date or "", "^(%d+)-")
+        months = string.match(date or "", "-(%d+)-")
+        days = string.match(date or "", "-(%d+)$")
+
+        hours = string.match(time or "", "^(%d+)-")
+        minutes = string.match(time or "", "-(%d+)$")
+
+        local timestamp = os.time{ year = years, month = months, day = days, hour = hours, min = minutes }
+
+        return timestamp or 0
+    end
 end
