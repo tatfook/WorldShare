@@ -43,7 +43,7 @@ end
 -- url: /worlds/%s
 -- method: PUT
 -- return: object
-function KeepworkWorldsApi:UpdateWorldinfo(worldId, params, success, error)
+function KeepworkWorldsApi:UpdateWorldInfo(worldId, params, success, error)
     if type(worldId) ~= 'number' or type(params) ~= 'table' then
         return false
     end

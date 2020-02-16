@@ -223,7 +223,7 @@ function UserConsole:HandleWorldId(pid)
             if token then
                 world:SetHttpHeaders({Authorization = format("Bearer %s", token)})
             end
-            
+
             local fileUrl = world:GetLocalFileName()
 
             if ParaIO.DoesFileExist(fileUrl) then
@@ -278,7 +278,7 @@ function UserConsole:HandleWorldId(pid)
                         if data == 'local' then
                             LoadWorld(world, "never")
                         elseif data == 'remote' then
-                            LoadWorld(world, "auto")
+                            LoadWorld(world, "force")
                         end
                     end
                 end)
@@ -481,7 +481,7 @@ function UserConsole:WorldRename(currentItemIndex, tempModifyWorldname, callback
             end)
         else
             -- just remote world exist
-            KeepworkServiceWorld:GetWorld(currentWorld.foldername, function(data)
+            KeepworkServiceWorld:GetWorld(currentWorld.foldername, currentWorld.shared, function(data)
                 local extra = data and data.extra or {}
 
                 extra.worldTagName = tempModifyWorldname

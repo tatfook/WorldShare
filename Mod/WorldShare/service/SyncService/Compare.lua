@@ -7,6 +7,14 @@ use the lib:
 ------------------------------------------------------------
 local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
 ------------------------------------------------------------
+
+status meaning:
+1:local only
+2:network only
+3:both
+4:network newest
+5:local newest
+
 ]]
 local Encoding = commonlib.gettable("commonlib.Encoding")
 local WorldRevision = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision")
@@ -19,8 +27,10 @@ local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua"
 local GitEncoding = NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua")
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
+local LocalServiceWorld = NPL.load("../LocalService/World.lua")
 local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
+local KeepworkServiceWorld = NPL.load("../KeepworkService/World.lua")
 local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
 
 local Compare = NPL.export()
@@ -153,7 +163,7 @@ function Compare:CompareRevision()
             currentRevision = tonumber(currentRevision) or 0
             remoteRevision = tonumber(data) or 0
 
-            self:UpdateSelectWorldInRemoteWorldsList(currentWorld.foldername, remoteRevision)
+            self:UpdateSelectWorldInCurrentWorldList(currentWorld.foldername, remoteRevision)
 
             Mod.WorldShare.Store:Set("world/currentRevision", currentRevision)
             Mod.WorldShare.Store:Set("world/remoteRevision", remoteRevision)
@@ -178,20 +188,20 @@ function Compare:CompareRevision()
     end
 end
 
-function Compare:UpdateSelectWorldInRemoteWorldsList(worldName, remoteRevision)
-    local remoteWorldsList = Mod.WorldShare.Store:Get('world/remoteWorldsList')
+function Compare:UpdateSelectWorldInCurrentWorldList(worldName, remoteRevision)
+    local currentWorldList = Mod.WorldShare.Store:Get('world/compareWorldList')
 
-    if not remoteWorldsList or not worldName then
+    if not currentWorldList or not worldName then
         return false
     end
 
-    for key, item in ipairs(remoteWorldsList) do
+    for key, item in ipairs(currentWorldList) do
         if item.worldName == worldName then
             item.revision = remoteRevision
         end
     end
 
-    Mod.WorldShare.Store:Set('world/remoteWorldsList', remoteWorldsList)
+    Mod.WorldShare.Store:Set('world/compareWorldList', currentWorldList)
 end
 
 function Compare:HasRevision()
@@ -213,6 +223,12 @@ end
 function Compare:GetCurrentWorldInfo(callback)
     local foldername = Mod.WorldShare.Utils:GetFolderName() or ''
     local currentWorld
+
+    if Mod.WorldShare.Store:Get("world/readonly") then
+        System.World.readonly = true
+        GameLogic.options:ResetWindowTitle()
+        Mod.WorldShare.Store:Remove("world/readonly")
+    end
 
     if GameLogic.IsReadOnly() then
         local originWorldPath = ParaWorld.GetWorldDirectory()
@@ -245,13 +261,17 @@ function Compare:GetCurrentWorldInfo(callback)
         Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
         Mod.WorldShare.Store:Set("world/currentRevision", GameLogic.options:GetRevision())
     else
-        local compareWorldList = Mod.WorldShare.Store:Get("world/compareWorldList")
+        local currentWorldList = Mod.WorldShare.Store:Get("world/compareWorldList")
     
-        if compareWorldList then
+        if currentWorldList then
             local searchCurrentWorld = nil
-    
-            for key, item in ipairs(compareWorldList) do
-                if item.foldername == foldername and not item.is_zip then
+            local worldpath = ParaWorld.GetWorldDirectory()
+            local shared = string.match(worldpath, "shared") == "shared" and true or nil
+
+            for key, item in ipairs(currentWorldList) do
+                if item.foldername == foldername and
+                   item.shared == shared and 
+                   not item.is_zip then
                     searchCurrentWorld = item
                     break
                 end
@@ -264,7 +284,7 @@ function Compare:GetCurrentWorldInfo(callback)
 
                 if currentWorld.status == 2 then
                     currentWorld.status = 3
-                    currentWorld.worldpath = ParaWorld.GetWorldDirectory()
+                    currentWorld.worldpath = worldpath
                     currentWorld.local_tagname = currentWorld.remote_tagname
                 end
 
@@ -309,7 +329,65 @@ function Compare:GetCurrentWorldInfo(callback)
         Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
     end
 
+    if not GameLogic.IsReadOnly() and currentWorld.project and currentWorld.project.memberCount > 1 then
+        KeepworkServiceWorld:UpdateLockHeartbeatStart(currentWorld.kpProjectId, "exclusive", currentWorld.revision)
+    end
+
     if type(callback) == 'function' then
         callback()
+    end
+end
+
+function Compare:RefreshWorldList(callback)
+    local localWorlds = LocalServiceWorld:GetWorldList()
+
+    if not KeepworkService:IsSignedIn() then
+        local currentWorldList = LocalServiceWorld:MergeInternetLocalWorldList(localWorlds)
+
+        self.SortWorldList(currentWorldList)
+        Mod.WorldShare.Store:Set("world/compareWorldList", currentWorldList)
+
+        if type(callback) == 'function' then
+            callback(currentWorldList)
+        end
+    else
+        KeepworkServiceWorld:MergeRemoteWorldList(
+            localWorlds,
+            function(currentWorldList)
+                currentWorldList = LocalServiceWorld:MergeInternetLocalWorldList(currentWorldList)
+                self.SortWorldList(currentWorldList)
+                Mod.WorldShare.Store:Set("world/compareWorldList", currentWorldList)
+                if type(callback) == 'function' then
+                    callback(currentWorldList)
+                end
+            end
+        )
+    end
+end
+
+function Compare.SortWorldList(currentWorldList)
+    if type(currentWorldList) == 'table' and #currentWorldList > 0 then
+        local tmp = 0
+
+        for i = 1, #currentWorldList - 1 do
+            for j = 1, #currentWorldList - i do
+                local curItemModifyTime = 0
+                local nextItemModifyTime = 0
+
+                if currentWorldList[j] and currentWorldList[j].modifyTime then
+                    curItemModifyTime = currentWorldList[j].modifyTime
+                end
+
+                if currentWorldList[j + 1] and currentWorldList[j + 1].modifyTime then
+                    nextItemModifyTime = currentWorldList[j + 1].modifyTime
+                end
+
+                if curItemModifyTime < nextItemModifyTime then
+                    tmp = currentWorldList[j]
+                    currentWorldList[j] = currentWorldList[j + 1]
+                    currentWorldList[j + 1] = tmp
+                end
+            end
+        end
     end
 end

@@ -101,5 +101,6 @@ function KeepworkService:SetCurrentCommitId()
 
     Mod.WorldShare.worldData = nil
     Mod.WorldShare:SetWorldData("revision", { id = currentWorld.lastCommitId }, currentWorld.worldpath)
+    Mod.WorldShare:SetWorldData("username", currentWorld.user and currentWorld.user.username or "", currentWorld.worldpath)
     Mod.WorldShare:SaveWorldData(currentWorld.worldpath)
 end

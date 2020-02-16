@@ -94,13 +94,13 @@ function GitKeepworkService:DeleteFile(foldername, path, callback)
     )
 end
 
-function GitKeepworkService:DownloadZIP(foldername, commitId, callback)
-    KeepworkReposApi:Download(foldername, commitId, callback, callback)
+function GitKeepworkService:DownloadZIP(foldername, username, commitId, callback)
+    KeepworkReposApi:Download(foldername, username, commitId, callback, callback)
 end
 
 local recursiveData = {}
-function GitKeepworkService:GetTree(foldername, commitId, callback)
-    KeepworkReposApi:Tree(foldername, commitId, function(data, err)
+function GitKeepworkService:GetTree(foldername, username, commitId, callback)
+    KeepworkReposApi:Tree(foldername, username, commitId, function(data, err)
         if type(data) ~= 'table' then
             return false
         end

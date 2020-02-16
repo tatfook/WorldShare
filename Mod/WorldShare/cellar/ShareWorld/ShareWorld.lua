@@ -28,7 +28,7 @@ local ShareWorld = NPL.export()
 function ShareWorld:Init()
     local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
 
-    if not currentWorld or currentWorld.is_zip then
+    if GameLogic.IsReadOnly() or not currentWorld or currentWorld.is_zip then
         _guihelper.MessageBox(L"此世界不支持分享")
         return false
     end
@@ -42,8 +42,9 @@ function ShareWorld:Init()
         function Handle()
             KeepworkServiceProject:GetProjectIdByWorldName(
                 currentWorld.foldername,
+                currentWorld.shared,
                 function()
-                    WorldList:RefreshCurrentServerList(function()
+                    Compare:RefreshWorldList(function()
                         Compare:GetCurrentWorldInfo(
                             function()
                                 Compare:Init(function(result)
@@ -53,7 +54,7 @@ function ShareWorld:Init()
                                 end)
                             end
                         )
-                    end, true)
+                    end)
                 end
             )
         end

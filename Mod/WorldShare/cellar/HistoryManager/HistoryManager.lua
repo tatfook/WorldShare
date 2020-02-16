@@ -541,7 +541,7 @@ function HistoryManager:Enter(index)
         return false
     end
 
-    local historyItemsList = Store:Get('user/historyItemsList')
+    local historyItemsList = Mod.Store:Get('user/historyItemsList')
 
     if type(historyItemsList) ~= 'table' or type(historyItemsList[index]) ~= 'table' then
         return false
@@ -550,7 +550,7 @@ function HistoryManager:Enter(index)
     local curItem = historyItemsList[index]
 
     if curItem.worldType == 'world' and curItem.displayName then
-        local compareWorldList = Store:Get('world/compareWorldList')
+        local compareWorldList = Mod.Store:Get('world/compareWorldList')
 
         for key, item in ipairs(compareWorldList) do
             if item.foldername == curItem.displayName then
