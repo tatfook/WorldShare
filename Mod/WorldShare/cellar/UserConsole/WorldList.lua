@@ -89,7 +89,9 @@ function WorldList:GetWorldIndexByFoldername(foldername, share, iszip)
     local currentWorldList = Mod.WorldShare.Store:Get("world/compareWorldList")
 
     for index, item in ipairs(currentWorldList) do
-        if foldername == item.foldername and share == item.share and iszip == item.is_zip then
+        if foldername == item.foldername and
+           share == item.shared and
+           iszip == item.is_zip then
             return index
         end
     end
