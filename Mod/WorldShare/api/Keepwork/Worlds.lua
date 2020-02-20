@@ -23,7 +23,7 @@ local KeepworkWorldsApi = NPL.export()
 ]]
 -- return: object
 function KeepworkWorldsApi:GetWorldList(success, error)
-    local url = '/worlds'
+    local url = '/joinedWorlds'
 
     KeepworkBaseApi:Get(url, nil, nil, success, error)
 end
@@ -35,7 +35,7 @@ end
 ]]
 -- return: object
 function KeepworkWorldsApi:GetWorldByName(foldername, success, error)
-    local url = format("/worlds?worldName=%s", Encoding.url_encode(foldername or ''))
+    local url = format("/joinedWorlds?worldName=%s", Encoding.url_encode(foldername or ''))
 
     KeepworkBaseApi:Get(url, nil, nil, success, error)
 end

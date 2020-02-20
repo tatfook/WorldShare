@@ -53,8 +53,9 @@ local HistoryManager = NPL.load("(gl)Mod/WorldShare/cellar/HistoryManager/Histor
 local WorldExitDialog = NPL.load("(gl)Mod/WorldShare/cellar/WorldExitDialog/WorldExitDialog.lua")
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local Grade = NPL.load("(gl)Mod/WorldShare/cellar/Grade/Grade.lua")
-local SocketService = commonlib.gettable("Mod.WorldShare.service.SocketService")
+local KeepworkServiceWorld = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/World.lua")
 
+local SocketService = commonlib.gettable("Mod.WorldShare.service.SocketService")
 local GameLogic = commonlib.gettable("MyCompany.Aries.Game.GameLogic")
 local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 
@@ -173,5 +174,6 @@ function WorldShare:OnWorldLoad()
 end
 
 function WorldShare:OnLeaveWorld()
+    KeepworkServiceWorld:UnlockWorld()
     Store:Remove("world/currentWorld")
 end

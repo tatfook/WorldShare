@@ -150,7 +150,7 @@ function RegisterModal:Bind(method)
             BindingPage:CloseWindow()
 
             if err == 409 then
-                GameLogic.AddBBS(nil, L"手机已被绑定", 3000, "255 0 0")
+                GameLogic.AddBBS(nil, L"该手机号已绑定其他账号，每个手机号码仅可绑定一个账号。如果忘记账号，请使用手机号作为账号登录", 3000, "255 0 0")
                 return false
             end
 

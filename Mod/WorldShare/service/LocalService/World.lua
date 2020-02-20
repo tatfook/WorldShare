@@ -154,15 +154,13 @@ function LocalServiceWorld:GetSharedWorldList()
                 end
             end
         end
-
-        table.sort(dsWorlds, function(a, b)
-            return (a.order or 0) > (b.order or 0)
-        end)
-
-        return dsWorlds
     end
 
-    return {}
+    table.sort(dsWorlds, function(a, b)
+        return (a.order or 0) > (b.order or 0)
+    end)
+
+    return dsWorlds
 end
 
 function LocalServiceWorld:GetInternetLocalWorldList()

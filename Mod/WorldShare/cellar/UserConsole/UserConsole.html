@@ -367,7 +367,7 @@
                 function is_multiplayer_edit()
                     local project = WorldList.GetCurWorldInfo("project",Eval("index"))
                     
-                    if project and project.memberCount > 1 then
+                    if (project and project.memberCount or 0) > 1 then
                         return "background: url(Texture/whitedot.png);background-color: #644c98;"
                     else
                         return ""
