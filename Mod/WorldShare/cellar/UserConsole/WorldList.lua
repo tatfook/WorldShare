@@ -253,7 +253,7 @@ function WorldList:EnterWorld(index)
             Compare:Init(function(result)
                 Mod.WorldShare.MsgBox:Close()
 
-                if currentWorld.project and currentWorld.project.memberCount > 1 then
+                if (currentWorld.project and currentWorld.project.memberCount or 0) > 1 then
                     local function lockAndEnter()
                         Mod.WorldShare.MsgBox:Show(L"请稍后...")
                         KeepworkServiceWorld:UpdateLock(

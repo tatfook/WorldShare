@@ -117,7 +117,13 @@ function SyncToDataSource:IsProjectExist(callback)
             if type(data) == 'table' then
                 callback(true)
             else
-                callback(false)
+                if self.currentWorld.shared then
+                    self.callback(false, L"该项目不属于您，无法上传分享")
+                    self:SetFinish(true)
+                    Progress:ClosePage()
+                else
+                    callback(false)
+                end
             end
         end
     )

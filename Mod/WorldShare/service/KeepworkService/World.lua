@@ -112,16 +112,19 @@ end
 
 -- update project lock info
 function KeepworkServiceWorld:UpdateLock(pid, mode, revision, callback)
+    self.isLockFetching = true
     KeepworkWorldLocksApi:UpdateWorldLockRecord(
         pid,
         mode,
         revision,
         function(data, err)
+            self.isLockFetching = false
             if type(callback) == 'function' then
                 callback(data)
             end
         end,
         function()
+            self.isLockFetching = false
             if type(callback) == 'function' then
                 callback(false)
             end
@@ -130,26 +133,73 @@ function KeepworkServiceWorld:UpdateLock(pid, mode, revision, callback)
 end
 
 function KeepworkServiceWorld:UpdateLockHeartbeatStart(pid, mode, revision)
-    if self.lockHeartbeat then
+    if self.isUnlockFetching or self.lockHeartbeat then
+        Mod.WorldShare.Utils.SetTimeOut(function()
+            self:UpdateLockHeartbeatStart(pid, mode, revision)
+        end, 3000)
         return false
     end
 
     self.lockHeartbeat = true
+    local lockTime = 0
 
     local function Heartbeat()
-        self:UpdateLock(pid, mode, revision)
+        if lockTime == 0 then
+            self:UpdateLock(pid, mode, revision, function(result)
+                if self.lockHeartbeat then
+                    lockTime = lockTime + 1
+                    Heartbeat()
+                end
+            end)
+            return true
+        end
+
         Mod.WorldShare.Utils.SetTimeOut(function()
             if self.lockHeartbeat then
+                lockTime = lockTime + 1
+
+                if lockTime == 120 then
+                    lockTime = 0
+                end
+
                 Heartbeat()
             end
-        end, 120 * 1000)
+        end, 1000)
     end
 
     Heartbeat()
 end
 
-function KeepworkServiceWorld:UpdateLockHeartbeatStop()
+function KeepworkServiceWorld:UnlockWorld()
     self.lockHeartbeat = false
+    local currentEnterWorld = Mod.WorldShare.Store:Get("world/currentEnterWorld")
+
+    if currentEnterWorld then
+        if (currentEnterWorld.project and currentEnterWorld.project.memberCount or 0) > 1 then
+            self.isUnlockFetching = true
+
+            local function unlock()
+                if self.isLockFetching then
+                    Mod.WorldShare.Utils.SetTimeOut(function()
+                        unlock()
+                    end, 3000)
+                    return false
+                end
+
+                KeepworkWorldLocksApi:RemoveWorldLockRecord(
+                    currentEnterWorld.kpProjectId,
+                    function()
+                        self.isUnlockFetching = false
+                    end,
+                    function()
+                        self.isUnlockFetching = false
+                    end
+                )
+            end
+
+            unlock()
+        end
+    end
 end
 
 function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
@@ -182,7 +232,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
             local status
             local remoteShared
 
-            if tonumber(remoteWorldUserId) ~= (userId) then
+            if remoteWorldUserId ~= 0 and tonumber(remoteWorldUserId) ~= (userId) then
                 remoteShared = true
             end
 
@@ -232,7 +282,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                 end
 
                 -- shared world path
-                if remoteWorldUserId ~= tonumber(userId) then
+                if remoteWorldUserId ~= 0 and remoteWorldUserId ~= tonumber(userId) then
                     worldpath = commonlib.Encoding.Utf8ToDefault(
                         format(
                             "%s/_shared/%s/%s/",
@@ -256,7 +306,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
 
             -- shared world text
             if remoteShared then
-                text = DItem['user']['username'] .. '/' .. text
+                text = (DItem['user'] and DItem['user']['username'] or '') .. '/' .. text
             end
 
             currentWorld = {
@@ -289,7 +339,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                 local remoteWorldUserId = DItem["user"] and DItem["user"]["id"] and tonumber(DItem["user"]["id"]) or 0
                 local remoteShared
 
-                if tonumber(remoteWorldUserId) ~= (userId) then
+                if remoteWorldUserId ~= 0 and tonumber(remoteWorldUserId) ~= (userId) then
                     remoteShared = true
                 end
 
@@ -304,7 +354,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
             if not isExist then
                 currentWorld = LItem
                 currentWorld.modifyTime = Mod.WorldShare.Utils:UnifiedTimestampFormat(currentWorld.writedate)
-                currentWorld.text = currentWorld.foldername
+                currentWorld.text = currentWorld.text
                 currentWorld.local_tagname = LItem['local_tagname']
                 currentWorld.status = 1 --local only
                 currentWorld.is_zip = LItem['is_zip'] or false
