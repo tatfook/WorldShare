@@ -13,7 +13,21 @@ local KeepworkBaseApi = NPL.load('./BaseApi.lua')
 
 local KeepworkWorldLocksApi = NPL.export()
 
--- url: /worldlock
+-- url: /worldlocks
+-- method: GET
+--[[
+  pid inter necessary project id
+]]
+-- return: object
+function KeepworkWorldLocksApi:GetWorldLockInfo(pid, success, error)
+    if type(pid) ~= 'number' then
+        return false
+    end
+
+    KeepworkBaseApi:Get("/worldlocks?pid=" .. tostring(pid), nil, nil, success, error)
+end
+
+-- url: /worldlocks
 -- method: POST
 -- params:
 --[[
@@ -24,17 +38,19 @@ local KeepworkWorldLocksApi = NPL.export()
   password string not necessary server password
 ]]
 -- return: object
-function KeepworkWorldLocksApi:UpdateWorldLockRecord(pid, mode, revision, success, error)
-  local params = {
-    pid = pid,
-    mode = mode,
-    revision = revision,
-  }
+function KeepworkWorldLocksApi:UpdateWorldLockRecord(pid, mode, revision, server, password, success, error)
+    local params = {
+        pid = pid,
+        mode = mode,
+        revision = revision,
+        server = server,
+        password = password,
+    }
 
-  KeepworkBaseApi:Post("/worldlocks", params, nil, success, error)
+    KeepworkBaseApi:Post("/worldlocks", params, nil, success, error)
 end
 
--- url: /worldlock
+-- url: /worldlocks
 -- method: DELETE
 -- params:
 --[[
@@ -42,5 +58,5 @@ end
 ]]
 -- return: object
 function KeepworkWorldLocksApi:RemoveWorldLockRecord(pid, success, error)
-  KeepworkBaseApi:Delete("/worldlocks", { pid = pid }, nil, success, error)
+    KeepworkBaseApi:Delete("/worldlocks", { pid = pid }, nil, success, error)
 end

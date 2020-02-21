@@ -376,6 +376,7 @@ function SyncToDataSource:UploadOne(file, callback)
     GitService:Upload(
         self.currentWorld.foldername,
         currentLocalItem.filename,
+        self.currentWorld.user and self.currentWorld.user.username or nil,
         currentLocalItem.file_content_t,
         function(bIsUpload)
             if bIsUpload then
@@ -439,6 +440,7 @@ function SyncToDataSource:UpdateOne(file, callback)
 
     GitService:Update(
         self.currentWorld.foldername,
+        self.currentWorld.user and self.currentWorld.user.username or nil,
         currentLocalItem.filename,
         currentLocalItem.file_content_t,
         function(bIsUpdate)
@@ -550,7 +552,7 @@ function SyncToDataSource:UpdateRecord(callback)
             }
 
             local worldInfo = {}
-            local username = Mod.WorldShare.Store:Get("user/username")
+            local username = self.currentWorld.user and self.currentWorld.user.username or nil
             local base32Foldername = GitEncoding.Base32(self.currentWorld.foldername or '')
             local repoPath = Mod.WorldShare.Utils.UrlEncode(username .. '/' .. base32Foldername)
 
@@ -558,7 +560,7 @@ function SyncToDataSource:UpdateRecord(callback)
             worldInfo.revision = Mod.WorldShare.Store:Get("world/currentRevision")
             worldInfo.fileSize = filesTotals
             worldInfo.commitId = lastCommitSha
-            worldInfo.username = username
+            -- worldInfo.username = username
             worldInfo.archiveUrl = format('%s/repos/%s/archive.zip?ref=%s', KeepworkService:GetCoreApi(), repoPath, lastCommitSha)
 
             local function AfterHandlePreview(preview)
@@ -673,5 +675,9 @@ function SyncToDataSource:UpdateRecord(callback)
         KeepworkServiceWorld:GetWorld(self.currentWorld.foldername, self.currentWorld.shared, HandleGetWorld)
     end
 
-    GitService:GetCommits(self.currentWorld.foldername, Handle)
+    GitService:GetCommits(
+        self.currentWorld.foldername,
+        self.currentWorld.user and self.currentWorld.user.username or nil,
+        Handle
+    )
 end

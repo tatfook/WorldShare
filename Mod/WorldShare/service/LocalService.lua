@@ -118,15 +118,13 @@ function LocalService:GetFileContent(filePath)
     end
 end
 
-function LocalService:Write(foldername, path, content)
-    if not foldername or not path or type(content) ~= 'string' then
+function LocalService:Write(worldpath, path, content)
+    if not worldpath or not path or type(content) ~= 'string' then
         return false
     end
 
-    foldername = CommonlibEncoding.Utf8ToDefault(foldername)
     path = CommonlibEncoding.Utf8ToDefault(path)
 
-    local root = Mod.WorldShare.Utils.GetWorldFolderFullPath()
     local allPath = {}
 
     for segmentation in string.gmatch(path, "[^/]+") do
@@ -141,13 +139,12 @@ function LocalService:Write(foldername, path, content)
                 curFolderPath = format("%s/%s", curFolderPath, allPath[i] or '')
             end
 
-            local curCreatePath = format("%s/%s%s/", root, foldername, curFolderPath)
-
+            local curCreatePath = format("%s/%s/", worldpath, curFolderPath)
             ParaIO.CreateDirectory(curCreatePath)
         end
     end
 
-    local writePath = format("%s/%s/%s", root, foldername, path)
+    local writePath = format("%s/%s", worldpath, path)
 
     local write = ParaIO.open(writePath, "w")
 
@@ -155,13 +152,8 @@ function LocalService:Write(foldername, path, content)
     write:close()
 end
 
-function LocalService:Delete(foldername, filename)
-    local deletePath = format(
-                        "%s/%s/%s",
-                        Mod.WorldShare.Utils.GetWorldFolderFullPath(),
-                        CommonlibEncoding.Utf8ToDefault(foldername or ''),
-                        CommonlibEncoding.Utf8ToDefault(filename or '')
-                       )
+function LocalService:Delete(worldpath, filename)
+    local deletePath = format("%s/%s", worldpath, CommonlibEncoding.Utf8ToDefault(filename or ''))
 
     ParaIO.DeleteFile(deletePath)
 end

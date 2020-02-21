@@ -110,13 +110,31 @@ function KeepworkServiceWorld:GetWorldByProjectId(kpProjectId, callback)
     end)
 end
 
+function KeepworkServiceWorld:GetLockInfo(pid, callback)
+    if type(callback) ~= 'function' then
+        return false
+    end
+
+    KeepworkWorldLocksApi:GetWorldLockInfo(
+        pid,
+        function(data, err)
+            callback(data)
+        end,
+        function(data, err)
+            callback(nil)
+        end
+    )
+end
+
 -- update project lock info
-function KeepworkServiceWorld:UpdateLock(pid, mode, revision, callback)
+function KeepworkServiceWorld:UpdateLock(pid, mode, revision, server, password, callback)
     self.isLockFetching = true
     KeepworkWorldLocksApi:UpdateWorldLockRecord(
         pid,
         mode,
         revision,
+        server,
+        password,
         function(data, err)
             self.isLockFetching = false
             if type(callback) == 'function' then
@@ -132,10 +150,10 @@ function KeepworkServiceWorld:UpdateLock(pid, mode, revision, callback)
     )
 end
 
-function KeepworkServiceWorld:UpdateLockHeartbeatStart(pid, mode, revision)
+function KeepworkServiceWorld:UpdateLockHeartbeatStart(pid, mode, revision, server, password)
     if self.isUnlockFetching or self.lockHeartbeat then
         Mod.WorldShare.Utils.SetTimeOut(function()
-            self:UpdateLockHeartbeatStart(pid, mode, revision)
+            self:UpdateLockHeartbeatStart(pid, mode, revision, server, password)
         end, 3000)
         return false
     end
@@ -145,7 +163,13 @@ function KeepworkServiceWorld:UpdateLockHeartbeatStart(pid, mode, revision)
 
     local function Heartbeat()
         if lockTime == 0 then
-            self:UpdateLock(pid, mode, revision, function(result)
+            self:UpdateLock(
+                pid,
+                mode,
+                revision,
+                server,
+                password,
+                function(result)
                 if self.lockHeartbeat then
                     lockTime = lockTime + 1
                     Heartbeat()
@@ -158,7 +182,7 @@ function KeepworkServiceWorld:UpdateLockHeartbeatStart(pid, mode, revision)
             if self.lockHeartbeat then
                 lockTime = lockTime + 1
 
-                if lockTime == 120 then
+                if lockTime == 30 then
                     lockTime = 0
                 end
 

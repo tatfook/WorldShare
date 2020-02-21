@@ -22,10 +22,10 @@ function GitKeepworkService:GetContent(foldername, path, commitId, callback)
     
 end
 
-function GitKeepworkService:GetContentWithRaw(foldername, path, commitId, callback)
+function GitKeepworkService:GetContentWithRaw(foldername, username, path, commitId, callback)
     KeepworkReposApi:Raw(
-        nil,
         foldername,
+        username,
         path,
         commitId,
         function(data, err)
@@ -59,9 +59,10 @@ function GitKeepworkService:Upload(foldername, path, content, callback)
     )
 end
 
-function GitKeepworkService:Update(foldername, path, content, callback)
+function GitKeepworkService:Update(foldername, username, path, content, callback)
     KeepworkReposApi:UpdateFile(
         foldername,
+        username,
         path,
         content,
         function()
@@ -148,8 +149,8 @@ function GitKeepworkService:GetRecursive(children)
     end
 end
 
-function GitKeepworkService:GetCommits(foldername, callback)
-    KeepworkReposApi:CommitInfo(foldername, callback)
+function GitKeepworkService:GetCommits(foldername, username, callback)
+    KeepworkReposApi:CommitInfo(foldername, username, callback)
 end
 
 function GitKeepworkService:GetWorldRevision(kpProjectId, isGetMine, callback)
@@ -170,8 +171,8 @@ function GitKeepworkService:GetWorldRevision(kpProjectId, isGetMine, callback)
             end
 
             KeepworkReposApi:Raw(
-                data.username,
                 data.name,
+                data.username,
                 'revision.xml',
                 data.world.commitId,
                 function(data, err)

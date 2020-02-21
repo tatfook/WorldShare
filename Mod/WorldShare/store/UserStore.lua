@@ -51,6 +51,13 @@ function UserStore:Getter()
     return {
         GetPlayerController = function()
             return self.playerController
+        end,
+        GetClientPassword = function()
+            if not self.clientPassword then
+                self.clientPassword = os.time()
+            end
+
+            return self.clientPassword
         end
     }
 end
