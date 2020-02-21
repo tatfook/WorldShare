@@ -330,7 +330,7 @@ function Compare:GetCurrentWorldInfo(callback)
     end
 
     if not GameLogic.IsReadOnly() and (currentWorld.project and currentWorld.project.memberCount or 0) > 1 then
-        KeepworkServiceWorld:UpdateLockHeartbeatStart(currentWorld.kpProjectId, "exclusive", currentWorld.revision)
+        KeepworkServiceWorld:UpdateLockHeartbeatStart(currentWorld.kpProjectId, "exclusive", currentWorld.revision, nil, nil)
     end
 
     Mod.WorldShare.Store:Set("world/currentEnterWorld", currentWorld)

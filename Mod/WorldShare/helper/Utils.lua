@@ -230,6 +230,15 @@ function Utils:GetFolderName()
     return Encoding.DefaultToUtf8(foldernameDefault)
 end
 
+function Utils:GetCurrentTime(isUTC)
+    if isUTC then
+        return os.time(os.date("!*t"))
+    else
+        return os.time()
+    end
+end
+
+-- 0000-00-00 00-00
 function Utils:UnifiedTimestampFormat(data)
     if not data then
         return 0
@@ -274,4 +283,19 @@ function Utils:UnifiedTimestampFormat(data)
 
         return timestamp or 0
     end
+end
+
+-- 0000-00-00 00:00:00
+function Utils:DatetimeToTimestamp(str)
+    local years = string.match(str or "", "^(%d+)-")
+    local months = string.match(str or "", "-(%d+)-")
+    local days = string.match(str or "", "-(%d+) ")
+
+    local hours = string.match(str or "", " (%d+):")
+    local minutes = string.match(str or "", ":(%d+):")
+    local seconds = string.match(str or "", ":(%d+)$")
+
+    local timestamp = os.time{ year = years, month = months, day = days, hour = hours, min = minutes, sec = seconds }
+
+    return timestamp or 0
 end

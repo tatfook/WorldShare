@@ -47,9 +47,9 @@ function GitService:Upload(...)
     end
 end
 
-function GitService:Update(projectName, path, content, sha, callback)
+function GitService:Update(...)
     if self:GetDataSourceType() == KEEPWORK then
-        GitKeepworkService:Update(projectName, path, content, sha, callback)
+        GitKeepworkService:Update(...)
     end
 end
 
