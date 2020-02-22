@@ -37,9 +37,17 @@
                 end
 
                 function get_window_style()
-                    Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
+                    return Mod.WorldShare.Utils.FixCenter(500, 270)
+                end
 
-                    return Utils.FixCenter(500, 270)
+                function is_multiplayer_world()
+                    local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
+
+                    if (currentWorld.project and currentWorld.project.memberCount or 0) > 1 then
+                        return true
+                    else
+                        return false
+                    end
                 end
             ]]>
         </script>
@@ -59,10 +67,10 @@
                         <pe:if condition="<%= get_status('local') %>">
                             <input type="button" onclick="delete_local()" class="button_highlight" style="float:left;margin-top:5px;margin-right:10px;min-width:130px;height: 30px;" name="" value='<%=L"只删除本地"%>' />
                         </pe:if>
-                        <pe:if condition="<%= get_status('remote') %>">
+                        <pe:if condition="<%= get_status('remote') and not is_multiplayer_world() %>">
                             <input type="button" onclick="delete_remote()" class="button_highlight" style="float:left;margin-top:5px;margin-right:10px;min-width:130px;height: 30px;" name="" value='<%=L"只删除远程"%>' />
                         </pe:if>
-                        <pe:if condition="<%= get_status('all') %>">
+                        <pe:if condition="<%= get_status('all') and not is_multiplayer_world() %>">
                             <input type="button" onclick="delete_all()" class="button_highlight" style="float:left;margin-top:5px;margin-right:10px;min-width:130px;height: 30px;" name="" value='<%=L"全部删除"%>' />
                         </pe:if>
                     </div>
