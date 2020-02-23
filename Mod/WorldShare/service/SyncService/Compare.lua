@@ -329,6 +329,12 @@ function Compare:GetCurrentWorldInfo(callback)
         Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
     end
 
+    -- for offline world
+    if not KeepworkService:IsSignedIn() and currentWorld.shared then
+        System.World.readonly = true
+        GameLogic.options:ResetWindowTitle()
+    end
+
     if not GameLogic.IsReadOnly() and (currentWorld.project and currentWorld.project.memberCount or 0) > 1 then
         KeepworkServiceWorld:UpdateLockHeartbeatStart(currentWorld.kpProjectId, "exclusive", currentWorld.revision, nil, nil)
     end
