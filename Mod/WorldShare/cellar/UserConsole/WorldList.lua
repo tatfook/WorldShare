@@ -33,16 +33,8 @@ local WorldList = NPL.export()
 
 WorldList.zipDownloadFinished = true
 
-function WorldList:RefreshCurrentServerList(callback, isForce)
+function WorldList:RefreshCurrentServerList(callback)
     local UserConsolePage = Mod.WorldShare.Store:Get('page/UserConsole')
-
-    if not UserConsolePage and not isForce then
-        if type(callback) == 'function' then
-            callback()
-        end
-
-        return false
-    end
 
     self:SetRefreshing(true)
 
@@ -52,6 +44,10 @@ function WorldList:RefreshCurrentServerList(callback, isForce)
         if UserConsolePage then
             UserConsolePage:GetNode("gw_world_ds"):SetAttribute("DataSource", currentWorldList)
             WorldList:OnSwitchWorld(1)
+        end
+        
+        if type(callback) == 'function' then
+            callback()
         end
     end)
 end
@@ -244,12 +240,16 @@ function WorldList:EnterWorld(index)
         -- compare list is not the same before login
         local index = self:GetWorldIndexByFoldername(currentWorld.foldername, currentWorld.shared, currentWorld.is_zip)
 
+        if not index then
+            return false
+        end
+
         self:OnSwitchWorld(index)
 
         local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
         local userId = Mod.WorldShare.Store:Get("user/userId")
         local clientPassword = Mod.WorldShare.Store:Getter("user/GetClientPassword")
-
+ 
         local function LockAndEnter()
             Mod.WorldShare.MsgBox:Show(L"请稍后...")
             KeepworkServiceWorld:GetLockInfo(
@@ -418,7 +418,14 @@ function WorldList:EnterWorld(index)
 
     if not KeepworkService:IsSignedIn() and currentWorld.kpProjectId then
         LoginModal:Init(function(result)
-            Handle(result)
+            if result then
+                -- refresh world list after 
+                self:RefreshCurrentServerList(function()
+                    Handle(result)
+                end)
+            else
+                Handle(result)
+            end
         end)
     else
         Handle()
