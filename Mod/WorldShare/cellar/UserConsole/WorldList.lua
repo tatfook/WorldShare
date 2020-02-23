@@ -214,6 +214,28 @@ function WorldList:EnterWorld(index)
         end
 
         if not KeepworkService:IsSignedIn() then
+            local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+
+            if currentWorld.shared then
+                Mod.WorldShare.MsgBox:Dialog(
+                    L"此世界为多人世界，请登陆后再打开世界，或者以只读模式打开世界",
+                    {
+                        Title = L"多人世界",
+                        Yes = L"知道了",
+                        No = L"只读模式打开"
+                    },
+                    function(res)
+                        if res and res == _guihelper.DialogResult.No then
+                            InternetLoadWorld.EnterWorld()
+                            UserConsole:ClosePage()
+                        end
+                    end,
+                    _guihelper.MessageBoxButtons.YesNo
+                )
+
+                return false
+            end
+
             self:OnSwitchWorld(index)
             InternetLoadWorld.EnterWorld()
             return false
@@ -239,7 +261,6 @@ function WorldList:EnterWorld(index)
                         canLocked = true
                     else
                         if data and data.owner and data.owner.userId == userId then
-                            
                             if tostring(data.password) == tostring(clientPassword) then
                                 canLocked = true
                             else
@@ -249,7 +270,6 @@ function WorldList:EnterWorld(index)
                                 if (curTimestamp - lastLockTimestamp) > 60 then
                                     canLocked = true
                                 else
-                                    echo(curTimestamp - lastLockTimestamp, true)
                                     canLocked = false
                                     Mod.WorldShare.MsgBox:Close()
     
