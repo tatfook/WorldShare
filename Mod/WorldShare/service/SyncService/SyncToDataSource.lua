@@ -553,7 +553,7 @@ function SyncToDataSource:UpdateRecord(callback)
             }
 
             local worldInfo = {}
-            local username = self.currentWorld.user and self.currentWorld.user.username or nil
+            local username = self.currentWorld.user and self.currentWorld.user.username or Mod.WorldShare.Store:Get("user/username")
             local base32Foldername = GitEncoding.Base32(self.currentWorld.foldername or '')
             local repoPath = Mod.WorldShare.Utils.UrlEncode(username .. '/' .. base32Foldername)
 
