@@ -41,9 +41,10 @@ function GitKeepworkService:GetContentWithRaw(foldername, username, path, commit
     )
 end
 
-function GitKeepworkService:Upload(foldername, path, content, callback)
+function GitKeepworkService:Upload(foldername, username, path, content, callback)
     KeepworkReposApi:CreateFile(
         foldername,
+        username,
         path,
         content,
         function()
