@@ -79,9 +79,10 @@ function GitKeepworkService:Update(foldername, username, path, content, callback
     )
 end
 
-function GitKeepworkService:DeleteFile(foldername, path, callback)
+function GitKeepworkService:DeleteFile(foldername, username, path, callback)
     KeepworkReposApi:RemoveFile(
         foldername,
+        username,
         path,
         function()
             if type(callback) == 'function' then

@@ -53,9 +53,9 @@ function GitService:Update(...)
     end
 end
 
-function GitService:DeleteFile(projectName, path, sha, callback)
+function GitService:DeleteFile(...)
     if self:GetDataSourceType() == KEEPWORK then
-        GitKeepworkService:DeleteFile(projectName, path, sha, callback)
+        GitKeepworkService:DeleteFile(...)
     end
 end
 

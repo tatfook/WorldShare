@@ -480,6 +480,7 @@ function SyncToDataSource:DeleteOne(file, callback)
 
     GitService:DeleteFile(
         self.currentWorld.foldername,
+        self.currentWorld.user and self.currentWorld.user.username or nil,
         currentRemoteItem.path,
         function(bIsDelete)
             if bIsDelete then
