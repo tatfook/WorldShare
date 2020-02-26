@@ -373,8 +373,8 @@ function WorldList:EnterWorld(index)
 
                 if (currentWorld.project and currentWorld.project.memberCount or 0) > 1 then
                     if result == Compare.REMOTEBIGGER then
-                        local currentRevision = Mod.WorldShare.Store:Get("world/currentRevision") or 0;
-                        local remoteRevision = Mod.WorldShare.Store:Get("world/remoteRevision") or 0;
+                        local currentRevision = Mod.WorldShare.Store:Get("world/currentRevision") or 0
+                        local remoteRevision = Mod.WorldShare.Store:Get("world/remoteRevision") or 0
 
                         Mod.WorldShare.MsgBox:Dialog(
                             format(L"你的本地版本%d比远程版本%d旧， 是否更新为最新的远程版本？", currentRevision, remoteRevision),
@@ -385,6 +385,7 @@ function WorldList:EnterWorld(index)
                             },
                             function(res)
                                 if res and res == _guihelper.DialogResult.Yes then
+                                    SyncMain:BackupWorld()
                                     Mod.WorldShare.MsgBox:Show(L"请稍后...")
                                     SyncToLocal:Init(function()
                                         Mod.WorldShare.MsgBox:Close()
