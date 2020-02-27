@@ -49,9 +49,6 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
     local username = response["username"] or ""
     local nickname = response["nickname"] or ""
 
-    local SetUserinfo = Mod.WorldShare.Store:Action("user/SetUserinfo")
-    SetUserinfo(token, userId, username, nickname)
-
     if not response.cellphone and not response.email then
         Mod.WorldShare.Store:Set("user/isVerified", false)
     else
@@ -66,6 +63,9 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
     else
         Mod.WorldShare.Store:Set("user/userType", 'plain')
     end
+
+    local SetUserinfo = Mod.WorldShare.Store:Action("user/SetUserinfo")
+    SetUserinfo(token, userId, username, nickname)
 
     LessonOrganizationsApi:GetUserAllOrgs(
         function(data, err)

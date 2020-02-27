@@ -130,6 +130,7 @@ function VersionChange:SelectVersion(index)
     commonlib.Files.DeleteFolder(targetDir)
     ParaIO.CreateDirectory(targetDir)
 
+    currentWorld.status = 2
     currentWorld.lastCommitId = commitId
     Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
 

@@ -28,6 +28,7 @@ local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
 local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
 local LocalServiceWorld = NPL.load("(gl)Mod/WorldShare/service/LocalService/World.lua")
+local SyncToLocal = NPL.load("(gl)Mod/WorldShare/service/SyncService/SyncToLocal.lua")
 
 local WorldList = NPL.export()
 
@@ -350,7 +351,7 @@ function WorldList:EnterWorld(index)
                     return false
                 end
 
-                SyncMain:SyncToLocal(function(result, msg)
+                SyncToLocal:Init(function(result, msg)
                     if not result then
                         return false
                     end
@@ -371,9 +372,12 @@ function WorldList:EnterWorld(index)
                 Mod.WorldShare.MsgBox:Close()
 
                 if (currentWorld.project and currentWorld.project.memberCount or 0) > 1 then
-                    if result ~= Compare.EQUAL then
+                    if result == Compare.REMOTEBIGGER then
+                        local currentRevision = Mod.WorldShare.Store:Get("world/currentRevision") or 0
+                        local remoteRevision = Mod.WorldShare.Store:Get("world/remoteRevision") or 0
+
                         Mod.WorldShare.MsgBox:Dialog(
-                            L"本地版本与远程版本不一致，是否同步后再进入？",
+                            format(L"你的本地版本%d比远程版本%d旧， 是否更新为最新的远程版本？", currentRevision, remoteRevision),
                             {
                                 Title = L"多人世界",
                                 Yes = L"同步",
@@ -381,8 +385,9 @@ function WorldList:EnterWorld(index)
                             },
                             function(res)
                                 if res and res == _guihelper.DialogResult.Yes then
+                                    SyncMain:BackupWorld()
                                     Mod.WorldShare.MsgBox:Show(L"请稍后...")
-                                    SyncMain:SyncToLocal(function()
+                                    SyncToLocal:Init(function()
                                         Mod.WorldShare.MsgBox:Close()
                                         LockAndEnter()
                                     end)
