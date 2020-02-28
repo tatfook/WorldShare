@@ -49,6 +49,7 @@ function MainLogin:Show()
         MainLoginPage:SetValue('autoLogin', PWDInfo.autoLogin or false)
         MainLoginPage:SetValue('rememberMe', PWDInfo.rememberMe or false)
         MainLoginPage:SetValue('password', PWDInfo.password or '')
+        MainLoginPage:SetValue('showaccount', PWDInfo.account or '')
 
         self.loginServer = PWDInfo.loginServer
         self.account = PWDInfo.account
@@ -286,6 +287,7 @@ function MainLogin:SelectAccount(username)
     MainLoginPage:SetValue("autoLogin", session.autoLogin)
     MainLoginPage:SetValue("rememberMe", session.rememberMe)
     MainLoginPage:SetValue("password", session.password)
+    MainLoginPage:SetValue('showaccount', session.account or '')
 
     self:Refresh()
 end
@@ -306,6 +308,7 @@ function MainLogin:RemoveAccount(username)
         MainLoginPage:SetValue("autoLogin", false)
         MainLoginPage:SetValue("rememberMe", false)
         MainLoginPage:SetValue("password", "")
+        MainLoginPage:SetValue("showaccount", "")
     end
 
     self:Refresh()
