@@ -63,6 +63,11 @@
                         LoginModal:Close('FORGET')
                         ForgetPassword:ShowPage()
                     end
+
+                    function write_accout(name, mcmlNode)
+                        local username = mcmlNode:GetUIValue()
+                        page:SetValue("account", username)
+                    end
                 ]]>
             </script>
             <style type="text/mcss">
@@ -104,7 +109,15 @@
                     <form>
                         <div style="margin-bottom:12px;">
                             <div style="<%='float:left;min-width:65px;' .. get_english_style('min-width:73px;') %>"><%= L"账号：" %></div>
-                            <select  name="account" DataSource="<%= get_history_users() %>" EmptyText='<%= L"账户名/邮箱/手机号" %>' onselect="<%= select_account %>" onremove="<%= remove_account %>" class="bbs_text text_field" style="height: 30px;"></select>
+                            <select name="account"
+                                    DataSource="<%= get_history_users() %>"
+                                    EmptyText='<%= L"账户名/邮箱/手机号" %>'
+                                    onselect="<%= select_account %>"
+                                    onremove="<%= remove_account %>"
+                                    class="bbs_text text_field"
+                                    style="height: 30px;">
+                            </select>
+                            <input name="showaccount" onchange="write_accout" type="text" class="bbs_text" style="height: 30px;margin-left: -165px; width: 140px;" EmptyText='<%= L"账户名/邮箱/手机号" %>' />
                         </div>
                         <div style="margin-bottom:12px;">
                             <div style="float:left;min-width:65px"><%= L"密码：" %></div>
