@@ -19,7 +19,7 @@ local LocalService = NPL.export()
 
 LocalService.filter = "*"
 LocalService.nMaxFileLevels = 0
-LocalService.nMaxFilesNum = 500
+LocalService.nMaxFilesNum = 10000
 LocalService.output = {}
 
 function LocalService:Find(path)
