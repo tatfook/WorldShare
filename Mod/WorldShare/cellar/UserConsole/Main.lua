@@ -499,6 +499,7 @@ function UserConsole:WorldRename(currentItemIndex, tempModifyWorldname, callback
                                 worldName = currentWorld.foldername,
                                 extra = extra
                             },
+                            currentWorld.shared,
                             function()
                                 if type(callback) == 'function' then
                                     callback()

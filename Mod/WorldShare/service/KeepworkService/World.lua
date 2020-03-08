@@ -307,21 +307,17 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
 
                 -- shared world path
                 if remoteWorldUserId ~= 0 and remoteWorldUserId ~= tonumber(userId) then
-                    worldpath = commonlib.Encoding.Utf8ToDefault(
-                        format(
-                            "%s/_shared/%s/%s/",
-                            Mod.WorldShare.Utils.GetWorldFolderFullPath(),
-                            DItem["user"]["username"],
-                            DItem["worldName"]
-                        )
+                    worldpath = format(
+                        "%s/_shared/%s/%s/",
+                        Mod.WorldShare.Utils.GetWorldFolderFullPath(),
+                        DItem["user"]["username"],
+                        commonlib.Encoding.Utf8ToDefault(DItem["worldName"])
                     )
                 else
-                    worldpath = commonlib.Encoding.Utf8ToDefault(
-                        format(
-                            "%s/%s/",
-                            Mod.WorldShare.Utils.GetWorldFolderFullPath(),
-                            DItem["worldName"]
-                        )
+                    worldpath = format(
+                        "%s/%s/",
+                        Mod.WorldShare.Utils.GetWorldFolderFullPath(),
+                        commonlib.Encoding.Utf8ToDefault(DItem["worldName"])
                     )
                 end
 
@@ -330,7 +326,11 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
 
             -- shared world text
             if remoteShared then
-                text = (DItem['user'] and DItem['user']['username'] or '') .. '/' .. text
+                if DItem['extra'] and DItem['extra']['worldTagName'] then
+                    text = (DItem['user'] and DItem['user']['username'] or '') .. '/' .. (DItem['extra'] and DItem['extra']['worldTagName'] or '') .. '(' .. text .. ')'
+                else
+                    text = (DItem['user'] and DItem['user']['username'] or '') .. '/' .. text
+                end
             end
 
             currentWorld = {
