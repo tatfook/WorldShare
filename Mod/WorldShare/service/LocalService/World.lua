@@ -124,7 +124,7 @@ function LocalServiceWorld:GetSharedWorldList()
                                         ip = item.ip or "127.0.0.1",
                                         order = item.order,
                                         IsFolder=true, time_text=item.time_text,
-                                        text = worldUsername .. "/" .. filenameUTF8,
+                                        text = worldUsername .. "/" .. display_name,
                                         shared = true,
                                     }
                                 )
@@ -159,7 +159,7 @@ function LocalServiceWorld:GetSharedWorldList()
     table.sort(dsWorlds, function(a, b)
         return (a.order or 0) > (b.order or 0)
     end)
-
+echo(dsWorlds, true)
     return dsWorlds
 end
 
