@@ -159,7 +159,7 @@ function LocalServiceWorld:GetSharedWorldList()
     table.sort(dsWorlds, function(a, b)
         return (a.order or 0) > (b.order or 0)
     end)
-echo(dsWorlds, true)
+
     return dsWorlds
 end
 
