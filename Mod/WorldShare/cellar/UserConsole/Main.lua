@@ -80,7 +80,9 @@ function UserConsole:ShowPage()
 end
 
 function UserConsole:EnterMainLogin()
-    GameMainLogin:next_step({IsLoginModeSelected = false})
+    if System.options.mc == true then
+        GameMainLogin:next_step({IsLoginModeSelected = false})
+    end
 end
 
 function UserConsole:ClosePage()

@@ -247,6 +247,10 @@
                 end
 
                 function close()
+                    if is_signed_in() then
+                        logout()
+                    end
+
                     if Mod.WorldShare.Store:Get("world/isEnterWorld") then
                         UserConsole:ClosePage()
                     else
@@ -395,18 +399,6 @@
                         return true
                     else
                         return false
-                    end
-                end
-
-                function show_close_button()
-                    if Mod.WorldShare.Store:Get("world/isEnterWorld") then
-                        return true
-                    else
-                        if is_signed_in() then
-                            return false
-                        else
-                            return true
-                        end
                     end
                 end
 
@@ -630,12 +622,10 @@
                            type="button"
                            value="<%= L'服务器' .. '...' %>" />
                 </div>
-                <pe:if condition="<%= show_close_button() %>">
-                    <input onclick="close()"
-                           style="margin-top:0px;float:left;background:url(Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#363 59 26 26:7 7 7 7);width:26px;height:26px"
-                           type="button"
-                           align="right" />
-                </pe:if>
+                <input onclick="close()"
+                       style="margin-top:0px;float:left;background:url(Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#363 59 26 26:7 7 7 7);width:26px;height:26px"
+                       type="button"
+                       align="right" />
             </div>
             <div style="height:2px;" width="100%" class="mc_line"></div>
             <div class="user_area">
