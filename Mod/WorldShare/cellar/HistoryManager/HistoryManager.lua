@@ -13,7 +13,6 @@ local Screen = commonlib.gettable("System.Windows.Screen")
 local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
 
 local MdParser = NPL.load("(gl)Mod/WorldShare/parser/MdParser.lua")
-local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local HttpRequest = NPL.load("(gl)Mod/WorldShare/service/HttpRequest.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 local KeepworkServiceProject = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Project.lua")
@@ -30,7 +29,7 @@ function HistoryManager:ShowPage()
     HistoryManager.OnScreenSizeChange()
 
     params._page.OnClose = function()
-        Store:Remove('page/HistoryManager')
+        Mod.WorldShare.Store:Remove('page/HistoryManager')
         Screen:Disconnect("sizeChanged", HistoryManager, HistoryManager.OnScreenSizeChange)
     end
 
@@ -38,11 +37,11 @@ function HistoryManager:ShowPage()
 end
 
 function HistoryManager:SetPage()
-    Store:Set("page/HistoryManager", document:GetPageCtrl())
+    Mod.WorldShare.Store:Set("page/HistoryManager", document:GetPageCtrl())
 end
 
 function HistoryManager.Refresh()
-    local HistoryManagerPage = Store:Get('page/HistoryManager')
+    local HistoryManagerPage = Mod.WorldShare.Store:Get('page/HistoryManager')
 
     if (HistoryManagerPage) then
         HistoryManagerPage:Refresh(0.01)
@@ -50,7 +49,7 @@ function HistoryManager.Refresh()
 end
 
 function HistoryManager:ClosePage()
-    local HistoryManagerPage = Store:Get('page/HistoryManager')
+    local HistoryManagerPage = Mod.WorldShare.Store:Get('page/HistoryManager')
 
     if (HistoryManagerPage) then
         HistoryManagerPage:CloseWindow()
@@ -58,7 +57,7 @@ function HistoryManager:ClosePage()
 end
 
 function HistoryManager.OnScreenSizeChange()
-    local HistoryManagerPage = Store:Get('page/HistoryManager')
+    local HistoryManagerPage = Mod.WorldShare.Store:Get('page/HistoryManager')
 
     if (not HistoryManagerPage) then
         return false
@@ -85,7 +84,7 @@ function HistoryManager.OnScreenSizeChange()
 end
 
 function HistoryManager:HasData()
-    local historyItems = Store:Get("user/historyItems")
+    local historyItems = Mod.WorldShare.Store:Get("user/historyItems")
 
     return true
 end
@@ -118,14 +117,14 @@ end
 function HistoryManager:MergeRecommendedWorldList(remoteTree, remoteItems)
     self:SetRecommendKeyToItems(remoteItems)
 
-    local historyTree = Store:Get('user/historyTree')
-    local historyItems = Store:Get('user/historyItems')
+    local historyTree = Mod.WorldShare.Store:Get('user/historyTree')
+    local historyItems = Mod.WorldShare.Store:Get('user/historyItems')
 
     local mergeTree = self:MergeTree(remoteTree, historyTree)
     local mergeItems = self:MergeItems(remoteItems, historyItems)
 
-    Store:Set('user/historyTree', mergeTree)
-    Store:Set('user/historyItems', mergeItems)
+    Mod.WorldShare.Store:Set('user/historyTree', mergeTree)
+    Mod.WorldShare.Store:Set('user/historyItems', mergeItems)
 
     self:UpdateList()
     self.Refresh()
@@ -147,8 +146,8 @@ function HistoryManager:GetWorldList()
         type = 'category'
     }
 
-    Store:Set('user/historyTree', mergeTree)
-    Store:Set('user/historyItems', mergeItems)
+    Mod.WorldShare.Store:Set('user/historyTree', mergeTree)
+    Mod.WorldShare.Store:Set('user/historyItems', mergeItems)
 
     self:GetRemoteRecommendedWorldList(
         function(remoteTree, remoteItems)
@@ -220,9 +219,9 @@ function HistoryManager:MergeItems(target, source)
 end
 
 function HistoryManager:UpdateList()
-    local tree = Store:Get('user/historyTree')
-    local items = Store:Get('user/historyItems')
-    local HistoryManagerPage = Store:Get('page/HistoryManager')
+    local tree = Mod.WorldShare.Store:Get('user/historyTree')
+    local items = Mod.WorldShare.Store:Get('user/historyItems')
+    local HistoryManagerPage = Mod.WorldShare.Store:Get('page/HistoryManager')
 
     if type(tree) ~= 'table' or type(items) ~= 'table' then
         return false
@@ -233,8 +232,8 @@ function HistoryManager:UpdateList()
     local treeList = self:SortTree(tree)
     local itemsList = self:SortItems(items)
 
-    Store:Set('user/historyTreeList', treeList)
-    Store:Set('user/historyItemsList', itemsList)
+    Mod.WorldShare.Store:Set('user/historyTreeList', treeList)
+    Mod.WorldShare.Store:Set('user/historyItemsList', itemsList)
 
     if not HistoryManagerPage then
         return false
@@ -350,7 +349,7 @@ function HistoryManager:GetItemsItemByIndex(index)
         return false
     end
 
-    local itemsList = Store:Get('user/historyItemsList')
+    local itemsList = Mod.WorldShare.Store:Get('user/historyItemsList')
 
     if not itemsList or
        not itemsList[index] or
@@ -388,7 +387,7 @@ function HistoryManager:CollectItem(index)
 end
 
 function HistoryManager:DeleteItem(index)
-    local itemsList = Store:Get('user/historyItemsList')
+    local itemsList = Mod.WorldShare.Store:Get('user/historyItemsList')
 
     _guihelper.MessageBox(
         L"是否删除此记录？",
@@ -409,7 +408,7 @@ function HistoryManager:DeleteItem(index)
 end
 
 function HistoryManager:SelectCategory(index)
-    local tree = Store:Get('user/historyTreeList')
+    local tree = Mod.WorldShare.Store:Get('user/historyTreeList')
 
     if type(index) ~= 'number' or type(tree) ~= 'table' then
         return false
@@ -462,8 +461,8 @@ end
 
 -- That will be execute when world loaded
 function HistoryManager:OnWorldLoad()
-    local curLesson = Store:Getter("lesson/GetCurLesson")
-    local currentWorld = Store:Get("world/currentWorld")
+    local curLesson = Mod.WorldShare.Store:Getter("lesson/GetCurLesson")
+    local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
 
     if curLesson then
         self:WriteLessonRecord(curLesson)
@@ -505,7 +504,7 @@ function HistoryManager:WriteWorldRecord(currentWorld)
     local curData
 
     if KeepworkService:IsSignedIn() then
-        local username = Store:Get('user/username')
+        local username = Mod.WorldShare.Store:Get('user/username')
 
         curData = {
             author = username,
@@ -541,7 +540,7 @@ function HistoryManager:Enter(index)
         return false
     end
 
-    local historyItemsList = Mod.Store:Get('user/historyItemsList')
+    local historyItemsList = Mod.WorldShare.Store:Get('user/historyItemsList')
 
     if type(historyItemsList) ~= 'table' or type(historyItemsList[index]) ~= 'table' then
         return false
@@ -550,7 +549,7 @@ function HistoryManager:Enter(index)
     local curItem = historyItemsList[index]
 
     if curItem.worldType == 'world' and curItem.displayName then
-        local compareWorldList = Mod.Store:Get('world/compareWorldList')
+        local compareWorldList = Mod.WorldShare.Store:Get('world/compareWorldList')
 
         for key, item in ipairs(compareWorldList) do
             if item.foldername == curItem.displayName then
