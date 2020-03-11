@@ -299,7 +299,7 @@ function SyncToLocal:DownloadOne(file, callback)
                 return false
             end
 
-            LocalService:Write(self.currentWorld.foldername, currentRemoteItem.path, content)
+            LocalService:Write(self.currentWorld.worldpath, string.gsub(currentRemoteItem.path, '&nbsp;', ' '), content)
 
             if type(callback) == "function" then
                 callback()
