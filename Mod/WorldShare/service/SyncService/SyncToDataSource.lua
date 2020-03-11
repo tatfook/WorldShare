@@ -376,7 +376,7 @@ function SyncToDataSource:UploadOne(file, callback)
     GitService:Upload(
         self.currentWorld.foldername,
         self.currentWorld.user and self.currentWorld.user.username or nil,
-        currentLocalItem.filename,
+        string.gsub(currentLocalItem.filename, ' ', '&nbsp;'),
         currentLocalItem.file_content_t,
         function(bIsUpload)
             if bIsUpload then
