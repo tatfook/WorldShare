@@ -131,6 +131,19 @@
                     function user_agreement()
                         RegisterModal:ShowUserAgreementPage()
                     end
+
+                    function show_notice()
+                        page:FindControl('notice').visible = true
+                    end
+
+                    function hide_notice()
+                        page:FindControl('notice').visible = false
+                    end
+
+                    function set_personal_web(name, mcmlNode)
+                        local personal_web_path = mcmlNode:GetUIValue()
+                        page:SetUIValue('personalweb', 'https://keepwork.com/u/' .. personal_web_path)
+                    end
                 ]]>
             </script>
             <style type="text/mcss">
@@ -167,8 +180,25 @@
                         <select name="registerServer" DataSource="<%= get_server_list()%>" style="height: 30px;width: 205px;" class="text_field"></select>
                     </div> -->
                     <div style="margin-bottom:12px;">
-                        <div style="<%='float:left;min-width:65px;' .. get_english_style('min-width:80px;') %>"><%= L"账号：" %></div>
-                        <input type="text" class="bbs_text text_field" EmptyText='<%= L"请输入账号" %>' style="height: 30px;" name="account" />
+                        <div style="<%='float:left;min-width:65px;' .. get_english_style('min-width:80px;') %>"><%= L"账户：" %></div>
+                        <input type="text"
+                               class="bbs_text text_field"
+                               onfocusin="show_notice()"
+                               onfocusout="hide_notice()"
+                               onchange="set_personal_web"
+                               EmptyText='<%= L"请输入账号" %>'
+                               style="height: 30px;"
+                               name="account" />
+                        <pe:container name="notice" visible="false" style="display:none;position:relative;background:">
+                            <div style="margin-top:-140px;margin-left: 20px; width: 290px; height: 100px;padding: 8px;font-size: 12px;background: url(textures/worldshare_32bits.png#72 20 16 16:3 3 3 3);">
+                                <div><%= L'账户名注册成功不可更改' %></div>
+                                <div><%= L'推荐使用英文字母、数字组合（例如：keep123）' %></div>
+                                <div><%= L'系统默认网址地址：' %></div>
+                                <div>
+                                    <pe:label name="personalweb" value="https://keepwork.com/u/" style="color:#409eff;font-size:12px;" />
+                                </div>
+                            </div>
+                        </pe:container>
                     </div>
                     <div style="margin-bottom:12px;">
                         <div style="<%='float:left;min-width:65px;' .. get_english_style('min-width:80px;') %>"><%= L"密码：" %></div>

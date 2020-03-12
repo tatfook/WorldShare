@@ -155,11 +155,6 @@ function KeepworkReposApi:UpdateFile(foldername, username, filePath, content, su
 
     local url = format('/repos/%s/files/%s', self:GetRepoPath(foldername, username), Mod.WorldShare.Utils.UrlEncode(filePath))
 
-    local write = ParaIO.open("/temp/t/" .. filePath, "w")
-
-    write:write(content, #content)
-    write:close()
-
     KeepworkBaseApi:Put(url, { encoding = 'base64', content = Encoding.base64(content) }, nil, success, error)
 end
 

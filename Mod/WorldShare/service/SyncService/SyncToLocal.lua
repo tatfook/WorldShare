@@ -175,7 +175,7 @@ function SyncToLocal:GetCompareList()
         local bIsExisted = false
 
         for DKey, DItem in ipairs(self.dataSourceFiles) do
-            if (LItem.filename == DItem.path) then
+            if string.gsub(LItem.filename, ' ', '&nbsp;') == DItem.path then
                 bIsExisted = true
                 break
             end

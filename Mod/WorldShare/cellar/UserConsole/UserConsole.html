@@ -247,15 +247,19 @@
                 end
 
                 function close()
-                    if Mod.WorldShare.Store:Get("world/isEnterWorld") then
-                        UserConsole:ClosePage()
-                    else
-                        if is_signed_in() then
-                            logout()
-                        end
+                    if System.options.mc == true then
+                        if Mod.WorldShare.Store:Get("world/isEnterWorld") then
+                            UserConsole:ClosePage()
+                        else
+                            if is_signed_in() then
+                                logout()
+                            end
 
+                            UserConsole:ClosePage()
+                            UserConsole:EnterMainLogin()
+                        end
+                    else
                         UserConsole:ClosePage()
-                        UserConsole:EnterMainLogin()
                     end
                 end
 
