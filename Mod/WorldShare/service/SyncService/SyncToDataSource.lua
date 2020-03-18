@@ -14,6 +14,7 @@ local LocalService = NPL.load("../LocalService.lua")
 local KeepworkService = NPL.load("../KeepworkService.lua")
 local KeepworkServiceProject = NPL.load("../KeepworkService/Project.lua")
 local KeepworkServiceWorld = NPL.load("../KeepworkService/World.lua")
+local KeepworkServiceSession = NPL.load("../KeepworkService/Session.lua")
 local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
 local KeepworkGen = NPL.load("(gl)Mod/WorldShare/helper/KeepworkGen.lua")
 local GitEncoding = NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua")
@@ -33,76 +34,86 @@ function SyncToDataSource:Init(callback)
 
     self.callback = callback
 
-    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
-    self.currentWorld = currentWorld
-
-    if not self.currentWorld.worldpath or self.currentWorld.worldpath == "" then
-        callback(false, L"上传失败，将使用离线模式，原因：上传目录为空")
-        return false
-    end
-
-    -- 加载进度UI界面
-    -- // TODO: move to UI file
-    Progress:Init(self)
-
-    self:SetFinish(false)
-    self:SetBroke(false)
-
-    self:IsProjectExist(
-        function(beExisted)
-            if beExisted then
-                -- update world
-                KeepworkServiceProject:GetProjectIdByWorldName(self.currentWorld.foldername, self.currentWorld.shared, function(pid)
-                    currentWorld = Mod.WorldShare.Store:Get('world/currentWorld') 
-
-                    if currentWorld and currentWorld.kpProjectId then
-                        local tag = LocalService:GetTag(currentWorld.worldpath)
-
-                        if type(tag) == 'table' then
-                            tag.kpProjectId = currentWorld.kpProjectId
-                            LocalService:SetTag(currentWorld.worldpath, tag)
-                        end
-                    end
-
-                    self:Start()
-                end)
-            else
-                KeepworkServiceProject:CreateProject(
-                    self.currentWorld.foldername,
-                    function(data, err)
-                        if err == 400 and data and data.code == 17 then
-                            callback(false, L"您创建的帕拉卡(Paracraft)在线项目数量过多。请删除不需要的项目后再试。")
-                            self:SetFinish(true)
-                            Progress:ClosePage()
-                            return false
-                        end
-
-                        if err ~= 200 or not data or not data.id then
-                            callback(false, L"创建项目失败")
-                            self:SetFinish(true)
-                            Progress:ClosePage()
-                            return false
-                        end
-
-                        currentWorld.kpProjectId = data.id
-
+    local function Handle()
+        local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+        self.currentWorld = currentWorld
+    
+        if not self.currentWorld.worldpath or self.currentWorld.worldpath == "" then
+            callback(false, L"上传失败，将使用离线模式，原因：上传目录为空")
+            return false
+        end
+    
+        -- 加载进度UI界面
+        -- // TODO: move to UI file
+        Progress:Init(self)
+    
+        self:SetFinish(false)
+        self:SetBroke(false)
+    
+        self:IsProjectExist(
+            function(beExisted)
+                if beExisted then
+                    -- update world
+                    KeepworkServiceProject:GetProjectIdByWorldName(self.currentWorld.foldername, self.currentWorld.shared, function(pid)
+                        currentWorld = Mod.WorldShare.Store:Get('world/currentWorld') 
+    
                         if currentWorld and currentWorld.kpProjectId then
                             local tag = LocalService:GetTag(currentWorld.worldpath)
-
+    
                             if type(tag) == 'table' then
                                 tag.kpProjectId = currentWorld.kpProjectId
-
                                 LocalService:SetTag(currentWorld.worldpath, tag)
                             end
                         end
-
-                        Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
+    
                         self:Start()
-                    end
-                )
+                    end)
+                else
+                    KeepworkServiceProject:CreateProject(
+                        self.currentWorld.foldername,
+                        function(data, err)
+                            if err == 400 and data and data.code == 17 then
+                                callback(false, L"您创建的帕拉卡(Paracraft)在线项目数量过多。请删除不需要的项目后再试。")
+                                self:SetFinish(true)
+                                Progress:ClosePage()
+                                return false
+                            end
+    
+                            if err ~= 200 or not data or not data.id then
+                                callback(false, L"创建项目失败")
+                                self:SetFinish(true)
+                                Progress:ClosePage()
+                                return false
+                            end
+    
+                            currentWorld.kpProjectId = data.id
+    
+                            if currentWorld and currentWorld.kpProjectId then
+                                local tag = LocalService:GetTag(currentWorld.worldpath)
+    
+                                if type(tag) == 'table' then
+                                    tag.kpProjectId = currentWorld.kpProjectId
+    
+                                    LocalService:SetTag(currentWorld.worldpath, tag)
+                                end
+                            end
+    
+                            Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
+                            self:Start()
+                        end
+                    )
+                end
             end
+        )
+    end
+
+    KeepworkServiceSession:CheckTokenExpire(function(bIsSuccess)
+        if bIsSuccess then
+            Handle()
+        else
+            self.callback(false, L"RE-ENTRY")
         end
-    )
+    end)
 end
 
 function SyncToDataSource:IsProjectExist(callback)
@@ -228,7 +239,7 @@ function SyncToDataSource:GetCompareList()
         local bIsExisted = false
 
         for IKey, IItem in ipairs(self.dataSourceFiles) do
-            if string.gsub(LItem.filename, ' ', '&nbsp;') == IItem.path then
+            if LItem.filename == IItem.path then
                 bIsExisted = true
                 break
             end
@@ -246,7 +257,7 @@ function SyncToDataSource:GetCompareList()
         local bIsExisted = false
 
         for LKey, LItem in ipairs(self.localFiles) do
-            if IItem.path == string.gsub(LItem.filename, ' ', '&nbsp;') then
+            if IItem.path == LItem.filename then
                 bIsExisted = true
                 break
             end
@@ -376,7 +387,7 @@ function SyncToDataSource:UploadOne(file, callback)
     GitService:Upload(
         self.currentWorld.foldername,
         self.currentWorld.user and self.currentWorld.user.username or nil,
-        string.gsub(currentLocalItem.filename, ' ', '&nbsp;'),
+        currentLocalItem.filename,
         currentLocalItem.file_content_t,
         function(bIsUpload)
             if bIsUpload then
@@ -401,7 +412,7 @@ end
 -- 更新数据源文件
 function SyncToDataSource:UpdateOne(file, callback)
     local currentLocalItem = self:GetLocalFileByFilename(file)
-    local currentRemoteItem = self:GetRemoteFileByPath(string.gsub(file, ' ', '&nbsp;'))
+    local currentRemoteItem = self:GetRemoteFileByPath(file)
 
     Progress:UpdateDataBar(
         self.compareListIndex,
@@ -441,7 +452,7 @@ function SyncToDataSource:UpdateOne(file, callback)
     GitService:Update(
         self.currentWorld.foldername,
         self.currentWorld.user and self.currentWorld.user.username or nil,
-        string.gsub(currentLocalItem.filename, ' ', '&nbsp;'),
+        currentLocalItem.filename,
         currentLocalItem.file_content_t,
         function(bIsUpdate)
             if bIsUpdate then

@@ -36,10 +36,6 @@ local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua
 
 local UserConsole = NPL.export()
 
-function UserConsole.IsSignedIn()
-   return KeepworkService:IsSignedIn()
-end
-
 -- this is called from ParaWorld Login App
 function UserConsole:CheckShowUserWorlds()
     if System.options.showUserWorldsOnce then
@@ -66,14 +62,16 @@ function UserConsole:ShowPage()
 
         KeepworkServiceSession:GetUserTokenFromUrlProtocol()
 
-        -- for restart game
-        if KeepworkServiceSession:GetCurrentUserToken() then
+        -- for restart and protocol
+        if not KeepworkService:IsSignedIn() and KeepworkServiceSession:GetCurrentUserToken() then
             UserInfo:LoginWithToken()
             return false
         end
 
         -- auto sign in here
-        UserInfo:CheckDoAutoSignin()
+        if not KeepworkService:IsSignedIn() then
+            UserInfo:CheckDoAutoSignin()
+        end
     end
 
     WorldList:RefreshCurrentServerList()
