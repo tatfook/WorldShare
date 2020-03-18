@@ -124,7 +124,7 @@ function KeepworkReposApi:Raw(foldername, username, filePath, commitId, success,
         commitIdUrl = format('?commitId=%s', commitId)
     end
 
-    local url = format('/repos/%s/files/%s/raw%s', self:GetRepoPath(foldername, username), Mod.WorldShare.Utils.UrlEncode(filePath), commitIdUrl)
+    local url = format('/repos/%s/files/%s/raw%s', self:GetRepoPath(foldername, username), Mod.WorldShare.Utils.EncodeURIComponent(filePath), commitIdUrl)
 
     KeepworkBaseApi:Get(url, nil, nil, success, error)
 end
@@ -153,7 +153,7 @@ function KeepworkReposApi:UpdateFile(foldername, username, filePath, content, su
         return false
     end
 
-    local url = format('/repos/%s/files/%s', self:GetRepoPath(foldername, username), Mod.WorldShare.Utils.UrlEncode(filePath))
+    local url = format('/repos/%s/files/%s', self:GetRepoPath(foldername, username), Mod.WorldShare.Utils.EncodeURIComponent(filePath))
 
     KeepworkBaseApi:Put(url, { encoding = 'base64', content = Encoding.base64(content) }, nil, success, error)
 end
@@ -172,7 +172,7 @@ function KeepworkReposApi:CreateFile(foldername, username, filePath, content, su
         return false
     end
 
-    local url = format('/repos/%s/files/%s', self:GetRepoPath(foldername, username), Mod.WorldShare.Utils.UrlEncode(filePath))
+    local url = format('/repos/%s/files/%s', self:GetRepoPath(foldername, username), Mod.WorldShare.Utils.EncodeURIComponent(filePath))
 
     KeepworkBaseApi:Post(url, { encoding = 'base64', content = Encoding.base64(content) }, nil, success, error)
 end
@@ -190,7 +190,7 @@ function KeepworkReposApi:RemoveFile(foldername, username, filePath, success, er
         return false
     end
 
-    local url = format('/repos/%s/files/%s', self:GetRepoPath(foldername, username), Mod.WorldShare.Utils.UrlEncode(filePath))
+    local url = format('/repos/%s/files/%s', self:GetRepoPath(foldername, username), Mod.WorldShare.Utils.EncodeURIComponent(filePath))
 
     KeepworkBaseApi:Delete(url, nil, nil, success, error)
 end

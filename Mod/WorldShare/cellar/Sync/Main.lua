@@ -20,6 +20,7 @@ local SyncToLocal = NPL.load("(gl)Mod/WorldShare/service/SyncService/SyncToLocal
 local SyncToDataSource = NPL.load("(gl)Mod/WorldShare/service/SyncService/SyncToDataSource.lua")
 local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
 local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
+local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
 
 local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 local WorldShare = commonlib.gettable("Mod.WorldShare")
@@ -186,6 +187,18 @@ function SyncMain:SyncToDataSource(callback)
 
     SyncToDataSource:Init(function(result, msg)
         if result == false then
+            if msg == 'RE-ENTRY' then
+                GameLogic.AddBBS(nil, L"请重新登录", 3000, "255 0 0")
+
+                LoginModal:Init(function()
+                    Mod.WorldShare.Utils.SetTimeOut(function()
+                        self:SyncToDataSource(callback)
+                    end, 300)
+                end)
+
+                return false
+            end
+
             GameLogic.AddBBS(nil, msg, 3000, "255 0 0")
         end
 

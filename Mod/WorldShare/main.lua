@@ -40,6 +40,7 @@ NPL.load("(gl)Mod/WorldShare/service/SocketService.lua")
 NPL.load("(gl)script/apps/Aries/Creator/Game/Network/NetworkMain.lua")
 NPL.load("(gl)script/ide/System/Encoding/guid.lua")
 NPL.load("(gl)script/apps/Aries/Creator/Game/Login/ParaWorldLessons.lua")
+NPL.load("(gl)script/ide/System/Encoding/jwt.lua")
 
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox/MsgBox.lua")
@@ -54,6 +55,7 @@ local WorldExitDialog = NPL.load("(gl)Mod/WorldShare/cellar/WorldExitDialog/Worl
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local Grade = NPL.load("(gl)Mod/WorldShare/cellar/Grade/Grade.lua")
 local KeepworkServiceWorld = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/World.lua")
+local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
 
 local SocketService = commonlib.gettable("Mod.WorldShare.service.SocketService")
 local GameLogic = commonlib.gettable("MyCompany.Aries.Game.GameLogic")
@@ -63,7 +65,7 @@ local WorldShare = commonlib.inherit(commonlib.gettable("Mod.ModBase"), commonli
 
 WorldShare:Property({"Name", "WorldShare", "GetName", "SetName", { auto = true }})
 WorldShare:Property({"Desc", "world share mod can share world to keepwork online", "GetDesc", "SetDesc", { auto = true }})
-WorldShare.version = '0.0.12'
+WorldShare.version = '0.0.13'
 
 -- register mod global variable
 WorldShare.Store = Store
@@ -151,6 +153,9 @@ function WorldShare:init()
 
     -- send udp online msg
     SocketService:StartUDPService()
+
+    -- refresh token
+    KeepworkServiceSession:RenewToken()
 end
 
 function WorldShare:OnInitDesktop()

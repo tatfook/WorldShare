@@ -320,3 +320,67 @@ function KeepworkServiceSession:GetUserTokenFromUrlProtocol()
         SetToken(usertoken)
     end
 end
+
+function KeepworkServiceSession:CheckTokenExpire(callback)
+    if not KeepworkService:IsSignedIn() then
+        return false
+    end
+    
+    local token = Mod.WorldShare.Store:Get('user/token')
+    local tokeninfo = System.Encoding.jwt.decode(token)
+    local exp = tokeninfo.exp and tokeninfo.exp or 0
+
+    local function ReEntry()
+        self:Logout()
+
+        local currentUser = self:LoadSigninInfo()
+
+        if not currentUser.account or not currentUser.password then
+            return false
+        end
+
+        self:Login(
+            currentUser.account,
+            currentUser.password,
+            function(response, err)
+                if err ~= 200 then
+                    if type(callback) == "function" then
+                        callback(false)
+                    end
+                    return false
+                end
+
+                self:LoginResponse(response, err, function()
+                    if type(callback) == "function" then
+                        callback(true)
+                    end
+                end)
+            end
+        )
+    end
+
+    -- we will not fetch token if token is expire
+    if exp <= (os.time() + 1 * 24 * 3600) then
+        ReEntry()
+        return false
+    end
+
+    self:Profile(function(data, err)
+        if err ~= 200 then
+            ReEntry()
+            return false
+        end
+
+        if type(callback) == "function" then
+            callback(true)
+        end
+    end, token)
+end
+
+function KeepworkServiceSession:RenewToken()
+    self:CheckTokenExpire()
+
+    Mod.WorldShare.Utils.SetTimeOut(function()
+        self:RenewToken()
+    end, 3600 * 1000)
+end
