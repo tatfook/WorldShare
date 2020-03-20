@@ -346,6 +346,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                 project = DItem["project"] or {},
                 user = DItem["user"] or {},
                 kpProjectId = DItem["projectId"],
+                hasPid = true,
                 local_tagname = localTagname,
                 remote_tagname = remoteTagname,
                 is_zip = false,

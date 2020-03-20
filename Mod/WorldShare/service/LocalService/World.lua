@@ -20,8 +20,9 @@ local LocalServiceWorld = NPL.export()
 
 function LocalServiceWorld:GetWorldList()
     local localWorlds = LocalLoadWorld.BuildLocalWorldList(true)
+    local sharedWorldList = self:GetSharedWorldList()
 
-    for key, item in ipairs(self:GetSharedWorldList()) do
+    for key, item in ipairs(sharedWorldList) do
         localWorlds[#localWorlds + 1] = item
     end
 
@@ -40,6 +41,9 @@ function LocalServiceWorld:GetWorldList()
 
             if tag.kpProjectId then
                 value.kpProjectId = tag.kpProjectId
+                value.hasPid = true
+            else
+                value.hasPid = false
             end
 
             if tag.size then
@@ -183,8 +187,10 @@ function LocalServiceWorld:GetInternetLocalWorldList()
 end
 
 function LocalServiceWorld:MergeInternetLocalWorldList(currentWorldList)
+    local internetLoadWorldList = self:GetInternetLocalWorldList()
+
     for CKey, CItem in ipairs(currentWorldList) do
-        for IKey, IItem in ipairs(self:GetInternetLocalWorldList()) do
+        for IKey, IItem in ipairs(internetLoadWorldList) do
             if not CItem.shared and IItem.foldername == CItem.foldername then
                 if IItem.is_zip == CItem.is_zip then 
                     for key, value in pairs(IItem) do
