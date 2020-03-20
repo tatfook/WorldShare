@@ -187,10 +187,10 @@ function LocalServiceWorld:GetInternetLocalWorldList()
 end
 
 function LocalServiceWorld:MergeInternetLocalWorldList(currentWorldList)
-    local internetLoadWorldList = self:GetInternetLocalWorldList()
+    local internetLocalWorldList = self:GetInternetLocalWorldList()
 
     for CKey, CItem in ipairs(currentWorldList) do
-        for IKey, IItem in ipairs(internetLoadWorldList) do
+        for IKey, IItem in ipairs(internetLocalWorldList) do
             if not CItem.shared and IItem.foldername == CItem.foldername then
                 if IItem.is_zip == CItem.is_zip then 
                     for key, value in pairs(IItem) do
