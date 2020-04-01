@@ -14,6 +14,7 @@ local Encoding = commonlib.gettable("commonlib.Encoding")
 local KeepworkService = NPL.load("../KeepworkService.lua")
 local KeepworkProjectsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Projects.lua")
 local KeepworkWorldsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Worlds.lua")
+local KeepworkMembersApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Members.lua")
 
 local KeepworkServiceProject = NPL.export()
 
@@ -40,25 +41,10 @@ function KeepworkServiceProject:GetProject(kpProjectId, callback, noTryStatus)
     KeepworkProjectsApi:GetProject(kpProjectId, callback, nil, noTryStatus)
 end
 
--- function KeepworkServiceProject:GetProjectByWorldName(foldername, callback)
---     if not KeepworkService:IsSignedIn() then
---         return false
---     end
-
---     KeepworkProjectsApi:GetProjectByWorldName(
---         foldername,
---         function(data, err)
---             if type(callback) == 'function' then
---                 callback(data)
---             end
---         end,
---         function()
---             if type(callback) == 'function' then
---                 callback()
---             end
---         end
---     )
--- end
+-- get project members
+function KeepworkServiceProject:GetMembers(pid, callback)
+    KeepworkMembersApi:Members(pid, 5, callback, callback)
+end
 
 -- get project id by worldname
 function KeepworkServiceProject:GetProjectIdByWorldName(foldername, shared, callback)

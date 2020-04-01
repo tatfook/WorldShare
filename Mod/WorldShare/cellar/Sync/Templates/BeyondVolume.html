@@ -42,16 +42,15 @@
         <div width="100%" height="100%">
             <aries:window mode="thin" width="500" height="270" style="<%=get_window_style()%>" title='<%=L"购买VIP" %>' onclose="close">
                 <div style="font-size:16px;base-font-size:16px;color:#ffffff;padding:30px;">
-                    <div style="margin-top:30px;">
+                    <div style="margin-top:15px;">
                         <%= getBeyondMsg() %>
                         <br />
                         <%= L"是否现在清理？" %>
                     </div>
                     <br />
                     <div style="margin-top:30px;">
-                        <input type="button" onclick="open_world_folder" class="button_highlight" style="float:left;width: 130px;height: 30px;" name="" value='<%= L"是"%>' />
-                        <input type="button" onclick="close" class="button_highlight" style="float:left;margin-left:10px;width: 130px;height: 30px;" name="" value='<%=L"否"%>'/>
-                        <input type="button" onclick="closee" class="button_highlight" style="float:left;margin-left:10px;width: 130px;height: 30px;" name="" value='<%=L"取消"%>'/>
+                        <input type="button" onclick="open_world_folder" class="button_highlight" style="float:left;width: 130px;height: 30px;margin-left: 50px;" name="" value='<%= L"是"%>' />
+                        <input type="button" onclick="close" class="button_highlight" style="float:left;margin-left:10px;width: 130px;height: 30px;margin-left: 60px;" name="" value='<%=L"否"%>'/>
                     </div>
                 </div>
             </aries:window>
