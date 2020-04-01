@@ -125,10 +125,6 @@ function SyncMain:BackupWorld()
 end
 
 function SyncMain:SyncToLocal(callback)
-    if self:CheckWorldSize() then
-        return false
-    end
-
     local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
 
     if not currentWorld.kpProjectId then
