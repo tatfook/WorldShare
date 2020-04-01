@@ -31,10 +31,10 @@ function CreateWorld:CreateNewWorld(foldername)
 end
 
 function CreateWorld.OnClickCreateWorld()
-    if not CreateWorld:CheckSpecialCharacter(CreateNewWorld.page:GetValue('new_world_name') or '') then
-         -- that return true to OnClickCreateWorld filter if have special charactor
-        return true
-    end
+    -- if not CreateWorld:CheckSpecialCharacter(CreateNewWorld.page:GetValue('new_world_name') or '') then
+    --      -- that return true to OnClickCreateWorld filter if have special charactor
+    --     return true
+    -- end
 
     Mod.WorldShare.Store:Remove("world/currentWorld")
 
