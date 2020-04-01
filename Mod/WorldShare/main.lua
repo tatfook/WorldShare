@@ -117,8 +117,7 @@ function WorldShare:init()
     GameLogic.GetFilters():add_filter(
         "OnClickCreateWorld",
         function()
-            CreateWorld.OnClickCreateWorld()
-            return false
+            return CreateWorld.OnClickCreateWorld()
         end
     )
 

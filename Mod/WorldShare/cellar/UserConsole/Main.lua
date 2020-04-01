@@ -399,19 +399,28 @@ function UserConsole:HandleWorldId(pid)
                     GameLogic.AddBBS(nil, L"该项目需要登录后访问", 3000, "255 0 0")
                     return false
                 else
-                    local userId = Mod.WorldShare.Store:Get("user/userId")
-
-                    if userId and data and data.userId and userId == data.userId then
-                        if not data.world or not data.world.archiveUrl then
+                    KeepworkServiceProject:GetMembers(pid, function(members, err)
+                        if type(members) ~= 'table' then
                             return false
                         end
 
-                        Mod.WorldShare.Store:Set('world/openKpProjectId', pid)
-                        HandleLoadWorld(data.world.archiveUrl .. "&private=true", data.world)
-                    else
+                        local username = Mod.WorldShare.Store:Get("user/username")
+                        
+                        for key, item in ipairs(members) do
+                            if item and item.username and item.username == username then
+                                if not data.world or not data.world.archiveUrl then
+                                    return false
+                                end
+
+                                Mod.WorldShare.Store:Set('world/openKpProjectId', pid)
+                                HandleLoadWorld(data.world.archiveUrl .. "&private=true", data.world)
+                                return true
+                            end
+                        end
+
                         GameLogic.AddBBS(nil, L"您未获得该项目的访问权限", 3000, "255 0 0")
                         return false
-                    end
+                    end)
                 end
             else
                 if data.world and data.world.archiveUrl and #data.world.archiveUrl > 0 then

@@ -335,7 +335,7 @@ function KeepworkServiceSession:CheckTokenExpire(callback)
 
         local currentUser = self:LoadSigninInfo()
 
-        if not currentUser.account or not currentUser.password then
+        if not currentUser or not currentUser.account or not currentUser.password then
             return false
         end
 
