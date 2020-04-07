@@ -276,11 +276,11 @@ function LocalService:MoveZipToFolder(worldpath, zipPath)
 end
 
 -- get all world total files size
-function LocalService:GetWorldSize(worldDir)
+function LocalService:GetWorldSize(worldpath)
     local files =
         commonlib.Files.Find(
         {},
-        worldDir,
+        worldpath,
         5,
         5000,
         function(item)
@@ -296,22 +296,22 @@ function LocalService:GetWorldSize(worldDir)
     return filesTotal
 end
 
-function LocalService:GetZipWorldSize(zipWorldDir)
-    return ParaIO.GetFileSize(zipWorldDir)
+function LocalService:GetZipWorldSize(path)
+    return ParaIO.GetFileSize(path)
 end
 
-function LocalService:GetZipRevision(zipWorldDir)
-    local zipParentDir = zipWorldDir:gsub("[^/\\]+$", "")
+function LocalService:GetZipRevision(path)
+    local parentPath = path:gsub("[^/\\]+$", "")
 
-    ParaAsset.OpenArchive(zipWorldDir, true)
+    ParaAsset.OpenArchive(path, true)
 
     local revision = 0
     local output = {}
 
-    Files.Find(output, "", 0, 500, ":revision.xml", zipWorldDir)
+    Files.Find(output, "", 0, self.nMaxFilesNum, ":revision.xml", path)
 
     if #output ~= 0 then
-        local file = ParaIO.open(zipParentDir .. output[1].filename, "r")
+        local file = ParaIO.open(parentPath .. output[1].filename, "r")
 
         if file:IsValid() then
             revision = file:GetText(0, -1)
@@ -319,9 +319,25 @@ function LocalService:GetZipRevision(zipWorldDir)
         end
     end
 
-    ParaAsset.CloseArchive(zipWorldDir)
+    ParaAsset.CloseArchive(path)
 
     return revision
+end
+
+function LocalService:IsFileExistInZip(path, filter)
+    ParaAsset.OpenArchive(path, true)
+
+    local output = {}
+
+    Files.Find(output, "", 0, self.nMaxFilesNum, filter or "", path)
+
+    ParaAsset.CloseArchive(path)
+
+    if #output > 0 then
+        return true
+    else
+        return false
+    end
 end
 
 function LocalService:SetTag(worldDir, newTag)

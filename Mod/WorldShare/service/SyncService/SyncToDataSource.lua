@@ -535,7 +535,7 @@ function SyncToDataSource:UpdateRecord(callback)
 
         self.currentWorld.lastCommitId = lastCommitSha
 
-        if string.lower(lastCommitFile) ~= "revision.xml" then
+        if not lastCommitFile or string.lower(lastCommitFile) ~= "revision.xml" then
             self.callback(false, L"上一次同步到数据源同步失败，请重新同步世界到数据源")
             self.callback = nil
             return false
