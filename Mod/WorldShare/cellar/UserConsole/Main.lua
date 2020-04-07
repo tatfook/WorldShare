@@ -192,6 +192,12 @@ function UserConsole:HandleWorldId(pid)
 
         local function LoadWorld(world, refreshMode)
             if world then
+                if refreshMode == 'never' then
+                    if not LocalService:IsFileExistInZip(world:GetLocalFileName(), ":worldconfig.txt") then
+                        refreshMode = 'force'
+                    end
+                end
+
                 local url = world:GetLocalFileName()
                 DownloadWorld.ShowPage(url)
                 local mytimer = commonlib.Timer:new(

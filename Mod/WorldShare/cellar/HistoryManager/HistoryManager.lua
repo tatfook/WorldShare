@@ -549,7 +549,7 @@ function HistoryManager:Enter(index)
     local curItem = historyItemsList[index]
 
     if curItem.worldType == 'world' and curItem.displayName then
-        local compareWorldList = Mod.WorldShare.Store:Get('world/compareWorldList')
+        local compareWorldList = Mod.WorldShare.Store:Get('world/compareWorldList') or {}
 
         for key, item in ipairs(compareWorldList) do
             if item.foldername == curItem.displayName then
