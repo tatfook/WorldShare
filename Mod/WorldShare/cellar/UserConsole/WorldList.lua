@@ -205,11 +205,22 @@ function WorldList:EnterWorld(index)
         return false
     end
 
-    local output = commonlib.Files.Find({}, currentWorld.worldpath, 0, 500, "worldconfig.txt")
+    local function CheckWorld()
+        local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+        local output = commonlib.Files.Find({}, currentWorld.worldpath, 0, 500, "worldconfig.txt")
 
-    if not output or #output == 0 then
-        _guihelper.MessageBox(L"世界文件异常，请重新下载")
-        return false
+        if not output or #output == 0 then
+            _guihelper.MessageBox(L"世界文件异常，请重新下载")
+            return false
+        else
+            return true
+        end
+    end
+
+    if currentWorld.status ~= 2 then
+        if not CheckWorld() then
+            return false
+        end
     end
 
     local function Handle(result)
@@ -358,22 +369,33 @@ function WorldList:EnterWorld(index)
                     return false
                 end
 
-                SyncToLocal:Init(function(result, msg)
+                SyncToLocal:Init(function(result, option)
                     if not result then
-                        if msg == 'NEWWORLD' then
-                            UserConsole:ClosePage()
-                            GameLogic.AddBBS(nil, L"服务器未找到世界数据，请新建", 3000, "255 255 0")
-                            local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
-                            CreateWorld:CreateNewWorld(currentWorld.foldername)
-                            Mod.WorldShare.MsgBox:Close()
-                            return false
+                        if type(option) == 'string' then
+                            if option == 'NEWWORLD' then
+                                UserConsole:ClosePage()
+                                GameLogic.AddBBS(nil, L"服务器未找到世界数据，请新建", 3000, "255 255 0")
+                                local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+                                CreateWorld:CreateNewWorld(currentWorld.foldername)
+                                Mod.WorldShare.MsgBox:Close()
+                                return false
+                            end
                         end
+
+                        if type(option) == 'table' then
+                            if option.method == 'UPDATE-PROGRESS-FINISH' then
+                                if not CheckWorld() then
+                                    return false
+                                end
+            
+                                LockAndEnter()
+                                Mod.WorldShare.MsgBox:Close()
+                            end
+                        end
+
 
                         return false
                     end
-
-                    LockAndEnter()
-                    Mod.WorldShare.MsgBox:Close()
                 end)
             end)
         else
