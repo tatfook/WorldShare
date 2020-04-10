@@ -1,12 +1,9 @@
 <body>
     <pe:mcml>
-        <script type="text/npl" refresh="false" src="Progress.lua">
+        <script type="text/npl" src="Progress.lua">
             <![CDATA[
                 Progress = NPL.load('./Progress.lua')
                 KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
-                Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
-
-                Progress:SetPage()
 
                 function current()
                     return Progress:GetCurrent()
@@ -28,24 +25,12 @@
                     return Progress:GetBroke()
                 end
 
-                function retry()
-                    Progress:Retry()
-                end
-
-                function cancel()
-                    Progress:Cancel()
-                end
-
-                function close()
-                    Progress:ClosePage()
-                end
-
                 function copy()
                     Progress:Copy(KeepworkService:GetShareUrl())
                 end
 
                 function get_window_style()
-                    return Utils.FixCenter(500, 270)
+                    return Mod.WorldShare.Utils.FixCenter(500, 270)
                 end
 
                 function get_world_url()
@@ -62,6 +47,14 @@
                     local url = get_world_url()
 
                     ParaGlobal.ShellExecute("open", url, "", "", 1)
+                end
+
+                function get_bar_maximun()
+                    return Progress.total
+                end
+
+                function get_bar_current()
+                    return Progress.current
                 end
              ]]>
         </script>
@@ -104,19 +97,9 @@
                     <pe:if condition="<%= broke() %>">
                         <%= msg() %>
                     </pe:if>
-
                     <div style="margin-top:30px;">
-                        <pe:progressbar name="progressbar"  block_bg_autosize = "true" Minimum="0" Maximum="100" Value="0"/>
+                        <pe:progressbar name="progressbar"  block_bg_autosize = "true" Minimum="0" Maximum="<%= get_bar_maximun() %>" Value="<%= get_bar_current() %>"/>
                     </div>
-                    <pe:if condition="<%=not finish() %>">
-                        <div style="margin-top:40px;">
-                            <input type="button" name="" onclick="cancel()" value='<%=L"取消" %>' class="button_highlight" style="width: 85px;height: 30px;margin-left: 155px" />
-                            <input type="button" name="" onclick="retry()" value='<%=L"重试" %>' class="button_highlight" style="width: 85px;height: 30px;margin-left: 15px" />
-                        </div>
-                    </pe:if>
-                    <pe:if condition="<%= finish() %>">
-                        <input type="button" name="" onclick="close()" value='<%=L"关闭" %>'  class="button_highlight" style="width: 85px;height: 30px;margin-top:40px;margin-left: 200px" />
-                    </pe:if>
                 </div>
             </aries:window>
         </div>

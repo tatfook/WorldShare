@@ -8,19 +8,24 @@ use the lib:
 local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
 ------------------------------------------------------------
 ]]
+-- UI
 local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
 local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
 local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
+local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
+local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
+local Progress = NPL.load("./Progress/Progress.lua")
+
+-- service
 local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
-local GitEncoding = NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua")
-local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local SyncToLocal = NPL.load("(gl)Mod/WorldShare/service/SyncService/SyncToLocal.lua")
 local SyncToDataSource = NPL.load("(gl)Mod/WorldShare/service/SyncService/SyncToDataSource.lua")
-local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
 local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
-local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
+
+-- helper
+local GitEncoding = NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua")
 
 local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 local WorldShare = commonlib.gettable("Mod.WorldShare")
@@ -141,25 +146,54 @@ function SyncMain:SyncToLocal(callback)
 
             Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
 
-            SyncToLocal:Init(function(result, msg)
+            local syncInstance = SyncToLocal:Init(function(result, option)
                 if result == false then
-                    if msg == 'NEWWORLD' then
-                        UserConsole:ClosePage()
-                        GameLogic.AddBBS(nil, L"服务器未找到世界数据，请新建", 3000, "255 255 0")
-                        local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
-                        CreateWorld:CreateNewWorld(currentWorld.foldername)
-                        return false
+                    if type(option) == 'string' then
+                        Progress:ClosePage()
+
+                        if option == 'NEWWORLD' then
+                            UserConsole:ClosePage()
+                            GameLogic.AddBBS(nil, L"服务器未找到世界数据，请新建", 3000, "255 255 0")
+                            local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+                            CreateWorld:CreateNewWorld(currentWorld.foldername)
+                            return false
+                        end
+            
+                        GameLogic.AddBBS(nil, option, 3000, "255 0 0")
                     end
+
+                    if type(option) == 'table' then
+                        if option.method == 'UPDATE-PROGRESS' then
+                            Progress:UpdateDataBar(option.current, option.total, option.msg)
+                            return false
+                        end
         
-                    GameLogic.AddBBS(nil, msg, 3000, "255 0 0")
+                        if option.method == 'UPDATE-PROGRESS-FAIL' then
+                            Progress:SetFinish(true)
+                            Progress:ClosePage()
+                            GameLogic.AddBBS(nil, option.msg, 3000, "255 0 0")
+                            return false
+                        end
+        
+                        if option.method == 'UPDATE-PROGRESS-FINISH' then
+                            Progress:UpdateDataBar(1, 1, L"处理完成")
+                            Progress:SetFinish(true)
+                            Progress:Refresh()
+                            Progress:RefreshOperate()
+                            return false
+                        end
+                    end
                 end
-        
+
                 if type(callback) == 'function' then
-                    callback(result, msg)
+                    callback(result, option)
                 end
         
                 WorldList:RefreshCurrentServerList()
             end)
+
+            -- load sync progress UI
+            Progress:Init(syncInstance)
         end,
         function()
             GameLogic.AddBBS(nil, L"获取项目信息失败", 3000, "255 0 0")
@@ -181,29 +215,57 @@ function SyncMain:SyncToDataSource(callback)
         return false
     end
 
-    SyncToDataSource:Init(function(result, msg)
+    local syncInstance = SyncToDataSource:Init(function(result, option)
         if result == false then
-            if msg == 'RE-ENTRY' then
-                GameLogic.AddBBS(nil, L"请重新登录", 3000, "255 0 0")
+            if type(option) == 'string' then
+                Progress:ClosePage()
 
-                LoginModal:Init(function()
-                    Mod.WorldShare.Utils.SetTimeOut(function()
-                        self:SyncToDataSource(callback)
-                    end, 300)
-                end)
+                if option == 'RE-ENTRY' then
+                    GameLogic.AddBBS(nil, L"请重新登录", 3000, "255 0 0")
 
-                return false
+                    LoginModal:Init(function()
+                        Mod.WorldShare.Utils.SetTimeOut(function()
+                            self:SyncToDataSource(callback)
+                        end, 300)
+                    end)
+
+                    return false
+                end
+
+                GameLogic.AddBBS(nil, option, 3000, "255 0 0")
             end
 
-            GameLogic.AddBBS(nil, msg, 3000, "255 0 0")
+            if type(option) == 'table' then
+                if option.method == 'UPDATE-PROGRESS' then
+                    Progress:UpdateDataBar(option.current, option.total, option.msg)
+                    return false
+                end
+
+                if option.method == 'UPDATE-PROGRESS-FAIL' then
+                    Progress:SetFinish(true)
+                    Progress:ClosePage()
+                    GameLogic.AddBBS(nil, option.msg, 3000, "255 0 0")
+                    return false
+                end
+
+                if option.method == 'UPDATE-PROGRESS-FINISH' then
+                    Progress:SetFinish(true)
+                    Progress:Refresh()
+                    Progress:RefreshOperate()
+                    return false
+                end
+            end
         end
 
         if type(callback) == 'function' then
-            callback(result, msg)
+            callback(result, option)
         end
 
         WorldList:RefreshCurrentServerList()
     end)
+
+    -- load sync progress UI
+    Progress:Init(syncInstance)
 end
 
 function SyncMain:CheckTagName(callback)

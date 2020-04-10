@@ -8,16 +8,19 @@ use the lib:
 local SyncToDataSource = NPL.load("(gl)Mod/WorldShare/cellar/Sync/SyncToDataSource.lua")
 ------------------------------------------------------------
 ]]
-local Progress = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Progress/Progress.lua")
+-- service
 local GitService = NPL.load("../GitService.lua")
 local LocalService = NPL.load("../LocalService.lua")
 local KeepworkService = NPL.load("../KeepworkService.lua")
 local KeepworkServiceProject = NPL.load("../KeepworkService/Project.lua")
 local KeepworkServiceWorld = NPL.load("../KeepworkService/World.lua")
 local KeepworkServiceSession = NPL.load("../KeepworkService/Session.lua")
-local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
+
+-- helper
 local KeepworkGen = NPL.load("(gl)Mod/WorldShare/helper/KeepworkGen.lua")
 local GitEncoding = NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua")
+
+-- api
 local StorageFilesApi = NPL.load("(gl)Mod/WorldShare/api/Storage/Files.lua")
 local QiniuRootApi = NPL.load("(gl)Mod/WorldShare/api/Qiniu/Root.lua")
 
@@ -42,10 +45,6 @@ function SyncToDataSource:Init(callback)
             callback(false, L"上传失败，将使用离线模式，原因：上传目录为空")
             return false
         end
-    
-        -- 加载进度UI界面
-        -- // TODO: move to UI file
-        Progress:Init(self)
     
         self:SetFinish(false)
         self:SetBroke(false)
@@ -75,14 +74,12 @@ function SyncToDataSource:Init(callback)
                             if err == 400 and data and data.code == 17 then
                                 callback(false, L"您创建的帕拉卡(Paracraft)在线项目数量过多。请删除不需要的项目后再试。")
                                 self:SetFinish(true)
-                                Progress:ClosePage()
                                 return false
                             end
     
                             if err ~= 200 or not data or not data.id then
                                 callback(false, L"创建项目失败")
                                 self:SetFinish(true)
-                                Progress:ClosePage()
                                 return false
                             end
     
@@ -114,6 +111,9 @@ function SyncToDataSource:Init(callback)
             self.callback(false, L"RE-ENTRY")
         end
     end)
+
+    -- return current sync instance to UI component
+    return self
 end
 
 function SyncToDataSource:IsProjectExist(callback)
@@ -131,7 +131,6 @@ function SyncToDataSource:IsProjectExist(callback)
                 if self.currentWorld.shared then
                     self.callback(false, L"该项目不属于您，无法上传分享")
                     self:SetFinish(true)
-                    Progress:ClosePage()
                 else
                     callback(false)
                 end
@@ -144,14 +143,13 @@ function SyncToDataSource:Start()
     self.compareListIndex = 1
     self.compareListTotal = 0
 
-    Progress:UpdateDataBar(0, 0, L"正在对比文件列表...")
+    self.callback(false, { method = 'UPDATE-PROGRESS', current = 0, total = 0, msg = L"正在对比文件列表..." })
 
     local function Handle(data, err)
         if type(data) ~= 'table' then
             self.callback(false, L"获取列表失败")
             self.callback = nil
             self:SetFinish(true)
-            Progress:ClosePage()
             return false
         end
 
@@ -284,29 +282,22 @@ function SyncToDataSource:GetCompareList()
     self.compareListTotal = #self.compareList
 end
 
-function SyncToDataSource:RefreshList()
-    self:UpdateRecord(
-        function()
-            Progress:SetFinish(true)
-            Progress:Refresh()
-
-            Mod.WorldShare.Store:Set(
-                "world/CloseProgress",
-                function()
-                    self.callback(true, 'success')
-                    self.callback = nil
-                end
-            )
-        end
-    )
+function SyncToDataSource:Close()
+    self.callback(true, 'success')
+    self.callback = nil
 end
 
 function SyncToDataSource:HandleCompareList()
     if self.compareListTotal < self.compareListIndex then
         -- sync finish
         self:SetFinish(true)
-
-        self:RefreshList()
+        self:UpdateRecord(
+            function()
+                self.callback(false, {
+                    method = 'UPDATE-PROGRESS-FINISH'
+                })
+            end
+        )
 
         self.compareListIndex = 1
         return false
@@ -321,12 +312,12 @@ function SyncToDataSource:HandleCompareList()
     local currentItem = self.compareList[self.compareListIndex]
 
     local function Retry()
-        Progress:UpdateDataBar(
-            self.compareListIndex,
-            self.compareListTotal,
-            format(L"%s 处理完成", currentItem.file),
-            self.finish
-        )
+        self.callback(false, {
+            method = 'UPDATE-PROGRESS',
+            current = self.compareListIndex,
+            total = self.compareListTotal,
+            msg = format(L"%s 处理完成", currentItem.file)
+        })
 
         self.compareListIndex = self.compareListIndex + 1
         self:HandleCompareList()
@@ -378,11 +369,12 @@ function SyncToDataSource:UploadOne(file, callback)
         Mod.WorldShare.Store:Set('world/isPreviewUpdated', true)
     end
 
-    Progress:UpdateDataBar(
-        self.compareListIndex,
-        self.compareListTotal,
-        format(L"%s （%s） 上传中", currentLocalItem.filename, Mod.WorldShare.Utils.FormatFileSize(currentLocalItem.filesize, "KB"))
-    )
+    self.callback(false, {
+        method = "UPDATE-PROGRESS",
+        current = self.compareListIndex,
+        total = self.compareListTotal,
+        msg = format(L"%s （%s） 上传中", currentLocalItem.filename, Mod.WorldShare.Utils.FormatFileSize(currentLocalItem.filesize, "KB"))
+    })
 
     GitService:Upload(
         self.currentWorld.foldername,
@@ -394,16 +386,13 @@ function SyncToDataSource:UploadOne(file, callback)
                 if type(callback) == "function" then
                     callback()
                 end
-            else
-                self.callback(false, format(L"%s上传失败", currentLocalItem.filename))
+            else    
+                self.callback(false, {
+                    method = 'UPDATE-PROGRESS-FAIL',
+                    msg = format(L"%s 上传失败", currentLocalItem.filename)
+                })
                 self.callback = nil
                 self:SetBroke(true)
-
-                Progress:UpdateDataBar(
-                    self.compareListIndex,
-                    self.compareListTotal,
-                    format(L"%s 上传失败", currentLocalItem.filename)
-                )
             end
         end
     )
@@ -414,11 +403,12 @@ function SyncToDataSource:UpdateOne(file, callback)
     local currentLocalItem = self:GetLocalFileByFilename(file)
     local currentRemoteItem = self:GetRemoteFileByPath(file)
 
-    Progress:UpdateDataBar(
-        self.compareListIndex,
-        self.compareListTotal,
-        format(L"%s （%s） 对比中", currentLocalItem.filename, Mod.WorldShare.Utils.FormatFileSize(currentLocalItem.filesize, "KB"))
-    )
+    self.callback(false, {
+        method = "UPDATE-PROGRESS",
+        current = self.compareListIndex,
+        total = self.compareListTotal,
+        msg = format(L"%s （%s） 对比中", currentLocalItem.filename, Mod.WorldShare.Utils.FormatFileSize(currentLocalItem.filesize, "KB"))
+    })
 
     -- These line give a feedback on update record method
     if string.lower(currentLocalItem.filename) == 'preview.jpg' then
@@ -431,11 +421,12 @@ function SyncToDataSource:UpdateOne(file, callback)
 
     if currentLocalItem.sha1 == currentRemoteItem.id and string.lower(currentLocalItem.filename) ~= "revision.xml" then
         if type(callback) == "function" then
-            Progress:UpdateDataBar(
-                self.compareListIndex,
-                self.compareListTotal,
-                format(L"%s （%s） 文件一致，跳过", currentLocalItem.filename, Mod.WorldShare.Utils.FormatFileSize(currentLocalItem.filesize, "KB"))
-            )
+            self.callback(false, {
+                method = "UPDATE-PROGRESS",
+                current = self.compareListIndex,
+                total = self.compareListTotal,
+                msg = format(L"%s （%s） 文件一致，跳过", currentLocalItem.filename, Mod.WorldShare.Utils.FormatFileSize(currentLocalItem.filesize, "KB"))
+            })
 
             Mod.WorldShare.Utils.SetTimeOut(callback)
         end
@@ -443,11 +434,12 @@ function SyncToDataSource:UpdateOne(file, callback)
         return false
     end
 
-    Progress:UpdateDataBar(
-        self.compareListIndex,
-        self.compareListTotal,
-        format(L"%s （%s） 更新中", currentLocalItem.filename, Mod.WorldShare.Utils.FormatFileSize(currentLocalItem.filesize, "KB"))
-    )
+    self.callback(false, {
+        method = "UPDATE-PROGRESS",
+        current = self.compareListIndex,
+        total = self.compareListTotal,
+        msg = format(L"%s （%s） 更新中", currentLocalItem.filename, Mod.WorldShare.Utils.FormatFileSize(currentLocalItem.filesize, "KB"))
+    })
 
     GitService:Update(
         self.currentWorld.foldername,
@@ -460,15 +452,12 @@ function SyncToDataSource:UpdateOne(file, callback)
                     callback()
                 end
             else
-                self.callback(false, L"更新失败")
+                self.callback(false, {
+                    method = 'UPDATE-PROGRESS-FAIL',
+                    msg = format(L"%s 更新失败", currentLocalItem.filename)
+                })
                 self.callback = nil
                 self:SetBroke(true)
-
-                Progress:UpdateDataBar(
-                    self.compareListIndex,
-                    self.compareListTotal,
-                    format(L"%s 更新失败", currentLocalItem.filename)
-                )
             end
         end
     )
@@ -483,11 +472,12 @@ function SyncToDataSource:DeleteOne(file, callback)
         Mod.WorldShare.Store:Set('world/isPreviewUpdated', false)
     end
 
-    Progress:UpdateDataBar(
-        self.compareListIndex,
-        self.compareListTotal,
-        format(L"%s 删除中", currentRemoteItem.path)
-    )
+    self.callback(false, {
+        method = "UPDATE-PROGRESS",
+        current = self.compareListIndex,
+        total = self.compareListTotal,
+        msg = format(L"%s 删除中", currentRemoteItem.path)
+    })
 
     GitService:DeleteFile(
         self.currentWorld.foldername,
@@ -499,15 +489,12 @@ function SyncToDataSource:DeleteOne(file, callback)
                     callback()
                 end
             else
-                self.callback(false, L"删除失败")
+                self.callback(false, {
+                    method = "UPDATE-PROGRESS-FAIL",
+                    msg = format(L"%s 删除失败", currentRemoteItem.name)
+                })
                 self.callback = nil
                 self:SetBroke(true)
-
-                Progress:UpdateDataBar(
-                    self.compareListIndex,
-                    self.compareListTotal,
-                    format(L"%s 删除失败", currentRemoteItem.name)
-                )
             end
         end
     )
@@ -526,7 +513,6 @@ function SyncToDataSource:UpdateRecord(callback)
             self.callback(false, L"获取Commit列表失败")
             self.callback = nil
             self:SetFinish(true)
-            Progress:ClosePage()
             return false
         end
 
@@ -538,6 +524,7 @@ function SyncToDataSource:UpdateRecord(callback)
         if not lastCommitFile or string.lower(lastCommitFile) ~= "revision.xml" then
             self.callback(false, L"上一次同步到数据源同步失败，请重新同步世界到数据源")
             self.callback = nil
+            self:SetFinish(true)
             return false
         end
 
@@ -594,6 +581,7 @@ function SyncToDataSource:UpdateRecord(callback)
                         if (err ~= 200) then
                             self.callback(false, L"更新服务器列表失败")
                             self.callback = nil
+                            self:SetFinish(true)
                             return false
                         end
         
