@@ -148,7 +148,6 @@ function SyncToDataSource:Start()
     local function Handle(data, err)
         if type(data) ~= 'table' then
             self.callback(false, L"获取列表失败")
-            self.callback = nil
             self:SetFinish(true)
             return false
         end
@@ -284,7 +283,6 @@ end
 
 function SyncToDataSource:Close()
     self.callback(true, 'success')
-    self.callback = nil
 end
 
 function SyncToDataSource:HandleCompareList()
@@ -391,7 +389,6 @@ function SyncToDataSource:UploadOne(file, callback)
                     method = 'UPDATE-PROGRESS-FAIL',
                     msg = format(L"%s 上传失败", currentLocalItem.filename)
                 })
-                self.callback = nil
                 self:SetBroke(true)
             end
         end
@@ -456,7 +453,6 @@ function SyncToDataSource:UpdateOne(file, callback)
                     method = 'UPDATE-PROGRESS-FAIL',
                     msg = format(L"%s 更新失败", currentLocalItem.filename)
                 })
-                self.callback = nil
                 self:SetBroke(true)
             end
         end
@@ -493,7 +489,6 @@ function SyncToDataSource:DeleteOne(file, callback)
                     method = "UPDATE-PROGRESS-FAIL",
                     msg = format(L"%s 删除失败", currentRemoteItem.name)
                 })
-                self.callback = nil
                 self:SetBroke(true)
             end
         end
@@ -511,7 +506,6 @@ function SyncToDataSource:UpdateRecord(callback)
            not data.commitId or
            not data.message then
             self.callback(false, L"获取Commit列表失败")
-            self.callback = nil
             self:SetFinish(true)
             return false
         end
@@ -523,7 +517,6 @@ function SyncToDataSource:UpdateRecord(callback)
 
         if not lastCommitFile or string.lower(lastCommitFile) ~= "revision.xml" then
             self.callback(false, L"上一次同步到数据源同步失败，请重新同步世界到数据源")
-            self.callback = nil
             self:SetFinish(true)
             return false
         end
@@ -580,7 +573,6 @@ function SyncToDataSource:UpdateRecord(callback)
                     function(data, err)
                         if (err ~= 200) then
                             self.callback(false, L"更新服务器列表失败")
-                            self.callback = nil
                             self:SetFinish(true)
                             return false
                         end

@@ -65,7 +65,6 @@ function SyncToLocal:Init(callback)
 
     if not self.currentWorld.worldpath or self.currentWorld.worldpath == "" then
         self.callback(false, L"下载失败，原因：下载目录为空")
-        self.callback = nil
         return false
     end
 
@@ -73,7 +72,6 @@ function SyncToLocal:Init(callback)
 
     if not self.currentWorld.lastCommitId then
         self.callback(false, L"commitId不存在")
-        self.callback = nil
         return false
     end
 
@@ -91,7 +89,6 @@ function SyncToLocal:Start()
     local function Handle(data, err)
         if type(data) ~= 'table' then
             self.callback(false, L"获取列表失败")
-            self.callback = nil
             self:SetFinish(true)
             return false
         end
@@ -103,7 +100,6 @@ function SyncToLocal:Start()
 
         if #data == 0 then
             self.callback(false, 'NEWWORLD')
-            self.callback = nil
             self:SetFinish(true)
             return false
         end
@@ -194,7 +190,6 @@ end
 
 function SyncToLocal:Close()
     self.callback(true, 'success')
-    self.callback = nil
 end
 
 function SyncToLocal:HandleCompareList()
@@ -285,7 +280,6 @@ function SyncToLocal:DownloadOne(file, callback)
                     method = 'UPDATE-PROGRESS-FAIL',
                     msg = format(L'同步失败，原因： %s 下载失败', currentRemoteItem.path)
                 })
-                self.callback = nil
                 self:SetBroke(true)
                 return false
             end
@@ -345,7 +339,6 @@ function SyncToLocal:UpdateOne(file, callback)
                     method = 'UPDATE-PROGRESS-FAIL',
                     msg = format(L'同步失败，原因： %s 更新失败', currentRemoteItem.path)
                 })
-                self.callback = nil
                 self:SetBroke(true)
                 return false
             end
