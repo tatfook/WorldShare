@@ -194,7 +194,7 @@ function KeepworkServiceWorld:UpdateLockHeartbeatStart(pid, mode, revision, serv
     Heartbeat()
 end
 
-function KeepworkServiceWorld:UnlockWorld()
+function KeepworkServiceWorld:UnlockWorld(callback)
     self.lockHeartbeat = false
     local currentEnterWorld = Mod.WorldShare.Store:Get("world/currentEnterWorld")
 
@@ -214,9 +214,17 @@ function KeepworkServiceWorld:UnlockWorld()
                     currentEnterWorld.kpProjectId,
                     function()
                         self.isUnlockFetching = false
+
+                        if type(callback) == 'function' then
+                            callback()
+                        end
                     end,
                     function()
                         self.isUnlockFetching = false
+
+                        if type(callback) == 'function' then
+                            callback()
+                        end
                     end
                 )
             end

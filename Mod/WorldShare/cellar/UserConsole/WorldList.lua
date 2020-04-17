@@ -271,94 +271,106 @@ function WorldList:EnterWorld(index)
  
         local function LockAndEnter()
             Mod.WorldShare.MsgBox:Show(L"请稍后...")
-            KeepworkServiceWorld:GetLockInfo(
-                currentWorld.kpProjectId,
-                function(data)
-                    local canLocked = false
-
-                    if not data then
-                        canLocked = true
-                    else
-                        if data and data.owner and data.owner.userId == userId then
-                            if tostring(data.password) == tostring(clientPassword) then
-                                canLocked = true
-                            else
-                                local curTimestamp = Mod.WorldShare.Utils:GetCurrentTime(true)
-                                local lastLockTimestamp = Mod.WorldShare.Utils:DatetimeToTimestamp(data.lastLockTime)
-
-                                if (curTimestamp - lastLockTimestamp) > 60 then
+            local function HandleLockAndEnter()
+                KeepworkServiceWorld:GetLockInfo(
+                    currentWorld.kpProjectId,
+                    function(data)
+                        local canLocked = false
+    
+                        if not data then
+                            canLocked = true
+                        else
+                            if data and data.owner and data.owner.userId == userId then
+                                if tostring(data.password) == tostring(clientPassword) then
                                     canLocked = true
                                 else
-                                    canLocked = false
+                                    local curTimestamp = Mod.WorldShare.Utils:GetCurrentTime(true)
+                                    local lastLockTimestamp = Mod.WorldShare.Utils:DatetimeToTimestamp(data.lastLockTime)
+    
+                                    if (curTimestamp - lastLockTimestamp) > 60 then
+                                        canLocked = true
+                                    else
+                                        canLocked = false
+                                        Mod.WorldShare.MsgBox:Close()
+        
+                                        Mod.WorldShare.MsgBox:Dialog(
+                                            format(
+                                                L"此账号已在其他地方占用此世界，请退出后再或者以只读模式打开世界",
+                                                data.owner.username,
+                                                currentWorld.foldername,
+                                                data.owner.username
+                                            ),
+                                            {
+                                                Title = L"世界被占用",
+                                                Yes = L"知道了",
+                                                No = L"只读模式打开"
+                                            },
+                                            function(res)
+                                                if res and res == _guihelper.DialogResult.No then
+                                                    Mod.WorldShare.Store:Set("world/readonly", true)
+                                                    InternetLoadWorld.EnterWorld()
+                                                    UserConsole:ClosePage()
+                                                end
+                                            end,
+                                            _guihelper.MessageBoxButtons.YesNo
+                                        )
+                                    end
+                                end
+                            else
+                                Mod.WorldShare.MsgBox:Dialog(
+                                    format(
+                                        L"%s正在以独占模式编辑世界%s，请联系%s退出编辑或者以只读模式打开世界",
+                                        data.owner.username,
+                                        currentWorld.foldername,
+                                        data.owner.username
+                                    ),
+                                    {
+                                        Title = L"世界被占用",
+                                        Yes = L"知道了",
+                                        No = L"只读模式打开"
+                                    },
+                                    function(res)
+                                        if res and res == _guihelper.DialogResult.No then
+                                            Mod.WorldShare.Store:Set("world/readonly", true)
+                                            InternetLoadWorld.EnterWorld()
+                                            UserConsole:ClosePage()
+                                        end
+                                    end,
+                                    _guihelper.MessageBoxButtons.YesNo
+                                )
+                            end
+                        end
+    
+                        if canLocked then
+                            KeepworkServiceWorld:UpdateLock(
+                                currentWorld.kpProjectId,
+                                "exclusive",
+                                currentWorld.revision,
+                                nil,
+                                clientPassword,
+                                function(data)
                                     Mod.WorldShare.MsgBox:Close()
     
-                                    Mod.WorldShare.MsgBox:Dialog(
-                                        format(
-                                            L"此账号已在其他地方占用此世界，请退出后再或者以只读模式打开世界",
-                                            data.owner.username,
-                                            currentWorld.foldername,
-                                            data.owner.username
-                                        ),
-                                        {
-                                            Title = L"世界被占用",
-                                            Yes = L"知道了",
-                                            No = L"只读模式打开"
-                                        },
-                                        function(res)
-                                            if res and res == _guihelper.DialogResult.No then
-                                                Mod.WorldShare.Store:Set("world/readonly", true)
-                                                InternetLoadWorld.EnterWorld()
-                                                UserConsole:ClosePage()
-                                            end
-                                        end,
-                                        _guihelper.MessageBoxButtons.YesNo
-                                    )
-                                end
-                            end
-                        else
-                            Mod.WorldShare.MsgBox:Dialog(
-                                format(
-                                    L"%s正在以独占模式编辑世界%s，请联系%s退出编辑或者以只读模式打开世界",
-                                    data.owner.username,
-                                    currentWorld.foldername,
-                                    data.owner.username
-                                ),
-                                {
-                                    Title = L"世界被占用",
-                                    Yes = L"知道了",
-                                    No = L"只读模式打开"
-                                },
-                                function(res)
-                                    if res and res == _guihelper.DialogResult.No then
-                                        Mod.WorldShare.Store:Set("world/readonly", true)
-                                        InternetLoadWorld.EnterWorld()
+                                    if data then
+                                        InternetLoadWorld.EnterWorld()	
                                         UserConsole:ClosePage()
                                     end
-                                end,
-                                _guihelper.MessageBoxButtons.YesNo
+                                end
                             )
                         end
                     end
+                )
+            end
+            
+            local currentEnterWorld = Mod.WorldShare.Store:Get("world/currentEnterWorld")
 
-                    if canLocked then
-                        KeepworkServiceWorld:UpdateLock(
-                            currentWorld.kpProjectId,
-                            "exclusive",
-                            currentWorld.revision,
-                            nil,
-                            clientPassword,
-                            function(data)
-                                Mod.WorldShare.MsgBox:Close()
-
-                                if data then
-                                    InternetLoadWorld.EnterWorld()	
-                                    UserConsole:ClosePage()
-                                end
-                            end
-                        )
-                    end
-                end
-            )
+            if currentEnterWorld and (currentEnterWorld.project and currentEnterWorld.project.memberCount or 0) > 1 then
+                KeepworkServiceWorld:UnlockWorld(function()
+                    HandleLockAndEnter()
+                end)
+            else
+                HandleLockAndEnter()
+            end
         end
 
         if currentWorld.status == 2 then

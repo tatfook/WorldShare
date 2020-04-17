@@ -54,7 +54,6 @@ local HistoryManager = NPL.load("(gl)Mod/WorldShare/cellar/HistoryManager/Histor
 local WorldExitDialog = NPL.load("(gl)Mod/WorldShare/cellar/WorldExitDialog/WorldExitDialog.lua")
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local Grade = NPL.load("(gl)Mod/WorldShare/cellar/Grade/Grade.lua")
-local KeepworkServiceWorld = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/World.lua")
 local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
 
 local SocketService = commonlib.gettable("Mod.WorldShare.service.SocketService")
@@ -178,6 +177,5 @@ function WorldShare:OnWorldLoad()
 end
 
 function WorldShare:OnLeaveWorld()
-    KeepworkServiceWorld:UnlockWorld()
     Store:Remove("world/currentWorld")
 end

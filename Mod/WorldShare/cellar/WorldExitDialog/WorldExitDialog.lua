@@ -16,6 +16,7 @@ local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
+local KeepworkServiceWorld = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/World.lua")
 local KeepworkServiceProject = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Project.lua")
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
@@ -161,8 +162,26 @@ function WorldExitDialog.OnDialogResult(res)
         WorldExitDialogPage:CloseWindow()
     end
 
-    if (WorldExitDialogPage.callback) then
-        WorldExitDialogPage.callback(res)
+    if res == _guihelper.DialogResult.No or res == _guihelper.DialogResult.Yes then
+        local currentEnterWorld = Mod.WorldShare.Store:Get("world/currentEnterWorld")
+
+        if (currentEnterWorld.project and currentEnterWorld.project.memberCount or 0) > 1 then
+            Mod.WorldShare.MsgBox:Show(L"请稍后...")
+            KeepworkServiceWorld:UnlockWorld(function()
+                if (WorldExitDialogPage.callback) then
+                    WorldExitDialogPage.callback(res)
+                end
+            end)
+        else
+            if (WorldExitDialogPage.callback) then
+                WorldExitDialogPage.callback(res)
+            end
+        end
+
+    else
+        if (WorldExitDialogPage.callback) then
+            WorldExitDialogPage.callback(res)
+        end
     end
 end
 
