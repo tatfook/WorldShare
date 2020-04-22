@@ -15,7 +15,6 @@ local SystemEncoding = commonlib.gettable("System.Encoding")
 local CommonlibEncoding = commonlib.gettable("commonlib.Encoding")
 local FileDownloader = commonlib.gettable("Mod.WorldShare.service.FileDownloader.FileDownloader")
 local LocalLoadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalLoadWorld")
-local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 
 local LocalService = NPL.export()
 
@@ -276,35 +275,6 @@ function LocalService:MoveZipToFolder(worldpath, zipPath)
     ParaAsset.CloseArchive(zipPath)
 end
 
--- copy current world to destination path
-function LocalService:CopyWorldTo(dest)
-    if not dest or dest == "" then
-        return false
-    end
-
-    local foldername = Mod.WorldShare.Utils:GetLastFoldername(dest)
-
-    local function Handle()
-        if WorldCommon.CopyWorldTo(dest) then
-            _guihelper.MessageBox(format(L"世界已经成功保存到: %s, 是否现在打开?", commonlib.Encoding.DefaultToUtf8(dest)), function(res)
-                if(res and res == _guihelper.DialogResult.Yes) then
-                    WorldCommon.OpenWorld(dest, true)
-                end
-            end, _guihelper.MessageBoxButtons.YesNo)
-        end
-    end
-
-    if ParaIO.DoesFileExist(dest .. "tag.xml", false) then
-        _guihelper.MessageBox(format(L"世界%s已经存在, 是否覆盖?", commonlib.Encoding.DefaultToUtf8(foldername)), function(res)
-            if res and res == _guihelper.DialogResult.Yes then
-                Handle()
-            end
-        end, _guihelper.MessageBoxButtons.YesNo)
-    else
-        Handle()
-    end
-end
-
 -- get all world total files size
 function LocalService:GetWorldSize(worldpath)
     local files =
@@ -452,28 +422,4 @@ function LocalService:ClearUserWorlds()
             ParaIO.DeleteFile(format("%s/%s", userworldsPath, item.filename))
         end
     end
-end
-
-function LocalService:FilterGetWorldsFolderFullPath()
-    local myWorldsFolder = Mod.WorldShare.Store:Get('world/myWorldsFolder') or 'worlds/DesignHouse'
-
-    if not self.myWorldsFolder or self.myWorldsFolder ~= myWorldsFolder then
-        self.myWorldsFolder = myWorldsFolder
-
-        return self.myWorldsFolder, true
-    end
-
-    return self.myWorldsFolder, false
-end
-
-function LocalService:GetSystemWorldsPath()
-    if not self.systemWorldsPath then
-        if System.os.GetExternalStoragePath() ~= "" then
-            self.systemWorldsPath = System.os.GetExternalStoragePath() .. "paracraft/worlds"
-        else
-            self.systemWorldsPath = ParaIO.GetWritablePath() .. "worlds"
-        end
-    end
-
-    return self.systemWorldsPath
 end
