@@ -14,6 +14,7 @@ local LocalService = NPL.load("./LocalService.lua")
 local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
 local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
 local KeepworkServiceProject = NPL.load('./KeepworkService/Project.lua')
+local KeepworkServiceSession = NPL.load('./KeepworkService/Session.lua')
 local Config = NPL.load("(gl)Mod/WorldShare/config/Config.lua")
 
 local KeepworkService = NPL.export()
@@ -61,10 +62,9 @@ function KeepworkService:GetServerList()
     end
 end
 
+-- [deprecated] we will remove this function in the future
 function KeepworkService:IsSignedIn()
-    local token = Mod.WorldShare.Store:Get("user/token")
-
-    return token ~= nil
+    return KeepworkServiceSession:IsSignedIn()
 end
 
 function KeepworkService:GetToken()

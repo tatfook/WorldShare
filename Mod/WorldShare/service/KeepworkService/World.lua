@@ -386,6 +386,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
 
             if not isExist then
                 currentWorld = LItem
+                currentWorld.project = {}
                 currentWorld.modifyTime = Mod.WorldShare.Utils:UnifiedTimestampFormat(currentWorld.writedate)
                 currentWorld.text = currentWorld.text
                 currentWorld.local_tagname = LItem['local_tagname']

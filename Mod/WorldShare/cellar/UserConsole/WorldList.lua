@@ -9,7 +9,6 @@ use the lib:
 local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
 ------------------------------------------------------------
 ]]
-local CreateNewWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.CreateNewWorld")
 local RemoteServerList = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.RemoteServerList")
 local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
 local Encoding = commonlib.gettable("commonlib.Encoding")
@@ -25,14 +24,12 @@ local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua
 local KeepworkServiceWorld = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/World.lua")
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
-local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
 local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
 local LocalServiceWorld = NPL.load("(gl)Mod/WorldShare/service/LocalService/World.lua")
 local SyncToLocal = NPL.load("(gl)Mod/WorldShare/service/SyncService/SyncToLocal.lua")
+local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
 
 local WorldList = NPL.export()
-
-WorldList.zipDownloadFinished = true
 
 function WorldList:RefreshCurrentServerList(callback)
     local UserConsolePage = Mod.WorldShare.Store:Get('page/UserConsole')
@@ -233,6 +230,7 @@ function WorldList:EnterWorld(index)
 
             if currentWorld.shared then
                 Mod.WorldShare.MsgBox:Dialog(
+                    "WorldReadOnly",
                     L"此世界为多人世界，请登陆后再打开世界，或者以只读模式打开世界",
                     {
                         Title = L"多人世界",
@@ -286,7 +284,7 @@ function WorldList:EnterWorld(index)
                                 else
                                     local curTimestamp = Mod.WorldShare.Utils:GetCurrentTime(true)
                                     local lastLockTimestamp = Mod.WorldShare.Utils:DatetimeToTimestamp(data.lastLockTime)
-    
+
                                     if (curTimestamp - lastLockTimestamp) > 60 then
                                         canLocked = true
                                     else
@@ -294,6 +292,7 @@ function WorldList:EnterWorld(index)
                                         Mod.WorldShare.MsgBox:Close()
         
                                         Mod.WorldShare.MsgBox:Dialog(
+                                            "OccupyWorld",
                                             format(
                                                 L"此账号已在其他地方占用此世界，请退出后再或者以只读模式打开世界",
                                                 data.owner.username,
@@ -427,6 +426,7 @@ function WorldList:EnterWorld(index)
                         local remoteRevision = Mod.WorldShare.Store:Get("world/remoteRevision") or 0
 
                         Mod.WorldShare.MsgBox:Dialog(
+                            "SharedLowerVersion",
                             format(L"你的本地版本%d比远程版本%d旧， 是否更新为最新的远程版本？", currentRevision, remoteRevision),
                             {
                                 Title = L"多人世界",
@@ -472,8 +472,12 @@ function WorldList:EnterWorld(index)
     end
 
     if not KeepworkService:IsSignedIn() and currentWorld.kpProjectId then
+        -- get my worlds folder when click enter button
+        local myWorldsFolder = Mod.WorldShare.Store:Get('world/myWorldsFolder')
         LoginModal:Init(function(result)
             if result then
+                -- set my worlds folder back to at click time value
+                Mod.WorldShare.Store:Set('world/myWorldsFolder', myWorldsFolder)
                 -- refresh world list after 
                 self:RefreshCurrentServerList(function()
                     Handle(result)
@@ -544,4 +548,45 @@ function WorldList:OpenProject(index)
     end
 
     ParaGlobal.ShellExecute("open", format("%s/pbl/project/%d/", KeepworkService:GetKeepworkUrl(), compareWorldList[index].kpProjectId or 0), "", "", 1)
+end
+
+function WorldList:GetWorldsPath()
+    local allPath = {
+        { text = L"临时文件夹", value = "worlds/DesignHouse" }
+    }
+
+    local list = LocalService:Find(LocalService:GetSystemWorldsPath())
+    local curWorldsFolder = Mod.WorldShare.Store:Get('world/myWorldsFolder') or "worlds/DesignHouse"
+
+    -- remove useless folder 
+    local function RemoveFilename(name)
+        for key, item in pairs(list) do
+            if item and item.filename == name then
+                for i = key, #list do
+                    list[i] = list[i + 1]
+                end
+    
+                break;
+            end
+        end
+    end
+
+    RemoveFilename('.DS_Store')
+    RemoveFilename('BlockTextures')
+    RemoveFilename('MyWorlds')
+    RemoveFilename('DesignHouse')
+
+    for key, item in pairs(list) do
+        allPath[#allPath + 1] = { text = item.filename .. L'的文件夹', value = "worlds/" .. item.filename }
+    end
+
+    for key, item in pairs(allPath) do
+        if item.value == curWorldsFolder then
+            item.selected = true
+        else
+            item.selected = nil
+        end
+    end
+
+    return allPath
 end
