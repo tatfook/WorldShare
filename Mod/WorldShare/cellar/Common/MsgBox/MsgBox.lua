@@ -87,43 +87,18 @@ function MsgBox.GetMsg(msgId)
     end
 end
 
---[[
-example:
-MsgBox:Dialog(
-    "your_content",
-    {
-        "Abort" = "Abort",
-        "Cancel" = "Cancel"
-    },
-    function(res)
-    end,
-    _guihelper.MessageBoxButtons.YesNo
-)
-]]
-function MsgBox:Dialog(dialogName, content, customLabels, MsgBoxClick_CallBack, buttons, styles, icon, isNotTopLevel, zorder)
-    self.customLabels = {}
-    self.styles = {}
-
+function MsgBox:Dialog(content, customLabels, MsgBoxClick_CallBack, buttons, icon, isNotTopLevel, zorder)
     if type(customLabels) == 'table' then
         self.customLabels = {
-            TitleLabel = customLabels["Title"],
-            OKLabel = customLabels["OK"],
-            CancelLabel = customLabels["Cancel"],
             AbortLabel = customLabels["Abort"],
+            CancelLabel = customLabels["Cancel"],
             IgnoreLabel = customLabels["Ignore"],
+            NoLabel = customLabels["No"],
             NoneLabel = customLabels["None"],
+            OKLabel = customLabels["OK"],
             RetryLabel = customLabels["Retry"],
             YesLabel = customLabels["Yes"],
-            NoLabel = customLabels["No"],
-        }
-    end
-
-    if type(styles) == 'table' then
-        self.styles = {
-            Window = styles['Window'] or {},
-            Container = styles['Container'] or {},
-            Yes = styles['Yes'] or {},
-            No = styles['No'] or {},
+            TitleLabel = customLabels["Title"]
         }
     end
 
@@ -132,8 +107,10 @@ function MsgBox:Dialog(dialogName, content, customLabels, MsgBoxClick_CallBack, 
         MsgBoxClick_CallBack,
         buttons,
         icon,
-        "Mod/WorldShare/cellar/Common/MsgBox/Dialog.html?dialogName=" .. dialogName,
+        "Mod/WorldShare/cellar/Common/MsgBox/Dialog.html",
         isNotTopLevel,
         zorder
     )
+
+    self.customLabels = {}
 end

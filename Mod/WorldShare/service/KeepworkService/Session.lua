@@ -23,12 +23,6 @@ local KeepworkServiceSession = NPL.export()
 
 KeepworkServiceSession.captchaKey = ''
 
-function KeepworkServiceSession:IsSignedIn()
-    local token = Mod.WorldShare.Store:Get("user/token")
-
-    return token ~= nil
-end
-
 function KeepworkServiceSession:Login(account, password, callback)
     KeepworkUsersApi:Login(account, password, callback, callback)
 end
@@ -73,16 +67,6 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
     local SetUserinfo = Mod.WorldShare.Store:Action("user/SetUserinfo")
     SetUserinfo(token, userId, username, nickname)
 
-    local userWorldsFolder = 'worlds/' .. username
-
-    if System.os.GetExternalStoragePath() ~= "" then
-        ParaIO.CreateDirectory(System.os.GetExternalStoragePath() .. "paracraft/" .. userWorldsFolder .. '/')
-    else
-        ParaIO.CreateDirectory(ParaIO.GetWritablePath() .. userWorldsFolder .. '/')
-    end
-
-    Mod.WorldShare.Store:Set('world/myWorldsFolder', 'worlds/' .. username)
-
     LessonOrganizationsApi:GetUserAllOrgs(
         function(data, err)
             if err == 200 then
@@ -109,7 +93,6 @@ function KeepworkServiceSession:Logout()
         local Logout = Mod.WorldShare.Store:Action("user/Logout")
         Logout()
         self:ResetIndulge()
-        Mod.WorldShare.Store:Set('world/myWorldsFolder', 'worlds/DesignHouse')
     end
 end
 
@@ -408,7 +391,7 @@ end
 function KeepworkServiceSession:PreventIndulge(callback)
     local function Handle()
         local times = 1000
-        self.gameTime = (self.gameTime or 0) + 1 * 60
+        self.gameTime = (self.gameTime or 0) + 1
 
         -- 40 minutes
         if self.gameTime == (40 * 60) then
@@ -450,72 +433,4 @@ end
 
 function KeepworkServiceSession:ResetIndulge()
     self.gameTime = 0
-end
-
-function KeepworkServiceSession:IsMyWorldsFolder()
-    local username = Mod.WorldShare.Store:Get('user/username') or ""
-    local myWorldsFolder = Mod.WorldShare.Store:Get('world/myWorldsFolder') or ""
-    local myWorldsFolderUsername = string.match(myWorldsFolder, '^worlds/(.+)') or ""
-
-    if username == "" or myWorldsFolderUsername == "" then
-        return false
-    end
-
-    if username == myWorldsFolderUsername then
-        return true
-    else
-        return false
-    end
-end
-
-function KeepworkServiceSession:IsMyTempWorldsFolder()
-    local myWorldsFolder = Mod.WorldShare.Store:Get('world/myWorldsFolder') or ""
-    local myWorldsFolderUsername = string.match(myWorldsFolder, '^worlds/(.+)') or ""
-
-    if myWorldsFolderUsername == "" then
-        return false
-    end
-
-    if myWorldsFolderUsername == 'DesignHouse' then
-        return true
-    else
-        return false
-    end
-end
-
-function KeepworkServiceSession:IsCurrentWorldsFolder()
-    local username = Mod.WorldShare.Store:Get('user/username') or ""
-    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
-
-    local myWorldsFolderUsername = ""
-
-    if currentWorld and currentWorld.worldpath then
-        myWorldsFolderUsername = string.match(currentWorld.worldpath, 'worlds/(%w+)/') or ""
-    end
-
-    if username == "" or myWorldsFolderUsername == "" then
-        return false
-    end
-
-    if username == myWorldsFolderUsername then
-        return true
-    else
-        return false
-    end
-end
-
-function KeepworkServiceSession:IsTempWorldsFolder()
-    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
-
-    local myWorldsFolderUsername = ""
-
-    if currentWorld and currentWorld.worldpath then
-        myWorldsFolderUsername = string.match(currentWorld.worldpath, 'worlds/(%w+)/') or ""
-    end
-
-    if myWorldsFolderUsername == 'DesignHouse' then
-        return true
-    else
-        return false
-    end
 end

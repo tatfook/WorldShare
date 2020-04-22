@@ -56,8 +56,6 @@ local PreventIndulge = NPL.load("(gl)Mod/WorldShare/cellar/PreventIndulge/Preven
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local Grade = NPL.load("(gl)Mod/WorldShare/cellar/Grade/Grade.lua")
 local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
-local SaveWorld = NPL.load("(gl)Mod/WorldShare/cellar/SaveWorld/SaveWorld.lua")
-local Config = NPL.load("(gl)Mod/WorldShare/config/Config.lua")
 
 local SocketService = commonlib.gettable("Mod.WorldShare.service.SocketService")
 local GameLogic = commonlib.gettable("MyCompany.Aries.Game.GameLogic")
@@ -67,7 +65,7 @@ local WorldShare = commonlib.inherit(commonlib.gettable("Mod.ModBase"), commonli
 
 WorldShare:Property({"Name", "WorldShare", "GetName", "SetName", { auto = true }})
 WorldShare:Property({"Desc", "world share mod can share world to keepwork online", "GetDesc", "SetDesc", { auto = true }})
-WorldShare.version = '0.0.14'
+WorldShare.version = '0.0.13'
 
 -- register mod global variable
 WorldShare.Store = Store
@@ -143,7 +141,6 @@ function WorldShare:init()
         end
     )
 
-    -- handle enter world width pid
     GameLogic.GetFilters():add_filter(
         "cmd_loadworld", 
         function(url, options)
@@ -154,30 +151,6 @@ function WorldShare:init()
             else
                 return url
             end
-        end
-    )
-
-    -- return current user worlds folder or temp folder
-    GameLogic.GetFilters():add_filter(
-        "LocalLoadWorld.GetWorldFolderFullPath",
-        function()
-            return LocalService:FilterGetWorldsFolderFullPath()
-        end
-    )
-
-    -- save world
-    GameLogic.GetFilters():add_filter(
-        "SaveWorld",
-        function(bEnable, callback)
-            return SaveWorld:Save(callback)
-        end
-    )
-
-    -- save world as
-    GameLogic.GetFilters():add_filter(
-        "WorldCommon.SaveWorldAs",
-        function(bEnable, callback)
-            return SaveWorld:SaveAs(callback)
         end
     )
 

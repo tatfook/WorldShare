@@ -21,7 +21,6 @@
 
                     -- @param name: "local", "internet"
                     function use_offline()
-                        Mod.WorldShare.Store:Set('world/myWorldsFolder', 'worlds/DesignHouse')
                         KeepworkServiceSession:Logout()
                         MainLogin:EnterUserConsole()
                     end
