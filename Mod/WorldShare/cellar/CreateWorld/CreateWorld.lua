@@ -13,20 +13,58 @@ local CommandManager = commonlib.gettable("MyCompany.Aries.Game.CommandManager")
 local ShareWorldPage = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.Areas.ShareWorldPage")
 local CreateNewWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.CreateNewWorld")
 
-local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
 local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
 local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
-local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
+local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
+local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
+local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 
 local CreateWorld = NPL.export()
 
-function CreateWorld:CreateNewWorld(foldername)
-    CreateNewWorld.ShowPage()
+function CreateWorld:CreateNewWorld(foldername, callback)
+    local function Handle()
+        if type(callback) == 'function' then
+            callback()
+        end
 
-    if type(foldername) == 'string' then
-        CreateNewWorld.page:SetValue('new_world_name', foldername)
-        CreateNewWorld.page:Refresh(0.01)
+        CreateNewWorld.ShowPage()
+    
+        if type(foldername) == 'string' then
+            CreateNewWorld.page:SetValue('new_world_name', foldername)
+            CreateNewWorld.page:Refresh(0.01)
+        end
+    end
+
+    if not KeepworkService:IsSignedIn() then
+        Mod.WorldShare.MsgBox:Dialog(
+            "CreateNewWorld",
+            L"您目前处于未登录状态，未登录状态下创建的世界将暂时保存于临时文件夹中，强烈建议用户登录，登陆后创建的世界文件将保存在个人文件夹中。",
+            {
+                Yes = L"创建临时世界",
+                No = L"登录创建个人世界"
+            },
+            function(res)
+                if res == 8 then
+                    Handle()
+                elseif res == 4 then
+                    LoginModal:Init(function(result)
+                        if result then
+                            Handle()
+                        end
+                    end)
+                end
+            end,
+            _guihelper.MessageBoxButtons.YesNo,
+            {
+                Window = { width = '500px' },
+                Container = { width = '490px' },
+                Yes = { width = '120px', marginLeft = '105px' },
+                No = { width = '140px' },
+            }
+        )
+    else
+        Handle()
     end
 end
 

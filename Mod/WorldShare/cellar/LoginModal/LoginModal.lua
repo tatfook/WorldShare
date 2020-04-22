@@ -7,6 +7,9 @@ Desc:
 use the lib:
 ------------------------------------------------------------
 local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
+LoginModal:Init(function(result)
+    -- after login execute
+end)
 LoginModal:ShowPage()
 ------------------------------------------------------------
 ]]
@@ -143,7 +146,12 @@ function LoginModal:LoginAction()
         self:ClosePage()
 
         if not Mod.WorldShare.Store:Get('user/isVerified') then
-            RegisterModal:ShowBindingPage()
+            local UserConsolePage = Mod.WorldShare.Store:Get('page/UserConsole')
+
+            -- we only show binding page when user console page opened
+            if UserConsolePage then
+                RegisterModal:ShowBindingPage()
+            end
         end
 
         local AfterLogined = Mod.WorldShare.Store:Get('user/AfterLogined')
@@ -192,6 +200,7 @@ function LoginModal:SetAutoLogin()
 
     local autoLogin = LoginModalPage:GetValue("autoLogin")
     local rememberMe = LoginModalPage:GetValue("rememberMe")
+    local account = LoginModalPage:GetValue("account")
     local password = LoginModalPage:GetValue("password")
     self.loginServer = KeepworkService:GetEnv()
     self.account = string.lower(LoginModalPage:GetValue("account"))
@@ -201,8 +210,9 @@ function LoginModal:SetAutoLogin()
     else
         LoginModalPage:SetValue("rememberMe", rememberMe)
     end
-    
+
     LoginModalPage:SetValue("autoLogin", autoLogin)
+    LoginModalPage:SetValue("account", account)
     LoginModalPage:SetValue("password", password)
 
     self:Refresh()
@@ -216,6 +226,7 @@ function LoginModal:SetRememberMe()
     end
 
     local loginServer = KeepworkService:GetEnv()
+    local account = LoginModalPage:GetValue("account")
     local password = LoginModalPage:GetValue("password")
     local rememberMe = LoginModalPage:GetValue("rememberMe")
     self.loginServer = KeepworkService:GetEnv()
@@ -228,6 +239,7 @@ function LoginModal:SetRememberMe()
     end
 
     LoginModalPage:SetValue("rememberMe", rememberMe)
+    LoginModalPage:SetValue("account", account)
     LoginModalPage:SetValue("password", password)
 
     self:Refresh()

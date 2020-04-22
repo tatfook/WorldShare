@@ -6,14 +6,23 @@
                     local MsgBox = NPL.load('./MsgBox.lua')
 
                     customLabels = MsgBox.customLabels or {}
+                    styles = MsgBox.styles or {}
+                    page = document:GetPageCtrl()
 
                     function close()
                         _guihelper.OnMessageBoxClick("Cancel")
                     end
+
+                    function get_window_margin()
+                        local cur_width = styles.Window and styles.Window.width and styles.Window.width or '340px'
+                        cur_width = tonumber(string.match(cur_width, '^(%d+)px'))
+
+                        return ((370 - cur_width) / 2) .. 'px'
+                    end
                 ]]>
             </script>
-            <aries:window  mode="thin" style="width:340px" title='<%= customLabels.TitleLabel or L"信息" %>' onclose="close">
-                <div style="padding:5px;width:330px;color:#cccccc">
+            <aries:window  mode="thin" style="<%= 'margin-left: ' .. get_window_margin() .. ';width:' .. (styles.Window and styles.Window.width and styles.Window.width or '340px') %>" title='<%= customLabels.TitleLabel or L"信息" %>' onclose="close">
+                <div style="<%= 'width:' .. (styles.Container and styles.Container.width and styles.Container.width or '330px') .. ';padding:5px;color:#cccccc' %>">
                     <pe:if condition='<%=type(_guihelper.values.icon)=="string"%>'>
                         <img style="margin-right:5px;width:24px;height:24px;" src='<%=_guihelper.values.icon%>'/>
                     </pe:if>
@@ -46,8 +55,8 @@
                             <input type="button" class="mc_big_button" hotkey="DIK_RETURN" name="OK" value='<%= customLabels.OKLabel or L"确定" %>' style="margin-left:125px;margin-top:5px;width:90px;" onclick="_guihelper.OnMessageBoxClick()"/>
                         </pe:if>
                         <pe:if condition='<%=_guihelper.values.buttons==_guihelper.MessageBoxButtons.YesNo%>'>
-                            <input type="button" class="mc_big_button" hotkey="DIK_RETURN" name="Yes" value='<%= customLabels.YesLabel or L"是" %>' style="margin-left:72px;margin-top:5px;width:90px;" onclick="_guihelper.OnMessageBoxClick()"/>
-                            <input type="button" class="mc_big_button" name="No" value='<%= customLabels.NoLabel or L"否"%>' style="margin-left:15px;margin-top:5px;width:90px;" onclick="_guihelper.OnMessageBoxClick()"/>
+                            <input type="button" class="mc_big_button" hotkey="DIK_RETURN" name="Yes" value='<%= customLabels.YesLabel or L"是" %>' style="<%= 'margin-left:' .. (styles.Yes and styles.Yes.marginLeft and styles.Yes.marginLeft or '72px') .. ';margin-top:5px;width:' .. (styles.Yes and styles.Yes.width and styles.Yes.width or '90px') .. ';' %>" onclick="_guihelper.OnMessageBoxClick()"/>
+                            <input type="button" class="mc_big_button" name="No" value='<%= customLabels.NoLabel or L"否"%>' style="<%= 'margin-left:15px;margin-top:5px;width:' .. (styles.No and styles.No.width and styles.No.width or '90px') .. ';' %>" onclick="_guihelper.OnMessageBoxClick()"/>
                         </pe:if>
                         <pe:if condition='<%=_guihelper.values.buttons==_guihelper.MessageBoxButtons.YesNoCancel%>'>
                             <input type="button" class="mc_big_button" hotkey="DIK_RETURN" name="Yes" value='<%= customLabels.YesLabel or L"是" %>' style="margin-left:20px;margin-top:5px;width:90px;" onclick="_guihelper.OnMessageBoxClick()"/>

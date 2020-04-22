@@ -38,26 +38,41 @@ end
 function KeepworkBaseApi:Get(url, params, headers, success, error, noTryStatus)
     url = self:GetApi() .. url
 
-    BaseApi:Get(url, params, self:GetHeaders(headers), success, error, noTryStatus)
+    BaseApi:Get(url, params, self:GetHeaders(headers), success, self:ErrorCollect("GET", url, error), noTryStatus)
 end
 
 -- public
 function KeepworkBaseApi:Post(url, params, headers, success, error, noTryStatus)
     url = self:GetApi() .. url
 
-    BaseApi:Post(url, params, self:GetHeaders(headers), success, error, noTryStatus)
+    BaseApi:Post(url, params, self:GetHeaders(headers), success, self:ErrorCollect("Post", url, error), noTryStatus)
 end
 
 -- public
 function KeepworkBaseApi:Put(url, params, headers, success, error, noTryStatus)
     url = self:GetApi() .. url
 
-    BaseApi:Put(url, params, self:GetHeaders(headers), success, error, noTryStatus)
+    BaseApi:Put(url, params, self:GetHeaders(headers), success, self:ErrorCollect("Put", url, error), noTryStatus)
 end
 
 -- public
 function KeepworkBaseApi:Delete(url, params, headers, success, error, noTryStatus)
     url = self:GetApi() .. url
 
-    BaseApi:Delete(url, params, self:GetHeaders(headers), success, error, noTryStatus)
+    BaseApi:Delete(url, params, self:GetHeaders(headers), success, self:ErrorCollect("Delete", url, error), noTryStatus)
+end
+
+-- public
+function KeepworkBaseApi:ErrorCollect(method, url, error)
+    local GoogleAnalytics = NPL.load("GoogleAnalytics")
+    local Logger = GoogleAnalytics.LogCollector:new():init()
+
+    return function(data, err)
+        -- send directly
+        Logger:collect("worldshare_api_error", method, format("httpstatus: %d, url: %s, content: %s", err, url, NPL.ToJson(data, true)))
+
+        if type(error) == 'function' then
+            error(data, err)
+        end
+    end
 end

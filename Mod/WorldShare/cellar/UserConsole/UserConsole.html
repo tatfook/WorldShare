@@ -12,6 +12,8 @@
                 UserInfo = NPL.load("./UserInfo.lua")
                 Server = NPL.load('../Server/Server.lua')
                 MySchool = NPL.load("(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua")
+                local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
+                local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
 
                 InternetLoadWorld.OnStaticInit()
                 InternetLoadWorld.GetEvents():AddEventListener(
@@ -37,38 +39,104 @@
                 end
 
                 function covert_status()
-                    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
-                    local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
+                    local function handle()
+                        local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+                        local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
-                    if currentEnterWorld and currentEnterWorld.foldername == currentWorld.foldername then
-                        GameLogic.AddBBS(nil, L"不能重命名当前编辑的世界", 3000, "255 0 0")
-                        return false
-                    end
-
-                    if do_modify then
-                        -- update world name
-
-                        if UserConsole:WorldRename(
-                            current_item_index,
-                            temp_modify_worldname,
-                            function()
-                                WorldList:RefreshCurrentServerList(function()
-                                    switch_world(current_item_index)
-                                end)
-                            end
-                        ) then
-                            temp_modify_worldname = ''
-                        else
-                            temp_modify_worldname = ''
-                            do_modify = not do_modify
-                            page:Refresh(0.01)
+                        if currentEnterWorld and currentEnterWorld.foldername == currentWorld.foldername then
+                            GameLogic.AddBBS(nil, L"不能重命名当前编辑的世界", 3000, "255 0 0")
+                            return false
                         end
 
-                        return true
+                        if do_modify then
+                            -- update world name
+
+                            if UserConsole:WorldRename(
+                                current_item_index,
+                                temp_modify_worldname,
+                                function()
+                                    WorldList:RefreshCurrentServerList(function()
+                                        switch_world(current_item_index)
+                                    end)
+                                end
+                            ) then
+                                temp_modify_worldname = ''
+                            else
+                                temp_modify_worldname = ''
+                                do_modify = not do_modify
+                                page:Refresh(0.01)
+                            end
+
+                            return true
+                        end
+
+                        do_modify = not do_modify
+                        page:Refresh(0.01)
                     end
 
-                    do_modify = not do_modify
-                    page:Refresh(0.01)
+                    if not is_modifying() then
+                        local myWorldsFolder = Mod.WorldShare.Store:Get("world/myWorldsFolder")
+
+                        if KeepworkServiceSession:IsSignedIn() then
+                            if KeepworkServiceSession:IsCurrentWorldsFolder() then
+                                handle()
+                            else
+                                if KeepworkServiceSession:IsMyTempWorldsFolder() then
+                                    handle()
+                                else
+                                    _guihelper.MessageBox(L"无法重命名他人本地世界文件夹中储存的世界。")
+                                end
+                            end
+                        else
+                            if myWorldsFolder and myWorldsFolder ~= 'worlds/DesignHouse' then
+                                Mod.WorldShare.MsgBox:Dialog(
+                                    "DeleteWorld",
+                                    L"未登录状态下无法重命名世界，请先登录。",
+                                    {
+                                        Yes = L"取消",
+                                        No = L"登录"
+                                    },
+                                    function(res)
+                                        if res == 4 then
+                                            LoginModal:Init(function(result)
+                                                if not result then
+                                                    return false
+                                                end
+
+                                                Mod.WorldShare.Store:Set('world/myWorldsFolder', myWorldsFolder)
+
+                                                WorldList:RefreshCurrentServerList()
+
+                                                if KeepworkServiceSession:IsCurrentWorldsFolder() then
+                                                    handle()
+                                                else
+                                                    _guihelper.MessageBox(L"无法重命名他人本地世界文件夹中储存的世界。")
+                                                end
+                                            end)
+                                        end
+                                    end,
+                                    _guihelper.MessageBoxButtons.YesNo
+                                )
+                            else
+                                Mod.WorldShare.MsgBox:Dialog(
+                                    "RenameWorld",
+                                    format(L"是否确认重命名此临时世界文件？重命名后的该临时世界名称将应用于所有用户的临时文件夹中。"),
+                                    {
+                                        Yes = L"取消",
+                                        No = L"确认"
+                                    },
+                                    function(res)
+                                        if res == 4 then
+                                            handle()
+                                        end
+                                    end,
+                                    _guihelper.MessageBoxButtons.YesNo
+                                )
+                            end
+                        end
+                    else
+                        handle()
+                    end
                 end
 
                 function be_selected()
@@ -76,7 +144,7 @@
                 end
 
                 function get_world_status(index)
-                    return UserInfo.IsSignedIn() and not WorldList.GetCurWorldInfo("is_zip", Eval("index")) and WorldList.GetCurWorldInfo("status", Eval("index")) == index;
+                    return can_be_sync() and not WorldList.GetCurWorldInfo("is_zip", Eval("index")) and WorldList.GetCurWorldInfo("status", Eval("index")) == index;
                 end
 
                 function get_world_status_icon(index)
@@ -163,7 +231,19 @@
                 end
 
                 function can_be_sync()
-                    return UserInfo.IsSignedIn() and not WorldList.GetCurWorldInfo("is_zip", Eval("index"))
+                    if UserInfo.IsSignedIn() then
+                        if KeepworkServiceSession:IsMyWorldsFolder() then
+                            if WorldList.GetCurWorldInfo("is_zip", Eval("index")) then
+                                return false
+                            else
+                                return true
+                            end
+                        else
+                            return false
+                        end
+                    else
+                        return false
+                    end
                 end
 
                 function get_world_date()
@@ -415,6 +495,31 @@
                         return ""
                     end
                 end
+
+                function get_worlds_path()
+                    return WorldList:GetWorldsPath()
+                end
+
+                function select_my_worlds_path(name, value)
+                    Mod.WorldShare.Store:Set('world/myWorldsFolder', value)
+                    refresh()
+                end
+
+                function is_show_create_button()
+                    if KeepworkServiceSession:IsMyTempWorldsFolder() then
+                        return true
+                    else
+                        if KeepworkServiceSession:IsSignedIn() then
+                            if KeepworkServiceSession:IsMyWorldsFolder() then
+                                return true
+                            else
+                                return false
+                            end
+                        else
+                            return false
+                        end
+                    end
+                end
             ]]>
         </script>
         <style type="text/mcss">
@@ -596,7 +701,7 @@
                 <div style="float:left;margin-top:5px;margin-left:10px;">
                     <input class="nav_button" style="<%=header_back()%>" type="button" tooltip='<%=L"返回"%>' />
                     <input class="nav_button" style="<%=header_forward()%>" type="button" tooltip='<%=L"前进"%>' />
-                    <input class="nav_button" style="<%=header_refresh()%>" type="button" onclick="refresh()" tooltip='<%=L"刷新本地目录或远程网址"%>' />
+                    <!-- <input class="nav_button" style="<%=header_refresh()%>" type="button" onclick="refresh()" tooltip='<%=L"刷新本地目录或远程网址"%>' /> -->
                 </div>
                 <div style="float:left;margin-left: 4px;margin-top: -1px;">
                     <div style="float:left" class="add_server_text_field">
@@ -682,8 +787,16 @@
             <div class="middle_line" />
             <div class="world_area">
                 <div style="height:350px;">
+                    <div style="margin-top: -2px;margin-bottom: 5px;">
+                        <select name="select_worlds_path" class="bbs_text" style="width: 140px;height: 25px;margin-top: -2px;" onselect="<%= select_my_worlds_path %>" DataSource="<%= get_worlds_path() %>"></select>
+                        <input class="flat_button mc_light_grey_button_with_fillet"
+                               onclick="refresh()"
+                               style="height:25px;min-width:40px;margin-top: -2px;margin-left:4px;"
+                               type="button"
+                               value="<%= L'刷新' %>" />
+                    </div>
                     <pe:if style="margin-top:10px;font-weight:bold;color:#ffffff" condition="<%= is_list_refreshing() %>">
-                        <%=L"正在刷新, 请稍候 ... " %>
+                        <%= L"正在刷新, 请稍候 ... " %>
                     </pe:if>
                     <pe:if style="margin-top:10px;font-weight:bold;color:#ffffff" condition="<%= not is_list_refreshing() %>">
                         <pe:gridview RememberScrollPos="true" AllowPaging="false" VerticalScrollBarStep="50"
@@ -736,10 +849,10 @@
                                         <div name="worldinfo">
                                             <div class="share_world_info" style="position:relative;margin-top:2px;">
                                                 <div>
-                                                    <pe:if condition='<%= is_signed_in() %>'>
+                                                    <pe:if condition='<%= can_be_sync() %>'>
                                                         <div style="float:left;width:25px;height:20px;background:#fff" />
                                                     </pe:if>
-                                                    <pe:if condition='<%= not is_signed_in() %>'>
+                                                    <pe:if condition='<%= not can_be_sync() %>'>
                                                         <div style="float:left;width:10px;height:20px;background:#fff" />
                                                     </pe:if>
                                                     <pe:if condition='<%= not Eval("is_zip") %>'>
@@ -761,10 +874,10 @@
                                                     </pe:if>
                                                 </div>
                                                 <div>
-                                                    <pe:if condition='<%= is_signed_in() %>'>
+                                                    <pe:if condition='<%= can_be_sync() %>'>
                                                         <div style="float:left;width:24px;height:20px;background:#fff" />
                                                     </pe:if>
-                                                    <pe:if condition='<%= not is_signed_in() %>'>
+                                                    <pe:if condition='<%= not can_be_sync() %>'>
                                                         <div style="float:left;width:10px;height:20px;background:#fff" />
                                                     </pe:if>
                                                     <span style="margin-left:0px;">
@@ -826,10 +939,10 @@
                                                 </pe:if>
                                             </div>
                                             <div class="share_world_info" style="padding-top:5px;">
-                                                <pe:if condition='<%= is_signed_in() %>'>
+                                                <pe:if condition='<%= can_be_sync() %>'>
                                                     <div style="float:left;width:24px;height:10px;background:#fff" />
                                                 </pe:if>
-                                                <pe:if condition='<%= not is_signed_in() %>'>
+                                                <pe:if condition='<%= not can_be_sync() %>'>
                                                     <div style="float:left;width:10px;height:20px;background:#fff" />
                                                 </pe:if>
                                                 <span style="float:left;margin-left:0px;">
@@ -867,10 +980,12 @@
                     </pe:if>
                 </div>
                 <div style="margin-top:20px">
-                    <input type="button" value='<%=L"创建世界" %>' style="float:left;margin-left:80px;min-width:120px"
-                        onclick="create_new_world()" class="common_button mc_light_grey_button_with_fillet" />
-                    <input type="button" value='<%="..." %>' style="margin-left:10px;height:30px;min-width:30px"
-                        onclick="import_world()" class="flat_button" tooltip='<%=L"导入/导出..." %>' />
+                    <pe:if condition="<%= is_show_create_button() %>">
+                        <input type="button" value='<%=L"创建世界" %>' style="float:left;margin-left:80px;min-width:120px"
+                            onclick="create_new_world()" class="common_button mc_light_grey_button_with_fillet" />
+                        <input type="button" value='<%="..." %>' style="margin-left:10px;height:30px;min-width:30px"
+                            onclick="import_world()" class="flat_button" tooltip='<%=L"导入/导出..." %>' />
+                    </pe:if>
                 </div>
             </div>
             <!--line-->

@@ -30,6 +30,7 @@ local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local LocalServiceWorld = NPL.load("../LocalService/World.lua")
 local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
+local KeepworkServiceSession = NPL.load("../KeepworkService/Session.lua")
 local KeepworkServiceWorld = NPL.load("../KeepworkService/World.lua")
 local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
 
@@ -284,9 +285,11 @@ function Compare:GetCurrentWorldInfo(callback)
 
                 if currentWorld.status == 2 then
                     currentWorld.status = 3
-                    currentWorld.worldpath = worldpath
                     currentWorld.local_tagname = currentWorld.remote_tagname
                 end
+
+                -- temporary fixed: always update worldpath
+                currentWorld.worldpath = worldpath
 
                 Mod.WorldShare.Store:Set("world/worldTag", worldTag)
                 Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
@@ -341,6 +344,11 @@ function Compare:GetCurrentWorldInfo(callback)
 
     Mod.WorldShare.Store:Set("world/currentEnterWorld", currentWorld)
 
+    if not KeepworkServiceSession:IsCurrentWorldsFolder() then
+        System.World.readonly = true
+        GameLogic.options:ResetWindowTitle()
+    end
+
     if type(callback) == 'function' then
         callback()
     end
@@ -349,7 +357,7 @@ end
 function Compare:RefreshWorldList(callback)
     local localWorlds = LocalServiceWorld:GetWorldList()
 
-    if not KeepworkService:IsSignedIn() then
+    if not KeepworkService:IsSignedIn() or not KeepworkServiceSession:IsMyWorldsFolder() then
         local currentWorldList = LocalServiceWorld:MergeInternetLocalWorldList(localWorlds)
 
         self.SortWorldList(currentWorldList)

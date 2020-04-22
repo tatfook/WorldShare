@@ -13,6 +13,9 @@ local LocalLoadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalL
 
 local Utils = NPL.export()
 
+Utils.GetWorldFolderFullPath = LocalLoadWorld.GetWorldFolderFullPath
+Utils.SetTimeOut = commonlib.TimerManager.SetTimeout
+
 -- show one page
 -- @param option window width or selfdefined params
 -- @param height window height
@@ -96,10 +99,6 @@ function Utils.FormatFileSize(size, unit)
     end
 
     return s or "0"
-end
-
-function Utils.SetTimeOut(callback, times)
-    commonlib.TimerManager.SetTimeout(callback, times or 100)
 end
 
 function Utils.FixCenter(width, height)
@@ -212,10 +211,6 @@ function Utils.IsEnglish()
     end
 end
 
-function Utils.GetWorldFolderFullPath()
-    return LocalLoadWorld.GetWorldFolderFullPath()
-end
-
 function Utils:GetFolderName()
     local originWorldPath = ParaWorld.GetWorldDirectory()
 
@@ -308,4 +303,19 @@ function Utils:DatetimeToTimestamp(str)
     local timestamp = os.time{ year = years, month = months, day = days, hour = hours, min = minutes, sec = seconds }
 
     return timestamp or 0
+end
+
+-- get last folder name in fullpath
+function Utils:GetLastFoldername(path)
+    if type(path) ~= 'string' or path == '' then
+        return false
+    end
+
+    local pathArray = {}
+
+    for segmentation in string.gmatch(path, "[^/]+") do
+        pathArray[#pathArray + 1] = segmentation 
+    end
+
+    return pathArray[#pathArray]
 end
