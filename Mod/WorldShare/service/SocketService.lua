@@ -81,7 +81,19 @@ function SocketService:SendUDPIamOnlineMsg(ip, port)
 		return false
 	end
 
-	self:SendUDPMsg({ type = "ONLINE", result = "IAM", username = "nil", serverName = "nil", uuid = self.uuid }, ip, port)
+	self:SendUDPMsg(
+		{
+			type = "ONLINE",
+			result = "IAM",
+			username = "nil",
+			serverName = "nil",
+			uuid = self.uuid,
+			worldHost = NetworkMain.server_manager.curHost,
+			worldPort = NetworkMain.server_manager.curPort
+		},
+		ip,
+		port
+	)
 end
 
 -- send udp msg
@@ -113,13 +125,13 @@ function SocketService:ReceiveUDPMsg(msg)
 		end
 
 		if msg.result == "IAM" then
-			if not msg.uuid then
+			local udpIp, udpPort = string.match(msg.nid, "~udp(.+)_(%d+)")
+			
+			if not udpIp or not udpPort then
 				return false
 			end
 
-			local ip, port = string.match(msg.nid, "~udp(.+)_(%d+)")
-
-			if not ip or not port then
+			if not msg.uuid or not msg.worldHost or not msg.worldPort then
 				return false
 			end
 
@@ -136,7 +148,7 @@ function SocketService:ReceiveUDPMsg(msg)
 				end
 			end
 
-			udpServerList[#udpServerList + 1] = { ip = ip, port = port, username = msg.username, serverName = msg.serverName, uuid = msg.uuid }
+			udpServerList[#udpServerList + 1] = { ip = udpIp, port = msg.worldPort, username = msg.username, serverName = msg.serverName, uuid = msg.uuid }
 
 			Mod.WorldShare.Store:Set('user/udpServerList', udpServerList)
 		end

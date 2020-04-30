@@ -322,6 +322,8 @@ function KeepworkServiceSession:GetUserTokenFromUrlProtocol()
         local SetToken = Mod.WorldShare.Store:Action("user/SetToken")
         SetToken(usertoken)
     end
+
+    return usertoken
 end
 
 function KeepworkServiceSession:CheckTokenExpire(callback)

@@ -12,13 +12,15 @@ WorldExitDialog.ShowPage()
 local ShareWorldPage = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.Areas.ShareWorldPage")
 local WorldRevision = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision")
 
-local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
-local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
+-- service
 local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
+local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
 local KeepworkServiceWorld = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/World.lua")
 local KeepworkServiceProject = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Project.lua")
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
+
+-- UI
 local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
 local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
 local Grade = NPL.load("./Grade.lua")
@@ -156,7 +158,7 @@ end
 
 -- @param res: _guihelper.DialogResult
 function WorldExitDialog.OnDialogResult(res)
-    local WorldExitDialogPage = Store:Get('page/WorldExitDialog')
+    local WorldExitDialogPage = Mod.WorldShare.Store:Get('page/WorldExitDialog')
 
     if (WorldExitDialogPage) then
         WorldExitDialogPage:CloseWindow()
@@ -169,6 +171,7 @@ function WorldExitDialog.OnDialogResult(res)
             Mod.WorldShare.MsgBox:Show(L"请稍后...")
             KeepworkServiceWorld:UnlockWorld(function()
                 if (WorldExitDialogPage.callback) then
+                    KeepworkServiceSession:Logout()
                     WorldExitDialogPage.callback(res)
                 end
             end)
