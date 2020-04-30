@@ -44,6 +44,7 @@ function UserStore:Action()
             self.username = nil
             self.nickname = nil
             self.myOrg = nil
+            self.userType = nil
 
             commonlib.setfield("System.User.keepworktoken", nil)
             commonlib.setfield("System.User.username", nil)
