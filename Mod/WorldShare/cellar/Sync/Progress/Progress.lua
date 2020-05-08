@@ -56,7 +56,10 @@ end
 
 function Progress:OnScreenSizeChange()
     local ProgressPage = Mod.WorldShare.Store:Get("page/Progress")
-    ProgressPage:Rebuild()
+
+    if ProgressPage then
+        ProgressPage:Rebuild()
+    end
 end
 
 function Progress:GetProgressBar()
