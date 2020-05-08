@@ -136,10 +136,10 @@ function DeleteWorld:DeleteRemote()
                         if currentWorld and currentWorld.worldpath and #currentWorld.worldpath > 0 then
                             local tag = LocalService:GetTag(currentWorld.worldpath)
 
-                            tag.kpProjectId = nil
-                            LocalService:SetTag(currentWorld.worldpath, tag)
-                            currentWorld.kpProjectId = nil
-                            Mod.WorldShare.Store:Set('world/currentWorld')
+                            if tag then
+                                tag.kpProjectId = nil
+                                LocalService:SetTag(currentWorld.worldpath, tag)
+                            end
                         end
 
                         WorldList:RefreshCurrentServerList()

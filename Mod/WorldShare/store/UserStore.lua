@@ -33,6 +33,7 @@ function UserStore:Action()
             commonlib.setfield("System.User.username", username)
             commonlib.setfield("System.User.keepworkUsername", username)
             commonlib.setfield("System.User.NickName", nickname)
+            commonlib.setfield("System.User.userType", self.userType)
         end,
         SetPlayerController = function(playerController)
             self.playerController = playerController
@@ -43,11 +44,14 @@ function UserStore:Action()
             self.username = nil
             self.nickname = nil
             self.myOrg = nil
+            self.userType = nil
 
             commonlib.setfield("System.User.keepworktoken", nil)
             commonlib.setfield("System.User.username", nil)
             commonlib.setfield("System.User.keepworkUsername", nil)
             commonlib.setfield("System.User.NickName", nil)
+            commonlib.setfield("System.User.userType", nil)
+            commonlib.setfield("System.User.isVip", nil)
         end
     }
 end

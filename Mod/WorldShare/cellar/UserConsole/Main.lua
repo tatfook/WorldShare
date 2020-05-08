@@ -60,10 +60,14 @@ function UserConsole:ShowPage()
     if not self.notFirstTimeShown then
         self.notFirstTimeShown = true
 
-        KeepworkServiceSession:GetUserTokenFromUrlProtocol()
-
-        -- for restart and protocol
+        -- for restart
         if not KeepworkService:IsSignedIn() and KeepworkServiceSession:GetCurrentUserToken() then
+            UserInfo:LoginWithToken()
+            return false
+        end
+
+        -- for protocol
+        if not KeepworkService:IsSignedIn() and KeepworkServiceSession:GetUserTokenFromUrlProtocol() then
             UserInfo:LoginWithToken()
             return false
         end

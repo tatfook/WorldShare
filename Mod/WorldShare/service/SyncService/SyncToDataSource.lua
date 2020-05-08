@@ -425,7 +425,7 @@ function SyncToDataSource:UpdateOne(file, callback)
                 msg = format(L"%s （%s） 文件一致，跳过", currentLocalItem.filename, Mod.WorldShare.Utils.FormatFileSize(currentLocalItem.filesize, "KB"))
             })
 
-            Mod.WorldShare.Utils.SetTimeOut(callback)
+            Mod.WorldShare.Utils.SetTimeOut(callback, 10)
         end
 
         return false

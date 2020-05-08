@@ -6,10 +6,16 @@
 
                 SyncMain:SetBeyondVolumePage();
 
-                maxWorldSize = 15;
-                maxWorldSizeVIP = 50;
+                function get_title()
+                    local userType = Mod.WorldShare.Store:Get("user/userType")
+                    if userType == "vip" then
+                        return L"提示"
+                    else
+                        return L"购买VIP"
+                    end
+                end
 
-                function getBeyondMsg()
+                function get_beyond_msg()
                     local userType = Mod.WorldShare.Store:Get("user/userType")
                     local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
 
@@ -40,10 +46,10 @@
             ]]>
         </script>
         <div width="100%" height="100%">
-            <aries:window mode="thin" width="500" height="270" style="<%=get_window_style()%>" title='<%=L"购买VIP" %>' onclose="close">
+            <aries:window mode="thin" width="500" height="270" style="<%=get_window_style()%>" title='<%=get_title() %>' onclose="close">
                 <div style="font-size:16px;base-font-size:16px;color:#ffffff;padding:30px;">
                     <div style="margin-top:15px;">
-                        <%= getBeyondMsg() %>
+                        <%= get_beyond_msg() %>
                         <br />
                         <%= L"是否现在清理？" %>
                     </div>

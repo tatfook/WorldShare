@@ -8,8 +8,13 @@ use the lib:
 local Progress = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Progress.lua")
 ------------------------------------------------------------
 ]]
+
+-- UI
 local SyncMain = NPL.load("../Main.lua")
+
+-- service
 local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
+local Screen = commonlib.gettable("System.Windows.Screen")
 
 local Progress = NPL.export()
 
@@ -45,6 +50,13 @@ function Progress:Init(syncInstance)
     self.broke = false
 
     self:Refresh()
+
+    Screen:Connect("sizeChanged", self, self.OnScreenSizeChange, "UniqueConnection")
+end
+
+function Progress:OnScreenSizeChange()
+    local ProgressPage = Mod.WorldShare.Store:Get("page/Progress")
+    ProgressPage:Rebuild()
 end
 
 function Progress:GetProgressBar()

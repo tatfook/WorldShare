@@ -314,7 +314,7 @@ function SyncToLocal:UpdateOne(file, callback)
         })
 
         if type(callback) == "function" then
-            Mod.WorldShare.Utils.SetTimeOut(callback, 200)
+            Mod.WorldShare.Utils.SetTimeOut(callback, 10)
         end
 
         return false
