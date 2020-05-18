@@ -149,7 +149,7 @@ function WorldExitDialog:OnInit()
 end
 
 function WorldExitDialog:Refresh(sec)
-    local worldExitDialogPage = Store:Get('page/WorldExitDialog')
+    local worldExitDialogPage = Mod.WorldShare.Store:Get('page/WorldExitDialog')
 
     if worldExitDialogPage then
         worldExitDialogPage:Refresh(sec or 0.01)

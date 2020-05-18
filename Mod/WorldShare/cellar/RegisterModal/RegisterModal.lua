@@ -18,6 +18,14 @@ local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkServ
 
 local RegisterModal = NPL.export()
 
+RegisterModal.m_mode = "account"
+RegisterModal.account = ""
+RegisterModal.password = ""
+RegisterModal.phonenumber = ""
+RegisterModal.phonepassword = ""
+RegisterModal.phonecaptcha = ""
+RegisterModal.bindphone = nil
+
 function RegisterModal:ShowPage(callback)
     local LoginModalPage = Mod.WorldShare.Store:Get("page/LoginModal")
 
@@ -25,8 +33,16 @@ function RegisterModal:ShowPage(callback)
         LoginModalPage:CloseWindow()
     end
 
-    Mod.WorldShare.Utils.ShowWindow(360, 480, "Mod/WorldShare/cellar/RegisterModal/RegisterModal.html", "RegisterModal")
     self.callback = callback
+    self.m_mode = "account"
+    self.account = ""
+    self.password = ""
+    self.phonenumber = ""
+    self.phonepassword = ""
+    self.phonecaptcha = ""
+    self.bindphone = nil
+
+    Mod.WorldShare.Utils.ShowWindow(360, 360, "Mod/WorldShare/cellar/RegisterModal/RegisterModal.html", "RegisterModal")
 end
 
 function RegisterModal:ShowUserAgreementPage()
@@ -35,6 +51,24 @@ end
 
 function RegisterModal:ShowBindingPage()
     Mod.WorldShare.Utils.ShowWindow(360, 480, "Mod/WorldShare/cellar/RegisterModal/Binding.html", "Binding")
+end
+
+function RegisterModal:ShowClassificationPage(callback)
+    local params = Mod.WorldShare.Utils.ShowWindow(
+        370,
+        280,
+        "Mod/WorldShare/cellar/RegisterModal/BindPhoneInAccountRegister.html",
+        "RegisterModal/BindPhoneInAccountRegister",
+        nil,
+        nil,
+        nil,
+        nil,
+        10
+    )
+
+    if type(callback) == "function" then
+        params._page.callback = callback
+    end
 end
 
 function RegisterModal:GetServerList()
@@ -52,91 +86,108 @@ function RegisterModal:GetServerList()
     return serverList
 end
 
-function RegisterModal:Register()
-    local RegisterModalPage = Mod.WorldShare.Store:Get('page/RegisterModal')
-
-    if not RegisterModalPage then
-        return false
-    end
-
+function RegisterModal:Register(page)
     local loginServer = KeepworkService:GetEnv()
-    local account = RegisterModalPage:GetValue("account")
-    local password = RegisterModalPage:GetValue("password")
-    local captcha = RegisterModalPage:GetValue("captcha")
-    local phone = RegisterModalPage:GetValue("phone")
-    local phonecaptcha = RegisterModalPage:GetValue("phonecaptcha")
-    local agree = RegisterModalPage:GetValue("agree")
 
-    if not agree then
-        GameLogic.AddBBS(nil, L"您未同意用户协议", 3000, "255 0 0")
+    if not self.account or self.account == "" then
         return false
     end
 
-    if not account or account == "" then
-        GameLogic.AddBBS(nil, L"账号不能为空", 3000, "255 0 0")
+    if #self.password < 6 then
         return false
     end
 
-    if #password < 6 then
-        GameLogic.AddBBS(nil, L"密码最少为6位", 3000, "255 0 0")
+    if #self.phonenumber == 0 and (not self.captcha or self.captcha == "") then
         return false
     end
 
-    if not captcha or captcha == "" then
-        GameLogic.AddBBS(nil, L"验证码不能为空", 3000, "255 0 0")
+    if #self.phonenumber > 0 and not Validated:Phone(self.phonenumber) then
         return false
     end
 
-    if #phone > 0 and not Validated:Phone(phone) then
-        GameLogic.AddBBS(nil, L"手机格式错误", 3000, "255 0 0")
+    if #self.phonenumber > 0 and #self.phonecaptcha == 0 then
         return false
     end
 
-    if #phone > 0 and #phonecaptcha == 0 then
-        GameLogic.AddBBS(nil, L"手机验证码不能为空", 3000, "255 0 0")
-        return false
-    end
+    Mod.WorldShare.MsgBox:Show(L"正在注册，请稍后...", 10000, L"链接超时", 500, 120)
 
-    Mod.WorldShare.MsgBox:Show(L"正在注册，可能需要10-15秒的时间，请稍后...", 20000, L"链接超时", 500, 120)
+    KeepworkServiceSession:Register(self.account, self.password, self.captcha, self.phonenumber, self.phonecaptcha, self.bindphone, function(state, err)
+        Mod.WorldShare.MsgBox:Close()
 
-    KeepworkServiceSession:Register(account, password, captcha, phone, phonecaptcha, function(state)
+        if err == 422 then
+            GameLogic.AddBBS(nil, L"未知错误", 5000, "0 255 0")
+            return false
+        end
+
         if state and state.id then
             if state.code then
                 GameLogic.AddBBS(nil, state.message, 5000, "0 0 255")
             else
-                GameLogic.AddBBS(nil, L"注册成功", 5000, "0 255 0")
+                if self.m_mode == "account" then
+                    self:ShowClassificationPage(function()
+                        WorldList:RefreshCurrentServerList()
+                    end)
+
+                    GameLogic.AddBBS(nil, L"注册成功", 5000, "0 255 0")
+                end
             end
 
-            RegisterModalPage:CloseWindow()
-            Mod.WorldShare.MsgBox:Close()
+            if page then
+                page:CloseWindow()
+            end
 
             if type(self.callback) == 'function' then
                 self.callback()
-                self.callback = nil
             end
 
-            WorldList:RefreshCurrentServerList()
             return true
         end
 
-        GameLogic.AddBBS(nil, format("%s%s(%d)", L"注册失败，错误信息：", state.message, state.code), 5000, "255 0 0")
+        GameLogic.AddBBS(nil, format("%s%s(%d)", L"注册失败，错误信息：", state.message or "", state.code or ""), 5000, "255 0 0")
         Mod.WorldShare.MsgBox:Close()
-        self.callback = nil
     end)
 end
 
-function RegisterModal:Bind(method)
-    local BindingPage = Mod.WorldShare.Store:Get('page/Binding')
+function RegisterModal:Classification(phonenumber, captcha, callback)
+    KeepworkServiceSession:ClassificationPhone(phonenumber, captcha, function(data, err)
+        if data.data then
+            GameLogic.AddBBS(nil, L"实名认证成功", 5000, "0 255 0")
 
-    if not BindingPage then
-        return false
-    end
+            Mod.WorldShare.Store:Set("user/isVerified", true)
 
+            if type(callback) == "function" then
+                callback()
+            end
+            return true
+        end
+
+        GameLogic.AddBBS(nil, format("%s%s(%d)", L"认证失败，错误信息：", data.message, data.code), 5000, "255 0 0")
+    end)
+end
+
+function RegisterModal:ClassificationAndBind(phonenumber, captcha, callback)
+    KeepworkServiceSession:ClassificationAndBindPhone(phonenumber, captcha, function(data, err)
+        if data.data then
+            GameLogic.AddBBS(nil, L"实名认证成功，手机号绑定成功", 5000, "0 255 0")
+
+            Mod.WorldShare.Store:Set("user/isVerified", true)
+            Mod.WorldShare.Store:Set("user/isBind", true)
+
+            if type(callback) == "function" then
+                callback()
+            end
+            return true
+        end
+
+        GameLogic.AddBBS(nil, format("%s%s(%d)", L"认证失败，错误信息：", data.message, data.code), 5000, "255 0 0")
+    end)
+end
+
+function RegisterModal:Bind(method, ...)
     if method == 'bindphone' then
-        local phone = BindingPage:GetValue("phone")
-        local phonecaptcha = BindingPage:GetValue("phonecaptcha")
+        local phonenumber, phonecaptcha, callback = ...;
 
-        if not Validated:Phone(phone) then
+        if not Validated:Phone(phonenumber) then
             GameLogic.AddBBS(nil, L"手机号码格式错误", 3000, "255 0 0")
             return false
         end
@@ -146,28 +197,26 @@ function RegisterModal:Bind(method)
             return false
         end
 
-        KeepworkServiceSession:BindPhone(phone, phonecaptcha, function(data, err)
-            BindingPage:CloseWindow()
+        Mod.WorldShare.MsgBox:Show(L"请稍后...")
+        KeepworkServiceSession:BindPhone(phonenumber, phonecaptcha, function(data, err)
+            Mod.WorldShare.MsgBox:Close()
 
-            if err == 409 then
-                GameLogic.AddBBS(nil, L"该手机号已绑定其他账号，每个手机号码仅可绑定一个账号。如果忘记账号，请使用手机号作为账号登录", 3000, "255 0 0")
-                return false
-            end
-
-            if data == 'true' and err == 200 then
+            if err == 200 and data.data then
                 GameLogic.AddBBS(nil, L"绑定成功", 3000, "0 255 0")
+                if type(callback) == "function" then
+                    callback()
+                end
                 return true
             end
 
-            GameLogic.AddBBS(nil, L"绑定失败", 3000, "255 0 0")
+            GameLogic.AddBBS(nil, format("%s%s(%d)", L"绑定失败，错误信息：", data.message, data.code), 5000, "255 0 0")
         end)
 
         return true
     end
 
     if method == 'bindemail' then
-        local email = BindingPage:GetValue("email")
-        local emailcaptcha = BindingPage:GetValue("emailcaptcha")
+        local email, emailcaptcha, callback = ...;
 
         if not Validated:Email(email) then
             GameLogic.AddBBS(nil, L"EMAIL格式错误", 3000, "255 0 0")
@@ -179,20 +228,24 @@ function RegisterModal:Bind(method)
             return false
         end
 
+        Mod.WorldShare.MsgBox:Show(L"请稍后...")
         KeepworkServiceSession:BindEmail(email, emailcaptcha, function(data, err)
-            BindingPage:CloseWindow()
+            Mod.WorldShare.MsgBox:Close()
 
             if err == 409 then
                 GameLogic.AddBBS(nil, L"邮箱已被绑定", 3000, "255 0 0")
                 return false
             end
 
-            if data == 'true' and err == 200 then
+            if err == 200 and data.data then
                 GameLogic.AddBBS(nil, L"绑定成功", 3000, "0 255 0")
+                if type(callback) == "function" then
+                    callback()
+                end
                 return true
             end
 
-            GameLogic.AddBBS(nil, L"绑定失败", 3000, "255 0 0")
+            GameLogic.AddBBS(nil, format("%s%s(%d)", L"绑定失败，错误信息：", data.message, data.code), 5000, "255 0 0")
         end)
 
         return true

@@ -7,11 +7,12 @@
                 WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
                 UniString = commonlib.gettable("System.Core.UniString")
 
-                UserConsole = NPL.load("./Main.lua")
-                WorldList = NPL.load("./WorldList")
-                UserInfo = NPL.load("./UserInfo.lua")
-                Server = NPL.load('../Server/Server.lua')
-                MySchool = NPL.load("(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua")
+                local UserConsole = NPL.load("./Main.lua")
+                local WorldList = NPL.load("./WorldList")
+                local UserInfo = NPL.load("./UserInfo.lua")
+                local Server = NPL.load('../Server/Server.lua')
+                local MySchool = NPL.load("(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua")
+                local RegisterModal = NPL.load("(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua")
 
                 InternetLoadWorld.OnStaticInit()
                 InternetLoadWorld.GetEvents():AddEventListener(
@@ -191,7 +192,7 @@
                 end
 
                 function on_click_lesson()
-                    UserConsole:ClosePage();
+                    UserConsole:ClosePage()
                     NPL.load("(gl)script/apps/Aries/Creator/Game/Login/ParaWorldLessons.lua");
                     local ParaWorldLessons = commonlib.gettable("MyCompany.Aries.Game.MainLogin.ParaWorldLessons")
                     ParaWorldLessons.ShowPage()
@@ -234,8 +235,9 @@
                 end
 
                 function register()
-                    local RegisterModal = NPL.load("(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua")
-                    RegisterModal:ShowPage()
+                    RegisterModal:ShowPage(function()
+                        WorldList:RefreshCurrentServerList()
+                    end)
                 end
 
                 function login()
@@ -414,6 +416,16 @@
                     else
                         return ""
                     end
+                end
+
+                function classification()
+                    RegisterModal:ShowClassificationPage(function()
+                        WorldList:RefreshCurrentServerList()
+                    end)
+                end
+
+                function is_verified()
+                    return Mod.WorldShare.Store:Get("user/isVerified") == true and true or false
                 end
             ]]>
         </script>
@@ -667,13 +679,24 @@
                             <div style="width:140px;color:#ffffff">
                                 <%= username() %>
                             </div>
+                            <pe:if condition="<%= not is_verified() %>">
+                                <div>
+                                    <input type="button" style="margin-left:40px" class="mc_light_grey_button_with_fillet" onclick="classification" value='<%= L"实名认证"%>' />
+                                </div>
+                            </pe:if>
                             <div style="margin-top:10px">
-                                <input type="button" style="margin-left:20px" onclick="my_school()" class="my_school_button"
-                                    value='<%= L"我的学校" %>' />
+                                <input type="button"
+                                       style="margin-left:20px"
+                                       onclick="my_school()"
+                                       class="my_school_button"
+                                       value='<%= L"我的学校" %>' />
                             </div>
                             <div style="margin-top:10px">
-                                <input type="button" style="margin-left:20px" onclick="logout()" class="login_button"
-                                    value='<%= L"退出登录" %>' />
+                                <input type="button"
+                                       style="margin-left:20px"
+                                       onclick="logout()"
+                                       class="login_button"
+                                       value='<%= L"退出登录" %>' />
                             </div>
                         </div>
                     </pe:if>
