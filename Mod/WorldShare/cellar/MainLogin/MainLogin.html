@@ -15,6 +15,7 @@
                     local RegisterModal = NPL.load("(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua")
                     local ForgetPassword = NPL.load("(gl)Mod/WorldShare/cellar/ForgetPassword/ForgetPassword.lua")
                     local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepWorkService/Session.lua")
+                    local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
 
                     local page = document:GetPageCtrl()
                     Mod.WorldShare.Store:Set("page/MainLogin", page)
@@ -103,6 +104,7 @@
                     function register()
                         RegisterModal:ShowPage(function()
                             MainLogin:EnterUserConsole()
+                            WorldList:RefreshCurrentServerList()
                         end)
                     end
 

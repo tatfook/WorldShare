@@ -142,7 +142,7 @@ function LoginModal:LoginAction()
 
         self:ClosePage()
 
-        if not Mod.WorldShare.Store:Get('user/isVerified') then
+        if not Mod.WorldShare.Store:Get('user/isBind') then
             RegisterModal:ShowBindingPage()
         end
 

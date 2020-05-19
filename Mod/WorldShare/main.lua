@@ -41,6 +41,7 @@ NPL.load("(gl)script/apps/Aries/Creator/Game/Network/NetworkMain.lua")
 NPL.load("(gl)script/ide/System/Encoding/guid.lua")
 NPL.load("(gl)script/apps/Aries/Creator/Game/Login/ParaWorldLessons.lua")
 NPL.load("(gl)script/ide/System/Encoding/jwt.lua")
+NPL.load("(gl)script/ide/System/Encoding/basexx.lua")
 
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox/MsgBox.lua")
@@ -56,6 +57,7 @@ local PreventIndulge = NPL.load("(gl)Mod/WorldShare/cellar/PreventIndulge/Preven
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local Grade = NPL.load("(gl)Mod/WorldShare/cellar/Grade/Grade.lua")
 local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
+local VipNotice = NPL.load("(gl)Mod/WorldShare/cellar/VipNotice/VipNotice.lua")
 
 local SocketService = commonlib.gettable("Mod.WorldShare.service.SocketService")
 local GameLogic = commonlib.gettable("MyCompany.Aries.Game.GameLogic")
@@ -65,7 +67,7 @@ local WorldShare = commonlib.inherit(commonlib.gettable("Mod.ModBase"), commonli
 
 WorldShare:Property({"Name", "WorldShare", "GetName", "SetName", { auto = true }})
 WorldShare:Property({"Desc", "world share mod can share world to keepwork online", "GetDesc", "SetDesc", { auto = true }})
-WorldShare.version = '0.0.13'
+WorldShare.version = '0.0.14'
 
 if Config.defaultEnv == 'RELEASE' or Config.defaultEnv == 'STAGE' then
     System.options.isAB_SDK = true
@@ -151,6 +153,14 @@ function WorldShare:init()
             else
                 return url
             end
+        end
+    )
+
+    GameLogic.GetFilters():add_filter(
+        "VipNotice",
+        function(bEnable, callback)
+            VipNotice:Init(callback)
+            return true
         end
     )
 
