@@ -427,6 +427,14 @@
                 function is_verified()
                     return Mod.WorldShare.Store:Get("user/isVerified") == true and true or false
                 end
+
+                function get_classification_style()
+                    if Mod.WorldShare.Utils.IsEnglish() then
+                        return 'margin-left: -6px;'
+                    else
+                        return 'margin-left: 40px;'
+                    end
+                end
             ]]>
         </script>
         <style type="text/mcss">
@@ -681,7 +689,7 @@
                             </div>
                             <pe:if condition="<%= not is_verified() %>">
                                 <div>
-                                    <input type="button" style="margin-left:40px" class="mc_light_grey_button_with_fillet" onclick="classification" value='<%= L"实名认证"%>' />
+                                    <input type="button" style="<%= get_classification_style() %>" class="mc_light_grey_button_with_fillet" onclick="classification" value='<%= L"实名认证"%>' />
                                 </div>
                             </pe:if>
                             <div style="margin-top:10px">

@@ -314,6 +314,14 @@
                     end
 
                     check_phone_number(RegisterModal.phonenumber)
+
+                    function get_user_register_style()
+                        if Mod.WorldShare.Utils.IsEnglish() then
+                            return 'padding-left: 65px;'
+                        else
+                            return 'padding-left: 75px;'
+                        end
+                    end
                 ]]>
             </script>
             <style type="text/mcss">
@@ -348,7 +356,7 @@
             </style>
             <aries:window mode="thin" width="360" style="float:left;" title_height="40" close_height="25" title='<%=L"注册" %>' onclose="close()">
                 <div name="register" class="user_register">
-                    <div style="padding-left: 75px;padding-top: 10px;padding-bottom: 10px;">
+                    <div style="<%= 'padding-top: 10px;padding-bottom: 10px;' ..  get_user_register_style() %>">
                         <input type="button"
                                style="<%= get_mode_active_style('account') %>"
                                class="mode_button"
