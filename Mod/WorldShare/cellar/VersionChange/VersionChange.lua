@@ -134,7 +134,7 @@ function VersionChange:SelectVersion(index)
     currentWorld.lastCommitId = commitId
     Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
 
-    SyncToLocal:Init(function(result, msg)
+    SyncMain:SyncToLocalSingle(function(result, msg)
         if result == false then
             if msg == 'NEWWORLD' then
                 return false
