@@ -25,13 +25,7 @@ local LoginModal = NPL.export()
 
 -- @param callbackFunc: called after successfully signed in. 
 function LoginModal:Init(callbackFunc)
-    if type(callbackFunc) == "function" then
-        Mod.WorldShare.Store:Set('user/AfterLogined', function(bIsSucceed)
-            -- OnLogin
-            GameLogic.GetFilters():apply_filters("OnLogin", bIsSucceed)
-            callbackFunc(bIsSucceed)
-        end)
-    end
+    Mod.WorldShare.Store:Set('user/AfterLogined', callbackFunc)
     self:ShowPage()
 end
 
