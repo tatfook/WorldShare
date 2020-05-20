@@ -437,12 +437,9 @@ function WorldList:EnterWorld(index)
                                 if res and res == _guihelper.DialogResult.Yes then
                                     SyncMain:BackupWorld()
                                     Mod.WorldShare.MsgBox:Show(L"请稍后...")
-
-                                    SyncMain:SyncToLocalSingle(function(result, option)
-                                        if result == true then
-                                            Mod.WorldShare.MsgBox:Close()
-                                            LockAndEnter()
-                                        end
+                                    SyncToLocal:Init(function()
+                                        Mod.WorldShare.MsgBox:Close()
+                                        LockAndEnter()
                                     end)
                                 end
 

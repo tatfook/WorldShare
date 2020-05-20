@@ -201,54 +201,6 @@ function SyncMain:SyncToLocal(callback)
     )
 end
 
-function SyncMain:SyncToLocalSingle(callback)
-    local syncInstance = SyncToLocal:Init(function(result, option)
-        if result == false then
-            if type(option) == 'string' then
-                Progress:ClosePage()
-
-                if option == 'NEWWORLD' then
-                    if type(callback) == 'function' then
-                        callback(result, option)
-                    end
-                    return false
-                end
-    
-                GameLogic.AddBBS(nil, option, 3000, "255 0 0")
-            end
-
-            if type(option) == 'table' then
-                if option.method == 'UPDATE-PROGRESS' then
-                    Progress:UpdateDataBar(option.current, option.total, option.msg)
-                    return false
-                end
-
-                if option.method == 'UPDATE-PROGRESS-FAIL' then
-                    Progress:SetFinish(true)
-                    Progress:ClosePage()
-                    GameLogic.AddBBS(nil, option.msg, 3000, "255 0 0")
-                    return false
-                end
-
-                if option.method == 'UPDATE-PROGRESS-FINISH' then
-                    Progress:UpdateDataBar(1, 1, L"处理完成")
-                    Progress:SetFinish(true)
-                    Progress:Refresh()
-                    Progress:RefreshOperate()
-                    return false
-                end
-            end
-        end
-
-        if type(callback) == 'function' then
-            callback(result, option)
-        end
-    end)
-
-    -- load sync progress UI
-    Progress:Init(syncInstance)
-end
-
 function SyncMain:SyncToDataSource(callback)
     if self:CheckWorldSize() then
         return false
