@@ -143,6 +143,7 @@ function WorldShare:init()
         end
     )
 
+    -- cmd load world
     GameLogic.GetFilters():add_filter(
         "cmd_loadworld", 
         function(url, options)
@@ -156,6 +157,7 @@ function WorldShare:init()
         end
     )
 
+    -- vip notice
     GameLogic.GetFilters():add_filter(
         "VipNotice",
         function(bEnable, callback)
