@@ -276,7 +276,7 @@
                             </div>
                             <div style="float:right;padding-left:28px;">
                                 <div style="margin-top:-5px;margin-bottom: 20px;">
-                                    <span style="color: #b2b2b2">项目ID：</span>
+                                    <span style="color: #b2b2b2"><%= "项目ID：" %></span>
                                     <input type="button" style="float:left;color:#FFFFFF;" class="mc_blue_button_with_fillet" value="<%= get_project_id() %>" onclick="open_keepwork_project()" tooltip='<%= L"点击访问作品项目页面" %>' />&nbsp;
                                     <pe:if condition="<%= not GameLogic.IsReadOnly() and (not has_project_id() or is_user_world()) %>">
                                         <input type="button" class="mc_light_grey_button_with_fillet" style="font-size: 12px;" value="<%= L'上传' %>" onclick="on_click_share_world()"/>
@@ -312,7 +312,7 @@
                                 </pe:if>
                                 <pe:if condition="<%= has_project_id() and not is_user_world() and not is_rated() %>">
                                     <div>
-                                        <div style="color:#b2b2b2">为作品打分：</div>
+                                        <div style="color:#b2b2b2"><%= L"为作品打分：" %></div>
                                         <div class="star_area">
                                             <pe:repeat DataSource="<%=get_star()%>">
                                                 <pe:repeatitem>

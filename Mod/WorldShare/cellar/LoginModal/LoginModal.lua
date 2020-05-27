@@ -11,22 +11,51 @@ LoginModal:ShowPage()
 ------------------------------------------------------------
 ]]
 
+local Translation = commonlib.gettable("MyCompany.Aries.Game.Common.Translation")
+
+-- service
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
+
+-- utils
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
-local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
+
+-- UI
 local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
-local SessionsData = NPL.load("(gl)Mod/WorldShare/database/SessionsData.lua")
 local RegisterModal = NPL.load("(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua")
 
-local Translation = commonlib.gettable("MyCompany.Aries.Game.Common.Translation")
+-- database
+local SessionsData = NPL.load("(gl)Mod/WorldShare/database/SessionsData.lua")
 
 local LoginModal = NPL.export()
 
--- @param callbackFunc: called after successfully signed in. 
-function LoginModal:Init(callbackFunc)
-    Mod.WorldShare.Store:Set('user/AfterLogined', callbackFunc)
+-- @param callback: called after successfully signed in. 
+function LoginModal:Init(callback)
+    if type(callback) == "function" then
+        Mod.WorldShare.Store:Set('user/AfterLogined', function(bIsSucceed)
+            -- OnKeepWorkLogin
+            GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", bIsSucceed)
+            callback(bIsSucceed)
+        end)
+    end
     self:ShowPage()
+end
+
+-- @param desc: login desc
+-- @param callback: after login function
+function LoginModal:CheckSignedIn(desc, callback)
+    if KeepworkServiceSession:IsSignedIn() then
+        if type(callback) == "function" then
+            callback(true)
+        end
+
+        return true
+    else
+        Mod.WorldShare.Store:Set("user/loginText", desc)
+        self:Init(callback)
+
+        return false
+    end
 end
 
 function LoginModal:ShowPage()
@@ -72,6 +101,7 @@ function LoginModal:ClosePage()
 
     self.loginServer = nil
     self.account = nil
+    Mod.WorldShare.Store:Remove("user/loginText")
 
     LoginModalPage:CloseWindow()
 end

@@ -12,22 +12,35 @@ local Screen = commonlib.gettable("System.Windows.Screen")
 local SocketService = commonlib.gettable("Mod.WorldShare.service.SocketService")
 local NetworkMain = commonlib.gettable("MyCompany.Aries.Game.Network.NetworkMain")
 
+-- UI
+local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
+local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
+local Permission = NPL.load("(gl)Mod/WorldShare/cellar/Permission/Permission.lua")
+
 local Server = NPL.export()
 
 Server.seachFinished = false
 
 function Server:ShowPage()
-    local params = Mod.WorldShare.Utils.ShowWindow(0, 0, "Mod/WorldShare/cellar/Server/Server.html", "Server", 0, 0, "_fi", false)
+    local function Handle(result)
+        if result then
+            local params = Mod.WorldShare.Utils.ShowWindow(0, 0, "Mod/WorldShare/cellar/Server/Server.html", "Server", 0, 0, "_fi", false)
 
-    Screen:Connect("sizeChanged", self, self.OnScreenSizeChange, "UniqueConnection")
-    self.OnScreenSizeChange()
+            Screen:Connect("sizeChanged", self, self.OnScreenSizeChange, "UniqueConnection")
+            self.OnScreenSizeChange()
+        
+            params._page.OnClose = function()
+                Mod.WorldShare.Store:Remove('page/Server')
+                Screen:Disconnect("sizeChanged", self, self.OnScreenSizeChange)
+            end
+        
+            self:GetOnlineList()
+        end
 
-    params._page.OnClose = function()
-        Mod.WorldShare.Store:Remove('page/Server')
-        Screen:Disconnect("sizeChanged", self, self.OnScreenSizeChange)
+        WorldList:RefreshCurrentServerList()
     end
 
-    self:GetOnlineList()
+    Permission:CheckPermission("OnlineLearning", true, Handle)
 end
 
 function Server.OnScreenSizeChange()

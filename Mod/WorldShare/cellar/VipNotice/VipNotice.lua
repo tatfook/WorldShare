@@ -32,10 +32,14 @@ end
 
 function VipNotice:CheckVip()
     if Mod.WorldShare.Store:Get("user/userType") ~= "vip" then
-        local parmas = Mod.WorldShare.Utils.ShowWindow(0, 0, "Mod/WorldShare/cellar/VipNotice/VipNotice.html", "VipNotice", 0, 0, "_fi", false)
+        self:ShowPage()
     else
         if type(self.callback) == "function" then
             self.callback()
         end
     end
+end
+
+function VipNotice:ShowPage()
+    Mod.WorldShare.Utils.ShowWindow(0, 0, "Mod/WorldShare/cellar/VipNotice/VipNotice.html", "VipNotice", 0, 0, "_fi", false, 10)
 end
