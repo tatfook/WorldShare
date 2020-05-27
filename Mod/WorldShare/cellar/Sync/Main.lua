@@ -15,6 +15,7 @@ local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
 local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
 local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
 local Progress = NPL.load("./Progress/Progress.lua")
+local Permission = NPL.load("(gl)Mod/WorldShare/cellar/Permission/Permission.lua")
 
 -- service
 local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
@@ -61,12 +62,8 @@ function SyncMain:CloseStartSyncPage()
     end
 end
 
-function SyncMain:ShowBeyondVolume()
-    SyncMain:ShowDialog("Mod/WorldShare/cellar/Sync/Templates/BeyondVolume.html", "BeyondVolume")
-end
-
-function SyncMain:SetBeyondVolumePage()
-    Mod.WorldShare.Store:Set('page/BeyondVolume', document:GetPageCtrl())
+function SyncMain:ShowBeyondVolume(bEnabled)
+    SyncMain:ShowDialog("Mod/WorldShare/cellar/Sync/Templates/BeyondVolume.html?bEnabled=" .. (bEnabled and "true" or "false"), "BeyondVolume")
 end
 
 function SyncMain:CloseBeyondVolumePage()
@@ -250,70 +247,70 @@ function SyncMain:SyncToLocalSingle(callback)
 end
 
 function SyncMain:SyncToDataSource(callback)
-    if self:CheckWorldSize() then
-        return false
-    end
-
-    -- close the notice
-    Mod.WorldShare.MsgBox:Close()
-
-    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
-
-    if not currentWorld.worldpath or currentWorld.worldpath == "" then
-        return false
-    end
-
-    local syncInstance = SyncToDataSource:Init(function(result, option)
-        if result == false then
-            if type(option) == 'string' then
-                Progress:ClosePage()
-
-                if option == 'RE-ENTRY' then
-                    GameLogic.AddBBS(nil, L"请重新登录", 3000, "255 0 0")
-
-                    LoginModal:Init(function()
-                        Mod.WorldShare.Utils.SetTimeOut(function()
-                            self:SyncToDataSource(callback)
-                        end, 300)
-                    end)
-
-                    return false
-                end
-
-                GameLogic.AddBBS(nil, option, 3000, "255 0 0")
-            end
-
-            if type(option) == 'table' then
-                if option.method == 'UPDATE-PROGRESS' then
-                    Progress:UpdateDataBar(option.current, option.total, option.msg)
-                    return false
-                end
-
-                if option.method == 'UPDATE-PROGRESS-FAIL' then
-                    Progress:SetFinish(true)
+    local function Handle()
+        -- close the notice
+        Mod.WorldShare.MsgBox:Close()
+    
+        local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+    
+        if not currentWorld.worldpath or currentWorld.worldpath == "" then
+            return false
+        end
+    
+        local syncInstance = SyncToDataSource:Init(function(result, option)
+            if result == false then
+                if type(option) == 'string' then
                     Progress:ClosePage()
-                    GameLogic.AddBBS(nil, option.msg, 3000, "255 0 0")
-                    return false
+    
+                    if option == 'RE-ENTRY' then
+                        GameLogic.AddBBS(nil, L"请重新登录", 3000, "255 0 0")
+    
+                        LoginModal:Init(function()
+                            Mod.WorldShare.Utils.SetTimeOut(function()
+                                self:SyncToDataSource(callback)
+                            end, 300)
+                        end)
+    
+                        return false
+                    end
+    
+                    GameLogic.AddBBS(nil, option, 3000, "255 0 0")
                 end
-
-                if option.method == 'UPDATE-PROGRESS-FINISH' then
-                    Progress:SetFinish(true)
-                    Progress:Refresh()
-                    Progress:RefreshOperate()
-                    return false
+    
+                if type(option) == 'table' then
+                    if option.method == 'UPDATE-PROGRESS' then
+                        Progress:UpdateDataBar(option.current, option.total, option.msg)
+                        return false
+                    end
+    
+                    if option.method == 'UPDATE-PROGRESS-FAIL' then
+                        Progress:SetFinish(true)
+                        Progress:ClosePage()
+                        GameLogic.AddBBS(nil, option.msg, 3000, "255 0 0")
+                        return false
+                    end
+    
+                    if option.method == 'UPDATE-PROGRESS-FINISH' then
+                        Progress:SetFinish(true)
+                        Progress:Refresh()
+                        Progress:RefreshOperate()
+                        return false
+                    end
                 end
             end
-        end
+    
+            if type(callback) == 'function' then
+                callback(result, option)
+            end
+    
+            WorldList:RefreshCurrentServerList()
+        end)
+    
+        -- load sync progress UI
+        Progress:Init(syncInstance)
+    end
 
-        if type(callback) == 'function' then
-            callback(result, option)
-        end
-
-        WorldList:RefreshCurrentServerList()
-    end)
-
-    -- load sync progress UI
-    Progress:Init(syncInstance)
+    self:CheckWorldSize(Handle)
 end
 
 function SyncMain:CheckTagName(callback)
@@ -372,7 +369,7 @@ function SyncMain:GetCurrentRevisionInfo()
     return WorldShare:GetWorldData("revision", currentWorld and currentWorld.worldpath .. '/')
 end
 
-function SyncMain:CheckWorldSize()
+function SyncMain:CheckWorldSize(callback)
     local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
     local userType = Mod.WorldShare.Store:Get("user/userType")
 
@@ -383,19 +380,21 @@ function SyncMain:CheckWorldSize()
     local filesTotal = LocalService:GetWorldSize(currentWorld.worldpath)
     local maxSize = 0
 
-    if userType == "vip" then
-        maxSize = 50 * 1024 * 1024
-    else
-        maxSize = 25 * 1024 * 1024
-    end
-
-    if filesTotal > maxSize then
-        self:ShowBeyondVolume()
-
-        return true
-    else
-        return false
-    end
+    Permission:CheckPermission("OnlineWorldData50Mb", false, function(result)
+        if result then
+            maxSize = 50 * 1024 * 1024
+        else
+            maxSize = 25 * 1024 * 1024
+        end
+    
+        if filesTotal > maxSize then
+            self:ShowBeyondVolume(result)
+        else
+            if type(callback) == "function" then
+                callback()
+            end
+        end
+    end)
 end
 
 function SyncMain:GetWorldDateTable()

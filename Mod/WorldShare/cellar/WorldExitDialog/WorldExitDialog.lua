@@ -60,7 +60,8 @@ function WorldExitDialog.ShowPage(callback)
             height = 400,
             cancelShowAnimation = true,
             bToggleShowHide = true,
-            enable_esc_key = true
+            enable_esc_key = true,
+            zorder = 10
         })
 
         params._page.OnClose = function()

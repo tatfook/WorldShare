@@ -13,6 +13,7 @@
                 local Server = NPL.load('../Server/Server.lua')
                 local MySchool = NPL.load("(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua")
                 local RegisterModal = NPL.load("(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua")
+                local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
 
                 InternetLoadWorld.OnStaticInit()
                 InternetLoadWorld.GetEvents():AddEventListener(
@@ -204,12 +205,8 @@
 
                 function username()
                     local iconList = {
-                        [1] = "textures/worldshare_32bits.png#12 310 26 18",
-                        [2] = "textures/worldshare_32bits.png#48 310 26 18",
-                        [3] = "textures/worldshare_32bits.png#84 310 26 18",
-                        [4] = "textures/worldshare_32bits.png#119 310 26 18",
-                        [5] = "textures/worldshare_32bits.png#155 310 26 18",
-                        vip = "textures/worldshare_32bits.png#195 310 18 18",
+                        vip = "textures/worldshare_32bits.png#256 311 18 18",
+                        teacher = "textures/worldshare_32bits.png#285 311 18 18";
                     }
 
                     local userType = Mod.WorldShare.Store:Get('user/userType')
@@ -217,18 +214,13 @@
                     local textWidth = _guihelper.GetTextWidth(username)
 
                     if userType == 'teacher' then
-                        local tLevel = Mod.WorldShare.Store:Get('user/tLevel')
                         local left = (140 - 23 - 2 - textWidth) / 2
 
-                        if tLevel and iconList[tLevel] then
-                            return '<img style="margin-top: 4px;margin-left:' .. left .. 'px;margin-right: 2px;width: 23px;height: 15px;background:url(' .. iconList[tLevel] .. ')" />' .. username
-                        else
-                            return '<div style="text-align: center">' .. username .. '</div>'
-                        end
+                        return '<img style="margin-top: 4px;margin-left:' .. left .. 'px;margin-right: 2px;width: 16px;height: 16px;background:url(' .. iconList['teacher'] .. ')" />' .. username
                     elseif userType == 'vip' then
                         local left = (140 - 16 - 2 - textWidth) / 2
 
-                        return '<img style="margin-top: 3px;margin-left:' .. left .. 'px;margin-right: 2px;width: 16px;height: 16px;background:url(' .. iconList['vip'] .. ')" />' .. username
+                        return '<img style="margin-top: 4px;margin-left:' .. left .. 'px;margin-right: 2px;width: 16px;height: 16px;background:url(' .. iconList['vip'] .. ')" />' .. username
                     else
                         return '<div style="text-align: center">' .. username .. '</div>'
                     end
@@ -426,6 +418,35 @@
 
                 function is_verified()
                     return Mod.WorldShare.Store:Get("user/isVerified") == true and true or false
+                end
+                
+                function get_classification_style()
+                    if Mod.WorldShare.Utils.IsEnglish() then
+                        return 'margin-left: -6px;'
+                    else
+                        return 'margin-left: 40px;'
+                    end
+                end
+
+                function OnDailyCheck()
+                    LoginModal:CheckSignedIn(L"请先登录", function(result)
+                        if result then
+                            local ParacraftLearningRoomDailyPage = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/ParacraftLearningRoom/ParacraftLearningRoomDailyPage.lua");
+                            ParacraftLearningRoomDailyPage.AutoOpen(nil,nil,function()
+                                -- UserConsole:ClosePage()
+                            end);
+                        end
+                    end)
+                end
+
+                function OnLearningLand()
+                    local ParacraftLearningRoomDailyPage = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/ParacraftLearningRoom/ParacraftLearningRoomDailyPage.lua");
+                    ParacraftLearningRoomDailyPage.OnLearningLand();
+                end
+
+                function OnVIP()
+                    local ParacraftLearningRoomDailyPage = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/ParacraftLearningRoom/ParacraftLearningRoomDailyPage.lua");
+                    ParacraftLearningRoomDailyPage.OnVIP();
                 end
             ]]>
         </script>
@@ -681,7 +702,7 @@
                             </div>
                             <pe:if condition="<%= not is_verified() %>">
                                 <div>
-                                    <input type="button" style="margin-left:40px" class="mc_light_grey_button_with_fillet" onclick="classification" value='<%= L"实名认证"%>' />
+                                    <input type="button" style="<%= get_classification_style() %>" class="mc_light_grey_button_with_fillet" onclick="classification" value='<%= L"实名认证"%>' />
                                 </div>
                             </pe:if>
                             <div style="margin-top:10px">
@@ -900,6 +921,33 @@
             <div class="middle_line" />
             <!--events_area-->
             <div class="events_area">
+                <div class="link_big_event">
+                    <div class="big_event_item">
+                            <div style="margin-top:2px;">
+                                <div style="float:left;margin-left:18px;">
+                                    <input type="button" tooltip='<%=L"每日签到"%>' onclick="OnDailyCheck" style="float:left;width:70px;height:50px;background:url(Texture/Aries/Creator/keepwork/LearningDailyCheck/gray_bg_32bits.png:6 6 6 6)" />
+                                    <div style="position:relative;width:70px;margin-top:-45px;color:#ffffff;" >
+                                        <div zorder="1001" style="margin-left:26px;width:18px;height:18px;background:url(Texture/Aries/Creator/keepwork/LearningDailyCheck/check_btn_32bits.png#0 0 18 18)"></div>
+                                        <div style="margin-top:5px;text-align:center;"><%= L"每日签到" %></div>
+                                    </div>
+                                </div>
+                                <div style="float:left;margin-left:20px;">
+                                    <input type="button" tooltip='<%=L"知识岛"%>' onclick="OnLearningLand" style="float:left;width:70px;height:50px;background:url(Texture/Aries/Creator/keepwork/LearningDailyCheck/gray_bg_32bits.png:6 6 6 6);" />
+                                    <div style="position:relative;width:70px;margin-top:-43px;color:#ffffff;" >
+                                        <div zorder="1001" style="margin-left:22px;width:25px;height:25px;background:url(Texture/Aries/Creator/keepwork/LearningDailyCheck/island_btn_32bits.png#0 0 25 25)"></div>
+                                        <div style="margin-top:-5px;text-align:center;"><%= L"知识岛" %></div>
+                                    </div>
+                            </div>
+                                <div style="float:left;margin-left:20px;">
+                                    <input type="button" tooltip='<%=L"VIP会员"%>' onclick="OnVIP" style="float:left;width:70px;height:50px;background:url(Texture/Aries/Creator/keepwork/LearningDailyCheck/gray_bg_32bits.png:6 6 6 6);" />
+                                    <div style="position:relative;width:70px;margin-top:-43px;color:#ffffff;" >
+                                        <div zorder="1001" style="margin-left:22px;width:20px;height:20px;background:url(Texture/Aries/Creator/keepwork/LearningDailyCheck/vip_32bits.png#0 0 20 20)"></div>
+                                        <div style="margin-top:0px;text-align:center;"><%= L"VIP会员" %></div>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <a onclick="official_worlds()" class="link_big_event">
                     <div class="big_event_item">
                         <div style="float:left;margin-left:5px;background:url(Texture/3DMapSystem/AppIcons/png/Tasks_64.png);width:48px;height:48px;"></div>
