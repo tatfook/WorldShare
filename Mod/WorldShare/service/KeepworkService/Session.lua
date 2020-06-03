@@ -68,8 +68,6 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
         Mod.WorldShare.Store:Set("user/isBind", true)
     end
 
-    echo(response, true)
-
     if response.orgAdmin and response.orgAdmin == 1 then
         Mod.WorldShare.Store:Set("user/userType", 'teacher')
     elseif response.tLevel and response.tLevel > 0 then

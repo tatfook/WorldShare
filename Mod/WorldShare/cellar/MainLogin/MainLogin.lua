@@ -86,6 +86,11 @@ function MainLogin:Show()
             end, 100)
         end
     end
+
+    Mod.WorldShare.Store:Set('user/AfterLogined', function(bIsSucceed)
+        -- OnKeepWorkLogin
+        GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", bIsSucceed)
+    end)
 end
 
 function MainLogin:Refresh(times)
