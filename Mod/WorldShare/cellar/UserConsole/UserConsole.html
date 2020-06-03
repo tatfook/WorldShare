@@ -430,12 +430,17 @@
 
                 function OnDailyCheck()
                     LoginModal:CheckSignedIn(L"请先登录", function(result)
-                        if result then
-                            local ParacraftLearningRoomDailyPage = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/ParacraftLearningRoom/ParacraftLearningRoomDailyPage.lua");
-                            ParacraftLearningRoomDailyPage.AutoOpen(nil,nil,function()
-                                -- UserConsole:ClosePage()
-                            end);
-                        end
+                        Mod.WorldShare.Utils.SetTimeOut(function()
+                            if result then
+                                WorldList:RefreshCurrentServerList()
+                                local ParacraftLearningRoomDailyPage = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/ParacraftLearningRoom/ParacraftLearningRoomDailyPage.lua");
+                                ParacraftLearningRoomDailyPage.AutoOpen(nil,nil,function()
+                                    if Mod.WorldShare.Store:Get('world/isEnterWorld') then
+                                        UserConsole:ClosePage()
+                                    end
+                                end);
+                            end
+                        end, 200)
                     end)
                 end
 
@@ -923,28 +928,28 @@
             <div class="events_area">
                 <div class="link_big_event">
                     <div class="big_event_item">
-                            <div style="margin-top:2px;">
-                                <div style="float:left;margin-left:18px;">
-                                    <input type="button" tooltip='<%=L"每日签到"%>' onclick="OnDailyCheck" style="float:left;width:70px;height:50px;background:url(Texture/Aries/Creator/keepwork/LearningDailyCheck/gray_bg_32bits.png:6 6 6 6)" />
-                                    <div style="position:relative;width:70px;margin-top:-45px;color:#ffffff;" >
-                                        <div zorder="1001" style="margin-left:26px;width:18px;height:18px;background:url(Texture/Aries/Creator/keepwork/LearningDailyCheck/check_btn_32bits.png#0 0 18 18)"></div>
-                                        <div style="margin-top:5px;text-align:center;"><%= L"每日签到" %></div>
-                                    </div>
+                        <div style="margin-top:2px;">
+                            <div style="float:left;margin-left:5px;">
+                                <input type="button" tooltip='<%=L"每日签到"%>' onclick="OnDailyCheck" style="float:left;width:70px;height:50px;background:url(Texture/Aries/Creator/keepwork/LearningDailyCheck/gray_bg_32bits.png:6 6 6 6)" />
+                                <div style="position:relative;width:70px;margin-top:-45px;color:#ffffff;" >
+                                    <div zorder="1001" style="margin-left:26px;width:18px;height:18px;background:url(Texture/Aries/Creator/keepwork/LearningDailyCheck/check_btn_32bits.png#0 0 18 18)"></div>
+                                    <div style="margin-top:5px;text-align:center;"><%= L"每日签到" %></div>
                                 </div>
-                                <div style="float:left;margin-left:20px;">
-                                    <input type="button" tooltip='<%=L"知识岛"%>' onclick="OnLearningLand" style="float:left;width:70px;height:50px;background:url(Texture/Aries/Creator/keepwork/LearningDailyCheck/gray_bg_32bits.png:6 6 6 6);" />
-                                    <div style="position:relative;width:70px;margin-top:-43px;color:#ffffff;" >
-                                        <div zorder="1001" style="margin-left:22px;width:25px;height:25px;background:url(Texture/Aries/Creator/keepwork/LearningDailyCheck/island_btn_32bits.png#0 0 25 25)"></div>
-                                        <div style="margin-top:-5px;text-align:center;"><%= L"知识岛" %></div>
-                                    </div>
                             </div>
-                                <div style="float:left;margin-left:20px;">
-                                    <input type="button" tooltip='<%=L"VIP会员"%>' onclick="OnVIP" style="float:left;width:70px;height:50px;background:url(Texture/Aries/Creator/keepwork/LearningDailyCheck/gray_bg_32bits.png:6 6 6 6);" />
-                                    <div style="position:relative;width:70px;margin-top:-43px;color:#ffffff;" >
-                                        <div zorder="1001" style="margin-left:22px;width:20px;height:20px;background:url(Texture/Aries/Creator/keepwork/LearningDailyCheck/vip_32bits.png#0 0 20 20)"></div>
-                                        <div style="margin-top:0px;text-align:center;"><%= L"VIP会员" %></div>
+                            <!-- <div style="float:left;margin-left:20px;">
+                                <input type="button" tooltip='<%=L"知识岛"%>' onclick="OnLearningLand" style="float:left;width:70px;height:50px;background:url(Texture/Aries/Creator/keepwork/LearningDailyCheck/gray_bg_32bits.png:6 6 6 6);" />
+                                <div style="position:relative;width:70px;margin-top:-43px;color:#ffffff;" >
+                                    <div zorder="1001" style="margin-left:22px;width:25px;height:25px;background:url(Texture/Aries/Creator/keepwork/LearningDailyCheck/island_btn_32bits.png#0 0 25 25)"></div>
+                                    <div style="margin-top:-5px;text-align:center;"><%= L"知识岛" %></div>
+                                </div>
                             </div>
-                            </div>
+                            <div style="float:left;margin-left:20px;">
+                                <input type="button" tooltip='<%=L"VIP会员"%>' onclick="OnVIP" style="float:left;width:70px;height:50px;background:url(Texture/Aries/Creator/keepwork/LearningDailyCheck/gray_bg_32bits.png:6 6 6 6);" />
+                                <div style="position:relative;width:70px;margin-top:-43px;color:#ffffff;" >
+                                    <div zorder="1001" style="margin-left:22px;width:20px;height:20px;background:url(Texture/Aries/Creator/keepwork/LearningDailyCheck/vip_32bits.png#0 0 20 20)"></div>
+                                    <div style="margin-top:0px;text-align:center;"><%= L"VIP会员" %></div>
+                                </div>
+                            </div> -->
                         </div>
                     </div>
                 </div>
