@@ -38,7 +38,7 @@ end
 
 -- get projectinfo
 function KeepworkServiceProject:GetProject(kpProjectId, callback, noTryStatus)
-    KeepworkProjectsApi:GetProject(kpProjectId, callback, nil, noTryStatus)
+    KeepworkProjectsApi:GetProject(kpProjectId, callback, callback, noTryStatus)
 end
 
 -- get project members
