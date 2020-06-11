@@ -73,7 +73,7 @@ function Server:GetOnlineList()
     SocketService:SendUDPWhoOnlineMsg()
 
     Mod.WorldShare.Utils.SetTimeOut(function()
-        local udpServerList = Mod.WorldShare.Store:Get('user/udpServerList')
+        local udpServerList = Mod.WorldShare.Store:Get('user/udpServerList') or {}
 
         ServerPage:GetNode("udp_server_list"):SetAttribute("DataSource", udpServerList)
 

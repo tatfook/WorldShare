@@ -26,8 +26,13 @@ KeepworkServiceSession.captchaKey = ''
 
 function KeepworkServiceSession:IsSignedIn()
     local token = Mod.WorldShare.Store:Get("user/token")
+    local bLoginSuccessed = Mod.WorldShare.Store:Get("user/bLoginSuccessed")
 
-    return token ~= nil
+    if token ~= nil and bLoginSuccessed then
+        return true
+    else
+        return false
+    end
 end
 
 function KeepworkServiceSession:Login(account, password, callback)
@@ -84,6 +89,8 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
     local SetUserinfo = Mod.WorldShare.Store:Action("user/SetUserinfo")
     SetUserinfo(token, userId, username, nickname)
 
+    Mod.WorldShare.Store:Set('user/bLoginSuccessed', true)
+
     LessonOrganizationsApi:GetUserAllOrgs(
         function(data, err)
             if err == 200 then
@@ -110,6 +117,7 @@ function KeepworkServiceSession:Logout()
         local Logout = Mod.WorldShare.Store:Action("user/Logout")
         Logout()
         self:ResetIndulge()
+        Mod.WorldShare.Store:Remove('user/bLoginSuccessed')
     end
 end
 

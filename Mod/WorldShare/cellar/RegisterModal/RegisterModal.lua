@@ -123,13 +123,19 @@ function RegisterModal:Register(page)
             if state.code then
                 GameLogic.AddBBS(nil, state.message, 5000, "0 0 255")
             else
+                -- register success
+
+                -- OnKeepWorkLogin
+                GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", true)
+
                 if self.m_mode == "account" then
                     self:ShowClassificationPage(function()
                         WorldList:RefreshCurrentServerList()
                     end)
-
-                    GameLogic.AddBBS(nil, L"注册成功", 5000, "0 255 0")
                 end
+
+                WorldList:RefreshCurrentServerList()
+                GameLogic.AddBBS(nil, L"注册成功", 5000, "0 255 0")
             end
 
             if page then

@@ -14,8 +14,14 @@
                     page:CloseWindow()
                 end
 
-                function join()
-                    Server:Connect(Eval('ip'), Eval('port'))
+                function join(index)
+                    local udpServerList = Mod.WorldShare.Store:Get('user/udpServerList') or {}
+
+                    if #udpServerList == 0 or not udpServerList[index] then
+                        return false
+                    end
+
+                    Server:Connect(udpServerList[index]['ip'], udpServerList[index]('port'))
                 end
 
                 function refresh()
@@ -135,7 +141,7 @@
                                                 <%= Eval('ip') .. ':' ..  Eval('port') %>
                                             </div>
                                             <div class="operate">
-                                                <input type="button" class="mc_light_grey_button_with_fillet" style="margin-left: 45px;margin-top: 5px;" value="加入" onclick="join"/>
+                                                <input type="button" class="mc_light_grey_button_with_fillet" style="margin-left: 45px;margin-top: 5px;" value="加入" name="<%= Eval('index') %>" onclick="join"/>
                                             </div>
                                         </div>
                                         <div style="height:1px;margin-top:5px;" width="100%" class="mc_line"></div>
