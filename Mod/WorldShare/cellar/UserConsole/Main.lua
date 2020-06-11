@@ -48,6 +48,13 @@ function UserConsole:CheckShowUserWorlds()
 end
 
 function UserConsole:ShowPage()
+    local UserConsolePage = Mod.WorldShare.Store:Get('page/UserConsole')
+
+    if UserConsolePage then
+        WorldList:RefreshCurrentServerList()
+        return true
+    end
+
     if self:CheckShowUserWorlds() then
         return false
     end
@@ -97,6 +104,7 @@ function UserConsole:ClosePage()
         end
 
         UserConsolePage:CloseWindow()
+        Mod.WorldShare.Store:Remove('page/UserConsole')
     end
 end
 
