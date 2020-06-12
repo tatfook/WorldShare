@@ -200,6 +200,9 @@ function WorldShare:init()
 
     -- prevent indulage
     PreventIndulge:Init()
+
+    -- init long tcp connection
+    KeepworkServiceSession:LongConnectionInit()
 end
 
 function WorldShare:OnInitDesktop()
