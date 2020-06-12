@@ -89,4 +89,11 @@ Config.dataSourceRawList = {
   }
 }
 
+Config.socket = {
+  ONLINE = "https://keepwork.com",
+  STAGE = "http://socket-dev.kp-para.cn",
+  RELEASE = "http://socket-dev.kp-para.cn",
+  LOCAL = "http://socket-dev.kp-para.cn"
+}
+
 Config.RecommendedWorldList = 'https://git.keepwork.com/gitlab_rls_official/keepworkdatasource/raw/master/official/paracraft/RecommendedWorldList.md'

@@ -9,13 +9,21 @@ local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkServ
 ------------------------------------------------------------
 ]]
 
+-- service
 local KeepworkService = NPL.load("../KeepworkService.lua")
+local GitGatewayService = NPL.load("../GitGatewayService.lua")
+local KpChatChannel = NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/ChatSystem/KpChatChannel.lua")
+
+-- api
 local KeepworkUsersApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Users.lua")
 local KeepworkKeepworksApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Keepworks.lua")
 local LessonOrganizationsApi = NPL.load("(gl)Mod/WorldShare/api/Lesson/LessonOrganizations.lua")
+local KeepworkSocketApi = NPL.load("(gl)Mod/WorldShare/api/Socket/Socket.lua")
+
+-- database
 local SessionsData = NPL.load("(gl)Mod/WorldShare/database/SessionsData.lua")
-local GitGatewayService = NPL.load("../GitGatewayService.lua")
-local Config = NPL.load("(gl)Mod/WorldShare/config/Config.lua")
+
+-- helper
 local Validated = NPL.load("(gl)Mod/WorldShare/helper/Validated.lua")
 
 local Encoding = commonlib.gettable("commonlib.Encoding")
@@ -23,6 +31,55 @@ local Encoding = commonlib.gettable("commonlib.Encoding")
 local KeepworkServiceSession = NPL.export()
 
 KeepworkServiceSession.captchaKey = ''
+
+function KeepworkServiceSession:LongConnectionInit(callback)
+    local connection = KeepworkSocketApi:Connect()
+
+    if not connection then
+        return false
+    end
+
+    if connection.inited then
+        return nil
+    end
+
+    if not KpChatChannel.client then
+        KpChatChannel.client = connection
+    
+        KpChatChannel.client:AddEventListener("OnOpen", KpChatChannel.OnOpen, KpChatChannel)
+        KpChatChannel.client:AddEventListener("OnMsg", KpChatChannel.OnMsg, KpChatChannel)
+        KpChatChannel.client:AddEventListener("OnClose", KpChatChannel.OnClose, KpChatChannel)
+    end
+
+    connection:AddEventListener("OnOpen", function(self)
+        LOG.std("KeepworkServiceSession", "debug", "LongConnectionInit", "Connected client")
+    end, connection)
+
+    connection:AddEventListener("OnMsg", self.OnMsg, connection)
+    connection.uiCallback = callback
+    connection.inited = true
+end
+
+function KeepworkServiceSession:OnMsg(msg)
+    LOG.std("KeepworkServiceSession", "debug", "OnMsg", "data: %s", NPL.ToJson(msg.data))
+
+    if not msg or not msg.data then
+        return false
+    end
+end
+
+function KeepworkServiceSession:LoginSocket()
+    local token = Mod.WorldShare.Store:Get("user/token")
+    local userId = Mod.WorldShare.Store:Get("user/userId")
+
+    if not token or not userId then
+        return false
+    end
+
+    local userRoom = '__user_' .. userId .. '__'
+
+    KeepworkSocketApi:SendMsg("app/join", { rooms = { userRoom } })
+end
 
 function KeepworkServiceSession:IsSignedIn()
     local token = Mod.WorldShare.Store:Get("user/token")
@@ -110,6 +167,7 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
     )
 
     self:ResetIndulge()
+    self:LoginSocket()
 end
 
 function KeepworkServiceSession:Logout()
