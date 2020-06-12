@@ -90,9 +90,9 @@ Config.dataSourceRawList = {
 }
 
 Config.socket = {
-  ONLINE = "https://keepwork.com",
+  ONLINE = "https://socket.keepwork.com",
   STAGE = "http://socket-dev.kp-para.cn",
-  RELEASE = "http://socket-dev.kp-para.cn",
+  RELEASE = "http://socket-rls.kp-para.cn",
   LOCAL = "http://socket-dev.kp-para.cn"
 }
 
