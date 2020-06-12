@@ -154,9 +154,13 @@ function WorldShare:init()
     GameLogic.GetFilters():add_filter(
         "cmd_loadworld", 
         function(url, options)
+			local refreshMode = nil;
+			if (options.force) then
+				refreshMode = "force";
+			end
             local pid = UserConsole:GetProjectId(url)
             if pid then
-                UserConsole:HandleWorldId(pid)
+                UserConsole:HandleWorldId(pid, refreshMode)
                 return
             else
                 return url
