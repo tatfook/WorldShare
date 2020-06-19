@@ -45,5 +45,5 @@ end
 -- method: GET
 -- return: object
 function StorageFilesApi:List(success, error)
-    StorageBaseApi:Get('/files/list', nil, nil, success, error)
+    StorageBaseApi:Post('/files/list', nil, nil, success, error)
 end
