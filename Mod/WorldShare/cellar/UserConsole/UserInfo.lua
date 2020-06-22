@@ -143,6 +143,7 @@ function UserInfo:LoginWithToken()
 
             if type(data) == 'table' and data.username then
                 data.token = usertoken
+                data.mode = 'auto'
                 KeepworkServiceSession:LoginResponse(
                     data,
                     err,
@@ -224,6 +225,7 @@ function UserInfo:CheckDoAutoSignin(callback)
 
             if type(data) == 'table' and data.username then
                 data.token = info.token
+                data.mode = 'auto'
                 KeepworkServiceSession:LoginResponse(
                     data,
                     err,

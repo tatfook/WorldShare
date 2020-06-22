@@ -116,7 +116,6 @@ function MainLogin:LoginAction()
         return false
     end
     
-    local loginServer = KeepworkService:GetEnv()
     local account = MainLoginPage:GetValue("account")
     local password = MainLoginPage:GetValue("password")
     local autoLogin = MainLoginPage:GetValue("autoLogin")
@@ -132,27 +131,11 @@ function MainLogin:LoginAction()
         return false
     end
 
-    if not loginServer then
-        return false
-    end
 
     Mod.WorldShare.MsgBox:Show(L"正在登陆，请稍后...", 8000, L"链接超时", 300, 120)
 
     local function HandleLogined()
         Mod.WorldShare.MsgBox:Close()
-
-        local token = Mod.WorldShare.Store:Get("user/token") or ""
-
-        KeepworkServiceSession:SaveSigninInfo(
-            {
-                loginServer = loginServer,
-                account = account,
-                password = password,
-                token = token,
-                autoLogin = autoLogin,
-                rememberMe = rememberMe
-            }
-        )
 
         self:EnterUserConsole()
 
@@ -177,6 +160,10 @@ function MainLogin:LoginAction()
                 Mod.WorldShare.MsgBox:Close()
                 return false
             end
+
+            response.autoLogin = autoLogin
+            response.rememberMe = rememberMe
+            response.password = password
 
             KeepworkServiceSession:LoginResponse(response, err, HandleLogined)
         end

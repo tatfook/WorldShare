@@ -265,10 +265,14 @@ function SyncMain:SyncToDataSource(callback)
                     if option == 'RE-ENTRY' then
                         GameLogic.AddBBS(nil, L"请重新登录", 3000, "255 0 0")
     
-                        LoginModal:Init(function()
-                            Mod.WorldShare.Utils.SetTimeOut(function()
-                                self:SyncToDataSource(callback)
-                            end, 300)
+                        LoginModal:Init(function(result)
+                            if result then
+                                Mod.WorldShare.Utils.SetTimeOut(function()
+                                    self:SyncToDataSource(callback)
+                                end, 300)
+                            else
+                                Progress:ClosePage()
+                            end
                         end)
     
                         return false
