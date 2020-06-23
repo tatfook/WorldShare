@@ -338,6 +338,7 @@ function WorldList:EnterWorld(index)
                                     end,
                                     _guihelper.MessageBoxButtons.YesNo
                                 )
+                                Mod.WorldShare.MsgBox:Close()
                             end
                         end
     
