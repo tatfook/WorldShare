@@ -207,7 +207,7 @@ function UserConsole:GetProjectId(url)
     return pid or false
 end
 
-function UserConsole:HandleWorldId(pid)
+function UserConsole:HandleWorldId(pid, refreshMode)
     if not pid then
         return false
     end
@@ -293,6 +293,10 @@ function UserConsole:HandleWorldId(pid)
 
                         return false
                     end
+
+					if refreshMode == "force" then
+						LoadWorld(world, refreshMode);
+					end
 
                     local worldName = ''
 
