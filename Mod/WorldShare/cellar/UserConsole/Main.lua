@@ -79,6 +79,14 @@ function UserConsole:ShowPage()
     -- load last selected avatar if world is not loaded before.
     UserInfo:OnChangeAvatar()
 
+    Mod.WorldShare.Store:Subscribe("user/Logout", function()
+        WorldList:RefreshCurrentServerList()
+    end)
+
+    Mod.WorldShare.Store:Subscribe("user/Login", function()
+        WorldList:RefreshCurrentServerList()
+    end)
+
     if not self.notFirstTimeShown then
         self.notFirstTimeShown = true
 
@@ -99,14 +107,6 @@ function UserConsole:ShowPage()
             UserInfo:CheckDoAutoSignin()
         end
     end
-
-    Mod.WorldShare.Store:Subscribe("user/Logout", function()
-        WorldList:RefreshCurrentServerList()
-    end)
-
-    Mod.WorldShare.Store:Subscribe("user/Login", function()
-        WorldList:RefreshCurrentServerList()
-    end)
 
     WorldList:RefreshCurrentServerList()
 end
