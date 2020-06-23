@@ -20,9 +20,7 @@
                 MsgBox.SetPage(msgId)
 
                 function get_window_style()
-                    Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
-
-                    return "width: " .. width .. "px;height: " .. height .. "px;" .. Utils.FixCenter(width, height)
+                    return "width: " .. width .. "px;height: " .. height .. "px;" .. Mod.WorldShare.Utils.FixCenter(width, height)
                 end
 
                 function get_msg()

@@ -26,6 +26,28 @@ Store.storeList = {
     lesson = LessonStore
 }
 
+function Store:Subscribe(key, callback)
+    if (not key) then
+        return false
+    end
+
+    local storeType = self:GetStoreType(key)
+    local storeKey = self:GetStoreKey(key)
+
+    self.storeList[storeType]:Connect("on" .. storeKey, nil, callback, "UniqueConnection")
+end
+
+function Store:Unsubscribe(key)
+    if (not key) then
+        return false
+    end
+
+    local storeType = self:GetStoreType(key)
+    local storeKey = self:GetStoreKey(key)
+
+    self.storeList[storeType]:Disconnect("on" .. storeKey)
+end
+
 function Store:Set(key, value)
     if (not key) then
         return false

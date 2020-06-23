@@ -10,6 +10,18 @@
                     return DeleteWorld.GetSelectWorld()
                 end
 
+                function get_world_name()
+                    if not get_select_world() then
+                        return ''
+                    end
+                
+                    if get_select_world().is_zip then
+                        return get_select_world().text .. '.zip'
+                    else
+                        return get_select_world().foldername
+                    end
+                end
+
                 function get_status(status)
                     if(status == 'local') then
                         return get_select_world().status == nil or get_select_world().status ~= 2
@@ -51,28 +63,32 @@
                 end
             ]]>
         </script>
+        <style type="text/mcss">
+            {
+                button_common = {
+                    float = 'left',
+                    ['margin-top'] = 5,
+                    ['margin-right'] = 10,
+                    ['min-width'] = 95,
+                    height = 30,
+                }
+            }
+        </style>
         <div width="100%" height="100%">
-            <aries:window mode="thin" width="500" height="270" style="<%=get_window_style()%>" title='<%=L"删除世界" %>' onclose="close_page()">
+            <aries:window mode="thin" width="500" height="270" style="<%=get_window_style()%>" title='<%=L"删除存档" %>' onclose="close_page()">
                 <div style="font-size:18px;base-font-size:18px;color:#ffffff;padding:30px;">
                     <div style="margin-top:30px;">
-                        <pe:if condition="<%= get_select_world().is_zip %>">
-                            <%= L"你确定要删除："%><%= get_select_world().text .. '.zip' %><%= L"世界么？请选择"%>
-                        </pe:if>
-                        <pe:if condition="<%= not get_select_world().is_zip %>">
-                            <%= L"你确定要删除："%><%= get_select_world().foldername %><%= L"世界么？请选择"%>
-                        </pe:if>
+                        <div style="float: left;background: url(textures/worldshare_32bits.png#20 130 80 80);width: 60px;height: 60px;margin-top: 0px;"></div>
+                        <div style="float: left;margin-left: 15px;">
+                            <%= L"删除："%><%= get_world_name() %>
+                        </div>
                     </div>
                     <br />
-                    <div style="margin-top:25px;">
-                        <pe:if condition="<%= get_status('local') %>">
-                            <input type="button" onclick="delete_local()" class="button_highlight" style="float:left;margin-top:5px;margin-right:10px;min-width:130px;height: 30px;" name="" value='<%=L"只删除本地"%>' />
-                        </pe:if>
-                        <pe:if condition="<%= get_status('remote') and not is_multiplayer_world() %>">
-                            <input type="button" onclick="delete_remote()" class="button_highlight" style="float:left;margin-top:5px;margin-right:10px;min-width:130px;height: 30px;" name="" value='<%=L"只删除远程"%>' />
-                        </pe:if>
-                        <pe:if condition="<%= get_status('all') and not is_multiplayer_world() %>">
-                            <input type="button" onclick="delete_all()" class="button_highlight" style="float:left;margin-top:5px;margin-right:10px;min-width:130px;height: 30px;" name="" value='<%=L"全部删除"%>' />
-                        </pe:if>
+                    <div style="margin-top:30px;margin-left: 10px;">
+                        <input type="button" enabled="<%= get_status('local') %>" onclick="delete_local()" class="button_highlight button_common" value='<%=L"删除本地"%>' />
+                        <input type="button" enabled="<%= get_status('remote') and not is_multiplayer_world() %>" onclick="delete_remote()" class="button_highlight button_common" value='<%=L"删除在线"%>' />
+                        <input type="button" enabled="<%= get_status('all') and not is_multiplayer_world() %>" onclick="delete_all()" class="button_highlight button_common" value='<%=L"全部删除"%>' />
+                        <input type="button" onclick="close_page()" class="button_highlight button_common" value='<%=L"取消"%>' />
                     </div>
                 </div>
             </aries:window>

@@ -22,17 +22,27 @@ local KeepworkUsersApi = NPL.export()
     password string 必须 密码
 ]]
 -- return: object
-function KeepworkUsersApi:Login(account, password, success, error)
+function KeepworkUsersApi:Login(account, password, platform, machineCode, success, error)
     if type(account) ~= "string" or type(password) ~= "string" then
         return false
     end
 
     local params = {
         username = account,
-        password = password
+        password = password,
+        platform = platform,
+        machineCode = machineCode
     }
 
     KeepworkBaseApi:Post("/users/login", params, nil, success, error, { 503, 400 })
+end
+
+-- url: /users/logout
+-- method: POST
+-- params: []
+-- return: object
+function KeepworkUsersApi:Logout(success, error)
+    KeepworkBaseApi:Post("/users/logout", nil, nil, success, error)
 end
 
 -- url: /users/profile
@@ -195,6 +205,9 @@ function KeepworkUsersApi:GetUserByPhonenumber(phonenumber, success, error)
     KeepworkBaseApi:Get('/users?cellphone=' .. phonenumber, nil, nil, success, error)
 end
 
+-- url: /users/PP{username base 64}
+-- method: GET
+-- return: object
 function KeepworkUsersApi:GetUserByUsernameBase64(username, success, error)
     if type(username) ~= "string" then
         return false
@@ -209,6 +222,9 @@ function KeepworkUsersApi:GetUserByUsernameBase64(username, success, error)
     KeepworkBaseApi:Get('/users/PP' .. usernameBase64, nil, nil, success, error)
 end
 
+-- url: /users?email={email}
+-- method: GET
+-- return: object
 function KeepworkUsersApi:GetUserByEmail(email, success, error)
     if type(email) ~= "string" then
         return false
@@ -219,4 +235,11 @@ function KeepworkUsersApi:GetUserByEmail(email, success, error)
     end
 
     KeepworkBaseApi:Get('/users?email=' .. email, nil, nil, success, error)
+end
+
+-- url: users/refreshToken
+-- method: GET
+-- return: object
+function KeepworkUsersApi:RefreshToken(success, error)
+    KeepworkBaseApi:Get('/users/refreshToken', nil, nil, success, error)
 end

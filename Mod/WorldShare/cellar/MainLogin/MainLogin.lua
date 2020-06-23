@@ -151,13 +151,19 @@ function MainLogin:LoginAction()
         end
     end
 
-    
     KeepworkServiceSession:Login(
         account,
         password,
         function(response, err)
-            if err == 503 then
+            if err ~= 200 or not response then
                 Mod.WorldShare.MsgBox:Close()
+
+                if response and response.code and response.message then
+                    GameLogic.AddBBS(nil, format(L"登录失败了, 错误信息：%s(%d)", response.message, response.code), 5000, "255 0 0")
+                else
+                    GameLogic.AddBBS(nil, format(L"登录失败了, 错误码：%d", err), 5000, "255 0 0")
+                end
+
                 return false
             end
 

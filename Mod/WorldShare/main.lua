@@ -74,7 +74,7 @@ local WorldShare = commonlib.inherit(commonlib.gettable("Mod.ModBase"), commonli
 
 WorldShare:Property({"Name", "WorldShare", "GetName", "SetName", { auto = true }})
 WorldShare:Property({"Desc", "world share mod can share world to keepwork online", "GetDesc", "SetDesc", { auto = true }})
-WorldShare.version = '0.0.15'
+WorldShare.version = '0.0.16'
 
 if Config.defaultEnv == 'RELEASE' or Config.defaultEnv == 'STAGE' then
     System.options.isAB_SDK = true
@@ -154,7 +154,7 @@ function WorldShare:init()
     GameLogic.GetFilters():add_filter(
         "cmd_loadworld", 
         function(url, options)
-			local refreshMode = nil;
+            local refreshMode = nil;
 			if (options.force) then
 				refreshMode = "force";
 			end
@@ -206,7 +206,21 @@ function WorldShare:init()
     PreventIndulge:Init()
 
     -- init long tcp connection
-    KeepworkServiceSession:LongConnectionInit()
+    KeepworkServiceSession:LongConnectionInit(function(result)
+        if type(result) ~= 'table' then
+            return false
+        end
+
+        if result.action == 'kickOut' then
+            local reason = 1
+
+            if result.payload and result.payload.reason then
+                reason = result.payload.reason
+            end
+
+            UserConsole:ShowKickOutPage(reason)
+        end
+    end)
 end
 
 function WorldShare:OnInitDesktop()

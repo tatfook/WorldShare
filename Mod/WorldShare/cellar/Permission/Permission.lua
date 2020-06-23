@@ -19,7 +19,7 @@ local Permission = NPL.export()
 
 function Permission:CheckPermission(authName, bOpenUIIfNot, callback)
     if not authName or type(authName) ~= "string" then
-        return false
+        authName = ""
     end
 
     if bOpenUIIfNot then
