@@ -259,9 +259,7 @@ end
 
 function UserInfo:OnClickLogin()
     Mod.WorldShare.Store:Set("user/loginText", L"请先登录")
-    LoginModal:Init(function()
-        WorldList:RefreshCurrentServerList()
-    end)
+    LoginModal:Init()
 end
 
 local curIndex = 1
@@ -326,7 +324,6 @@ function UserInfo:Logout()
         -- OnKeepWorkLogout
         GameLogic.GetFilters():apply_filters("OnKeepWorkLogout", true)
         KeepworkServiceSession:Logout()
-        WorldList:RefreshCurrentServerList()
     else
         -- OnKeepWorkLogout
         GameLogic.GetFilters():apply_filters("OnKeepWorkLogout", false)

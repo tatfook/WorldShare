@@ -66,19 +66,35 @@ function KeepworkServiceSession:OnMsg(msg)
     if not msg or not msg.data then
         return false
     end
+
+    if msg.data.sio_pkt_name and msg.data.sio_pkt_name == "event" then
+        if msg.data.body and msg.data.body[1] == "app/msg" then
+
+            local connection = KeepworkSocketApi:GetConnection()
+
+            if type(connection.uiCallback) == "function" then
+                connection.uiCallback(msg.data.body[2])
+            end
+        end
+    end
 end
 
-function KeepworkServiceSession:LoginSocket()
-    local token = Mod.WorldShare.Store:Get("user/token")
-    local userId = Mod.WorldShare.Store:Get("user/userId")
 
-    if not token or not userId then
+function KeepworkServiceSession:LoginSocket()
+    if not self:IsSignedIn() then
         return false
     end
 
-    local userRoom = '__user_' .. userId .. '__'
+    local platform
 
-    KeepworkSocketApi:SendMsg("app/join", { rooms = { userRoom } })
+    if System.os.GetPlatform() == 'mac' or System.os.GetPlatform() == 'win32' then
+        platform = "PC"
+    else
+        platform = "MOBILE"
+    end
+
+    local machineCode = SessionsData:GetDeviceUUID()
+    KeepworkSocketApi:SendMsg("app/login", { platform = platform, machineCode = machineCode })
 end
 
 function KeepworkServiceSession:IsSignedIn()
@@ -93,7 +109,23 @@ function KeepworkServiceSession:IsSignedIn()
 end
 
 function KeepworkServiceSession:Login(account, password, callback)
-    KeepworkUsersApi:Login(account, password, callback, callback)
+    local machineCode = SessionsData:GetDeviceUUID()
+    local platform
+
+    if System.os.GetPlatform() == 'mac' or System.os.GetPlatform() == 'win32' then
+        platform = "PC"
+    else
+        platform = "MOBILE"
+    end
+
+    KeepworkUsersApi:Login(
+        account,
+        password,
+        platform,
+        machineCode,
+        callback,
+        callback
+    )
 end
 
 function KeepworkServiceSession:LoginWithToken(token, callback)
@@ -101,15 +133,7 @@ function KeepworkServiceSession:LoginWithToken(token, callback)
 end
 
 function KeepworkServiceSession:LoginResponse(response, err, callback)
-    if err == 400 then
-        Mod.WorldShare.MsgBox:Close()
-        GameLogic.AddBBS(nil, L"用户名或者密码错误", 3000, "255 0 0")
-        return false
-    end
-
-    if type(response) ~= "table" then
-        Mod.WorldShare.MsgBox:Close()
-        GameLogic.AddBBS(nil, L"服务器连接失败", 3000, "255 0 0")
+    if err ~= 200 or type(response) ~= "table" then
         return false
     end
 
@@ -144,7 +168,6 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
         Mod.WorldShare.Store:Set("user/userType", 'plain')
     end
 
-
     Mod.WorldShare.Store:Set('user/bLoginSuccessed', true)
 
     local tokenExpire
@@ -167,8 +190,8 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
         )
     end
 
-    local SetUserinfo = Mod.WorldShare.Store:Action("user/SetUserinfo")
-    SetUserinfo(token, userId, username, nickname)
+    local Login = Mod.WorldShare.Store:Action("user/Login")
+    Login(token, userId, username, nickname)
 
     LessonOrganizationsApi:GetUserAllOrgs(
         function(data, err)
@@ -194,6 +217,8 @@ end
 
 function KeepworkServiceSession:Logout()
     if KeepworkService:IsSignedIn() then
+        KeepworkUsersApi:Logout()
+        KeepworkSocketApi:SendMsg("app/logout", {})
         local Logout = Mod.WorldShare.Store:Action("user/Logout")
         Logout()
         self:ResetIndulge()
@@ -276,7 +301,7 @@ function KeepworkServiceSession:Register(username, password, captcha, cellphone,
         end,
         function(data, err)
             if type(callback) == 'function' then
-                callback(data)
+                callback({ message = "", code = err})
             end
         end,
         { 400 }
@@ -427,6 +452,7 @@ function KeepworkServiceSession:CheckTokenExpire(callback)
 
     local token = Mod.WorldShare.Store:Get('user/token')
     local info = self:LoadSigninInfo()
+
     local tokenExpire = info and info.tokenExpire or 0
 
     local function ReEntry()

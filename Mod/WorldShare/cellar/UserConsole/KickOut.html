@@ -1,0 +1,103 @@
+<html>
+    <body>
+        <pe:mcml>
+            <script type="text/npl" refresh="false">
+                local UserConsole = NPL.load('./Main.lua')
+                local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
+                local ForgetPassword = NPL.load("(gl)Mod/WorldShare/cellar/ForgetPassword/ForgetPassword.lua")
+                local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
+                local Desktop = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop")
+
+                local page = document:GetPageCtrl()
+
+                reason = page:GetRequestParam("reason")
+
+                function get_window_style()
+                    return Mod.WorldShare.Utils.FixCenter(400, 200)
+                end
+
+                function reset_password()
+                    UserConsole.isKickOutPageOpened = false
+                    page:CloseWindow()
+
+                    local isEnterWorld = Mod.WorldShare.Store:Get('world/isEnterWorld')
+
+                    if isEnterWorld then
+                        SyncMain:BackupWorld()
+                        Desktop.ForceExit(true)
+                    else
+                        ForgetPassword:ShowPage()
+                    end
+                end
+
+                function logout()
+                    UserConsole.isKickOutPageOpened = false
+                    page:CloseWindow()
+
+                    local isEnterWorld = Mod.WorldShare.Store:Get('world/isEnterWorld')
+
+                    if isEnterWorld then
+                        SyncMain:BackupWorld()
+                        Desktop.ForceExit(true)
+                    end
+                end
+
+                function re_login()
+                    UserConsole.isKickOutPageOpened = false
+                    page:CloseWindow()
+
+                    local isEnterWorld = Mod.WorldShare.Store:Get('world/isEnterWorld')
+
+                    if isEnterWorld then
+                        SyncMain:BackupWorld()
+                        Desktop.ForceExit(true)
+                    else
+                        LoginModal:Init()
+                    end
+                end
+            </script>
+            <style type="text/mcss">
+                {
+                    container = {
+                        width = 400,
+                        height = 200,
+                        padding = 40,
+                        background = "Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#267 89 34 34:8 8 8 8"
+                    },
+                    common_button = {
+                        width = 80,
+                        height = 30
+                    }
+                }
+            </style>
+            <div width="100%" height="100%">
+                <div style="<%= get_window_style() %>" class="container">
+                    <pe:if condition='<%= reason == "1" %>'>
+                        <div>
+                            <div style="float: left;background: url(textures/worldshare_32bits.png#20 130 80 80);width: 60px;height: 60px;margin-top: 5px;"></div>
+                            <div style="float: left;color: white;font-size: 15px;base-font-size: 15px;margin-left: 10px;">
+                                <%= L"您的账号在其他地方登陆，您已被迫下线，如不是您本人操作，请立即修改密码。"%>
+                            </div>
+                        </div>
+                        <div style="margin-top: 25px;margin-left: 28px;">
+                            <input type="button" class="mc_light_grey_button_with_fillet common_button" value="<%= L'修改密码'%>" onclick="reset_password"/>
+                            <input type="button" style="margin-left: 10px;" class="mc_light_grey_button_with_fillet common_button" value="<%= L'直接退出'%>" onclick="logout"/>
+                            <input type="button" style="margin-left: 10px;" class="mc_light_grey_button_with_fillet common_button" value="<%= L'重新登录'%>" onclick="re_login"/>
+                        </div>
+                    </pe:if>
+                    <pe:if condition='<%= reason == "2" %>'>
+                        <div>
+                            <div style="float: left;background: url(textures/worldshare_32bits.png#20 130 80 80);width: 60px;height: 60px;margin-top: 5px;"></div>
+                            <div style="float: left;color: white;font-size: 15px;base-font-size: 15px;margin-left: 10px;margin-top: 20px;">
+                                <%= L"账号密码已修改，请重新登录。"%>
+                            </div>
+                        </div>
+                        <div style="margin-top: 25px;margin-left: 28px;">
+                            <input type="button" style="margin-left: 200px;" class="mc_light_grey_button_with_fillet common_button" value="<%= L'确定'%>" onclick="logout"/>
+                        </div>
+                    </pe:if>
+                </div>
+            </div>
+        </pe:mcml>
+    </body>
+</html>
