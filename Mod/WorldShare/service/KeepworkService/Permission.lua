@@ -26,6 +26,7 @@ KeepworkServicePermission.AllAuth = {
     OnlineWorldData50Mb = "vip_online_world_data_50mb",
     MakeApp = "MakeApp",
     ChangeAvatarSkin = "ChangeAvatarSkin",
+    CreateVipWorld = "t_create_vip_world",
 }
 
 function KeepworkServicePermission:GetAuth(authName)
