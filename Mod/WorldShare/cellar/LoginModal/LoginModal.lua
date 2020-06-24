@@ -165,8 +165,6 @@ function LoginModal:LoginAction()
             RegisterModal:ShowBindingPage()
         end
 
-        echo("handle logined!!!!!!", true)
-
         local AfterLogined = Mod.WorldShare.Store:Get('user/AfterLogined')
 
         if type(AfterLogined) == 'function' then
