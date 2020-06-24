@@ -193,51 +193,51 @@ function MainLogin:EnterUserConsole()
 end
 
 function MainLogin:SetAutoLogin()
-    local LoginModalPage = Mod.WorldShare.Store:Get("page/LoginModal")
+    local MainLoginPage = Mod.WorldShare.Store:Get("page/MainLogin")
 
-    if not LoginModalPage then
+    if not MainLoginPage then
         return false
     end
 
-    local autoLogin = LoginModalPage:GetValue("autoLogin")
-    local rememberMe = LoginModalPage:GetValue("rememberMe")
-    local password = LoginModalPage:GetValue("password")
+    local autoLogin = MainLoginPage:GetValue("autoLogin")
+    local rememberMe = MainLoginPage:GetValue("rememberMe")
+    local password = MainLoginPage:GetValue("password")
     self.loginServer = KeepworkService:GetEnv()
-    self.account = string.lower(LoginModalPage:GetValue("account"))
+    self.account = string.lower(MainLoginPage:GetValue("account"))
 
     if autoLogin then
-        LoginModalPage:SetValue("rememberMe", true)
+        MainLoginPage:SetValue("rememberMe", true)
     else
-        LoginModalPage:SetValue("rememberMe", rememberMe)
+        MainLoginPage:SetValue("rememberMe", rememberMe)
     end
     
-    LoginModalPage:SetValue("autoLogin", autoLogin)
-    LoginModalPage:SetValue("password", password)
+    MainLoginPage:SetValue("autoLogin", autoLogin)
+    MainLoginPage:SetValue("password", password)
 
     self:Refresh()
 end
 
 function MainLogin:SetRememberMe()
-    local LoginModalPage = Mod.WorldShare.Store:Get("page/LoginModal")
+    local MainLoginPage = Mod.WorldShare.Store:Get("page/MainLogin")
 
-    if not LoginModalPage then
+    if not MainLoginPage then
         return false
     end
 
     local loginServer = KeepworkService:GetEnv()
-    local password = LoginModalPage:GetValue("password")
-    local rememberMe = LoginModalPage:GetValue("rememberMe")
+    local password = MainLoginPage:GetValue("password")
+    local rememberMe = MainLoginPage:GetValue("rememberMe")
     self.loginServer = KeepworkService:GetEnv()
-    self.account = string.lower(LoginModalPage:GetValue("account"))
+    self.account = string.lower(MainLoginPage:GetValue("account"))
 
     if rememberMe then
-        LoginModalPage:SetValue("autoLogin", autoLogin)
+        MainLoginPage:SetValue("autoLogin", autoLogin)
     else
-        LoginModalPage:SetValue("autoLogin", false)
+        MainLoginPage:SetValue("autoLogin", false)
     end
 
-    LoginModalPage:SetValue("rememberMe", rememberMe)
-    LoginModalPage:SetValue("password", password)
+    MainLoginPage:SetValue("rememberMe", rememberMe)
+    MainLoginPage:SetValue("password", password)
 
     self:Refresh()
 end
