@@ -456,7 +456,21 @@
                     end)
                 end
                 function OnLearningLand()
-                    ParacraftLearningRoomDailyPage.OnLearningLand();
+                        if(KeepworkServiceSession:IsSignedIn())then
+                            ParacraftLearningRoomDailyPage.OnLearningLand();
+                            return
+                        end
+                        LoginModal:CheckSignedIn(L"请先登录", function(result)
+                        if result == true then
+                            Mod.WorldShare.Utils.SetTimeOut(function()
+                                if result then
+                                    WorldList:RefreshCurrentServerList()
+                                    local ParacraftLearningRoomDailyPage = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/ParacraftLearningRoom/ParacraftLearningRoomDailyPage.lua");
+                                    ParacraftLearningRoomDailyPage.OnLearningLand();
+                                end
+                            end, 300)
+                        end
+                    end)
                 end
 
                 function OnVIP()
