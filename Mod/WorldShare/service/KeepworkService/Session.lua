@@ -456,8 +456,6 @@ function KeepworkServiceSession:CheckTokenExpire(callback)
     local token = Mod.WorldShare.Store:Get('user/token')
     local info = self:LoadSigninInfo()
 
-    echo(info, true)
-
     local tokenExpire = info and info.tokenExpire or 0
 
     local function ReEntry()
@@ -511,7 +509,6 @@ function KeepworkServiceSession:CheckTokenExpire(callback)
 end
 
 function KeepworkServiceSession:RenewToken()
-    echo("from renew token!!!!!", true)
     self:CheckTokenExpire()
 
     Mod.WorldShare.Utils.SetTimeOut(function()
