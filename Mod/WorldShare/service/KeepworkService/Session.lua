@@ -215,9 +215,12 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
     self:LoginSocket()
 end
 
-function KeepworkServiceSession:Logout()
+function KeepworkServiceSession:Logout(mode)
     if KeepworkService:IsSignedIn() then
-        KeepworkUsersApi:Logout()
+        if not mode or mode ~= "KICKOUT" then
+            KeepworkUsersApi:Logout()
+        end
+
         KeepworkSocketApi:SendMsg("app/logout", {})
         local Logout = Mod.WorldShare.Store:Action("user/Logout")
         Logout()
@@ -453,6 +456,8 @@ function KeepworkServiceSession:CheckTokenExpire(callback)
     local token = Mod.WorldShare.Store:Get('user/token')
     local info = self:LoadSigninInfo()
 
+    echo(info, true)
+
     local tokenExpire = info and info.tokenExpire or 0
 
     local function ReEntry()
@@ -506,6 +511,7 @@ function KeepworkServiceSession:CheckTokenExpire(callback)
 end
 
 function KeepworkServiceSession:RenewToken()
+    echo("from renew token!!!!!", true)
     self:CheckTokenExpire()
 
     Mod.WorldShare.Utils.SetTimeOut(function()
