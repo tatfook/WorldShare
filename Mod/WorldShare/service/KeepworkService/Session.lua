@@ -215,17 +215,31 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
     self:LoginSocket()
 end
 
-function KeepworkServiceSession:Logout(mode)
+function KeepworkServiceSession:Logout(mode, callback)
     if KeepworkService:IsSignedIn() then
         if not mode or mode ~= "KICKOUT" then
-            KeepworkUsersApi:Logout()
-        end
+            KeepworkUsersApi:Logout(function()
+                KeepworkSocketApi:SendMsg("app/logout", {})
+                local Logout = Mod.WorldShare.Store:Action("user/Logout")
+                Logout()
+                self:ResetIndulge()
+                Mod.WorldShare.Store:Remove('user/bLoginSuccessed')
+                
+                if type(callback) then
+                    callback()
+                end
+            end)
+        else
+            KeepworkSocketApi:SendMsg("app/logout", {})
+            local Logout = Mod.WorldShare.Store:Action("user/Logout")
+            Logout()
+            self:ResetIndulge()
+            Mod.WorldShare.Store:Remove('user/bLoginSuccessed')
 
-        KeepworkSocketApi:SendMsg("app/logout", {})
-        local Logout = Mod.WorldShare.Store:Action("user/Logout")
-        Logout()
-        self:ResetIndulge()
-        Mod.WorldShare.Store:Remove('user/bLoginSuccessed')
+            if type(callback) then
+                callback()
+            end
+        end
     end
 end
 

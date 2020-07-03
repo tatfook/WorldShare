@@ -322,8 +322,9 @@ end
 function UserInfo:Logout(mode)
     if self.IsSignedIn() and self:CanSwitchUser() then
         -- OnKeepWorkLogout
-        GameLogic.GetFilters():apply_filters("OnKeepWorkLogout", true)
-        KeepworkServiceSession:Logout(mode)
+        KeepworkServiceSession:Logout(mode, function()
+            GameLogic.GetFilters():apply_filters("OnKeepWorkLogout", true)
+        end)
     else
         -- OnKeepWorkLogout
         GameLogic.GetFilters():apply_filters("OnKeepWorkLogout", false)
