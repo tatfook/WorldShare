@@ -82,7 +82,7 @@
                     local data = get_data()
                     local curData = data[index] or {}
 
-                    local url = KeepworkService:GetKeepworkUrl() .. "/org/" .. curData.name .. "/index"
+                    local url = KeepworkService:GetKeepworkUrl() .. "/org/" .. curData.loginUrl .. "/index"
 
                     ParaGlobal.ShellExecute("open", url, "", "", 1)
                 end
