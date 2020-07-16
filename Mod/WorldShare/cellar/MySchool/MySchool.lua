@@ -24,16 +24,21 @@ function MySchool:Show()
     KeepworkServiceSchoolAndOrg:GetMyAllOrgsAndSchools(function(schoolData, orgData)
         Mod.WorldShare.MsgBox:Close()
 
+        local hasJoinedSchool = false
+        local hasJoinedOrg = false
+
         if type(schoolData) == "table" and schoolData.regionId then
-            self.hasJoined = true
+            hasJoinedSchool = true
             self.schoolData= schoolData
-        else
-            self.hasJoined = false
         end
 
         if type(orgData) == "table" and #orgData > 0 then
-            self.hasJoined = true
+            hasJoinedOrg = true
             self.orgData = orgData
+        end
+
+        if hasJoinedSchool or hasJoinedOrg then
+            self.hasJoined = true
         else
             self.hasJoined = false
         end
