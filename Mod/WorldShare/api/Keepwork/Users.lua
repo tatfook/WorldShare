@@ -18,21 +18,17 @@ local KeepworkUsersApi = NPL.export()
 -- method: POST
 -- params:
 --[[
-    account	string 必须 用户名	
-    password string 必须 密码
+    account	string necessary username	
+    password string necessary password
+    platform string not necessary platform
+    machineCode string not necessary machine code
+    oauthToken string not necessary third party token 
 ]]
 -- return: object
-function KeepworkUsersApi:Login(account, password, platform, machineCode, success, error)
-    if type(account) ~= "string" or type(password) ~= "string" then
+function KeepworkUsersApi:Login(params, success, error)
+    if not params or type(params.username) ~= "string" or type(params.password) ~= "string" then
         return false
     end
-
-    local params = {
-        username = account,
-        password = password,
-        platform = platform,
-        machineCode = machineCode
-    }
 
     KeepworkBaseApi:Post("/users/login", params, nil, success, error, { 503, 400 })
 end
@@ -66,12 +62,14 @@ end
 -- method: POST
 -- params:
 --[[
-    token string 必须 token
-    username string 必须 username,
-    password string 必须 password,
-    key string 必须 captchaKey,
-    captcha string 必须 captcha,
-    channel = 3
+    username string necessary username,
+    password string necessary password,
+    key string necessary captchaKey,
+    captcha string necessary captcha,
+    channel = 3,
+    platform string not necessary WEB WEB,PC,MOBILE
+    machineCode	string necessary
+    oauthToken string not necessary third party account token 
 ]]
 -- return: object
 function KeepworkUsersApi:Register(params, success, error, noTryStatus)
@@ -242,4 +240,70 @@ end
 -- return: object
 function KeepworkUsersApi:RefreshToken(success, error)
     KeepworkBaseApi:Get('/users/refreshToken', nil, nil, success, error)
+end
+
+-- url: /users/school
+-- desc: get user school list
+-- method: GET
+-- headers: 
+--[[
+    Authorization string necessary
+]]
+-- return:
+--[[
+    id number not necessary
+    name string not necessary
+    regionId number not necessary
+    region object not necessary
+        country string not necessary
+        state string not necessary
+        city string not necessary
+        county string not necessary	
+    type string not necessary
+    orgId number not necessary
+]]
+function KeepworkUsersApi:School(success, error)
+    KeepworkBaseApi:Get('/users/school', nil, nil, success, error)
+end
+
+-- url: /users/school
+-- method: PUT
+-- header:
+--[[
+    Authorization string necessary
+]]
+-- params:
+--[[
+    schoolId int necessary
+]]
+-- return: object
+function KeepworkUsersApi:ChangeSchool(schoolId, success, error)
+    if not schoolId then
+        return false
+    end
+
+    KeepworkBaseApi:Put('/users/school', { schoolId = schoolId }, nil, success, error)
+end
+
+-- url: /users/school/register
+-- method: POST
+-- header:
+--[[
+    Authorization string necessary
+]]
+-- params:
+--[[
+    type string necessary 学校类型	
+    regionId integer necessary 地域ID
+    name string necessary 学校名称
+]]
+-- return: object
+function KeepworkUsersApi:SchoolRegister(schoolType, regoinId, schoolName, success, error)
+    local params = {
+        type = schoolType,
+        regionId = regoinId,
+        name = schoolName
+    }
+
+    KeepworkBaseApi:Post('/users/school/register', params, nil, success, error)
 end

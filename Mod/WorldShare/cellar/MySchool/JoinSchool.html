@@ -1,0 +1,166 @@
+<html>
+    <body>
+        <pe:mcml>
+            <script type="text/npl">
+                <![CDATA[
+                    local MySchool = NPL.load("./MySchool.lua")
+                    local page = document:GetPageCtrl()
+
+                    function close()
+                        page:CloseWindow()
+                    end
+
+                    function record_school()
+                        MySchool:ShowRecordSchool()
+                        close()
+                    end
+
+                    function get_provinces()
+                        return MySchool.provinces
+                    end
+
+                    function get_cities()
+                        return MySchool.cities
+                    end
+
+                    function get_areas()
+                        return MySchool.areas
+                    end
+
+                    function get_kinds()
+                        return MySchool.kinds
+                    end
+
+                    function get_result()
+                        return MySchool.result
+                    end
+
+                    function select_province(name, value)
+                        if value == 0 then
+                            return false
+                        end
+
+                        MySchool.curId = value
+
+                        MySchool:GetCities(value, function(data)
+                            MySchool.cities = data
+                            MySchool.areas = {
+                                {
+                                    text = L"请选择",
+                                    value = 0,
+                                    selected = true,
+                                }
+                            }
+
+                            MySchool:GetSearchSchoolResult(value, MySchool.kind, function(data)
+                                page:Refresh(0.01)
+                            end)
+
+                            page:Refresh(0.01)
+                        end)
+                    end
+
+                    function select_city(name, value)
+                        if value == 0 then
+                            return false
+                        end
+
+                        MySchool.curId = value
+
+                        MySchool:GetAreas(value, function(data)
+                            MySchool.areas = data
+
+                            MySchool:GetSearchSchoolResult(value, MySchool.kind, function(data)
+                                page:Refresh(0.01)
+                            end)
+                            
+                            page:Refresh(0.01)
+                        end)
+                    end
+
+                    function select_area(name, value)
+                        if value == 0 then
+                            return false
+                        end
+
+                        MySchool.curId = value
+
+                        MySchool:GetSearchSchoolResult(value, MySchool.kind, function(data)
+                            page:Refresh(0.01)
+                        end)
+                    end
+
+                    function select_kind(name, value)
+                        if value == 0 then
+                            MySchool.kind = nil
+                        else
+                            MySchool.kind = value
+                        end
+
+
+                        if not MySchool.curId or MySchool.curId == 0 then
+                            return false
+                        end
+
+                        MySchool:GetSearchSchoolResult(MySchool.curId, MySchool.kind, function(data)
+                            page:Refresh(0.01)
+                        end)
+                    end
+
+                    function confirm()
+                        local text = page:GetValue("result")
+                        local curItem
+
+                        for key, item in ipairs(get_result()) do
+                            if item.text == text then
+                                curItem = item
+                                break
+                            end
+                        end
+
+                        if not curItem or not curItem.value or curItem.value == 0 then
+                            GameLogic.AddBBS(nil, L"请选择一所学校", 3000, "255 0 0")
+                            return false
+                        end
+
+                        Mod.WorldShare.MsgBox:Show(L"请稍后...")
+                        MySchool:ChangeSchool(curItem.value, function(bSuccessed)
+                            Mod.WorldShare.MsgBox:Close()
+                            if bSuccessed then
+                                close()
+                                GameLogic.AddBBS(nil, L"加入学校成功", 3000, "0 255 0")
+                            else
+                                GameLogic.AddBBS(nil, L"加入学校失败", 3000, "255 0 0")
+                            end
+                        end)
+                    end
+                ]]>
+            </script>
+            <style type="text/mcss">
+            </style>
+            <aries:window mode="thin" title='<%=L"加入学校"%>' onclose="close()">
+                <div width="100%" height="100%" style="color: white;padding: 20px;">
+                    <div><%= L"您未加入任何学校，请选择：" %></div>
+                    <div style="margin-left: 80px;margin-top: 10px;">
+                        <div style="margin-bottom: 10px;">
+                            <select name="province" style="width:87px;height: 26px;" DataSource="<%= get_provinces() %>" onselect="select_province"></select>
+                            <select name="city" DataSource="<%= get_cities() %>" style="margin-left: 10px;width:87px;height: 26px;" onselect="select_city"></select>
+                            <select name="area" DataSource="<%= get_areas() %>" style="margin-left: 10px;width:87px;height: 26px;" onselect="select_area"></select>
+                            <select name="kind" DataSource="<%= get_kinds() %>" style="margin-left: 10px;width:88px;height: 26px;" onselect="select_kind"></select>
+                        </div>
+                        <div style="width: 380px;margin-bottom: 10px;">
+                            <select name="result" DataSource="<%= get_result() %>" size="5"></select>
+                        </div>
+                        <div style="width: 380px;">
+                            <%= L"*如果您的学校未出现在列表中，请登记学校。我们会尽快添加。" %>
+                        </div>
+                    </div>
+                    <div style="margin-top: 10px;margin-left: 220px;">
+                        <input type="button" class="button_highlight" style="height: 35px;width: 120px;" value="<%= L'登记学校' %>" onclick="record_school()"/>
+                        <input type="button" class="button_highlight" style="height: 35px;width: 120px;margin-left: 10px;" value="<%= L'确定' %>" onclick="confirm()"/>
+                    </div>
+                </div>
+            </aries:window>
+        </pe:mcml>
+    </body>
+</html>

@@ -205,6 +205,12 @@ function WorldList:EnterWorld(index)
         return false
     end
 
+    local ThirdPartyLoginPage = Mod.WorldShare.Store:Get('page/ThirdPartyLogin')
+
+    if ThirdPartyLoginPage then
+        ThirdPartyLoginPage:CloseWindow()
+    end
+
     local function CheckWorld()
         local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
         local output = commonlib.Files.Find({}, currentWorld.worldpath, 0, 500, "worldconfig.txt")
@@ -223,17 +229,14 @@ function WorldList:EnterWorld(index)
         end
     end
 
-    local function Handle(result)
-        if result == 'REGISTER' or result == 'FORGET' then
-            return false
-        end
-
+    local function Handle()
         if not KeepworkService:IsSignedIn() then
             local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
             if currentWorld.shared then
                 Mod.WorldShare.MsgBox:Dialog(
-                    L"此世界为多人世界，请登陆后再打开世界，或者以只读模式打开世界",
+                    "MultiPlayerWorldLogin",
+                    L"此世界为多人世界，请登录后再打开世界，或者以只读模式打开世界",
                     {
                         Title = L"多人世界",
                         Yes = L"知道了",
@@ -295,6 +298,7 @@ function WorldList:EnterWorld(index)
         
                                         Mod.WorldShare.MsgBox:Dialog(
                                             format(
+                                                "MultiPlayerWorldOccupy",
                                                 L"此账号已在其他地方占用此世界，请退出后再或者以只读模式打开世界",
                                                 data.owner.username,
                                                 currentWorld.foldername,
@@ -319,6 +323,7 @@ function WorldList:EnterWorld(index)
                             else
                                 Mod.WorldShare.MsgBox:Dialog(
                                     format(
+                                        "MultiPlayerWolrdOthersOccupy",
                                         L"%s正在以独占模式编辑世界%s，请联系%s退出编辑或者以只读模式打开世界",
                                         data.owner.username,
                                         currentWorld.foldername,
@@ -428,6 +433,7 @@ function WorldList:EnterWorld(index)
                         local remoteRevision = Mod.WorldShare.Store:Get("world/remoteRevision") or 0
 
                         Mod.WorldShare.MsgBox:Dialog(
+                            "MultiPlayerWorldUpdate",
                             format(L"你的本地版本%d比远程版本%d旧， 是否更新为最新的远程版本？", currentRevision, remoteRevision),
                             {
                                 Title = L"多人世界",
@@ -478,12 +484,24 @@ function WorldList:EnterWorld(index)
     if not KeepworkService:IsSignedIn() and currentWorld.kpProjectId then
         LoginModal:Init(function(result)
             if result then
+                if result == 'THIRD' then
+                    return function()
+                        self:RefreshCurrentServerList(function()
+                            Handle()
+                        end)
+                    end
+                end
+
                 -- refresh world list after 
                 self:RefreshCurrentServerList(function()
-                    Handle(result)
+                    if result == 'REGISTER' or result == 'FORGET' then
+                        return false
+                    end
+
+                    Handle()
                 end)
             else
-                Handle(result)
+                Handle()
             end
         end)
     else

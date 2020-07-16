@@ -7,15 +7,22 @@
             <script type="text/npl">
                 <![CDATA[
                     NPL.load("(gl)script/apps/Aries/Creator/Game/Login/Rebranding.lua")
+                    
+                    -- load lib
                     Rebranding = commonlib.gettable("MyCompany.Aries.Creator.Game.Rebranding")
                     local GameMainLogin = commonlib.gettable("MyCompany.Aries.Game.MainLogin")
 
+                    -- load UI
                     local MainLogin = NPL.load("./MainLogin.lua")
                     local LoginModal = NPL.load("../LoginModal/LoginModal.lua")
                     local RegisterModal = NPL.load("(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua")
                     local ForgetPassword = NPL.load("(gl)Mod/WorldShare/cellar/ForgetPassword/ForgetPassword.lua")
-                    local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepWorkService/Session.lua")
+                    local ThirdPartyLogin = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/ThirdPartyLogin.lua")
+                    local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
                     local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
+                    
+                    -- service
+                    local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepWorkService/Session.lua")
 
                     local page = document:GetPageCtrl()
                     Mod.WorldShare.Store:Set("page/MainLogin", page)
@@ -128,6 +135,22 @@
                         local username = mcmlNode:GetUIValue()
                         page:SetValue("account", username)
                     end
+                    
+                    function login_with_wx()
+                        ThirdPartyLogin:Init("WECHAT", function()
+                            UserConsole.notFirstTimeShown = nil
+                            MainLogin:EnterUserConsole()
+                            WorldList:RefreshCurrentServerList()
+                        end)
+                    end
+
+                    function login_with_qq()
+                        ThirdPartyLogin:Init("QQ", function()
+                            UserConsole.notFirstTimeShown = nil
+                            MainLogin:EnterUserConsole()
+                            WorldList:RefreshCurrentServerList()
+                        end)
+                    end
                 ]]>
             </script>
             <style type="text/mcss">
@@ -140,7 +163,7 @@
                         ["padding-right"] = 40,
                         ["padding-left"] = 40,
                         ["padding-top"] = 20,
-                        ["padding-bottom"] = 20,
+                        ["padding-bottom"] = 10,
                     },
                     text_field = {
                         background = "textures/worldshare_32bits.png;72 20 16 16:3 3 3 3",
@@ -208,9 +231,20 @@
                                 <input type="checkbox" style="float:left;margin-top:3px;min-width:90px;" name="autoLogin" onclick="set_auto_login()"/><div style="float:left" for="autoLogin"><%= L"自动登录" %></div>    
                             </div>
                         </div>
-                        <div style="margin-top:30px;margin-bottom:15px;">
+                        <div style="margin-top:15px;margin-bottom:15px;">
                             <input type="button" class="offline_button mc_light_grey_button_with_fillet" onclick="use_offline()" value="<%= L'离线模式' %>" />
                             <input type="button" DefaultButton="true" class="login_button" onclick="login()" value='<%= L"登 录"%>' />
+                        </div>
+                        <div>
+                            <div style="base-font-size: 14px;font-size: 14px;">
+                                <div style="width: 50px;height: 1px;background-color: #6d6d6e;float:left;margin-top: 10px;margin-left: 20px;margin-right: 2px;"></div>
+                                <%= L"第三方账号登录" %>
+                                <div style="width: 50px;height: 1px;background-color: #6d6d6e;float:left;margin-top: 10px;margin-left: 2px;"></div>
+                            </div>
+                            <div style="margin-top: 5px;margin-bottom: 5px;">
+                                <div onclick="login_with_wx()" style="width: 44px;height: 44px;background:url(textures/worldshare_32bits.png#245 135 44 44);float: left;margin-left: 40px;"></div>
+                                <div onclick="login_with_qq()" style="width: 44px;height: 44px;background:url(textures/worldshare_32bits.png#301 135 44 44);float: left;margin-left: 80x;"></div>
+                            </div>
                         </div>
                         <div style="<%='text-align:left;margin-left:55px;' .. get_english_style('margin-left:15px;')%>">
                             <a name="forgot" onclick="forget_password()" style="background:url(textures/worldshare_32bits.png#399 76 64 30:0 0 0 0);height:30px;width:150px;font-size: 14px;color: #ffffff;"><%= L"忘记密码" %></a>

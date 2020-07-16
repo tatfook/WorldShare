@@ -14,6 +14,7 @@ local UserStore = commonlib.inherit(commonlib.gettable("System.Core.ToolBase"), 
 
 UserStore:Signal("onLogin", function() end)
 UserStore:Signal("onLogout", function() end)
+UserStore:Signal("onSetThirdPartyLoginAuthinfo", function() end)
 
 function UserStore:Action()
     return {
@@ -21,22 +22,20 @@ function UserStore:Action()
             self.token = token
             commonlib.setfield("System.User.keepworktoken", token)
         end,
-        Login = function(token, userId, username, nickname)
+        Login = function(token, userId, username, nickname, realname)
             self.token = token
             self.userId = userId
             self.username = username
             self.nickname = nickname
+            self.realname = realname
 
-            if self.userType == 'vip' then
-                -- true or nil
-                commonlib.setfield("System.User.isVip", true)
-            end
-
-            commonlib.setfield("System.User.keepworktoken", token)
-            commonlib.setfield("System.User.username", username)
-            commonlib.setfield("System.User.keepworkUsername", username)
-            commonlib.setfield("System.User.NickName", nickname)
+            commonlib.setfield("System.User.keepworktoken", self.token)
+            commonlib.setfield("System.User.username", self.username)
+            commonlib.setfield("System.User.keepworkUsername", self.username)
+            commonlib.setfield("System.User.NickName", self.nickname)
+            commonlib.setfield("System.User.realname", self.realname)
             commonlib.setfield("System.User.userType", self.userType)
+            commonlib.setfield("System.User.isVip", self.isVip)
 
             self:onLogin()
         end,
@@ -60,6 +59,12 @@ function UserStore:Action()
         SetPlayerController = function(playerController)
             self.playerController = playerController
         end,
+        SetThirdPartyLoginAuthinfo = function(authType, authCode)
+            self.authType = authType
+            self.authCode = authCode
+
+            self:onSetThirdPartyLoginAuthinfo()
+        end
     }
 end
 

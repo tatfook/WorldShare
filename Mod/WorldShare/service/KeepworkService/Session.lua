@@ -13,10 +13,12 @@ local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkServ
 local KeepworkService = NPL.load("../KeepworkService.lua")
 local GitGatewayService = NPL.load("../GitGatewayService.lua")
 local KpChatChannel = NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/ChatSystem/KpChatChannel.lua")
+local KeepworkServiceSchoolAndOrg = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/SchoolAndOrg.lua")
 
 -- api
 local KeepworkUsersApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Users.lua")
 local KeepworkKeepworksApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Keepworks.lua")
+local KeepworkOauthUsersApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/OauthUsers.lua")
 local LessonOrganizationsApi = NPL.load("(gl)Mod/WorldShare/api/Lesson/LessonOrganizations.lua")
 local KeepworkSocketApi = NPL.load("(gl)Mod/WorldShare/api/Socket/Socket.lua")
 
@@ -25,6 +27,9 @@ local SessionsData = NPL.load("(gl)Mod/WorldShare/database/SessionsData.lua")
 
 -- helper
 local Validated = NPL.load("(gl)Mod/WorldShare/helper/Validated.lua")
+
+-- config
+local Config = NPL.load("(gl)Mod/WorldShare/config/Config.lua")
 
 local Encoding = commonlib.gettable("commonlib.Encoding")
 
@@ -118,11 +123,40 @@ function KeepworkServiceSession:Login(account, password, callback)
         platform = "MOBILE"
     end
 
+    local params = {
+        username = account,
+        password = password,
+        platform = platform,
+        machineCode = machineCode
+    }
+
     KeepworkUsersApi:Login(
-        account,
-        password,
-        platform,
-        machineCode,
+        params,
+        callback,
+        callback
+    )
+end
+
+function KeepworkServiceSession:LoginAndBindThirdPartyAccount(account, password, oauthToken, callback)
+    local machineCode = SessionsData:GetDeviceUUID()
+    local platform
+
+    if System.os.GetPlatform() == 'mac' or System.os.GetPlatform() == 'win32' then
+        platform = "PC"
+    else
+        platform = "MOBILE"
+    end
+
+    local params = {
+        username = account,
+        password = password,
+        platform = platform,
+        machineCode = machineCode,
+        oauthToken = oauthToken
+    }
+
+    KeepworkUsersApi:Login(
+        params,
         callback,
         callback
     )
@@ -142,6 +176,7 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
     local userId = response["id"] or 0
     local username = response["username"] or ""
     local nickname = response["nickname"] or ""
+    local realname = response['realname'] or ""
 
     if not response.realname then
         Mod.WorldShare.Store:Set("user/isVerified", false)
@@ -155,17 +190,23 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
         Mod.WorldShare.Store:Set("user/isBind", true)
     end
 
+    local userType = {}
+
     if response.orgAdmin and response.orgAdmin == 1 then
-        Mod.WorldShare.Store:Set("user/userType", 'teacher')
+        userType.teacher = true
     elseif response.tLevel and response.tLevel > 0 then
-        Mod.WorldShare.Store:Set("user/userType", 'teacher')
+        userType.teacher = true
         Mod.WorldShare.Store:Set("user/tLevel", response.tLevel)
     elseif response.student and response.student == 1 then
-        Mod.WorldShare.Store:Set("user/userType", 'vip')
-    elseif response.vip and response.vip == 1 then
-        Mod.WorldShare.Store:Set("user/userType", 'vip')
+        userType.student = true
     else
-        Mod.WorldShare.Store:Set("user/userType", 'plain')
+        userType.plain = true
+    end
+
+    Mod.WorldShare.Store:Set("user/userType", userType)
+
+    if response.vip and response.vip == 1 then
+        Mod.WorldShare.Store:Set("user/isVip", true)
     end
 
     Mod.WorldShare.Store:Set('user/bLoginSuccessed', true)
@@ -191,7 +232,7 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
     end
 
     local Login = Mod.WorldShare.Store:Action("user/Login")
-    Login(token, userId, username, nickname)
+    Login(token, userId, username, nickname, realname)
 
     LessonOrganizationsApi:GetUserAllOrgs(
         function(data, err)
@@ -205,9 +246,24 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
                 end
             end
 
-            if type(callback) == "function" then
-                callback()
-            end
+            KeepworkServiceSchoolAndOrg:GetMyAllOrgsAndSchools(function(schoolData, orgData)
+                if type(schoolData) == "table" and schoolData.regionId then
+                    Mod.WorldShare.Store:Set('user/hasJoinedSchoolOrOrg', true)
+                else
+                    Mod.WorldShare.Store:Set('user/hasJoinedSchoolOrOrg', false)
+
+                end
+                
+                if type(orgData) == "table" and #orgData > 0 then
+                    Mod.WorldShare.Store:Set('user/hasJoinedSchoolOrOrg', true)
+                else
+                    Mod.WorldShare.Store:Set('user/hasJoinedSchoolOrOrg', false)
+                end
+                
+                if type(callback) == "function" then
+                    callback()
+                end
+            end)
         end
     )
 
@@ -244,10 +300,6 @@ function KeepworkServiceSession:Logout(mode, callback)
 end
 
 function KeepworkServiceSession:Register(username, password, captcha, cellphone, cellphoneCaptcha, isBind, callback)
-    if not username or not password or not captcha then
-        return false
-    end
-
     if type(username) ~= 'string' or
        type(password) ~= 'string' or
        type(captcha) ~= 'string' or
@@ -278,6 +330,66 @@ function KeepworkServiceSession:Register(username, password, captcha, cellphone,
             channel = 3
         }
     end
+
+    KeepworkUsersApi:Register(
+        params,
+        function(registerData, err)
+            if registerData.id then
+                self:Login(
+                    username,
+                    password,
+                    function(loginData, err)
+                        if err ~= 200 then
+                            registerData.message = L'注册成功，登录失败'
+                            registerData.code = 9
+
+                            if type(callback) == 'function' then
+                                callback(registerData)
+                            end
+
+                            return false
+                        end
+
+                        loginData.autoLogin = autoLogin
+                        loginData.rememberMe = rememberMe
+                        loginData.password = password
+
+                        self:LoginResponse(loginData, err, function()
+                            if type(callback) == 'function' then
+                                callback(registerData)
+                            end
+                        end)
+                    end
+                )
+                return true
+            end
+
+            if type(callback) == 'function' then
+                callback(registerData)
+            end
+        end,
+        function(data, err)
+            if type(callback) == 'function' then
+                callback({ message = "", code = err})
+            end
+        end,
+        { 400 }
+    )
+end
+
+function KeepworkServiceSession:RegisterAndBindThirdPartyAccount(username, password, oauthToken, callback)
+    if type(username) ~= 'string' or
+       type(password) ~= 'string' or
+       type(oauthToken) ~= 'string' then
+        return false
+    end
+
+    local params = {
+        username = username,
+        password = password,
+        oauthToken = oauthToken,
+        channel = 3
+    }
 
     KeepworkUsersApi:Register(
         params,
@@ -647,4 +759,34 @@ function KeepworkServiceSession:CheckEmailExist(email, callback)
             callback(false)
         end
     )
+end
+
+function KeepworkServiceSession:CheckOauthUserExisted(platform, code, callback)
+    KeepworkOauthUsersApi:GetOauthUsers(
+        string.lower(platform),
+        self:GetOauthClientId(platform),
+        code,
+        function(data, err)
+            if not data or err ~= 200 then
+                return false
+            end
+
+            if data.username then
+                if type(callback) == "function" then
+                    callback(true, data)
+                end
+            else
+                if type(callback) == "function" then
+                    callback(false, data)
+                end
+            end
+        end)
+end
+
+function KeepworkServiceSession:GetOauthClientId(platform)
+    if type(platform) ~= "string" then
+        return ""
+    end
+
+    return Config[platform][KeepworkService:GetEnv()].clientId
 end

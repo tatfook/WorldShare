@@ -9,63 +9,265 @@ local MySchool = NPL.load("(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua")
 ------------------------------------------------------------
 ]]
 
-local NPLWebServer = commonlib.gettable("MyCompany.Aries.Game.Network.NPLWebServer")
-
+-- service
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
+local KeepworkServiceSchoolAndOrg = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/SchoolAndOrg.lua")
 
 local MySchool = NPL.export()
 
 function MySchool:Show()
-    local function showpage()
-        local params = Mod.WorldShare.Utils.ShowWindow(870, 650, "Mod/WorldShare/cellar/MySchool/MySchool.html", "MySchool")
+    self.hasJoined = nil
 
-        params._page:CallMethod("nplbrowser_instance", "SetVisible", true)
-    
-        params._page.OnClose = function()
-            Mod.WorldShare.Store:Remove('page/MySchoolPage')
-            params._page:CallMethod("nplbrowser_instance", "SetVisible", false)
+    Mod.WorldShare.MsgBox:Show(L"请稍后...", nil, nil, nil, nil, 6)
+    local params = Mod.WorldShare.Utils.ShowWindow(600, 330, "Mod/WorldShare/cellar/MySchool/MySchool.html", "MySchool")
+
+    KeepworkServiceSchoolAndOrg:GetMyAllOrgsAndSchools(function(schoolData, orgData)
+        Mod.WorldShare.MsgBox:Close()
+
+        if type(schoolData) == "table" and schoolData.regionId then
+            self.hasJoined = true
+            self.schoolData= schoolData
+        else
+            self.hasJoined = false
         end
-    end
 
-    if System.os.GetPlatform() ~= 'mac' then
-        local bStarted, site_url = NPLWebServer.CheckServerStarted(function(bStarted, site_url)
-            if not bStarted then
-                return false
+        if type(orgData) == "table" and #orgData > 0 then
+            self.hasJoined = true
+            self.orgData = orgData
+        else
+            self.hasJoined = false
+        end
+
+        params._page:Refresh(0.01)
+    end)
+end
+
+function MySchool:ShowJoinSchool()
+    self.provinces = {
+        {
+            text = L"请选择",
+            value = 0,
+            selected = true,
+        }
+    }
+
+    self.cities = {
+        {
+            text = L"请选择",
+            value = 0,
+            selected = true,
+        }
+    }
+
+    self.areas = {
+        {
+            text = L"请选择",
+            value = 0,
+            selected = true,
+        }
+    }
+
+    self.kinds = {
+        {
+            text = L"请选择",
+            value = 0,
+            selected = true,
+        },
+        {
+            text = L"小学",
+            value = L"小学"
+        },
+        {
+            text = L"中学",
+            value = L"中学"
+        },
+        {
+            text = L"大学",
+            value = L"大学",
+        }
+    }
+
+    self.result = {
+        {
+            text = L"在这里显示筛选的结果",
+            value = 0,
+            selected = true,
+        },
+    }
+
+    self.curId = 0
+    self.kind = nil
+
+    local params = Mod.WorldShare.Utils.ShowWindow(600, 330, "Mod/WorldShare/cellar/MySchool/JoinSchool.html", "JoinSchool")
+
+    self:GetProvinces(function(data)
+        if type(data) ~= "table" then
+            return false
+        end
+
+        self.provinces = data
+
+        params._page:Refresh(0.01)
+    end)
+end
+
+function MySchool:ShowJoinInstitute()
+    local params = Mod.WorldShare.Utils.ShowWindow(600, 200, "Mod/WorldShare/cellar/MySchool/JoinInstitute.html", "JoinInstitute")
+end
+
+function MySchool:ShowRecordSchool()
+    self.provinces = {
+        {
+            text = L"请选择",
+            value = 0,
+            selected = true,
+        }
+    }
+
+    self.cities = {
+        {
+            text = L"请选择",
+            value = 0,
+            selected = true,
+        }
+    }
+
+    self.areas = {
+        {
+            text = L"请选择",
+            value = 0,
+            selected = true,
+        }
+    }
+
+    self.kinds = {
+        {
+            text = L"请选择",
+            value = 0,
+            selected = true,
+        },
+        {
+            text = L"小学",
+            value = L"小学"
+        },
+        {
+            text = L"中学",
+            value = L"中学"
+        },
+        {
+            text = L"大学",
+            value = L"大学",
+        }
+    }
+
+    self.curId = 0
+    self.kind = nil
+
+    local params = Mod.WorldShare.Utils.ShowWindow(600, 300, "Mod/WorldShare/cellar/MySchool/RecordSchool.html", "RecordSchool")
+
+    self:GetProvinces(function(data)
+        if type(data) ~= "table" then
+            return false
+        end
+
+        self.provinces = data
+
+        params._page:Refresh(0.01)
+    end)
+end
+
+function MySchool:GetProvinces(callback)
+    KeepworkServiceSchoolAndOrg:GetSchoolRegion("province", nil, function(data)
+        if type(data) ~= "table" then
+            return false
+        end
+
+        if type(callback) == "function" then
+            for key, item in ipairs(data) do
+                item.text = item.name
+                item.value = item.id
             end
 
-            NPL.load("(gl)script/apps/Aries/Creator/Game/NplBrowser/NplBrowserLoaderPage.lua");	
-            local NplBrowserLoaderPage = commonlib.gettable("NplBrowser.NplBrowserLoaderPage");	
-            NplBrowserLoaderPage.Check()
-            if not NplBrowserLoaderPage.IsLoaded() then
-                ParaGlobal.ShellExecute("open", MySchool.GetUrl(), "", "", 1);	
-                return
+            data[#data + 1] = {
+                text = L"请选择",
+                value = 0,
+                selected = true,
+            }
+
+            callback(data)
+        end
+    end)
+end
+
+function MySchool:GetCities(id, callback)
+    KeepworkServiceSchoolAndOrg:GetSchoolRegion("city", id, function(data)
+        if type(data) ~= "table" then
+            return false
+        end
+
+        if type(callback) == "function" then
+            for key, item in ipairs(data) do
+                item.text = item.name
+                item.value = item.id
             end
-            
-            showpage()
-        end)
-    else
-        showpage()
-    end
+
+            data[#data + 1] = {
+                text = L"请选择",
+                value = 0,
+                selected = true,
+            }
+
+            callback(data)
+        end
+    end)
 end
 
-function MySchool:SetPage()
-    Mod.WorldShare.Store:Set('page/MySchoolPage', document:GetPageCtrl())
+function MySchool:GetAreas(id, callback)
+    KeepworkServiceSchoolAndOrg:GetSchoolRegion('area', id, function(data)
+        if type(data) ~= "table" then
+            return false
+        end
+
+        if type(callback) == "function" then
+            for key, item in ipairs(data) do
+                item.text = item.name
+                item.value = item.id
+            end
+
+            data[#data + 1] = {
+                text = L"请选择",
+                value = 0,
+                selected = true,
+            }
+
+            callback(data)
+        end
+    end)
 end
 
-function MySchool:Close()
-    local MySchoolPage = Mod.WorldShare.Store:Get('page/MySchoolPage')
+function MySchool:GetSearchSchoolResult(id, kind, callback)
+    KeepworkServiceSchoolAndOrg:SearchSchool(id, kind, function(data)
+        self.result = data
 
-    if MySchoolPage then
-        MySchoolPage:CloseWindow()
-    end
+        for key, item in ipairs(self.result) do
+            item.text = item.name
+            item.value = item.id
+        end
+
+        if type(callback) == "function" then
+            callback(self.result)
+        end
+    end)
 end
 
-function MySchool.GetUrl()
-    local token = Mod.WorldShare.Store:Get("user/token") or ''
+function MySchool:ChangeSchool(schoolId, callback)
+    KeepworkServiceSchoolAndOrg:ChangeSchool(schoolId, callback)
+end
 
-    if System.os.GetPlatform() == 'mac' or System.os.GetPlatform() == 'android' then
-        return KeepworkService:GetKeepworkUrl() .. '/p/org/home?type=protocol&port=8099&token=' .. token
-    else
-        return KeepworkService:GetKeepworkUrl() .. '/p/org/home?port=8099&token=' .. token
-    end
+function MySchool:JoinInstitute(code, callback)
+    KeepworkServiceSchoolAndOrg:JoinInstitute(code, callback)
+end
+
+function MySchool:RecordSchool(schoolType, regionId, schoolName, callback)
+    KeepworkServiceSchoolAndOrg:SchoolRegister(schoolType, regionId, schoolName, callback)
 end

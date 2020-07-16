@@ -31,7 +31,7 @@ function VipNotice:Init(callback)
 end
 
 function VipNotice:CheckVip()
-    if Mod.WorldShare.Store:Get("user/userType") ~= "vip" then
+    if not Mod.WorldShare.Store:Get('user/isVip') then
         self:ShowPage()
     else
         if type(self.callback) == "function" then

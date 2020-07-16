@@ -1,0 +1,152 @@
+<html>
+    <body>
+        <pe:mcml>
+            <script type="text/npl" refresh="false">
+                <![CDATA[
+                    page = document:GetPageCtrl()
+                    method = page:GetRequestParam("method")
+
+                    local ThirdPartyLogin = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/ThirdPartyLogin.lua")
+                    local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
+                    local Validated = NPL.load("(gl)Mod/WorldShare/helper/Validated.lua")
+                    local RegisterModal = NPL.load("(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua")
+
+                    local bBound = false
+                    local bCreated = false
+
+                    function close()
+                        page:CloseWindow()
+                    end
+
+                    function confirm()
+                        local account = page:GetValue("account")
+                        local password = page:GetValue("password")
+                        local agree = page:GetValue("agree")
+                        local authToken = Mod.WorldShare.Store:Get("user/authToken")
+
+                        if not Validated:Account(account) then
+                            GameLogic.AddBBS(nil, L"账号格式错误", 3000, "255 0 0")
+                            return false
+                        end
+
+                        if not Validated:Password(password) then
+                            GameLogic.AddBBS(nil, L"密码至少6位", 3000, "255 0 0")
+                            return false
+                        end
+
+                        if not agree then
+                            GameLogic.AddBBS(nil, L"您未同意用户协议", 3000, "255 0 0")
+                            return false
+                        end
+
+                        if method == "bind" then
+                            if not bBound then
+                                GameLogic.AddBBS(nil, L"此账号不存在", 3000, "255 0 0")
+                                return false
+                            end
+
+                            ThirdPartyLogin:LoginAndBind(account, password, authToken)
+                        end
+
+                        if method == "create" then
+                            if not bCreated then
+                                GameLogic.AddBBS(nil, L"此账号已存在", 3000, "255 0 0")
+                                return false
+                            end
+
+                            ThirdPartyLogin:RegisterAndBind(account, password, authToken)
+                        end
+                    end
+
+                    function check_account()
+                        local account = page:GetValue("account")
+                        local password = page:GetValue("password")
+
+                        KeepworkServiceSession:CheckUsernameExist(account, function(bExisted)
+                            if method == "bind" then
+                                if not bExisted then
+                                    GameLogic.AddBBS(nil, L"此账号不存在", 3000, "255 0 0")
+                                    bBound = false
+                                else
+                                    bBound = true
+                                end
+                            end
+    
+                            if method == "create" then
+                                if bExisted then
+                                    GameLogic.AddBBS(nil, L"此账号已存在", 3000, "255 0 0")
+                                    bCreated = false
+                                else
+                                    bCreated = true
+                                end
+                            end
+                        end)
+                    end
+
+                    function user_agreement()
+                        RegisterModal:ShowUserAgreementPage()
+                    end
+                ]]>
+            </script>
+            <style type="text/mcss">
+                {
+                    confirm_button = {
+                        ["margin-left"] = 0,
+                        width = 120,
+                        height = 33,
+                        textcolor = "#000000",
+                        color = "#000000",
+                        ["font-size"] = 18
+                        background = "textures/worldshare_32bits.png;149 104 16 16:4 4 4 4",
+                    },
+                    edittext_common = {
+                        width = 150,
+                        height = 30
+                    }
+                }
+            </style>
+            <aries:window
+                mode="thin"
+                width="400"
+                height="300"
+                style="float:left;color: white;"
+                title_height="40"
+                close_height="25"
+                title='<%=L"补充账号信息" %>'
+                onclose="close()">
+                <div style="padding: 30px;">
+                    <div style="margin-bottom: 20px;">
+                        <pe:if condition="<%= method == 'bind' %>">
+                            <%= L"输入已有的Paracraft账号并将第三方账号绑定到该账号" %>
+                        </pe:if>
+                        <pe:if condition="<%= method == 'create' %>">
+                            <%= L"新建Paracraft账号并将第三方账号绑定到该账号" %>
+                        </pe:if>
+                    </div>
+                    <div style="margin-left: 60px;">
+                        <%= L"账号：" %>
+                        <input type="text" name="account" class="bbs_text edittext_common" onfocusout="check_account()"/>   
+                    </div>
+                    <div style="margin-left: 60px;">
+                        <%= L"密码：" %>
+                        <input type="text" name="password" PasswordChar="*" class="bbs_text edittext_common" />
+                    </div>
+                    <pe:if condition="<%= method == 'create' %>">
+                        <div style="margin-top: 15px;margin-left: 30px;">
+                            <input type="checkbox" style="float:left;margin-top:3px;min-width:90px;" name="agree" checked="checked"/>
+                            <div style="float:left; color: white;font-size: 12px;margin-top:1px;">
+                                <div style="float:left;width: 2px;"></div>
+                                <%= L"我同意" %>
+                                <div style="float:left;color: #fe5927" onclick="user_agreement()"><%= L"《Paracraft用户协议》" %></div>
+                                <%= L"中的内容" %>
+                            </div>
+                        </div>
+                    </pe:if>
+                    <div style="margin-top: 30px;margin-left: 110px;">
+                        <input type="button" class="confirm_button" value="确定" onclick="confirm"/>
+                    </div>
+                </div>
+            </aries:window>
+        </pe:mcml>
+    </body>
+</html>
