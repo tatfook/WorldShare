@@ -24,7 +24,11 @@ function Permission:CheckPermission(authName, bOpenUIIfNot, callback)
 
     if bOpenUIIfNot then
         LoginModal:CheckSignedIn(L"此功能需要特殊权限，请先登录", function(result)
-            if result then
+            if not result then
+                return false
+            end
+
+            local function Handle()
                 KeepworkServicePermission:Authentication(authName, function(result)
                     if result == false then
                         self:ShowFailDialog(authName)
@@ -34,6 +38,18 @@ function Permission:CheckPermission(authName, bOpenUIIfNot, callback)
                         callback(result)
                     end
                 end)
+            end
+
+            if result == 'REGISTER' or result == 'FORGET' then
+                return false
+            end
+
+            if result == 'THIRD' then
+                return Handle
+            end
+
+            if result == true then
+                Handle()
             end
         end)
     else

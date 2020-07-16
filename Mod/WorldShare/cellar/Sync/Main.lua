@@ -375,7 +375,6 @@ end
 
 function SyncMain:CheckWorldSize(callback)
     local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
-    local userType = Mod.WorldShare.Store:Get("user/userType")
 
     if not currentWorld or not currentWorld.worldpath  or #currentWorld.worldpath == 0 then
         return false

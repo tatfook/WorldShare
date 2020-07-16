@@ -87,8 +87,6 @@ function RegisterModal:GetServerList()
 end
 
 function RegisterModal:Register(page)
-    local loginServer = KeepworkService:GetEnv()
-
     if not self.account or self.account == "" then
         return false
     end

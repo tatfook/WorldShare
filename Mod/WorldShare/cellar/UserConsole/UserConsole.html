@@ -212,14 +212,15 @@
                     }
 
                     local userType = Mod.WorldShare.Store:Get('user/userType')
+                    local isVip = Mod.WorldShare.Store:Get('user/isVip')
                     local username = UserInfo.GetUserName()
                     local textWidth = _guihelper.GetTextWidth(username)
 
-                    if userType == 'teacher' then
+                    if userType and userType.teacher then
                         local left = (140 - 23 - 2 - textWidth) / 2
 
                         return '<img tooltip="<%= L\'动画编程导师\' %>" style="margin-top: 4px;margin-left:' .. left .. 'px;margin-right: 2px;width: 16px;height: 16px;background:url(' .. iconList['teacher'] .. ')" />' .. username
-                    elseif userType == 'vip' then
+                    elseif isVip then
                         local left = (140 - 16 - 2 - textWidth) / 2
 
                         return '<img tooltip="<%= L\'VIP用户\' %>" style="margin-top: 4px;margin-left:' .. left .. 'px;margin-right: 2px;width: 16px;height: 16px;background:url(' .. iconList['vip'] .. ')" />' .. username
@@ -438,6 +439,7 @@
                         end
                     end
                 end
+
                 function OnDailyCheck()
                         if(KeepworkServiceSession:IsSignedIn())then
                             ParacraftLearningRoomDailyPage.DoCheckin();
@@ -455,6 +457,7 @@
                         end
                     end)
                 end
+
                 function OnLearningLand()
                         if(KeepworkServiceSession:IsSignedIn())then
                             ParacraftLearningRoomDailyPage.OnLearningLand();
@@ -476,8 +479,13 @@
                 function OnVIP()
                     ParacraftLearningRoomDailyPage.OnVIP();
                 end
+
                 function HasCheckedToday()
                     return (not ParacraftLearningRoomDailyPage.HasCheckedToday());
+                end
+
+                function has_setted_my_school()
+                    return not Mod.WorldShare.Store:Get('user/hasJoinedSchoolOrOrg')
                 end
             ]]>
         </script>
@@ -742,6 +750,7 @@
                                        onclick="my_school()"
                                        class="my_school_button"
                                        value='<%= L"我的学校" %>' />
+                                <kp:redtip style="position:relative;margin-left:116;margin-top:-33px;" onupdate='<%= has_setted_my_school()%>'></kp:redtip>
                             </div>
                             <div style="margin-top:10px">
                                 <input type="button"

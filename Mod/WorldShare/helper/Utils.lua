@@ -61,6 +61,12 @@ function Utils.ShowWindow(option, height, url, name, x, y, align, allowDrag, zor
 
     System.App.Commands.Call("File.MCMLWindowFrame", params)
 
+    if not params or not params._page then
+        return params
+    end
+
+    Mod.WorldShare.Store:Set('page/' .. tostring(name), params._page)
+
     params._page.OnClose = function()
         Mod.WorldShare.Store:Remove('page/' .. tostring(name))
     end

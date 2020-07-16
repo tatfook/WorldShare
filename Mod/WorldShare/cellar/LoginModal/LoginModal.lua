@@ -37,7 +37,7 @@ function LoginModal:Init(callback)
         Mod.WorldShare.Store:Set('user/AfterLogined', function(bIsSucceed)
             -- OnKeepWorkLogin
             GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", bIsSucceed)
-            callback(bIsSucceed)
+            return callback(bIsSucceed)
         end)
     else
         Mod.WorldShare.Store:Set('user/AfterLogined', function(bIsSucceed)
@@ -123,13 +123,16 @@ end
 
 function LoginModal:Close(params)
     local AfterLogined = Mod.WorldShare.Store:Get('user/AfterLogined')
+    local callback
 
     if type(AfterLogined) == 'function' then
-        AfterLogined(params or false)
+        callback = AfterLogined(params or false)
         Mod.WorldShare.Store:Remove('user/AfterLogined')
     end
 
     self:ClosePage()
+
+    return callback
 end
 
 function LoginModal:LoginAction()
@@ -154,7 +157,7 @@ function LoginModal:LoginAction()
         return false
     end
 
-    Mod.WorldShare.MsgBox:Show(L"正在登陆，请稍后...", 8000, L"链接超时", 300, 120, 6)
+    Mod.WorldShare.MsgBox:Show(L"正在登录，请稍后...", 8000, L"链接超时", 300, 120, 6)
 
     local function HandleLogined()
         Mod.WorldShare.MsgBox:Close()
