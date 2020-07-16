@@ -194,12 +194,18 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
 
     if response.orgAdmin and response.orgAdmin == 1 then
         userType.teacher = true
-    elseif response.tLevel and response.tLevel > 0 then
+    end
+    
+    if response.tLevel and response.tLevel > 0 then
         userType.teacher = true
         Mod.WorldShare.Store:Set("user/tLevel", response.tLevel)
-    elseif response.student and response.student == 1 then
+    end
+    
+    if response.student and response.student == 1 then
         userType.student = true
-    else
+    end
+
+    if not userType.teacher and not userType.student then
         userType.plain = true
     end
 
@@ -247,14 +253,18 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
             end
 
             KeepworkServiceSchoolAndOrg:GetMyAllOrgsAndSchools(function(schoolData, orgData)
-                if type(schoolData) == "table" and schoolData.regionId then
-                    Mod.WorldShare.Store:Set('user/hasJoinedSchoolOrOrg', true)
-                else
-                    Mod.WorldShare.Store:Set('user/hasJoinedSchoolOrOrg', false)
+                local hasJoinedSchool = false
+                local hasJoinedOrg = false
 
+                if type(schoolData) == "table" and schoolData.regionId then
+                    hasJoinedSchool = true
                 end
-                
+
                 if type(orgData) == "table" and #orgData > 0 then
+                    hasJoinedOrg = true
+                end
+
+                if hasJoinedSchool or hasJoinedSchool then
                     Mod.WorldShare.Store:Set('user/hasJoinedSchoolOrOrg', true)
                 else
                     Mod.WorldShare.Store:Set('user/hasJoinedSchoolOrOrg', false)
