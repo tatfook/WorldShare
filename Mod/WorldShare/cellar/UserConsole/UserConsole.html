@@ -235,6 +235,14 @@
                         end
                     end
 
+                    if userType and userType.orgAdmin and not userType.teacher then
+                        if isVip then
+                            local left = (140 - 18 - 2 - textWidth) / 2
+
+                            styleStr = styleStr .. '<kp:usertag tag="V" style="float:left;margin-top: 2px;width: 18px;height: 18px;margin-left:' .. left .. '" />'
+                        end
+                    end
+
                     if userType and userType.plain then
                         if isVip then
                             local left = (140 - 18 - 2 - textWidth) / 2
