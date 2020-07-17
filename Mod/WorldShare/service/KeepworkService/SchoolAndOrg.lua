@@ -30,6 +30,9 @@ function KeepworkServiceSchoolAndOrg:GetUserAllOrgs(callback)
                     callback(data.data.allOrgs)
                 end
             end
+        end,
+        function()
+            callback({})
         end
     )
 end
@@ -44,6 +47,9 @@ function KeepworkServiceSchoolAndOrg:GetUserAllSchools(callback)
             if err == 200 then
                 callback(data)
             end
+        end,
+        function()
+            callback({})
         end
     )
 end
@@ -52,7 +58,7 @@ function KeepworkServiceSchoolAndOrg:GetMyAllOrgsAndSchools(callback)
     if type(callback) ~= "function" then
         return false
     end
-    
+
     self:GetUserAllSchools(function(data)
         local schoolData = data
 
