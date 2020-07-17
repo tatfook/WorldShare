@@ -213,6 +213,8 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
 
     if response.vip and response.vip == 1 then
         Mod.WorldShare.Store:Set("user/isVip", true)
+    else
+        Mod.WorldShare.Store:Set("user/isVip", false)
     end
 
     Mod.WorldShare.Store:Set('user/bLoginSuccessed', true)
