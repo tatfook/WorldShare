@@ -215,18 +215,49 @@
                     local isVip = Mod.WorldShare.Store:Get('user/isVip')
                     local username = UserInfo.GetUserName()
                     local textWidth = _guihelper.GetTextWidth(username)
+                    local styleStr = ''
 
                     if userType and userType.teacher then
-                        local left = (140 - 23 - 2 - textWidth) / 2
-
-                        return '<img tooltip="<%= L\'动画编程导师\' %>" style="margin-top: 4px;margin-left:' .. left .. 'px;margin-right: 2px;width: 16px;height: 16px;background:url(' .. iconList['teacher'] .. ')" />' .. username
-                    elseif isVip then
-                        local left = (140 - 16 - 2 - textWidth) / 2
-
-                        return '<img tooltip="<%= L\'VIP用户\' %>" style="margin-top: 4px;margin-left:' .. left .. 'px;margin-right: 2px;width: 16px;height: 16px;background:url(' .. iconList['vip'] .. ')" />' .. username
-                    else
-                        return '<div style="text-align: center">' .. username .. '</div>'
+                        if isVip then
+                            local left = (140 - 34 - 2 - textWidth) / 2
+                            styleStr = styleStr .. '<kp:usertag tag="VT" style="float:left;width: 34px;margin-top: 2px;height: 18px;margin-left:' .. left .. 'px" />'
+                        else
+                            local left = (140 - 18 - 2 - textWidth) / 2
+                            styleStr = styleStr .. '<kp:usertag tag="T" style="float:left;margin-top: 2px;width: 18px;height: 18px;margin-left:' .. left .. 'px" />'
+                        end
                     end
+
+                    if userType and userType.student and not userType.teacher then
+                        if isVip then
+                            local left = (140 - 18 - 2 - textWidth) / 2
+
+                            styleStr = styleStr .. '<kp:usertag tag="V" style="float:left;margin-top: 2px;width: 18px;height: 18px;margin-left:' .. left .. '" />'
+                        end
+                    end
+
+                    if userType and userType.orgAdmin and not userType.teacher then
+                        if isVip then
+                            local left = (140 - 18 - 2 - textWidth) / 2
+
+                            styleStr = styleStr .. '<kp:usertag tag="V" style="float:left;margin-top: 2px;width: 18px;height: 18px;margin-left:' .. left .. '" />'
+                        end
+                    end
+
+                    if userType and userType.plain then
+                        if isVip then
+                            local left = (140 - 18 - 2 - textWidth) / 2
+
+                            styleStr = styleStr .. '<kp:usertag tag="V" style="float:left;margin-top: 2px;width: 18px;height: 18px;margin-left:' .. left .. '" />'
+                        end
+                    end
+
+                    if not styleStr or styleStr == "" then
+                        styleStr = styleStr ..  '<div style="text-align: center">' .. username .. '</div>'
+                    else
+                        styleStr = styleStr .. '<div style="float: left;margin-left: 2px;">' .. username .. '</div>'
+                    end
+
+                    return styleStr
                 end
 
                 function register()

@@ -297,8 +297,8 @@ function WorldList:EnterWorld(index)
                                         Mod.WorldShare.MsgBox:Close()
         
                                         Mod.WorldShare.MsgBox:Dialog(
+                                            "MultiPlayerWorldOccupy",
                                             format(
-                                                "MultiPlayerWorldOccupy",
                                                 L"此账号已在其他地方占用此世界，请退出后再或者以只读模式打开世界",
                                                 data.owner.username,
                                                 currentWorld.foldername,
@@ -322,8 +322,8 @@ function WorldList:EnterWorld(index)
                                 end
                             else
                                 Mod.WorldShare.MsgBox:Dialog(
+                                    "MultiPlayerWolrdOthersOccupy",
                                     format(
-                                        "MultiPlayerWolrdOthersOccupy",
                                         L"%s正在以独占模式编辑世界%s，请联系%s退出编辑或者以只读模式打开世界",
                                         data.owner.username,
                                         currentWorld.foldername,
