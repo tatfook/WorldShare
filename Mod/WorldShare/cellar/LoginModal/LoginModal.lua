@@ -92,7 +92,6 @@ function LoginModal:ShowPage()
         LoginModalPage:SetValue('password', PWDInfo.password or '')
         LoginModalPage:SetValue('showaccount', PWDInfo.account or '')
 
-        self.loginServer = PWDInfo.loginServer
         self.account = PWDInfo.account
     end
 
@@ -106,7 +105,6 @@ function LoginModal:ClosePage()
         return false
     end
 
-    self.loginServer = nil
     self.account = nil
     Mod.WorldShare.Store:Remove("user/loginText")
 
@@ -201,21 +199,6 @@ function LoginModal:LoginAction()
     )
 end
 
-function LoginModal:GetServerList()
-    local serverList = KeepworkService:GetServerList()
-
-    if self.loginServer then
-        for key, item in ipairs(serverList) do
-            item.selected = nil
-            if item.value == self.loginServer then
-                item.selected = true
-            end
-        end
-    end
-
-    return serverList
-end
-
 function LoginModal:SetAutoLogin()
     local LoginModalPage = Mod.WorldShare.Store:Get("page/LoginModal")
 
@@ -226,9 +209,8 @@ function LoginModal:SetAutoLogin()
     local autoLogin = LoginModalPage:GetValue("autoLogin")
     local rememberMe = LoginModalPage:GetValue("rememberMe")
     local password = LoginModalPage:GetValue("password")
-    self.loginServer = KeepworkService:GetEnv()
-    self.account = string.lower(LoginModalPage:GetValue("account"))
-
+    local account = LoginModalPage:GetValue("showaccount")
+    
     if autoLogin then
         LoginModalPage:SetValue("rememberMe", true)
     else
@@ -237,6 +219,9 @@ function LoginModal:SetAutoLogin()
     
     LoginModalPage:SetValue("autoLogin", autoLogin)
     LoginModalPage:SetValue("password", password)
+    LoginModalPage:SetValue("account", account)
+    LoginModalPage:SetValue("showaccount", account)
+    self.account = string.lower(account)
 
     self:Refresh()
 end
@@ -248,20 +233,22 @@ function LoginModal:SetRememberMe()
         return false
     end
 
-    local loginServer = KeepworkService:GetEnv()
+    local autoLogin = LoginModalPage:GetValue("autoLogin")
     local password = LoginModalPage:GetValue("password")
     local rememberMe = LoginModalPage:GetValue("rememberMe")
-    self.loginServer = KeepworkService:GetEnv()
-    self.account = string.lower(LoginModalPage:GetValue("account"))
-
+    local account = LoginModalPage:GetValue("showaccount")
+    
     if rememberMe then
         LoginModalPage:SetValue("autoLogin", autoLogin)
     else
         LoginModalPage:SetValue("autoLogin", false)
     end
-
+    
     LoginModalPage:SetValue("rememberMe", rememberMe)
     LoginModalPage:SetValue("password", password)
+    LoginModalPage:SetValue("account", account)
+    LoginModalPage:SetValue("showaccount", account)
+    self.account = string.lower(account)
 
     self:Refresh()
 end
@@ -277,7 +264,6 @@ function LoginModal:RemoveAccount(username)
 
     if self.account == username then
         self.account = nil
-        self.loginServer = nil
 
         LoginModalPage:SetValue("autoLogin", false)
         LoginModalPage:SetValue("rememberMe", false)
@@ -301,7 +287,6 @@ function LoginModal:SelectAccount(username)
         return false
     end
 
-    self.loginServer = session and session.loginServer or 'ONLINE'
     self.account = session and session.account or ''
 
     LoginModalPage:SetValue("autoLogin", session.autoLogin)
