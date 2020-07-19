@@ -166,7 +166,7 @@ function ThirdPartyLogin:Init(thirdPartyType, callback)
         end)
     end
 
-    if System.os.GetPlatform == "mac" then
+    if System.os.GetPlatform() == "mac" then
         Handle()
     end
 end
@@ -183,7 +183,7 @@ function ThirdPartyLogin:GetUrl()
 
     if self.thirdPartyType == 'WECHAT' then
         local clientId = KeepworkServiceSession:GetOauthClientId("WECHAT")
-        local state = "WECHAT|" .. sysTag .. "|" .. self.port .. "|" .. System.Encoding.guid.uuid()
+        local state = Mod.WorldShare.Utils.EncodeURIComponent("WECHAT|" .. sysTag .. "|" .. self.port .. "|" .. System.Encoding.guid.uuid())
 
         return
             format(
@@ -196,7 +196,7 @@ function ThirdPartyLogin:GetUrl()
 
     if self.thirdPartyType == "QQ" then
         local clientId = KeepworkServiceSession:GetOauthClientId("QQ")
-        local state = "QQ|" .. sysTag .. "|" .. self.port .. "|" .. System.Encoding.guid.uuid()
+        local state = Mod.WorldShare.Utils.EncodeURIComponent("QQ|" .. sysTag .. "|" .. self.port .. "|" .. System.Encoding.guid.uuid())
 
         return 
             format(
