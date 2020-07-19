@@ -12,10 +12,6 @@
                     page = document:GetPageCtrl()
                     Mod.WorldShare.Store:Set('page/LoginModal', page)
 
-                    function get_server_list()
-                        return LoginModal:GetServerList()
-                    end
-
                     function get_history_users()
                         return LoginModal:GetHistoryUsers()
                     end
@@ -132,10 +128,6 @@
                     <pe:if condition="<%= login_text() ~= nil%>">
                         <div style="margin-bottom:15px;"><%= login_text()%></div>
                     </pe:if>
-                    <!-- <div style="margin-bottom:12px;">
-                        <div style="<%='float:left;min-width:40px;' .. get_english_style('min-width:73px;') %>"><%= L"服务器："%></div>
-                        <select name="loginServer" DataSource="<%= get_server_list()%>" style="height: 30px;width: 165px;" class="text_field"></select>
-                    </div> -->
                     <form>
                         <div style="margin-bottom:12px;">
                             <div style="<%='float:left;min-width:65px;' .. get_english_style('min-width:73px;') %>"><%= L"账号：" %></div>

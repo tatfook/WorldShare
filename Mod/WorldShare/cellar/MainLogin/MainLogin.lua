@@ -50,8 +50,6 @@ function MainLogin:Show()
         MainLoginPage:SetValue('rememberMe', PWDInfo.rememberMe or false)
         MainLoginPage:SetValue('password', PWDInfo.password or '')
         MainLoginPage:SetValue('showaccount', PWDInfo.account or '')
-
-        self.loginServer = PWDInfo.loginServer
         self.account = PWDInfo.account
     end
 
@@ -201,18 +199,20 @@ function MainLogin:SetAutoLogin()
 
     local autoLogin = MainLoginPage:GetValue("autoLogin")
     local rememberMe = MainLoginPage:GetValue("rememberMe")
+    local account = MainLoginPage:GetValue("showaccount")
     local password = MainLoginPage:GetValue("password")
-    self.loginServer = KeepworkService:GetEnv()
-    self.account = string.lower(MainLoginPage:GetValue("account"))
 
     if autoLogin then
         MainLoginPage:SetValue("rememberMe", true)
     else
         MainLoginPage:SetValue("rememberMe", rememberMe)
     end
-    
+
     MainLoginPage:SetValue("autoLogin", autoLogin)
     MainLoginPage:SetValue("password", password)
+    MainLoginPage:SetValue("account", account)
+    MainLoginPage:SetValue("showaccount", account)
+    self.account = string.lower(account)
 
     self:Refresh()
 end
@@ -224,11 +224,10 @@ function MainLogin:SetRememberMe()
         return false
     end
 
-    local loginServer = KeepworkService:GetEnv()
+    local autoLogin = MainLoginPage:GetValue("autoLogin")
     local password = MainLoginPage:GetValue("password")
     local rememberMe = MainLoginPage:GetValue("rememberMe")
-    self.loginServer = KeepworkService:GetEnv()
-    self.account = string.lower(MainLoginPage:GetValue("account"))
+    local account = MainLoginPage:GetValue("showaccount")
 
     if rememberMe then
         MainLoginPage:SetValue("autoLogin", autoLogin)
@@ -238,6 +237,9 @@ function MainLogin:SetRememberMe()
 
     MainLoginPage:SetValue("rememberMe", rememberMe)
     MainLoginPage:SetValue("password", password)
+    MainLoginPage:SetValue("account", account)
+    MainLoginPage:SetValue("showaccount", account)
+    self.account = string.lower(account)
 
     self:Refresh()
 end
@@ -279,7 +281,6 @@ function MainLogin:SelectAccount(username)
         return false
     end
 
-    self.loginServer = session and session.loginServer or 'ONLINE'
     self.account = session and session.account or ''
 
     MainLoginPage:SetValue("autoLogin", session.autoLogin)
@@ -301,7 +302,6 @@ function MainLogin:RemoveAccount(username)
 
     if self.account == username then
         self.account = nil
-        self.loginServer = nil
 
         MainLoginPage:SetValue("autoLogin", false)
         MainLoginPage:SetValue("rememberMe", false)

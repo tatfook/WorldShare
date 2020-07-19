@@ -41,8 +41,8 @@ function ForgetPassword:Reset()
         return false
     end
     
-    if not Validated:Password(str) then
-        GameLogic.AddBBS(nil, L"密码格式错误", 3000, "255 0 0")
+    if not Validated:Password(password) then
+        GameLogic.AddBBS(nil, L"密码至少位6位", 3000, "255 0 0")
         return false
     end
 

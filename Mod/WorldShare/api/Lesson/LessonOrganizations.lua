@@ -13,7 +13,7 @@ local LessonBaseApi = NPL.load('./BaseApi.lua')
 
 local LessonOrganizationsApi = NPL.export()
 
--- url: /users/login
+-- url: /lessonOrganizations/userOrgInfo
 -- method: GET
 -- params:
 -- return: { message = '', data = { showOrgId = 1, allOrgs = {} }}
