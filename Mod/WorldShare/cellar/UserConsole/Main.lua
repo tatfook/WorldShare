@@ -296,6 +296,7 @@ function UserConsole:HandleWorldId(pid, refreshMode)
 
 					if refreshMode == "force" then
 						LoadWorld(world, refreshMode);
+						return false;
 					end
 
                     local worldName = ''
