@@ -235,7 +235,7 @@
                         end
                     end
 
-                    if userType and userType.orgAdmin and not userType.teacher then
+                    if userType and userType.orgAdmin and not userType.teacher and not userType.student then
                         if isVip then
                             local left = (140 - 18 - 2 - textWidth) / 2
 

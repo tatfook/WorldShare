@@ -143,7 +143,11 @@ end
 
 -- return true or false
 function KeepworkServiceSchoolAndOrg:JoinInstitute(code, callback)
-    local realname = Mod.WorldShare.Store:Get("user/realname")
+    local realname = Mod.WorldShare.Store:Get("user/nickname")
+
+    if not nickname or nickname == '' then
+        realname = Mod.WorldShare.Store:Get("user/username")
+    end
 
     code = string.gsub(code, " ", "")
 

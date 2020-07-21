@@ -3,6 +3,8 @@
     <pe:mcml>
         <script type="text/npl">
             <![CDATA[
+                local UniString = commonlib.gettable("System.Core.UniString")
+
                 local MySchool = NPL.load("./MySchool.lua")
                 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
                 local page = document:GetPageCtrl()
@@ -94,6 +96,58 @@
                         return L"暂无"
                     end
                 end
+
+                function get_name()
+                    local cur_name = Eval('name')
+
+                    if not cur_name or cur_name == "" then
+                        return ""
+                    end
+
+                    if _guihelper.GetTextWidth(cur_name) > 80 then
+                        local function chsize(char)
+                            if not char then
+                                return 0
+                            elseif char > 240 then
+                                return 4
+                            elseif char > 225 then
+                                return 3
+                            elseif char > 192 then
+                                return 2
+                            else
+                                return 1
+                            end
+                        end
+
+                        local len = 0
+                        local count = 0
+                        local currentIndex = 1
+
+                        while currentIndex <= #cur_name do
+                            local charsizenum = chsize(string.byte(cur_name, currentIndex))
+
+                            currentIndex = currentIndex + charsizenum
+
+                            if len >= 18 then
+                                break
+                            end
+
+                            if charsizenum ~= 0 then
+                                count = count + 1
+
+                                if charsizenum >= 3 then
+                                    len = len + 3.2
+                                else
+                                    len = len + 1.5
+                                end
+                            end
+                        end
+
+                        cur_name = UniString:new(cur_name):sub(1, count).text .. '...'
+                    end
+
+                    return cur_name
+                end
             ]]>
         </script>
         <style type="text/mcss">
@@ -131,7 +185,7 @@
                                                 <div style="width: 120px;height: 80px;background: url(textures/worldshare_32bits.png#287 346 170 99);"></div>
                                             </div>
                                             <div style="float:left; margin-left: 10px;margin-top: 10px;width: 95px;color: white">
-                                                <div><%= Eval('name') %></div>
+                                                <div><%= get_name() %></div>
                                                 <div><%= get_place(Eval('region')) %></div>
                                             </div>
                                         </div>
@@ -143,7 +197,7 @@
                                                 <div style="<%= 'width: 120px;height: 80px;background:url(' .. (Eval('logo') or 'textures/worldshare_32bits.png#287 346 170 99') .. ');' %>"></div>
                                             </div>
                                             <div style="float:left; margin-left: 10px;margin-top: 10px;width: 95px;color: white">
-                                                <div><%= Eval('name') %></div>
+                                                <div><%= get_name() %></div>
                                                 <div><%= Eval('location') %></div>
                                             </div>
                                         </div>
