@@ -151,6 +151,14 @@
                             WorldList:RefreshCurrentServerList()
                         end)
                     end
+
+                    function is_support_third_party_login()
+                        if System.os.GetPlatform() == 'win32' then
+                            return true
+                        else
+                            return false
+                        end
+                    end
                 ]]>
             </script>
             <style type="text/mcss">
@@ -235,17 +243,19 @@
                             <input type="button" class="offline_button mc_light_grey_button_with_fillet" onclick="use_offline()" value="<%= L'离线模式' %>" />
                             <input type="button" DefaultButton="true" class="login_button" onclick="login()" value='<%= L"登 录"%>' />
                         </div>
-                        <div>
-                            <div style="base-font-size: 14px;font-size: 14px;">
-                                <div style="width: 50px;height: 1px;background-color: #6d6d6e;float:left;margin-top: 10px;margin-left: 20px;margin-right: 2px;"></div>
-                                <%= L"第三方账号登录" %>
-                                <div style="width: 50px;height: 1px;background-color: #6d6d6e;float:left;margin-top: 10px;margin-left: 2px;"></div>
+                        <pe:if condition="<%= is_support_third_party_login() %>">
+                            <div>
+                                <div style="base-font-size: 14px;font-size: 14px;">
+                                    <div style="width: 50px;height: 1px;background-color: #6d6d6e;float:left;margin-top: 10px;margin-left: 20px;margin-right: 2px;"></div>
+                                    <%= L"第三方账号登录" %>
+                                    <div style="width: 50px;height: 1px;background-color: #6d6d6e;float:left;margin-top: 10px;margin-left: 2px;"></div>
+                                </div>
+                                <div style="margin-top: 5px;margin-bottom: 5px;">
+                                    <div onclick="login_with_wx()" style="width: 44px;height: 44px;background:url(textures/worldshare_32bits.png#245 135 44 44);float: left;margin-left: 40px;"></div>
+                                    <div onclick="login_with_qq()" style="width: 44px;height: 44px;background:url(textures/worldshare_32bits.png#301 135 44 44);float: left;margin-left: 80x;"></div>
+                                </div>
                             </div>
-                            <div style="margin-top: 5px;margin-bottom: 5px;">
-                                <div onclick="login_with_wx()" style="width: 44px;height: 44px;background:url(textures/worldshare_32bits.png#245 135 44 44);float: left;margin-left: 40px;"></div>
-                                <div onclick="login_with_qq()" style="width: 44px;height: 44px;background:url(textures/worldshare_32bits.png#301 135 44 44);float: left;margin-left: 80x;"></div>
-                            </div>
-                        </div>
+                        </pe:if>
                         <div style="<%='text-align:left;margin-left:55px;' .. get_english_style('margin-left:15px;')%>">
                             <a name="forgot" onclick="forget_password()" style="background:url(textures/worldshare_32bits.png#399 76 64 30:0 0 0 0);height:30px;width:150px;font-size: 14px;color: #ffffff;"><%= L"忘记密码" %></a>
                             <span style="color:#ffffff;">|</span>

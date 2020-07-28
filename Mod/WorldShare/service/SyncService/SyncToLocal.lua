@@ -127,7 +127,7 @@ function SyncToLocal:IgnoreFiles()
     local content = file:GetText(0, -1)
     file:close()
 
-    local ignoreFiles = { "mod/" }
+    local ignoreFiles = {}
 
     if #content > 0 then
         for item in string.gmatch(content, "[^\r\n]+") do

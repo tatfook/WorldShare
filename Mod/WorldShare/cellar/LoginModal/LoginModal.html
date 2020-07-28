@@ -94,6 +94,14 @@
                             end)
                         end)
                     end
+
+                    function is_support_third_party_login()
+                        if System.os.GetPlatform() == 'win32' then
+                            return true
+                        else
+                            return false
+                        end
+                    end
                 ]]>
             </script>
             <style type="text/mcss">
@@ -153,17 +161,19 @@
                                 <input type="checkbox" style="float:left;margin-top:3px;min-width:90px;" name="autoLogin" onclick="set_auto_login()"/><div style="float:left" for="autoLogin"><%= L"自动登录" %></div>    
                             </div>
                         </div>
-                        <div>
-                            <div style="base-font-size: 14px;font-size: 14px;margin-top: 15px;">
-                                <div style="width: 50px;height: 1px;background-color: #6d6d6e;float:left;margin-top: 10px;margin-left: 20px;margin-right: 2px;"></div>
-                                <%= L"第三方账号登录" %>
-                                <div style="width: 50px;height: 1px;background-color: #6d6d6e;float:left;margin-top: 10px;margin-left: 2px;"></div>
+                        <pe:if condition="<%= is_support_third_party_login() %>">
+                            <div>
+                                <div style="base-font-size: 14px;font-size: 14px;margin-top: 15px;">
+                                    <div style="width: 50px;height: 1px;background-color: #6d6d6e;float:left;margin-top: 10px;margin-left: 20px;margin-right: 2px;"></div>
+                                    <%= L"第三方账号登录" %>
+                                    <div style="width: 50px;height: 1px;background-color: #6d6d6e;float:left;margin-top: 10px;margin-left: 2px;"></div>
+                                </div>
+                                <div style="margin-top: 5px;margin-bottom: 5px;">
+                                    <div onclick="login_with_wx()" style="width: 44px;height: 44px;background:url(textures/worldshare_32bits.png#245 135 44 44);float: left;margin-left: 40px;"></div>
+                                    <div onclick="login_with_qq()" style="width: 44px;height: 44px;background:url(textures/worldshare_32bits.png#301 135 44 44);float: left;margin-left: 80px;"></div>
+                                </div>
                             </div>
-                            <div style="margin-top: 5px;margin-bottom: 5px;">
-                                <div onclick="login_with_wx()" style="width: 44px;height: 44px;background:url(textures/worldshare_32bits.png#245 135 44 44);float: left;margin-left: 40px;"></div>
-                                <div onclick="login_with_qq()" style="width: 44px;height: 44px;background:url(textures/worldshare_32bits.png#301 135 44 44);float: left;margin-left: 80px;"></div>
-                            </div>
-                        </div>
+                        </pe:if>
                         <div style="margin-top:15px;margin-bottom:15px;">
                             <input type="button" DefaultButton="true" class="login_button" onclick="login()" value='<%= L"登 录"%>' />
                         </div>
