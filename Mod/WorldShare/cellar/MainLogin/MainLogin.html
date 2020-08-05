@@ -153,7 +153,7 @@
                     end
 
                     function is_support_third_party_login()
-                        if System.os.GetPlatform() == 'win32' then
+                        if System.os.GetPlatform() == 'win32' or System.os.GetPlatform() == 'mac' then
                             return true
                         else
                             return false
