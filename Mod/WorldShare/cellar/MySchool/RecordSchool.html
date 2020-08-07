@@ -99,7 +99,11 @@
                                     GameLogic.AddBBS(nil, format(L"已提交，状态：%s", data.status), 5000, "0 255 0")
                                     close()
                                 else
-                                    GameLogic.AddBBS(nil, L"提交失败", 3000, "255 0 0")
+                                    if type(data) == 'table' and data.code then
+                                        GameLogic.AddBBS(nil, format(L"提交失败：%s（%d）", data.message, data.code), 3000, "255 0 0")
+                                    else
+                                        GameLogic.AddBBS(nil, L"提交失败", 3000, "255 0 0")
+                                    end
                                 end
                             end
                         )

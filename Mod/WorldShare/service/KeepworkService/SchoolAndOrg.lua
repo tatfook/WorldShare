@@ -190,9 +190,9 @@ function KeepworkServiceSchoolAndOrg:SchoolRegister(schoolType, regionId, school
                 callback(true, data)
             end
         end,
-        function()
+        function(data, err)
             if type(callback) == "function" then
-                callback(false)
+                callback(false, data)
             end
         end)
 end
