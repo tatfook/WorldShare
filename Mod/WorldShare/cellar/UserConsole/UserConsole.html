@@ -245,12 +245,8 @@
 
                         margin_left = (140 - textWidth - 2 - 18 * count) / 2
 
-                        echo(margin_left, true)
-
                         styleStr = '<div style="float: left;margin-left: ' .. margin_left .. 'px;margin-top: 2px;">' .. styleStr .. '</div>' .. '<div style="float: left;margin-left: 2px;">' .. username .. '</div>'
                     end
-
-                    echo(styleStr, true)
 
                     return styleStr
                 end
