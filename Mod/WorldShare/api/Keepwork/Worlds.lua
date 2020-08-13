@@ -20,10 +20,20 @@ local KeepworkWorldsApi = NPL.export()
 -- method: GET
 -- params:
 --[[
+    x-page
+    x-per-page
 ]]
 -- return: object
-function KeepworkWorldsApi:GetWorldList(success, error)
+function KeepworkWorldsApi:GetWorldList(xPerPage, xPage, success, error)
     local url = '/joinedWorlds'
+
+    if type(xPerPage) == 'number' then
+        url = url .. '?x-per-page=' .. xPerPage
+
+        if type(xPerPage) == 'number' then
+            url = url .. '&x-page=' .. xPage
+        end
+    end
 
     KeepworkBaseApi:Get(url, nil, nil, success, error)
 end
