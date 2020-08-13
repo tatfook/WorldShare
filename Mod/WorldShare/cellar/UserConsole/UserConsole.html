@@ -15,7 +15,8 @@
                 local RegisterModal = NPL.load("(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua")
                 local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
                 local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
-                local ParacraftLearningRoomDailyPage = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/ParacraftLearningRoom/ParacraftLearningRoomDailyPage.lua");
+                local ParacraftLearningRoomDailyPage = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/ParacraftLearningRoom/ParacraftLearningRoomDailyPage.lua")
+                local KpUserTag = NPL.load("(gl)script/apps/Aries/Creator/Game/mcml/keepwork/KpUserTag.lua")
 
                 InternetLoadWorld.OnStaticInit()
                 InternetLoadWorld.GetEvents():AddEventListener(
@@ -206,56 +207,50 @@
                 end
 
                 function username()
-                    local iconList = {
-                        vip = "textures/worldshare_32bits.png#256 311 18 18",
-                        teacher = "textures/worldshare_32bits.png#285 311 18 18";
-                    }
-
                     local userType = Mod.WorldShare.Store:Get('user/userType')
                     local isVip = Mod.WorldShare.Store:Get('user/isVip')
                     local username = UserInfo.GetUserName()
                     local textWidth = _guihelper.GetTextWidth(username)
+
                     local styleStr = ''
 
-                    if userType and userType.teacher then
-                        if isVip then
-                            local left = (140 - 34 - 2 - textWidth) / 2
-                            styleStr = styleStr .. '<kp:usertag tag="VT" style="float:left;width: 34px;margin-top: 2px;height: 18px;margin-left:' .. left .. 'px" />'
-                        else
-                            local left = (140 - 18 - 2 - textWidth) / 2
-                            styleStr = styleStr .. '<kp:usertag tag="T" style="float:left;margin-top: 2px;width: 18px;height: 18px;margin-left:' .. left .. 'px" />'
+                    local user_info = {}
+                    local count = 0
+
+                    if userType.teacher then
+                        user_info.tLevel = 1
+                        count = count + 1
                         end
+                        
+                    if userType.student then
+                        user_info.student = 1
+                        count = count + 1
+                    end
+                        
+                    if isVip then
+                        user_info.vip = 1
+                        count = count + 1
                     end
 
-                    if userType and userType.student and not userType.teacher then
-                        if isVip then
-                            local left = (140 - 18 - 2 - textWidth) / 2
-
-                            styleStr = styleStr .. '<kp:usertag tag="V" style="float:left;margin-top: 2px;width: 18px;height: 18px;margin-left:' .. left .. '" />'
-                        end
-                    end
-
-                    if userType and userType.orgAdmin and not userType.teacher and not userType.student then
-                        if isVip then
-                            local left = (140 - 18 - 2 - textWidth) / 2
-
-                            styleStr = styleStr .. '<kp:usertag tag="V" style="float:left;margin-top: 2px;width: 18px;height: 18px;margin-left:' .. left .. '" />'
-                        end
-                    end
-
-                    if userType and userType.plain then
-                        if isVip then
-                            local left = (140 - 18 - 2 - textWidth) / 2
-
-                            styleStr = styleStr .. '<kp:usertag tag="V" style="float:left;margin-top: 2px;width: 18px;height: 18px;margin-left:' .. left .. '" />'
-                        end
-                    end
+                    styleStr = KpUserTag.GetMcml(user_info)
 
                     if not styleStr or styleStr == "" then
                         styleStr = styleStr ..  '<div style="text-align: center">' .. username .. '</div>'
                     else
-                        styleStr = styleStr .. '<div style="float: left;margin-left: 2px;">' .. username .. '</div>'
+                        local margin_left = 0
+
+                        if count >= 2 then
+                            count = 2
+                        end
+
+                        margin_left = (140 - textWidth - 2 - 18 * count) / 2
+
+                        echo(margin_left, true)
+
+                        styleStr = '<div style="float: left;margin-left: ' .. margin_left .. 'px;margin-top: 2px;">' .. styleStr .. '</div>' .. '<div style="float: left;margin-left: 2px;">' .. username .. '</div>'
                     end
+
+                    echo(styleStr, true)
 
                     return styleStr
                 end
@@ -796,13 +791,19 @@
             </div>
             <div class="middle_line" />
             <div class="world_area">
-                <div style="height:350px;">
+                <div style="height:360px;">
                     <pe:if style="margin-top:10px;font-weight:bold;color:#ffffff" condition="<%= is_list_refreshing() %>">
                         <%=L"正在刷新, 请稍候 ... " %>
                     </pe:if>
                     <pe:if style="margin-top:10px;font-weight:bold;color:#ffffff" condition="<%= not is_list_refreshing() %>">
-                        <pe:gridview RememberScrollPos="true" AllowPaging="false" VerticalScrollBarStep="50"
-                            DefaultNodeHeight="85" ItemsPerLine="1" name="gw_world_ds">
+                        <pe:gridview 
+                            RememberScrollPos="true"
+                            AllowPaging="true"
+                            pagesize="25"
+                            VerticalScrollBarStep="50"
+                            DefaultNodeHeight="85"
+                            ItemsPerLine="1"
+                            name="gw_world_ds">
                             <Columns>
                                 <!--selected-->
                                 <pe:if condition='<%= be_selected()%>'>
@@ -978,14 +979,29 @@
                                     <%=L"正在搜索, 请稍候 ... " %>
                                 </div>
                             </FetchingDataTemplate>
+                            <PagerSettings Position="Bottom" />
+                            <PagerTemplate AutoHidePager="true" style="margin-top: 8px;margin-left: 80px;">
+                                <form>
+                                    <input type="button" name="pre" zorder="2" class="mc_light_grey_button_with_fillet" style="float:left;height: 20px;font-size: 13px;" value="<%= L'上一页' %>"/>
+                                    <label name="page" style="color:#ffffff;height:18px;width: 50px;text-align: center;margin-top: -2px;"></label>
+                                    <input type="button" name="next" zorder="2" class="mc_light_grey_button_with_fillet" style="float:left;height: 20px;font-size: 13px;" value="<%= L'下一页' %>"/>
+                                </form>
+                            </PagerTemplate>
                         </pe:gridview>
                     </pe:if>
                 </div>
-                <div style="margin-top:20px">
-                    <input type="button" value='<%=L"创建世界" %>' style="float:left;margin-left:80px;min-width:120px"
-                        onclick="create_new_world()" class="common_button mc_light_grey_button_with_fillet" />
-                    <input type="button" value='<%="..." %>' style="margin-left:10px;height:30px;min-width:30px"
-                        onclick="import_world()" class="flat_button" tooltip='<%=L"导入/导出..." %>' />
+                <div style="margin-top:10x">
+                    <input type="button"
+                           value='<%=L"创建世界" %>'
+                           style="float:left;margin-left:80px;min-width:120px"
+                           onclick="create_new_world()"
+                           class="common_button mc_light_grey_button_with_fillet" />
+                    <input type="button"
+                           value='<%="..." %>'
+                           style="margin-left:10px;height:30px;min-width:30px"
+                           onclick="import_world()"
+                           class="flat_button"
+                           tooltip='<%=L"导入/导出..." %>' />
                 </div>
             </div>
             <!--line-->

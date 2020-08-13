@@ -382,7 +382,11 @@ function KeepworkServiceSession:Register(username, password, captcha, cellphone,
         end,
         function(data, err)
             if type(callback) == 'function' then
-                callback({ message = "", code = err})
+                if type(data) == 'table' and data.code then
+                    callback(data)
+                else
+                    callback({ message = L"未知错误", code = err})
+                end
             end
         end,
         { 400 }
