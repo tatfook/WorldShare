@@ -3,6 +3,7 @@
         <pe:mcml>
             <script type="text/npl" refresh="false" src="VipNotice.lua">
                 local page = document:GetPageCtrl()
+				local Config = NPL.load("(gl)Mod/WorldShare/config/Config.lua")
                 local VipNotice = NPL.load("(gl)Mod/WorldShare/cellar/VipNotice/VipNotice.lua")
                 local firstOpen = true;
 
@@ -15,13 +16,12 @@
                 end
 
                 function open()
-                    ParaGlobal.ShellExecute("open", "https://keepwork.com/vip", "", "", 1)
+                    ParaGlobal.ShellExecute("open", Config.keepworkVipList[Config.defaultEnv], "", "", 1)
                     firstOpen = false;
                     page:Refresh(0);
                 end
 
                 function isFirstOpen()
-                    commonlib.echo(firstOpen);
                     return firstOpen;
                 end
 
