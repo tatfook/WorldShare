@@ -46,14 +46,7 @@
                     UserConsole.isKickOutPageOpened = false
                     page:CloseWindow()
 
-                    local isEnterWorld = Mod.WorldShare.Store:Get('world/isEnterWorld')
-
-                    if isEnterWorld then
-                        SyncMain:BackupWorld()
-                        Desktop.ForceExit(true)
-                    else
-                        LoginModal:Init()
-                    end
+                    LoginModal:Init()
                 end
             </script>
             <style type="text/mcss">

@@ -1,0 +1,37 @@
+<html>
+    <body>
+        <pe:mcml>
+            <script type="text/npl" refresh="false">
+                <![CDATA[
+                    local MemberManager = NPL.load("./MemberManager.lua")
+
+                    local page = document:GetPageCtrl()
+
+                    function close()
+                        page:CloseWindow()
+                    end
+
+                    function confirm()
+                        local message = page:GetValue("message")
+
+                        MemberManager:Apply(message)
+                    end
+                ]]>
+            </script>
+            <style type="type/mcss">
+            </style>
+            <aries:window mode="thin" title="<%= L'申请加入' %>" width="400" height="230" onclose="close()">
+                <div style="color: #FFFFFF;padding: 15px;font-size: 14px;">
+                    <div><%= L'申请留言：' %></div>
+                    <div style="background-color: #ffffff;width: 360px;">
+                        <textarea name="message" rows="5"></textarea>
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <input type="button" class="mc_light_grey_button_with_fillet" style="float:left;width: 80px;height: 35px;margin-left:190px;" value="<%= L'确定' %>" onclick="confirm"/>
+                        <input type="button" class="mc_light_grey_button_with_fillet" style="float:left;width: 80px;height: 35px;margin-left: 10px;" value="<%= L'取消' %>" onclick="close"/>
+                    </div>
+                </div>
+            </aries:window>
+        </pe:mcml>
+    </body>
+</html>

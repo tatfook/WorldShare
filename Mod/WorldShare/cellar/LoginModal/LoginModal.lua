@@ -7,7 +7,8 @@ Desc:
 use the lib:
 ------------------------------------------------------------
 local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
-LoginModal:ShowPage()
+LoginModal:Init(function(bSucceed) end)
+LoginModal:CheckSignedIn("desc", function(bSucceed) end)
 ------------------------------------------------------------
 ]]
 

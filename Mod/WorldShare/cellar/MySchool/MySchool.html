@@ -55,7 +55,7 @@
                 function get_data()
                     local data = {}
 
-                    if MySchool.schoolData and global_type(MySchool.schoolData) == "table" then
+                    if MySchool.schoolData and global_type(MySchool.schoolData) == "table" and MySchool.schoolData.id then
                         MySchool.schoolData.showType = 1
 
                         data[#data + 1] = MySchool.schoolData
@@ -128,7 +128,7 @@
 
                             currentIndex = currentIndex + charsizenum
 
-                            if len >= 18 then
+                            if len >= 16 then
                                 break
                             end
 
