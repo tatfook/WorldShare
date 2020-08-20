@@ -16,23 +16,24 @@ local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua")
 
 local VipNotice = NPL.export()
 
-function VipNotice:Init(callback)
+function VipNotice:Init(bEnable, callback)
     self.callback = callback
 
     if not KeepworkService:IsSignedIn() then
         Mod.WorldShare.Store:Set("user/loginText", L"您需要登录并成为VIP用户，才能使用此功能")
         LoginModal:Init(function(bSuccesed)
             if bSuccesed then
-                self:CheckVip()
+                self:CheckVip(bEnable)
             end
         end)
     else
-        self:CheckVip()
+        self:CheckVip(bEnable)
     end
 end
 
-function VipNotice:CheckVip()
-    if not Mod.WorldShare.Store:Get('user/isVip') then
+function VipNotice:CheckVip(bEnable)
+    if (not Mod.WorldShare.Store:Get('user/isVip') or bEnable) then
+        VipNotice.onlyRecharge = bEnable;
         self:ShowPage()
     else
         if type(self.callback) == "function" then
@@ -46,5 +47,5 @@ function VipNotice:ShowPage()
 end
 
 function VipNotice:RefreshVipInfo()
-    UserInfo:LoginWithToken();
+    UserInfo:LoginWithToken(self.callback);
 end

@@ -30,37 +30,111 @@
                     page:CloseWindow();
                 end
 
+                function isVip()
+                    return Mod.WorldShare.Store:Get('user/isVip');
+                end
+
+				function onlyRecharge()
+					return VipNotice.onlyRecharge;
+				end
+
             </script>
             <div width="100%" height="100%">
-                <aries:window
-                    class="default"
-                    mode="thin"
-                    width="400"
-                    height="200"
-                    style="<%=get_window_style()%>"
-                    title='<%=L"VIP权限提示" %>'
-                    onclose="close">
-                    <pe:if condition='<%=isFirstOpen()%>'>
-						<div style="padding: 30px;">
-							<div style="font-size: 14px;margin-left: 65px;margin-top: 10px;">
-								<%= L"该功能为VIP功能，" %><a href="https://keepwork.com/vip" style="color: #0f8165"><%= L"了解VIP详情。" %></a>
+                <pe:if condition='<%=onlyRecharge()%>'>
+					<pe:if condition='<%=isVip()%>'>
+						<aries:window
+							class="default"
+							mode="thin"
+							width="400"
+							height="200"
+							style="<%=get_window_style()%>"
+							title='<%=L"续费VIP" %>'
+							onclose="close">
+							<pe:if condition='<%=isFirstOpen()%>'>
+								<div style="padding: 30px;">
+									<div style="font-size: 14px;margin-left: 65px;margin-top: 10px;">
+										<%= L"续费VIP查看更多学习资源，" %><a href="https://keepwork.com/vip" style="color: #0f8165"><%= L"了解VIP详情。" %></a>
+									</div>
+									<div style="margin-left: 85px;margin-top:30px;">
+										<input type="button" style="width: 150px;height: 30px;" class="mc_light_grey_button_with_fillet" onclick="open" value='<%= L"立即续费" %>' />
+									</div>
+								</div>
+							</pe:if>
+							<pe:if condition='<%=not isFirstOpen()%>'>
+								<div style="padding: 30px;">
+									<div style="font-size: 14px;margin-left: 0px;margin-top: 10px;">
+										<%= L"请您在新打开的窗口中进行支付，支付完成前请不要关闭本窗口" %>
+									</div>
+									<div style="margin-left: 85px;margin-top:30px;">
+										<input type="button" style="width: 150px;height: 30px;" class="mc_light_grey_button_with_fillet" onclick="refreshVip" value='<%= L"已完成支付" %>' />
+									</div>
+								</div>
+							</pe:if>
+						</aries:window>
+					</pe:if>
+					<pe:if condition='<%=not isVip()%>'>
+						<aries:window
+							class="default"
+							mode="thin"
+							width="400"
+							height="200"
+							style="<%=get_window_style()%>"
+							title='<%=L"开通VIP" %>'
+							onclose="close">
+							<pe:if condition='<%=isFirstOpen()%>'>
+								<div style="padding: 30px;">
+									<div style="font-size: 14px;margin-left: 65px;margin-top: 10px;">
+										<%= L"开通VIP查看更多学习资源，" %><a href="https://keepwork.com/vip" style="color: #0f8165"><%= L"了解VIP详情。" %></a>
+									</div>
+									<div style="margin-left: 85px;margin-top:30px;">
+										<input type="button" style="width: 150px;height: 30px;" class="mc_light_grey_button_with_fillet" onclick="open" value='<%= L"开通VIP" %>' />
+									</div>
+								</div>
+							</pe:if>
+							<pe:if condition='<%=not isFirstOpen()%>'>
+								<div style="padding: 30px;">
+									<div style="font-size: 14px;margin-left: 0px;margin-top: 10px;">
+										<%= L"请您在新打开的窗口中进行支付，支付完成前请不要关闭本窗口" %>
+									</div>
+									<div style="margin-left: 85px;margin-top:30px;">
+										<input type="button" style="width: 150px;height: 30px;" class="mc_light_grey_button_with_fillet" onclick="refreshVip" value='<%= L"已完成支付" %>' />
+									</div>
+								</div>
+							</pe:if>
+						</aries:window>
+					</pe:if>
+				</pe:if
+                <pe:if condition='<%=not onlyRecharge()%>'>
+					<aries:window
+						class="default"
+						mode="thin"
+						width="400"
+						height="200"
+						style="<%=get_window_style()%>"
+						title='<%=L"VIP权限提示" %>'
+						onclose="close">
+						<pe:if condition='<%=isFirstOpen()%>'>
+							<div style="padding: 30px;">
+								<div style="font-size: 14px;margin-left: 65px;margin-top: 10px;">
+									<%= L"该功能为VIP功能，" %><a href="https://keepwork.com/vip" style="color: #0f8165"><%= L"了解VIP详情。" %></a>
+								</div>
+								<div style="margin-left: 85px;margin-top:30px;">
+									<input type="button" style="width: 150px;height: 30px;" class="mc_light_grey_button_with_fillet" onclick="open" value='<%= L"开通VIP" %>' />
+								</div>
 							</div>
-							<div style="margin-left: 85px;margin-top:30px;">
-								<input type="button" style="width: 150px;height: 30px;" class="mc_light_grey_button_with_fillet" onclick="open" value='<%= L"开通VIP" %>' />
+						</pe:if>
+						<pe:if condition='<%=not isFirstOpen()%>'>
+							<div style="padding: 30px;">
+								<div style="font-size: 14px;margin-left: 0px;margin-top: 10px;">
+									<%= L"请您在新打开的窗口中进行支付，支付完成前请不要关闭本窗口" %>
+								</div>
+								<div style="margin-left: 85px;margin-top:30px;">
+									<input type="button" style="width: 150px;height: 30px;" class="mc_light_grey_button_with_fillet" onclick="refreshVip" value='<%= L"已完成支付" %>' />
+								</div>
 							</div>
-						</div>
-                    </pe:if>
-                    <pe:if condition='<%=not isFirstOpen()%>'>
-						<div style="padding: 30px;">
-							<div style="font-size: 14px;margin-left: 0px;margin-top: 10px;">
-								<%= L"请您在新打开的窗口中进行支付，支付完成前请不要关闭本窗口" %>
-							</div>
-							<div style="margin-left: 85px;margin-top:30px;">
-								<input type="button" style="width: 150px;height: 30px;" class="mc_light_grey_button_with_fillet" onclick="refreshVip" value='<%= L"已完成支付" %>' />
-							</div>
-						</div>
-                    </pe:if>
-                </aries:window>
+						</pe:if>
+					</aries:window>
+                </pe:if>
             </div>
         </pe:mcml>
     </body>
