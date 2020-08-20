@@ -67,6 +67,6 @@ function Permission:ShowFailDialog(authName)
     if authName == "OnlineTeaching" then
         _guihelper.MessageBox(L"此功能需要教师权限")
     else
-        VipNotice:ShowPage()
+        VipNotice:Init(false);
     end
 end
