@@ -3,10 +3,16 @@
     <pe:mcml>
         <script type="text/npl" refresh="false">
             <![CDATA[
-                InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
-                WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
-                UniString = commonlib.gettable("System.Core.UniString")
+                -- lib
+                local ParacraftLearningRoomDailyPage = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/ParacraftLearningRoom/ParacraftLearningRoomDailyPage.lua")
+                local KpUserTag = NPL.load("(gl)script/apps/Aries/Creator/Game/mcml/keepwork/KpUserTag.lua")
 
+
+                local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
+                local UniString = commonlib.gettable("System.Core.UniString")
+                local NplBrowserLoaderPage = commonlib.gettable("NplBrowser.NplBrowserLoaderPage")
+
+                -- UI
                 local UserConsole = NPL.load("./Main.lua")
                 local WorldList = NPL.load("./WorldList")
                 local UserInfo = NPL.load("./UserInfo.lua")
@@ -14,9 +20,9 @@
                 local MySchool = NPL.load("(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua")
                 local RegisterModal = NPL.load("(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua")
                 local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
+                
+                -- service
                 local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
-                local ParacraftLearningRoomDailyPage = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/ParacraftLearningRoom/ParacraftLearningRoomDailyPage.lua")
-                local KpUserTag = NPL.load("(gl)script/apps/Aries/Creator/Game/mcml/keepwork/KpUserTag.lua")
 
                 InternetLoadWorld.OnStaticInit()
                 InternetLoadWorld.GetEvents():AddEventListener(
@@ -31,7 +37,8 @@
                 )
 
                 local page = document:GetPageCtrl()
-                Mod.WorldShare.Store:Set('page/UserConsole', page)
+                Mod.WorldShare.Store:Set('page/UserConsole', page)   
+                Mod.WorldShare.Store:Remove("world/searchText")
 
                 local do_modify = false
                 local current_item_index = 1
@@ -463,6 +470,7 @@
                 end
 
                 function OnDailyCheck()
+                    NplBrowserLoaderPage.Check(function()
                         if(KeepworkServiceSession:IsSignedIn())then
                             ParacraftLearningRoomDailyPage.DoCheckin();
                             return
@@ -478,14 +486,15 @@
                             end, 500)
                         end
                     end)
+                    end)
                 end
 
                 function OnLearningLand()
-                        if(KeepworkServiceSession:IsSignedIn())then
-                            ParacraftLearningRoomDailyPage.OnLearningLand();
-                            return
-                        end
-                        LoginModal:CheckSignedIn(L"请先登录", function(result)
+                    if(KeepworkServiceSession:IsSignedIn())then
+                        ParacraftLearningRoomDailyPage.OnLearningLand();
+                        return
+                    end
+                    LoginModal:CheckSignedIn(L"请先登录", function(result)
                         if result == true then
                             Mod.WorldShare.Utils.SetTimeOut(function()
                                 if result then
@@ -509,6 +518,23 @@
                 function has_setted_my_school()
                     return not Mod.WorldShare.Store:Get('user/hasJoinedSchoolOrOrg')
                 end
+
+                function search()
+                    local search_text = page:GetValue('search_text')
+
+                    if type(search_text) == "string" then
+                        Mod.WorldShare.Store:Set("world/searchText", search_text)
+                        refresh()
+                    end
+                end
+
+                function get_last_serch_text()
+                    local searchText = Mod.WorldShare.Store:Get("world/searchText")
+
+                    if type(searchText) == "string" and searchText ~= "" then
+                        return searchText
+                    end
+                end
             ]]>
         </script>
         <style type="text/mcss">
@@ -528,7 +554,7 @@
                 middle_line = {
                     float  = "left",
                     width  = 2,
-                    height = 430,
+                    height = 450,
                     ["margin-left"] = 0,
                     ["margin-top"]  = 0,
                     ["background-color"] = "#b7b2b2"
@@ -536,12 +562,12 @@
                 user_area = {
                     float = "left",
                     width  = 158,
-                    height = 430,
+                    height = 450,
                 },
                 world_area = {
                     float = "left",
                     width  = 340,
-                    height = 430,
+                    height = 450,
                     ["padding-top"] = 10,
                     ["padding-left"] = 10,
                     ["padding-right"] = 0,
@@ -549,7 +575,7 @@
                 events_area = {
                     float = "left",
                     width  = 340,
-                    height = 430,
+                    height = 450,
                     ["padding-top"] = 10,
                     ["padding-left"] = 10,
                     ["padding-right"] = 10,
@@ -787,6 +813,15 @@
             </div>
             <div class="middle_line" />
             <div class="world_area">
+                <div style="width: 175px;margin-top: -5px;margin-bottom: 3px;margin-left: 120px;">
+                    <div style="float:left;">
+                        <div style="height: 23px;width: 20px;background-color: #ffffff;float: left;margin-top: 1px;">
+                            <img src="Texture/3DMapSystem/common/searchIcon.png" style="width: 16px;height: 16px;margin-left: 2px;margin-top: 4.5px;" />
+                        </div>
+                        <input type="text" class="bbs_text" style="height: 25px;width: 120px;margin-left: -5px;" name="search_text" onfocusout="search" EmptyText='<%= L"搜索列表项目" %>' value="<%= get_last_serch_text() %>" />
+                    </div>
+                    <input type="button" class="mc_light_grey_button_with_fillet" style="height: 23px;margin-top: 1px;margin-left: 2px;" onclick="search" value="<%= L'确定' %>" />
+                </div>
                 <div style="height:360px;">
                     <pe:if style="margin-top:10px;font-weight:bold;color:#ffffff" condition="<%= is_list_refreshing() %>">
                         <%=L"正在刷新, 请稍候 ... " %>

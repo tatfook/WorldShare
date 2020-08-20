@@ -54,6 +54,7 @@ NPL.load("(gl)script/apps/Aries/Creator/Game/Login/TeacherAgent/TeacherAgent.lua
 
 -- include aries creator game areas
 NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/ShareWorldPage.lua")
+NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/DesktopMenu.lua")
 
 -- include aries creator game network
 NPL.load("(gl)script/apps/Aries/Creator/Game/Network/NPLWebServer.lua")
@@ -92,21 +93,26 @@ local Grade = NPL.load("(gl)Mod/WorldShare/cellar/Grade/Grade.lua")
 local VipNotice = NPL.load("(gl)Mod/WorldShare/cellar/VipNotice/VipNotice.lua")
 local Permission = NPL.load("(gl)Mod/WorldShare/cellar/Permission/Permission.lua")
 local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
+local Menu = NPL.load("(gl)Mod/WorldShare/cellar/Menu/Menu.lua")
 
 -- service
 local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
+local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
 
 -- helper
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox/MsgBox.lua")
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 
+-- command
+local MenuCommand = NPL.load("(gl)Mod/WorldShare/command/Menu.lua")
+
 local WorldShare = commonlib.inherit(commonlib.gettable("Mod.ModBase"), commonlib.gettable("Mod.WorldShare"))
 
 WorldShare:Property({"Name", "WorldShare", "GetName", "SetName", { auto = true }})
 WorldShare:Property({"Desc", "world share mod can share world to keepwork online", "GetDesc", "SetDesc", { auto = true }})
-WorldShare.version = '0.0.19'
+WorldShare.version = '0.0.20'
 
 if Config.defaultEnv == 'RELEASE' or Config.defaultEnv == 'STAGE' then
     System.options.isAB_SDK = true
@@ -227,6 +233,22 @@ function WorldShare:init()
             return true
         end
     )
+    
+    -- filter menu project
+    GameLogic:GetFilters():add_filter(
+        "desktop_menu",
+        function(menuItems)
+            return Menu:Init(menuItems)
+        end
+    )
+
+    -- filter menu command
+    GameLogic:GetFilters():add_filter(
+        "menu_command",
+        function(bEnable, cmdName, cmdText, cmdParams)
+            return MenuCommand:Call(cmdName, cmdText, cmdParams)
+        end
+    )
 
     -- send udp online msg
     SocketService:StartUDPService()
@@ -267,6 +289,8 @@ function WorldShare:OnLogin()
 end
 
 function WorldShare:OnWorldLoad()
+    MenuCommand:Init()
+
     Store:Set('world/isEnterWorld', true)
 
     UserConsole:ClosePage()
@@ -277,7 +301,19 @@ function WorldShare:OnWorldLoad()
     -- if enter with lesson method, we will not check revision
     if not curLesson then
         SyncMain:OnWorldLoad()
-    end   
+    end
+
+    Store:Subscribe("user/Logout", function()
+        Compare:RefreshWorldList(function()
+            Compare:GetCurrentWorldInfo()
+        end)
+    end)
+
+    Store:Subscribe("user/Login", function()
+        Compare:RefreshWorldList(function()
+            Compare:GetCurrentWorldInfo()
+        end)
+    end)
 end
 
 function WorldShare:OnLeaveWorld()

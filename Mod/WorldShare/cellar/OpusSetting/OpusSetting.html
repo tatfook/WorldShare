@@ -1,0 +1,70 @@
+<html>
+    <body>
+        <pe:mcml>
+            <script type="text/npl" refresh="false">
+                <![CDATA[
+                    local OpusSetting = NPL.load("./OpusSetting.lua")
+                    local page = document:GetPageCtrl()
+
+                    function close()
+                        page:CloseWindow()
+                    end
+
+                    function ban(value)
+                        if not GameLogic.IsReadOnly() then
+                            GameLogic.options:SetHasCopyright(value)
+                        end
+                    end
+
+                    function set_vip(value)
+                        if not GameLogic.IsReadOnly() then
+                            GameLogic.IsVip("CreateVipWorld", true, function(result)
+                                if result then
+                                    GameLogic.options:SetVipWorld(value)
+                                end
+                            end)
+                        end
+                    end
+
+                    function set_public(val)
+                        if val == "public" then
+                            page:SetValue("private", false)
+                        end
+
+                        if val == "private" then
+                            page:SetValue("public", false)
+                        end
+
+                        page:Refresh(0.01)
+
+                        OpusSetting:SetPublic(val)
+                    end
+                ]]>
+            </script>
+            <style type="type/mcss">
+            </style>
+            <aries:window mode="thin" title="<%= L'项目设置' %>" width="400" height="280" onclose="close()">
+                <div style="color: #FFFFFF;padding: 15px;font-size: 14px;">
+                    <div><%= L"内容保护：" %></div>
+                    <div style="margin-left: 20px;">
+                        <div><input type="checkbox" checked="<%=GameLogic.options:HasCopyright()%>" onclick="ban" /><%= L"禁止另存" %></div>
+                        <div><%= L"*为本世界设置保护，其他人无法另存该世界的内容。" %></div>
+                    </div>
+                    <div style="margin-top: 20px;"><%= L"权限访问" %></div>
+                    <div style="margin-left: 20px;">
+                        <div>
+                            <div><input type="radio" name="public" value="public" onclick="set_public"/><%= L"公开世界" %></div>
+                            <div style="margin-left: 20px;">
+                                <div><input type="checkbox" tooltip="<%=L'是否只有VIP用户可以访问'%>" checked="<%= GameLogic.options:IsVipWorld()%>" onclick="set_vip" /><%= L"VIP访问" %></div>
+                                <!-- <div><input type="checkbox" /><%= L"机构成员访问" %></div> -->
+                            </div>
+                        </div>
+                        <div>
+                            <div><input type="radio" name="private" value="private" onclick="set_public"/><%= L"私有世界" %></div>
+                        </div>
+                    </div>
+                </div>
+            </aries:window>
+        </pe:mcml>
+    </body>
+</html>

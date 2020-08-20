@@ -5,8 +5,8 @@ Date: 2017.5.12
 Desc:  It can take snapshot for the current world. It can quick save or full save the world to datasource. 
 use the lib:
 ------------------------------------------------------------
-local ShareWorld = NPL.load("(gl)Mod/WorldShare/sync/ShareWorld.lua")
-ShareWorld.ShowPage()
+local ShareWorld = NPL.load("(gl)Mod/WorldShare/cellar/ShareWorld/ShareWorld.lua")
+ShareWorld:Init()
 -------------------------------------------------------
 ]]
 local PackageShareWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.Areas.ShareWorldPage")

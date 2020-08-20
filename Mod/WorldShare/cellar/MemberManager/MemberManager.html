@@ -1,0 +1,159 @@
+<html>
+    <body>
+        <pe:mcml>
+            <script type="text/npl" refresh="false">
+                <![CDATA[
+                    local MemberManager = NPL.load("./MemberManager.lua")
+
+                    local page = document:GetPageCtrl()
+
+                    function close()
+                        page:CloseWindow()
+                    end
+
+                    function refresh_apply_list()
+                        MemberManager:GetApplyList()
+                        MemberManager.sel = 1
+                    end
+
+                    function get_apply_list()
+                        return MemberManager.applyList or {}
+                    end
+
+                    function refresh_project_members()
+                        MemberManager:GetMembers()
+                        MemberManager.sel = 2
+                    end
+
+                    function get_project_members()
+                        return MemberManager.memberList or {}
+                    end
+
+                    function be_selected(i)
+                        if MemberManager.sel == i then
+                            return true
+                        end
+                    end
+
+                    function allow(id)
+                        MemberManager:HandleApply(id, true)
+                    end
+                        
+                    function refuse(id)
+                        MemberManager:HandleApply(id, false)
+                    end
+
+                    function remove_user(id)
+                        MemberManager:RemoveUser(id)
+                    end
+
+                    function add_users()
+                        local edit_member_list = page:GetValue('edit_member_list')
+
+                        if edit_member_list == "" then
+                            GameLogic.AddBBS(nil, L"至少输入一个用户名", 3000, "255 0 0")
+                            return false
+                        end
+
+                        edit_member_list = string.gsub(edit_member_list, "\r\n", "")
+
+                        local edit_member_list_array = {}
+
+                        for item in string.gmatch(edit_member_list, "[^,]+") do
+                            edit_member_list_array[#edit_member_list_array + 1] = item
+                        end
+
+                        MemberManager:AddUsers(edit_member_list_array)
+                    end
+                ]]>
+            </script>
+            <style type="type/mcss">
+            </style>
+            <aries:window mode="thin" title="<%= L'成员管理' %>" width="500" height="320" onclose="close()">
+                <div style="color: #ffffff;padding: 15px;font-size: 14px;width: 470px;">
+                    <pe:tabs style="width: 470px;">
+                        <pe:tab-item name="apply_list" onclick="refresh_apply_list" text="<%= L'申请列表' %>" selected="<%= be_selected(1) %>" style="padding: 5px">
+                            <div style="width: 450px;height: 225px;">
+                                <div name='apply_list_title' style="width: 450px;">
+                                    <div style="float:left;width: 112.5px;"><%= L"成员" %></div>
+                                    <div style="float:left;width: 112.5px;"><%= L"申请时间" %></div>
+                                    <div style="float:left;width: 112.5px;"><%= L"留言" %></div>
+                                    <div style="float:left;width: 112.5px;"><%= L"操作" %></div>
+                                </div>
+                                <div name='apply_list_body'>
+                                    <pe:gridview
+                                        RememberScrollPos="true"
+                                        AllowPaging="false"
+                                        VerticalScrollBarStep="10"
+                                        DefaultNodeHeight="30"
+                                        ItemsPerLine="1"
+                                        DataSource="<%= get_apply_list() %>"
+                                    >
+                                        <Columns>
+                                            <div style="color: #ffffff;font-size: 14px;width: 450px;">
+                                                <div style="float:left;width: 112.5px;"><%= Eval('username') %></div>
+                                                <div style="float:left;width: 112.5px;"><%= Eval('date') %></div>
+                                                <div style="float:left;width: 112.5px;"><%= Eval('message') %></div>
+                                                <div style="float:left;width: 112.5px;">
+                                                    <input type="button" class="mc_light_grey_button_with_fillet" name="<%= Eval('id') %>" value="<%= L'通过' %>" onclick="allow"/>
+                                                    <input type="button" class="mc_light_grey_button_with_fillet" name="<%= Eval('id') %>" style="margin-left: 10px;" value="<%= L'拒绝' %>" onclick="refuse"/>
+                                                </div>
+                                            </div>
+                                        </Columns>
+                                    </pe:gridview>
+                                </div>
+                            </div>
+                        </pe:tab-item>
+                        <pe:tab-item name="member_list" onclick="refresh_project_members" text="<%= L'项目成员' %>" selected="<%= be_selected(2) %>" style="padding: 5px">
+                            <div style="width: 450px;height: 225px;">
+                                <div>
+                                    <div name='member_list_title'>
+                                        <div style="float:left;width: 150px;"><%= L"成员" %></div>
+                                        <div style="float:left;width: 150px;"><%= L"加入时间" %></div>
+                                        <div style="float:left;width: 150px;"><%= L"操作" %></div>
+                                    </div>
+                                    <div name='member_list_body'>
+                                        <pe:gridview
+                                            RememberScrollPos="true"
+                                            AllowPaging="false"
+                                            VerticalScrollBarStep="10"
+                                            DefaultNodeHeight="30"
+                                            ItemsPerLine="1"
+                                            DataSource="<%= get_project_members() %>"
+                                        >
+                                            <Columns>
+                                                <div style="color: #ffffff;font-size: 14px;width: 450px;">
+                                                    <div style="float:left;width: 150px;"><%= Eval('username') %></div>
+                                                    <div style="float:left;width: 150px;"><%= Eval('date') %></div>
+                                                    <div style="float:left;width: 150px;">
+                                                        <input type="button" class="mc_light_grey_button_with_fillet" name="<%= Eval('id') %>" value="<%= L'移出' %>" onclick="remove_user"/>
+                                                    </div>
+                                                </div>
+                                            </Columns>
+                                        </pe:gridview>
+                                    </div>
+                                </div>
+                            </div>
+                        </pe:tab-item>
+                        <pe:tab-item name="add_member" text="<%= L'添加成员' %>" style="padding: 5px;">
+                            <div style="width: 450px;height: 225px;">
+                                <div>
+                                    <div><%= L'请输入要添加的账号，添加多个账号可连续输入，用英文逗号分隔。' %></div>
+                                    <div><%= L'例如：user1,user2' %></div>
+                                </div>
+                                <div style="margin-top: 10px;">
+                                    <div style="background-color: #ffffff;">
+                                        <textarea name="edit_member_list" rows="5"></textarea>
+                                    </div>
+                                    <div style="margin-top: 20px;">
+                                        <input type="button" class="mc_light_grey_button_with_fillet" style="margin-left: 360px;;width: 90px;height: 35px;" value="<%= L'提交' %>" onclick="add_users"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </pe:tab-item>
+                    </pe:tabs>
+                </div>
+            </aries:window>
+        </pe:mcml>
+    </body>
+</html>

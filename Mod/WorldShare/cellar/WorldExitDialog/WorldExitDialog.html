@@ -9,7 +9,6 @@
         <script type="text/npl" src="WorldExitDialog.lua" refresh="false">
             <![CDATA[
                 local WorldExitDialog = NPL.load('./WorldExitDialog.lua')
-                local Store = NPL.load('(gl)Mod/WorldShare/store/Store.lua')
                 local ShareWorld = NPL.load('(gl)Mod/WorldShare/cellar/ShareWorld/ShareWorld.lua')
                 local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
                 local Grade = NPL.load('./Grade.lua')
@@ -93,7 +92,7 @@
                 end
 
                 function open_keepwork_project()
-                    local currentWorld = Store:Get('world/currentWorld')
+                    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
                     if currentWorld and currentWorld.kpProjectId then
                         ParaGlobal.ShellExecute("open", format("%s/pbl/project/%d/", KeepworkService:GetKeepworkUrl(), currentWorld.kpProjectId or 0), "", "", 1)
@@ -162,7 +161,7 @@
                 end
 
                 function get_project_id()
-                    local currentWorld = Store:Get('world/currentWorld')
+                    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
                     if currentWorld and currentWorld.kpProjectId then
                         return tostring(currentWorld.kpProjectId)
@@ -172,7 +171,7 @@
                 end
 
                 function has_project_id()
-                    local currentWorld = Store:Get('world/currentWorld')
+                    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
                     if currentWorld and currentWorld.kpProjectId then
                         return true
@@ -186,11 +185,11 @@
                 end
 
                 function get_remote_revision()
-                    return Store:Get('world/remoteRevision') or L'无'
+                    return Mod.WorldShare.Store:Get('world/remoteRevision') or L'无'
                 end
 
                 function get_current_revision()
-                    return Store:Get("world/currentRevision") or L'无'
+                    return Mod.WorldShare.Store:Get("world/currentRevision") or L'无'
                 end
 
                 function is_user_world()

@@ -742,7 +742,7 @@ function KeepworkServiceSession:CheckUsernameExist(username, callback)
         username,
         function(data, err)
             if type(data) == 'table' then
-                callback(true)
+                callback(true, data)
             else
                 callback(false)
             end

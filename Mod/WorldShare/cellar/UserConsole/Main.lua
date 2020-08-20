@@ -74,7 +74,7 @@ function UserConsole:ShowPage()
         return false
     end
 
-    local params = Mod.WorldShare.Utils.ShowWindow(850, 470, "Mod/WorldShare/cellar/UserConsole/UserConsole.html", "UserConsole")
+    local params = Mod.WorldShare.Utils.ShowWindow(850, 490, "Mod/WorldShare/cellar/UserConsole/UserConsole.html", "UserConsole")
 
     -- load last selected avatar if world is not loaded before.
     UserInfo:OnChangeAvatar()

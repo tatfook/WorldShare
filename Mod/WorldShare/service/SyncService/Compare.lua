@@ -16,10 +16,14 @@ status meaning:
 5:local newest
 
 ]]
+
+-- lib
 local Encoding = commonlib.gettable("commonlib.Encoding")
 local WorldRevision = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision")
 local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
+local DesktopMenu = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.DesktopMenu")
 
+-- UI
 local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
 local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
 local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua")
@@ -254,7 +258,8 @@ function Compare:GetCurrentWorldInfo(callback)
             progress = "0",
             size = 0,
             worldpath = originWorldPath,
-            kpProjectId = worldTag.kpProjectId
+            kpProjectId = worldTag.kpProjectId,
+            fromProjectId = tonumber(worldTag.fromProjects)
         }
 
         Mod.WorldShare.Store:Set("world/worldTag", worldTag)
@@ -286,6 +291,10 @@ function Compare:GetCurrentWorldInfo(callback)
                     currentWorld.status = 3
                     currentWorld.worldpath = worldpath
                     currentWorld.local_tagname = currentWorld.remote_tagname
+                end
+
+                if type(worldTag) == 'table' then
+                    currentWorld.fromProjectId = tonumber(worldTag.fromProjects)
                 end
 
                 Mod.WorldShare.Store:Set("world/worldTag", worldTag)
@@ -325,6 +334,10 @@ function Compare:GetCurrentWorldInfo(callback)
             currentWorld.status = 1
         end
 
+        if type(worldTag) == 'table' then
+            currentWorld.fromProjectId = tonumber(worldTag.fromProjects)
+        end
+
         Mod.WorldShare.Store:Set("world/worldTag", worldTag)
         Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
     end
@@ -340,6 +353,8 @@ function Compare:GetCurrentWorldInfo(callback)
     end
 
     Mod.WorldShare.Store:Set("world/currentEnterWorld", currentWorld)
+
+    DesktopMenu.LoadMenuItems(true)
 
     if type(callback) == 'function' then
         callback()
@@ -363,7 +378,25 @@ function Compare:RefreshWorldList(callback)
             localWorlds,
             function(currentWorldList)
                 currentWorldList = LocalServiceWorld:MergeInternetLocalWorldList(currentWorldList)
+
+                local searchText = Mod.WorldShare.Store:Get("world/searchText")
+
+                if type(searchText) == "string" and searchText ~= "" then
+                    local searchWorldList = {}
+
+                    for key, item in ipairs(currentWorldList) do
+                        if item and item.text and string.match(item.text, searchText)then
+                            searchWorldList[#searchWorldList + 1] = item
+                        elseif item and item.kpProjectId and string.match(item.kpProjectId, searchText) then
+                            searchWorldList[#searchWorldList + 1] = item
+                        end
+                    end
+
+                    currentWorldList = searchWorldList
+                end
+
                 self.SortWorldList(currentWorldList)
+
                 Mod.WorldShare.Store:Set("world/compareWorldList", currentWorldList)
                 if type(callback) == 'function' then
                     callback(currentWorldList)

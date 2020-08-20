@@ -25,20 +25,20 @@ local Utils = NPL.export()
 -- @return table
 function Utils.ShowWindow(option, height, url, name, x, y, align, allowDrag, zorder)
     local params
- 
+
     if type(option) == 'table' then
         params = option
     else
         local width = option
-    
+
         if not x then
             x = width
         end
-    
+
         if not y then
             y = height
         end
-    
+
         params = {
             url = url,
             name = name,
@@ -57,6 +57,16 @@ function Utils.ShowWindow(option, height, url, name, x, y, align, allowDrag, zor
             cancelShowAnimation = true,
             bToggleShowHide = true
         }
+    end
+
+    local matchUrl, matched = string.gsub(params.url, "^%(ws%)", "")
+
+    if matched == 1 then
+        if not string.match(matchUrl, "%.html$") then
+            matchUrl = matchUrl .. "/" .. matchUrl .. ".html"
+        end
+
+        params.url = "Mod/WorldShare/cellar/" .. matchUrl
     end
 
     System.App.Commands.Call("File.MCMLWindowFrame", params)
