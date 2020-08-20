@@ -12,6 +12,7 @@ local VipNotice = NPL.load("(gl)Mod/WorldShare/cellar/VipNotice/VipNotice.lua")
 
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
+local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua")
 
 local VipNotice = NPL.export()
 
@@ -42,4 +43,8 @@ end
 
 function VipNotice:ShowPage()
     Mod.WorldShare.Utils.ShowWindow(0, 0, "Mod/WorldShare/cellar/VipNotice/VipNotice.html", "VipNotice", 0, 0, "_fi", false, 10)
+end
+
+function VipNotice:RefreshVipInfo()
+    UserInfo:LoginWithToken();
 end
