@@ -54,6 +54,8 @@ function LocalServiceWorld:GetWorldList()
 
             value.local_tagname = tag.name
             value.is_zip = false
+            value.vipEnabled = tag.vipEnabled
+            value.institueEnabled = tag.instituteEnabled
         else
             value.foldername = value.Title
             value.text = value.Title

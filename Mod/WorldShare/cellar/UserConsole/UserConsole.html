@@ -976,7 +976,7 @@
                                                 </pe:if>
                                                 <div class="share_world_name">
                                                     <%= get_world_text() %>
-                                                    <pe:if condition='<%= Eval("project") and tonumber(Eval("project")["visibility"]) == 1 %>'>
+                                                    <pe:if condition='<%= Eval("project") and Eval("project")["visibility"] and tonumber(Eval("project")["visibility"]) == 1 %>'>
                                                         <div style="float:left;margin-top:5px;margin-left:5px;background: url(textures/worldshare_32bits.png#223 309 20 20);width: 14px;height: 14px;"></div>
                                                     </pe:if>
                                                 </div>

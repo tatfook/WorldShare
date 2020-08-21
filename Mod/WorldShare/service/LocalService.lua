@@ -384,6 +384,8 @@ function LocalService:SaveWorldInfo(ctx, node)
     end
 
     node.attr.clientversion = self:GetClientVersion() or ctx.clientversion
+    node.attr.vipEnabled = ctx.vipEnabled or false
+    node.attr.institueVipEnabled = ctx.institueVipEnabled or false
 
     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
     node.attr.kpProjectId = currentWorld and currentWorld.kpProjectId or ctx.kpProjectId
@@ -398,6 +400,8 @@ function LocalService:LoadWorldInfo(ctx, node)
 
     ctx.clientversion = node.attr.clientversion
     ctx.kpProjectId = node.attr.kpProjectId
+    ctx.vipEnabled = node.attr.vipEnabled
+    ctx.institueVipEnabled = node.attr.institueVipEnabled
 end
 
 function LocalService:GetClientVersion(node)

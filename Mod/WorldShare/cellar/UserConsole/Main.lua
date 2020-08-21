@@ -444,7 +444,11 @@ function UserConsole:HandleWorldId(pid, refreshMode)
 
             if data and data.visibility == 1 then
                 if not KeepworkService:IsSignedIn() then
-                    GameLogic.AddBBS(nil, L"该项目需要登录后访问", 3000, "255 0 0")
+                    LoginModal:CheckSignedIn(L"该项目需要登录后访问", function(bIsSuccessed)
+                        if bIsSuccessed then
+                            self:HandleWorldId(pid, refreshMode)
+                        end
+                    end)
                     return false
                 else
                     KeepworkServiceProject:GetMembers(pid, function(members, err)
@@ -471,6 +475,45 @@ function UserConsole:HandleWorldId(pid, refreshMode)
                     end)
                 end
             else
+                -- vip enter
+                if data and data.extra and data.extra.vipEnabled == 1 or data.extra.institudeEnabled == 1 then
+                    if not KeepworkService:IsSignedIn() then
+                        LoginModal:CheckSignedIn(L"该项目需要登录后访问", function(bIsSuccessed)
+                            if bIsSuccessed then
+                                self:HandleWorldId(pid, refreshMode)
+                            end
+                        end)
+                        return false
+                    end
+    
+                    local userType = Mod.WorldShare.Store:Get("user/userType")
+                    local username = Mod.WorldShare.Store:Get("user/username")
+                    local isVip = Mod.WorldShare.Store:Get("user/isVip")
+
+                    local canEnter = false
+
+                    if data.username and data.username == username then
+                        canEnter = true
+                    end
+
+                    if data.extra.vipEnabled == 1 then
+                        if isVip then
+                            canEnter = true
+                        end
+                    end
+
+                    if data.extra.institudeEnabled == 1 then
+                        if userType.student then
+                            canEnter = true
+                        end
+                    end
+
+                    if not canEnter then
+                        _guihelper.MessageBox(L"你没有权限进入此世界")
+                        return false
+                    end
+                end
+
                 if data.world and data.world.archiveUrl and #data.world.archiveUrl > 0 then
                     Mod.WorldShare.Store:Set('world/openKpProjectId', pid)
                     HandleLoadWorld(data.world.archiveUrl, data.world)
