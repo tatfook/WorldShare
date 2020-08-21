@@ -186,6 +186,10 @@ function LocalServiceWorld:GetInternetLocalWorldList()
   return ServerPage.ds or {}
 end
 
+function LocalServiceWorld:SetInternetLocalWorldList(currentWorldList)
+    InternetLoadWorld.cur_ds = currentWorldList
+end
+
 function LocalServiceWorld:MergeInternetLocalWorldList(currentWorldList)
     local internetLocalWorldList = self:GetInternetLocalWorldList()
 
