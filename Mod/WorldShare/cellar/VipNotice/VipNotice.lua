@@ -18,7 +18,6 @@ local VipNotice = NPL.export()
 
 VipNotice.onlyRecharge = false;
 function VipNotice:Init(bEnable, callback)
-    commonlib.echo("VipNotice:Init");
     VipNotice.callback = callback
 
     if not KeepworkService:IsSignedIn() then
@@ -34,7 +33,6 @@ function VipNotice:Init(bEnable, callback)
 end
 
 function VipNotice:CheckVip(bEnable)
-    commonlib.echo("VipNotice:CheckVip");
     if (not Mod.WorldShare.Store:Get('user/isVip') or bEnable) then
         VipNotice.onlyRecharge = bEnable;
         self:ShowPage()
