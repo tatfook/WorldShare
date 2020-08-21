@@ -4,6 +4,7 @@
             <script type="text/npl" refresh="false">
                 <![CDATA[
                     local OpusSetting = NPL.load("./OpusSetting.lua")
+                    local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
                     local page = document:GetPageCtrl()
 
                     function close()
@@ -33,17 +34,31 @@
 
                         if val == "private" then
                             page:SetValue("public", false)
+                            page:SetValue("institute_vip_checkbox", false)
+                            page:SetValue("vip_checkbox", false)
                         end
 
                         page:Refresh(0.01)
 
                         OpusSetting:SetPublic(val)
                     end
+
+                    function set_vip(val)
+                        WorldCommon.SetWorldTag("vipEnabled", val)
+                        WorldCommon.SaveWorldTag()
+                        OpusSetting:SetVip(val)
+                    end
+
+                    function set_institute_vip(val)
+                        WorldCommon.SetWorldTag("institueVipEnabled", val)
+                        WorldCommon.SaveWorldTag()
+                        OpusSetting:SetInstituteVip(val)
+                    end
                 ]]>
             </script>
             <style type="type/mcss">
             </style>
-            <aries:window mode="thin" title="<%= L'项目设置' %>" width="400" height="280" onclose="close()">
+            <aries:window mode="thin" title="<%= L'项目设置' %>" width="505" height="270" onclose="close()">
                 <div style="color: #FFFFFF;padding: 15px;font-size: 14px;">
                     <div><%= L"内容保护：" %></div>
                     <div style="margin-left: 20px;">
@@ -55,8 +70,19 @@
                         <div>
                             <div><input type="radio" name="public" value="public" onclick="set_public"/><%= L"公开世界" %></div>
                             <div style="margin-left: 20px;">
-                                <div><input type="checkbox" tooltip="<%=L'是否只有VIP用户可以访问'%>" checked="<%= GameLogic.options:IsVipWorld()%>" onclick="set_vip" /><%= L"VIP访问" %></div>
-                                <!-- <div><input type="checkbox" /><%= L"机构成员访问" %></div> -->
+                                <div>
+                                    <input type="checkbox"
+                                           name="vip_checkbox"
+                                           tooltip="<%=L'是否只有VIP用户可以访问'%>"
+                                           onclick="set_vip" />
+                                    <%= L"需要是Paracraft会员（访问与编辑均需登录Paracraft账号）" %>
+                                </div>
+                                <div>
+                                    <input type="checkbox"
+                                           name="institute_vip_checkbox"
+                                           onclick="set_institute_vip" />
+                                    <%= L"需要是合作机构VIP会员（访问与编辑均需登录Paracraft账号）" %>
+                                </div>
                             </div>
                         </div>
                         <div>

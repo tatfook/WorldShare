@@ -263,6 +263,8 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
             local remoteWorldUserId = DItem["user"] and DItem["user"]["id"] and tonumber(DItem["user"]["id"]) or 0
             local status
             local remoteShared
+            local vipEnabled = false
+            local instituteVipEnabled =false
 
             if remoteWorldUserId ~= 0 and tonumber(remoteWorldUserId) ~= (userId) then
                 remoteShared = true
@@ -289,6 +291,8 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
 
                     localTagname = LItem["local_tagname"] or LItem["foldername"]
                     remoteTagname = DItem["extra"] and DItem["extra"]["worldTagName"] or DItem["worldName"]
+                    vipEnabled = LItem["vipEnabled"] or false
+                    instituteVipEnabled = LItem["instituteVipEnabled"] or false
 
                     if tonumber(LItem["kpProjectId"]) ~= tonumber(DItem["projectId"]) then
                         local tag = SaveWorldHandler:new():Init(worldpath):LoadWorldInfo()
@@ -358,8 +362,16 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                 local_tagname = localTagname,
                 remote_tagname = remoteTagname,
                 is_zip = false,
-                shared = remoteShared
+                shared = remoteShared,
+                vipEnabled = vipEnabled,
+                instituteVipEnabled = instituteVipEnabled
             }
+
+            if currentWorld.project.visibility == 0 then
+                currentWorld.project.visibility = 0
+            else
+                currentWorld.project.visibility = 1
+            end
 
             currentWorldList:push_back(currentWorld)
         end
@@ -391,6 +403,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                 currentWorld.local_tagname = LItem['local_tagname']
                 currentWorld.status = 1 --local only
                 currentWorld.is_zip = LItem['is_zip'] or false
+                currentWorld.project = { visibility = 0 }
 
                 currentWorldList:push_back(currentWorld)
             end

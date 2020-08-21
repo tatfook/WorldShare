@@ -54,6 +54,8 @@ function LocalServiceWorld:GetWorldList()
 
             value.local_tagname = tag.name
             value.is_zip = false
+            value.vipEnabled = tag.vipEnabled
+            value.institueEnabled = tag.instituteEnabled
         else
             value.foldername = value.Title
             value.text = value.Title
@@ -184,6 +186,10 @@ function LocalServiceWorld:GetInternetLocalWorldList()
   )
 
   return ServerPage.ds or {}
+end
+
+function LocalServiceWorld:SetInternetLocalWorldList(currentWorldList)
+    InternetLoadWorld.cur_ds = currentWorldList
 end
 
 function LocalServiceWorld:MergeInternetLocalWorldList(currentWorldList)

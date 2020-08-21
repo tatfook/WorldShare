@@ -535,6 +535,16 @@
                         return searchText
                     end
                 end
+
+                function set_search_button()
+                    local search_text = page:GetValue('search_text')
+
+                    if type(search_text) == "string" and #search_text > 0 then
+                        page:FindControl('search_button').visible = true
+                    else
+                        page:FindControl('search_button').visible = false
+                    end
+                end
             ]]>
         </script>
         <style type="text/mcss">
@@ -813,14 +823,16 @@
             </div>
             <div class="middle_line" />
             <div class="world_area">
-                <div style="width: 175px;margin-top: -5px;margin-bottom: 3px;margin-left: 120px;">
+                <div style="width: 175px;margin-top: -5px;margin-bottom: 3px;margin-left: 140px;">
                     <div style="float:left;">
                         <div style="height: 23px;width: 20px;background-color: #ffffff;float: left;margin-top: 1px;">
-                            <img src="Texture/3DMapSystem/common/searchIcon.png" style="width: 16px;height: 16px;margin-left: 2px;margin-top: 4.5px;" />
+                            <img src="Texture/3DMapSystem/common/searchIcon.png" style="width: 16px;height: 16px;margin-left: 2px;margin-top: 3px;" />
                         </div>
-                        <input type="text" class="bbs_text" style="height: 25px;width: 120px;margin-left: -5px;" name="search_text" onfocusout="search" EmptyText='<%= L"搜索列表项目" %>' value="<%= get_last_serch_text() %>" />
+                        <input type="text" class="bbs_text" style="height: 25px;width: 140px;margin-left: -5px;" name="search_text" onchange="set_search_button" onfocusout="search" EmptyText='<%= L"搜索列表项目" %>' value="<%= get_last_serch_text() %>" />
                     </div>
-                    <input type="button" class="mc_light_grey_button_with_fillet" style="height: 23px;margin-top: 1px;margin-left: 2px;" onclick="search" value="<%= L'确定' %>" />
+                    <pe:container name="search_button" visible="false" style="display:none;position:relative;margin-top: -26px;background:">
+                        <input type="button" class="mc_light_grey_button_with_fillet" style="height: 23px;margin-left: 117px;" onclick="search" value="<%= L'确定' %>" />
+                    </pe:container>
                 </div>
                 <div style="height:360px;">
                     <pe:if style="margin-top:10px;font-weight:bold;color:#ffffff" condition="<%= is_list_refreshing() %>">
@@ -964,7 +976,7 @@
                                                 </pe:if>
                                                 <div class="share_world_name">
                                                     <%= get_world_text() %>
-                                                    <pe:if condition='<%= Eval("project") and tonumber(Eval("project")["visibility"]) == 1 %>'>
+                                                    <pe:if condition='<%= Eval("project") and Eval("project")["visibility"] and tonumber(Eval("project")["visibility"]) == 1 %>'>
                                                         <div style="float:left;margin-top:5px;margin-left:5px;background: url(textures/worldshare_32bits.png#223 309 20 20);width: 14px;height: 14px;"></div>
                                                     </pe:if>
                                                 </div>
