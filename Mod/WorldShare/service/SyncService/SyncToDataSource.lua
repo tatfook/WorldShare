@@ -15,6 +15,7 @@ local KeepworkService = NPL.load("../KeepworkService.lua")
 local KeepworkServiceProject = NPL.load("../KeepworkService/Project.lua")
 local KeepworkServiceWorld = NPL.load("../KeepworkService/World.lua")
 local KeepworkServiceSession = NPL.load("../KeepworkService/Session.lua")
+local Compare = NPL.load("./Compare.lua")
 
 -- helper
 local KeepworkGen = NPL.load("(gl)Mod/WorldShare/helper/KeepworkGen.lua")
@@ -282,6 +283,7 @@ function SyncToDataSource:GetCompareList()
 end
 
 function SyncToDataSource:Close()
+    Compare:GetCurrentWorldInfo()
     self.callback(true, 'success')
 end
 
@@ -642,7 +644,7 @@ function SyncToDataSource:UpdateRecord(callback)
                             return false
                         end
 
-                        StorageFilesApi:List(function(listData, err)
+                        StorageFilesApi:List(data.key, function(listData, err)
                             if listData and type(listData.data) ~= 'table' then
                                 AfterHandlePreview()
                                 return false
@@ -656,7 +658,7 @@ function SyncToDataSource:UpdateRecord(callback)
                                     end
                                 end
                             end
-
+ 
                             AfterHandlePreview()
                         end)
                     end

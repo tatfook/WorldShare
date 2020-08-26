@@ -42,8 +42,15 @@ function StorageFilesApi:Token(filename, success, error)
 end
 
 -- url: /files/list
--- method: GET
+-- method: POST
+-- params: key string
 -- return: object
-function StorageFilesApi:List(success, error)
-    StorageBaseApi:Post('/files/list', nil, nil, success, error)
+function StorageFilesApi:List(key, success, error)
+    local params = {}
+
+    if type(key) == "string" then
+        params.key = key
+    end
+
+    StorageBaseApi:Post('/files/list', params, nil, success, error)
 end

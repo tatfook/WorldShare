@@ -4,6 +4,7 @@
             <script type="text/npl" refresh="false">
                 <![CDATA[
                     local MemberManager = NPL.load("./MemberManager.lua")
+                    local KeepworkServiceProject = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Project.lua")
 
                     local page = document:GetPageCtrl()
 
@@ -14,24 +15,34 @@
                     function confirm()
                         local message = page:GetValue("message")
 
-                        local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
                         local username = Mod.WorldShare.Store:Get('user/username')
-                        echo(currentEnterWorld, true)
-
-                        if not currentEnterWorld or not currentEnterWorld.user or not currentEnterWorld.user.username then
-                            return false
-                        end
 
                         if not username then
                             return false
                         end
 
-                        if currentEnterWorld.user.username == username then
-                            GameLogic.AddBBS(nil, L"不能向自己申请", 3000, "255 0 0")
-                            return false
+                        local worldUsername
+
+                        local function Handle(worldUsername)
+                            if worldUsername == username then
+                                GameLogic.AddBBS(nil, L"不能向自己申请", 3000, "255 0 0")
+                                return false
+                            end
+
+                            MemberManager:Apply(message)
                         end
 
-                        MemberManager:Apply(message)
+                        local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
+
+                        if not currentEnterWorld or not currentEnterWorld.user or not currentEnterWorld.user.username then
+                            KeepworkServiceProject:GetProject(currentEnterWorld.kpProjectId, function(data, err)
+                                if data and data.username then
+                                    Handle(data.username)
+                                end
+                            end)
+                        else
+                            Handle(currentEnterWorld.user.username)
+                        end
                     end
                 ]]>
             </script>

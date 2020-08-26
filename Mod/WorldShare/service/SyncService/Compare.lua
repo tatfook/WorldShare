@@ -294,6 +294,7 @@ function Compare:GetCurrentWorldInfo(callback)
                 end
 
                 if type(worldTag) == 'table' then
+                    currentWorld.kpProjectId = tonumber(worldTag.kpProjectId)
                     currentWorld.fromProjectId = tonumber(worldTag.fromProjects)
                 end
 
@@ -304,6 +305,9 @@ function Compare:GetCurrentWorldInfo(callback)
     end
 
     if not currentWorld then
+        local worldpath = ParaWorld.GetWorldDirectory()
+
+        WorldCommon.LoadWorldTag(worldpath)
         local worldTag = WorldCommon.GetWorldInfo() or {}
 
         currentWorld = {
@@ -325,7 +329,7 @@ function Compare:GetCurrentWorldInfo(callback)
             preview = "",
             progress = "0",
             size = 0,
-            worldpath = ParaWorld.GetWorldDirectory(), 
+            worldpath = worldpath, 
         }
 
         if worldTag.kpProjectId then
@@ -335,6 +339,7 @@ function Compare:GetCurrentWorldInfo(callback)
         end
 
         if type(worldTag) == 'table' then
+            currentWorld.kpProjectId = tonumber(worldTag.kpProjectId)
             currentWorld.fromProjectId = tonumber(worldTag.fromProjects)
         end
 
