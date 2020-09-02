@@ -33,7 +33,7 @@ function MsgBox:Show(msg, sec, overtimeMsg, width, height, index)
         0,
         "_fi",
         false,
-        index
+        index or 11
     )
 
     params._page.OnClose = function()
