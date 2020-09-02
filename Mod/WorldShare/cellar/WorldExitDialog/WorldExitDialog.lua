@@ -172,7 +172,7 @@ function WorldExitDialog.OnDialogResult(res)
             Mod.WorldShare.MsgBox:Show(L"请稍后...")
             KeepworkServiceWorld:UnlockWorld(function()
                 if (WorldExitDialogPage.callback) then
-                    KeepworkServiceSession:Logout()
+                    --KeepworkServiceSession:Logout()
                     WorldExitDialogPage.callback(res)
                 end
             end)
