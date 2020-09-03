@@ -97,10 +97,13 @@ function ThirdPartyLogin:Init(thirdPartyType, callback)
 
                 if bExisted then
                     Mod.WorldShare.Store:Set("user/token", data.token)
-
-                    if type(self.callback) == "function" then
-                        self.callback()
-                    end
+                    -- login again to enter world
+                    local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua")
+                    UserInfo:LoginWithToken(function()
+                         if type(self.callback) == "function" then
+                            self.callback()
+                        end      
+		            end);
                 else
                     if data and data.token then
                         Mod.WorldShare.Store:Set("user/authToken", data.token)
