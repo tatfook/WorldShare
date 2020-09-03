@@ -59,7 +59,7 @@ function Utils.ShowWindow(option, height, url, name, x, y, align, allowDrag, zor
         }
     end
 
-    local matchUrl, matched = string.gsub(params.url, "^%(ws%)", "")
+    local matchUrl, matched = string.gsub(params.url, "^%(ws%)", "") -- ws: worldshare
 
     if matched == 1 then
         if not string.match(matchUrl, "%.html$") then
@@ -67,6 +67,16 @@ function Utils.ShowWindow(option, height, url, name, x, y, align, allowDrag, zor
         end
 
         params.url = "Mod/WorldShare/cellar/" .. matchUrl
+    end
+
+    local matchUrl, matched = string.gsub(params.url, "^%(ep%)", "") -- ep: explorerapp
+
+    if matched == 1 then
+        if not string.match(matchUrl, "%.html$") then
+            matchUrl = matchUrl .. "/" .. matchUrl .. ".html"
+        end
+
+        params.url = "Mod/ExplorerApp/components/" .. matchUrl
     end
 
     System.App.Commands.Call("File.MCMLWindowFrame", params)

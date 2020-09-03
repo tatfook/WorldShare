@@ -37,7 +37,7 @@
                 )
 
                 local page = document:GetPageCtrl()
-                Mod.WorldShare.Store:Set('page/UserConsole', page)   
+                Mod.WorldShare.Store:Set('page/Mod.WorldShare.UserConsole', page)   
                 Mod.WorldShare.Store:Remove("world/searchText")
 
                 local do_modify = false
@@ -93,23 +93,23 @@
 
                 function get_world_status_icon(index)
                     if(index == 1) then
-                        return 'background:url(textures/worldshare_32bits.png#72 104 16 16)';
+                        return 'background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#72 104 16 16)';
                     end
 
                     if(index == 2) then
-                        return 'background:url(textures/worldshare_32bits.png#98 104 16 16)';
+                        return 'background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#98 104 16 16)';
                     end
 
                     if(index == 3) then
-                        return 'background:url(textures/worldshare_32bits.png#20 104 16 16)';
+                        return 'background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#20 104 16 16)';
                     end
 
                     if(index == 4) then
-                        return 'background:url(textures/worldshare_32bits.png#46 104 16 16)';
+                        return 'background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#46 104 16 16)';
                     end
 
                     if(index == 5) then
-                        return 'background:url(textures/worldshare_32bits.png#124 104 16 16)';
+                        return 'background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#124 104 16 16)';
                     end
                 end
 
@@ -119,15 +119,15 @@
 
                 function get_share_button(style)
                     if (style == 'delete') then
-                        return 'background:url(textures/worldshare_32bits.png#78 46 48 48)';
+                        return 'background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#78 46 48 48)';
                     end
 
                     if (style == 'sync') then
-                        return 'background:url(textures/worldshare_32bits.png#136 46 48 48)';
+                        return 'background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#136 46 48 48)';
                     end
 
                     if (style == 'enter') then
-                        return 'background:url(textures/worldshare_32bits.png#20 46 48 48)';
+                        return 'background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#20 46 48 48)';
                     end
                 end
 
@@ -603,7 +603,7 @@
                     ["padding-top"] = 4,
                     width  = 295,
                     height = 80,
-                    background = "textures/worldshare_32bits.png;150 20 16 16:4 4 4 4"
+                    background = "Texture/Aries/Creator/keepwork/worldshare_32bits.png;150 20 16 16:4 4 4 4"
                 },
                 share_unselect_item = {
                     ["margin-bottom"] = 20,
@@ -872,15 +872,15 @@
                                             </pe:if>
                                             <div class="share_world_name">
                                                 <pe:if condition='<%= is_modifying() %>'>
-                                                    <input type="text" onchange="update_temp_modify_worldname" style="width: 120px;height: 25px;textcolor: #ffffff;background: url(textures/worldshare_32bits.png#285 21 16 16:2 2 2 2);" value='<%= get_tagname() %>' />
+                                                    <input type="text" onchange="update_temp_modify_worldname" style="width: 120px;height: 25px;textcolor: #ffffff;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#285 21 16 16:2 2 2 2);" value='<%= get_tagname() %>' />
                                                     <input type="button" onclick="covert_status" style="margin-left:4px;width: 40px;height: 25px;font-size: 12px;color: #ffffff" class="common_button mc_light_grey_button_with_fillet" value="<%=L'保存'%>" />
                                                 </pe:if>
                                                 <pe:if condition='<%= not is_modifying() %>'>
                                                     <%= get_world_text() %>
                                                     <pe:if condition='<%= Eval("project") and tonumber(Eval("project")["visibility"]) == 1 %>'>
-                                                        <div style="float:left;margin-top:5px;margin-left:5px;background: url(textures/worldshare_32bits.png#223 309 20 20);width: 14px;height: 14px;"></div>
+                                                        <div style="float:left;margin-top:5px;margin-left:5px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#223 309 20 20);width: 14px;height: 14px;"></div>
                                                     </pe:if>
-                                                    <div onclick="covert_status" tooltip="<%=Eval('text')%>" style="float:left;margin-top:5px;margin-left:5px;background: url(textures/worldshare_32bits.png#237 49 14 14);width: 14px;height: 14px;z-index: 10"></div>
+                                                    <div onclick="covert_status" tooltip="<%=Eval('text')%>" style="float:left;margin-top:5px;margin-left:5px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#237 49 14 14);width: 14px;height: 14px;z-index: 10"></div>
                                                 </pe:if>
                                             </div>
                                             <pe:if condition="<%= Eval('hasPid') %>">
@@ -977,7 +977,7 @@
                                                 <div class="share_world_name">
                                                     <%= get_world_text() %>
                                                     <pe:if condition='<%= Eval("project") and Eval("project")["visibility"] and tonumber(Eval("project")["visibility"]) == 1 %>'>
-                                                        <div style="float:left;margin-top:5px;margin-left:5px;background: url(textures/worldshare_32bits.png#223 309 20 20);width: 14px;height: 14px;"></div>
+                                                        <div style="float:left;margin-top:5px;margin-left:5px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#223 309 20 20);width: 14px;height: 14px;"></div>
                                                     </pe:if>
                                                 </div>
                                                 <pe:if condition="<%= Eval('hasPid') %>">
@@ -1005,7 +1005,7 @@
                                             </div>
                                         </div>
                                         <div align="right" style="position:relative;width:30px;height:30px;margin-right:9px;margin-top:25px;">
-                                            <input type="button" class="share_button" style="background:url(textures/worldshare_32bits.png#20 46 48 48)"
+                                            <input type="button" class="share_button" style="background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#20 46 48 48)"
                                                 onclick="enter" name='<%=Eval("index")%>' />
                                             <!--进入-->
                                         </div>

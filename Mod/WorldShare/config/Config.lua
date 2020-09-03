@@ -50,6 +50,13 @@ Config.keepworkServerList = {
   LOCAL = "http://api-dev.kp-para.cn/core/v0",
 }
 
+Config.keepworkApiCdnList = {
+  ONLINE = "https://apicdn.keepwork.com/core/v0",
+  STAGE = "http://api-dev.kp-para.cn/core/v0",
+  RELEASE = "http://api-rls.kp-para.cn/core/v0",
+  LOCAL = "http://api-dev.kp-para.cn/core/v0",
+}
+
 Config.gitGatewayList = {
   ONLINE = "https://api.keepwork.com/git/v0",
   STAGE = "http://api-dev.kp-para.cn/git/v0",

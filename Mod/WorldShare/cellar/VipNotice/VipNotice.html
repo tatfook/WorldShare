@@ -4,7 +4,6 @@
             <script type="text/npl" refresh="false" src="VipNotice.lua">
                 local page = document:GetPageCtrl()
 				local Config = NPL.load("(gl)Mod/WorldShare/config/Config.lua")
-				local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
                 local VipNotice = NPL.load("(gl)Mod/WorldShare/cellar/VipNotice/VipNotice.lua")
                 local firstOpen = true;
 
@@ -17,12 +16,7 @@
                 end
 
                 function open()
-					local url = Config.keepworkVipList[Config.defaultEnv];
-					local token = KeepworkServiceSession:GetCurrentUserToken();
-					if (token) then
-						url = url.."?token="..token;
-					end
-                    ParaGlobal.ShellExecute("open", url, "", "", 1)
+                    ParaGlobal.ShellExecute("open", Config.keepworkVipList[Config.defaultEnv], "", "", 1)
                     firstOpen = false;
                     page:Refresh(0);
                 end
@@ -58,7 +52,7 @@
 							onclose="close">
 							<pe:if condition='<%=isFirstOpen()%>'>
 								<div style="padding: 30px;">
-									<div style="font-size: 14px;margin-left: 40px;margin-top: 10px;">
+									<div style="font-size: 14px;margin-left: 65px;margin-top: 10px;">
 										<%= L"续费VIP查看更多学习资源，" %><a href="https://keepwork.com/vip" style="color: #0f8165"><%= L"了解VIP详情。" %></a>
 									</div>
 									<div style="margin-left: 85px;margin-top:30px;">
@@ -89,7 +83,7 @@
 							onclose="close">
 							<pe:if condition='<%=isFirstOpen()%>'>
 								<div style="padding: 30px;">
-									<div style="font-size: 14px;margin-left: 40px;margin-top: 10px;">
+									<div style="font-size: 14px;margin-left: 65px;margin-top: 10px;">
 										<%= L"开通VIP查看更多学习资源，" %><a href="https://keepwork.com/vip" style="color: #0f8165"><%= L"了解VIP详情。" %></a>
 									</div>
 									<div style="margin-left: 85px;margin-top:30px;">

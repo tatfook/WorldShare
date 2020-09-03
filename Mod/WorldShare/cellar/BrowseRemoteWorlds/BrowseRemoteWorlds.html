@@ -100,8 +100,8 @@
                             </div>
                             <div style="margin-left:160px;margin-top:20px;position:relative">
                                 <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) == 100%>'>
-                                    <input type="button" class="share_button" style="background:url(textures/worldshare_32bits.png#78 46 48 48)" onclick='BrowseRemoteWorlds.DeleteWorld' tooltip='<%=L"删除"%>' name='<%=Eval("index")%>' /><!-- 删除 -->
-                                    <input type="button" class="share_button" style="background:url(textures/worldshare_32bits.png#20 46 48 48)" onclick="BrowseRemoteWorlds.EnterWorld" tooltip='<%=L"进入"%>' name='<%=Eval("index")%>' /><!-- 进入 -->
+                                    <input type="button" class="share_button" style="background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#78 46 48 48)" onclick='BrowseRemoteWorlds.DeleteWorld' tooltip='<%=L"删除"%>' name='<%=Eval("index")%>' /><!-- 删除 -->
+                                    <input type="button" class="share_button" style="background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#20 46 48 48)" onclick="BrowseRemoteWorlds.EnterWorld" tooltip='<%=L"进入"%>' name='<%=Eval("index")%>' /><!-- 进入 -->
                                 </pe:if>
                                 <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) < 100 %>'>
                                     <pe:if condition='<%= InternetLoadWorld:GetDownloadPercent(Eval("index")) >= 0 %>'>

@@ -178,9 +178,11 @@ function MainLogin:EnterUserConsole(isOffline)
     ParaWorldLessons.CheckShowOnStartup(function(bBeginLessons)
         if not bBeginLessons then
             System.options.loginmode = "local"
-            if(isOffline)then
+
+            if isOffline then
                 System.options.loginmode = "offline"
             end
+
             local MainLoginPage = Mod.WorldShare.Store:Get("page/MainLogin")
 
             if MainLoginPage then

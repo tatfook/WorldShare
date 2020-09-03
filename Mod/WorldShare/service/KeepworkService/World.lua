@@ -9,17 +9,89 @@ local KeepworkServiceWorld = NPL.load("(gl)Mod/WorldShare/service/KeepworkServic
 ------------------------------------------------------------
 ]]
 
+-- lib
+local WorldRevision = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision")
+local SaveWorldHandler = commonlib.gettable("MyCompany.Aries.Game.SaveWorldHandler")
+
+-- service
 local KeepworkService = NPL.load('../KeepworkService.lua')
+local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
+
+-- api
 local KeepworkWorldsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Worlds.lua")
 local KeepworkProjectsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Projects.lua")
 local KeepworkWorldLocksApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/WorldLocks.lua")
-local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
-
-local SaveWorldHandler = commonlib.gettable("MyCompany.Aries.Game.SaveWorldHandler")
 
 local KeepworkServiceWorld = NPL.export()
 
 KeepworkServiceWorld.lockHeartbeat = false
+
+-- set world instance by pid 
+function KeepworkServiceWorld:SetWorldInstanceByPid(pid, callback)
+    self:GetWorldByProjectId(pid, function(data, err)
+        if type(data) ~= 'table' or not data.worldName then
+            return false
+        end
+
+        local foldername = data.worldName
+        local worldpath = Mod.WorldShare.Utils.GetWorldFolderFullPath() .. "/" .. foldername
+        local status
+
+        if not ParaIO.DoesFileExist(worldpath) then
+            status = 2
+        else
+            if LocalService:IsZip(worldpath) then
+                return false
+            end
+        end
+
+        local worldRevision = WorldRevision:new():init(worldpath):Checkout()
+
+        if not data.revision then
+            return false
+        end
+
+        if tonumber(data.revision) == worldRevision then
+            status = 3
+        else
+            if tonumber(data.revision) > worldRevision then
+                status = 4
+            else
+                status = 5
+            end
+        end
+
+        local worldTag = LocalService:GetTag(worldpath)
+
+        local currentWorld = {
+            IsFolder = true,
+            is_zip = false,
+            Title = worldTag.name,
+            text = worldTag.name,
+            author = "None",
+            costTime = "0:0:0",
+            filesize = 0,
+            foldername = foldername,
+            grade = "primary",
+            icon = "Texture/3DMapSystem/common/page_world.png",
+            ip = "127.0.0.1",
+            mode = "survival",
+            modifyTime = 0,
+            nid = "",
+            order = 0,
+            preview = "",
+            progress = "0",
+            size = 0,
+            worldpath = worldpath, 
+        }
+
+        Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
+
+        if callback and type(callback) == 'function' then
+            callback()
+        end
+    end)
+end
 
 -- get world list
 function KeepworkServiceWorld:GetWorldsList(callback)

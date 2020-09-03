@@ -366,7 +366,7 @@ function Compare:GetCurrentWorldInfo(callback)
     end
 end
 
-function Compare:RefreshWorldList(callback)
+function Compare:RefreshWorldList(callback, statusFilter)
     local localWorlds = LocalServiceWorld:GetWorldList()
 
     if not KeepworkService:IsSignedIn() then
@@ -400,6 +400,37 @@ function Compare:RefreshWorldList(callback)
             localWorlds,
             function(currentWorldList)
                 currentWorldList = LocalServiceWorld:MergeInternetLocalWorldList(currentWorldList)
+
+                if statusFilter and statusFilter == 'LOCAL' then
+                    local filterCurrentWorldList = {}
+
+                    for key, item in ipairs(currentWorldList) do
+                        if item and
+                           type(item) == 'table' and
+                           (type(item.status) == 'number' or type(item.status) == 'string') and
+                           tonumber(item.status) == 1 then
+                            filterCurrentWorldList[#filterCurrentWorldList + 1] = item
+                        end
+                    end
+
+                    currentWorldList = filterCurrentWorldList
+                end
+
+                if statusFilter and statusFilter == "ONLINE" then
+                    local filterCurrentWorldList = {}
+
+                    for key, item in ipairs(currentWorldList) do
+                        if item and
+                           type(item) == 'table' and
+                           (type(item.status) == 'number' or type(item.status) == 'string') and
+                           tonumber(item.status) == 2 or
+                           tonumber(item.status) == 3 then
+                            filterCurrentWorldList[#filterCurrentWorldList + 1] = item
+                        end
+                    end
+
+                    currentWorldList = filterCurrentWorldList
+                end
 
                 local searchText = Mod.WorldShare.Store:Get("world/searchText")
 

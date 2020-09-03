@@ -41,6 +41,12 @@ function KeepworkService:GetCoreApi()
     return Config.keepworkServerList[env]
 end
 
+function KeepworkService:GetApiCdnApi()
+    local env = self:GetEnv()
+
+    return Config.keepworkApiCdnList[env]
+end
+
 function KeepworkService:GetLessonApi()
     local env = self:GetEnv()
 
