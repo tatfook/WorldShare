@@ -83,6 +83,7 @@ local Cef3Manager = commonlib.gettable("Mod.WorldShare.service.Cef3Manager")
 -- UI
 local MainLogin = NPL.load("(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua")
 local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
+local UserConsoleCreate = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Create/Create.lua")
 local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
 local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
 local ShareWorld = NPL.load("(gl)Mod/WorldShare/cellar/ShareWorld/ShareWorld.lua")
@@ -139,7 +140,13 @@ function WorldShare:init()
     GameLogic.GetFilters():add_filter(
         "InternetLoadWorld.ShowPage",
         function(bEnable, bShow)
-            UserConsole:ShowPage()
+            local worldsharebeat = ParaEngine.GetAppCommandLineByParam("worldsharebeat", nil)
+
+            if worldsharebeat and worldsharebeat == 'true' then
+                UserConsoleCreate:Show()
+            else
+                UserConsole:ShowPage()
+            end
             return false
         end
     )

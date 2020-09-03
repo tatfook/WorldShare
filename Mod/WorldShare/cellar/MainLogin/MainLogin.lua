@@ -75,11 +75,12 @@ function MainLogin:Show()
                 end
             )
 
-			Mod.WorldShare.Store:Set('user/AfterLogined', function(bIsSucceed)
+            Mod.WorldShare.Store:Set('user/AfterLogined', function(bIsSucceed)
 				-- OnKeepWorkLogin
 				GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", bIsSucceed)
 			end)
-           return
+
+            return
         end
 
         if PWDInfo and PWDInfo.autoLogin then
@@ -141,9 +142,9 @@ function MainLogin:LoginAction()
 
         self:EnterUserConsole()
 
-        if not Mod.WorldShare.Store:Get('user/isBind') then
-            RegisterModal:ShowBindingPage()
-        end
+        -- if not Mod.WorldShare.Store:Get('user/isBind') then
+        --     RegisterModal:ShowBindingPage()
+        -- end
 
         local AfterLogined = Mod.WorldShare.Store:Get('user/AfterLogined')
 
@@ -182,9 +183,11 @@ function MainLogin:EnterUserConsole(isOffline)
     ParaWorldLessons.CheckShowOnStartup(function(bBeginLessons)
         if not bBeginLessons then
             System.options.loginmode = "local"
-            if(isOffline)then
+
+            if isOffline then
                 System.options.loginmode = "offline"
             end
+
             local MainLoginPage = Mod.WorldShare.Store:Get("page/MainLogin")
 
             if MainLoginPage then

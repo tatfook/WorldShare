@@ -12,14 +12,20 @@ local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/Login/UserInfo.lua")
 local GameLogic = commonlib.gettable("MyCompany.Aries.Game.GameLogic")
 local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
 
+-- UI
 local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
 local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
 local LoginModal = NPL.load("../LoginModal/LoginModal.lua")
+
+-- service
 local HttpRequest = NPL.load("(gl)Mod/WorldShare/service/HttpRequest.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
-local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
+
+-- config
 local Config = NPL.load("(gl)Mod/WorldShare/config/Config.lua")
+
+-- database
 local SessionsData = NPL.load("(gl)Mod/WorldShare/database/SessionsData.lua")
 
 local UserInfo = NPL.export()
@@ -111,7 +117,7 @@ function UserInfo.GetUserNickName()
 end
 
 function UserInfo:GetUserName()
-    local username = Store:Get('user/username') or ''
+    local username = Mod.WorldShare.Store:Get('user/username') or ''
 
     return username
 end
@@ -271,7 +277,7 @@ local curIndex = 1
 -- cycle through
 -- @param btnName: if nil, we will load the default one if scene is not started.
 function UserInfo:OnChangeAvatar(btnName)
-    local UserConsolePage = Store:Get("page/UserConsole")
+    local UserConsolePage = Mod.WorldShare.Store:Get("page/Mod.WorldShare.UserConsole")
 
     if not btnName then
         local filename = GameLogic.options:GetMainPlayerAssetName()

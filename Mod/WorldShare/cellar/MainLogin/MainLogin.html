@@ -174,7 +174,7 @@
                         ["padding-bottom"] = 10,
                     },
                     text_field = {
-                        background = "textures/worldshare_32bits.png;72 20 16 16:3 3 3 3",
+                        background = "Texture/Aries/Creator/keepwork/worldshare_32bits.png;72 20 16 16:3 3 3 3",
                         border = "none",
                         width = 165,
                     },
@@ -191,7 +191,7 @@
                         textcolor = "#000000",
                         color = "#000000",
                         ["font-size"] = 18
-                        background = "textures/worldshare_32bits.png;149 104 17 16:4 4 4 4",
+                        background = "Texture/Aries/Creator/keepwork/worldshare_32bits.png;149 104 17 16:4 4 4 4",
                     },
                 }
             </style>
@@ -200,7 +200,7 @@
                 <iframe ClickThrough="true" src="script/apps/Aries/Creator/Game/Login/ParaWorldLoginDocker.html"></iframe>
             </pe:container>
             <pe:container alignment="_ct" ClickThrough="true" style="position:relative;background:;margin-left:-260px;margin-top:-250px;width:520px;height:500px;">
-                <div style='<%="position:relative;margin-left:145px;margin-top: 40px;width: 231px;height: 98px;background:url(textures/worldshare_32bits.png#12 345 231 98);"%>'></div>
+                <div style='<%="position:relative;margin-left:145px;margin-top: 40px;width: 231px;height: 98px;background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#12 345 231 98);"%>'></div>
                 <pe:if condition='<%=Rebranding:GetValue("companylogo") ~= nil %>'>
                     <div style='<%=format("position:relative;margin-top:15px;margin-left:-220px;width:256px;height:64px;background:url(%s)", Rebranding:GetValue("companylogo"))%>'></div>
                 </pe:if>
@@ -235,7 +235,7 @@
                             <div>
                                 <input type="checkbox" style="float:left;margin-top:3px;min-width:90px;" name="rememberMe" onclick="set_remember_me()"/><div style="float:left" for="rememberMe"><%= L"记住密码?" %></div>
                             </div>
-							<!--
+                            <!--
                             <div>
                                 <input type="checkbox" style="float:left;margin-top:3px;min-width:90px;" name="autoLogin" onclick="set_auto_login()"/><div style="float:left" for="autoLogin"><%= L"自动登录" %></div>    
                             </div>
@@ -253,15 +253,15 @@
                                     <div style="width: 50px;height: 1px;background-color: #6d6d6e;float:left;margin-top: 10px;margin-left: 2px;"></div>
                                 </div>
                                 <div style="margin-top: 5px;margin-bottom: 5px;">
-                                    <div onclick="login_with_wx()" style="width: 44px;height: 44px;background:url(textures/worldshare_32bits.png#245 135 44 44);float: left;margin-left: 40px;"></div>
-                                    <div onclick="login_with_qq()" style="width: 44px;height: 44px;background:url(textures/worldshare_32bits.png#301 135 44 44);float: left;margin-left: 80x;"></div>
+                                    <div onclick="login_with_wx()" style="width: 44px;height: 44px;background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#245 135 44 44);float: left;margin-left: 40px;"></div>
+                                    <div onclick="login_with_qq()" style="width: 44px;height: 44px;background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#301 135 44 44);float: left;margin-left: 80x;"></div>
                                 </div>
                             </div>
                         </pe:if>
                         <div style="<%='text-align:left;margin-left:55px;' .. get_english_style('margin-left:15px;')%>">
-                            <a name="forgot" onclick="forget_password()" style="background:url(textures/worldshare_32bits.png#399 76 64 30:0 0 0 0);height:30px;width:150px;font-size: 14px;color: #ffffff;"><%= L"忘记密码" %></a>
+                            <a name="forgot" onclick="forget_password()" style="background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#399 76 64 30:0 0 0 0);height:30px;width:150px;font-size: 14px;color: #ffffff;"><%= L"忘记密码" %></a>
                             <span style="color:#ffffff;">|</span>
-                            <a name="register" onclick="register()" style="background:url(textures/worldshare_32bits.png#399 76 64 30:0 0 0 0);height:30px;width:150px;font-size: 14px;color: #fe5927;"><%= L"点击注册" %></a>
+                            <a name="register" onclick="register()" style="background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#399 76 64 30:0 0 0 0);height:30px;width:150px;font-size: 14px;color: #fe5927;"><%= L"点击注册" %></a>
                         </div>
                     </div>
                 </div>

@@ -163,8 +163,20 @@ function KeepworkServiceSchoolAndOrg:JoinInstitute(code, callback)
                 end
             end
         end,
-        function()
+        function(data, err)
             if type(callback) == "function" then
+                if data and type(data) == "table" then
+                    callback(false, data, err)
+                    return false
+                end
+
+                if data and type(data) == "string" then
+                    local dataParams = {}
+                    NPL.FromJson(data, dataParams)
+                    callback(false, dataParams, err)
+                    return false
+                end
+
                 callback(false)
             end
         end

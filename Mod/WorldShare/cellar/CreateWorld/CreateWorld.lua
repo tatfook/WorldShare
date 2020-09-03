@@ -42,10 +42,18 @@ function CreateWorld.OnClickCreateWorld()
 end
 
 function CreateWorld:CheckRevision(callback)
-    if not GameLogic.IsReadOnly() and not Compare:HasRevision() then
+    local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
+
+    if not currentWorld or type(currentWorld) ~= 'table' then
+        return false
+    end
+
+    if not currentWorld.is_zip and not Compare:HasRevision() then
         Mod.WorldShare.MsgBox:Show(L"正在初始化世界...")
         self:CreateRevisionXml()
         Mod.WorldShare.MsgBox:Close()
+    else
+        return false
     end
 end
 
