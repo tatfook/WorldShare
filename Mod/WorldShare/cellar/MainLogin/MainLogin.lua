@@ -137,9 +137,9 @@ function MainLogin:LoginAction()
 
         self:EnterUserConsole()
 
-        if not Mod.WorldShare.Store:Get('user/isBind') then
-            RegisterModal:ShowBindingPage()
-        end
+        -- if not Mod.WorldShare.Store:Get('user/isBind') then
+        --     RegisterModal:ShowBindingPage()
+        -- end
 
         local AfterLogined = Mod.WorldShare.Store:Get('user/AfterLogined')
 

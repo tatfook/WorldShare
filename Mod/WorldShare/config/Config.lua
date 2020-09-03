@@ -53,7 +53,7 @@ Config.keepworkServerList = {
 Config.keepworkApiCdnList = {
   ONLINE = "https://apicdn.keepwork.com/core/v0",
   STAGE = "http://api-dev.kp-para.cn/core/v0",
-  RELEASE = "http://api-rls.kp-para.cn/core/v0",
+  RELEASE = "http://apicdn-rls.kp-para.cn/core/v0",
   LOCAL = "http://api-dev.kp-para.cn/core/v0",
 }
 

@@ -184,6 +184,7 @@ function Compare:CompareRevision()
 
         if self.createRevisionTimes > 3 then
             self.createRevisionTimes = 0
+            self:SetFinish(true)
             return false
         end
 

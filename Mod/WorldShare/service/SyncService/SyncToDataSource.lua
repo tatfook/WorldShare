@@ -645,7 +645,6 @@ function SyncToDataSource:UpdateRecord(callback)
                         end
 
                         StorageFilesApi:List(data.key, function(listData, err)
-                            echo(listData, true)
                             if listData and type(listData.data) ~= 'table' then
                                 AfterHandlePreview()
                                 return false
