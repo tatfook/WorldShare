@@ -75,7 +75,11 @@ function MainLogin:Show()
                 end
             )
 
-            return
+			Mod.WorldShare.Store:Set('user/AfterLogined', function(bIsSucceed)
+				-- OnKeepWorkLogin
+				GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", bIsSucceed)
+			end)
+           return
         end
 
         if PWDInfo and PWDInfo.autoLogin then

@@ -293,7 +293,7 @@ function KeepworkServiceSession:Logout(mode, callback)
                 self:ResetIndulge()
                 Mod.WorldShare.Store:Remove('user/bLoginSuccessed')
                 
-                if type(callback) then
+                if callback and type(callback) == "function" then
                     callback()
                 end
             end)
@@ -304,7 +304,7 @@ function KeepworkServiceSession:Logout(mode, callback)
             self:ResetIndulge()
             Mod.WorldShare.Store:Remove('user/bLoginSuccessed')
 
-            if type(callback) then
+            if callback and type(callback) == "function" then
                 callback()
             end
         end
