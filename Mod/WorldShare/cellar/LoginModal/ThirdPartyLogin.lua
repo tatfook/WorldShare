@@ -15,6 +15,7 @@ ThirdPartyLogin:Init(type)
 local NPLWebServer = commonlib.gettable("MyCompany.Aries.Game.Network.NPLWebServer")
 local Cef3Manager = commonlib.gettable("Mod.WorldShare.service.Cef3Manager")
 local NplBrowserPlugin = commonlib.gettable("NplBrowser.NplBrowserPlugin")
+local GameLogic = commonlib.gettable("MyCompany.Aries.Game.GameLogic")
 
 -- service
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
