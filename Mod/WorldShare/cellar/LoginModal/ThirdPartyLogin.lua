@@ -100,7 +100,8 @@ function ThirdPartyLogin:Init(thirdPartyType, callback)
                     -- login again to enter world
                     local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua")
                     UserInfo:LoginWithToken(function()
-                         if type(self.callback) == "function" then
+						GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", true);
+                        if type(self.callback) == "function" then
                             self.callback()
                         end      
 		            end);
