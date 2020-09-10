@@ -42,7 +42,7 @@ function KeepworkSchoolsApi:GetList(name, regionId, type, success, error)
     local params = {}
 
     if name then
-        params.name = name
+        params.name = Mod.WorldShare.Utils.EncodeURIComponent(name)
     end
 
     if regionId then

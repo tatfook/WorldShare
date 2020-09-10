@@ -16,7 +16,7 @@ MsgBox.allMsg = {}
 MsgBox.allMsgBox = commonlib.Array:new()
 MsgBox.customLabels = {}
 
-function MsgBox:Show(msg, sec, overtimeMsg, width, height, index)
+function MsgBox:Show(msg, sec, overtimeMsg, width, height, index, align)
     self.msgIdCount = self.msgIdCount + 1
 
     local msgId = self.msgIdCount
@@ -31,7 +31,7 @@ function MsgBox:Show(msg, sec, overtimeMsg, width, height, index)
         "MsgBox",
         0,
         0,
-        "_fi",
+        align or "_fi",
         false,
         index or 11
     )

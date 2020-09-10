@@ -46,17 +46,17 @@
                             MySchool.cities = data
                             MySchool.areas = {
                                 {
-                                    text = L"请选择",
+                                    text = L"区",
                                     value = 0,
                                     selected = true,
                                 }
                             }
 
                             MySchool:GetSearchSchoolResult(value, MySchool.kind, function(data)
-                                page:Refresh(0.01)
+                                MySchool:RefreshJoinSchool()
                             end)
 
-                            page:Refresh(0.01)
+                            MySchool:RefreshJoinSchool()
                         end)
                     end
 
@@ -71,10 +71,10 @@
                             MySchool.areas = data
 
                             MySchool:GetSearchSchoolResult(value, MySchool.kind, function(data)
-                                page:Refresh(0.01)
+                                MySchool:RefreshJoinSchool()
                             end)
                             
-                            page:Refresh(0.01)
+                            MySchool:RefreshJoinSchool()
                         end)
                     end
 
@@ -86,7 +86,7 @@
                         MySchool.curId = value
 
                         MySchool:GetSearchSchoolResult(value, MySchool.kind, function(data)
-                            page:Refresh(0.01)
+                            MySchool:RefreshJoinSchool()
                         end)
                     end
 
@@ -103,12 +103,18 @@
                         end
 
                         MySchool:GetSearchSchoolResult(MySchool.curId, MySchool.kind, function(data)
-                            page:Refresh(0.01)
+                            MySchool:RefreshJoinSchool()
                         end)
                     end
 
                     function confirm()
-                        local text = page:GetValue("result")
+                        local JoinSchoolResultPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.JoinSchoolResult')
+
+                        if not JoinSchoolResultPage then
+                            return false
+                        end
+
+                        local text = JoinSchoolResultPage:GetValue("result")
                         local curItem
 
                         for key, item in ipairs(get_result()) do
@@ -134,25 +140,115 @@
                             end
                         end)
                     end
+
+                    function on_enter_school_name(name, mcmlNode)
+                        local text = mcmlNode:GetUIValue()
+
+                        MySchool:GetSearchSchoolResultByName(text, function()
+                            local JoinSchoolResultPage = Mod.WorldShare.Store:Get("page/Mod.WorldShare.JoinSchoolResult")
+
+                            if JoinSchoolResultPage then
+                                JoinSchoolResultPage:Refresh(0.01)
+                            end
+                        end)
+                    end
+
+                    function select_search_by_name()
+                        if focus_refresh then
+                            return false
+                        end
+
+                        if MySchool.provinces and type(MySchool.provinces) == 'table' then
+                            for key, item in ipairs(MySchool.provinces) do
+                                if item and type(item) == 'table' and item.selected then
+                                    item.selected = nil
+                                end
+
+                                if item and type(item) == 'table' and item.value == 0 then
+                                    item.selected = true
+                                end
+                            end
+                        end
+
+                        MySchool.cities = {
+                            {
+                                text = L"市",
+                                value = 0,
+                                selected = true,
+                            }
+                        }
+                    
+                        MySchool.areas = {
+                            {
+                                text = L"区",
+                                value = 0,
+                                selected = true,
+                            }
+                        }
+                    
+                        MySchool.kinds = {
+                            {
+                                text = L"学校类型",
+                                value = 0,
+                                selected = true,
+                            },
+                            {
+                                text = L"小学",
+                                value = L"小学"
+                            },
+                            {
+                                text = L"中学",
+                                value = L"中学"
+                            },
+                            {
+                                text = L"大学",
+                                value = L"大学",
+                            }
+                        }
+
+                        MySchool.result = {
+                            {
+                                text = L"在这里显示筛选的结果",
+                                value = 0,
+                                selected = true,
+                            },
+                        }
+
+                        MySchool:RefreshJoinSchool()
+
+                        Mod.WorldShare.Utils.SetTimeOut(function()
+                            focus_refresh = true
+                            page:FindControl('school_name'):Focus()
+                            Mod.WorldShare.Utils.SetTimeOut(function()
+                                focus_refresh = false
+                            end, 500)
+                        end, 500)
+                    end
                 ]]>
             </script>
             <style type="text/mcss">
             </style>
             <aries:window mode="thin" title='<%=L"加入学校"%>' onclose="close()">
                 <div width="100%" height="100%" style="color: white;padding: 20px;">
-                    <div><%= L"您未加入任何学校，请选择：" %></div>
                     <div style="margin-left: 80px;margin-top: 10px;">
-                        <div style="margin-bottom: 10px;">
-                            <select name="province" style="width:87px;height: 26px;" DataSource="<%= get_provinces() %>" onselect="select_province"></select>
-                            <select name="city" DataSource="<%= get_cities() %>" style="margin-left: 10px;width:87px;height: 26px;" onselect="select_city"></select>
-                            <select name="area" DataSource="<%= get_areas() %>" style="margin-left: 10px;width:87px;height: 26px;" onselect="select_area"></select>
-                            <select name="kind" DataSource="<%= get_kinds() %>" style="margin-left: 10px;width:88px;height: 26px;" onselect="select_kind"></select>
+                        <div><%= L"请输入学校名称搜索：" %></div>
+                        <div>
+                            <input type="text" class="bbs_text" style="width: 380px;height: 30px;" onchange="on_enter_school_name" onfocusin="select_search_by_name()" name="school_name" value="" />
                         </div>
-                        <div style="width: 380px;margin-bottom: 10px;">
-                            <select name="result" DataSource="<%= get_result() %>" size="5"></select>
-                        </div>
-                        <div style="width: 380px;">
-                            <%= L"*如果您的学校未出现在列表中，请登记学校。我们会尽快添加。" %>
+                    </div>
+                    <div style="margin-left: 80px;margin-top: 10px;">
+                        <div><%= L"您未加入任何学校，请选择：" %></div>
+                        <div>
+                            <div style="margin-bottom: 10px;">
+                                <select name="province" style="width:87px;height: 26px;" DataSource="<%= get_provinces() %>" onselect="select_province"></select>
+                                <select name="city" DataSource="<%= get_cities() %>" style="margin-left: 10px;width:87px;height: 26px;" onselect="select_city"></select>
+                                <select name="area" DataSource="<%= get_areas() %>" style="margin-left: 10px;width:87px;height: 26px;" onselect="select_area"></select>
+                                <select name="kind" DataSource="<%= get_kinds() %>" style="margin-left: 10px;width:88px;height: 26px;" onselect="select_kind"></select>
+                            </div>
+                            <div style="width: 380px;margin-bottom: 10px;height: 100px;"></div>
+                            <div style="width: 380px;">
+                                <%= L"*如果您的学校未出现在列表中，请登记学校。我们会尽快添加。" %>
+                            </div>
                         </div>
                     </div>
                     <div style="margin-top: 10px;margin-left: 220px;">

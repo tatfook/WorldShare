@@ -128,6 +128,16 @@ function KeepworkServiceSchoolAndOrg:SearchSchool(id, kind, callback)
     end)
 end
 
+function KeepworkServiceSchoolAndOrg:SearchSchoolByName(name, callback)
+    KeepworkSchoolsApi:GetList(name, nil, nil, function(data, err)
+        if data and data.rows then
+            if type(callback) == "function" then
+                callback(data.rows)
+            end
+        end
+    end)
+end
+
 -- return true or false
 function KeepworkServiceSchoolAndOrg:ChangeSchool(schoolId, callback)
     KeepworkUsersApi:ChangeSchool(schoolId, function(data, err)
