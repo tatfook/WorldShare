@@ -179,8 +179,8 @@ function WorldShare:init()
     -- replace share world page
     GameLogic.GetFilters():add_filter(
         "SaveWorldPage.ShowSharePage",
-        function(bEnable)
-            ShareWorld:Init()
+        function(bEnable, callback)
+            ShareWorld:Init(bEnable, callback)
             return false
         end
     )

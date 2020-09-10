@@ -25,7 +25,8 @@ local KeepworkServiceProject = NPL.load("(gl)Mod/WorldShare/service/KeepworkServ
 
 local ShareWorld = NPL.export()
 
-function ShareWorld:Init()
+function ShareWorld:Init(bEnabled, callback)
+	ShareWorld.callback = callback;
     local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
 
     if GameLogic.IsReadOnly() or not currentWorld or currentWorld.is_zip then
@@ -155,7 +156,11 @@ function ShareWorld:OnClick()
 
     local function Handle()
         SyncMain:CheckTagName(function()
-            SyncMain:SyncToDataSource()
+            SyncMain:SyncToDataSource(function(result, msg)
+				if (ShareWorld.callback and type(ShareWorld.callback) == "function") then
+					ShareWorld.callback(true);
+				end
+			end);
             self:ClosePage()
         end)
     end
