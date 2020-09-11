@@ -32,14 +32,21 @@ function KeepworkServiceWorld:GetSingleFile(pid, filename, callback)
         return false
     end
 
-    self:GetWorldByProjectId(pid, function(data, err)
-        if not data.id or not data.projectId or not data.commitId then
+    KeepworkProjectsApi:GetProject(pid, function(data, err)
+        if not data or type(data) ~= 'table' or not data.username or not data.world then
+            return false
+        end
+
+        local username = data.username
+        local world = data.world
+
+        if not world.id or not world.projectId or not world.commitId then
             return false
         end
 
         GitService:GetContentWithRaw(
-            data.worldName,
-            nil,
+            world.worldName,
+            username,
             filename,
             data.commitId,
             function(content, err)
@@ -49,7 +56,6 @@ function KeepworkServiceWorld:GetSingleFile(pid, filename, callback)
             end
         )
     end)
-
 end
 
 -- set world instance by pid 
