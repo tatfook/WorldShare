@@ -16,6 +16,7 @@ local SaveWorldHandler = commonlib.gettable("MyCompany.Aries.Game.SaveWorldHandl
 -- service
 local KeepworkService = NPL.load('../KeepworkService.lua')
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
+local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
 
 -- api
 local KeepworkWorldsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Worlds.lua")
@@ -25,6 +26,31 @@ local KeepworkWorldLocksApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/WorldLoc
 local KeepworkServiceWorld = NPL.export()
 
 KeepworkServiceWorld.lockHeartbeat = false
+
+function KeepworkServiceWorld:GetSingleFile(pid, filename, callback)
+    if not KeepworkService:IsSignedIn() then
+        return false
+    end
+
+    self:GetWorldByProjectId(pid, function(data, err)
+        if not data.id or not data.projectId or not data.commitId then
+            return false
+        end
+
+        GitService:GetContentWithRaw(
+            data.worldName,
+            nil,
+            filename,
+            data.commitId,
+            function(content, err)
+                if callback and type(callback) == 'function' then
+                    callback(content)
+                end
+            end
+        )
+    end)
+
+end
 
 -- set world instance by pid 
 function KeepworkServiceWorld:SetWorldInstanceByPid(pid, callback)

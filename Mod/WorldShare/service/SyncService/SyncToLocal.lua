@@ -273,7 +273,7 @@ function SyncToLocal:DownloadOne(file, callback)
         self.currentWorld.user and self.currentWorld.user.username or nil,
         currentRemoteItem.path,
         self.currentWorld.lastCommitId,
-        function(content, size)
+        function(content, err)
             if content == false then
                 self.compareListIndex = 1
                 self.callback(false, {
