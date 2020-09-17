@@ -23,7 +23,7 @@ function UserConsoleCreate:Show()
         return true
     end
 
-    local params = Mod.WorldShare.Utils.ShowWindow(850, 490, "(ws)UserConsole/Create/Create.html", "Mod.WorldShare.UserConsole")
+    local params = Mod.WorldShare.Utils.ShowWindow(920, 530, "(ws)UserConsole/Create/Create.html", "Mod.WorldShare.UserConsole")
 
     WorldList:RefreshCurrentServerList()
 end

@@ -12,8 +12,8 @@ status meaning:
 1:local only
 2:network only
 3:both
-4:network newest
-5:local newest
+4:local newest
+5:network newest
 
 ]]
 
@@ -409,7 +409,7 @@ function Compare:RefreshWorldList(callback, statusFilter)
                         if item and
                            type(item) == 'table' and
                            (type(item.status) == 'number' or type(item.status) == 'string') and
-                           tonumber(item.status) == 1 then
+                           tonumber(item.status) ~= 2 then
                             filterCurrentWorldList[#filterCurrentWorldList + 1] = item
                         end
                     end
@@ -424,8 +424,7 @@ function Compare:RefreshWorldList(callback, statusFilter)
                         if item and
                            type(item) == 'table' and
                            (type(item.status) == 'number' or type(item.status) == 'string') and
-                           tonumber(item.status) == 2 or
-                           tonumber(item.status) == 3 then
+                           tonumber(item.status) ~= 1 then
                             filterCurrentWorldList[#filterCurrentWorldList + 1] = item
                         end
                     end

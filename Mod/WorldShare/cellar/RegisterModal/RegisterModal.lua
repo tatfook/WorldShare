@@ -125,11 +125,11 @@ function RegisterModal:Register(page)
                 -- OnKeepWorkLogin
                 GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", true)
 
-                if self.m_mode == "account" then
-                    self:ShowClassificationPage(function()
-                        WorldList:RefreshCurrentServerList()
-                    end)
-                end
+                -- if self.m_mode == "account" then
+                --     self:ShowClassificationPage(function()
+                --         WorldList:RefreshCurrentServerList()
+                --     end)
+                -- end
 
                 GameLogic.AddBBS(nil, L"注册成功", 5000, "0 255 0")
             end

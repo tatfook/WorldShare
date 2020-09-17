@@ -108,6 +108,7 @@ local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 
 -- command
 local MenuCommand = NPL.load("(gl)Mod/WorldShare/command/Menu.lua")
+local PipeCommand = NPL.load("(gl)Mod/WorldShare/command/Pipe.lua")
 
 local WorldShare = commonlib.inherit(commonlib.gettable("Mod.ModBase"), commonlib.gettable("Mod.WorldShare"))
 
@@ -311,6 +312,7 @@ end
 
 function WorldShare:OnWorldLoad()
     MenuCommand:Init()
+    PipeCommand:Init()
 
     Store:Set('world/isEnterWorld', true)
 

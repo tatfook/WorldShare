@@ -1,0 +1,51 @@
+<html>
+    <body>
+        <pe:mcml>
+            <script type="text/npl">
+                <![CDATA[
+                    local MySchool = NPL.load("(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua")
+                    local page = document:GetPageCtrl()
+
+                    function submit()
+                        MySchool:JoinInstitute(page:GetValue("code"), function(bSuccessed, data, err)
+                            if bSuccessed then
+                                GameLogic.AddBBS(nil, L"加入机构成功", 3000, "0 255 0")
+                                close()
+                            else
+                                echo(data, true)
+                                if not data or type(data) ~= 'table' or not data.message then
+                                    GameLogic.AddBBS(nil, L"加入机构失败，或已加入此机构", 3000, "255 0 0")
+                                else
+                                    GameLogic.AddBBS(nil, format("加入机构失败，原因：%s（%d）", data.message, err), 3000, "255 0 0")
+                                end
+                            end
+                        end)
+                    end
+
+                    function close()
+                        page:CloseWindow()
+                    end
+                ]]>
+            </script>
+            <style type="text/mcss">
+            </style>
+            <kp:window width="600" height="200" icon="Texture/Aries/Creator/keepwork/Window/title/biaoti_xuexiao_32bits.png" onclose="close()">
+                <div width="100%" height="100%">
+                    <div style="width: 600px; height: 40px;">
+                        <div style="margin-left: 120px;margin-top: 14px;font-size: 14px;base-font-size: 14px;color: #ffffff;"><%=L"加入机构"%></div>
+                    </div>
+                    <div style="padding: 20px;">
+                        <div><%= L"请输入从机构处获得的激活码" %></div>
+                        <div style="margin-left: 80px;margin-top: 10px;">
+                            <input type="text" class="bbs_text" style="width: 380px;height: 30px;" name="code" value="" />
+                        </div>
+                        <div style="margin-top: 25px;margin-left: 220px;">
+                            <input type="button" class="button_highlight" style="height: 35px;width: 120px;" value="<%= L'提交' %>" onclick="submit()"/>
+                            <input type="button" class="button_highlight" style="height: 35px;width: 120px;margin-left: 10px;" value="<%= L'取消' %>" onclick="close()"/>
+                        </div>
+                    </div>
+                </div>
+            </kp:window>
+        </pe:mcml>
+    </body>
+</html>

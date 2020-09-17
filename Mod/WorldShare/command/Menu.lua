@@ -9,7 +9,6 @@ NPL.load("(gl)Mod/WorldShare/command/Menu.lua")
 -------------------------------------------------------
 ]]
 
-
 -- load lib
 local CmdParser = commonlib.gettable("MyCompany.Aries.Game.CmdParser")
 local Commands = commonlib.gettable("MyCompany.Aries.Game.Commands")

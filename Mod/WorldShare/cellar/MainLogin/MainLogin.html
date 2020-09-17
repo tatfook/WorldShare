@@ -20,6 +20,7 @@
                     local ThirdPartyLogin = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/ThirdPartyLogin.lua")
                     local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
                     local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
+                    local MySchool = NPL.load("(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua")
                     
                     -- service
                     local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepWorkService/Session.lua")
@@ -110,8 +111,10 @@
 
                     function register()
                         RegisterModal:ShowPage(function()
-                            MainLogin:EnterUserConsole()
-                            WorldList:RefreshCurrentServerList()
+                            MySchool:Show(function()
+                                MainLogin:EnterUserConsole()
+                                WorldList:RefreshCurrentServerList()
+                            end)
                         end)
                     end
 

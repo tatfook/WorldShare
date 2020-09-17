@@ -5,13 +5,17 @@
             <![CDATA[
                 local UniString = commonlib.gettable("System.Core.UniString")
 
-                local MySchool = NPL.load("./MySchool.lua")
+                local MySchool = NPL.load("(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua")
                 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
                 local page = document:GetPageCtrl()
                 local global_type = type
 
                 function close()
                     page:CloseWindow()
+
+                    if MySchool.callback and type(MySchool.callback) == 'function' then
+                        MySchool.callback()
+                    end
                 end
 
                 function has_joined(index)
@@ -38,7 +42,7 @@
 
                 function join_school()
                     MySchool:ShowJoinSchool()
-                    close()
+                    page:CloseWindow()
                 end
 
                 function join_institute()
@@ -164,11 +168,13 @@
                 }
             }
         </style>
-        <aries:window mode="thin" title='<%=L"我的学校"%>' onclose="close()">
+        <kp:window width="600" height="330" icon="Texture/Aries/Creator/keepwork/Window/title/biaoti_xuexiao_32bits.png" onclose="close()">
             <div width="100%" height="100%">
-                <div><%=L"我的学校"%></div>
+                <div style="width: 600px; height: 40px;">
+                    <div style="margin-left: 120px;margin-top: 14px;font-size: 14px;base-font-size: 14px;color: #ffffff;"><%=L"我的学校"%></div>
+                </div>
                 <pe:if condition="<%= has_joined(1) %>">
-                    <div style="padding: 20px;">
+                    <div style="padding: 15px;">
                         <div style="color: white;height: 220px;;margin-bottom: 10px">
                             <pe:gridview
                                 RememberScrollPos="true"
@@ -238,7 +244,7 @@
                     </div>
                 </pe:if>
             </div>
-        </aries:window>
+        </kp:window>
     </pe:mcml>
 </body>
 </html>
