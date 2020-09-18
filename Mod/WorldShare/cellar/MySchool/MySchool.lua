@@ -60,7 +60,7 @@ function MySchool:Show(callback)
     end)
 end
 
-function MySchool:ShowJoinSchool()
+function MySchool:ShowJoinSchool(callback)
     self.provinces = {
         {
             text = L"省",
@@ -115,6 +115,7 @@ function MySchool:ShowJoinSchool()
 
     self.curId = 0
     self.kind = nil
+    self.joinSchoolCallback = callback
 
     -- local worldsharebeat = ParaEngine.GetAppCommandLineByParam("worldsharebeat", nil)
     -- local params1

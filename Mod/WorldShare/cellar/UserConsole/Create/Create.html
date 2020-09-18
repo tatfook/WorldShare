@@ -834,6 +834,17 @@
 
                         return width .. 'px'
                     end
+
+                    function open_folder(index)
+                        local currentSelectedWorld = WorldList:GetSelectWorld(index)
+                        if currentSelectedWorld and type(currentSelectedWorld) == 'table' and currentSelectedWorld.status and currentSelectedWorld.status == 2 then
+                            _guihelper.MessageBox(L"请先下载世界")
+                            return false
+                        end
+
+                        local worldpath = currentSelectedWorld.worldpath or ""
+                        Map3DSystem.App.Commands.Call("File.WinExplorer", {filepath = worldpath, silentmode=true});
+                    end
                 ]]>
             </script>
             <style type="text/mcss">

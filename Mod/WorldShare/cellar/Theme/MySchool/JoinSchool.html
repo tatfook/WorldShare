@@ -12,6 +12,10 @@
                         if MySchool.callback and type(MySchool.callback) == 'function' then
                             MySchool.callback()
                         end
+
+                        if MySchool.joinSchoolCallback and type(MySchool.joinSchoolCallback) == 'function' then
+                            MySchool.joinSchoolCallback()
+                        end
                     end
 
                     function record_school()
@@ -145,6 +149,10 @@
 
                             if MySchool.callback and type(MySchool.callback) == 'function' then
                                 MySchool.callback()
+                            end
+
+                            if MySchool.joinSchoolCallback and type(MySchool.joinSchoolCallback) == 'function' then
+                                MySchool.joinSchoolCallback()
                             end
                         end)
                     end

@@ -162,6 +162,7 @@ function WorldShare:init()
             else
                 UserConsole:ShowPage()
             end
+            -- UserConsoleCreate:Show()
             return false
         end
     )
