@@ -83,11 +83,11 @@ function MainLogin:Show()
             return
         end
 
-        if PWDInfo and PWDInfo.autoLogin then
-            Mod.WorldShare.Utils.SetTimeOut(function()
-                self:EnterUserConsole()
-            end, 100)
-        end
+        -- if PWDInfo and PWDInfo.autoLogin then
+        --     Mod.WorldShare.Utils.SetTimeOut(function()
+        --         self:EnterUserConsole()
+        --     end, 100)
+        -- end
     end
 
     Mod.WorldShare.Store:Set('user/AfterLogined', function(bIsSucceed)
