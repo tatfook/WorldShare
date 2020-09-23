@@ -29,13 +29,14 @@
             ]]>
         </script>
         <div width="100%" height="100%">
-            <aries:window mode="thin" style="<%= get_window_style() %>" title='<%=L"提示" %>'>
-                <div style="<%= 'padding:20px;font-size:18px;base-font-size:18px;color:#ffffff;margin-top:10px;height: ' .. height .. 'px;' %>">
+            <kp:window  mode="lite" style="<%= get_window_style() %>" icon="Texture/Aries/Creator/keepwork/Window/title/biaoti_tishi_32bits.png" title='<%=L"提示" %>'>
+                <div style="height: 38px;"></div>
+                <div style="<%= 'padding:20px;font-size:18px;base-font-size:18px;margin-top:10px;height: ' .. height .. 'px;' %>">
                     <div style="margin-right:60px;">
-                       <%= get_msg() %>
+                    <%= get_msg() %>
                     </div>
                 </div>
-            </aries:window>
+            </kp:window>
         </div>
     </pe:mcml>
 </body>
