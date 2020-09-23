@@ -17,13 +17,17 @@
                         local cur_width = styles.Window and styles.Window.width and styles.Window.width or '340px'
                         cur_width = tonumber(string.match(cur_width, '^(%d+)px'))
 
-                        return ((370 - cur_width) / 2) .. 'px'
+                        return ((630 - cur_width) / 2) .. 'px'
                     end
                 ]]>
             </script>
-            <kp:window  mode="lite" style="<%= 'margin-left: ' .. get_window_margin() .. ';width:' .. (styles.Window and styles.Window.width and styles.Window.width or '340px') %>" icon="Texture/Aries/Creator/keepwork/Window/title/biaoti_tishi_32bits.png" title='<%= customLabels.TitleLabel or L"信息" %>' onclose="close">
+            <kp:window
+                mode="lite"
+                style="<%= 'margin-left: ' .. get_window_margin() .. ';width:' .. (styles.Window and styles.Window.width and styles.Window.width or '340px') %>"
+                icon="Texture/Aries/Creator/keepwork/Window/title/biaoti_tishi_32bits.png" title='<%= customLabels.TitleLabel or L"信息" %>'
+                onclose="close">
                 <div style="height: 38px;"></div>
-                <div style="<%= 'width:' .. (styles.Container and styles.Container.width and styles.Container.width or '330px') .. ';padding:5px;color:#cccccc' %>">
+                <div style="<%= 'width:' .. (styles.Container and styles.Container.width and styles.Container.width or '330px') .. ';padding:5px;' %>">
                     <pe:if condition='<%=type(_guihelper.values.icon)=="string"%>'>
                         <img style="margin-right:5px;width:24px;height:24px;" src='<%=_guihelper.values.icon%>'/>
                     </pe:if>
