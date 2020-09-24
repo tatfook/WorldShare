@@ -9,14 +9,17 @@ use the lib:
 local VipNotice = NPL.load("(gl)Mod/WorldShare/cellar/VipNotice/VipNotice.lua")
 ------------------------------------------------------------
 ]]
-
+-- service
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
+
+-- UI
 local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
 local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua")
 
 local VipNotice = NPL.export()
 
 VipNotice.onlyRecharge = false;
+
 function VipNotice:Init(bEnable, callback)
     VipNotice.callback = callback
 

@@ -2,42 +2,53 @@
     <body>
         <pe:mcml>
             <script type="text/npl" refresh="false" src="VipNotice.lua">
-                local page = document:GetPageCtrl()
-                local Config = NPL.load("(gl)Mod/WorldShare/config/Config.lua")
-                local VipNotice = NPL.load("(gl)Mod/WorldShare/cellar/VipNotice/VipNotice.lua")
-                local firstOpen = true;
+                <![CDATA[
+                    -- UI
+                    local VipNotice = NPL.load("(gl)Mod/WorldShare/cellar/VipNotice/VipNotice.lua")
+                    local GetVipMemberByCode = NPL.load("(gl)Mod/WorldShare/cellar/Vip/GetVipMemberByCode/GetVipMemberByCode.lua")
 
-                function close()
-                    page:CloseWindow()
-                end
+                    -- service
+                    local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 
-                function get_window_style(w,h)
-                    return Mod.WorldShare.Utils.FixCenter(w, h)
-                end
+                    local firstOpen = true;
+                    local page = document:GetPageCtrl()
 
-                function open()
-                    ParaGlobal.ShellExecute("open", Config.keepworkVipList[Config.defaultEnv], "", "", 1)
-                    firstOpen = false;
-                    page:Refresh(0);
-                end
+                    function close()
+                        page:CloseWindow()
+                    end
 
-                function isFirstOpen()
-                    return firstOpen;
-                end
+                    function get_window_style(w,h)
+                        return Mod.WorldShare.Utils.FixCenter(w, h)
+                    end
 
-                function refreshVip()
-                    VipNotice.RefreshVipInfo();
-                    page:CloseWindow();
-                end
+                    function open()
+                        ParaGlobal.ShellExecute("open", KeepworkService:GetKeepworkUrl() .. "/vip", "", "", 1)
+                        firstOpen = false;
+                        page:Refresh(0);
+                    end
 
-                function isVip()
-                    return Mod.WorldShare.Store:Get('user/isVip');
-                end
+                    function isFirstOpen()
+                        return firstOpen;
+                    end
 
-                function onlyRecharge()
-                    return VipNotice.onlyRecharge;
-                end
+                    function refreshVip()
+                        VipNotice.RefreshVipInfo();
+                        page:CloseWindow();
+                    end
 
+                    function isVip()
+                        return Mod.WorldShare.Store:Get('user/isVip');
+                    end
+
+                    function onlyRecharge()
+                        return VipNotice.onlyRecharge;
+                    end
+
+                    function show_get_vip_member_by_code_page()
+                        page:CloseWindow()
+                        GetVipMemberByCode:Show()
+                    end
+                ]]>
             </script>
             <div width="100%" height="100%">
                 <pe:if condition='<%=onlyRecharge()%>'>
@@ -49,7 +60,7 @@
                                     width="955"
                                     height="580"
                                     style="<%=get_window_style(955,580)%>"
-                                    title='<%=L"Paracraft会员" %>'
+                                    icon="Texture/Aries/Creator/keepwork/Window/title/biaoti_vip_32bits.png"
                                     onclose="close">
                                         <div style="margin-left: 10px; margin-top: 40px; width: 932px; height: 534x; background: url(Texture/Aries/Creator/keepwork/vip/huiyuan_932X534_32bits.png#0 0 932 534)">
                                             <input type="button"  onclick="open" style="margin-left:55px;margin-top:380px;width: 184px;height: 124x;background: url(Texture/Aries/Creator/keepwork/vip/btn_zhaojiazhangkaitong_184X124_32bits.png#0 0 184 124)" />
@@ -64,7 +75,7 @@
                                     width="400"
                                     height="200"
                                     style="<%=get_window_style(400,200)%>"
-                                    title='<%=L"Paracraft会员" %>'
+                                    icon="Texture/Aries/Creator/keepwork/Window/title/biaoti_vip_32bits.png"
                                     onclose="close">
                                         <div style="padding: 30px;">
                                             <div style="font-size: 14px;margin-left: 0px;margin-top: 20px;color:#000000;">
@@ -85,11 +96,18 @@
                                     width="955"
                                     height="580"
                                     style="<%=get_window_style(955,580)%>"
-                                    title='<%=L"Paracraft会员" %>'
+                                    icon="Texture/Aries/Creator/keepwork/Window/title/biaoti_vip_32bits.png"
                                     onclose="close">
                                         <div style="margin-left: 10px; margin-top: 40px; width: 932px; height: 534x; background: url(Texture/Aries/Creator/keepwork/vip/huiyuan_932X534_32bits.png#0 0 932 534)">
-                                            <input type="button"  onclick="open" style="margin-left:55px;margin-top:380px;width: 184px;height: 124x;background: url(Texture/Aries/Creator/keepwork/vip/btn_zhaojiazhangkaitong_184X124_32bits.png#0 0 184 124)" />
-                                            <div style="margin-left:100px;margin-top:-45px;color:#000000;"><%=L"找家长开通会员" %></div>
+                                            <div style="margin-left:55px;margin-top:340;">
+                                                <div style="width: 184px;height: 124px;">
+                                                    <input type="button"  onclick="open" style="width: 184px;height: 124px;background: url(Texture/Aries/Creator/keepwork/vip/btn_zhaojiazhangkaitong_184X124_32bits.png#0 0 184 124)" />
+                                                    <div style="margin-left: 43px;margin-top: -45px;color: #000000;"><%=L"找家长开通会员" %></div>
+                                                </div>
+                                                <div style="width: 184px;height: 30px;margin-top: 5px;">
+                                                    <input type="button" style="width: 184px;height: 50px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#512 204 48 50:15 15 15 15);" value="<%= L'兑换会员' %>" onclick="show_get_vip_member_by_code_page()" />
+                                                </div>
+                                            </div>
                                         </div>
                                 </kp:window>
                             </pe:if>
@@ -122,7 +140,7 @@
                             width="955"
                             height="580"
                             style="<%=get_window_style(955,580)%>"
-                            title='<%=L"Paracraft会员" %>'
+                            icon="Texture/Aries/Creator/keepwork/Window/title/biaoti_vip_32bits.png"
                             onclose="close">
                                 <div style="margin-left: 10px; margin-top: 40px; width: 932px; height: 534x; background: url(Texture/Aries/Creator/keepwork/vip/huiyuan_932X534_32bits.png#0 0 932 534)">
                                     <input type="button"  onclick="open" style="margin-left:55px;margin-top:380px;width: 184px;height: 124x;background: url(Texture/Aries/Creator/keepwork/vip/btn_zhaojiazhangkaitong_184X124_32bits.png#0 0 184 124)" />
@@ -137,7 +155,7 @@
                             width="400"
                             height="200"
                             style="<%=get_window_style(400,200)%>"
-                            title='<%=L"Paracraft会员" %>'
+                            icon="Texture/Aries/Creator/keepwork/Window/title/biaoti_vip_32bits.png"
                             onclose="close">
                                 <div style="padding: 30px;">
                                     <div style="font-size: 14px;margin-left: 0px;margin-top: 20px;color:#000000;">

@@ -21,6 +21,7 @@ local KeepworkKeepworksApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Keepworks
 local KeepworkOauthUsersApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/OauthUsers.lua")
 local LessonOrganizationsApi = NPL.load("(gl)Mod/WorldShare/api/Lesson/LessonOrganizations.lua")
 local KeepworkSocketApi = NPL.load("(gl)Mod/WorldShare/api/Socket/Socket.lua")
+local LessonVipCodeApi = NPL.load("(gl)Mod/WorldShare/api/Lesson/VipCode.lua")
 
 -- database
 local SessionsData = NPL.load("(gl)Mod/WorldShare/database/SessionsData.lua")
@@ -805,4 +806,12 @@ function KeepworkServiceSession:GetOauthClientId(platform)
     end
 
     return Config[platform][KeepworkService:GetEnv()].clientId
+end
+
+function KeepworkServiceSession:ActiveVipByCode(key, callback)
+    if not key or type(key) ~= 'string' then
+        return false
+    end
+
+    LessonVipCodeApi:Activate(key, callback, callback)
 end

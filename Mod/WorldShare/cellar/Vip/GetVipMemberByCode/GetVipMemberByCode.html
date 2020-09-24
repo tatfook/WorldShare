@@ -1,0 +1,44 @@
+<html>
+    <body>
+        <pe:mcml>
+            <script type="text/npl" refresh="false" src="GetVipMemberByCode.lua">
+                <![CDATA[
+                    -- UI
+                    local GetVipMemberByCode = NPL.load("./GetVipMemberByCode.lua")
+
+                    local page = document:GetPageCtrl()
+
+                    function close()
+                        page:CloseWindow()
+                    end
+
+                    function cancel()
+                        close()
+                    end
+
+                    function confirm()
+                        GetVipMemberByCode:Activation()
+                    end
+                ]]>
+            </script>
+            <kp:window
+                class="default"
+                mode="lite"
+                width="400"
+                height="200"
+                icon="Texture/Aries/Creator/keepwork/Window/title/biaoti_vip_32bits.png"
+                onclose="close">
+                <div style="height: 40px;width: 400px;">
+                    <img style="width: 120px;height: 25px;margin-left: 130px;margin-top: 11px;" src="Texture/Aries/Creator/keepwork/worldshare_32bits.png#462 262 120 25" />
+                </div>
+                <div style="padding: 20px;padding-top: 30px;">
+                    <input type="text" name="code" style="height: 30px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#477 182 16 16:5 5 5 5);textcolor: #ffffff;" EmptyText="<%= L'请输入您的激活码' %>" />
+                    <div style="padding-top: 30px;">
+                        <input type="button" style="height: 40px;width: 120px;margin-left: 50px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#512 204 48 50:15 15 15 15);" value="<%= L'取消' %>" onclick="cancel"/>
+                        <input type="button" style="height: 40px;width: 120px;margin-left: 10px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#575 198 38 62:11 9 13 11);" value="<%= L'确定' %>" onclick="confirm"/>
+                    </div>
+                </div>
+            </kp:window>
+        </pe:mcml>
+    </body>
+</html>

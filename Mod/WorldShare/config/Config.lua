@@ -103,13 +103,6 @@ Config.socket = {
   LOCAL = "http://socket-dev.kp-para.cn"
 }
 
-Config.keepworkVipList= {
-  ONLINE = "https://keepwork.com/vip",
-  STAGE = "http://rls.kp-para.cn/vip",
-  RELEASE = "http://rls.kp-para.cn/vip",
-  LOCAL = "http://dev.kp-para.cn/vip"
-}
-
 Config.RecommendedWorldList = 'https://git.keepwork.com/gitlab_rls_official/keepworkdatasource/raw/master/official/paracraft/RecommendedWorldList.md'
 
 Config.QQ = {
