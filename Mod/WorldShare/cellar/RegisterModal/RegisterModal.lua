@@ -11,10 +11,16 @@ RegisterModal:ShowPage()
 ------------------------------------------------------------
 ]]
 
+-- helper
 local Validated = NPL.load("(gl)Mod/WorldShare/helper/Validated.lua")
+
+-- service
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
-local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
 local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
+
+-- UI
+local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
+local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua")
 
 local RegisterModal = NPL.export()
 
@@ -121,10 +127,14 @@ function RegisterModal:Register(page)
             if state.code then
                 GameLogic.AddBBS(nil, format("%s%s(%d)", L"错误信息：", state.message or "", state.code or 0), 5000, "255 0 0")
             else
+                -- set default user role
+                local filename = UserInfo.GetValidAvatarFilename('boy01')
+                GameLogic.options:SetMainPlayerAssetName(filename)
+
                 -- register success
                 -- OnKeepWorkLogin
                 GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", true)
-
+                
                 -- if self.m_mode == "account" then
                 --     self:ShowClassificationPage(function()
                 --         WorldList:RefreshCurrentServerList()
