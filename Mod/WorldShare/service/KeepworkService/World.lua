@@ -96,6 +96,7 @@ function KeepworkServiceWorld:SetWorldInstanceByPid(pid, callback)
         local worldTag = LocalService:GetTag(worldpath)
 
         local currentWorld = {
+            kpProjectId = pid,
             IsFolder = true,
             is_zip = false,
             Title = worldTag.name,

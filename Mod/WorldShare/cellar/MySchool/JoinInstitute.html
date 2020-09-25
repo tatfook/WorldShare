@@ -12,7 +12,6 @@
                                 GameLogic.AddBBS(nil, L"加入机构成功", 3000, "0 255 0")
                                 close()
                             else
-                                echo(data, true)
                                 if not data or type(data) ~= 'table' or not data.message then
                                     GameLogic.AddBBS(nil, L"加入机构失败，或已加入此机构", 3000, "255 0 0")
                                 else

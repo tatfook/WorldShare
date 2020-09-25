@@ -126,7 +126,7 @@ function SyncMain:BackupWorld()
     revision:Backup()
 end
 
-function SyncMain:SyncToLocal(callback)
+function SyncMain:SyncToLocal(callback, isRefreshWorldList)
     local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
 
     if not currentWorld.kpProjectId then
@@ -185,8 +185,10 @@ function SyncMain:SyncToLocal(callback)
                 if type(callback) == 'function' then
                     callback(result, option)
                 end
-        
-                WorldList:RefreshCurrentServerList()
+
+                if isRefreshWorldList == nil or isRefreshWorldList == true then
+                    WorldList:RefreshCurrentServerList()
+                end
             end)
 
             -- load sync progress UI

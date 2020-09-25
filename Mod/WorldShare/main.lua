@@ -107,8 +107,8 @@ local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox/MsgBox.lua")
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 
 -- command
+local WorldShareCommand = NPL.load("(gl)Mod/WorldShare/command/Command.lua")
 local MenuCommand = NPL.load("(gl)Mod/WorldShare/command/Menu.lua")
-local PipeCommand = NPL.load("(gl)Mod/WorldShare/command/Pipe.lua")
 
 local WorldShare = commonlib.inherit(commonlib.gettable("Mod.ModBase"), commonlib.gettable("Mod.WorldShare"))
 
@@ -307,6 +307,8 @@ function WorldShare:init()
             UserConsole:ShowKickOutPage(reason)
         end
     end)
+
+    WorldShareCommand:Init()
 end
 
 function WorldShare:OnInitDesktop()
@@ -316,9 +318,6 @@ function WorldShare:OnLogin()
 end
 
 function WorldShare:OnWorldLoad()
-    MenuCommand:Init()
-    PipeCommand:Init()
-
     Store:Set('world/isEnterWorld', true)
 
     UserConsole:ClosePage()

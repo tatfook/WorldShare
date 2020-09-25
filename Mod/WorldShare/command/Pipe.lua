@@ -50,9 +50,5 @@ function PipeCommand:Init()
 
     Commands['pipe'] = pipe
 
-    GameLogic.GetFilters():add_filter("register_command", function(_, SlashCommand)
-        SlashCommand:RegisterSlashCommand(pipe)
-    end)
-
-    CommandManager:Init()
+    return pipe
 end
