@@ -353,28 +353,28 @@ function MySchool:GetSearchSchoolResultByName(name, callback)
         for key, item in ipairs(self.result) do
             local name = ''
 
-            if item.region and type(item.region) == 'table' then
-                if item.region.state and
-                   type(item.region.state) == 'table' and
-                   item.region.state.name and
-                   type(item.region.state.name) == 'string' then
-                    name = name .. item.region.state.name
-                end
+            -- if item.region and type(item.region) == 'table' then
+            --     if item.region.state and
+            --        type(item.region.state) == 'table' and
+            --        item.region.state.name and
+            --        type(item.region.state.name) == 'string' then
+            --         name = name .. item.region.state.name
+            --     end
 
-                if item.region.city and
-                   type(item.region.city) == 'table' and
-                   item.region.city.name and
-                   type(item.region.city.name) == 'string' then
-                    name = name .. item.region.city.name
-                end
+            --     if item.region.city and
+            --        type(item.region.city) == 'table' and
+            --        item.region.city.name and
+            --        type(item.region.city.name) == 'string' then
+            --         name = name .. item.region.city.name
+            --     end
 
-                if item.region.county and
-                   type(item.region.county) == 'table' and
-                   item.region.county.name and
-                   type(item.region.county.name) == 'string' then
-                    name = name .. item.region.county.name
-                end
-            end
+            --     if item.region.county and
+            --        type(item.region.county) == 'table' and
+            --        item.region.county.name and
+            --        type(item.region.county.name) == 'string' then
+            --         name = name .. item.region.county.name
+            --     end
+            -- end
 
             item.text = name .. (item.name or "")
             item.value = item.id
