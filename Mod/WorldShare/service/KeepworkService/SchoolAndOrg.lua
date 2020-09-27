@@ -75,15 +75,15 @@ function KeepworkServiceSchoolAndOrg:GetSchoolRegion(selectType, parentId, callb
         return false
     end
 
-    KeepworkRegionsApi:GetList(function(data)
-        if type(data) ~= "table" then
+    local function Handle()
+        if type(self.schoolData) ~= "table" then
             return false
         end
 
         if selectType == "province" then
             local provinceData = {}
             
-            for key, item in ipairs(data) do
+            for key, item in ipairs(self.schoolData) do
                 if item and item.level == 2 then
                     provinceData[#provinceData + 1] = item
                 end
@@ -95,7 +95,7 @@ function KeepworkServiceSchoolAndOrg:GetSchoolRegion(selectType, parentId, callb
         if selectType == "city" then
             local cityData = {}
 
-            for key, item in ipairs(data) do
+            for key, item in ipairs(self.schoolData) do
                 if item and tonumber(item.parentId) == tonumber(parentId) then
                     cityData[#cityData + 1] = item
                 end
@@ -107,7 +107,7 @@ function KeepworkServiceSchoolAndOrg:GetSchoolRegion(selectType, parentId, callb
         if selectType == "area" then
             local areaData = {}
 
-            for key, item in ipairs(data) do
+            for key, item in ipairs(self.schoolData) do
                 if item and tonumber(item.parentId) == tonumber(parentId) then
                     areaData[#areaData + 1] = item
                 end
@@ -115,6 +115,19 @@ function KeepworkServiceSchoolAndOrg:GetSchoolRegion(selectType, parentId, callb
 
             callback(areaData)
         end
+    end
+
+    if self.schoolData then
+        Handle()
+        return
+    end
+
+    KeepworkRegionsApi:GetList(function(data)
+        if not self.schoolData then
+            self.schoolData = data
+        end
+
+        Handle()
     end)
 end
 
