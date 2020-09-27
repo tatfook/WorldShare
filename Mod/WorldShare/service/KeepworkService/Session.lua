@@ -19,9 +19,9 @@ local KeepworkServiceSchoolAndOrg = NPL.load("(gl)Mod/WorldShare/service/Keepwor
 local KeepworkUsersApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Users.lua")
 local KeepworkKeepworksApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Keepworks.lua")
 local KeepworkOauthUsersApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/OauthUsers.lua")
-local LessonOrganizationsApi = NPL.load("(gl)Mod/WorldShare/api/Lesson/LessonOrganizations.lua")
+local AccountingOrgApi = NPL.load("(gl)Mod/WorldShare/api/Accounting/Org.lua")
 local KeepworkSocketApi = NPL.load("(gl)Mod/WorldShare/api/Socket/Socket.lua")
-local LessonVipCodeApi = NPL.load("(gl)Mod/WorldShare/api/Lesson/VipCode.lua")
+local AccountingVipCodeApi = NPL.load("(gl)Mod/WorldShare/api/Accounting/ParacraftVipCode.lua")
 
 -- database
 local SessionsData = NPL.load("(gl)Mod/WorldShare/database/SessionsData.lua")
@@ -243,15 +243,11 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
     local Login = Mod.WorldShare.Store:Action("user/Login")
     Login(token, userId, username, nickname, realname)
 
-    LessonOrganizationsApi:GetUserAllOrgs(
+    AccountingOrgApi:GetUserAllOrgs(
         function(data, err)
             if err == 200 then
-                if data and data.data and type(data.data.allOrgs) == 'table' and type(data.data.showOrgId) == 'number' then
-                    for key, item in ipairs(data.data.allOrgs) do
-                        if item.id == data.data.showOrgId then
-                            Mod.WorldShare.Store:Set('user/myOrg', item)
-                        end
-                    end
+                if data and data.data and type(data.data) == 'table' and #data.data > 0 then
+                    Mod.WorldShare.Store:Set('user/myOrg', data.data[1] or {})
                 end
             end
 
@@ -813,5 +809,5 @@ function KeepworkServiceSession:ActiveVipByCode(key, callback)
         return false
     end
 
-    LessonVipCodeApi:Activate(key, callback, callback)
+    AccountingVipCodeApi:Activate(key, callback, callback)
 end

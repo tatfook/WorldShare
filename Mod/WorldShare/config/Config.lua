@@ -78,6 +78,13 @@ Config.lessonList = {
   LOCAL = "http://api-dev.kp-para.cn/lessonapi/v0"
 }
 
+Config.accountingList = {
+  ONLINE = "https://api.keepwork.com/accounting",
+  STAGE = "http://api-dev.kp-para.cn/accounting",
+  RELEASE = "http://api-rls.kp-para.cn/accounting",
+  LOCAL = "http://api-dev.kp-para.cn/accounting"
+}
+
 Config.dataSourceApiList = {
   gitlab = {
     ONLINE = "https://git.keepwork.com/api/v4",

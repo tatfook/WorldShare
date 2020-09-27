@@ -10,11 +10,11 @@ local KeepworkServiceSchoolAndOrg = NPL.load("(gl)Mod/WorldShare/service/Keepwor
 ]]
 
 -- api
-local LessonOrganizationsApi = NPL.load("(gl)Mod/WorldShare/api/Lesson/LessonOrganizations.lua")
+local AccountingOrgApi = NPL.load("(gl)Mod/WorldShare/api/Accounting/Org.lua")
 local KeepworkUsersApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Users.lua")
 local KeepworkRegionsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Regions.lua")
 local KeepworkSchoolsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Schools.lua")
-local LessonOrganizationActivateCodesApi = NPL.load("(gl)Mod/WorldShare/api/Lesson/LessonOrganizationActivateCodes.lua")
+local AccountingOrgActivateCodeApi = NPL.load("(gl)Mod/WorldShare/api/Accounting/OrgActivateCode.lua")
 
 local KeepworkServiceSchoolAndOrg = NPL.export()
 
@@ -23,11 +23,11 @@ function KeepworkServiceSchoolAndOrg:GetUserAllOrgs(callback)
         return false
     end
 
-    LessonOrganizationsApi:GetUserAllOrgs(
+    AccountingOrgApi:GetUserAllOrgs(
         function(data, err)
             if err == 200 then
-                if data and data.data and type(data.data.allOrgs) == 'table' then
-                    callback(data.data.allOrgs)
+                if data and data.data and type(data.data) == 'table' then
+                    callback(data.data)
                 end
             end
         end,
@@ -161,7 +161,7 @@ function KeepworkServiceSchoolAndOrg:JoinInstitute(code, callback)
 
     code = string.gsub(code, " ", "")
 
-    LessonOrganizationActivateCodesApi:Activate(
+    AccountingOrgActivateCodeApi:Activate(
         code,
         realname,
         function(data, err)
