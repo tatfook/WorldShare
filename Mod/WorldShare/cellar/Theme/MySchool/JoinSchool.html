@@ -60,11 +60,22 @@
                                 }
                             }
 
+                            if MySchool.searchText and MySchool.searchText ~= "" then
+                                MySchool:GetSearchSchoolResultByName(MySchool.searchText, function()
+                                    MySchool:RefreshJoinSchool()
+                                    page:SetValue('school_name', MySchool.searchText)
+                                end)
+
+                                return
+                            end
+
                             MySchool:GetSearchSchoolResult(value, MySchool.kind, function(data)
                                 MySchool:RefreshJoinSchool()
+                                page:SetValue('school_name', MySchool.searchText)
                             end)
 
                             MySchool:RefreshJoinSchool()
+                            page:SetValue('school_name', MySchool.searchText)
                         end)
                     end
 
@@ -78,11 +89,22 @@
                         MySchool:GetAreas(value, function(data)
                             MySchool.areas = data
 
+                            if MySchool.searchText and MySchool.searchText ~= "" then
+                                MySchool:GetSearchSchoolResultByName(MySchool.searchText, function()
+                                    MySchool:RefreshJoinSchool()
+                                    page:SetValue('school_name', MySchool.searchText)
+                                end)
+
+                                return
+                            end
+
                             MySchool:GetSearchSchoolResult(value, MySchool.kind, function(data)
                                 MySchool:RefreshJoinSchool()
+                                page:SetValue('school_name', MySchool.searchText)
                             end)
                             
                             MySchool:RefreshJoinSchool()
+                            page:SetValue('school_name', MySchool.searchText)
                         end)
                     end
 
@@ -93,8 +115,18 @@
 
                         MySchool.curId = value
 
+                        if MySchool.searchText and MySchool.searchText ~= "" then
+                            MySchool:GetSearchSchoolResultByName(MySchool.searchText, function()
+                                MySchool:RefreshJoinSchool()
+                                page:SetValue('school_name', MySchool.searchText)
+                            end)
+
+                            return
+                        end
+
                         MySchool:GetSearchSchoolResult(value, MySchool.kind, function(data)
                             MySchool:RefreshJoinSchool()
+                            page:SetValue('school_name', MySchool.searchText)
                         end)
                     end
 
@@ -110,8 +142,18 @@
                             return false
                         end
 
+                        if MySchool.searchText and MySchool.searchText ~= "" then
+                            MySchool:GetSearchSchoolResultByName(MySchool.searchText, function()
+                                MySchool:RefreshJoinSchool()
+                                page:SetValue('school_name', MySchool.searchText)
+                            end)
+
+                            return
+                        end
+
                         MySchool:GetSearchSchoolResult(MySchool.curId, MySchool.kind, function(data)
                             MySchool:RefreshJoinSchool()
+                            page:SetValue('school_name', MySchool.searchText)
                         end)
                     end
 
@@ -160,6 +202,17 @@
                     function on_enter_school_name(name, mcmlNode)
                         local text = mcmlNode:GetUIValue()
 
+                        MySchool.searchText = text
+
+                        if text and text == "" then
+                            MySchool:GetSearchSchoolResult(MySchool.curId, MySchool.kind, function(data)
+                                MySchool:RefreshJoinSchool()
+                                page:SetValue('school_name', MySchool.searchText)
+                            end)
+
+                            return
+                        end
+
                         MySchool:GetSearchSchoolResultByName(text, function()
                             local JoinSchoolResultPage = Mod.WorldShare.Store:Get("page/Mod.WorldShare.JoinSchoolResult")
 
@@ -170,7 +223,7 @@
                     end
 
                     function select_search_by_name()
-                        if focus_refresh then
+                        --[[ if focus_refresh then
                             return false
                         end
 
@@ -238,7 +291,7 @@
                             Mod.WorldShare.Utils.SetTimeOut(function()
                                 focus_refresh = false
                             end, 500)
-                        end, 500)
+                        end, 500) ]]
                     end
                 ]]>
             </script>

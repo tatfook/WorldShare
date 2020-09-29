@@ -307,3 +307,19 @@ function KeepworkUsersApi:SchoolRegister(schoolType, regoinId, schoolName, succe
 
     KeepworkBaseApi:Post('/users/school/register', params, nil, success, error)
 end
+
+-- url: /users/search
+-- method: POST
+-- header:
+-- params:
+--[[
+    {"id":{"$in": [ 用户id数组 ]}}
+]]
+-- return: object
+function KeepworkUsersApi:Search(params, success, error)
+    if not params or type(params) ~= 'table' then
+        return false
+    end
+
+    KeepworkBaseApi:Post('/users/search', params, nil, success, error)
+end
