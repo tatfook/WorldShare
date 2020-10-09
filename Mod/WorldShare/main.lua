@@ -215,24 +215,6 @@ function WorldShare:init()
         end
     )
 
-    -- cmd load world
-    GameLogic.GetFilters():add_filter(
-        "cmd_loadworld", 
-        function(url, options)
-            local refreshMode = nil;
-			if (options.force) then
-				refreshMode = "force";
-			end
-            local pid = UserConsole:GetProjectId(url)
-            if pid then
-                UserConsole:HandleWorldId(pid, refreshMode)
-                return
-            else
-                return url
-            end
-        end
-    )
-
     -- vip notice
     GameLogic.GetFilters():add_filter(
         "VipNotice",

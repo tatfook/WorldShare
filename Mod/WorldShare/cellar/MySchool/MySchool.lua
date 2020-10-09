@@ -131,7 +131,7 @@ function MySchool:ShowJoinSchool(callback)
     -- end
 
     local params1 = Mod.WorldShare.Utils.ShowWindow(600, 420, "(ws)Theme/MySchool/JoinSchool.html", "Mod.WorldShare.JoinSchool", nil, nil, nil, false, 1)
-    local params2 = Mod.WorldShare.Utils.ShowWindow(380, 100, "(ws)Theme/MySchool/JoinSchoolResult.html", "Mod.WorldShare.JoinSchoolResult", nil, 20, nil, nil, 2)
+    local params2 = Mod.WorldShare.Utils.ShowWindow(380, 100, "(ws)Theme/MySchool/JoinSchoolResult.html", "Mod.WorldShare.JoinSchoolResult", nil, 20, nil, false, 2)
 
     self:GetProvinces(function(data)
         if type(data) ~= "table" then
