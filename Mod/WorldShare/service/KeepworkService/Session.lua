@@ -811,3 +811,11 @@ function KeepworkServiceSession:ActiveVipByCode(key, callback)
 
     AccountingVipCodeApi:Activate(key, callback, callback)
 end
+
+function KeepworkServiceSession:GetUsersByUsernames(usernames, callback)
+    if not usernames or type(usernames) ~= 'table' then
+        return false
+    end
+    
+    KeepworkUsersApi:Search({ username = { ['$in'] = usernames }}, callback, callback)
+end

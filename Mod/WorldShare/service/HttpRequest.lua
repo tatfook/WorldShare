@@ -256,18 +256,68 @@ function HttpRequest:Delete(url, params, headers, success, error, noTryStatus)
     )
 end
 
-function HttpRequest:PostFields(url, headers, content, success, error)
-    System.os.GetUrl({ url = url, headers = headers, postfields = content }, function(err, msg, data)
-        LOG.std("HttpRequest", "debug", "Request", "Status Code: %s, Method: %s, URL: %s", err, "POST", url)
+function HttpRequest:PostFields(url, params, headers, success, error)
+    if not params or type(params) ~= "table" then
+        return false
+    end
 
-        if err == 200 then
-            if type(success) == 'function' then
-                success(data, err)
-            end
-        else
-            if type(error) == 'function' then
-                error(data, err)
+    if not self.boundary then
+        self.boundary = ParaMisc.md5('')
+    end
+
+    local boundaryLine = "--WebKitFormBoundary" .. self.boundary .. "\n"
+    local postfields = ""
+
+    
+    for key, item in ipairs(params) do
+        if not item or not item.name or not item.type or not item.value then
+            return false
+        end
+
+        if item.type == "string" then
+            postfields = postfields .. "Content-Disposition: form-data; name=\"" .. item.name .. "\"\n\n" ..
+                         item.value .. "\n"
+        end
+
+        if item.type == "file" then
+            if item.filename then
+                postfields = postfields .. "Content-Disposition: form-data; name=\"file\"; filename=\"" .. item.filename .. "\"\n" ..
+                             "Content-Type: application/octet-stream\n" ..
+                             "Content-Transfer-Encoding: binary\n\n" ..
+                             item.value .. "\n"
             end
         end
-    end)
+
+        postfields = postfields .. boundaryLine
+    end
+
+    headers = headers or {}
+
+    headers['User-Agent'] = "paracraft"
+    headers["Accept"] = "*/*"
+    headers["Cache-Control"] = "no-cache"
+    headers['Content-Type'] = "multipart/form-data; boundary=WebKitFormBoundary" .. self.boundary
+    headers['Content-Length'] = #postfields
+    headers['Connection'] = "keep-alive"
+
+    System.os.GetUrl(
+        {
+            url = url,
+            headers = headers,
+            postfields = postfields
+        },
+        function(err, msg, data)
+            LOG.std("HttpRequest", "debug", "Request", "Status Code: %s, Method: %s, URL: %s", err, "POST", url)
+
+            if err == 200 then
+                if type(success) == 'function' then
+                    success(data, err)
+                end
+            else
+                if type(error) == 'function' then
+                    error(data, err)
+                end
+            end
+        end
+    )
 end
