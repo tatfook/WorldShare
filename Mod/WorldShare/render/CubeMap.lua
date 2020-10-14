@@ -88,7 +88,7 @@ function CubeMapRender:Generate(worldpath, callback)
 end
 
 function CubeMapRender:RenderCubeMapImage(filepath)
-    local tempfile = Mod.WorldShare.Utils.GetTempFolderFullPath() .. "cubemap_render.jpg"
+    local tempfile = Mod.WorldShare.Utils.GetTempFolderFullPath() .. "cubemap_render" .. os.time() .. ".jpg"
 
     CommandManager:RunCommand("/hide tips")
     ParaUI.GetUIObject("root").visible = false;
@@ -114,7 +114,7 @@ function CubeMapRender:RenderCubeMapImage(filepath)
 
         local r = ParaUI.GetUIObject("root");
 
-        local c = ParaUI.CreateUIObject("container", "RenderCubMapImage", "_lt", -(_width - _height), 0, _width + (_width - _height) * 2, _height);
+        local c = ParaUI.CreateUIObject("container", "RenderCubMapImage" .. os.time(), "_lt", -(_width - _height), 0, _width + (_width - _height) * 2, _height);
         c.background = tempfile
         c.zorder = 10
         
@@ -123,6 +123,7 @@ function CubeMapRender:RenderCubeMapImage(filepath)
         Mod.WorldShare.Utils.SetTimeOut(function()
             ParaMovie.TakeScreenShot((filepath), _height, _height)
             ParaUI.DestroyUIObject(c)
+            ParaIO.DeleteFile(tempfile)
         end, 100)
     end, 100)
 end
