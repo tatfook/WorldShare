@@ -3,8 +3,14 @@
         <pe:mcml>
             <script type="text/npl" refresh="false">
                 <![CDATA[
+                    -- helper
                     local Validated = NPL.load("(gl)Mod/WorldShare/helper/Validated.lua")
+                    local BroadcastHelper = commonlib.gettable("CommonCtrl.BroadcastHelper");
+                    
+                    -- service
                     KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
+                    
+                    -- UI
                     RegisterModal = NPL.load("./RegisterModal.lua")
 
                     page = document:GetPageCtrl()
@@ -220,6 +226,8 @@
                     end
 
                     function set_mode(mode)
+                        BroadcastHelper.Clear()
+                    
                         RegisterModal.account = page:GetValue("account")
                         RegisterModal.password = page:GetValue("password")
                         RegisterModal.phonepassword = page:GetValue("phonepassword")
@@ -291,29 +299,33 @@
                     end
 
                     function check_phone_number(pn)
-                        local phonenumber
-                        
-                        if page:GetValue("phonenumber") and #page:GetValue("phonenumber") > 0 then
-                            phonenumber = page:GetValue("phonenumber")
-                        else
-                            phonenumber = pn
-                        end
-
-                        if not Validated:Phone(phonenumber) then
-                            return false
-                        end
-
-                        KeepworkServiceSession:CheckPhonenumberExist(phonenumber, function(bIsExist)
-                            if bIsExist then
-                                phonenumberExist = true
-                                GameLogic.AddBBS(nil, L"手机号已存在", 3000, "255 0 0")
-                            else
-                                phonenumberExist = false
+                        Mod.WorldShare.Utils.SetTimeOut(function()
+                            if RegisterModal.m_mode ~= 'phonenumber' then
+                                return false
                             end
-                        end)
-                    end
 
-                    check_phone_number(RegisterModal.phonenumber)
+                            local phonenumber
+                            
+                            if page:GetValue("phonenumber") and #page:GetValue("phonenumber") > 0 then
+                                phonenumber = page:GetValue("phonenumber")
+                            else
+                                phonenumber = pn
+                            end
+
+                            if not Validated:Phone(phonenumber) then
+                                return false
+                            end
+
+                            KeepworkServiceSession:CheckPhonenumberExist(phonenumber, function(bIsExist)
+                                if bIsExist then
+                                    phonenumberExist = true
+                                    GameLogic.AddBBS(nil, L"手机号已存在", 3000, "255 0 0")
+                                else
+                                    phonenumberExist = false
+                                end
+                            end)
+                        end, 100)
+                    end
 
                     function get_user_register_style()
                         if Mod.WorldShare.Utils.IsEnglish() then

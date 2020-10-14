@@ -113,7 +113,12 @@
                 end
 
                 function snapshot()
-                    WorldExitDialog.Snapshot();
+                    -- WorldExitDialog.Snapshot();
+
+                    local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
+
+                    local CubeMapRender = NPL.load("(gl)Mod/WorldShare/render/CubeMap.lua")
+                    CubeMapRender:RenderCubeMapImage(currentEnterWorld.worldpath .. "test6.jpg")
                 end
 
                 function get_english_style(styleStr)
