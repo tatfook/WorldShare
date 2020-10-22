@@ -32,6 +32,9 @@ NPL.load("(gl)script/ide/System/Encoding/basexx.lua")
 -- include ide system windows
 NPL.load("(gl)script/ide/System/Windows/Screen.lua")
 
+-- include ide system scene
+NPL.load("(gl)script/ide/System/Scene/Viewports/ViewportManager.lua")
+
 -- include ide system core
 NPL.load("(gl)script/ide/System/Core/UniString.lua")
 NPL.load("(gl)script/ide/System/Core/Event.lua")
@@ -73,6 +76,7 @@ NPL.load("(gl)script/apps/Aries/Creator/Game/NplBrowser/NplBrowserPlugin.lua")
 -- include worldshare service
 NPL.load("(gl)Mod/WorldShare/service/SocketService.lua")
 NPL.load("(gl)Mod/WorldShare/service/Cef3Manager.lua")
+
 
 -- get table lib
 local SocketService = commonlib.gettable("Mod.WorldShare.service.SocketService")
@@ -212,24 +216,6 @@ function WorldShare:init()
         "save_world_info",
         function(ctx, node)
             LocalService:SaveWorldInfo(ctx, node)
-        end
-    )
-
-    -- cmd load world
-    GameLogic.GetFilters():add_filter(
-        "cmd_loadworld", 
-        function(url, options)
-            local refreshMode = nil;
-			if (options.force) then
-				refreshMode = "force";
-			end
-            local pid = UserConsole:GetProjectId(url)
-            if pid then
-                UserConsole:HandleWorldId(pid, refreshMode)
-                return
-            else
-                return url
-            end
         end
     )
 

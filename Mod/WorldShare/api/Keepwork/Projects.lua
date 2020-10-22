@@ -144,3 +144,18 @@ function KeepworkProjectsApi:RemoveProject(kpProjectId, success, error)
 
     KeepworkBaseApi:Delete(url, nil, nil ,success, error)
 end
+
+-- url: /projects/shareWxacode
+-- method: POST
+-- params:
+--[[
+    projectId int necessary
+]]
+-- return: object
+function KeepworkProjectsApi:ShareWxacode(projectId, success, error)
+    if not projectId or type(projectId) ~= 'number' then
+        return false
+    end
+
+    KeepworkBaseApi:Post('/projects/shareWxacode', { projectId = projectId }, nil, success, error)
+end

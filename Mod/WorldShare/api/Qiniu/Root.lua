@@ -19,37 +19,17 @@ QiniuRootApi.boundary = ParaMisc.md5('')
 -- method: POST FIELDS
 -- return: object
 function QiniuRootApi:Upload(token, key, filename, content, callback)
-    local boundary = QiniuRootApi.boundary
-    local boundaryLine = "--WebKitFormBoundary" .. boundary .. "\n"
-
-    local postFieldsString = boundaryLine ..
-                             "Content-Disposition: form-data; name=\"file\"; filename=\"" .. filename .. "\"\n" ..
-                             "Content-Type: application/octet-stream\n" ..
-                             "Content-Transfer-Encoding: binary\n\n" ..
-                             content .. "\n" ..
-                             boundaryLine ..
-                             "Content-Disposition: form-data; name=\"x:filename\"\n\n" ..
-                             filename ..  "\n" ..
-                             boundaryLine ..
-                             "Content-Disposition: form-data; name=\"token\"\n\n" ..
-                             token ..  "\n" ..
-                             boundaryLine ..
-                             "Content-Disposition: form-data; name=\"key\"\n\n" ..
-                             key .. "\n" .. 
-                             boundaryLine
-
     QiniuBaseApi:PostFields(
         '/',
         {
-            ['Host'] = "upload-z2.qiniup.com",
-            ['User-Agent'] = "paracraft",
-            ["Accept"] = "*/*",
-            ["Cache-Control"] = "no-cache",
-            ['Content-Type'] = "multipart/form-data; boundary=WebKitFormBoundary" .. boundary,
-            ['Content-Length'] = #postFieldsString,
-            ['Connection'] = "keep-alive",
+            { name = "file", type = "file", filename = filename, value = content },
+            { name = "x:filename", type = "string", value = filename },
+            { name = "token", type = "string", value = token },
+            { name = "key", type = "string", value = key }
         },
-        postFieldsString,
+        {
+            ['Host'] = "upload-z2.qiniup.com",
+        },
         callback,
         callback
     )

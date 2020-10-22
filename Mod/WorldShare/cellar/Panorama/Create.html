@@ -1,0 +1,57 @@
+<html>
+    <body>
+        <pe:mcml>
+            <script type="text/npl">
+                <![CDATA[
+                    -- UI
+                    local Panorama = NPL.load('./Panorama.lua')
+
+                    local page = document:GetPageCtrl()
+                    
+                    local width = page:GetRequestParam('width') or 0
+                    local height = page:GetRequestParam('height') or 0
+
+                    function close()
+                        page:CloseWindow()
+                    end
+
+                    function get_width()
+                        return width
+                    end
+
+                    function get_height()
+                        return height
+                    end
+
+                    function start_shooting()
+                        close() 
+                        Panorama:StartShooting()
+                    end
+                ]]>
+            </script>
+            <div style="background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#467 297 100 184:34 86 34 74);">
+                <div style="<%= 'width: ' .. get_width() .. 'px;height: ' .. get_height() .. 'px;' %>">
+                    <div style="<%= 'height: 40px;width: ' .. get_width() .. 'px;' %>">
+                        <!-- title bar -->
+                        <div style="position: relative;margin-top: 8px;margin-left: 15px;width: 165px;height: 25px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#575 331 165 25)"></div>
+                        <input type="button"
+                               style="<%= 'margin-left: ' .. (get_width() - 32) .. 'px;margin-top: 10px;width: 22px;height: 22px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#575 297 22 22);' %>"
+                               onclick="close()" />
+                    </div>
+                    <div>
+                        <!-- body -->
+                        <div style="margin-left: 16px;margin-top: 7px;">
+                            <%= L'你搭建的世界太棒了，快去选择一个能展示你世界的最佳位置进行3D全景图拍摄吧' %>
+                        </div>
+                        <div style="<%= 'margin-left: ' .. (get_width() / 2 - 62.5) .. 'px;margin-top: ' .. (get_height() - 40 - 74 - 7 - 10) .. 'px;' %>">
+                            <input type="button"
+                                   style="width: 125px;height: 45px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#575 198 38 62:11 9 13 11);"
+                                   onclick="start_shooting()"
+                                   value="<%= L'开始拍摄' %>" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </pe:mcml>
+    </body>
+</html>

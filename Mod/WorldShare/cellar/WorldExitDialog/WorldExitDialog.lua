@@ -46,7 +46,7 @@ function WorldExitDialog.ShowPage(callback)
         Mod.WorldShare.MsgBox:Close()
 
         local params = Mod.WorldShare.Utils.ShowWindow({
-            url = "Mod/WorldShare/cellar/WorldExitDialog/WorldExitDialog.html",
+            url = "Mod/WorldShare/cellar/Theme/WorldExitDialog/WorldExitDialog.html",
             name = "WorldExitDialog",
             isShowTitleBar = false,
             DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory

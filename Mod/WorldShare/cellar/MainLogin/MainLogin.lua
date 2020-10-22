@@ -164,7 +164,7 @@ function MainLogin:LoginAction()
                 if response and response.code and response.message then
                     GameLogic.AddBBS(nil, format(L"登录失败了, 错误信息：%s(%d)", response.message, response.code), 5000, "255 0 0")
                 else
-                    GameLogic.AddBBS(nil, format(L"登录失败了, 错误码：%d", err), 5000, "255 0 0")
+                    GameLogic.AddBBS(nil, format(L"登录失败了, 系统维护中, 错误码：%d", err), 5000, "255 0 0")
                 end
 
                 return false

@@ -242,6 +242,22 @@ function Utils.GetWorldFolderFullPath()
     return LocalLoadWorld.GetWorldFolderFullPath()
 end
 
+function Utils.GetRootFolderFullPath()
+    if System.os.GetExternalStoragePath() ~= "" then
+        return System.os.GetExternalStoragePath() .. "paracraft/"
+    else
+        return ParaIO.GetWritablePath()
+    end
+end
+
+function Utils.GetTempFolderFullPath()
+    if System.os.GetExternalStoragePath() ~= "" then
+        return System.os.GetExternalStoragePath() .. "paracraft/temp/"
+    else
+        return ParaIO.GetWritablePath() .. "temp/"
+    end
+end
+
 function Utils:GetFolderName()
     local originWorldPath = ParaWorld.GetWorldDirectory()
 

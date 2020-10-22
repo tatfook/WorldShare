@@ -55,8 +55,8 @@ function QiniuBaseApi:Delete(url, params, headers, success, error, noTryStatus)
 end
 
 -- public
-function QiniuBaseApi:PostFields(url, headers, content, success, error, noTryStatus)
+function QiniuBaseApi:PostFields(url, params, headers, success, error, noTryStatus)
     url = self:GetApi() .. url
 
-    BaseApi:PostFields(url, headers, content, success, error, noTryStatus)
+    BaseApi:PostFields(url, params, headers, success, error, noTryStatus)
 end
