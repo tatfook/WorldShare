@@ -10,11 +10,11 @@ local KeepworkServiceSchoolAndOrg = NPL.load("(gl)Mod/WorldShare/service/Keepwor
 ]]
 
 -- api
-local LessonOrganizationsApi = NPL.load("(gl)Mod/WorldShare/api/Lesson/LessonOrganizations.lua")
+local AccountingOrgApi = NPL.load("(gl)Mod/WorldShare/api/Accounting/Org.lua")
 local KeepworkUsersApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Users.lua")
 local KeepworkRegionsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Regions.lua")
 local KeepworkSchoolsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Schools.lua")
-local LessonOrganizationActivateCodesApi = NPL.load("(gl)Mod/WorldShare/api/Lesson/LessonOrganizationActivateCodes.lua")
+local AccountingOrgActivateCodeApi = NPL.load("(gl)Mod/WorldShare/api/Accounting/OrgActivateCode.lua")
 
 local KeepworkServiceSchoolAndOrg = NPL.export()
 
@@ -23,11 +23,11 @@ function KeepworkServiceSchoolAndOrg:GetUserAllOrgs(callback)
         return false
     end
 
-    LessonOrganizationsApi:GetUserAllOrgs(
+    AccountingOrgApi:GetUserAllOrgs(
         function(data, err)
             if err == 200 then
-                if data and data.data and type(data.data.allOrgs) == 'table' then
-                    callback(data.data.allOrgs)
+                if data and data.data and type(data.data) == 'table' then
+                    callback(data.data)
                 end
             end
         end,
@@ -75,15 +75,15 @@ function KeepworkServiceSchoolAndOrg:GetSchoolRegion(selectType, parentId, callb
         return false
     end
 
-    KeepworkRegionsApi:GetList(function(data)
-        if type(data) ~= "table" then
+    local function Handle()
+        if type(self.schoolData) ~= "table" then
             return false
         end
 
         if selectType == "province" then
             local provinceData = {}
             
-            for key, item in ipairs(data) do
+            for key, item in ipairs(self.schoolData) do
                 if item and item.level == 2 then
                     provinceData[#provinceData + 1] = item
                 end
@@ -95,7 +95,7 @@ function KeepworkServiceSchoolAndOrg:GetSchoolRegion(selectType, parentId, callb
         if selectType == "city" then
             local cityData = {}
 
-            for key, item in ipairs(data) do
+            for key, item in ipairs(self.schoolData) do
                 if item and tonumber(item.parentId) == tonumber(parentId) then
                     cityData[#cityData + 1] = item
                 end
@@ -107,7 +107,7 @@ function KeepworkServiceSchoolAndOrg:GetSchoolRegion(selectType, parentId, callb
         if selectType == "area" then
             local areaData = {}
 
-            for key, item in ipairs(data) do
+            for key, item in ipairs(self.schoolData) do
                 if item and tonumber(item.parentId) == tonumber(parentId) then
                     areaData[#areaData + 1] = item
                 end
@@ -115,6 +115,19 @@ function KeepworkServiceSchoolAndOrg:GetSchoolRegion(selectType, parentId, callb
 
             callback(areaData)
         end
+    end
+
+    if self.schoolData then
+        Handle()
+        return
+    end
+
+    KeepworkRegionsApi:GetList(function(data)
+        if not self.schoolData then
+            self.schoolData = data
+        end
+
+        Handle()
     end)
 end
 
@@ -128,8 +141,8 @@ function KeepworkServiceSchoolAndOrg:SearchSchool(id, kind, callback)
     end)
 end
 
-function KeepworkServiceSchoolAndOrg:SearchSchoolByName(name, regionId, kind, callback)
-    KeepworkSchoolsApi:GetList(name, regionId, kind, function(data, err)
+function KeepworkServiceSchoolAndOrg:SearchSchoolByName(name, callback)
+    KeepworkSchoolsApi:GetList(name, nil, nil, function(data, err)
         if data and data.rows then
             if type(callback) == "function" then
                 callback(data.rows)
@@ -161,7 +174,7 @@ function KeepworkServiceSchoolAndOrg:JoinInstitute(code, callback)
 
     code = string.gsub(code, " ", "")
 
-    LessonOrganizationActivateCodesApi:Activate(
+    AccountingOrgActivateCodeApi:Activate(
         code,
         realname,
         function(data, err)

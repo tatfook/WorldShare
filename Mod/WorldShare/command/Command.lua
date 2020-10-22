@@ -17,6 +17,7 @@ local CommandManager = commonlib.gettable("MyCompany.Aries.Game.CommandManager")
 -- command
 local MenuCommand = NPL.load("(gl)Mod/WorldShare/command/Menu.lua")
 local PipeCommand = NPL.load("(gl)Mod/WorldShare/command/Pipe.lua")
+local LoadWorldCommand = NPL.load("(gl)Mod/WorldShare/command/LoadWorld.lua")
 local LoadPersonalWorldCommand = NPL.load("(gl)Mod/WorldShare/command/LoadPersonalWorld.lua")
 local LoadReadOnlyWorldCommand = NPL.load("(gl)Mod/WorldShare/command/LoadReadOnlyWorld.lua")
 
@@ -24,6 +25,7 @@ local WorldShareCommand = NPL.export()
 
 function WorldShareCommand:Init()
     MenuCommand:Init()
+    LoadWorldCommand:Init()
     local pipe = PipeCommand:Init()
     local loadpersonalworld = LoadPersonalWorldCommand:Init()
     local loadreadonlyworld = LoadReadOnlyWorldCommand:Init()

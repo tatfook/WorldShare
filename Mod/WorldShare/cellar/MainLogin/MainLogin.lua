@@ -59,7 +59,7 @@ function MainLogin:Show()
         self.notFirstTimeShown = true
 
         if System.User.keepworktoken then
-            Mod.WorldShare.MsgBox:Show(L"正在登录，请稍后...", 8000, L"链接超时", 300, 120)
+            Mod.WorldShare.MsgBox:Show(L"正在登录，请稍后...", 32000, L"链接超时", 300, 120)
 
             KeepworkServiceSession:LoginWithToken(
                 System.User.keepworktoken,
@@ -135,7 +135,7 @@ function MainLogin:LoginAction()
     end
 
 
-    Mod.WorldShare.MsgBox:Show(L"正在登录，请稍后...", 8000, L"链接超时", 300, 120)
+    Mod.WorldShare.MsgBox:Show(L"正在登录，请稍后...", 32000, L"链接超时", 300, 120)
 
     local function HandleLogined()
         Mod.WorldShare.MsgBox:Close()
@@ -164,7 +164,7 @@ function MainLogin:LoginAction()
                 if response and response.code and response.message then
                     GameLogic.AddBBS(nil, format(L"登录失败了, 错误信息：%s(%d)", response.message, response.code), 5000, "255 0 0")
                 else
-                    GameLogic.AddBBS(nil, format(L"登录失败了, 错误码：%d", err), 5000, "255 0 0")
+                    GameLogic.AddBBS(nil, format(L"登录失败了, 系统维护中, 错误码：%d", err), 5000, "255 0 0")
                 end
 
                 return false

@@ -19,9 +19,9 @@ local KeepworkServiceSchoolAndOrg = NPL.load("(gl)Mod/WorldShare/service/Keepwor
 local KeepworkUsersApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Users.lua")
 local KeepworkKeepworksApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Keepworks.lua")
 local KeepworkOauthUsersApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/OauthUsers.lua")
-local LessonOrganizationsApi = NPL.load("(gl)Mod/WorldShare/api/Lesson/LessonOrganizations.lua")
+local AccountingOrgApi = NPL.load("(gl)Mod/WorldShare/api/Accounting/Org.lua")
 local KeepworkSocketApi = NPL.load("(gl)Mod/WorldShare/api/Socket/Socket.lua")
-local LessonVipCodeApi = NPL.load("(gl)Mod/WorldShare/api/Lesson/VipCode.lua")
+local AccountingVipCodeApi = NPL.load("(gl)Mod/WorldShare/api/Accounting/ParacraftVipCode.lua")
 
 -- database
 local SessionsData = NPL.load("(gl)Mod/WorldShare/database/SessionsData.lua")
@@ -172,7 +172,7 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
         return false
     end
 
-    -- login success ↓
+    -- login api success ↓
     local token = response["token"] or System.User.keepworktoken
     local userId = response["id"] or 0
     local username = response["username"] or ""
@@ -240,22 +240,32 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
         )
     end
 
-    local Login = Mod.WorldShare.Store:Action("user/Login")
-    Login(token, userId, username, nickname, realname)
+    -- for follow api
+    Mod.WorldShare.Store:Set('user/token', token)
 
-    LessonOrganizationsApi:GetUserAllOrgs(
+    AccountingOrgApi:GetUserAllOrgs(
         function(data, err)
+            if err ~= 200 then
+                if callback and type(callback) == "function" then
+                    callback(false, L"获取学校信息失败")
+                end
+                return
+            end
+
             if err == 200 then
-                if data and data.data and type(data.data.allOrgs) == 'table' and type(data.data.showOrgId) == 'number' then
-                    for key, item in ipairs(data.data.allOrgs) do
-                        if item.id == data.data.showOrgId then
-                            Mod.WorldShare.Store:Set('user/myOrg', item)
-                        end
-                    end
+                if data and data.data and type(data.data) == 'table' and #data.data > 0 then
+                    Mod.WorldShare.Store:Set('user/myOrg', data.data[1] or {})
                 end
             end
 
             KeepworkServiceSchoolAndOrg:GetMyAllOrgsAndSchools(function(schoolData, orgData)
+                if not schoolData and not orgData then
+                    if callback and type(callback) == "function" then
+                        callback(false, L"获取学校信息失败")
+                    end
+                    return
+                end
+
                 local hasJoinedSchool = false
                 local hasJoinedOrg = false
 
@@ -272,11 +282,19 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
                 else
                     Mod.WorldShare.Store:Set('user/hasJoinedSchoolOrOrg', false)
                 end
-                
-                if type(callback) == "function" then
-                    callback()
+
+                local Login = Mod.WorldShare.Store:Action("user/Login")
+                Login(token, userId, username, nickname, realname)
+
+                if callback and type(callback) == "function" then
+                    callback(true)
                 end
             end)
+        end,
+        function(data, err)
+            if callback and type(callback) == "function" then
+                callback(false, L"获取学校信息失败")
+            end
         end
     )
 
@@ -813,7 +831,7 @@ function KeepworkServiceSession:ActiveVipByCode(key, callback)
         return false
     end
 
-    LessonVipCodeApi:Activate(key, callback, callback)
+    AccountingVipCodeApi:Activate(key, callback, callback)
 end
 
 function KeepworkServiceSession:GetUsersByUsernames(usernames, callback)
