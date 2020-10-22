@@ -35,31 +35,31 @@ function KeepworkBaseApi:GetHeaders(headers)
 end
 
 -- public
-function KeepworkBaseApi:Get(url, params, headers, success, error, noTryStatus)
+function KeepworkBaseApi:Get(url, params, headers, success, error, noTryStatus, timeout)
     local fullUrl = self:GetApi() .. url
 
-    BaseApi:Get(fullUrl, params, self:GetHeaders(headers), success, self:ErrorCollect("GET", fullUrl, url, error), noTryStatus)
+    BaseApi:Get(fullUrl, params, self:GetHeaders(headers), success, self:ErrorCollect("GET", fullUrl, url, error), noTryStatus, timeout)
 end
 
 -- public
-function KeepworkBaseApi:Post(url, params, headers, success, error, noTryStatus)
+function KeepworkBaseApi:Post(url, params, headers, success, error, noTryStatus, timeout)
     local fullUrl = self:GetApi() .. url
 
-    BaseApi:Post(fullUrl, params, self:GetHeaders(headers), success, self:ErrorCollect("POST", fullUrl, url, error), noTryStatus)
+    BaseApi:Post(fullUrl, params, self:GetHeaders(headers), success, self:ErrorCollect("POST", fullUrl, url, error), noTryStatus, timeout)
 end
 
 -- public
-function KeepworkBaseApi:Put(url, params, headers, success, error, noTryStatus)
+function KeepworkBaseApi:Put(url, params, headers, success, error, noTryStatus, timeout)
     local fullUrl = self:GetApi() .. url
 
-    BaseApi:Put(fullUrl, params, self:GetHeaders(headers), success, self:ErrorCollect("PUT", fullUrl, url, error), noTryStatus)
+    BaseApi:Put(fullUrl, params, self:GetHeaders(headers), success, self:ErrorCollect("PUT", fullUrl, url, error), noTryStatus, timeout)
 end
 
 -- public
-function KeepworkBaseApi:Delete(url, params, headers, success, error, noTryStatus)
+function KeepworkBaseApi:Delete(url, params, headers, success, error, noTryStatus, timeout)
     local fullUrl = self:GetApi() .. url
 
-    BaseApi:Delete(fullUrl, params, self:GetHeaders(headers), success, self:ErrorCollect("DELETE", fullUrl, url, error), noTryStatus)
+    BaseApi:Delete(fullUrl, params, self:GetHeaders(headers), success, self:ErrorCollect("DELETE", fullUrl, url, error), noTryStatus, timeout)
 end
 
 -- public

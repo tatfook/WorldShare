@@ -30,7 +30,7 @@ function KeepworkUsersApi:Login(params, success, error)
         return false
     end
 
-    KeepworkBaseApi:Post("/users/login", params, nil, success, error, { 503, 400 })
+    KeepworkBaseApi:Post("/users/login", params, nil, success, error, { 503, 400 }, 8)
 end
 
 -- url: /users/logout
@@ -38,7 +38,7 @@ end
 -- params: []
 -- return: object
 function KeepworkUsersApi:Logout(success, error)
-    KeepworkBaseApi:Post("/users/logout", nil, nil, success, error)
+    KeepworkBaseApi:Post("/users/logout", nil, nil, success, error, nil, 8)
 end
 
 -- url: /users/profile
@@ -55,7 +55,7 @@ function KeepworkUsersApi:Profile(token, success, error)
 
     local headers = { Authorization = format("Bearer %s", token) }
 
-    KeepworkBaseApi:Get("/users/profile", nil, headers, success, error, 401)
+    KeepworkBaseApi:Get("/users/profile", nil, headers, success, error, 401, 8)
 end
 
 -- url: /users/register
@@ -263,7 +263,7 @@ end
     orgId number not necessary
 ]]
 function KeepworkUsersApi:School(success, error)
-    KeepworkBaseApi:Get('/users/school', nil, nil, success, error)
+    KeepworkBaseApi:Get('/users/school', nil, nil, success, error, nil, 8)
 end
 
 -- url: /users/school

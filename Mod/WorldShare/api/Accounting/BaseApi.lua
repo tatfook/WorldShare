@@ -35,29 +35,29 @@ function AccountingBaseApi:GetHeaders(headers)
 end
 
 -- public
-function AccountingBaseApi:Get(url, params, headers, callback, error, noTryStatus)
+function AccountingBaseApi:Get(url, params, headers, callback, error, noTryStatus, timeout)
     url = self:GetApi() .. url
 
-    BaseApi:Get(url, params, self:GetHeaders(headers), callback, error, noTryStatus)
+    BaseApi:Get(url, params, self:GetHeaders(headers), callback, error, noTryStatus, timeout)
 end
 
 -- public
-function AccountingBaseApi:Post(url, params, headers, callback, error, noTryStatus)
+function AccountingBaseApi:Post(url, params, headers, callback, error, noTryStatus, timeout)
     url = self:GetApi() .. url
 
-    BaseApi:Post(url, params, self:GetHeaders(headers), callback, error, noTryStatus)
+    BaseApi:Post(url, params, self:GetHeaders(headers), callback, error, noTryStatus, timeout)
 end
 
 -- public
-function AccountingBaseApi:Put(url, params, headers, callback, error, noTryStatus)
+function AccountingBaseApi:Put(url, params, headers, callback, error, noTryStatus, timeout)
     url = self:GetApi() .. url
 
-    BaseApi:Put(url, params, self:GetHeaders(headers), callback, error, noTryStatus)
+    BaseApi:Put(url, params, self:GetHeaders(headers), callback, error, noTryStatus, timeout)
 end
 
 -- public
-function AccountingBaseApi:Delete(url, params, headers, callback, error, noTryStatus)
+function AccountingBaseApi:Delete(url, params, headers, callback, error, noTryStatus, timeout)
     url = self:GetApi() .. url
 
-    BaseApi:Delete(url, params, self:GetHeaders(headers), callback, error, noTryStatus)
+    BaseApi:Delete(url, params, self:GetHeaders(headers), callback, error, noTryStatus, timeout)
 end

@@ -156,10 +156,15 @@ function LoginModal:LoginAction()
         return false
     end
 
-    Mod.WorldShare.MsgBox:Show(L"正在登录，请稍后...", 8000, L"链接超时", 300, 120, 6)
+    Mod.WorldShare.MsgBox:Show(L"正在登录，请稍后...", 32000, L"链接超时", 300, 120, 6)
 
-    local function HandleLogined()
+    local function HandleLogined(bSucceed, message)
         Mod.WorldShare.MsgBox:Close()
+
+        if not bSucceed then
+            GameLogic.AddBBS(nil, format(L"登录失败了, 错误信息：%s", message), 5000, "255 0 0")
+            return
+        end
 
         self:ClosePage()
 

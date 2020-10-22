@@ -441,6 +441,11 @@ function UserConsole:HandleWorldId(pid, refreshMode)
                 return false
             end
 
+            if err ~= 200 then
+                GameLogic.AddBBS(nil, L"服务器维护中...", 3000, "255 0 0")
+                return
+            end
+
             if data and data.visibility == 1 then
                 if not KeepworkService:IsSignedIn() then
                     LoginModal:CheckSignedIn(L"该项目需要登录后访问", function(bIsSuccessed)

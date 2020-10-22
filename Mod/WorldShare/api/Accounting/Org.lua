@@ -18,5 +18,5 @@ local AccountingOrgApi = NPL.export()
 -- params:
 -- return: { message = '', data = { showOrgId = 1, allOrgs = {} }}
 function AccountingOrgApi:GetUserAllOrgs(success, error)
-    AccountingBaseApi:Get("/org/userOrg", nil, nil, success, error)
+    AccountingBaseApi:Get("/org/userOrg", nil, nil, success, error, nil, 8)
 end

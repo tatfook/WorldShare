@@ -12,12 +12,20 @@ local HttpRequest = NPL.export()
 
 HttpRequest.tryTimes = 1
 HttpRequest.maxTryTimes = 3
+HttpRequest.defaultTimeout = 120
+HttpRequest.maxTimeout = 0
 HttpRequest.defaultSuccessCode = {200, 201, 202, 204}
 HttpRequest.defaultFailCode = {400, 401, 404, 409, 422, 500}
 
-function HttpRequest:GetUrl(params, callback, noTryStatus)
+function HttpRequest:GetUrl(params, callback, noTryStatus, timeout)
     if type(params) ~= "table" and type(params) ~= "string" then
         return false
+    end
+
+    if timeout and type(timeout) == 'number' then
+        self.maxTimeout = timeout
+    else
+        self.maxTimeout = self.defaultTimeout
     end
 
     local formatParams = {}
@@ -71,8 +79,14 @@ function HttpRequest:GetUrl(params, callback, noTryStatus)
     System.os.GetUrl(
         formatParams,
         function(err, msg, data)
-            if err == 0 or (os.time() - requestTime) >= 8 then -- 8 seconds
-                LOG.std("HttpRequest", "debug", "Request", "Connection timeout, Status Code: %s, Method: %s, URL: %s, Params: %s", -1, method, debugUrl, NPL.ToJson(formatParams, true))
+            if err == 0 or (os.time() - requestTime) >= self.maxTimeout then
+                ---- debug code ----
+                local debugUrl = type(params) == "string" and params or formatParams.url
+                local method = type(params) == "table" and params.method and params.method or "GET"
+                LOG.std("HttpRequest", "debug", "Request", "Connection timeout, Status Code: %s, Method: %s, URL: %s, Params: %s", err, method, debugUrl, NPL.ToJson(formatParams, true))
+                
+                ---- debug code ----
+                callback(nil, 0)
                 return
             end
 
@@ -131,7 +145,7 @@ function HttpRequest:GetUrl(params, callback, noTryStatus)
             end
 
             -- fail try
-            HttpRequest:Retry(err, msg, data, params, callback)
+            HttpRequest:Retry(err, msg, data, params, callback, timeout)
         end
     )
 end
@@ -158,7 +172,7 @@ function HttpRequest:Retry(err, msg, data, params, callback)
     )
 end
 
-function HttpRequest:Get(url, params, headers, success, error, noTryStatus)
+function HttpRequest:Get(url, params, headers, success, error, noTryStatus, timeout)
     if not url then
         return false
     end
@@ -180,11 +194,12 @@ function HttpRequest:Get(url, params, headers, success, error, noTryStatus)
                 if type(error) == 'function' then error(data, err) end
             end
         end,
-        noTryStatus
+        noTryStatus,
+        timeout
     )
 end
 
-function HttpRequest:Post(url, params, headers, success, error, noTryStatus)
+function HttpRequest:Post(url, params, headers, success, error, noTryStatus, timeout)
     if not url then
         return false
     end
@@ -206,12 +221,13 @@ function HttpRequest:Post(url, params, headers, success, error, noTryStatus)
                 if type(error) == 'function' then error(data, err) end
             end
         end,
-        noTryStatus
+        noTryStatus,
+        timeout
     )
 
 end
 
-function HttpRequest:Put(url, params, headers, success, error, noTryStatus)
+function HttpRequest:Put(url, params, headers, success, error, noTryStatus, timeout)
     if not url then
         return false
     end
@@ -233,11 +249,12 @@ function HttpRequest:Put(url, params, headers, success, error, noTryStatus)
                 if type(error) == 'function' then error(data, err) end
             end
         end,
-        noTryStatus
+        noTryStatus,
+        timeout
     )
 end
 
-function HttpRequest:Delete(url, params, headers, success, error, noTryStatus)
+function HttpRequest:Delete(url, params, headers, success, error, noTryStatus, timeout)
     if not url then
         return false
     end
@@ -259,11 +276,12 @@ function HttpRequest:Delete(url, params, headers, success, error, noTryStatus)
                 if type(error) == 'function' then error(data, err) end
             end
         end,
-        noTryStatus
+        noTryStatus,
+        timeout
     )
 end
 
-function HttpRequest:PostFields(url, params, headers, success, error)
+function HttpRequest:PostFields(url, params, headers, success, error, timeout)
     if not params or type(params) ~= "table" then
         return false
     end
@@ -325,6 +343,8 @@ function HttpRequest:PostFields(url, params, headers, success, error)
                     error(data, err)
                 end
             end
-        end
+        end,
+        nil,
+        timeout
     )
 end
