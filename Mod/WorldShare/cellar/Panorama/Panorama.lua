@@ -17,6 +17,7 @@ local EntityManager = commonlib.gettable("MyCompany.Aries.Game.EntityManager")
 
 -- UI
 local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
+local ShareWorld = NPL.load("(gl)Mod/WorldShare/cellar/ShareWorld/ShareWorld.lua")
 
 -- service
 local KeepworkServicePanorama = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Panorama.lua")
@@ -28,6 +29,22 @@ local Panorama = NPL.export()
 function Panorama:ShowCreate()
     LoginModal:CheckSignedIn(L"登录后才能分享全景图", function(bSucceed)
         if bSucceed then
+            local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
+
+            if not currentEnterWorld or not currentEnterWorld.kpProjectId then
+                _guihelper.MessageBox(
+                    L"你还没将你的世界分享至服务器哦，请先将世界分享至服务器，再进行全景图分享",
+                    function(res)
+                        ShareWorld:Init(nil, function()
+                            self:ShowCreate()
+                        end)
+                    end,
+                    _guihelper.MessageBoxButtons.OK
+                )
+
+                return
+            end
+
             local width = Screen:GetWidth()
             local height = Screen:GetHeight()
 
