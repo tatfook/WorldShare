@@ -348,7 +348,7 @@ function MySchool:GetSearchSchoolResultByName(name, callback)
         return false
     end
 
-    KeepworkServiceSchoolAndOrg:SearchSchoolByName(name, self.curId, self.kind,function(data)
+    KeepworkServiceSchoolAndOrg:SearchSchoolByName(name, self.curId, self.kind, function(data)
         self.result = data
 
         for key, item in ipairs(self.result) do

@@ -66,7 +66,7 @@ function KeepworkServiceWorld:SetWorldInstanceByPid(pid, callback)
         end
 
         local foldername = data.worldName
-        local worldpath = Mod.WorldShare.Utils.GetWorldFolderFullPath() .. "/" .. foldername
+        local worldpath = Mod.WorldShare.Utils.GetWorldFolderFullPath() .. "/" .. commonlib.Encoding.Utf8ToDefault(foldername)
         local status
 
         if not ParaIO.DoesFileExist(worldpath) then
@@ -99,8 +99,8 @@ function KeepworkServiceWorld:SetWorldInstanceByPid(pid, callback)
             kpProjectId = pid,
             IsFolder = true,
             is_zip = false,
-            Title = worldTag.name,
-            text = worldTag.name,
+            Title = foldername,
+            text = foldername,
             author = "None",
             costTime = "0:0:0",
             filesize = 0,
@@ -115,7 +115,9 @@ function KeepworkServiceWorld:SetWorldInstanceByPid(pid, callback)
             preview = "",
             progress = "0",
             size = 0,
-            worldpath = worldpath, 
+            worldpath = worldpath,
+            status = status,
+            kpProjectId = pid,
         }
 
         Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)

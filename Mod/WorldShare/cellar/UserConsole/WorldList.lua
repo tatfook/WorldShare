@@ -110,6 +110,10 @@ function WorldList:SelectVersion(index)
 end
 
 function WorldList:Sync()
+    if not KeepworkService:IsSignedIn() then
+        return false
+    end
+
     Mod.WorldShare.MsgBox:Show(L"请稍后...")
 
     Compare:Init(function(result)
