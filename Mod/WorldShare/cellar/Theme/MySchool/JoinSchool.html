@@ -137,18 +137,18 @@
                             MySchool.kind = value
                         end
 
-
-                        if not MySchool.curId or MySchool.curId == 0 then
-                            return false
-                        end
-
                         if MySchool.searchText and MySchool.searchText ~= "" then
+                            echo(MySchool.kind, true)
                             MySchool:GetSearchSchoolResultByName(MySchool.searchText, function()
                                 MySchool:RefreshJoinSchool()
                                 page:SetValue('school_name', MySchool.searchText)
                             end)
 
                             return
+                        end
+
+                        if not MySchool.curId or MySchool.curId == 0 then
+                            return false
                         end
 
                         MySchool:GetSearchSchoolResult(MySchool.curId, MySchool.kind, function(data)
