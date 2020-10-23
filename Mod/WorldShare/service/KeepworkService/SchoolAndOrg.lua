@@ -141,10 +141,10 @@ function KeepworkServiceSchoolAndOrg:SearchSchool(id, kind, callback)
     end)
 end
 
-function KeepworkServiceSchoolAndOrg:SearchSchoolByName(name, callback)
-    KeepworkSchoolsApi:GetList(name, nil, nil, function(data, err)
+function KeepworkServiceSchoolAndOrg:SearchSchoolByName(name, id, kind, callback)
+    KeepworkSchoolsApi:GetList(name, id, kind, function(data, err)
         if data and data.rows then
-            if type(callback) == "function" then
+            if callback and type(callback) == "function" then
                 callback(data.rows)
             end
         end

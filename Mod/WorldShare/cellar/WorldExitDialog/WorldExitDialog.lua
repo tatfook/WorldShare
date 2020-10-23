@@ -9,8 +9,11 @@ local WorldExitDialog = NPL.load("(gl)Mod/WorldShare/cellar/WorldExitDialog/Worl
 WorldExitDialog.ShowPage()
 ------------------------------------------------------------
 ]]
+
+-- lib
 local ShareWorldPage = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.Areas.ShareWorldPage")
 local WorldRevision = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision")
+local NplBrowserPlugin = commonlib.gettable("NplBrowser.NplBrowserPlugin")
 
 -- service
 local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
@@ -173,11 +176,13 @@ function WorldExitDialog.OnDialogResult(res)
             KeepworkServiceWorld:UnlockWorld(function()
                 if (WorldExitDialogPage.callback) then
                     --KeepworkServiceSession:Logout()
+                    NplBrowserPlugin.CloseAllBrowsers()
                     WorldExitDialogPage.callback(res)
                 end
             end)
         else
             if (WorldExitDialogPage.callback) then
+                NplBrowserPlugin.CloseAllBrowsers()
                 WorldExitDialogPage.callback(res)
             end
         end

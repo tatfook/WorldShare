@@ -137,11 +137,6 @@
                             MySchool.kind = value
                         end
 
-
-                        if not MySchool.curId or MySchool.curId == 0 then
-                            return false
-                        end
-
                         if MySchool.searchText and MySchool.searchText ~= "" then
                             MySchool:GetSearchSchoolResultByName(MySchool.searchText, function()
                                 MySchool:RefreshJoinSchool()
@@ -149,6 +144,10 @@
                             end)
 
                             return
+                        end
+
+                        if not MySchool.curId or MySchool.curId == 0 then
+                            return false
                         end
 
                         MySchool:GetSearchSchoolResult(MySchool.curId, MySchool.kind, function(data)
@@ -204,7 +203,7 @@
 
                         MySchool.searchText = text
 
-                        if text and text == "" then
+                        if text and text == "" and MySchool.curId ~= 0 then
                             MySchool:GetSearchSchoolResult(MySchool.curId, MySchool.kind, function(data)
                                 MySchool:RefreshJoinSchool()
                                 page:SetValue('school_name', MySchool.searchText)
