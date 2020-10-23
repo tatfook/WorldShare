@@ -138,7 +138,6 @@
                         end
 
                         if MySchool.searchText and MySchool.searchText ~= "" then
-                            echo(MySchool.kind, true)
                             MySchool:GetSearchSchoolResultByName(MySchool.searchText, function()
                                 MySchool:RefreshJoinSchool()
                                 page:SetValue('school_name', MySchool.searchText)
