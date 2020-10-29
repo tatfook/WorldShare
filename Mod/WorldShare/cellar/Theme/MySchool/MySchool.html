@@ -3,17 +3,21 @@
     <pe:mcml>
         <script type="text/npl">
             <![CDATA[
+                -- libs
                 local UniString = commonlib.gettable("System.Core.UniString")
 
+                -- UI
                 local MySchool = NPL.load("(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua")
                 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
+                local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
+
                 local page = document:GetPageCtrl()
                 local global_type = type
 
                 function close()
                     page:CloseWindow()
 
-                    if MySchool.callback and type(MySchool.callback) == 'function' then
+                    if MySchool.callback and global_type(MySchool.callback) == 'function' then
                         MySchool.callback()
                     end
                 end
@@ -50,30 +54,8 @@
                     close()
                 end
 
-                function enter_school()
-                    close()
-                    local ParacraftLearningRoomDailyPage = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/ParacraftLearningRoom/ParacraftLearningRoomDailyPage.lua")
-                    ParacraftLearningRoomDailyPage.OnLearningLand()
-                end
-
                 function get_data()
-                    local data = {}
-
-                    if MySchool.schoolData and global_type(MySchool.schoolData) == "table" and MySchool.schoolData.id then
-                        MySchool.schoolData.showType = 1
-
-                        data[#data + 1] = MySchool.schoolData
-                    end
-
-                    if MySchool.orgData and global_type(MySchool.orgData) == "table" then
-                        for key, item in ipairs(MySchool.orgData) do
-                            item.showType = 2
-
-                            data[#data + 1] = item
-                        end
-                    end
-
-                    return data
+                    return MySchool.orgData
                 end
 
                 function has_school_joined()
@@ -84,7 +66,19 @@
                     end
                 end
 
-                function open_org_page(index)
+                function enter_world(index)
+                    local data = get_data()
+                    local curData = data[index] or {}
+
+                    if not curData or not curData.paraWorld or not curData.paraWorld.projectId then
+                        return
+                    end
+
+                    close()
+                    UserConsole:HandleWorldId(curData.paraWorld.projectId, true)
+                end
+
+                function open_page(index)
                     local data = get_data()
                     local curData = data[index] or {}
 
@@ -112,7 +106,7 @@
                         return ""
                     end
 
-                    if _guihelper.GetTextWidth(cur_name) > 80 then
+                    if _guihelper.GetTextWidth(cur_name) > 240 then
                         local function chsize(char)
                             if not char then
                                 return 0
@@ -156,9 +150,27 @@
 
                     return cur_name
                 end
+
+                function has_project_id()
+                    local index = Eval('index')
+                    
+                    if not index or global_type(index) ~= 'number' then
+                        return false
+                    end
+
+                    local data = get_data()
+                    local curData = data[index] or {}
+                    local paraWorld = curData.paraWorld
+
+                    if paraWorld and global_type(paraWorld) == 'table' and paraWorld.projectId then
+                        return true
+                    else
+                        return false
+                    end
+                end
             ]]>
         </script>
-        <style type="text/mcss">
+        <style type="text/mcss" src="Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss">
             {
                 join_school_bg = {
                     color = '#000000',
@@ -172,44 +184,68 @@
                 }
             }
         </style>
-        <kp:window width="600" height="330" icon="Texture/Aries/Creator/keepwork/Window/title/biaoti_xuexiao_32bits.png" onclose="close()">
+        <kp:window width="600" height="380" icon="Texture/Aries/Creator/keepwork/Window/title/biaoti_xuexiao_32bits.png" onclose="close()">
             <div width="100%" height="100%">
                 <div style="width: 600px; height: 40px;">
                     <div style="margin-left: 120px;margin-top: 14px;font-size: 14px;base-font-size: 14px;color: #ffffff;"><%=L"我的学校"%></div>
                 </div>
                 <pe:if condition="<%= has_joined(1) %>">
                     <div style="padding: 15px;">
-                        <div style="color: white;height: 220px;;margin-bottom: 10px">
+                        <div style="color: white;height: 265px;;margin-bottom: 10px">
                             <pe:gridview
                                 RememberScrollPos="true"
                                 AllowPaging="false"
                                 VerticalScrollBarStep="50"
                                 DefaultNodeHeight="85"
-                                ItemsPerLine="2"
+                                ItemsPerLine="1"
                                 DataSource="<%= get_data() %>"
                             >
                                 <Columns>
-                                    <pe:if condition="<%= Eval('showType') == 1%>">
-                                        <div style="width: 260px;height: 100px;background-color: #333333;float: left;margin-bottom: 10px;margin-right: 10px;">
-                                            <input type="button" class="click" name='<%=Eval("index")%>' onclick="enter_school" />
+                                    <pe:if condition="<%= Eval('type') == 4 %>">
+                                        <div style="width: 550px;height: 100px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#435 212 30 30:11 11 11 11);float: left;margin-bottom: 10px;margin-right: 10px;">
+                                            <div style="position: relative;width: 550px;height: 100px;">
+                                                <div style="margin-left: 325px;margin-top: 60px;width: 225px;height: 35px;">
+                                                    <div style="float: left;width: 100px;height: 35px;">
+                                                        <pe:if condition="<%= has_project_id() %>">
+                                                            <input type="button" class="theme1_baby_bule_button" name='<%= Eval("index") %>' style="height: 35px;width: 100px;" value="<%= L'进入3D校园' %>" onclick="enter_world()"/>
+                                                        </pe:if>
+                                                    </div>
+                                                    <div style="float: left;width: 105px;height: 35px;">
+                                                        <input type="button" class="theme1_lime_button" style="height: 35px;width: 110px;margin-left: 5px;" value="<%= L'进入学校主页' %>" onclick="open_page()"/>
+                                                    </div>
+                                                </div>
+                                            </div>
                                             <div style="float:left; margin-left: 10px;margin-top: 10px;">
+                                                <div style="position: relative;width: 120px;height: 80px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#394 211 32 32:9 9 9 9);"></div>
                                                 <div style="width: 120px;height: 80px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#287 346 170 99);"></div>
                                             </div>
-                                            <div style="float:left; margin-left: 10px;margin-top: 10px;width: 95px;color: white">
+                                            <div style="float:left; margin-left: 10px;margin-top: 10px;width: 350px;color: #000000">
                                                 <div><%= get_name() %></div>
-                                                <div><%= get_place(Eval('region')) %></div>
+                                                <div style="font-size: 12px;color:#555555;"><%= Eval('fullname') %></div>
                                             </div>
                                         </div>
                                     </pe:if>
-                                    <pe:if condition="<%= Eval('showType') == 2%>">
-                                        <div style="width: 260px;height: 100px;background-color: #333333;float: left;margin-bottom: 10px;margin-right: 10px;">
-                                            <input type="button" class="click" name='<%=Eval("index")%>' onclick="open_org_page" />
+                                    <pe:if condition="<%= Eval('type') ~= 4 %>">
+                                        <div style="width: 550px;height: 100px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#435 212 30 30:11 11 11 11);float: left;margin-bottom: 10px;margin-right: 10px;">
+                                            <div style="position: relative;width: 550px;height: 100px;">
+                                                <div style="margin-left: 325px;margin-top: 60px;width: 225px;height: 35px;">
+                                                    <div style="float: left;width: 100px;height: 35px;">
+                                                        <pe:if condition="<%= has_project_id() %>">
+                                                            <input type="button" class="theme1_baby_bule_button" name='<%= Eval("index") %>' style="height: 35px;width: 100px;" value="<%= L'进入机构世界' %>" onclick="enter_world()"/>
+                                                        </pe:if>
+                                                    </div>
+                                                    <div style="float: left;width: 105px;height: 35px;">
+                                                        <input type="button" class="theme1_lime_button" name='<%= Eval("index") %>' style="height: 35px;width: 110px;margin-left: 5px;" value="<%= L'进入机构主页' %>" onclick="open_page()" />
+                                                    </div>
+                                                </div>
+                                            </div>
                                             <div style="float:left; margin-left: 10px;margin-top: 10px;">
+                                                <div style="position: relative;width: 120px;height: 80px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#394 211 32 32:9 9 9 9);"></div>
                                                 <div style="<%= 'width: 120px;height: 80px;background:url(' .. (Eval('logo') or 'Texture/Aries/Creator/keepwork/worldshare_32bits.png#287 346 170 99') .. ');' %>"></div>
                                             </div>
-                                            <div style="float:left; margin-left: 10px;margin-top: 10px;width: 95px;color: white">
+                                            <div style="float:left; margin-left: 10px;margin-top: 10px;width: 350px;color: #000000">
                                                 <div><%= get_name() %></div>
-                                                <div><%= Eval('location') %></div>
+                                                <div style="font-size: 12px;color:#555555;"><%= Eval('fullname') %></div>
                                             </div>
                                         </div>
                                     </pe:if>
@@ -219,7 +255,7 @@
                         <div style="margin-left: 280px;">
                             <div>
                                 <pe:if condition="<%= has_school_joined() %>">
-                                    <input type="button" class="button_highlight" style="height: 35px;width: 120px;" value="<%= L'变更学校' %>" onclick="join_school()"/>
+                                    <input type="button" class="theme1_orange_button" style="height: 35px;width: 120px;" value="<%= L'变更学校' %>" onclick="join_school()"/>
                                 </pe:if>
                                 <pe:if condition="<%= not has_school_joined() %>">
                                     <div style="float:left;">
@@ -227,13 +263,13 @@
                                         <kp:redtip style="position:relative;margin-left:117px;margin-top:-40px;" onupdate='<%= not has_school_joined() %>'></kp:redtip>    
                                     </div>
                                 </pe:if>
-                                <input type="button" class="button_highlight" style="height: 35px;width: 120px;margin-left: 10px;" value="<%= L'加入机构' %>" onclick="join_institute()"/>
+                                <input type="button" class="theme1_gray_button" style="height: 35px;width: 120px;margin-left: 10px;" value="<%= L'加入机构' %>" onclick="join_institute()"/>
                             </div>
                         </div>
                     </div>
                 </pe:if>
                 <pe:if condition="<%= has_joined(2) %>">
-                    <div style="padding-top: 100px;padding-left: 100px;">
+                    <div style="padding-top: 130px;padding-left: 100px;">
                         <input type="button"
                                class="button_highlight join_school_bg"
                                style="width: 180px;height: 60px;font-size: 15px;font-weight: bold"

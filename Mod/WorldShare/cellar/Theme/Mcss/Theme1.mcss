@@ -1,0 +1,39 @@
+--[[
+Title: Theme1
+Author(s):  big
+Date:  2020.10.27
+Desc: 
+use the lib:
+------------------------------------------------------------
+local Theme1 = NPL.load("(gl)Mod/WorldShare/cellar/Theme/Mcss/Main.lua")
+------------------------------------------------------------
+]]
+
+{
+    theme1_green_button = {
+        background = "Texture/Aries/Creator/keepwork/worldshare_32bits.png#673 198 38 64:12 10 12 15",
+        ["text-offset-y"] = -2,
+    },
+    theme1_baby_bule_button = {
+        background = "Texture/Aries/Creator/keepwork/worldshare_32bits.png#720 209 38 40:12 10 12 13",
+        ["text-offset-y"] = -2,
+        color = "#000000",
+    },
+    theme1_lime_button = {
+        background = "Texture/Aries/Creator/keepwork/worldshare_32bits.png#765 209 38 40:12 10 12 13",
+        ["text-offset-y"] = -2,
+    },
+    theme1_orange_button = {
+        background = "Texture/Aries/Creator/keepwork/worldshare_32bits.png#576 198 38 64:12 10 12 15",
+        ["text-offset-y"] = -2,
+    },
+    theme1_gray_button = {
+        background = "Texture/Aries/Creator/keepwork/worldshare_32bits.png#624 198 38 64:12 10 12 15",
+        ['text-offset-y'] = -2,
+    },
+    theme1_black_button = {
+        background = "Texture/Aries/Creator/keepwork/worldshare_32bits.png#904 205 36 42:11 11 12 11",
+        ['text-offset-y'] = -2,
+        color = "#ffffff",
+    }
+}

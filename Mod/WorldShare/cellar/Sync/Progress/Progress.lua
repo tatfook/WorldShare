@@ -36,8 +36,8 @@ function Progress:Init(syncInstance)
         ProgressOperatePage:CloseWindow()
     end
 
-    local progressParams = Mod.WorldShare.Utils.ShowWindow(0, 0, "Mod/WorldShare/cellar/Sync/Progress/Progress.html", "Progress", 0, 0, "_fi", false, 2)
-    local operateParams = Mod.WorldShare.Utils.ShowWindow(270, 65, "Mod/WorldShare/cellar/Sync/Progress/Operate.html", "ProgressOperate", 230, -150 ,"_ct", false, 3)
+    local progressParams = Mod.WorldShare.Utils.ShowWindow(0, 0, "Mod/WorldShare/cellar/Theme/Sync/Progress/Progress.html", "Progress", 0, 0, "_fi", false, 2)
+    local operateParams = Mod.WorldShare.Utils.ShowWindow(270, 65, "Mod/WorldShare/cellar/Theme/Sync/Progress/Operate.html", "ProgressOperate", 270, -150 ,"_ct", false, 3)
 
     if not progressParams._page or not operateParams._page then
         return false

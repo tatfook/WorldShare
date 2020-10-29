@@ -79,6 +79,14 @@ function Utils.ShowWindow(option, height, url, name, x, y, align, allowDrag, zor
         params.url = "Mod/ExplorerApp/components/" .. matchUrl
     end
 
+    if Mod.WorldShare.Utils.IsEnglish() then
+        local enUrl = string.gsub(params.url, ".html", ".en.html")
+
+        if ParaIO.DoesFileExist(enUrl, true) then
+            params.url = enUrl
+        end
+    end
+
     System.App.Commands.Call("File.MCMLWindowFrame", params)
 
     if not params or not params._page then

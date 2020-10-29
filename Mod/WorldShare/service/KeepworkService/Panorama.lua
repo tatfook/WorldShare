@@ -89,7 +89,7 @@ function KeepworkServicePanorama:GenerateMiniProgramCode(callback)
     end
 
     KeepworkProjectsApi:ShareWxacode(
-        currentEnterWorld.kpProjectId,
+        tonumber(currentEnterWorld.kpProjectId),
         function(data, err)
             if err ~= 200 or not data or not data.wxacode then
                 callback(false)

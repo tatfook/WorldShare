@@ -1,0 +1,109 @@
+<body>
+    <pe:mcml>
+        <script type="text/npl">
+            <![CDATA[
+                local Progress = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Progress/Progress.lua')
+                local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
+
+                function current()
+                    return Progress:GetCurrent()
+                end
+
+                function total()
+                    return Progress:GetTotal()
+                end
+
+                function msg()
+                    return Progress:GetMsg()
+                end
+
+                function finish()
+                    return Progress:GetFinish()
+                end
+
+                function broke()
+                    return Progress:GetBroke()
+                end
+
+                function copy()
+                    Progress:Copy(KeepworkService:GetShareUrl())
+                end
+
+                function get_window_style()
+                    return Mod.WorldShare.Utils.FixCenter(550, 320)
+                end
+
+                function get_world_url()
+                    local worldUrl = KeepworkService:GetShareUrl()
+
+                    if (worldUrl) then
+                        return worldUrl
+                    else
+                        return ''
+                    end
+                end
+
+                function open_url()
+                    local url = get_world_url()
+
+                    ParaGlobal.ShellExecute("open", url, "", "", 1)
+                end
+
+                function get_bar_maximun()
+                    return Progress.total
+                end
+
+                function get_bar_current()
+                    return Progress.current
+                end
+             ]]>
+        </script>
+        <style type="text/mcss" src="Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss">
+            {
+                 ["common_button"] = {
+                    height = 30,
+                    ["margin-left"] = 5,
+                    ["margin-top"] = -5,
+                    spacing = 10,
+                    ["font-weight"] = "bold",
+                    ["font-size"]   = 13,
+                    ["base-font-size"] = 13,
+                 },
+            }
+        </style>
+        <div width="100%" height="100%">
+            <kp:window width="550" height="320" style="<%= get_window_style()%>"  title='<%=L"同步中" %>'>
+                <div style="height: 40px;"></div>
+                <div style="padding:20px;font-size:18px;base-font-size:18px;color:#000000;margin-top:20px;">
+                    <pe:if condition="<%= not finish() and not broke() %>">
+                        <div style="margin-right:20px;">
+                            <%=L"同步进度：" %><%= current() %> / <%= total() %>
+                            <br />
+                            <%= msg() %>
+                        </div>
+                    </pe:if>
+                    <pe:if condition="<%= finish() and not broke() %>">
+                        <div style="margin-right:20px;font-size:13px;base-font-size:13px;">
+                            <%=L"恭喜！世界已经同步完毕！" %>
+                            <br />
+                            <%=L"你可以通过下面页面分享给他人" %>
+                            <br />
+                            <div>
+                                <%= get_world_url() %>
+                                <input type="button" class="common_button theme1_gray_button" value='<%=L"复制" %>' onclick="copy()"/>
+                                <input type="button" class="common_button theme1_gray_button" value='<%=L"打开" %>' onclick="open_url()" />
+                            </div>
+                        </div>
+                    </pe:if>
+                    <pe:if condition="<%= broke() %>">
+                        <%= msg() %>
+                    </pe:if>
+                    <div style="margin-top:30px;">
+                        <pe:progressbar name="progressbar"  block_bg_autosize = "true" Minimum="0" Maximum="<%= get_bar_maximun() %>" Value="<%= get_bar_current() %>"/>
+                    </div>
+                </div>
+            </kp:window>
+        </div>
+    </pe:mcml>
+</body>
+</html>

@@ -56,18 +56,38 @@ function Panorama:ShowCreate(force)
                 Mod.WorldShare.MsgBox:Close()
 
                 if not force and data and type(data) == 'table' and data.extra and data.extra.cubeMap and #data.extra.cubeMap > 0 then
-                    self:ShowShare()
+                    if data.userId then
+                        local userId = Mod.WorldShare.Store:Get('user/userId')
+
+                        if data.userId == userId then
+                            self:ShowShare(true)
+                        else
+                            self:ShowShare(false)
+                        end
+                    else
+                        self:ShowShare(false)
+                    end
                 else
-                    local params = Mod.WorldShare.Utils.ShowWindow(
-                        scaleWidth,
-                        scaleHeight,
-                        format("Mod/WorldShare/cellar/Panorama/Create.html?width=%d&height=%d", scaleWidth, scaleHeight),
-                        "Mod.WorldShare.Panorama.Create",
-                        nil,
-                        nil,
-                        nil,
-                        false
-                    )
+                    if not data.userId then
+                        return false
+                    end
+
+                    local userId = Mod.WorldShare.Store:Get('user/userId')
+
+                    if data.userId == userId then
+                        local params = Mod.WorldShare.Utils.ShowWindow(
+                            scaleWidth,
+                            scaleHeight,
+                            format("Mod/WorldShare/cellar/Panorama/Create.html?width=%d&height=%d", scaleWidth, scaleHeight),
+                            "Mod.WorldShare.Panorama.Create",
+                            nil,
+                            nil,
+                            nil,
+                            false
+                        )
+                    else
+                        GameLogic.AddBBS(nil, L"这个作品的创建者还没拍摄过全景图哦，暂时无法进行全景图分享。", 4000, "255 0 0")
+                    end
                 end
             end)
         end
@@ -87,18 +107,24 @@ function Panorama:ShowPreview()
     end
 end
 
-function Panorama:ShowShare()
+function Panorama:ShowShare(beShowButton)
     Mod.WorldShare.MsgBox:Show(L"正在生成小程序二维码...", 8000)
     KeepworkServicePanorama:GenerateMiniProgramCode(function(bSucceed, wxacode)
         Mod.WorldShare.MsgBox:Close()
 
         if not bSucceed then
-            GameLogic.AddBBS(nil, 3000, L"生成小程序二维码失败", "255 0 0")
+            GameLogic.AddBBS(nil, L"生成小程序二维码失败", 3000, "255 0 0")
             return
         end
 
+        local height = 305
+
+        if beShowButton then
+            height = 392
+        end
+
         self.wxacodeUrl = wxacode
-        local params = Mod.WorldShare.Utils.ShowWindow(520, 392, "(ws)Panorama/Share.html", "Mod.WorldShare.Panorama.Share")
+        local params = Mod.WorldShare.Utils.ShowWindow(520, height, "Mod/WorldShare/cellar/Panorama/Share.html?height=" .. height, "Mod.WorldShare.Panorama.Share")
     end)
 end
 

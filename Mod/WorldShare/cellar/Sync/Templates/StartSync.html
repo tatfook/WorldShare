@@ -58,7 +58,13 @@
                 end
 
                 function enter_offline_world()
-                    InternetLoadWorld.EnterWorld()
+                    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+
+                    if not currentWorld then
+                        return false
+                    end
+
+                    InternetLoadWorld.LoadWorld(currentWorld)
                     UserConsole:ClosePage()
                     SyncMain:CloseStartSyncPage()
                 end
@@ -97,7 +103,7 @@
 	                <div style="margin-left:80px;margin-top:20px;">
                         <%=L"本地版本号：" %><%= SyncMain.GetCurrentRevision() %>
 	                	<pe:if condition="<%=use_offline == 'true' %>">
-	                		<input onclick="enter_offline_world()" class="button_highlight" style="margin-left:10px;height:30px;" type="button" value='<%=L"使用本地离线版本" %>' />
+	                		<input onclick="enter_offline_world()" class="button_highlight" style="margin-left:10px;width: 130px;height:30px;" type="button" value='<%=L"使用本地离线版本" %>' />
 	                	</pe:if>
 	                	<pe:if condition="<%=use_offline == 'false' %>">
 	                		<input onclick="use_local()" class="button_highlight" name="local" style="<%= 'margin-left:10px;width: 130px;height:30px;' .. get_bigger_style('local') %>" type="button" value='<%=L"使用本地版本" %>' />

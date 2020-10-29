@@ -8,6 +8,10 @@ use the lib:
 local SyncToDataSource = NPL.load("(gl)Mod/WorldShare/cellar/Sync/SyncToDataSource.lua")
 ------------------------------------------------------------
 ]]
+
+-- libs
+local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
+
 -- service
 local GitService = NPL.load("../GitService.lua")
 local LocalService = NPL.load("../LocalService.lua")
@@ -557,6 +561,19 @@ function SyncToDataSource:UpdateRecord(callback)
             -- worldInfo.username = username
             worldInfo.archiveUrl = format('%s/repos/%s/archive.zip?ref=%s', KeepworkService:GetApiCdnApi(), repoPath, lastCommitSha)
 
+            -- set world type
+            local currentWorldTag = LocalService:GetTag(self.currentWorld.worldpath) or {}
+            
+            if currentWorldTag.world_generator and type(currentWorldTag.world_generator) == 'string' then
+                if currentWorldTag.world_generator == 'paraworldMini' then
+                    worldInfo.type = 1
+                elseif currentWorldTag.world_generator == 'paraworld' then
+                    worldInfo.type = 2
+                else
+                    worldInfo.type = 0
+                end
+            end
+
             local function AfterHandlePreview(preview)
                 preview = preview or ""
 
@@ -630,6 +647,12 @@ function SyncToDataSource:UpdateRecord(callback)
 
                 if not content then
                     AfterHandlePreview()
+                    return false
+                end
+
+                if not self.currentWorld or
+                   not self.currentWorld.kpProjectId or
+                   not lastCommitSha then
                     return false
                 end
 

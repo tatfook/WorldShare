@@ -7,6 +7,8 @@
                     local Panorama = NPL.load('./Panorama.lua')
 
                     local page = document:GetPageCtrl()
+                    
+                    height = page:GetRequestParam('height') or 0
 
                     function close()
                         page:CloseWindow()
@@ -22,7 +24,8 @@
                     end
                 ]]>
             </script>
-            <kp:window width="520" height="392" onclose="close()">
+            <style type="text/mcss" src="Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss"></style>
+            <kp:window width="520" onclose="close()">
                 <div style="width: 520px;height: 40px;">
                     <!-- title -->
                     <div style="margin-top: 8px;margin-left: 12px;width: 119px;height: 25px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#575 394 119 25);"></div>
@@ -33,12 +36,15 @@
                     <div style="margin-left: 160px;margin-top: 25px;width: 140px;height: 140px;background-color: #ffffff;">
                         <img style="width: 140px;height: 140px;" src="<%= get_qrcode_url() %>" />
                     </div>
-                    <div style="margin-left: 155px;margin-top: 25px;text-align: center;">
-                        <input type="button"
-                               style="width: 150px;height: 60px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#575 198 38 62:11 9 13 11);"
-                               onclick="retry()"
-                               value="<%= L'重新拍摄全景图' %>" />
-                    </div>
+                    <pe:if condition="<%= height == '392' %>">
+                        <div style="margin-left: 155px;margin-top: 25px;text-align: center;">
+                            <input type="button"
+                                class="theme1_orange_button"
+                                style="width: 150px;height: 60px;"
+                                onclick="retry()"
+                                value="<%= L'重新拍摄全景图' %>" />
+                        </div>
+                    </pe:if>
                 </div>
             </kp:window>
         </pe:mcml>
