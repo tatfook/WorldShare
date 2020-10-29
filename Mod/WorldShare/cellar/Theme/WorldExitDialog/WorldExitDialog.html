@@ -266,11 +266,13 @@
                     <div style="padding:20px;padding-top: 5px;padding-bottom:5px;color:#ffffff;">
                         <div style="margin-bottom: 5px;">
                             <pe:if condition='<%= System.os.GetPlatform() == "win32" %>'>
-                                <input type="button" class="theme1_gray_button" style='height: 30px;width: 95px;' value='<%= L"短视频分享" %>' onclick="share_short_video()" />
-                                <div class="theme1_black_button" style="float:left;width: 110px;height: 35px;padding-top: 4px;">
-                                    <input type="button" style='position: relative;width: 110px;height: 35px;background: url()' value='' onclick="share_panorama()" />
-                                    <img style="width: 20px;height: 21px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#950 216 20 21);margin-left: 10px;margin-top: 1px;" />
-                                    <%= L"全景图分享" %>
+                                <input type="button" class="theme1_gray_button" style='height: 36px;width: 110px;' value='<%= L"短视频分享" %>' onclick="share_short_video()" />
+                                <div class="theme1_black_button" style="float:left;width: 112px;height: 35px;padding-top: 4px;">
+                                    <input type="button" style='position: relative;width: 112px;height: 35px;background: url()' value='' onclick="share_panorama()" />
+                                    <img style="width: 20px;height: 21px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#950 216 20 21);margin-left: 9px;margin-top: 1px;" />
+                                    <div style="float: left;margin-left: 4px;margin-top: 1px;">
+                                        <%= L"全景图分享" %>
+                                    </div>
                                 </div>
                             </pe:if>
                             <pe:if condition='<%= System.os.GetPlatform() ~= "win32" %>'>
