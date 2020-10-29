@@ -56,7 +56,17 @@ function Panorama:ShowCreate(force)
                 Mod.WorldShare.MsgBox:Close()
 
                 if not force and data and type(data) == 'table' and data.extra and data.extra.cubeMap and #data.extra.cubeMap > 0 then
-                    self:ShowShare()
+                    if data.userId then
+                        local userId = Mod.WorldShare.Store:Get('user/userId')
+
+                        if data.userId == userId then
+                            self:ShowShare(true)
+                        else
+                            self:ShowShare(false)
+                        end
+                    else
+                        self:ShowShare(false)
+                    end
                 else
                     if not data.userId then
                         return false
@@ -97,7 +107,7 @@ function Panorama:ShowPreview()
     end
 end
 
-function Panorama:ShowShare()
+function Panorama:ShowShare(beShowButton)
     Mod.WorldShare.MsgBox:Show(L"正在生成小程序二维码...", 8000)
     KeepworkServicePanorama:GenerateMiniProgramCode(function(bSucceed, wxacode)
         Mod.WorldShare.MsgBox:Close()
@@ -107,8 +117,14 @@ function Panorama:ShowShare()
             return
         end
 
+        local height = 305
+
+        if beShowButton then
+            height = 392
+        end
+
         self.wxacodeUrl = wxacode
-        local params = Mod.WorldShare.Utils.ShowWindow(520, 392, "(ws)Panorama/Share.html", "Mod.WorldShare.Panorama.Share")
+        local params = Mod.WorldShare.Utils.ShowWindow(520, height, "Mod/WorldShare/cellar/Panorama/Share.html?height=" .. height, "Mod.WorldShare.Panorama.Share")
     end)
 end
 
