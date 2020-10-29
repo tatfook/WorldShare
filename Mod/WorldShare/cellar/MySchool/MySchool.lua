@@ -29,7 +29,7 @@ function MySchool:Show(callback)
     KeepworkServiceSchoolAndOrg:GetUserAllOrgs(function(orgData)
         Mod.WorldShare.MsgBox:Close()
 
-        echo(orgData, true)
+        self.hasJoined = false
 
         if type(orgData) == "table" and #orgData > 0 then
             self.orgData = orgData
