@@ -77,7 +77,7 @@ function LoginModal:ShowPage()
         return false
     end
 
-    local params = Mod.WorldShare.Utils.ShowWindow(320, 470, "Mod/WorldShare/cellar/LoginModal/LoginModal.html", "LoginModal", nil, nil, nil, nil, 5)
+    local params = Mod.WorldShare.Utils.ShowWindow(320, 470, "Mod/WorldShare/cellar/LoginModal/LoginModal.html", "LoginModal", nil, nil, nil, nil, 12)
 
     local LoginModalPage = Mod.WorldShare.Store:Get('page/LoginModal')
 
@@ -156,7 +156,7 @@ function LoginModal:LoginAction()
         return false
     end
 
-    Mod.WorldShare.MsgBox:Show(L"正在登录，请稍后...", 32000, L"链接超时", 300, 120, 6)
+    Mod.WorldShare.MsgBox:Show(L"正在登录，请稍后...", 32000, L"链接超时", 300, 120, 13)
 
     local function HandleLogined(bSucceed, message)
         Mod.WorldShare.MsgBox:Close()

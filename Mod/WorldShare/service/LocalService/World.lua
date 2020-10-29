@@ -19,6 +19,7 @@ local WorldRevision = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevi
 local SaveWorldHandler = commonlib.gettable("MyCompany.Aries.Game.SaveWorldHandler")
 local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
 local RemoteServerList = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.RemoteServerList")
+local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 
 local LocalServiceWorld = NPL.export()
 
@@ -244,4 +245,70 @@ function LocalServiceWorld:MergeInternetLocalWorldList(currentWorldList)
     InternetLoadWorld.cur_ds = currentWorldList
     
     return currentWorldList
+end
+
+function LocalServiceWorld:SetWorldInstanceByFoldername(foldername)
+    if not foldername or type(foldername) ~= 'string' then
+        return false
+    end
+
+    local worldpath = Mod.WorldShare.Utils.GetWorldFolderFullPath() .. '/'  .. foldername .. '/'
+
+    local currentWorldList = Mod.WorldShare.Store:Get("world/compareWorldList")
+    local currentWorld = nil
+
+    if currentWorldList then
+        local searchCurrentWorld = nil
+        local shared = string.match(worldpath, "shared") == "shared" and true or nil
+
+        for key, item in ipairs(currentWorldList) do
+            if item.foldername == foldername and
+                item.shared == shared and 
+                not item.is_zip then
+                searchCurrentWorld = item
+                break
+            end
+        end
+
+        if searchCurrentWorld then
+            currentWorld = searchCurrentWorld
+        end
+    end
+
+    if not currentWorld then
+        WorldCommon.LoadWorldTag(worldpath)
+        local worldTag = WorldCommon.GetWorldInfo() or {}
+
+        currentWorld = {
+            IsFolder = true,
+            is_zip = false,
+            Title = worldTag.name,
+            text = worldTag.name,
+            author = "None",
+            costTime = "0:0:0",
+            filesize = 0,
+            foldername = foldername,
+            grade = "primary",
+            icon = "Texture/3DMapSystem/common/page_world.png",
+            ip = "127.0.0.1",
+            mode = "survival",
+            modifyTime = 0,
+            nid = "",
+            order = 0,
+            preview = "",
+            progress = "0",
+            size = 0,
+            worldpath = worldpath,
+            remotefile = format("local://%s", worldpath)
+        }
+
+        if type(worldTag) == 'table' then
+            currentWorld.kpProjectId = tonumber(worldTag.kpProjectId)
+            currentWorld.fromProjectId = tonumber(worldTag.fromProjects)
+        end
+    end
+
+    Mod.WorldShare.Store:Set('world/currentWorld', currentWorld)
+
+    return currentWorld
 end

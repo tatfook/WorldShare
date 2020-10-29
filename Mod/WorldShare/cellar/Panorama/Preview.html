@@ -27,6 +27,7 @@
                     end
                 ]]>
             </script>
+            <style type="text/mcss" src="Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss"></style>
             <kp:window width="500" height="653" onclose="close()">
                 <div style="width: 500px;height: 40px;">
                     <!-- title -->
@@ -44,13 +45,11 @@
                         />
                     </div>
                     <div style="float: left;width: 216px;height: 200px;">
-                        <div style="width: 197px;height: 55px;margin-left: 10px;margin-top: 30px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#673 198 38 64:12 10 12 15);font-size: 18px;base-font-size: 18px;text-align: center;padding: 0;padding-top: 12px;">
-                            <input type="button" style="position: relative;width: 200px;height: 60px;background: url()"  value="" onclick="share()"/>
-                            <%= L'分享' %>
+                        <div style="width: 197px;height: 55px;margin-left: 10px;margin-top: 30px;">
+                            <input type="button" class="theme1_green_button" style="position: relative;width: 200px;height: 60px;font-size: 18px;base-font-size: 18px;"  value="<%= L'分享' %>" onclick="share()"/>
                         </div>
-                        <div style="width: 197px;height: 55px;margin-left: 10px;margin-top: 10px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#624 198 38 64:12 10 12 15);font-size: 18px;base-font-size: 18px;text-align: center;padding: 0;padding-top: 12px;">
-                            <input type="button" style="position: relative;width: 200px;height: 60px;background: url()" value="" onclick="retry()"/>
-                            <%= L'重新拍摄' %>
+                        <div style="width: 197px;height: 55px;margin-left: 10px;margin-top: 10px;">
+                            <input type="button" class="theme1_gray_button" style="position: relative;width: 200px;height: 60px;font-size: 18px;base-font-size: 18px;" value="<%= L'重新拍摄' %>" onclick="retry()"/>
                         </div>
                     </div>
                     <!-- body -->

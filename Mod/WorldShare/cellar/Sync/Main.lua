@@ -20,10 +20,12 @@ local Permission = NPL.load("(gl)Mod/WorldShare/cellar/Permission/Permission.lua
 -- service
 local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
+local LocalServiceWorld = NPL.load("(gl)Mod/WorldShare/service/LocalService/World.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 local SyncToLocal = NPL.load("(gl)Mod/WorldShare/service/SyncService/SyncToLocal.lua")
 local SyncToDataSource = NPL.load("(gl)Mod/WorldShare/service/SyncService/SyncToDataSource.lua")
 local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
+local Compare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
 
 -- helper
 local GitEncoding = NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua")
@@ -42,12 +44,14 @@ function SyncMain:OnWorldLoad()
     end)
 end
 
-function SyncMain:ShowStartSyncPage(useOffline)
-    local params = SyncMain:ShowDialog("Mod/WorldShare/cellar/Sync/Templates/StartSync.html?useOffline=" .. (useOffline and "true" or "false"), "StartSync")
+function SyncMain:ShowNewVersionFoundPage(callback)
+    local params = SyncMain:ShowDialog("Mod/WorldShare/cellar/Theme/Sync/NewVersionFound.html", "Mod.WorldShare.NewVersionFound")
 
-    params._page.OnClose = function()
-        Mod.WorldShare.Store:Remove('page/StartSync')
-    end
+    params._page.afterSyncCallback = callback
+end
+
+function SyncMain:ShowStartSyncPage(useOffline)
+    SyncMain:ShowDialog("Mod/WorldShare/cellar/Theme/Sync/StartSync.html?useOffline=" .. (useOffline and "true" or "false"), "Mod.WorldShare.StartSync")
 end
 
 function SyncMain:SetStartSyncPage()
@@ -63,7 +67,7 @@ function SyncMain:CloseStartSyncPage()
 end
 
 function SyncMain:ShowBeyondVolume(bEnabled)
-    SyncMain:ShowDialog("Mod/WorldShare/cellar/Sync/Templates/BeyondVolume.html?bEnabled=" .. (bEnabled and "true" or "false"), "BeyondVolume")
+    SyncMain:ShowDialog("Mod/WorldShare/cellar/Sync/Templates/BeyondVolume.html?bEnabled=" .. (bEnabled and "true" or "false"), "Mod.WorldShare.BeyondVolume")
 end
 
 function SyncMain:CloseBeyondVolumePage()
@@ -75,11 +79,7 @@ function SyncMain:CloseBeyondVolumePage()
 end
 
 function SyncMain:ShowStartSyncUseLocalPage()
-    local params = SyncMain:ShowDialog("Mod/WorldShare/cellar/Sync/Templates/UseLocal.html", "StartSyncUseLocal")
-
-    params._page.OnClose = function()
-        Mod.WorldShare.Store:Remove('page/StartSyncUseLocal')
-    end
+    SyncMain:ShowDialog("Mod/WorldShare/cellar/Sync/Templates/UseLocal.html", "Mod.WorldShare.StartSyncUseLocal")
 end
 
 function SyncMain:SetStartSyncUseLocalPage()
@@ -417,4 +417,34 @@ function SyncMain:GetWorldDateTable()
     end
 
     return date
+end
+
+function SyncMain:CheckAndUpdatedBeforeEnterMyHome(callback)
+    if not KeepworkService:IsSignedIn() then
+        return false
+    end
+
+    local username = Mod.WorldShare.Store:Get('user/username')
+
+    if not username then
+        return false
+    end
+
+    local foldername = username .. '_main'
+
+    self:CheckAndUpdatedByFoldername(foldername, callback)
+end
+
+function SyncMain:CheckAndUpdatedByFoldername(foldername, callback)
+    LocalServiceWorld:SetWorldInstanceByFoldername(foldername)
+    self:CheckAndUpdated(callback)
+end
+
+function SyncMain:CheckAndUpdated(callback)
+    Compare:Init(function(result)
+        self:ShowNewVersionFoundPage(callback)
+        -- if result ~= 2 then
+
+        -- end
+    end)
 end

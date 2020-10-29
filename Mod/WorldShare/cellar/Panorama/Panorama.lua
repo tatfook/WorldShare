@@ -58,16 +58,26 @@ function Panorama:ShowCreate(force)
                 if not force and data and type(data) == 'table' and data.extra and data.extra.cubeMap and #data.extra.cubeMap > 0 then
                     self:ShowShare()
                 else
-                    local params = Mod.WorldShare.Utils.ShowWindow(
-                        scaleWidth,
-                        scaleHeight,
-                        format("Mod/WorldShare/cellar/Panorama/Create.html?width=%d&height=%d", scaleWidth, scaleHeight),
-                        "Mod.WorldShare.Panorama.Create",
-                        nil,
-                        nil,
-                        nil,
-                        false
-                    )
+                    if not data.userId then
+                        return false
+                    end
+
+                    local userId = Mod.WorldShare.Store:Get('user/userId')
+
+                    if data.userId == userId then
+                        local params = Mod.WorldShare.Utils.ShowWindow(
+                            scaleWidth,
+                            scaleHeight,
+                            format("Mod/WorldShare/cellar/Panorama/Create.html?width=%d&height=%d", scaleWidth, scaleHeight),
+                            "Mod.WorldShare.Panorama.Create",
+                            nil,
+                            nil,
+                            nil,
+                            false
+                        )
+                    else
+                        GameLogic.AddBBS(nil, L"这个作品的创建者还没拍摄过全景图哦，暂时无法进行全景图分享。", 4000, "255 0 0")
+                    end
                 end
             end)
         end
@@ -93,7 +103,7 @@ function Panorama:ShowShare()
         Mod.WorldShare.MsgBox:Close()
 
         if not bSucceed then
-            GameLogic.AddBBS(nil, 3000, L"生成小程序二维码失败", "255 0 0")
+            GameLogic.AddBBS(nil, L"生成小程序二维码失败", 3000, "255 0 0")
             return
         end
 

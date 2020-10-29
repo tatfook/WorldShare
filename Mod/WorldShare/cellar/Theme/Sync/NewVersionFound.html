@@ -1,0 +1,85 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>StartSync,by big,2017.4.18</title>
+</head>
+<body>
+    <pe:mcml>
+        <script type="text/npl" refresh="false">
+            <![CDATA[
+                -- libs
+                local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
+
+                -- UI
+                local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
+                SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
+                Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
+
+                page = document:GetPageCtrl()
+
+                function use_remote()
+                    close()
+
+                    SyncMain:SyncToLocal(page.afterSyncCallback)
+                end
+
+                function get_window_style()
+                    return Mod.WorldShare.Utils.FixCenter(500, 270)
+                end
+
+                function close()
+                    page:CloseWindow()
+                end
+
+                function use_local()
+                    close()
+
+                    if page.afterSyncCallback and type(page.afterSyncCallback) == 'function' then
+                        page.afterSyncCallback()
+                    end
+                end
+
+                function get_current_world_name()
+                    return Mod.WorldShare.Store:Getter("world/GetWorldTextName")
+                end
+
+                function get_bigger_style(type)
+                    if type == 'remote' and SyncMain.GetRemoteRevision() > SyncMain.GetCurrentRevision() then
+                        return 'background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#150 104 16 16:4 4 4 4)'
+                    end
+
+                    if type == 'local' and SyncMain.GetRemoteRevision() < SyncMain.GetCurrentRevision() then
+                        return 'background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#150 104 16 16:4 4 4 4)'
+                    end
+
+                    return ""
+                end
+             ]]>
+        </script>
+        <style type="text/mcss" src="Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss"></style>
+        <div width="100%" height="100%">
+            <kp:window width="500" height="270" style="<%= get_window_style()%>"  title='<%=L"与数据源同步" %>' onclose="close()">
+                <div style="height: 40px;"></div>
+                <div style="padding-top:20px;padding-left: 50px;font-size:18px;base-font-size:18px;color:#000000">
+                    <div>
+                        <%= L"远程有新的版本，是否需要同步呢？" %>
+                    </div>
+                    <div style="margin-left:80px;margin-top:20px;">
+                        <%= L"世界名称：" %>
+                        <%= get_current_world_name() %>
+                    </div>
+                    <div style="margin-left:80px;margin-top:20px;">
+                        <%= L"远程版本号：" %>
+                		<%= SyncMain.GetRemoteRevision()%>
+                        <input onclick="use_remote()" class="theme1_orange_button" name="remote" style="<%= 'margin-left:10px;width: 130px;height:30px;' .. get_bigger_style('remote') %>" type="button" value='<%=L"同步远程版本" %>' />
+	                </div>
+	                <div style="margin-left:80px;margin-top:20px;">
+                        <%=L"本地版本号：" %><%= SyncMain.GetCurrentRevision() %>
+                        <input onclick="use_local()" class="theme1_gray_button" style="margin-left:10px;width: 130px;height:30px;" type="button" value='<%=L"进入本地版本" %>' />
+	                </div>
+            	</div>
+            </kp:window>
+        </div>
+    </pe:mcml>
+</body>
+</html>
+
