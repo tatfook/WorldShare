@@ -107,6 +107,10 @@ function MySchool:ShowJoinSchool(callback)
         {
             text = L"大学",
             value = L"大学",
+        },
+        {
+            text = L"综合",
+            value = L"综合",
         }
     }
 
@@ -202,6 +206,10 @@ function MySchool:ShowRecordSchool()
         {
             text = L"大学",
             value = L"大学",
+        },
+        {
+            text = L"综合",
+            value = L"综合",
         }
     }
 
