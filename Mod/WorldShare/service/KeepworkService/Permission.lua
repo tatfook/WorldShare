@@ -27,6 +27,8 @@ KeepworkServicePermission.AllAuth = {
     MakeApp = "MakeApp",
     ChangeAvatarSkin = "ChangeAvatarSkin",
     CreateVipWorld = "t_create_vip_world",
+    VipCodeGameArtOfWar = "vip_code_game_art_of_war",
+    VipWeeklyTraining = "vip_ weekly_training",
 }
 
 function KeepworkServicePermission:GetAuth(authName)
