@@ -243,60 +243,39 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
     -- for follow api
     Mod.WorldShare.Store:Set('user/token', token)
 
-    AccountingOrgApi:GetUserAllOrgs(
-        function(data, err)
-            if err ~= 200 then
-                if callback and type(callback) == "function" then
-                    callback(false, L"获取学校信息失败")
-                end
-                return
-            end
-
-            if err == 200 then
-                if data and data.data and type(data.data) == 'table' and #data.data > 0 then
-                    Mod.WorldShare.Store:Set('user/myOrg', data.data[1] or {})
-                end
-            end
-
-            KeepworkServiceSchoolAndOrg:GetMyAllOrgsAndSchools(function(schoolData, orgData)
-                if not schoolData and not orgData then
-                    if callback and type(callback) == "function" then
-                        callback(false, L"获取学校信息失败")
-                    end
-                    return
-                end
-
-                local hasJoinedSchool = false
-                local hasJoinedOrg = false
-
-                if type(schoolData) == "table" and schoolData.regionId then
-                    hasJoinedSchool = true
-                end
-
-                if type(orgData) == "table" and #orgData > 0 then
-                    hasJoinedOrg = true
-                end
-
-                if hasJoinedSchool or hasJoinedSchool then
-                    Mod.WorldShare.Store:Set('user/hasJoinedSchoolOrOrg', true)
-                else
-                    Mod.WorldShare.Store:Set('user/hasJoinedSchoolOrOrg', false)
-                end
-
-                local Login = Mod.WorldShare.Store:Action("user/Login")
-                Login(token, userId, username, nickname, realname)
-
-                if callback and type(callback) == "function" then
-                    callback(true)
-                end
-            end)
-        end,
-        function(data, err)
+    KeepworkServiceSchoolAndOrg:GetMyAllOrgsAndSchools(function(schoolData, orgData)
+        if not schoolData and not orgData then
             if callback and type(callback) == "function" then
-                callback(false, L"获取学校信息失败")
+                callback(false, L"获取学校或机构信息失败")
             end
+            return
         end
-    )
+
+        local hasJoinedSchool = false
+        local hasJoinedOrg = false
+
+        if type(schoolData) == "table" and schoolData.regionId then
+            hasJoinedSchool = true
+        end
+
+        if type(orgData) == "table" and #orgData > 0 then
+            hasJoinedOrg = true
+            Mod.WorldShare.Store:Set('user/myOrg', orgData[1] or {})
+        end
+
+        if hasJoinedSchool or hasJoinedSchool then
+            Mod.WorldShare.Store:Set('user/hasJoinedSchoolOrOrg', true)
+        else
+            Mod.WorldShare.Store:Set('user/hasJoinedSchoolOrOrg', false)
+        end
+
+        local Login = Mod.WorldShare.Store:Action("user/Login")
+        Login(token, userId, username, nickname, realname)
+
+        if callback and type(callback) == "function" then
+            callback(true)
+        end
+    end)
 
     self:ResetIndulge()
     self:LoginSocket()
@@ -560,8 +539,6 @@ end
 function KeepworkServiceSession:GetCurrentUserToken()
     if Mod.WorldShare.Store:Get("user/token") then
         return Mod.WorldShare.Store:Get("user/token")
-    else
-        return System.User and System.User.keepworktoken
     end
 end
 

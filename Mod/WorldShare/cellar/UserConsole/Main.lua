@@ -274,7 +274,7 @@ function UserConsole:HandleWorldId(pid, refreshMode)
                     return false
                 end
 
-                Mod.WorldShare.MsgBox:Show(L"请稍后...")
+                Mod.WorldShare.MsgBox:Show(L"请稍候...")
                 GitService:GetWorldRevision(pid, false, function(data, err)
                     local localRevision = tonumber(LocalService:GetZipRevision(fileUrl)) or 0
                     local remoteRevision = tonumber(data) or 0
@@ -415,7 +415,7 @@ function UserConsole:HandleWorldId(pid, refreshMode)
         end
     end, 5000)
 
-    Mod.WorldShare.MsgBox:Show(L"请稍后...", 20000)
+    Mod.WorldShare.MsgBox:Show(L"请稍候...", 20000)
     KeepworkServiceProject:GetProject(
         pid,
         function(data, err)

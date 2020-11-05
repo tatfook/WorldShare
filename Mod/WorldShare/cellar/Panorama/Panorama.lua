@@ -51,7 +51,7 @@ function Panorama:ShowCreate(force)
             local scaleWidth = width * 0.9
             local scaleHeight = height * 0.9
 
-            Mod.WorldShare.MsgBox:Show(L"请稍后...")
+            Mod.WorldShare.MsgBox:Show(L"请稍候...")
             KeepworkServiceProject:GetProject(currentEnterWorld.kpProjectId, function(data, err)
                 Mod.WorldShare.MsgBox:Close()
 
@@ -151,7 +151,7 @@ function Panorama:FinishShooting()
     GameLogic.AddBBS(nil, L"生成全景图完成", 3000, "0 255 0")
     GameLogic.GetCodeGlobal():UnregisterTextEvent("after_generate_panorama", self.AfterGeneratePanorama)
 
-    Mod.WorldShare.MsgBox:Show(L"正在上传全景图，请稍后...", 30000, L"分享失败", 320, 120)
+    Mod.WorldShare.MsgBox:Show(L"正在上传全景图，请稍候...", 30000, L"分享失败", 320, 120)
     self:UploadPanoramaPhoto(function(bSucceed)
         Mod.WorldShare.MsgBox:Close()
 

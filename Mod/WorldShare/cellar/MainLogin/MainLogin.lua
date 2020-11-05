@@ -55,40 +55,40 @@ function MainLogin:Show()
 
     self:Refresh()
 
-    if not self.notFirstTimeShown then
-        self.notFirstTimeShown = true
+    -- if not self.notFirstTimeShown then
+    --     self.notFirstTimeShown = true
 
-        if System.User.keepworktoken then
-            Mod.WorldShare.MsgBox:Show(L"正在登录，请稍后...", 32000, L"链接超时", 300, 120)
+    --     if System.User.keepworktoken then
+    --         Mod.WorldShare.MsgBox:Show(L"正在登录，请稍候...", 24000, L"链接超时", 300, 120)
 
-            KeepworkServiceSession:LoginWithToken(
-                System.User.keepworktoken,
-                function(response, err)
-                    Mod.WorldShare.MsgBox:Close()
+    --         KeepworkServiceSession:LoginWithToken(
+    --             System.User.keepworktoken,
+    --             function(response, err)
+    --                 Mod.WorldShare.MsgBox:Close()
 
-                    if(err == 200 and type(response) == "table" and response.username) then
-                        self:EnterUserConsole()
-                    else
-                        -- token expired
-                        System.User.keepworktoken = nil;
-                    end
-                end
-            )
+    --                 if(err == 200 and type(response) == "table" and response.username) then
+    --                     self:EnterUserConsole()
+    --                 else
+    --                     -- token expired
+    --                     System.User.keepworktoken = nil;
+    --                 end
+    --             end
+    --         )
 
-            Mod.WorldShare.Store:Set('user/AfterLogined', function(bIsSucceed)
-				-- OnKeepWorkLogin
-				GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", bIsSucceed)
-			end)
+    --         Mod.WorldShare.Store:Set('user/AfterLogined', function(bIsSucceed)
+	-- 			-- OnKeepWorkLogin
+	-- 			GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", bIsSucceed)
+	-- 		end)
 
-            return
-        end
+    --         return
+    --     end
 
-        -- if PWDInfo and PWDInfo.autoLogin then
-        --     Mod.WorldShare.Utils.SetTimeOut(function()
-        --         self:EnterUserConsole()
-        --     end, 100)
-        -- end
-    end
+    --     -- if PWDInfo and PWDInfo.autoLogin then
+    --     --     Mod.WorldShare.Utils.SetTimeOut(function()
+    --     --         self:EnterUserConsole()
+    --     --     end, 100)
+    --     -- end
+    -- end
 
     Mod.WorldShare.Store:Set('user/AfterLogined', function(bIsSucceed)
         -- OnKeepWorkLogin
@@ -135,10 +135,15 @@ function MainLogin:LoginAction()
     end
 
 
-    Mod.WorldShare.MsgBox:Show(L"正在登录，请稍后...", 32000, L"链接超时", 300, 120)
+    Mod.WorldShare.MsgBox:Show(L"正在登录，请稍候...", 24000, L"链接超时", 300, 120)
 
-    local function HandleLogined()
+    local function HandleLogined(bSucceed, message)
         Mod.WorldShare.MsgBox:Close()
+
+        if not bSucceed then
+            GameLogic.AddBBS(nil, format(L"登录失败了, 错误信息：%s", message), 5000, "255 0 0")
+            return
+        end
 
         self:EnterUserConsole()
 

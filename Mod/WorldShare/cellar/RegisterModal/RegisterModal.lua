@@ -113,7 +113,7 @@ function RegisterModal:Register(page)
         return false
     end
 
-    Mod.WorldShare.MsgBox:Show(L"正在注册，请稍后...", 10000, L"链接超时", 500, 120)
+    Mod.WorldShare.MsgBox:Show(L"正在注册，请稍候...", 10000, L"链接超时", 500, 120)
 
     KeepworkServiceSession:Register(self.account, self.password, self.captcha, self.phonenumber, self.phonecaptcha, self.bindphone, function(state)
         Mod.WorldShare.MsgBox:Close()
@@ -208,7 +208,7 @@ function RegisterModal:Bind(method, ...)
             return false
         end
 
-        Mod.WorldShare.MsgBox:Show(L"请稍后...")
+        Mod.WorldShare.MsgBox:Show(L"请稍候...")
         KeepworkServiceSession:BindPhone(phonenumber, phonecaptcha, function(data, err)
             Mod.WorldShare.MsgBox:Close()
 
@@ -239,7 +239,7 @@ function RegisterModal:Bind(method, ...)
             return false
         end
 
-        Mod.WorldShare.MsgBox:Show(L"请稍后...")
+        Mod.WorldShare.MsgBox:Show(L"请稍候...")
         KeepworkServiceSession:BindEmail(email, emailcaptcha, function(data, err)
             Mod.WorldShare.MsgBox:Close()
 

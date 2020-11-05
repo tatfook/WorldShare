@@ -1,0 +1,41 @@
+<html>
+    <body>
+        <pe:mcml>
+            <script type="text/npl">
+                <![CDATA[
+                    -- UI
+                    local Panorama = NPL.load('./Panorama.lua')
+
+                    local page = document:GetPageCtrl()
+                    local wxacode = page:GetRequestParam("wxacode")
+
+                    function close()
+                        page:CloseWindow()
+                    end
+
+                    function retry()
+                        close()
+                    end
+
+                    function get_qrcode_url()
+                        return wxacode
+                    end
+                ]]>
+            </script>
+            <style type="text/mcss" src="Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss"></style>
+            <kp:window width="520" title="<%= L'分享' %>" onclose="close()">
+                <div style="width: 520px;height: 40px;">
+                    <!-- title -->
+                    <!-- <div style="margin-top: 8px;margin-left: 12px;width: 119px;height: 25px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#575 394 119 25);"></div> -->
+                </div>
+                <div style="padding: 30px;">
+                    <!-- body -->
+                    <div style="text-align: center;font-size: 16px;base-font-size: 16px;"><%= L'请使用微信扫描下方二维码分享' %></div>
+                    <div style="margin-left: 160px;margin-top: 25px;width: 140px;height: 140px;background-color: #ffffff;">
+                        <img style="width: 140px;height: 140px;" src="<%= get_qrcode_url() %>" />
+                    </div>
+                </div>
+            </kp:window>
+        </pe:mcml>
+    </body>
+</html>

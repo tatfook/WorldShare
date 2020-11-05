@@ -130,7 +130,7 @@ function UserInfo:LoginWithToken(callback)
         return false
     end
 
-    Mod.WorldShare.MsgBox:Show(L"正在自动登录，请稍后...", 8000, L"链接超时")
+    Mod.WorldShare.MsgBox:Show(L"正在自动登录，请稍候...", 8000, L"链接超时")
 
     KeepworkServiceSession:Profile(
         function(data, err)
@@ -180,7 +180,7 @@ function UserInfo:CheckDoAutoSignin(callback)
         return false
     end
 
-    Mod.WorldShare.MsgBox:Show(L"正在自动登录，请稍后...", 8000, L"链接超时")
+    Mod.WorldShare.MsgBox:Show(L"正在自动登录，请稍候...", 8000, L"链接超时")
 
     KeepworkServiceSession:Profile(
         function(data, err)

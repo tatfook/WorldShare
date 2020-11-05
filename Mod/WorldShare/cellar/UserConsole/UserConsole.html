@@ -214,7 +214,7 @@
                 end
 
                 function username()
-                    local userType = Mod.WorldShare.Store:Get('user/userType')
+                    local userType = Mod.WorldShare.Store:Get('user/userType') or {}
                     local isVip = Mod.WorldShare.Store:Get('user/isVip')
                     local username = UserInfo.GetUserName()
                     local textWidth = _guihelper.GetTextWidth(username)

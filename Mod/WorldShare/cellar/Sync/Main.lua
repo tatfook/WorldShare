@@ -173,10 +173,8 @@ function SyncMain:SyncToLocal(callback, isRefreshWorldList)
                         end
         
                         if option.method == 'UPDATE-PROGRESS-FINISH' then
-                            Progress:UpdateDataBar(1, 1, L"处理完成")
                             Progress:SetFinish(true)
-                            Progress:Refresh()
-                            Progress:RefreshOperate()
+                            Progress:UpdateDataBar(1, 1, L"处理完成")
                             return false
                         end
                     end
@@ -230,10 +228,8 @@ function SyncMain:SyncToLocalSingle(callback)
                 end
 
                 if option.method == 'UPDATE-PROGRESS-FINISH' then
-                    Progress:UpdateDataBar(1, 1, L"处理完成")
                     Progress:SetFinish(true)
-                    Progress:Refresh()
-                    Progress:RefreshOperate()
+                    Progress:UpdateDataBar(1, 1, L"处理完成")
                     return false
                 end
             end
@@ -298,8 +294,7 @@ function SyncMain:SyncToDataSource(callback)
     
                     if option.method == 'UPDATE-PROGRESS-FINISH' then
                         Progress:SetFinish(true)
-                        Progress:Refresh()
-                        Progress:RefreshOperate()
+                        Progress:UpdateDataBar(1, 1, L"处理完成")
                         return false
                     end
                 end
@@ -311,7 +306,7 @@ function SyncMain:SyncToDataSource(callback)
     
             WorldList:RefreshCurrentServerList()
         end)
-    
+
         -- load sync progress UI
         Progress:Init(syncInstance)
     end

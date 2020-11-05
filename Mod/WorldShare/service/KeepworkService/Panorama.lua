@@ -21,7 +21,10 @@ local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 
 KeepworkServicePanorama.uploadIndex = 0
 KeepworkServicePanorama.fileArray = {}
-KeepworkServicePanorama.basePath = Mod.WorldShare.Utils.GetRootFolderFullPath() .. "Screen Shots/"
+
+function KeepworkServicePanorama:GetBasePath()
+    return Mod.WorldShare.Utils.GetRootFolderFullPath() .. "Screen Shots/"
+end
 
 function KeepworkServicePanorama:Upload(callback, recursive)
     if not callback or type(callback) ~= 'function' then
@@ -58,7 +61,7 @@ function KeepworkServicePanorama:Upload(callback, recursive)
                 return
             end
 
-            local content = LocalService:GetFileContent(self.basePath .. filename)
+            local content = LocalService:GetFileContent(self:GetBasePath() .. filename)
 
             QiniuRootApi:Upload(data.data.token, data.data.key, data.data.key, content, function(data, err)
                 if err ~= 200 or not data or not data.data or not data.data.url then

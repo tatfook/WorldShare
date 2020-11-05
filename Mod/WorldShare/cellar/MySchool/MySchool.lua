@@ -22,7 +22,7 @@ function MySchool:Show(callback)
     self.callback = callback
     self.searchText = ""
 
-    Mod.WorldShare.MsgBox:Show(L"请稍后...", nil, nil, nil, nil, 6)
+    Mod.WorldShare.MsgBox:Show(L"请稍候...", nil, nil, nil, nil, 6)
 
     local params = Mod.WorldShare.Utils.ShowWindow(600, 380, "(ws)Theme/MySchool/MySchool.html", "Mod.WorldShare.MySchool")
 
@@ -114,13 +114,13 @@ function MySchool:ShowJoinSchool(callback)
         }
     }
 
-    self.result = {
+    self:SetResult({
         {
             text = L"在这里显示筛选的结果",
             value = 0,
             selected = true,
         },
-    }
+    })
 
     self.curId = 0
     self.kind = nil
@@ -300,7 +300,7 @@ end
 
 function MySchool:GetSearchSchoolResult(id, kind, callback)
     KeepworkServiceSchoolAndOrg:SearchSchool(id, kind, function(data)
-        self.result = data
+        self:SetResult(data)
 
         for key, item in ipairs(self.result) do
             item.text = item.name
@@ -316,13 +316,13 @@ end
 function MySchool:GetSearchSchoolResultByName(name, callback)
     if not name or type(name) ~= "string" or #name == 0 then
         if callback and type(callback) == "function" then
-            self.result = {
+            self:SetResult({
                 {
                     text = L"在这里显示筛选的结果",
                     value = 0,
                     selected = true,
                 },
-            }
+            })
 
             callback()
         end
@@ -331,7 +331,7 @@ function MySchool:GetSearchSchoolResultByName(name, callback)
     end
 
     KeepworkServiceSchoolAndOrg:SearchSchoolByName(name, self.curId, self.kind, function(data)
-        self.result = data
+        self:SetResult(data)
 
         for key, item in ipairs(self.result) do
             item.text = item.name or ""
@@ -354,4 +354,59 @@ end
 
 function MySchool:RecordSchool(schoolType, regionId, schoolName, callback)
     KeepworkServiceSchoolAndOrg:SchoolRegister(schoolType, regionId, schoolName, callback)
+end
+
+function MySchool:SetResult(data)
+    self.result = data
+    
+    if self.result and type(self.result) == 'table' then
+        for aKey, aItem in ipairs(self.result) do
+            local sameName = false
+
+            for bKey, bItem in ipairs(self.result) do
+                if aItem.id ~= bItem.id and aItem.name == bItem.name then
+                    sameName = true
+                    break
+                end
+            end
+
+            if sameName then
+                aItem.sameName = true
+            end
+        end
+
+        for key, item in ipairs(self.result) do
+            if item and item.name then
+                item.originName = item.name
+
+                if item and item.status and item.status == 0 then
+                    item.name = item.name .. L"（审核中）"
+                end
+            end
+
+            if item and item.region and item.sameName then
+                local regionString = ''
+
+                if item.region.country and item.region.country.name then
+                    regionString = regionString .. item.region.country.name
+                end
+
+                if item.region.state and item.region.state.name then
+                    regionString = regionString .. item.region.state.name
+                end
+
+                if item.region.city and item.region.city.name then
+                    regionString = regionString .. item.region.city.name
+                end
+
+                if item.region.county and item.region.county.name then
+                    regionString = regionString .. item.region.county.name
+                end
+
+                regionString = '（' .. regionString .. '）'
+
+                item.name = item.name .. regionString
+            end
+        end
+    end
 end

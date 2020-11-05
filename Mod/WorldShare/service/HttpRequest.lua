@@ -145,12 +145,12 @@ function HttpRequest:GetUrl(params, callback, noTryStatus, timeout)
             end
 
             -- fail try
-            HttpRequest:Retry(err, msg, data, params, callback, timeout)
+            HttpRequest:Retry(err, msg, data, params, callback, noTryStatus, timeout)
         end
     )
 end
 
-function HttpRequest:Retry(err, msg, data, params, callback)
+function HttpRequest:Retry(err, msg, data, params, callback, noTryStatus, timeout)
     -- beyond the max try times, must be return
     if HttpRequest.tryTimes >= HttpRequest.maxTryTimes then
         if (type(callback) == "function") then
@@ -166,7 +166,7 @@ function HttpRequest:Retry(err, msg, data, params, callback)
 
     commonlib.TimerManager.SetTimeout(
         function()
-            HttpRequest:GetUrl(params, callback)
+            HttpRequest:GetUrl(params, callback, noTryStatus, timeout)
         end,
         2100
     )

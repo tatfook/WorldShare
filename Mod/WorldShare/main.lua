@@ -103,6 +103,7 @@ local Menu = NPL.load("(gl)Mod/WorldShare/cellar/Menu/Menu.lua")
 -- service
 local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
+local EventTrackingService = NPL.load("(gl)Mod/WorldShare/service/EventTracking.lua")
 local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
 
 -- helper
@@ -147,7 +148,7 @@ function WorldShare:init()
             if Mod.WorldShare.Utils.IsEnglish() then
                 Mod.WorldShare.MsgBox:Show(L"checking for updates...", nil, nil, nil, nil, nil, "_ct")
             else
-                Mod.WorldShare.MsgBox:Show(L"正在检查更新， 请稍后...", nil, nil, nil, nil, nil, "_ct")
+                Mod.WorldShare.MsgBox:Show(L"正在检查更新， 请稍候...", nil, nil, nil, nil, nil, "_ct")
             end
         end
     )
@@ -263,6 +264,14 @@ function WorldShare:init()
         end
     )
 
+    -- filter user behavior
+    GameLogic:GetFilters():add_filter(
+        "user_behavior",
+        function(type, action)
+            EventTrackingService:Send(type, action)
+        end
+    )
+
     -- send udp online msg
     SocketService:StartUDPService()
 
@@ -271,6 +280,9 @@ function WorldShare:init()
 
     -- prevent indulage
     PreventIndulge:Init()
+
+    -- event tracking init
+    EventTrackingService:Init()
 
     -- init cef3 for windows
     if System.os.GetPlatform() == "win32" then
@@ -290,6 +302,7 @@ function WorldShare:init()
                 reason = result.payload.reason
             end
 
+            Mod.WorldShare.Store:Action("user/Logout")()
             UserConsole:ShowKickOutPage(reason)
         end
     end)

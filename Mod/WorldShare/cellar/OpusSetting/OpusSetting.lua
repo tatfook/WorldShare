@@ -24,7 +24,7 @@ function OpusSetting:Show()
         return false
     end
 
-    Mod.WorldShare.MsgBox:Show(L"请稍后...")
+    Mod.WorldShare.MsgBox:Show(L"请稍候...")
 
     KeepworkServiceProject:GetProject(currentWorld.kpProjectId, function(data, err)
         Mod.WorldShare.MsgBox:Close()
