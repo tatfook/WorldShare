@@ -7,6 +7,7 @@ Desc:
 use the lib:
 ------------------------------------------------------------
 local Panorama = NPL.load("(gl)Mod/WorldShare/cellar/Panorama/Panorama.lua")
+Panorama:ShowCreate(true)
 ------------------------------------------------------------
 ]]
 
@@ -216,5 +217,4 @@ function Panorama:UploadPanoramaPhoto(callback)
             end)
         end)
     end)
-
 end
