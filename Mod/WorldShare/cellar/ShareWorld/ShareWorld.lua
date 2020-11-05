@@ -9,15 +9,20 @@ local ShareWorld = NPL.load("(gl)Mod/WorldShare/cellar/ShareWorld/ShareWorld.lua
 ShareWorld:Init()
 -------------------------------------------------------
 ]]
+
+-- libs
 local PackageShareWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.Areas.ShareWorldPage")
 local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 local CommandManager = commonlib.gettable("MyCompany.Aries.Game.CommandManager")
 
+-- UI
 local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
 local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
 local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua")
 local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
 local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
+
+-- service
 local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
@@ -30,7 +35,7 @@ function ShareWorld:Init(bEnabled, callback)
     local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
 
     if GameLogic.IsReadOnly() or not currentWorld or currentWorld.is_zip then
-        _guihelper.MessageBox(L"此世界不支持分享")
+        self:ShowWorldCode(currentWorld.kpProjectId)
         return false
     end
 
@@ -68,7 +73,7 @@ function ShareWorld:Init(bEnabled, callback)
         return false
     end
 
-    Mod.WorldShare.MsgBox:Show(L"请稍后...")
+    Mod.WorldShare.MsgBox:Show(L"请稍候...")
     Compare:Init(function(result)
         Mod.WorldShare.MsgBox:Close()
         if result then
@@ -78,7 +83,7 @@ function ShareWorld:Init(bEnabled, callback)
 end
 
 function ShareWorld:ShowPage()
-    local params = Mod.WorldShare.Utils.ShowWindow(640, 415, "Mod/WorldShare/cellar/ShareWorld/ShareWorld.html", "ShareWorld")
+    local params = Mod.WorldShare.Utils.ShowWindow(640, 415, "Mod/WorldShare/cellar/Theme/ShareWorld/ShareWorld.html", "ShareWorld")
 
     params._page.OnClose = function()
         Mod.WorldShare.Store:Remove('page/ShareWorld')
@@ -207,4 +212,22 @@ function ShareWorld:UpdateImage(bRefreshAsset)
 
         self:Refresh()
     end
+end
+
+function ShareWorld:ShowWorldCode(projectId)
+    Mod.WorldShare.MsgBox:Show(L"请稍候...")
+
+    KeepworkServiceProject:GenerateMiniProgramCode(
+        projectId,
+        function(bSucceed, wxacode)
+            Mod.WorldShare.MsgBox:Close()
+
+            if not bSucceed then
+                GameLogic.AddBBS(nil, L"生成二维码失败", 3000, "255 0 0")
+                return false
+            end
+
+            Mod.WorldShare.Utils.ShowWindow(520, 305, "Mod/WorldShare/cellar/ShareWorld/Code.html?wxacode=".. wxacode or "", "Mod.WorldShare.ShareWorld.Code")
+        end
+    )
 end

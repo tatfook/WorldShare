@@ -20,7 +20,7 @@
 
                     function record_school()
                         MySchool:ShowRecordSchool()
-                        close()
+                        page:CloseWindow()
                     end
 
                     function get_provinces()
@@ -178,7 +178,7 @@
                             return false
                         end
 
-                        Mod.WorldShare.MsgBox:Show(L"请稍后...")
+                        Mod.WorldShare.MsgBox:Show(L"请稍候...")
                         MySchool:ChangeSchool(curItem.value, function(bSuccessed)
                             Mod.WorldShare.MsgBox:Close()
                             if bSuccessed then
@@ -318,7 +318,7 @@
                             <div style="width: 380px;margin-bottom: 10px;height: 100px;"></div>
                             <div style="width: 380px;">
                                 <%= L"*如果您的学校未出现在列表中，请登记学校。我们会尽快添加。" %>
-                                <a style="background: " onclick="record_school()">登记学校</a>
+                                <a style="background: " onclick="record_school()"> <%= L'》登记学校《' %> </a>
                             </div>
                         </div>
                     </div>

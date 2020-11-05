@@ -43,7 +43,7 @@ function WorldExitDialog.ShowPage(callback)
         return false
     end
 
-    Mod.WorldShare.MsgBox:Show(L"请稍后...")
+    Mod.WorldShare.MsgBox:Show(L"请稍候...")
 
     local function Handle()
         Mod.WorldShare.MsgBox:Close()
@@ -172,7 +172,7 @@ function WorldExitDialog.OnDialogResult(res)
         local currentEnterWorld = Mod.WorldShare.Store:Get("world/currentEnterWorld")
 
         if (currentEnterWorld.project and currentEnterWorld.project.memberCount or 0) > 1 then
-            Mod.WorldShare.MsgBox:Show(L"请稍后...")
+            Mod.WorldShare.MsgBox:Show(L"请稍候...")
             KeepworkServiceWorld:UnlockWorld(function()
                 if (WorldExitDialogPage.callback) then
                     --KeepworkServiceSession:Logout()

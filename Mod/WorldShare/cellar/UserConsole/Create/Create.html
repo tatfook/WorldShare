@@ -152,6 +152,7 @@
 
                     function header()
                         return 'height:34px;\
+                                width: 300px;\
                                 margin:2px;\
                                 margin-top:5px;\
                                 margin-left:5px;\
@@ -163,21 +164,6 @@
                                 width:28px;\
                                 height:20px;\
                                 background:url(Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#217 183 28 20)';
-                    end
-
-                    function header_forward()
-                        return 'background-color:#ffffff33;\
-                                width:28px;\
-                                height:20px;\
-                                margin-left:5px;\
-                                background:url(Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#242 183 28 20)';
-                    end
-
-                    function header_refresh()
-                        return 'width:28px;\
-                                height:20px;\
-                                margin-left:5px;\
-                                background:url(Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#267 183 28 20)';
                     end
 
                     function get_world_version()
@@ -847,7 +833,7 @@
                     end
                 ]]>
             </script>
-            <style type="text/mcss">
+            <style type="text/mcss" src="Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss">
                 {
                     my_school_button = {
                         ["min-width"] = 100,
@@ -1008,40 +994,38 @@
                         float = 'left',
                         ['margin-left'] = 10,
                         ['margin-top'] = 0,
-                        textcolor = "#ffffff",
                         width = 316,
                         height = 30,
-                        padding = 0,
-                        background = "Texture/Aries/Creator/keepwork/explorer_32bits.png#198 132 16 16:4 4 4 4",
                     },
                     list_search_textfield = {
                         width = 266,
                         height = 30,
-                        background = '',
-                        textcolor = '#000000'
+                        background = ''
                     },
                     list_search_button = {
                         position = 'relative',
                         align = 'right',
                         color = "#000000",
-                        background = "Texture/Aries/Creator/keepwork/explorer_32bits.png#225 127 36 28:6 5 7 6",
                         height = 30,
                         width = 57,
                         ['text-align'] = 'center',
-                        ['padding-top'] = 3,
                         ['margin-top'] = -32
                     },
                     list_search_button_click = {
                         postion = 'relative',
                         height = 30,
-                        width = 57,
-                        ['margin-top'] = -25,
-                        background = ''
+                        width = 57
                     },
                 }
             </style>
             <kp:window width="920" height="530" icon="Texture/Aries/Creator/keepwork/Window/title/biaoti_chuangzao_32bits.png" onclose="close()">
                 <div style="<%=header()%>" width="100%">
+                    <div class="list_search_bar theme1_white1_textfield" style="<%= 'float: left;margin-left: 520px;' %>">
+                        <input type="text" name="content" class="list_search_textfield" spacing="4" EmptyText='<%=L"输入项目ID或课程ID或服务器地址"%>' value=""/>
+                        <div class="list_search_button">
+                            <input type="button" class="list_search_button_click theme1_gray2_button" value='<%=L"打开"%>' onclick="go_to_url()" />
+                        </div>
+                    </div>
                 </div>
                 <div class="world_area">
                     <div style="height: 30px;margin-bottom: 3px;">
@@ -1088,11 +1072,10 @@
                                 </pe:if>
                             </pe:if>
                         </div>
-                        <div class="list_search_bar" style="<%= 'float: left;margin-left: ' .. (is_signed_in() and '120px' or '320px') .. ';' %>">
-                            <input type="text" name="search_text" class="list_search_textfield" spacing="4" EmptyText='<%=L"请输入你搜索的内容"%>' onfocusout="search" value="<%= get_last_serch_text() %>"/>
+                        <div class="theme1_black_textfield" style="margin-top: 0;width: 220px;height: 30px;float: left;margin-left: 220px;">
+                            <input type="text" name="search_text" style="textcolor: #ffffff;width: 220px;height: 30px;background: ''" spacing="4" EmptyText='<%=L"搜索列表项目"%>' onfocusout="search" value="<%= get_last_serch_text() %>"/>
                             <div class="list_search_button">
-                                <%=L"搜索"%>
-                                <input type="button" class="list_search_button_click" DefaultButton="true" onclick="search()" />
+                                <input type="button" class="list_search_button_click theme1_gray2_button" value='<%=L"搜索"%>' onclick="search()" />
                             </div>
                         </div>
                         <div style="float:left;margin-left:10px;height: 37px;width:130px;margin-top: -3px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#264 46 38 34:12 12 14 12)">
@@ -1163,16 +1146,16 @@
                                                             <div class="list_search_bar" style="float: left;margin-left: 0px;width: 180px;height: 25px;">
                                                                 <input type="text"
                                                                        onchange="update_temp_modify_worldname"
-                                                                       class="list_search_textfield"
+                                                                       class="list_search_textfield theme1_white_textfield"
                                                                        style="width: 145px;height: 25px;"
                                                                        value="<%= get_tagname() %>"
                                                                        spacing="4" />
                                                                 <div class="list_search_button" style="height: 25px;width: 40px;font-size: 12px;base-font-size: 12px;margin-top: -26px;">
-                                                                    <%=L"保存"%>
                                                                     <input type="button"
-                                                                           class="list_search_button_click"
+                                                                           class="list_search_button_click theme1_gray2_button"
                                                                            style="height: 25px;"
                                                                            DefaultButton="true"
+                                                                           value='<%=L"保存"%>'
                                                                            onclick="covert_status" />
                                                                 </div>
                                                             </div>

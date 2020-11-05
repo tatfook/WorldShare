@@ -51,7 +51,7 @@ function ThirdPartyLogin:Init(thirdPartyType, callback)
         self.callback = callback
 
         if self.needToWait then
-            Mod.WorldShare.MsgBox:Show(L"请稍后...", nil, nil, nil, nil, 6)
+            Mod.WorldShare.MsgBox:Show(L"请稍候...", nil, nil, nil, nil, 6)
 
             Mod.WorldShare.Utils.SetTimeOut(function()
                 Mod.WorldShare.MsgBox:Close()
@@ -150,7 +150,7 @@ function ThirdPartyLogin:Init(thirdPartyType, callback)
 
 
     if System.os.GetPlatform() == "win32" then
-        Mod.WorldShare.MsgBox:Show(L"请稍后...", nil, nil, nil, nil, 6)
+        Mod.WorldShare.MsgBox:Show(L"请稍候...", nil, nil, nil, nil, 6)
         NPLServerService:CheckDefaultServerStarted(function(bStarted, siteUrl)
             Mod.WorldShare.MsgBox:Close()
             if not bStarted or not siteUrl then
@@ -162,7 +162,7 @@ function ThirdPartyLogin:Init(thirdPartyType, callback)
             if Cef3Manager.bLoaded then
                 Handle()
             else
-                Mod.WorldShare.MsgBox:Show(L"请稍后...", 30000, nil, nil, nil, 6)
+                Mod.WorldShare.MsgBox:Show(L"请稍候...", 30000, nil, nil, nil, 6)
                 Cef3Manager:Connect("finishLoadCef3", nil, function()
                     Mod.WorldShare.MsgBox:Close()
                     Handle()
@@ -220,7 +220,7 @@ function ThirdPartyLogin:ShowCreateOrBindThirdPartyAccountPage(method)
 end
 
 function ThirdPartyLogin:RegisterAndBind(account, password, authToken)
-    Mod.WorldShare.MsgBox:Show(L"请稍后...")
+    Mod.WorldShare.MsgBox:Show(L"请稍候...")
 
     KeepworkServiceSession:RegisterAndBindThirdPartyAccount(account, password, authToken, function(state)
         Mod.WorldShare.MsgBox:Close()
@@ -259,7 +259,7 @@ function ThirdPartyLogin:RegisterAndBind(account, password, authToken)
 end
 
 function ThirdPartyLogin:LoginAndBind(account, password, authToken)
-    Mod.WorldShare.MsgBox:Show(L"请稍后...")
+    Mod.WorldShare.MsgBox:Show(L"请稍候...")
 
     KeepworkServiceSession:LoginAndBindThirdPartyAccount(account, password, authToken, function(response, err)
         if err ~= 200 or not response then

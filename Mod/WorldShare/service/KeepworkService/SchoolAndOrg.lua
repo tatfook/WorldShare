@@ -173,6 +173,8 @@ function KeepworkServiceSchoolAndOrg:JoinInstitute(code, callback)
     end
 
     code = string.gsub(code, " ", "")
+    code = string.gsub(code, "\r", "")
+    code = string.gsub(code, "\n", "")
 
     AccountingOrgActivateCodeApi:Activate(
         code,

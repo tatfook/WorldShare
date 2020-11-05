@@ -39,7 +39,7 @@ function VersionChange:Init(foldername)
         end
     end
 
-    Mod.WorldShare.MsgBox:Show(L"请稍后...")
+    Mod.WorldShare.MsgBox:Show(L"请稍候...")
 
     self.foldername = foldername
 

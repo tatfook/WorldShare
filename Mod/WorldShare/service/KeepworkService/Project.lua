@@ -193,3 +193,24 @@ function KeepworkServiceProject:RemoveProject(kpProjectId, callback)
 
     KeepworkProjectsApi:RemoveProject(tonumber(kpProjectId), callback)
 end
+
+function KeepworkServiceProject:GenerateMiniProgramCode(projectId, callback)
+    if not callback or type(callback) ~= 'function' or not projectId then
+        return false
+    end
+
+    KeepworkProjectsApi:ShareWxacode(
+        tonumber(projectId),
+        function(data, err)
+            if err ~= 200 or not data or not data.wxacode then
+                callback(false)
+                return
+            end
+
+            callback(true, data.wxacode)
+        end,
+        function(data, err)
+            callback(false)
+        end
+    )
+end

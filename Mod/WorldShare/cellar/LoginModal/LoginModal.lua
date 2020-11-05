@@ -156,7 +156,7 @@ function LoginModal:LoginAction()
         return false
     end
 
-    Mod.WorldShare.MsgBox:Show(L"正在登录，请稍后...", 32000, L"链接超时", 300, 120, 13)
+    Mod.WorldShare.MsgBox:Show(L"正在登录，请稍候...", 24000, L"链接超时", 300, 120, 13)
 
     local function HandleLogined(bSucceed, message)
         Mod.WorldShare.MsgBox:Close()

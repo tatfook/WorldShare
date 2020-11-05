@@ -114,7 +114,7 @@ function WorldList:Sync()
         return false
     end
 
-    Mod.WorldShare.MsgBox:Show(L"请稍后...")
+    Mod.WorldShare.MsgBox:Show(L"请稍候...")
 
     Compare:Init(function(result)
         if not result then
@@ -323,7 +323,7 @@ function WorldList:EnterWorld(index)
         local clientPassword = Mod.WorldShare.Store:Getter("user/GetClientPassword")
  
         local function LockAndEnter()
-            Mod.WorldShare.MsgBox:Show(L"请稍后...")
+            Mod.WorldShare.MsgBox:Show(L"请稍候...")
             local function HandleLockAndEnter()
                 KeepworkServiceWorld:GetLockInfo(
                     currentWorld.kpProjectId,
@@ -430,7 +430,7 @@ function WorldList:EnterWorld(index)
         end
 
         if currentWorld.status == 2 then
-            Mod.WorldShare.MsgBox:Show(L"请稍后...")
+            Mod.WorldShare.MsgBox:Show(L"请稍候...")
 
             Compare:Init(function(result)
                 if result ~= Compare.JUSTREMOTE then
@@ -473,7 +473,7 @@ function WorldList:EnterWorld(index)
                 return true
             end
     
-            Mod.WorldShare.MsgBox:Show(L"请稍后...")
+            Mod.WorldShare.MsgBox:Show(L"请稍候...")
             Compare:Init(function(result)
                 Mod.WorldShare.MsgBox:Close()
 
@@ -493,7 +493,7 @@ function WorldList:EnterWorld(index)
                             function(res)
                                 if res and res == _guihelper.DialogResult.Yes then
                                     SyncMain:BackupWorld()
-                                    Mod.WorldShare.MsgBox:Show(L"请稍后...")
+                                    Mod.WorldShare.MsgBox:Show(L"请稍候...")
 
                                     SyncMain:SyncToLocalSingle(function(result, option)
                                         if result == true then
