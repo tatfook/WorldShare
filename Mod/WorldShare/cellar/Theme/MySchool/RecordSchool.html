@@ -8,6 +8,10 @@
 
                     function close()
                         page:CloseWindow()
+
+                        if MySchool.joinSchoolCallback and type(MySchool.joinSchoolCallback) == 'function' then
+                            MySchool.joinSchoolCallback()
+                        end
                     end
 
                     function get_provinces()
