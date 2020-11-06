@@ -16,7 +16,8 @@ local KeepworkServiceSchoolAndOrg = NPL.load("(gl)Mod/WorldShare/service/Keepwor
 local MySchool = NPL.export()
 
 function MySchool:Show(callback)
-    self.hasJoined = nil
+    self.hasJoined = false
+    self.hasSchoolJoined = false
     self.schoolData = {}
     self.orgData = {}
     self.callback = callback
@@ -34,6 +35,13 @@ function MySchool:Show(callback)
         if type(orgData) == "table" and #orgData > 0 then
             self.orgData = orgData
             self.hasJoined = true
+        
+            for key, item in ipairs(orgData) do
+                if item and item.type == 4 then
+                    self.hasSchoolJoined = true
+                    break
+                end
+            end
         end
 
         params._page:Refresh(0.01)

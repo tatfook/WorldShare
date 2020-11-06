@@ -17,7 +17,7 @@ HttpRequest.maxTimeout = 0
 HttpRequest.defaultSuccessCode = {200, 201, 202, 204}
 HttpRequest.defaultFailCode = {400, 401, 404, 409, 422, 500}
 
-function HttpRequest:GetUrl(params, callback, noTryStatus, timeout)
+function HttpRequest:GetUrl(params, callback, noTryStatus, timeout, noShowLog)
     if type(params) ~= "table" and type(params) ~= "string" then
         return false
     end
@@ -83,7 +83,10 @@ function HttpRequest:GetUrl(params, callback, noTryStatus, timeout)
                 ---- debug code ----
                 local debugUrl = type(params) == "string" and params or formatParams.url
                 local method = type(params) == "table" and params.method and params.method or "GET"
-                LOG.std("HttpRequest", "debug", "Request", "Connection timeout, Status Code: %s, Method: %s, URL: %s, Params: %s", err, method, debugUrl, NPL.ToJson(formatParams, true))
+
+                if not noShowLog then
+                    LOG.std("HttpRequest", "debug", "Request", "Connection timeout, Status Code: %s, Method: %s, URL: %s, Params: %s", err, method, debugUrl, NPL.ToJson(formatParams, true))
+                end
                 
                 ---- debug code ----
                 callback(nil, 0)
@@ -94,7 +97,9 @@ function HttpRequest:GetUrl(params, callback, noTryStatus, timeout)
             local debugUrl = type(params) == "string" and params or formatParams.url
             local method = type(params) == "table" and params.method and params.method or "GET"
 
-            LOG.std("HttpRequest", "debug", "Request", "Status Code: %s, Method: %s, URL: %s, Params: %s", err, method, debugUrl, NPL.ToJson(formatParams, true))
+            if not noShowLog then
+                LOG.std("HttpRequest", "debug", "Request", "Status Code: %s, Method: %s, URL: %s, Params: %s", err, method, debugUrl, NPL.ToJson(formatParams, true))
+            end
             ---- debug code ----
 
             -- no try status code, return directly
@@ -172,7 +177,7 @@ function HttpRequest:Retry(err, msg, data, params, callback, noTryStatus, timeou
     )
 end
 
-function HttpRequest:Get(url, params, headers, success, error, noTryStatus, timeout)
+function HttpRequest:Get(url, params, headers, success, error, noTryStatus, timeout, noShowLog)
     if not url then
         return false
     end
@@ -195,11 +200,12 @@ function HttpRequest:Get(url, params, headers, success, error, noTryStatus, time
             end
         end,
         noTryStatus,
-        timeout
+        timeout,
+        noShowLog
     )
 end
 
-function HttpRequest:Post(url, params, headers, success, error, noTryStatus, timeout)
+function HttpRequest:Post(url, params, headers, success, error, noTryStatus, timeout, noShowLog)
     if not url then
         return false
     end
@@ -222,12 +228,13 @@ function HttpRequest:Post(url, params, headers, success, error, noTryStatus, tim
             end
         end,
         noTryStatus,
-        timeout
+        timeout,
+        noShowLog
     )
 
 end
 
-function HttpRequest:Put(url, params, headers, success, error, noTryStatus, timeout)
+function HttpRequest:Put(url, params, headers, success, error, noTryStatus, timeout, noShowLog)
     if not url then
         return false
     end
@@ -250,11 +257,12 @@ function HttpRequest:Put(url, params, headers, success, error, noTryStatus, time
             end
         end,
         noTryStatus,
-        timeout
+        timeout,
+        noShowLog
     )
 end
 
-function HttpRequest:Delete(url, params, headers, success, error, noTryStatus, timeout)
+function HttpRequest:Delete(url, params, headers, success, error, noTryStatus, timeout, noShowLog)
     if not url then
         return false
     end
@@ -277,7 +285,8 @@ function HttpRequest:Delete(url, params, headers, success, error, noTryStatus, t
             end
         end,
         noTryStatus,
-        timeout
+        timeout,
+        noShowLog
     )
 end
 
