@@ -59,7 +59,7 @@
                 end
 
                 function has_school_joined()
-                    if MySchool.schoolData and MySchool.schoolData.regionId then
+                    if MySchool.hasSchoolJoined then
                         return true
                     else
                         return false
@@ -259,8 +259,8 @@
                                 </pe:if>
                                 <pe:if condition="<%= not has_school_joined() %>">
                                     <div style="float:left;">
-                                        <input type="button" class="join_school_bg" style="width: 120px;height: 35px;" value="<%= L'加入学校' %>" onclick="join_school()"/>
-                                        <kp:redtip style="position:relative;margin-left:117px;margin-top:-40px;" onupdate='<%= not has_school_joined() %>'></kp:redtip>    
+                                        <input type="button" class="theme1_orange_button" style="height: 35px;width: 120px;" value="<%= L'加入学校' %>" onclick="join_school()"/>
+                                        <kp:redtip style="position:relative;margin-left:110px;margin-top:-37px;" onupdate='<%= not has_school_joined() %>'></kp:redtip>    
                                     </div>
                                 </pe:if>
                                 <input type="button" class="theme1_gray_button" style="height: 35px;width: 120px;margin-left: 10px;" value="<%= L'加入机构' %>" onclick="join_institute()"/>

@@ -20,10 +20,6 @@
                     Progress:Copy(KeepworkService:GetShareUrl())
                 end
 
-                function get_window_style()
-                    return Mod.WorldShare.Utils.FixCenter(550, 400)
-                end
-
                 function get_world_url()
                     local worldUrl = KeepworkService:GetShareUrl()
 
@@ -79,7 +75,7 @@
             }
         </style>
         <div width="100%" height="100%">
-            <kp:window width="550" height="400" style="<%= get_window_style()%>"  title='<%=L"同步完成" %>' onclose="close()">
+            <kp:window width="550" height="400" title='<%=L"同步完成" %>' onclose="close()">
                 <div style="height: 40px;"></div>
                 <div style="padding:20px;font-size:18px;base-font-size:18px;color:#000000">
                     <div style="margin-right:20px;font-size:13px;base-font-size:13px;">

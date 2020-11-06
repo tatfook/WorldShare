@@ -87,7 +87,7 @@ function Progress:ShowFinishPage()
         function(bSucceed, wxacode)
             Mod.WorldShare.MsgBox:Close()
 
-            Mod.WorldShare.Utils.ShowWindow(0, 0, "Mod/WorldShare/cellar/Theme/Sync/Progress/Finish.html?wxacode=" .. wxacode or "", "Mod.WorldShare.Progress.Finish", 0, 0, "_fi", false, 2)
+            Mod.WorldShare.Utils.ShowWindow(550, 400, "Mod/WorldShare/cellar/Theme/Sync/Progress/Finish.html?wxacode=" .. wxacode or "", "Mod.WorldShare.Progress.Finish")
         end
     )
 end

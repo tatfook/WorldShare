@@ -14,6 +14,8 @@ local BaseApi = NPL.load("../BaseApi.lua")
 
 local EventGatewayBaseApi = NPL.export()
 
+EventGatewayBaseApi.noShowLog = true
+
 function EventGatewayBaseApi:GetApi()
     return Config.eventGatewayList[BaseApi:GetEnv()] or ""
 end
@@ -37,28 +39,28 @@ end
 function EventGatewayBaseApi:Get(url, params, headers, success, error, noTryStatus, timeout)
     local fullUrl = self:GetApi() .. url
 
-    BaseApi:Get(fullUrl, params, self:GetHeaders(headers), success, self:ErrorCollect("GET", fullUrl, url, error), noTryStatus, timeout)
+    BaseApi:Get(fullUrl, params, self:GetHeaders(headers), success, self:ErrorCollect("GET", fullUrl, url, error), noTryStatus, timeout, self.noShowLog)
 end
 
 -- public
 function EventGatewayBaseApi:Post(url, params, headers, success, error, noTryStatus, timeout)
     local fullUrl = self:GetApi() .. url
 
-    BaseApi:Post(fullUrl, params, self:GetHeaders(headers), success, self:ErrorCollect("POST", fullUrl, url, error), noTryStatus, timeout)
+    BaseApi:Post(fullUrl, params, self:GetHeaders(headers), success, self:ErrorCollect("POST", fullUrl, url, error), noTryStatus, timeout, self.noShowLog)
 end
 
 -- public
 function EventGatewayBaseApi:Put(url, params, headers, success, error, noTryStatus, timeout)
     local fullUrl = self:GetApi() .. url
 
-    BaseApi:Put(fullUrl, params, self:GetHeaders(headers), success, self:ErrorCollect("PUT", fullUrl, url, error), noTryStatus, timeout)
+    BaseApi:Put(fullUrl, params, self:GetHeaders(headers), success, self:ErrorCollect("PUT", fullUrl, url, error), noTryStatus, timeout, self.noShowLog)
 end
 
 -- public
 function EventGatewayBaseApi:Delete(url, params, headers, success, error, noTryStatus, timeout)
     local fullUrl = self:GetApi() .. url
 
-    BaseApi:Delete(fullUrl, params, self:GetHeaders(headers), success, self:ErrorCollect("DELETE", fullUrl, url, error), noTryStatus, timeout)
+    BaseApi:Delete(fullUrl, params, self:GetHeaders(headers), success, self:ErrorCollect("DELETE", fullUrl, url, error), noTryStatus, timeout, self.noShowLog)
 end
 
 -- public
