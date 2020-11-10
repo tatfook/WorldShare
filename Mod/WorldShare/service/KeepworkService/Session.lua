@@ -178,6 +178,7 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
     local username = response["username"] or ""
     local nickname = response["nickname"] or ""
     local realname = response['realname'] or ""
+    local paraWorldId = response['paraWorldId'] or nil
 
     if not response.realname then
         Mod.WorldShare.Store:Set("user/isVerified", false)
@@ -190,6 +191,8 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
     else
         Mod.WorldShare.Store:Set("user/isBind", true)
     end
+
+    Mod.WorldShare.Store:Set('world/paraWorldId', paraWorldId)
 
     local userType = {}
 
@@ -817,4 +820,22 @@ function KeepworkServiceSession:GetUsersByUsernames(usernames, callback)
     end
     
     KeepworkUsersApi:Search({ username = { ['$in'] = usernames }}, callback, callback)
+end
+
+function KeepworkServiceSession:GetWebToken(callback)
+    KeepworkUsersApi:WebToken(
+        function(data, err)
+            if not data or type(data) ~= 'table' or not data.token then
+                return false
+            end
+
+            if callback and type(callback) == 'function' then
+                callback(data.token)
+            end
+        end,
+        function(data, err)
+            -- do nothing ...
+        end
+    )
+
 end

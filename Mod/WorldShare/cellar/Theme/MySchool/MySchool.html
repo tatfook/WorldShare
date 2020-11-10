@@ -168,6 +168,17 @@
                         return false
                     end
                 end
+
+                function open_teaching_plan_center()
+                    local data = get_data()
+                    local curData = data[index] or {}
+
+                    if not curData or not curData.orgUrl then
+                        return
+                    end
+
+                    MySchool:OpenTeachingPlanCenter(curData.orgUrl)
+                end
             ]]>
         </script>
         <style type="text/mcss" src="Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss">
@@ -204,14 +215,17 @@
                                     <pe:if condition="<%= Eval('type') == 4 %>">
                                         <div style="width: 550px;height: 100px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#435 212 30 30:11 11 11 11);float: left;margin-bottom: 10px;margin-right: 10px;">
                                             <div style="position: relative;width: 550px;height: 100px;">
-                                                <div style="margin-left: 325px;margin-top: 60px;width: 225px;height: 35px;">
+                                                <div style="margin-left: 220px;margin-top: 60px;width: 330px;height: 35px;">
                                                     <div style="float: left;width: 100px;height: 35px;">
                                                         <pe:if condition="<%= has_project_id() %>">
-                                                            <input type="button" class="theme1_baby_bule_button" name='<%= Eval("index") %>' style="height: 35px;width: 100px;" value="<%= L'进入3D校园' %>" onclick="enter_world()"/>
+                                                            <input type="button" class="theme1_baby_bule_button" name='<%= Eval("index") %>' style="height: 35px;width: 100px;" value="<%= L'3D校园' %>" onclick="enter_world()"/>
                                                         </pe:if>
                                                     </div>
+                                                    <div style="float: left;width: 105px;height: 35px;margin-left: 5px;">
+                                                        <input type="button" class="theme1_lime_button" name='<%= Eval("index") %>' style="height: 35px;width: 110px;" value="<%= L'首页' %>" onclick="open_page()"/>
+                                                    </div>
                                                     <div style="float: left;width: 105px;height: 35px;">
-                                                        <input type="button" class="theme1_lime_button" name='<%= Eval("index") %>' style="height: 35px;width: 110px;margin-left: 5px;" value="<%= L'进入学校主页' %>" onclick="open_page()"/>
+                                                        <input type="button" class="theme1_lime_button" name='<%= Eval("index") %>' style="height: 35px;width: 110px;margin-left: 5px;" value="<%= L'教学中心' %>" onclick="open_teaching_plan_center()"/>
                                                     </div>
                                                 </div>
                                             </div>
@@ -228,7 +242,7 @@
                                     <pe:if condition="<%= Eval('type') ~= 4 %>">
                                         <div style="width: 550px;height: 100px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#435 212 30 30:11 11 11 11);float: left;margin-bottom: 10px;margin-right: 10px;">
                                             <div style="position: relative;width: 550px;height: 100px;">
-                                                <div style="margin-left: 325px;margin-top: 60px;width: 225px;height: 35px;">
+                                                <!-- <div style="margin-left: 325px;margin-top: 60px;width: 225px;height: 35px;">
                                                     <div style="float: left;width: 100px;height: 35px;">
                                                         <pe:if condition="<%= has_project_id() %>">
                                                             <input type="button" class="theme1_baby_bule_button" name='<%= Eval("index") %>' style="height: 35px;width: 100px;" value="<%= L'进入机构世界' %>" onclick="enter_world()"/>
@@ -236,6 +250,19 @@
                                                     </div>
                                                     <div style="float: left;width: 105px;height: 35px;">
                                                         <input type="button" class="theme1_lime_button" name='<%= Eval("index") %>' style="height: 35px;width: 110px;margin-left: 5px;" value="<%= L'进入机构主页' %>" onclick="open_page()" />
+                                                    </div>
+                                                </div> -->
+                                                <div style="margin-left: 220px;margin-top: 60px;width: 330px;height: 35px;">
+                                                    <div style="float: left;width: 100px;height: 35px;">
+                                                        <pe:if condition="<%= has_project_id() %>">
+                                                            <input type="button" class="theme1_baby_bule_button" name='<%= Eval("index") %>' style="height: 35px;width: 100px;" value="<%= L'3D校园' %>" onclick="enter_world()"/>
+                                                        </pe:if>
+                                                    </div>
+                                                    <div style="float: left;width: 105px;height: 35px;margin-left: 5px;">
+                                                        <input type="button" class="theme1_lime_button" name='<%= Eval("index") %>' style="height: 35px;width: 110px;" value="<%= L'首页' %>" onclick="open_page()"/>
+                                                    </div>
+                                                    <div style="float: left;width: 105px;height: 35px;">
+                                                        <input type="button" class="theme1_lime_button" name='<%= Eval("index") %>' style="height: 35px;width: 110px;margin-left: 5px;" value="<%= L'教学中心' %>" onclick="open_teaching_plan_center()"/>
                                                     </div>
                                                 </div>
                                             </div>

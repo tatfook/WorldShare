@@ -436,10 +436,15 @@ function SyncMain:CheckAndUpdatedByFoldername(foldername, callback)
 end
 
 function SyncMain:CheckAndUpdated(callback)
+    Mod.WorldShare.MsgBox:Show(L"请稍后...")
     Compare:Init(function(result)
-        self:ShowNewVersionFoundPage(callback)
-        -- if result ~= 2 then
-
-        -- end
+        Mod.WorldShare.MsgBox:Close()
+        if result == 'REMOTEBIGGER' then
+            self:ShowNewVersionFoundPage(callback)
+        else
+            if callback and type(callback) == 'function' then
+                callback()
+            end
+        end
     end)
 end

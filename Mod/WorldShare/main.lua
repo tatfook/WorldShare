@@ -341,12 +341,12 @@ function WorldShare:OnWorldLoad()
         end)
     end)
 
-    EventTrackingService:Send(2, "stayWorld")
+    EventTrackingService:Send(2, "duration.world.stay")
 
     if GameLogic.GameMode:GetMode() == 'editor'then
-        EventTrackingService:Send(1, "editWorld")
+        EventTrackingService:Send(1, "click.world.edit")
     else
-        EventTrackingService:Send(1, 'playWorld')
+        EventTrackingService:Send(1, 'click.world.play')
     end
 end
 
@@ -354,7 +354,7 @@ function WorldShare:OnLeaveWorld()
     local isEnterWorld = Mod.WorldShare.Store:Get('world/isEnterWorld')
 
     if isEnterWorld then
-        EventTrackingService:Send(2, "stayWorld")
+        EventTrackingService:Send(2, "duration.world.stay")
     end
 
     Store:Remove("world/currentWorld")
