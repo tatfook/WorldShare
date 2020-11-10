@@ -27,7 +27,11 @@ local KeepworkServiceWorld = NPL.export()
 
 KeepworkServiceWorld.lockHeartbeat = false
 
-function KeepworkServiceWorld:GetSingleFile(pid, filename, callback)
+function KeepworkServiceWorld:GetSingleFile(pid, filename, callback, cdnState)
+    self:GetSingleFileByCommitId(pid, nil, filename, callback, cdnState)
+end
+
+function KeepworkServiceWorld:GetSingleFileByCommitId(pid, commitId, filename, callback, cdnState)
     if not KeepworkService:IsSignedIn() then
         return false
     end
@@ -44,16 +48,21 @@ function KeepworkServiceWorld:GetSingleFile(pid, filename, callback)
             return false
         end
 
+        if not commitId then
+            commitId = world
+        end
+
         GitService:GetContentWithRaw(
             world.worldName,
             username,
             filename,
-            data.commitId,
+            world.commitId,
             function(content, err)
                 if callback and type(callback) == 'function' then
                     callback(content)
                 end
-            end
+            end,
+            cdnState
         )
     end)
 end
