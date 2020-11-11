@@ -49,8 +49,8 @@ function Panorama:ShowCreate(force)
             local width = Screen:GetWidth()
             local height = Screen:GetHeight()
 
-            local scaleWidth = width * 0.9
-            local scaleHeight = height * 0.9
+            local scaleWidth = width * 0.6
+            local scaleHeight = height * 0.7
 
             Mod.WorldShare.MsgBox:Show(L"请稍候...")
             KeepworkServiceProject:GetProject(currentEnterWorld.kpProjectId, function(data, err)
@@ -77,9 +77,15 @@ function Panorama:ShowCreate(force)
 
                     if data.userId == userId then
                         local params = Mod.WorldShare.Utils.ShowWindow(
-                            scaleWidth,
-                            scaleHeight,
-                            format("Mod/WorldShare/cellar/Panorama/Create.html?width=%d&height=%d", scaleWidth, scaleHeight),
+                            width,
+                            height,
+                            format(
+                                "Mod/WorldShare/cellar/Panorama/Create.html?width=%d&height=%d&scaleWidth=%d&scaleHeight=%d",
+                                tonumber(width),
+                                tonumber(height),
+                                scaleWidth,
+                                scaleHeight
+                            ),
                             "Mod.WorldShare.Panorama.Create",
                             nil,
                             nil,
