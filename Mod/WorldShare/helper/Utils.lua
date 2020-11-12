@@ -7,11 +7,18 @@ Desc:
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 -------------------------------------------------------
 ]]
+
+-- libs
 local Encoding = commonlib.gettable("commonlib.Encoding")
 local Translation = commonlib.gettable("MyCompany.Aries.Game.Common.Translation")
 local LocalLoadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalLoadWorld")
 
+-- service
+local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+
 local Utils = NPL.export()
+local self = Utils
 
 -- show one page
 -- @param option window width or selfdefined params
@@ -358,4 +365,25 @@ function Utils:DatetimeToTimestamp(str)
     local timestamp = os.time{ year = years, month = months, day = days, hour = hours, min = minutes, sec = seconds }
 
     return timestamp or 0
+end
+
+-- open a keepwork url with keepwork token
+function Utils.OpenKeepworkUrlByToken(url)
+    if not KeepworkServiceSession:IsSignedIn() then
+        return
+    end
+
+    Mod.WorldShare.MsgBox:Show(L'请稍后...')
+    KeepworkServiceSession:GetWebToken(function(token)
+        Mod.WorldShare.MsgBox:Close()
+        if not token or type(token) ~= 'string' then
+            return false
+        end
+
+        local keepworkUrl = KeepworkService:GetKeepworkUrl()
+        local url = keepworkUrl .. url
+        local openUrl = format("%s/p?url=%s&token=%s", keepworkUrl, self.EncodeURIComponent(url), token)
+    
+        ParaGlobal.ShellExecute('open', openUrl, "", "", 1)
+    end)
 end

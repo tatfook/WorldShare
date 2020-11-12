@@ -18,8 +18,7 @@
 
                 function use_remote()
                     close()
-
-                    SyncMain:SyncToLocal(page.afterSyncCallback)
+                    SyncMain:SyncToLocal(page.afterSyncCallback, nil, true)
                 end
 
                 function get_window_style()
@@ -70,7 +69,7 @@
                     <div style="margin-left:80px;margin-top:20px;">
                         <%= L"远程版本号：" %>
                 		<%= SyncMain.GetRemoteRevision()%>
-                        <input onclick="use_remote()" class="theme1_orange_button" name="remote" style="<%= 'margin-left:10px;width: 130px;height:30px;' .. get_bigger_style('remote') %>" type="button" value='<%=L"同步远程版本" %>' />
+                        <input onclick="use_remote()" class="theme1_orange_button" name="remote" style="<%= 'margin-left:10px;width: 130px;height:30px;' %>" type="button" value='<%=L"同步远程版本" %>' />
 	                </div>
 	                <div style="margin-left:80px;margin-top:20px;">
                         <%=L"本地版本号：" %><%= SyncMain.GetCurrentRevision() %>

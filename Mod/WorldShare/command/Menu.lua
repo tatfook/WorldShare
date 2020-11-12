@@ -16,6 +16,7 @@ local CommandManager = commonlib.gettable("MyCompany.Aries.Game.CommandManager")
 
 -- service
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
+local EventTrackingService = NPL.load("(gl)Mod/WorldShare/service/EventTracking.lua")
 
 -- UI
 local ShareWorld = NPL.load("(gl)Mod/WorldShare/cellar/ShareWorld/ShareWorld.lua")
@@ -38,6 +39,12 @@ end
 
 function MenuCommand:Call(cmdName, cmdText, cmdParams)
     local name, cmdText = CmdParser.ParseString(cmdText);
+
+    if name and type(name) == 'string' then
+        local action = "click.menu." .. name
+
+        EventTrackingService:Send(1, action)
+    end
 
     if name == "project.share" then
         self:Share()

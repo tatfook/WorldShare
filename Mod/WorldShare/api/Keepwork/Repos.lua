@@ -8,12 +8,17 @@ use the lib:
 local KeepworkReposApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Repos.lua")
 ------------------------------------------------------------
 ]]
+
+-- libs
 NPL.load("(gl)Mod/WorldShare/service/FileDownloader/FileDownloader.lua")
 local FileDownloader = commonlib.gettable("Mod.WorldShare.service.FileDownloader.FileDownloader")
-
-local KeepworkBaseApi = NPL.load('./BaseApi.lua')
-local GitEncoding = NPL.load('(gl)Mod/WorldShare/helper/GitEncoding.lua')
 local Encoding = commonlib.gettable("System.Encoding")
+
+-- api
+local KeepworkBaseApi = NPL.load('./BaseApi.lua')
+
+-- helper
+local GitEncoding = NPL.load('(gl)Mod/WorldShare/helper/GitEncoding.lua')
 
 local KeepworkReposApi = NPL.export()
 
@@ -113,7 +118,7 @@ end
     filePath string 必须 文件路径
 ]]
 -- return: object
-function KeepworkReposApi:Raw(foldername, username, filePath, commitId, success, error)
+function KeepworkReposApi:Raw(foldername, username, filePath, commitId, success, error, cdnState)
     if type(filePath) ~= 'string' then
         return false
     end
@@ -126,7 +131,7 @@ function KeepworkReposApi:Raw(foldername, username, filePath, commitId, success,
 
     local url = format('/repos/%s/files/%s/raw%s', self:GetRepoPath(foldername, username), Mod.WorldShare.Utils.EncodeURIComponent(filePath), commitIdUrl)
 
-    KeepworkBaseApi:Get(url, nil, nil, success, error)
+    KeepworkBaseApi:Get(url, nil, nil, success, error, nil, nil, cdnState)
 end
 
 -- url: /repos/:repoPath/files/:filePath/history

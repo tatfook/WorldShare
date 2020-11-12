@@ -323,3 +323,13 @@ function KeepworkUsersApi:Search(params, success, error)
 
     KeepworkBaseApi:Post('/users/search', params, nil, success, error)
 end
+
+-- url: /users/webToken
+-- method: GET
+-- header:
+-- params:
+--[[ ]]
+-- return: object
+function KeepworkUsersApi:WebToken(success, error)
+    KeepworkBaseApi:Get('/users/webToken', nil, nil, success, error)
+end

@@ -20,6 +20,7 @@ local KeepworkServiceProject = NPL.load("../KeepworkService/Project.lua")
 local KeepworkServiceWorld = NPL.load("../KeepworkService/World.lua")
 local KeepworkServiceSession = NPL.load("../KeepworkService/Session.lua")
 local Compare = NPL.load("./Compare.lua")
+local EventTrackingService = NPL.load('../EventTracking.lua')
 
 -- helper
 local KeepworkGen = NPL.load("(gl)Mod/WorldShare/helper/KeepworkGen.lua")
@@ -575,6 +576,8 @@ function SyncToDataSource:UpdateRecord(callback)
             end
 
             local function AfterHandlePreview(preview)
+                EventTrackingService:Send(1, 'click.world.after_upload', { blockCount = Mod.WorldShare.Store:Get('world/blockCount') or 0 })
+
                 preview = preview or ""
 
                 worldInfo.extra = {

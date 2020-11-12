@@ -126,7 +126,7 @@ function SyncMain:BackupWorld()
     revision:Backup()
 end
 
-function SyncMain:SyncToLocal(callback, isRefreshWorldList)
+function SyncMain:SyncToLocal(callback, isRefreshWorldList, noShownResult)
     local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
 
     if not currentWorld.kpProjectId then
@@ -175,12 +175,18 @@ function SyncMain:SyncToLocal(callback, isRefreshWorldList)
                         if option.method == 'UPDATE-PROGRESS-FINISH' then
                             Progress:SetFinish(true)
                             Progress:UpdateDataBar(1, 1, L"处理完成")
+
+                            if noShownResult then
+                                if callback and type(callback) == 'function' then
+                                    callback()
+                                end
+                            end
                             return false
                         end
                     end
                 end
 
-                if type(callback) == 'function' then
+                if callback and type(callback) == 'function' then
                     callback(result, option)
                 end
 
@@ -436,10 +442,15 @@ function SyncMain:CheckAndUpdatedByFoldername(foldername, callback)
 end
 
 function SyncMain:CheckAndUpdated(callback)
+    Mod.WorldShare.MsgBox:Show(L"请稍后...")
     Compare:Init(function(result)
-        self:ShowNewVersionFoundPage(callback)
-        -- if result ~= 2 then
-
-        -- end
+        Mod.WorldShare.MsgBox:Close()
+        if result == 'REMOTEBIGGER' then
+            self:ShowNewVersionFoundPage(callback)
+        else
+            if callback and type(callback) == 'function' then
+                callback()
+            end
+        end
     end)
 end

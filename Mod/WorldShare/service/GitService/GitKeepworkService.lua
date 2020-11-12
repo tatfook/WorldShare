@@ -22,7 +22,7 @@ function GitKeepworkService:GetContent(foldername, path, commitId, callback)
     
 end
 
-function GitKeepworkService:GetContentWithRaw(foldername, username, path, commitId, callback)
+function GitKeepworkService:GetContentWithRaw(foldername, username, path, commitId, callback, cdnState)
     KeepworkReposApi:Raw(
         foldername,
         username,
@@ -37,7 +37,8 @@ function GitKeepworkService:GetContentWithRaw(foldername, username, path, commit
             if type(callback) == 'function' then
                 callback(false)
             end
-        end
+        end,
+        cdnState
     )
 end
 

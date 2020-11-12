@@ -73,16 +73,16 @@
                         return Mod.WorldShare.Store:Getter("world/GetWorldTextName")
                     end
 
-                    function get_bigger_style(type)
+                    function get_bigger_class(type)
                         if type == 'remote' and SyncMain.GetRemoteRevision() > SyncMain.GetCurrentRevision() then
-                            return 'background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#150 104 16 16:4 4 4 4)'
+                            return 'theme1_orange_button'
                         end
 
                         if type == 'local' and SyncMain.GetRemoteRevision() < SyncMain.GetCurrentRevision() then
-                            return 'background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#150 104 16 16:4 4 4 4)'
+                            return 'theme1_orange_button'
                         end
 
-                        return ""
+                        return 'theme1_gray_button'
                     end
                 ]]>
             </script>
@@ -99,7 +99,7 @@
                             <%= L"远程版本号：" %>
                             <%= SyncMain.GetRemoteRevision()%>
                             <pe:if condition="<%=be_show_use_remote()%>">
-                                <input onclick="use_remote()" class="theme1_gray_button" name="remote" style="<%= 'margin-left:10px;width: 130px;height:30px;' .. get_bigger_style('remote') %>" type="button" value='<%=L"使用远程版本" %>' />
+                                <input onclick="use_remote()" class="<%= get_bigger_class('remote') %>" name="remote" style="<%= 'margin-left:10px;width: 130px;height:30px;' %>" type="button" value='<%=L"使用远程版本" %>' />
                             </pe:if>
                         </div>
                         <div style="margin-left:80px;margin-top:20px;">
@@ -108,7 +108,7 @@
                                 <input onclick="enter_offline_world()" class="theme1_gray_button" style="margin-left:10px;width: 130px;height:30px;" type="button" value='<%=L"使用本地离线版本" %>' />
                             </pe:if>
                             <pe:if condition="<%=use_offline == 'false' %>">
-                                <input onclick="use_local()" class="theme1_gray_button" name="local" style="<%= 'margin-left:10px;width: 130px;height:30px;' .. get_bigger_style('local') %>" type="button" value='<%=L"使用本地版本" %>' />
+                                <input onclick="use_local()" class="<%= get_bigger_class('local') %>" name="local" style="<%= 'margin-left:10px;width: 130px;height:30px;' %>" type="button" value='<%=L"使用本地版本" %>' />
                             </pe:if>
                         </div>
                     </div>
