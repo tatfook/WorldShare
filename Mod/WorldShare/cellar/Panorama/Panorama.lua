@@ -24,6 +24,7 @@ local ShareWorld = NPL.load("(gl)Mod/WorldShare/cellar/ShareWorld/ShareWorld.lua
 local KeepworkServicePanorama = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Panorama.lua")
 local KeepworkServiceProject = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Project.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
+local EventTrackingService = NPL.load("(gl)Mod/WorldShare/service/EventTracking.lua")
 
 local Panorama = NPL.export()
 
@@ -219,6 +220,7 @@ function Panorama:UploadPanoramaPhoto(callback)
                     callback(false)
                 end
 
+                EventTrackingService:Send(1, 'click.world.after_upload_panorama')
                 callback(true)
             end)
         end)

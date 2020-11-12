@@ -33,12 +33,14 @@ EventTrackingService.map = {
             edit = 'duration.world.edit', -- 用户编辑世界时间
             play = 'duration.world.play'  -- 用户播放世界时间
         },
+        learning_daily = 'duration.learning_daily' -- 成长日记
     },
     click = {
         world = { -- 世界
             edit = 'click.world.edit', -- 切换世界为编辑模式
             play = 'click.world.play', -- 切换世界为播放模式
             after_upload = 'click.world.after_upload', -- 上传世界后
+            after_upload_panorama = 'click.world.after_upload_panorama', -- 上传全景图后
             block = {
                 destroy = 'click.world.block.destroy', -- 删除方块
                 create = 'click.world.block.create', -- 创建方块
