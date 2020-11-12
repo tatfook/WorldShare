@@ -5,120 +5,121 @@ Date: 2017.4.17
 Desc: 
 use the lib:
 ------------------------------------------------------------
-NPL.load("(gl)Mod/WorldShare/main.lua")
-local WorldShare = commonlib.gettable("Mod.WorldShare")
+NPL.load('(gl)Mod/WorldShare/main.lua')
+local WorldShare = commonlib.gettable('Mod.WorldShare')
 ------------------------------------------------------------
 
 CODE GUIDELINE
 
-1. all classes and functions use upper camel case
-2. all variables use lower camel case
-3. all files use use upper camel case
-4. all templates variables and functions use underscore case
+1. all classes and functions use upper camel case.
+2. all variables use lower camel case.
+3. all files use use upper camel case.
+4. all templates variables and functions use underscore case.
+5. single quotation marks are used for strings.
 
 ]]
 
 -- include ide
-NPL.load("(gl)script/ide/Files.lua")
-NPL.load("(gl)script/ide/Encoding.lua")
+NPL.load('(gl)script/ide/Files.lua')
+NPL.load('(gl)script/ide/Encoding.lua')
 
 -- include ide system encoding
-NPL.load("(gl)script/ide/System/Encoding/sha1.lua")
-NPL.load("(gl)script/ide/System/Encoding/base64.lua")
-NPL.load("(gl)script/ide/System/Encoding/guid.lua")
-NPL.load("(gl)script/ide/System/Encoding/jwt.lua")
-NPL.load("(gl)script/ide/System/Encoding/basexx.lua")
+NPL.load('(gl)script/ide/System/Encoding/sha1.lua')
+NPL.load('(gl)script/ide/System/Encoding/base64.lua')
+NPL.load('(gl)script/ide/System/Encoding/guid.lua')
+NPL.load('(gl)script/ide/System/Encoding/jwt.lua')
+NPL.load('(gl)script/ide/System/Encoding/basexx.lua')
 
 -- include ide system windows
-NPL.load("(gl)script/ide/System/Windows/Screen.lua")
+NPL.load('(gl)script/ide/System/Windows/Screen.lua')
 
 -- include ide system scene
-NPL.load("(gl)script/ide/System/Scene/Viewports/ViewportManager.lua")
+NPL.load('(gl)script/ide/System/Scene/Viewports/ViewportManager.lua')
 
 -- include ide system core
-NPL.load("(gl)script/ide/System/Core/UniString.lua")
-NPL.load("(gl)script/ide/System/Core/Event.lua")
-NPL.load("(gl)script/ide/System/Core/ToolBase.lua")
+NPL.load('(gl)script/ide/System/Core/UniString.lua')
+NPL.load('(gl)script/ide/System/Core/Event.lua')
+NPL.load('(gl)script/ide/System/Core/ToolBase.lua')
 
 -- include ide system os
-NPL.load("(gl)script/ide/System/os/os.lua")
+NPL.load('(gl)script/ide/System/os/os.lua')
 
 -- include aries creator
-NPL.load("(gl)script/apps/Aries/Creator/WorldCommon.lua")
+NPL.load('(gl)script/apps/Aries/Creator/WorldCommon.lua')
 
 -- include aries creator game login
-NPL.load("(gl)script/apps/Aries/Creator/Game/Login/InternetLoadWorld.lua")
-NPL.load("(gl)script/apps/Aries/Creator/Game/Login/CreateNewWorld.lua")
-NPL.load("(gl)script/apps/Aries/Creator/Game/Login/LocalLoadWorld.lua")
-NPL.load("(gl)script/apps/Aries/Creator/Game/Login/RemoteServerList.lua")
-NPL.load("(gl)script/apps/Aries/Creator/Game/Login/DownloadWorld.lua")
-NPL.load("(gl)script/apps/Aries/Creator/Game/Login/RemoteWorld.lua")
-NPL.load("(gl)script/apps/Aries/Creator/Game/Login/TeacherAgent/TeacherAgent.lua")
+NPL.load('(gl)script/apps/Aries/Creator/Game/Login/InternetLoadWorld.lua')
+NPL.load('(gl)script/apps/Aries/Creator/Game/Login/CreateNewWorld.lua')
+NPL.load('(gl)script/apps/Aries/Creator/Game/Login/LocalLoadWorld.lua')
+NPL.load('(gl)script/apps/Aries/Creator/Game/Login/RemoteServerList.lua')
+NPL.load('(gl)script/apps/Aries/Creator/Game/Login/DownloadWorld.lua')
+NPL.load('(gl)script/apps/Aries/Creator/Game/Login/RemoteWorld.lua')
+NPL.load('(gl)script/apps/Aries/Creator/Game/Login/TeacherAgent/TeacherAgent.lua')
 
 -- include aries creator game areas
-NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/ShareWorldPage.lua")
-NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/DesktopMenu.lua")
+NPL.load('(gl)script/apps/Aries/Creator/Game/Areas/ShareWorldPage.lua')
+NPL.load('(gl)script/apps/Aries/Creator/Game/Areas/DesktopMenu.lua')
 
 -- include aries creator game network
-NPL.load("(gl)script/apps/Aries/Creator/Game/Network/NPLWebServer.lua")
-NPL.load("(gl)script/apps/Aries/Creator/Game/Network/NetworkMain.lua")
+NPL.load('(gl)script/apps/Aries/Creator/Game/Network/NPLWebServer.lua')
+NPL.load('(gl)script/apps/Aries/Creator/Game/Network/NetworkMain.lua')
 
 -- include aries creator game world
-NPL.load("(gl)script/apps/Aries/Creator/Game/World/SaveWorldHandler.lua")
+NPL.load('(gl)script/apps/Aries/Creator/Game/World/SaveWorldHandler.lua')
 
 -- include aries creator game login
-NPL.load("(gl)script/apps/Aries/Creator/Game/Login/ParaWorldLessons.lua")
+NPL.load('(gl)script/apps/Aries/Creator/Game/Login/ParaWorldLessons.lua')
 
 -- include aries creator game nplbrowser
-NPL.load("(gl)script/apps/Aries/Creator/Game/NplBrowser/NplBrowserLoaderPage.lua")
-NPL.load("(gl)script/apps/Aries/Creator/Game/NplBrowser/NplBrowserPlugin.lua")
+NPL.load('(gl)script/apps/Aries/Creator/Game/NplBrowser/NplBrowserLoaderPage.lua')
+NPL.load('(gl)script/apps/Aries/Creator/Game/NplBrowser/NplBrowserPlugin.lua')
 
 -- include worldshare service
-NPL.load("(gl)Mod/WorldShare/service/SocketService.lua")
-NPL.load("(gl)Mod/WorldShare/service/Cef3Manager.lua")
+NPL.load('(gl)Mod/WorldShare/service/SocketService.lua')
+NPL.load('(gl)Mod/WorldShare/service/Cef3Manager.lua')
 
 
 -- get table lib
-local SocketService = commonlib.gettable("Mod.WorldShare.service.SocketService")
-local GameLogic = commonlib.gettable("MyCompany.Aries.Game.GameLogic")
-local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
-local Cef3Manager = commonlib.gettable("Mod.WorldShare.service.Cef3Manager")
+local SocketService = commonlib.gettable('Mod.WorldShare.service.SocketService')
+local GameLogic = commonlib.gettable('MyCompany.Aries.Game.GameLogic')
+local WorldCommon = commonlib.gettable('MyCompany.Aries.Creator.WorldCommon')
+local Cef3Manager = commonlib.gettable('Mod.WorldShare.service.Cef3Manager')
 
 -- UI
-local MainLogin = NPL.load("(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua")
-local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
-local UserConsoleCreate = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Create/Create.lua")
-local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
-local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
-local ShareWorld = NPL.load("(gl)Mod/WorldShare/cellar/ShareWorld/ShareWorld.lua")
-local HistoryManager = NPL.load("(gl)Mod/WorldShare/cellar/HistoryManager/HistoryManager.lua")
-local WorldExitDialog = NPL.load("(gl)Mod/WorldShare/cellar/WorldExitDialog/WorldExitDialog.lua")
-local PreventIndulge = NPL.load("(gl)Mod/WorldShare/cellar/PreventIndulge/PreventIndulge.lua")
-local Grade = NPL.load("(gl)Mod/WorldShare/cellar/Grade/Grade.lua")
-local VipNotice = NPL.load("(gl)Mod/WorldShare/cellar/VipNotice/VipNotice.lua")
-local Permission = NPL.load("(gl)Mod/WorldShare/cellar/Permission/Permission.lua")
-local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
-local Menu = NPL.load("(gl)Mod/WorldShare/cellar/Menu/Menu.lua")
+local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
+local UserConsole = NPL.load('(gl)Mod/WorldShare/cellar/UserConsole/Main.lua')
+local UserConsoleCreate = NPL.load('(gl)Mod/WorldShare/cellar/UserConsole/Create/Create.lua')
+local CreateWorld = NPL.load('(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua')
+local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
+local ShareWorld = NPL.load('(gl)Mod/WorldShare/cellar/ShareWorld/ShareWorld.lua')
+local HistoryManager = NPL.load('(gl)Mod/WorldShare/cellar/HistoryManager/HistoryManager.lua')
+local WorldExitDialog = NPL.load('(gl)Mod/WorldShare/cellar/WorldExitDialog/WorldExitDialog.lua')
+local PreventIndulge = NPL.load('(gl)Mod/WorldShare/cellar/PreventIndulge/PreventIndulge.lua')
+local Grade = NPL.load('(gl)Mod/WorldShare/cellar/Grade/Grade.lua')
+local VipNotice = NPL.load('(gl)Mod/WorldShare/cellar/VipNotice/VipNotice.lua')
+local Permission = NPL.load('(gl)Mod/WorldShare/cellar/Permission/Permission.lua')
+local LoginModal = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua')
+local Menu = NPL.load('(gl)Mod/WorldShare/cellar/Menu/Menu.lua')
 
 -- service
-local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
-local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
-local EventTrackingService = NPL.load("(gl)Mod/WorldShare/service/EventTracking.lua")
-local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
+local EventTrackingService = NPL.load('(gl)Mod/WorldShare/service/EventTracking.lua')
+local Compare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
 
 -- helper
-local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
-local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox/MsgBox.lua")
-local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
+local Store = NPL.load('(gl)Mod/WorldShare/store/Store.lua')
+local MsgBox = NPL.load('(gl)Mod/WorldShare/cellar/Common/MsgBox/MsgBox.lua')
+local Utils = NPL.load('(gl)Mod/WorldShare/helper/Utils.lua')
 
 -- command
-local WorldShareCommand = NPL.load("(gl)Mod/WorldShare/command/Command.lua")
-local MenuCommand = NPL.load("(gl)Mod/WorldShare/command/Menu.lua")
+local WorldShareCommand = NPL.load('(gl)Mod/WorldShare/command/Command.lua')
+local MenuCommand = NPL.load('(gl)Mod/WorldShare/command/Menu.lua')
 
-local WorldShare = commonlib.inherit(commonlib.gettable("Mod.ModBase"), commonlib.gettable("Mod.WorldShare"))
+local WorldShare = commonlib.inherit(commonlib.gettable('Mod.ModBase'), commonlib.gettable('Mod.WorldShare'))
 
-WorldShare:Property({"Name", "WorldShare", "GetName", "SetName", { auto = true }})
-WorldShare:Property({"Desc", "world share mod can share world to keepwork online", "GetDesc", "SetDesc", { auto = true }})
+WorldShare:Property({'Name', 'WorldShare', 'GetName', 'SetName', { auto = true }})
+WorldShare:Property({'Desc', 'world share mod can share world to keepwork online', 'GetDesc', 'SetDesc', { auto = true }})
 WorldShare.version = '0.0.20'
 
 if Config.defaultEnv == 'RELEASE' or Config.defaultEnv == 'STAGE' then
@@ -130,12 +131,12 @@ WorldShare.Store = Store
 WorldShare.MsgBox = MsgBox
 WorldShare.Utils = Utils
 
-LOG.std(nil, "info", "WorldShare", "world share version %s", WorldShare.version)
+LOG.std(nil, 'info', 'WorldShare', 'world share version %s', WorldShare.version)
 
 function WorldShare:init()
     -- replace load world page
     GameLogic.GetFilters():add_filter(
-        "ShowLoginModePage",
+        'ShowLoginModePage',
         function()
             MainLogin:Show()
             return false
@@ -143,18 +144,18 @@ function WorldShare:init()
     )
 
     GameLogic.GetFilters():add_filter(
-        "ShowClientUpdaterNotice",
+        'ShowClientUpdaterNotice',
         function()
             if Mod.WorldShare.Utils.IsEnglish() then
-                Mod.WorldShare.MsgBox:Show(L"checking for updates...", nil, nil, nil, nil, nil, "_ct")
+                Mod.WorldShare.MsgBox:Show(L'checking for updates...', nil, nil, nil, nil, nil, '_ct')
             else
-                Mod.WorldShare.MsgBox:Show(L"正在检查更新， 请稍候...", nil, nil, nil, nil, nil, "_ct")
+                Mod.WorldShare.MsgBox:Show(L'正在检查更新， 请稍候...', nil, nil, nil, nil, nil, '_ct')
             end
         end
     )
 
     GameLogic.GetFilters():add_filter(
-        "HideClientUpdaterNotice",
+        'HideClientUpdaterNotice',
         function()
             Mod.WorldShare.MsgBox:Close()
         end
@@ -162,9 +163,9 @@ function WorldShare:init()
 
     -- replace load world page
     GameLogic.GetFilters():add_filter(
-        "InternetLoadWorld.ShowPage",
+        'InternetLoadWorld.ShowPage',
         function(bEnable, bShow)
-            local worldsharebeat = ParaEngine.GetAppCommandLineByParam("worldsharebeat", nil)
+            local worldsharebeat = ParaEngine.GetAppCommandLineByParam('worldsharebeat', nil)
 
             if worldsharebeat and worldsharebeat == 'true' then
                 UserConsoleCreate:Show()
@@ -178,7 +179,7 @@ function WorldShare:init()
 
     -- replace the exit world dialog
     GameLogic.GetFilters():add_filter(
-        "ShowExitDialog",
+        'ShowExitDialog',
         function(dialog)
             if (dialog and dialog.callback) then
                 WorldExitDialog.ShowPage(dialog.callback)
@@ -189,7 +190,7 @@ function WorldShare:init()
 
     -- replace share world page
     GameLogic.GetFilters():add_filter(
-        "SaveWorldPage.ShowSharePage",
+        'SaveWorldPage.ShowSharePage',
         function(bEnable, callback)
             ShareWorld:Init(bEnable, callback)
             return false
@@ -198,7 +199,7 @@ function WorldShare:init()
 
     -- replace implement or replace create new world event
     GameLogic.GetFilters():add_filter(
-        "OnClickCreateWorld",
+        'OnClickCreateWorld',
         function()
             return CreateWorld.OnClickCreateWorld()
         end
@@ -206,7 +207,7 @@ function WorldShare:init()
 
     -- replcae implement local world event
     GameLogic.GetFilters():add_filter(
-        "load_world_info",
+        'load_world_info',
         function(ctx, node)
             LocalService:LoadWorldInfo(ctx, node)
         end
@@ -214,7 +215,7 @@ function WorldShare:init()
 
     -- replace implement save world event
     GameLogic.GetFilters():add_filter(
-        "save_world_info",
+        'save_world_info',
         function(ctx, node)
             LocalService:SaveWorldInfo(ctx, node)
         end
@@ -222,7 +223,7 @@ function WorldShare:init()
 
     -- vip notice
     GameLogic.GetFilters():add_filter(
-        "VipNotice",
+        'VipNotice',
         function(bEnabled, callback)
             VipNotice:Init(bEnabled, callback)
             return true
@@ -231,7 +232,7 @@ function WorldShare:init()
 
     -- filter KeepworkPremission
     GameLogic.GetFilters():add_filter(
-        "KeepworkPermission",
+        'KeepworkPermission',
         function(bEnabled, authName, bOpenUIIfNot, callback)
             Permission:CheckPermission(authName, bOpenUIIfNot, callback)
 
@@ -241,7 +242,7 @@ function WorldShare:init()
 
     -- filter CheckSignedIn
     GameLogic:GetFilters():add_filter(
-        "LoginModal.CheckSignedIn",
+        'LoginModal.CheckSignedIn',
         function(bEnabled, desc, callback)
             LoginModal:CheckSignedIn(desc, callback)
             return true
@@ -250,7 +251,7 @@ function WorldShare:init()
     
     -- filter menu project
     GameLogic:GetFilters():add_filter(
-        "desktop_menu",
+        'desktop_menu',
         function(menuItems)
             return Menu:Init(menuItems)
         end
@@ -258,7 +259,7 @@ function WorldShare:init()
 
     -- filter menu command
     GameLogic:GetFilters():add_filter(
-        "menu_command",
+        'menu_command',
         function(bEnable, cmdName, cmdText, cmdParams)
             return MenuCommand:Call(cmdName, cmdText, cmdParams)
         end
@@ -266,9 +267,47 @@ function WorldShare:init()
 
     -- filter user behavior
     GameLogic:GetFilters():add_filter(
-        "user_behavior",
-        function(type, action)
-            EventTrackingService:Send(type, action)
+        'user_behavior',
+        function(type, action, extra)
+            EventTrackingService:Send(type, action, extra)
+        end
+    )
+
+    -- filter old user behavior
+    GameLogic:GetFilters():add_filter(
+        'user_event_stat',
+        function(category, action, value, label)            
+            local sArray = {}
+
+            for item in string.gmatch(action, "[^%:]+") do
+                sArray[#sArray + 1] = item
+            end
+
+            local newActionName = "click.world." .. category .. "." .. sArray[1]
+
+            EventTrackingService:Send(1, newActionName)
+
+            -- count edit block
+            if newActionName == 'click.world.block.create' or
+               newActionName == 'click.world.block.destroy' then
+                local blockCount = Store:Get('world/blockCount')
+
+                if not blockCount or type(blockCount) ~= 'number' then
+                    blockCount = 0
+                end
+
+                if newActionName == 'click.world.block.create' then
+                    blockCount = blockCount + 1
+                end
+
+                if newActionName == 'click.world.block.destroy' then
+                    blockCount = blockCount - 1
+                end
+
+                Store:Set('world/blockCount', blockCount)
+            end
+
+            return category
         end
     )
 
@@ -285,7 +324,7 @@ function WorldShare:init()
     EventTrackingService:Init()
 
     -- init cef3 for windows
-    if System.os.GetPlatform() == "win32" then
+    if System.os.GetPlatform() == 'win32' then
         Cef3Manager:Init()
     end
 
@@ -302,7 +341,7 @@ function WorldShare:init()
                 reason = result.payload.reason
             end
 
-            Mod.WorldShare.Store:Action("user/Logout")()
+            Mod.WorldShare.Store:Action('user/Logout')()
             UserConsole:ShowKickOutPage(reason)
         end
     end)
@@ -322,31 +361,33 @@ function WorldShare:OnWorldLoad()
     UserConsole:ClosePage()
     HistoryManager:OnWorldLoad()
 
-    local curLesson = Store:Getter("lesson/GetCurLesson")
+    local curLesson = Store:Getter('lesson/GetCurLesson')
 
     -- if enter with lesson method, we will not check revision
     if not curLesson then
         SyncMain:OnWorldLoad()
     end
 
-    Store:Subscribe("user/Logout", function()
+    Store:Subscribe('user/Logout', function()
         Compare:RefreshWorldList(function()
             Compare:GetCurrentWorldInfo()
         end)
     end)
 
-    Store:Subscribe("user/Login", function()
+    Store:Subscribe('user/Login', function()
         Compare:RefreshWorldList(function()
             Compare:GetCurrentWorldInfo()
         end)
     end)
 
-    EventTrackingService:Send(2, "duration.world.stay")
+    EventTrackingService:Send(2, 'duration.world.stay', { started = true })
 
-    if GameLogic.GameMode:GetMode() == 'editor'then
-        EventTrackingService:Send(1, "click.world.edit")
+    if GameLogic.GameMode:GetMode() == 'editor' then
+        EventTrackingService:Send(1, 'click.world.edit')
+        EventTrackingService:Send(2, 'duration.world.edit', { started = true })
     else
         EventTrackingService:Send(1, 'click.world.play')
+        EventTrackingService:Send(2, 'duration.world.play', { started = true })
     end
 end
 
@@ -354,8 +395,14 @@ function WorldShare:OnLeaveWorld()
     local isEnterWorld = Mod.WorldShare.Store:Get('world/isEnterWorld')
 
     if isEnterWorld then
-        EventTrackingService:Send(2, "duration.world.stay")
+        EventTrackingService:Send(2, 'duration.world.stay', { ended = true })
+
+        if GameLogic.GameMode:GetMode() == 'editor' then
+            EventTrackingService:Send(2, 'duration.world.edit', { ended = true })
+        else
+            EventTrackingService:Send(2, 'duration.world.play', { ended = true })
+        end
     end
 
-    Store:Remove("world/currentWorld")
+    Store:Remove('world/currentWorld')
 end

@@ -29,18 +29,66 @@ EventTrackingService.currentLoop = nil
 EventTrackingService.map = {
     duration = {
         world = {
-            stay = 'duration.world.stay' -- 用户当前所在世界留存时间
+            stay = 'duration.world.stay', -- 用户当前所在世界留存时间
+            edit = 'duration.world.edit', -- 用户编辑世界时间
+            play = 'duration.world.play'  -- 用户播放世界时间
         },
     },
     click = {
         world = { -- 世界
             edit = 'click.world.edit', -- 切换世界为编辑模式
             play = 'click.world.play', -- 切换世界为播放模式
+            after_upload = 'click.world.after_upload', -- 上传世界后
+            block = {
+                destroy = 'click.world.block.destroy', -- 删除方块
+                create = 'click.world.block.create', -- 创建方块
+                DeleteSelection = 'click.world.block.DeleteSelection', -- 删除选择的方块
+            },
+            tool = {
+                pick = 'click.world.tool.pick', -- 拾取方块
+                help = 'click.world.tool.help', -- 查看代码方块帮助
+                browser = 'click.world.tool.browser' -- 角色 显示新页面
+            },
+            help = {
+                browser = {
+                    codeblock = 'click.world.help.browser.codeblock' -- 点击学习Codeblock
+                },
+                startTutorial = 'click.world.help.startTutorial', -- 开始向导
+            },
+            world = {
+                save = 'click.world.world.save', -- 保存世界
+                saveas = 'click.world.world.saveas', -- 另存为世界
+                enter = 'click.world.world.enter', -- 进入世界
+                create = 'click.world.world.create', -- 创建新世界
+                delete = 'click.world.world.delete', -- 删除世界
+            },
+            desktop = {
+                ForceExit = 'click.world.desktop.ForceExit', -- 强制退出世界
+            },
+            cmd = {
+                execute = 'click.world.cmd.execute', -- 执行命令
+            },
+            model = {
+                export = {
+                    bmax = 'click.world.model.export.bmax', -- 保存bmax模型
+                },
+                exportAsTemplate = 'click.world.model.exportAsTemplate', -- 导出模板
+            },
+            paraworld = {
+                DockerClick = 'click.world.paraworld.DockerClick', -- 点击顶部Docker
+            },
+            movie = {
+                play = 'click.world.movie.play', -- 播放电影
+            },
+            actor = {
+                addNPC = 'click.world.actor.addNPC', -- 添加NPC
+                edit = 'click.world.actor.edit', -- 编辑角色
+            }
         },
-        minimap = { -- 小地图
-            paraworldlist = 'click.minimap.paraworldlist', -- 显示所有并行世界
-            localworldinfo = 'click.minimap.localworldinfo', -- 显示当前并行世界选地窗口
-            spawnpoint = 'click.minimap.spawnpoint', -- 回到出生点
+        mini_map = { -- 小地图
+            paraworld_list = 'click.mini_map.paraworld_list', -- 显示所有并行世界
+            local_worldinfo = 'click.mini_map.local_worldinfo', -- 显示当前并行世界选地窗口
+            spawn_point = 'click.mini_map.spawn_point', -- 回到出生点
         },
         dock = { -- 并行世界DOCK栏
             character = 'click.dock.character', -- 人物
@@ -56,10 +104,10 @@ EventTrackingService.map = {
             mall = 'click.dock.mall', -- 资源
             competition = 'click.dock.competition', -- 大赛
             checkin = 'click.dock.checkin', -- 成长任务
-            weekquest = 'click.dock.weekquest', -- 实战提升
-            codewar = 'click.dock.codewar', -- 玩学课堂
-            webkeepworkhome = 'click.dock.webkeepworkhome', -- 用户社区
-            usertip = 'click.dock.usertip', -- 成长日记
+            week_quest = 'click.dock.week_quest', -- 实战提升
+            code_war = 'click.dock.code_war', -- 玩学课堂
+            web_keepwork_home = 'click.dock.web_keepwork_home', -- 用户社区
+            user_tip = 'click.dock.user_tip', -- 成长日记
         },
         task = { -- 实战提升
             program = 'click.task.program', -- 编程
@@ -73,14 +121,14 @@ EventTrackingService.map = {
         },
         menu = { -- 菜单
             file = { -- 文件
-                createworld = "click.menu.file.createworld", -- 新建
-                loadworld = "click.menu.file.loadworld", -- 打开
-                saveworld = "click.menu.file.saveworld", -- 快速保存
-                saveworldas = "click.menu.file.saveworldas", -- 另存为
-                uploadworld = "click.menu.file.uploadworld", -- 分享上传
-                makeapp = "click.menu.file.makeapp", -- 生成独立应用程序
-                worldrevision = "click.menu.file.worldrevision", -- 备份
-                openworlddir = "click.menu.file.openworlddir", -- 打开本地目录
+                createworld = "click.menu.file.create_world", -- 新建
+                loadworld = "click.menu.file.load_world", -- 打开
+                saveworld = "click.menu.file.save_world", -- 快速保存
+                saveworldas = "click.menu.file.save_world_as", -- 另存为
+                uploadworld = "click.menu.file.upload_world", -- 分享上传
+                makeapp = "click.menu.file.make_app", -- 生成独立应用程序
+                worldrevision = "click.menu.file.world_revision", -- 备份
+                openworlddir = "click.menu.file.open_world_dir", -- 打开本地目录
                 settings = "click.menu.file.settings", -- 系统设置
                 exit = "click.menu.file.exit" -- 退出
             },
@@ -91,32 +139,32 @@ EventTrackingService.map = {
                 paste = "click.menu.edit.paste", -- 粘贴
                 delete = "click.menu.edit.delete", -- 删除
                 find = "click.menu.edit.find", -- 方块跳转
-                findfile = "click.menu.edit.findfile", -- 全文搜索
-                upstairs = "click.menu.edit.upstairs", -- 跳到上一层
-                downstairs = "click.menu.edit.downstairs", -- 跳到下一层
+                findfile = "click.menu.edit.find_file", -- 全文搜索
+                upstairs = "click.menu.edit.up_stairs", -- 跳到上一层
+                downstairs = "click.menu.edit.down_stairs", -- 跳到下一层
             },
             online = { -- 多人联网
                 server = "click.menu.online.server",  -- 多人服务器
                 teacher_panel = "click.menu.online.teacher_panel", -- 联网控制面板
             },
             window = { -- 窗口
-                changeskin = "click.menu.window.changeskin", -- 角色换装
-                texturepack = "click.menu.window.texturepack", -- 材质包管理
+                changeskin = "click.menu.window.change_skin", -- 角色换装
+                texturepack = "click.menu.window.texture_pack", -- 材质包管理
                 mall = "click.menu.window.mall", -- 资源
-                userbag = "click.menu.window.userbag", -- 背包
-                videorecoder = "click.menu.window.videorecoder", -- 视频录制
-                videosharing = "click.menu.window.videosharing", -- 短视频分享
+                userbag = "click.menu.window.user_bag", -- 背包
+                videorecoder = "click.menu.window.video_recoder", -- 视频录制
+                videosharing = "click.menu.window.video_sharing", -- 短视频分享
                 info = "click.menu.window.info", -- 信息
                 console = "click.menu.window.console", -- NPL控制面板
                 mod = "click.menu.window.mod", -- MOD插件管理
             },
             help = { -- 帮助
-                userintroduction = "click.menu.help.userintroduction", -- 新手引导
-                videotutorials = "click.menu.help.videotutorials", -- 教学视频
+                userintroduction = "click.menu.help.user_introduction", -- 新手引导
+                videotutorials = "click.menu.help.video_tutorials", -- 教学视频
                 learn = "click.menu.help.learn", -- 学习资源
                 ask = "click.menu.help.ask", -- 提问
                 help = "click.menu.help.help", -- 帮助
-                shortcutkey = "click.menu.help.shortcutkey", -- 快捷键
+                shortcutkey = "click.menu.help.shortcut_key", -- 快捷键
                 bug = "click.menu.help.bug", -- 提交意见与反馈
                 about = "click.menu.help.about", -- 关于Paracraft
             },
@@ -124,24 +172,24 @@ EventTrackingService.map = {
                 share = "click.menu.project.share", -- 上传分享
                 index = "click.menu.project.index", -- 项目首页
                 author = "click.menu.project.author", -- 项目作者
-                openworlddir = "click.menu.project.openworlddir", -- 本地目录
-                worldrevision = "click.menu.project.worldrevision", -- 本地备份
+                openworlddir = "click.menu.project.open_world_dir", -- 本地目录
+                worldrevision = "click.menu.project.world_revision", -- 本地备份
                 setting = "click.menu.project.setting", -- 项目设置
                 member = "click.menu.project.member", -- 成员管理
                 apply = "click.menu.project.apply", -- 申请加入
             }
         },
-        systemsetting = { -- 系统设置
-            shareworld = "click.systemsetting.shareworld", -- 分享世界
-            saveworld = "click.systemsetting.saveworld", -- 保存世界
-            changetexture = "click.systemsetting.changetexture", -- 更换材质
-            loadworld = "click.systemsetting.loadworld", -- 加载世界
-            systemsetting = "click.systemsetting.systemsetting", -- 系统设置
-            exitworld = "click.systemsetting.exitworld", -- 退出世界
-            friends = "click.systemsetting.friends", -- 邀请好友
-            continuegame = "click.systemsetting.continuegame", -- 继续创作
-            createnewworld = "click.systemsetting.createnewworld", -- 新建世界
-            openserverpage = "click.systemsetting.openserverpage", -- 架设私服
+        system_setting = { -- 系统设置
+            share_world = "click.system_setting.share_world", -- 分享世界
+            save_world = "click.system_setting.save_world", -- 保存世界
+            change_texture = "click.system_setting.change_texture", -- 更换材质
+            load_world = "click.system_setting.load_world", -- 加载世界
+            system_setting = "click.system_setting.system_setting", -- 系统设置
+            exit_world = "click.system_setting.exit_world", -- 退出世界
+            friends = "click.system_setting.friends", -- 邀请好友
+            continue_game = "click.system_setting.continue_game", -- 继续创作
+            create_new_world = "click.system_setting.create_new_world", -- 新建世界
+            open_server_page = "click.system_setting.open_server_page", -- 架设私服
         }
     }
 }
@@ -158,7 +206,7 @@ function EventTrackingService:Init()
     self:Loop()
 end
 
-function EventTrackingService:GenerateDataPacket(type, userId, action)
+function EventTrackingService:GenerateDataPacket(eventType, userId, action, started)
     if not userId or not action then
         return
     end
@@ -170,14 +218,14 @@ function EventTrackingService:GenerateDataPacket(type, userId, action)
         projectId = currentEnterWorld.kpProjectId
     end
 
-    if type == 1 then -- one click event
+    if eventType == 1 then -- one click event
         return {
             userId = userId,
             projectId = projectId,
             currentAt = os.time(),
             traceId = System.Encoding.guid.uuid()
         }
-    elseif type == 2 then -- duration event
+    elseif eventType == 2 then -- duration event
         local unitinfo =  {
             userId = userId,
             projectId = projectId
@@ -186,7 +234,7 @@ function EventTrackingService:GenerateDataPacket(type, userId, action)
         -- get previous action from local storage
         local previousUnitinfo = EventTrackingDatabase:GetPacket(userId, action)
 
-        if not previousUnitinfo then
+        if started or not previousUnitinfo then
             unitinfo.beginAt = os.time()
             unitinfo.endAt = 0
             unitinfo.duration = 0
@@ -228,13 +276,13 @@ function EventTrackingService:GetAction(action)
     end
 end
 
--- type: 1 is one click event, 2 is duration event
-function EventTrackingService:Send(type, action, ...)
+-- eventType: 1 is one click event, 2 is duration event
+function EventTrackingService:Send(eventType, action, extra)
     if not KeepworkServiceSession:IsSignedIn() then
         return false
     end
 
-    if not type or not action then
+    if not eventType or not action then
         return false
     end
 
@@ -245,7 +293,27 @@ function EventTrackingService:Send(type, action, ...)
     end
 
     local userId = Mod.WorldShare.Store:Get('user/userId')
-    local dataPacket = self:GenerateDataPacket(type, userId, action)
+    local dataPacket = self:GenerateDataPacket(eventType, userId, action, extra and extra.started or false)
+
+    if eventType == 2 then
+        if not extra then
+            return false
+        end
+
+        -- prevent send not started event
+        if extra.ended and dataPacket.duration == 0 then
+            return false
+        end
+    end
+
+    if extra and type(extra) == 'table' then
+        extra.started = nil -- remove started key in extra table because we needn't upload that
+        extra.ended = nil -- remove ended key in extra table because we needn't upload that
+
+        for key, value in pairs(extra) do
+            dataPacket[key] = value
+        end
+    end
 
     if EventTrackingDatabase:PutPacket(userId, action, dataPacket) then
         EventGatewayEventsApi:Send(
