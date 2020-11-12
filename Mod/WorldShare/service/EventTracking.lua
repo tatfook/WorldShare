@@ -181,6 +181,13 @@ EventTrackingService.map = {
                 apply = "click.menu.project.apply", -- 申请加入
             }
         },
+        daily_task = { -- 成长任务
+            growth_diary = 'click.daily_task.growth_diary', -- 成长日记
+            week_work = 'click.daily_task.week_work', -- 实战提升
+            class_room = 'click.daily_task.class_room', -- 玩学课堂
+            update_world = 'click.daily_task.update_world', -- 更新世界
+            visit_world = 'click.daily_task.visit_world', -- 参观5个世界
+        },
         system_setting = { -- 系统设置
             share_world = "click.system_setting.share_world", -- 分享世界
             save_world = "click.system_setting.save_world", -- 保存世界
