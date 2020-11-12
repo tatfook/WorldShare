@@ -311,6 +311,10 @@ function EventTrackingService:Send(eventType, action, extra)
     local userId = Mod.WorldShare.Store:Get('user/userId')
     local dataPacket = self:GenerateDataPacket(eventType, userId, action, extra and extra.started or false)
 
+    if not dataPacket or not dataPacket.projectId then
+        return false
+    end
+
     if eventType == 2 then
         if not extra then
             return false
