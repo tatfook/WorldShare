@@ -236,16 +236,23 @@ function EventTrackingService:GenerateDataPacket(eventType, userId, action, star
         -- get previous action from local storage
         local previousUnitinfo = EventTrackingDatabase:GetPacket(userId, action)
 
-        if started or not previousUnitinfo then
+        if not previousUnitinfo then
             unitinfo.beginAt = os.time()
             unitinfo.endAt = 0
             unitinfo.duration = 0
             unitinfo.traceId = System.Encoding.guid.uuid()
         else
-            unitinfo.beginAt = previousUnitinfo.beginAt
-            unitinfo.endAt = os.time()
-            unitinfo.duration = unitinfo.endAt - previousUnitinfo.beginAt
-            unitinfo.traceId = previousUnitinfo.traceId
+            if started then
+                unitinfo.beginAt = previousUnitinfo.beginAt
+                unitinfo.endAt = 0
+                unitinfo.duration = os.time() - previousUnitinfo.beginAt
+                unitinfo.traceId = previousUnitinfo.traceId
+            else
+                unitinfo.beginAt = previousUnitinfo.beginAt
+                unitinfo.endAt = os.time()
+                unitinfo.duration = unitinfo.endAt - previousUnitinfo.beginAt
+                unitinfo.traceId = previousUnitinfo.traceId
+            end
         end
 
         return unitinfo
