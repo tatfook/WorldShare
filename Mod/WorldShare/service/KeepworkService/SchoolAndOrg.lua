@@ -24,6 +24,8 @@ function KeepworkServiceSchoolAndOrg:GetUserAllOrgs(callback)
     end
 
     AccountingOrgApi:GetUserAllOrgs(
+        nil,
+        true,
         function(data, err)
             if err == 200 then
                 if data and data.data and type(data.data) == 'table' then

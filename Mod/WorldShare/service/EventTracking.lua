@@ -382,6 +382,10 @@ function EventTrackingService:Loop()
                         if unitinfo and type(unitinfo) == 'table' then
                             for uKey, uItem in ipairs(unitinfo) do
                                 if uItem and uItem.packet then
+                                    if uItem.packet.endAt and uItem.packet.endAt == 0 then
+                                        uItem.packet.duration = os.time() - uItem.packet.beginAt
+                                    end
+
                                     -- send and remove cache
                                     EventGatewayEventsApi:Send(
                                         "behavior",
