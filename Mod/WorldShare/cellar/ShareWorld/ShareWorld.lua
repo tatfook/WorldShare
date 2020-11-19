@@ -21,12 +21,14 @@ local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
 local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua")
 local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
 local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
+local RegisterModal = NPL.load("(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua")
 
 -- service
 local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 local KeepworkServiceProject = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Project.lua")
+local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
 
 local ShareWorld = NPL.export()
 
@@ -55,7 +57,9 @@ function ShareWorld:Init(bEnabled, callback)
                             function()
                                 Compare:Init(function(result)
                                     if result then
-                                        self:ShowPage()
+                                        self:CheckRealName(function()                                        
+                                            self:ShowPage()
+                                        end)
                                     end
                                 end)
                             end
@@ -77,9 +81,23 @@ function ShareWorld:Init(bEnabled, callback)
     Compare:Init(function(result)
         Mod.WorldShare.MsgBox:Close()
         if result then
-            self:ShowPage()
+            self:CheckRealName(function()
+                self:ShowPage()
+            end)
         end
     end)
+end
+
+function ShareWorld:CheckRealName(callback)
+    if not callback or type(callback) ~= "function" then
+        return false
+    end
+
+    if KeepworkServiceSession:IsRealName() then
+        callback()
+    else
+        RegisterModal:ShowClassificationPage(callback, true)
+    end
 end
 
 function ShareWorld:ShowPage()

@@ -59,7 +59,7 @@ function RegisterModal:ShowBindingPage()
     Mod.WorldShare.Utils.ShowWindow(360, 480, "Mod/WorldShare/cellar/RegisterModal/Binding.html", "Mod.WorldShare.RegisterModal.Binding")
 end
 
-function RegisterModal:ShowClassificationPage(callback)
+function RegisterModal:ShowClassificationPage(callback, forceCallback)
     local params = Mod.WorldShare.Utils.ShowWindow(
         520,
         320,
@@ -71,6 +71,8 @@ function RegisterModal:ShowClassificationPage(callback)
         nil,
         10
     )
+
+    params._page.forceCallback = forceCallback
 
     if type(callback) == "function" then
         params._page.callback = callback

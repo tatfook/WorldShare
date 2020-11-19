@@ -837,5 +837,9 @@ function KeepworkServiceSession:GetWebToken(callback)
             -- do nothing ...
         end
     )
-
 end
+
+function KeepworkServiceSession:IsRealName()
+    return Mod.WorldShare.Store:Get('user/isVerified')
+end
+

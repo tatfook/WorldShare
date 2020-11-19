@@ -4,13 +4,19 @@
             <script type="text/npl" refresh="false">
                 <![CDATA[
                     local Validated = NPL.load("(gl)Mod/WorldShare/helper/Validated.lua")
-                    local RegisterModal = NPL.load("./RegisterModal.lua")
+                    local RegisterModal = NPL.load("(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua")
                     local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
                     page = document:GetPageCtrl()
 
                     isClickedGetPhoneCaptcha = false
 
-                    function close()
+                    function close(callbackFinished)
+                        if not callbackFinished and page.forceCallback then
+                            if type(page.callback) == "function" then
+                                page.callback()
+                            end
+                        end
+
                         page:CloseWindow()
                     end
 
@@ -35,7 +41,7 @@
                                     page.callback()
                                 end
 
-                                close()
+                                close(true)
                             end)
                         else
                             -- only classification
@@ -44,7 +50,7 @@
                                     page.callback()
                                 end
 
-                                close()
+                                close(true)
                             end)
                         end
                     end
