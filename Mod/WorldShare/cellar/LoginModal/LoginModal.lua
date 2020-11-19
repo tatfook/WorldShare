@@ -67,7 +67,7 @@ function LoginModal:CheckSignedIn(desc, callback)
 end
 
 function LoginModal:ShowPage()
-    local RegisterModalPage = Mod.WorldShare.Store:Get("page/RegisterModal")
+    local RegisterModalPage = Mod.WorldShare.Store:Get("page/Mod.WorldShare.RegisterModal")
 
     if RegisterModalPage then
         RegisterModalPage:CloseWindow()
@@ -77,9 +77,9 @@ function LoginModal:ShowPage()
         return false
     end
 
-    local params = Mod.WorldShare.Utils.ShowWindow(320, 470, "Mod/WorldShare/cellar/LoginModal/LoginModal.html", "LoginModal", nil, nil, nil, nil, 12)
+    local params = Mod.WorldShare.Utils.ShowWindow(320, 470, "Mod/WorldShare/cellar/LoginModal/LoginModal.html", "Mod.WorldShare.LoginModal", nil, nil, nil, nil, 12)
 
-    local LoginModalPage = Mod.WorldShare.Store:Get('page/LoginModal')
+    local LoginModalPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.LoginModal')
 
     if not LoginModalPage then
         return false
@@ -100,7 +100,7 @@ function LoginModal:ShowPage()
 end
 
 function LoginModal:ClosePage()
-    local LoginModalPage = Mod.WorldShare.Store:Get('page/LoginModal')
+    local LoginModalPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.LoginModal')
 
     if(not LoginModalPage) then
         return false
@@ -113,7 +113,7 @@ function LoginModal:ClosePage()
 end
 
 function LoginModal:Refresh(times)
-    local LoginModalPage = Mod.WorldShare.Store:Get('page/LoginModal')
+    local LoginModalPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.LoginModal')
 
     if LoginModalPage then
         LoginModalPage:Refresh(times or 0.01)
@@ -135,7 +135,7 @@ function LoginModal:Close(params)
 end
 
 function LoginModal:LoginAction()
-    local LoginModalPage = Mod.WorldShare.Store:Get("page/LoginModal")
+    local LoginModalPage = Mod.WorldShare.Store:Get("page/Mod.WorldShare.LoginModal")
 
     if not LoginModalPage then
         return false
@@ -206,7 +206,7 @@ function LoginModal:LoginAction()
 end
 
 function LoginModal:SetAutoLogin()
-    local LoginModalPage = Mod.WorldShare.Store:Get("page/LoginModal")
+    local LoginModalPage = Mod.WorldShare.Store:Get("page/Mod.WorldShare.LoginModal")
 
     if not LoginModalPage then
         return false
@@ -233,7 +233,7 @@ function LoginModal:SetAutoLogin()
 end
 
 function LoginModal:SetRememberMe()
-    local LoginModalPage = Mod.WorldShare.Store:Get("page/LoginModal")
+    local LoginModalPage = Mod.WorldShare.Store:Get("page/Mod.WorldShare.LoginModal")
 
     if not LoginModalPage then
         return false
@@ -260,7 +260,7 @@ function LoginModal:SetRememberMe()
 end
 
 function LoginModal:RemoveAccount(username)
-    local LoginModalPage = Mod.WorldShare.Store:Get('page/LoginModal')
+    local LoginModalPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.LoginModal')
 
     if not LoginModalPage then
         return false
@@ -281,7 +281,7 @@ function LoginModal:RemoveAccount(username)
 end
 
 function LoginModal:SelectAccount(username)
-    local LoginModalPage = Mod.WorldShare.Store:Get('page/LoginModal')
+    local LoginModalPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.LoginModal')
 
     if not LoginModalPage then
         return false
