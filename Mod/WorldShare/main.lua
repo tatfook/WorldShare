@@ -393,7 +393,6 @@ function WorldShare:OnWorldLoad()
 end
 
 function WorldShare:OnLeaveWorld()
-    echo('from world share on leave world!!!!!', true)
     Store:Set('world/loadWorldFinish', false)
 
     local isEnterWorld = Mod.WorldShare.Store:Get('world/isEnterWorld')
