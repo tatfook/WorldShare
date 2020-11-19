@@ -608,21 +608,13 @@ function SyncToDataSource:UpdateRecord(callback)
                 KeepworkServiceProject:GetProject(
                     self.currentWorld.kpProjectId,
                     function(data)
-                        local extra = data and data.extra or {}
+                        local extra = {}
 
                         if Mod.WorldShare.Store:Get('world/isPreviewUpdated') then
                             extra.imageUrl = preview
                         end
 
-                        if self.currentWorld.local_tagname and
-                           self.currentWorld.local_tagname ~= self.currentWorld.foldername then
-                            extra.worldTagName = self.currentWorld.local_tagname
-                        end
-
-                        if self.currentWorld.local_tagname and
-                           self.currentWorld.local_tagname == self.currentWorld.foldername then
-                            extra.worldTagName = nil
-                        end
+                        extra.worldTagName = self.currentWorld.local_tagname
 
                         KeepworkServiceProject:UpdateProject(
                             self.currentWorld.kpProjectId,

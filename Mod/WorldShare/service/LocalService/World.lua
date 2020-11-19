@@ -276,14 +276,13 @@ function LocalServiceWorld:SetWorldInstanceByFoldername(foldername)
     end
 
     if not currentWorld then
-        WorldCommon.LoadWorldTag(worldpath)
-        local worldTag = WorldCommon.GetWorldInfo() or {}
+        local worldTag = LocalService:GetTag(worldpath) or {}
 
         currentWorld = {
             IsFolder = true,
             is_zip = false,
-            Title = worldTag.name,
-            text = worldTag.name,
+            Title = worldTag.name or '',
+            text = worldTag.name or '',
             author = "None",
             costTime = "0:0:0",
             filesize = 0,

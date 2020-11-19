@@ -42,15 +42,15 @@ EventTrackingService.map = {
             after_upload = 'click.world.after_upload', -- 上传世界后
             after_upload_panorama = 'click.world.after_upload_panorama', -- 上传全景图后
             block = {
-                destroy = 'click.world.block.destroy', -- 删除方块
-                create = 'click.world.block.create', -- 创建方块
+                -- destroy = 'click.world.block.destroy', -- 删除方块
+                -- create = 'click.world.block.create', -- 创建方块
                 DeleteSelection = 'click.world.block.DeleteSelection', -- 删除选择的方块
             },
-            tool = {
-                pick = 'click.world.tool.pick', -- 拾取方块
-                help = 'click.world.tool.help', -- 查看代码方块帮助
-                browser = 'click.world.tool.browser' -- 角色 显示新页面
-            },
+            -- tool = {
+            --     pick = 'click.world.tool.pick', -- 拾取方块
+            --     help = 'click.world.tool.help', -- 查看代码方块帮助
+            --     browser = 'click.world.tool.browser' -- 角色 显示新页面
+            -- },
             help = {
                 browser = {
                     codeblock = 'click.world.help.browser.codeblock' -- 点击学习Codeblock

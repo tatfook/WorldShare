@@ -326,10 +326,10 @@ function SyncMain:CheckTagName(callback)
     if currentWorld and currentWorld.remote_tagname and currentWorld.worldpath then
         if currentWorld.remote_tagname ~= currentWorld.local_tagname then
             local params = Mod.WorldShare.Utils.ShowWindow(
-                500,
-                190,
-                "Mod/WorldShare/cellar/Sync/Templates/CheckTagName.html?remote_tagname=" .. currentWorld.remote_tagname .. "&local_tagname=" .. currentWorld.local_tagname,
-                "CheckTagName"
+                630,
+                240,
+                "Mod/WorldShare/cellar/Theme/Sync/CheckTagName.html?remote_tagname=" .. currentWorld.remote_tagname .. "&local_tagname=" .. currentWorld.local_tagname,
+                "Mod.WorldShare.Sync.CheckTagName"
             )
             params._page.callback = function(params)
                 if params ~= 'local' and params ~= 'remote' then
