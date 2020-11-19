@@ -437,14 +437,37 @@ function SyncMain:CheckAndUpdatedBeforeEnterMyHome(callback)
 end
 
 function SyncMain:CheckAndUpdatedByFoldername(foldername, callback)
-    LocalServiceWorld:SetWorldInstanceByFoldername(foldername)
-    self:CheckAndUpdated(callback)
+    local currentWorld = LocalServiceWorld:SetWorldInstanceByFoldername(foldername)
+
+    if not currentWorld or not currentWorld.worldpath then
+        return false
+    end
+
+    local worldTagPath = currentWorld.worldpath .. 'tag.xml'
+
+    if not ParaIO.DoesFileExist(worldTagPath) then
+        return false
+    end
+
+    if currentWorld.kpProjectId then
+        self:CheckAndUpdated(callback)
+    else
+        KeepworkServiceProject:GetProjectIdByWorldName(currentWorld.foldername, false, function(projectId)
+            if projectId and type(projectId) == 'number' then
+                currentWorld.kpProjectId = projectId
+                Mod.WorldShare.Store:Set('world/currentWorld', currentWorld)
+            end
+
+            self:CheckAndUpdated(callback)
+        end)
+    end
 end
 
 function SyncMain:CheckAndUpdated(callback)
     Mod.WorldShare.MsgBox:Show(L"请稍后...")
     Compare:Init(function(result)
         Mod.WorldShare.MsgBox:Close()
+
         if result == 'REMOTEBIGGER' then
             self:ShowNewVersionFoundPage(callback)
         else
