@@ -10,6 +10,9 @@ local Theme1 = NPL.load("(gl)Mod/WorldShare/cellar/Theme/Mcss/Main.lua")
 ]]
 
 {
+    theme1_header = {
+        height = 40,
+    },
     theme1_green_button = {
         background = "Texture/Aries/Creator/keepwork/worldshare_32bits.png#673 198 38 64:12 10 12 15",
         ["text-offset-y"] = -2,

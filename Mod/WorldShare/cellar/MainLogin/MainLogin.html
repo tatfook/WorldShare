@@ -24,6 +24,7 @@
                     
                     -- service
                     local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepWorkService/Session.lua")
+                    local EventTrackingService = NPL.load("(gl)Mod/WorldShare/service/EventTracking.lua")
 
                     local page = document:GetPageCtrl()
                     Mod.WorldShare.Store:Set("page/MainLogin", page)
@@ -32,6 +33,7 @@
                     function use_offline()
                         KeepworkServiceSession:Logout()
                         MainLogin:EnterUserConsole(true)
+                        EventTrackingService:Send(1, 'click.main_login.offline_enter', nil, true)
                     end
 
                     function OnOpenModulePage()

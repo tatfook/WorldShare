@@ -74,8 +74,22 @@
                         return
                     end
 
+                    local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
+
                     close()
-                    UserConsole:HandleWorldId(curData.paraWorld.projectId, true)
+                    if currentEnterWorld and currentEnterWorld.text then
+                        _guihelper.MessageBox(
+                            format(L"即将离开【%s】进入【%s】", currentEnterWorld.text, curData.paraWorld.name),
+                            function(res)
+                                if res and res == _guihelper.DialogResult.Yes then
+                                    UserConsole:HandleWorldId(curData.paraWorld.projectId, true) 
+                                end
+                            end,
+                            _guihelper.MessageBoxButtons.YesNo
+                        )
+                    else
+                        UserConsole:HandleWorldId(curData.paraWorld.projectId, true)
+                    end
                 end
 
                 function open_page(index)

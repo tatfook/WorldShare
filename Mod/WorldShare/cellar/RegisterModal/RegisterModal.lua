@@ -33,7 +33,7 @@ RegisterModal.phonecaptcha = ""
 RegisterModal.bindphone = nil
 
 function RegisterModal:ShowPage(callback)
-    local LoginModalPage = Mod.WorldShare.Store:Get("page/LoginModal")
+    local LoginModalPage = Mod.WorldShare.Store:Get("page/Mod.WorldShare.LoginModal")
 
     if LoginModalPage then
         LoginModalPage:CloseWindow()
@@ -48,29 +48,31 @@ function RegisterModal:ShowPage(callback)
     self.phonecaptcha = ""
     self.bindphone = nil
 
-    Mod.WorldShare.Utils.ShowWindow(360, 360, "Mod/WorldShare/cellar/RegisterModal/RegisterModal.html", "RegisterModal")
+    Mod.WorldShare.Utils.ShowWindow(360, 360, "Mod/WorldShare/cellar/RegisterModal/RegisterModal.html", "Mod.WorldShare.RegisterModal")
 end
 
 function RegisterModal:ShowUserAgreementPage()
-    Mod.WorldShare.Utils.ShowWindow(400, 580, "Mod/WorldShare/cellar/RegisterModal/UserAgreement.html", "UserAgreement")
+    Mod.WorldShare.Utils.ShowWindow(400, 580, "Mod/WorldShare/cellar/RegisterModal/UserAgreement.html", "Mod.WorldShare.RegisterModal.UserAgreement")
 end
 
 function RegisterModal:ShowBindingPage()
-    Mod.WorldShare.Utils.ShowWindow(360, 480, "Mod/WorldShare/cellar/RegisterModal/Binding.html", "Binding")
+    Mod.WorldShare.Utils.ShowWindow(360, 480, "Mod/WorldShare/cellar/RegisterModal/Binding.html", "Mod.WorldShare.RegisterModal.Binding")
 end
 
-function RegisterModal:ShowClassificationPage(callback)
+function RegisterModal:ShowClassificationPage(callback, forceCallback)
     local params = Mod.WorldShare.Utils.ShowWindow(
-        370,
-        280,
-        "Mod/WorldShare/cellar/RegisterModal/BindPhoneInAccountRegister.html",
-        "RegisterModal/BindPhoneInAccountRegister",
+        520,
+        320,
+        "Mod/WorldShare/cellar/Theme/RegisterModal/BindPhoneInAccountRegister.html",
+        "Mod.WorldShare.RegisterModal.BindPhoneInAccountRegister",
         nil,
         nil,
         nil,
         nil,
         10
     )
+
+    params._page.forceCallback = forceCallback
 
     if type(callback) == "function" then
         params._page.callback = callback

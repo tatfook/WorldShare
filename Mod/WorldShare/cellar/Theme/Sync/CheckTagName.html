@@ -1,0 +1,43 @@
+<html>
+    <body>
+        <pe:mcml>
+            <script type="text/npl">
+                local page = document:GetPageCtrl()
+    
+                remote_tagname = page:GetRequestParam("remote_tagname")
+                local_tagname = page:GetRequestParam("local_tagname")
+    
+                function close(params)
+                    if type(page.callback) == 'function' then
+                        page.callback(params)
+                    end
+
+                    page:CloseWindow()
+                end
+            </script>
+            <style type="text/mcss" src="Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss"></style>
+            <div width="100%" height="100%">
+                <kp:window width='630' height='240' style="font-size: 18px;" onclose="close()">
+                    <div class="theme1_header">
+                        <div style="background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#423 296 144 25);width: 144px;height: 25px;margin-left: 10px;margin-top: 8px;"></div>
+                    </div>
+                    <div style="margin-top:30px;text-align: center;"><%= L"远程名字与本地名字冲突，请选择你要使用的名字" %></div>
+                    <div style="margin-top:20px;margin-left: 150px;">
+                        <div>
+                            <div style="float: left; width: 230px;">
+                                <%= L"远程名字："%><%= remote_tagname %>
+                            </div>
+                            <input type="button" style="margin-left: 5px;width: 80px;height: 30px;" class="theme1_baby_bule_button" name="remote" onclick="close" value="<%= L'使用' %>"/>
+                        </div>
+                        <div style="margin-top: 20px;">
+                            <div style="float: left; width: 230px;">
+                                <%= L"本地名字："%><%= local_tagname %>
+                            </div>
+                            <input type="button" style="margin-left: 5px;width: 80px;height: 30px;" class="theme1_baby_bule_button" name="local" onclick="close" value="<%= L'使用' %>"/>
+                        </div>
+                    </div>
+                </kp:window>
+            </div>
+        </pe:mcml>
+    </body>
+</html>

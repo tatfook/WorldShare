@@ -1,0 +1,192 @@
+<html>
+    <body>
+        <pe:mcml>
+            <script type="text/npl" refresh="false">
+                <![CDATA[
+                    local Validated = NPL.load("(gl)Mod/WorldShare/helper/Validated.lua")
+                    local RegisterModal = NPL.load("(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua")
+                    local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
+                    page = document:GetPageCtrl()
+
+                    isClickedGetPhoneCaptcha = false
+
+                    function close(callbackFinished)
+                        if not callbackFinished and page.forceCallback then
+                            if type(page.callback) == "function" then
+                                page.callback()
+                            end
+                        end
+
+                        page:CloseWindow()
+                    end
+
+                    function bind()
+                        local phonenumber = page:GetValue("phonenumber")
+                        local phonecaptcha = page:GetValue("phonecaptcha")
+
+                        if not phonenumber or not Validated:Phone(phonenumber) then
+                            GameLogic.AddBBS(nil, L"手机格式错误", 3000, "255 0 0")
+                            return false
+                        end
+
+                        if not phonecaptcha or #phonecaptcha == 0 then
+                            GameLogic.AddBBS(nil, L"手机验证码格式错误", 3000, "255 0 0")
+                            return false
+                        end
+
+                        if page:GetValue("is_bind") then
+                            -- classification and bind
+                            RegisterModal:ClassificationAndBind(phonenumber, phonecaptcha, function()
+                                if type(page.callback) == "function" then
+                                    page.callback()
+                                end
+
+                                close(true)
+                            end)
+                        else
+                            -- only classification
+                            RegisterModal:Classification(phonenumber, phonecaptcha, function()
+                                if type(page.callback) == "function" then
+                                    page.callback()
+                                end
+
+                                close(true)
+                            end)
+                        end
+                    end
+
+                    function get_phone_captcha()
+                        if not Validated:Phone(page:GetValue("phonenumber")) then
+                            GameLogic.AddBBS(nil, L"手机格式错误", 3000, "255 0 0")
+                            return false
+                        end
+
+                        if isClickedGetPhoneCaptcha then
+                            return false 
+                        end
+
+                        isClickedGetPhoneCaptcha = true
+
+                        local times = 60
+
+                        local timer = commonlib.Timer:new({
+                            callbackFunc = function(timer)
+                                page:SetValue("getPhoneCaptcha", format("%s(%ds)", L"重新发送", times))
+
+                                if times == 0 then
+                                    isClickedGetPhoneCaptcha = false
+                                    page:SetValue("getPhoneCaptcha", L"获取验证码")
+                                    timer:Change(nil, nil)
+                                end
+
+                                times = times - 1
+                            end
+                        })
+
+                        KeepworkServiceSession:GetPhoneCaptcha(page:GetValue("phonenumber"), function(data, err)
+                            if err ~= 200 then
+                                isClickedGetPhoneCaptcha = false
+                                page:SetValue("getPhoneCaptcha", L"获取验证码")
+                                GameLogic.AddBBS(nil, format("%s%s(%d)", L"发送验证码失败，错误信息：", data.message, data.code), 5000, "255 0 0")
+                                timer:Change(nil, nil)
+                            end
+                        end)
+
+                        timer:Change(1000, 1000)
+                    end
+
+                    function check_phone_number(callback)
+                        local phonenumber = page:GetValue("phonenumber")
+
+                        if type(phonenumber) ~= "string" then
+                            return false
+                        end
+
+                        if #phonenumber == 0 then
+                            return false
+                        end
+
+                        KeepworkServiceSession:CheckPhonenumberExist(phonenumber, function(bIsExist)
+                            if bIsExist then
+                                page:SetValue("is_bind", false)
+
+                                if type(callback) == "function" then
+                                    callback(false)
+                                end
+                            end
+                        end)
+                    end
+
+                    function click_bind_phone_button()
+                        check_phone_number(function(result)
+                            if result == false then
+                                GameLogic.AddBBS(nil, L"手机号已被绑定", 3000, "255 0 0")
+                            end
+                        end)
+                    end
+                ]]>
+            </script>
+            <style type="text/mcss" src="Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss">
+                {
+                    certification_phone_in_account_register = {
+                        ["base-font-size"] = 16,
+                        ["font-size"] = 16,
+                        ["padding-left"] = 30,
+                        ["padding-right"] = 30,
+                        ["padding-top"] = 25,
+                    },
+                    common_button = {
+                        width = 130,
+                        height = 40,
+                        textcolor = "#000000",
+                        color = "#000000",
+                        ["font-size"] = 18
+                    },
+                    text_field = {
+                        background = "Texture/Aries/Creator/keepwork/worldshare_32bits.png;72 20 16 16:3 3 3 3",
+                        border = "none",
+                        width = 205
+                    },
+                }
+            </style>
+            <kp:window width="520" height="320" style="float: left;"  title='<%= L"实名认证" %>' onclose="close()">
+                <div class="theme1_header"></div>
+                <div name="certification_phone_in_account_register" class="certification_phone_in_account_register">
+                    <div style="margin-top: 5px;margin-bottom:15px;"><%= L"你的账号还没有完成实名认证，完成实名认证后才可以把你创造的世界发布到互联网上让更多人看到哦" %></div>
+                    <div style="width: 350px;margin-left: 90px;">
+                        <div style="margin-bottom:12px;">
+                            <div style="<%='float:left;min-width:65px;'%>"><%= L"手机号：" %></div>
+                            <input type="text"
+                                   class="bbs_text text_field"
+                                   EmptyText='<%= L"请输入手机号" %>'
+                                   style="<%= 'height: 30px;'%>"
+                                   onfocusout="check_phone_number()"
+                                   name="phonenumber" />
+                        </div>
+                        <div style="margin-bottom:12px;">
+                            <div style="<%='float:left;min-width:65px;'%>"><%= L"验证码：" %></div>
+                            <input type="text" class="bbs_text text_field" EmptyText='<%= L"请输入验证码" %>' style="height: 30px;width: 100px;" name="phonecaptcha" />
+                            <input
+                                type="button"
+                                name="getPhoneCaptcha"
+                                DefaultButton="true"
+                                class="theme1_baby_bule_button"
+                                style="margin-left:5px;width: 100px;height:35x;"
+                                onclick="get_phone_captcha()"
+                                disabled="disabled"
+                                value='<%= L"获取验证码"%>'
+                            />
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <input type="checkbox" name="is_bind" checked="checked" onclick="click_bind_phone_button()"/><span style="font-size: 14px;margin-top: -2px;"><%= L"同时将账号绑定到该手机号" %></span>
+                        </div>
+                        <div>
+                            <input type="button" DefaultButton="true" class="common_button theme1_baby_bule_button" onclick="bind" value='<%= L"完成绑定"%>' />
+                            <input type="button" DefaultButton="true" class="common_button theme1_gray_button" style="margin-left: 15x;" onclick="close()" value='<%= L"以后认证"%>' />
+                        </div>
+                    </div>
+                </div>
+            </kp:window>
+        </pe:mcml>
+    </body>
+</html>

@@ -36,21 +36,25 @@ EventTrackingService.map = {
         learning_daily = 'duration.learning_daily' -- 成长日记
     },
     click = {
+        main_login = {
+            offline_enter = 'click.main_login.offline_enter', -- 离线进入
+        },
         world = { -- 世界
             edit = 'click.world.edit', -- 切换世界为编辑模式
             play = 'click.world.play', -- 切换世界为播放模式
             after_upload = 'click.world.after_upload', -- 上传世界后
-            after_upload_panorama = 'click.world.after_upload_panorama', -- 上传全景图后
+            after_upload_panorama = 'click.world.after_upload_panorama', -- 上传全景图后,
+            visit_user_home = 'click.world.visit_user_home', -- 观看用户家园
             block = {
-                destroy = 'click.world.block.destroy', -- 删除方块
-                create = 'click.world.block.create', -- 创建方块
+                -- destroy = 'click.world.block.destroy', -- 删除方块
+                -- create = 'click.world.block.create', -- 创建方块
                 DeleteSelection = 'click.world.block.DeleteSelection', -- 删除选择的方块
             },
-            tool = {
-                pick = 'click.world.tool.pick', -- 拾取方块
-                help = 'click.world.tool.help', -- 查看代码方块帮助
-                browser = 'click.world.tool.browser' -- 角色 显示新页面
-            },
+            -- tool = {
+            --     pick = 'click.world.tool.pick', -- 拾取方块
+            --     help = 'click.world.tool.help', -- 查看代码方块帮助
+            --     browser = 'click.world.tool.browser' -- 角色 显示新页面
+            -- },
             help = {
                 browser = {
                     codeblock = 'click.world.help.browser.codeblock' -- 点击学习Codeblock
@@ -293,8 +297,8 @@ function EventTrackingService:GetAction(action)
 end
 
 -- eventType: 1 is one click event, 2 is duration event
-function EventTrackingService:Send(eventType, action, extra)
-    if not KeepworkServiceSession:IsSignedIn() then
+function EventTrackingService:Send(eventType, action, extra, offlineMode)
+    if not offlineMode and not KeepworkServiceSession:IsSignedIn() then
         return false
     end
 
@@ -308,10 +312,10 @@ function EventTrackingService:Send(eventType, action, extra)
         return false
     end
 
-    local userId = Mod.WorldShare.Store:Get('user/userId')
+    local userId = Mod.WorldShare.Store:Get('user/userId') or 0
     local dataPacket = self:GenerateDataPacket(eventType, userId, action, extra and extra.started or false)
 
-    if not dataPacket or not dataPacket.projectId then
+    if not offlineMode and (not dataPacket or not dataPacket.projectId) then
         return false
     end
 
