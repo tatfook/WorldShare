@@ -357,6 +357,7 @@ end
 
 function WorldShare:OnWorldLoad()
     Store:Set('world/isEnterWorld', true)
+    Store:Set('world/loadWorldFinish', true)
 
     UserConsole:ClosePage()
     HistoryManager:OnWorldLoad()
@@ -392,6 +393,9 @@ function WorldShare:OnWorldLoad()
 end
 
 function WorldShare:OnLeaveWorld()
+    echo('from world share on leave world!!!!!', true)
+    Store:Set('world/loadWorldFinish', false)
+
     local isEnterWorld = Mod.WorldShare.Store:Get('world/isEnterWorld')
 
     if isEnterWorld then
