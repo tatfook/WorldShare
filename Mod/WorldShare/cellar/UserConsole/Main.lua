@@ -268,6 +268,9 @@ function UserConsole:HandleWorldId(pid, refreshMode)
 
             local fileUrl = world:GetLocalFileName()
 
+            -- set remote world value here bacause local path
+            Mod.WorldShare.Store:Set('world/currentRemoteWorld', world)
+
             if ParaIO.DoesFileExist(fileUrl) then
                 if offlineMode then
                     LoadWorld(world, "never")
@@ -355,6 +358,9 @@ function UserConsole:HandleWorldId(pid, refreshMode)
         world:SetProjectId(pid)
         local fileUrl = world:GetLocalFileName()   
         local localRevision = tonumber(LocalService:GetZipRevision(fileUrl)) or 0
+        
+        -- set remote world value here bacause local path
+        Mod.WorldShare.Store:Set('world/currentRemoteWorld', world)
 
         local worldName = ''
 

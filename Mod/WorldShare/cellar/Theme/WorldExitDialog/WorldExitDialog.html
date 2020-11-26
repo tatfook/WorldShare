@@ -16,6 +16,7 @@
                 
                 -- service
                 local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
+                local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
                 
                 -- lib
                 local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
@@ -228,6 +229,22 @@
                     on_click_cancel()
                     Panorama:ShowCreate()
                 end
+
+                function reload()
+                    WorldExitDialog.OnDialogResult(_guihelper.DialogResult.Cancel)
+                    GameLogic.RunCommand("/reload")
+                end
+
+                function notice()
+                    if KeepworkServiceSession:IsSignedIn() then
+                        local remote_revision = tonumber(Mod.WorldShare.Store:Get('world/remoteRevision') or 0)
+                        local current_revision = tonumber(Mod.WorldShare.Store:Get("world/currentRevision") or 0)
+
+                        if remote_revision < current_revision then
+                            return '<div style="margin-left: 20px;float:left;color: #ff6a00">注意：您还没有分享本地版本</div>'
+                        end
+                    end
+                end
             ]]>
         </script>
         <style type="text/mcss" src="Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss">
@@ -247,7 +264,7 @@
                     ['margin-left'] = 50
                 },
                 dialog_container = {
-                    width = 610,
+                    width = 630,
                     height = 400
                 },
                 dialog_header = {
@@ -255,7 +272,7 @@
                 }
             }
         </style>
-        <kp:window width="610" height="420" onclose="on_click_cancel()">
+        <kp:window width="660" height="420" onclose="on_click_cancel()">
             <div class="dialog_container">
                 <div class="dialog_header">
                     <div style="position: relative;margin-top: 9px;margin-left: 8px;color: white;">
@@ -283,7 +300,7 @@
                                 </div>
                             </pe:if>
                         </div>
-                        <div style="width: 571px;padding: 10px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#660 273 32 32:8 8 8 8);">
+                        <div style="width: 615x;padding: 10px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#660 273 32 32:8 8 8 8);">
                             <div style="float:left;width: 280px;height: 185px;">
                                 <div zorder="2" class="theme1_gray_image_mask" style="width: 280px;height: 185px;"></div>
                                 <img name="ShareWorldImage" zorder="1" width="280" height="185" onclick="snapshot()" tooltip='<%= L"重新截图" %>' />
@@ -354,16 +371,18 @@
                         </div>
                         <div style="margin-top:5x;base-font-size:15px;font-size:15px;">
                             <%= L"您上次保存世界是:"%> <span style="color:#ff6a00"><%=format(L"%d秒前", get_elapsed_unsaved_seconds())%></span>
+                            <%= notice() %>
                         </div>
                         <div style="margin-top:10x;">
                             <pe:if condition="<%= GameLogic.IsReadOnly() %>">
-                                <input type="button" onclick="save_as()" value='<%=L"另存为..." %>' class="theme1_orange_button" style="min-width:155px;height:45px;" />
+                                <input type="button" onclick="save_as()" value='<%=L"另存为..." %>' class="theme1_orange_button" style="min-width:130px;height:45px;" />
                             </pe:if>
                             <pe:if condition="<%= not GameLogic.IsReadOnly() %>">
-                                <input type="button" onclick="on_click_save_and_exit()" value='<%=L"保存并退出" %>' class="theme1_orange_button" style="min-width:155px;height:50px;" />
+                                <input type="button" onclick="on_click_save_and_exit()" value='<%=L"保存并退出" %>' class="theme1_orange_button" style="min-width:130px;height:50px;" />
                             </pe:if>
-                            <input type="button" onclick="on_click_exit_without_save()" value='<%=L"直接退出" %>' class="theme1_gray_button" style="margin-left:45px;min-width:155px;height:50px;" />
-                            <input type="button" onclick="on_click_cancel()" value='<%=L"取消" %>' class="theme1_gray_button" style="margin-left:45x;min-width:155px;height:50px;" />
+                            <input type="button" onclick="on_click_exit_without_save()" value='<%=L"直接退出" %>' class="theme1_gray_button" style="margin-left:25px;min-width:130px;height:50px;" />
+                            <input type="button" onclick="reload()" value='<%=L"重启世界" %>' class="theme1_gray_button" style="margin-left:25px;min-width:130px;height:50px;" />
+                            <input type="button" onclick="on_click_cancel()" value='<%=L"取消" %>' class="theme1_gray_button" style="margin-left:25x;min-width:130px;height:50px;" />
                         </div>
                     </div>
                 </div>

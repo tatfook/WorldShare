@@ -427,3 +427,7 @@ function LocalService:ClearUserWorlds()
         end
     end
 end
+
+function LocalService:TouchFolder(...)
+    Files.TouchFolder(...)
+end

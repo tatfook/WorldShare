@@ -211,7 +211,7 @@ function SyncToDataSource:CheckReadmeFile()
             if (value.filename == "README.md") then
                 hasReadme = true
             else
-                LocalService:Delete(self.currentWorld.foldername, value.filename)
+                LocalService:Delete(self.currentWorld.worldpath, value.filename)
                 hasReadme = false
             end
         end

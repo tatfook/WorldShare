@@ -32,8 +32,7 @@
 
                 function open_url()
                     local url = get_world_url()
-
-                    ParaGlobal.ShellExecute("open", url, "", "", 1)
+                    Mod.WorldShare.Utils.OpenKeepworkUrlByToken(url)
                 end
 
                 function close()
