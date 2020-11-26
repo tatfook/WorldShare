@@ -24,7 +24,7 @@ local EventTrackingDatabase = NPL.load("(gl)Mod/WorldShare/database/EventTrackin
 local EventTrackingService = NPL.export()
 
 EventTrackingService.firstInit = false
-EventTrackingService.timeInterval = 10000 -- 10 seconds
+EventTrackingService.timeInterval = 10000 * 6 -- 60 seconds
 EventTrackingService.currentLoop = nil
 EventTrackingService.map = {
     duration = {
