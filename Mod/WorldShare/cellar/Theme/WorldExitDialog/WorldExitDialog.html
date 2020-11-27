@@ -237,6 +237,12 @@
 
                 function notice()
                     if KeepworkServiceSession:IsSignedIn() then
+                        local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
+
+                        if currentEnterWorld and currentEnterWorld.is_zip then
+                            return
+                        end
+
                         local remote_revision = tonumber(Mod.WorldShare.Store:Get('world/remoteRevision') or 0)
                         local current_revision = tonumber(Mod.WorldShare.Store:Get("world/currentRevision") or 0)
 

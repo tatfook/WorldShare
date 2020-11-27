@@ -100,6 +100,7 @@ local VipNotice = NPL.load('(gl)Mod/WorldShare/cellar/VipNotice/VipNotice.lua')
 local Permission = NPL.load('(gl)Mod/WorldShare/cellar/Permission/Permission.lua')
 local LoginModal = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua')
 local Menu = NPL.load('(gl)Mod/WorldShare/cellar/Menu/Menu.lua')
+local Beginner = NPL.load('(gl)Mod/WorldShare/cellar/Beginner/Beginner.lua')
 
 -- service
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
@@ -361,6 +362,7 @@ function WorldShare:OnWorldLoad()
 
     UserConsole:ClosePage()
     HistoryManager:OnWorldLoad()
+    Beginner:OnWorldLoad()
 
     local curLesson = Store:Getter('lesson/GetCurLesson')
 
