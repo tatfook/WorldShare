@@ -26,16 +26,18 @@ function Beginner:OnWorldLoad()
     end
 
     if not self.inited and not KeepWorkItemManager.HasGSItem(60000) then
-        _guihelper.MessageBox(
-            L"是否进入新手教学？",
-            function(res)
-                if res and res == _guihelper.DialogResult.Yes then
-                    CommandManager:RunCommand('/loadworld -s 29477')
-                    self.inited = true
-                    KeepWorkItemManager.DoExtendedCost(40000)
-                end
-            end,
-            _guihelper.MessageBoxButtons.YesNo
-        )
+        Mod.WorldShare.Utils.SetTimeOut(function()
+            _guihelper.MessageBox(
+                L"是否进入新手教学？",
+                function(res)
+                    if res and res == _guihelper.DialogResult.Yes then
+                        CommandManager:RunCommand('/loadworld -s 29477')
+                        self.inited = true
+                        KeepWorkItemManager.DoExtendedCost(40000)
+                    end
+                end,
+                _guihelper.MessageBoxButtons.YesNo
+            )
+        end, 3000)
     end
 end
