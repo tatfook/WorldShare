@@ -48,6 +48,9 @@ function WorldExitDialog.ShowPage(callback)
     local function Handle()
         Mod.WorldShare.MsgBox:Close()
 
+        local width = 660
+        local height = 420
+
         local params = Mod.WorldShare.Utils.ShowWindow({
             url = "Mod/WorldShare/cellar/Theme/WorldExitDialog/WorldExitDialog.html",
             name = "WorldExitDialog",
@@ -57,10 +60,10 @@ function WorldExitDialog.ShowPage(callback)
             allowDrag = true,
             directPosition = true,
             align = "_ct",
-            x = -610 / 2,
-            y = -400 / 2,
-            width = 610,
-            height = 400,
+            x = -width / 2,
+            y = -height / 2,
+            width = width,
+            height = height,
             cancelShowAnimation = true,
             bToggleShowHide = true,
             enable_esc_key = true,

@@ -26,7 +26,8 @@ function KeepworkProjectsApi:CreateProject(foldername, success, error)
 
     local params = {
         name = foldername or '',
-        type = 1
+        type = 1,
+        privilege = 165,
     }
 
     KeepworkBaseApi:Post(url, params, nil, success, error)

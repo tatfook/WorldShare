@@ -52,19 +52,17 @@ function ShareWorld:Init(bEnabled, callback)
                 currentWorld.foldername,
                 currentWorld.shared,
                 function()
-                    Compare:RefreshWorldList(function()
-                        Compare:GetCurrentWorldInfo(
-                            function()
-                                Compare:Init(function(result)
-                                    if result then
-                                        self:CheckRealName(function()                                        
-                                            self:ShowPage()
-                                        end)
-                                    end
-                                end)
-                            end
-                        )
-                    end)
+                    Compare:GetCurrentWorldInfo(
+                        function()
+                            Compare:Init(function(result)
+                                if result then
+                                    self:CheckRealName(function()                                        
+                                        self:ShowPage()
+                                    end)
+                                end
+                            end)
+                        end
+                    )
                 end
             )
         end

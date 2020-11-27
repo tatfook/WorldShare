@@ -170,8 +170,6 @@ function WorldList:UpdateWorldInfo(worldIndex)
             worldTag.size = filesize
             LocalService:SetTag(currentWorld.worldpath, worldTag)
 
-            Mod.WorldShare.Store:Set("world/worldTag", worldTag)
-
             compareWorldList[worldIndex].size = filesize
         else
             compareWorldList[worldIndex].revision = LocalService:GetZipRevision(currentWorld.worldpath)

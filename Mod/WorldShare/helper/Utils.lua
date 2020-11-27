@@ -381,7 +381,11 @@ function Utils.OpenKeepworkUrlByToken(url)
         end
 
         local keepworkUrl = KeepworkService:GetKeepworkUrl()
-        local url = keepworkUrl .. url
+
+        if url and not (string.match(url, 'https://') or string.match(url, 'http://')) then
+            url = keepworkUrl .. url
+        end
+
         local openUrl = format("%s/p?url=%s&token=%s", keepworkUrl, self.EncodeURIComponent(url), token)
     
         ParaGlobal.ShellExecute('open', openUrl, "", "", 1)

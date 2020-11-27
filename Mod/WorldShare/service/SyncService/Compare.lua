@@ -226,7 +226,6 @@ function Compare:HasRevision()
 end
 
 function Compare:GetCurrentWorldInfo(callback)
-    local foldername = Mod.WorldShare.Utils:GetFolderName() or ''
     local currentWorld
 
     if Mod.WorldShare.Store:Get("world/readonly") then
@@ -263,7 +262,9 @@ function Compare:GetCurrentWorldInfo(callback)
             fromProjectId = tonumber(worldTag.fromProjects)
         }
 
-        Mod.WorldShare.Store:Set("world/worldTag", worldTag)
+        local currentRemoteWorld = Mod.WorldShare.Store:Get('world/currentRemoteWorld')
+        currentWorld.remoteWorld = commonlib.copy(currentRemoteWorld)
+
         Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
         Mod.WorldShare.Store:Set("world/currentRevision", GameLogic.options:GetRevision())
     else
@@ -274,6 +275,7 @@ function Compare:GetCurrentWorldInfo(callback)
             local worldpath = ParaWorld.GetWorldDirectory()
             local shared = string.match(worldpath, "shared") == "shared" and true or nil
 
+            local foldername = Mod.WorldShare.Utils:GetFolderName() or ''
             for key, item in ipairs(currentWorldList) do
                 if item.foldername == foldername and
                    item.shared == shared and 
@@ -285,8 +287,6 @@ function Compare:GetCurrentWorldInfo(callback)
 
             if searchCurrentWorld then
                 currentWorld = searchCurrentWorld
-    
-                local worldTag = LocalService:GetTag(currentWorld.worldpath)
 
                 if currentWorld.status == 2 then
                     currentWorld.status = 3
@@ -294,12 +294,13 @@ function Compare:GetCurrentWorldInfo(callback)
                     currentWorld.local_tagname = currentWorld.remote_tagname
                 end
 
+                local worldTag = LocalService:GetTag(currentWorld.worldpath)
+
                 if type(worldTag) == 'table' then
                     currentWorld.kpProjectId = tonumber(worldTag.kpProjectId)
                     currentWorld.fromProjectId = tonumber(worldTag.fromProjects)
                 end
 
-                Mod.WorldShare.Store:Set("world/worldTag", worldTag)
                 Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
             end
         end
@@ -344,7 +345,6 @@ function Compare:GetCurrentWorldInfo(callback)
             currentWorld.fromProjectId = tonumber(worldTag.fromProjects)
         end
 
-        Mod.WorldShare.Store:Set("world/worldTag", worldTag)
         Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
     end
 
