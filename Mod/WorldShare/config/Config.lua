@@ -19,7 +19,7 @@ Config.env = {
   LOCAL = "LOCAL"
 }
 
-Config.defaultEnv = (ParaEngine.GetAppCommandLineByParam("worldshareenv", nil) or Config.env.ONLINE)
+Config.defaultEnv = (ParaEngine.GetAppCommandLineByParam("http_env", nil) or Config.env.ONLINE)
 Config.defaultGit = "KEEPWORK"
 
 Config.keepworkList = {
