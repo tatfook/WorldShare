@@ -32,8 +32,8 @@ function Beginner:Show()
                 if res and res == _guihelper.DialogResult.Yes then
                     CommandManager:RunCommand('/loadworld -s 29477')
                     self.inited = true
-                    KeepWorkItemManager.DoExtendedCost(40000)
                 end
+                KeepWorkItemManager.DoExtendedCost(40000)
             end,
             _guihelper.MessageBoxButtons.YesNo
         )
