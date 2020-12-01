@@ -1,0 +1,44 @@
+<body>
+    <pe:mcml>
+        <script type="text/npl">
+            <![CDATA[
+                local page = document:GetPageCtrl()
+
+                function close()
+                    if page.certificateCallback and type(page.certificateCallback) == 'function' then
+                        page.certificateCallback(false)
+                    end
+                    page:CloseWindow()
+                end
+
+                function confirm()
+                    if page and page.Confirm then
+                        page.Confirm()
+                        page:CloseWindow()
+                    end
+                end
+            ]]>
+        </script>
+        <style type="text/mscc" src="Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss">
+        </style>
+        <div width="100%" height="100%">
+            <kp:window width="700" height="400" onclose="close()">
+                <div class="theme1_header"></div>
+                <div style="padding: 30px;">
+                    <div>
+                        <img style="width: 598px;height: 202px;margin-left: 17px;" src="Texture/Aries/Creator/keepwork/paracraft_guide_32bits.png#18 16 598 202" />
+                    </div>
+                    <div style="margin-left: 235px;margin-top: 40px;">
+                        <input type="button"
+                               class="theme1_orange_button"
+                               style="width: 160px;height: 55px;font-size: 20px;base-font-size: 20px;"
+                               value="<%= '确认' %>"
+                               onclick="confirm()" />
+                    </div>
+                </div>
+            </kp:window>
+        </div>
+    </pe:mcml>
+</body>
+</html>
+

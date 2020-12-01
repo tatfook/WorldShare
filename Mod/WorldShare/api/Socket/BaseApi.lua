@@ -5,7 +5,7 @@ Date:  2020.05.26
 Place: Foshan
 use the lib:
 ------------------------------------------------------------
-local SocketBaseApi = NPL.load("(gl)Mod/WorldShare/api/Storage/BaseApi.lua")
+local SocketBaseApi = NPL.load("(gl)Mod/WorldShare/api/Socket/BaseApi.lua")
 ------------------------------------------------------------
 ]]
 

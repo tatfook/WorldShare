@@ -1,0 +1,55 @@
+<body>
+    <pe:mcml>
+        <script type="text/npl">
+            <![CDATA[
+                local page = document:GetPageCtrl()
+
+                function close()
+                    if page.certificateCallback and type(page.certificateCallback) == 'function' then
+                        page.certificateCallback(false)
+                    end
+                    page:CloseWindow()
+                end
+
+                function confirm()
+                    if page and page.Success then
+                        page.Success()
+                        page:CloseWindow()
+                    end
+                end
+            ]]>
+        </script>
+        <style type="text/mscc" src="Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss">
+        </style>
+        <div width="100%" height="100%">
+            <kp:window width="800" height="680" onclose="close()">
+                <div class="theme1_header"></div>
+                <div style="padding: 30px;">
+                    <div style="margin-left: 90px;">
+                        <img style="width: 567px;height: 40px;" src="Texture/Aries/Creator/keepwork/paracraft_guide_32bits.png#13 338 567 40" />
+                    </div>
+                    <div style="font-size: 18px;base-font-size: 18px;margin-left: 135px;margin-top: 20px;">
+                        <%= L'姓名' %>
+                        <input type="text" style="width: 300px;height: 30px;margin-left: 60px;" class="theme1_white_textfield" />
+                    </div>
+                    <div style="font-size: 18px;base-font-size: 18px;margin-left: 135px;margin-top: 20px;">
+                        <%= L'家长手机号' %>
+                        <input type="text" style="width: 300px;height: 30px;margin-left: 5px;" class="theme1_white_textfield" />
+                        <input type="button" style="width: 110px;height: 35px;margin-left: 5px;" class="theme1_baby_bule_button" value="<%= L'确认发送' %>" onclick="confirm()"/>
+                    </div>
+                    <div style="margin-left: 90px;margin-top: 10px;">
+                        <img style="width: 567px;height: 40px;" src="Texture/Aries/Creator/keepwork/paracraft_guide_32bits.png#12 388 567 40" />
+                    </div>
+                    <div style="margin-left: 150px;margin-top: 20px;">
+                        <img style="width: 429px;height: 168px;" src="Texture/Aries/Creator/keepwork/paracraft_guide_32bits.png#31 442 429 168" />
+                    </div>
+                    <div style="margin-left: 200px;margin-top: 20px;">
+                        <img style="width: 311px;height: 177px;" src="Texture/Aries/Creator/keepwork/paracraft_guide_32bits.png#12 814 311 177" />
+                    </div>
+                </div>
+            </kp:window>
+        </div>
+    </pe:mcml>
+</body>
+</html>
+
