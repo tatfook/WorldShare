@@ -22,12 +22,12 @@ function Certificate:Init(callback)
         return
     end
 
-    -- if KeepworkServiceSession:IsRealName() then
-    --     if callback and type(callback) == 'function' then
-    --         callback(true)
-    --     end
-    --     return
-    -- end
+    if KeepworkServiceSession:IsRealName() then
+        if callback and type(callback) == 'function' then
+            callback(true)
+        end
+        return
+    end
 
     self.certificateCallback = callback
 
