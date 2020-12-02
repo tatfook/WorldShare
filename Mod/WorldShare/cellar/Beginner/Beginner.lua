@@ -20,7 +20,7 @@ local Beginner = NPL.export()
 
 Beginner.inited = false
 
-function Beginner:Show()
+function Beginner:Show(callback)
     if not KeepworkServiceSession:IsSignedIn() then
         return
     end
@@ -29,13 +29,20 @@ function Beginner:Show()
         _guihelper.MessageBox(
             L"是否进入新手教学？",
             function(res)
-                if res and res == _guihelper.DialogResult.Yes then
+                if res and res == _guihelper.DialogResult.OK then
                     CommandManager:RunCommand('/loadworld -s 29477')
                     self.inited = true
                 end
+
+                if res and res == _guihelper.DialogResult.Cancel then
+                    if callback and type(callback) == 'function' then
+                        callback()
+                    end
+                end
+
                 KeepWorkItemManager.DoExtendedCost(40000)
             end,
-            _guihelper.MessageBoxButtons.YesNo
+            _guihelper.MessageBoxButtons.OKCancel_CustomLabel
         )
     end
 end

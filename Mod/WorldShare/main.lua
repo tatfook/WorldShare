@@ -331,7 +331,7 @@ function WorldShare:init()
                 end)
                 TeacherAgent:SetEnabled(true)
             end
-            Beginner:Show()
+            Beginner:Show(callback)
             return false
         end
     )
