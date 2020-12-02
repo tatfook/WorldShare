@@ -52,7 +52,7 @@ function Certificate:ShowCertificateTypePage()
     local params = Mod.WorldShare.Utils.ShowWindow(
         700,
         480,
-        '(ws)/Certificate/CertificateType.html',
+        '(ws)Certificate/CertificateType.html',
         'Mod.WorldShare.Certificate.CertificateType'
     )
 
