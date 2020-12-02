@@ -316,15 +316,17 @@ function WorldShare:init()
     GameLogic.GetFilters():add_filter(
         'show_certificate_page',
         function(callback)
-            if KeepworkServiceSession:IsRealName() then
+            if not KeepworkServiceSession:IsRealName() then
                 NPL.load("(gl)script/apps/Aries/Creator/Game/Login/TeacherAgent/TeacherAgent.lua");
                 local TeacherAgent = commonlib.gettable("MyCompany.Aries.Creator.Game.Teacher.TeacherAgent");
                 TeacherAgent:AddTaskButton('award', "Texture/Aries/Creator/keepwork/paracraft_guide_32bits.png#484 458 90 91", function() 
                     local Certificate = NPL.load("(gl)Mod/WorldShare/cellar/Certificate/Certificate.lua")
-                    Certificate:Init(function()
-                        TeacherAgent:RemoveTaskButton('award')
-                        TeacherAgent:SetEnabled(false)
-                        GameLogic.AddBBS(nil, L'领取成功', 3000, '0 255 0')
+                    Certificate:Init(function(result)
+                        if result then
+                            TeacherAgent:RemoveTaskButton('award')
+                            TeacherAgent:SetEnabled(false)
+                            GameLogic.AddBBS(nil, L'领取成功', 3000, '0 255 0')
+                        end
                     end)
                 end)
                 TeacherAgent:SetEnabled(true)
