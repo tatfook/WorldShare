@@ -101,6 +101,7 @@ local Permission = NPL.load('(gl)Mod/WorldShare/cellar/Permission/Permission.lua
 local LoginModal = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua')
 local Menu = NPL.load('(gl)Mod/WorldShare/cellar/Menu/Menu.lua')
 local Beginner = NPL.load('(gl)Mod/WorldShare/cellar/Beginner/Beginner.lua')
+local Certificate = NPL.load("(gl)Mod/WorldShare/cellar/Certificate/Certificate.lua")
 
 -- service
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
@@ -316,21 +317,6 @@ function WorldShare:init()
     GameLogic.GetFilters():add_filter(
         'show_certificate_page',
         function(callback)
-            if not KeepworkServiceSession:IsRealName() then
-                NPL.load("(gl)script/apps/Aries/Creator/Game/Login/TeacherAgent/TeacherAgent.lua");
-                local TeacherAgent = commonlib.gettable("MyCompany.Aries.Creator.Game.Teacher.TeacherAgent");
-                TeacherAgent:AddTaskButton('award', "Texture/Aries/Creator/keepwork/paracraft_guide_32bits.png#484 458 90 91", function() 
-                    local Certificate = NPL.load("(gl)Mod/WorldShare/cellar/Certificate/Certificate.lua")
-                    Certificate:Init(function(result)
-                        if result then
-                            TeacherAgent:RemoveTaskButton('award')
-                            TeacherAgent:SetEnabled(false)
-                            GameLogic.AddBBS(nil, L'领取成功', 3000, '0 255 0')
-                        end
-                    end)
-                end)
-                TeacherAgent:SetEnabled(true)
-            end
             Beginner:Show(callback)
             return false
         end
@@ -680,6 +666,7 @@ function WorldShare:OnWorldLoad()
 
     UserConsole:ClosePage()
     HistoryManager:OnWorldLoad()
+    Certificate:OnWorldLoad()
 
     local curLesson = Store:Getter('lesson/GetCurLesson')
 

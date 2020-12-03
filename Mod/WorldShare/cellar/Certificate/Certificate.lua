@@ -9,12 +9,36 @@ local Certificate = NPL.load("(gl)Mod/WorldShare/cellar/Certificate/Certificate.
 ------------------------------------------------------------
 ]]
 
+-- libs
+local TeacherAgent = commonlib.gettable("MyCompany.Aries.Creator.Game.Teacher.TeacherAgent");
+
 -- service
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
 
 local Certificate = NPL.export()
 
 Certificate.certificateCallback = nil
+Certificate.inited = false
+
+function Certificate:OnWorldLoad()
+    if not KeepworkServiceSession:IsRealName() then
+        if not self.inited then
+            self.inited = true
+            TeacherAgent:AddTaskButton('award', "Texture/Aries/Creator/keepwork/paracraft_guide_32bits.png#484 458 90 91", function()
+                self:Init(function(result)
+                    if result then
+                        TeacherAgent:RemoveTaskButton('award')
+                        TeacherAgent:SetEnabled(false)
+                        GameLogic.AddBBS(nil, L'领取成功', 3000, '0 255 0')
+                    end
+                end)
+            end)
+            TeacherAgent:SetEnabled(true)
+        else
+            TeacherAgent:ShowIcon(true)
+        end
+    end
+end
 
 function Certificate:Init(callback)
     if not KeepworkServiceSession:IsSignedIn() then
