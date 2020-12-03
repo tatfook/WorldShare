@@ -333,3 +333,25 @@ end
 function KeepworkUsersApi:WebToken(success, error)
     KeepworkBaseApi:Get('/users/webToken', nil, nil, success, error)
 end
+
+-- url:/users/textingToInviteRealname
+-- method: POST
+-- header:
+-- params:
+--[[
+    cellphone string necessary
+    name string necessary user real name
+]]
+-- return: object
+function KeepworkUsersApi:TextingToInviteRealname(cellphone, name, success, error)
+    if not cellphone or not name then
+        return false
+    end
+
+    local params = {
+        cellphone = cellphone,
+        name = name
+    }
+
+    KeepworkBaseApi:Post('/users/textingToInviteRealname', params, nil, success, error)
+end

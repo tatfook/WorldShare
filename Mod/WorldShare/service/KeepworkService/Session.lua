@@ -843,3 +843,6 @@ function KeepworkServiceSession:IsRealName()
     return Mod.WorldShare.Store:Get('user/isVerified')
 end
 
+function KeepworkServiceSession:TextingToInviteRealname(cellphone, name, callback)
+    KeepworkUsersApi:TextingToInviteRealname(cellphone, name, callback, callback)
+end

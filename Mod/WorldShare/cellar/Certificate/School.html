@@ -2,6 +2,9 @@
     <pe:mcml>
         <script type="text/npl">
             <![CDATA[
+                -- helper
+                local Validated = NPL.load("(gl)Mod/WorldShare/helper/Validated.lua")
+
                 local page = document:GetPageCtrl()
 
                 function close()
@@ -12,9 +15,16 @@
                 end
 
                 function confirm()
-                    if page and page.Success then
-                        page.Success()
-                        page:CloseWindow()
+                    local cellphone = page:GetValue('cellphone')
+                    local realname = page:GetValue('realname')
+
+                    if not Validated:Phone(cellphone) then
+                        GameLogic.AddBBS(nil, L"手机格式错误", 3000, "255 0 0")
+                        return false
+                    end
+
+                    if page and page.Confirm then
+                        page.Confirm(cellphone, realname)
                     end
                 end
             ]]>
@@ -30,11 +40,11 @@
                     </div>
                     <div style="font-size: 18px;base-font-size: 18px;margin-left: 135px;margin-top: 20px;">
                         <%= L'姓名' %>
-                        <input type="text" style="width: 300px;height: 30px;margin-left: 60px;" class="theme1_white_textfield" />
+                        <input type="text" name="realname" style="width: 300px;height: 30px;margin-left: 60px;" class="theme1_white_textfield" />
                     </div>
                     <div style="font-size: 18px;base-font-size: 18px;margin-left: 135px;margin-top: 20px;">
                         <%= L'家长手机号' %>
-                        <input type="text" style="width: 300px;height: 30px;margin-left: 5px;" class="theme1_white_textfield" />
+                        <input type="text" name="cellphone" style="width: 300px;height: 30px;margin-left: 5px;" class="theme1_white_textfield" />
                         <input type="button" style="width: 110px;height: 35px;margin-left: 5px;" class="theme1_baby_bule_button" value="<%= L'确认发送' %>" onclick="confirm()"/>
                     </div>
                     <div style="margin-left: 90px;margin-top: 10px;">

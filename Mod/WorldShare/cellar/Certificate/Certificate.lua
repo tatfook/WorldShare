@@ -72,7 +72,15 @@ function Certificate:ShowSchoolPage()
     )
 
     if params and type(params) == 'table' and params._page then
-        params._page.Success = function() self:ShowSendSmsPage() end
+        params._page.Confirm = function(cellphone, realname)
+            KeepworkServiceSession:TextingToInviteRealname(cellphone, realname, function(data, err)
+                if err ~= 200 then
+                    return
+                end
+                params._page:CloseWindow()
+                self:ShowSendSmsPage()
+            end)
+        end
         params._page.certificateCallback = self.certificateCallback
     end
 end
