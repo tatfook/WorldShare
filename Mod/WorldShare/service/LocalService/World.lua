@@ -84,6 +84,20 @@ function LocalServiceWorld:GetWorldList()
                 value.size = 0
             end
 
+            if not value.shared then
+                if tag.seed and type(tag.seed) == 'string' and #tag.seed > 0 then
+                    local realFoldername = value.foldername
+                    value.foldername = tag.seed
+                    value.real_foldername = realFoldername
+                end
+    
+                if value.foldername ~= tag.name then
+                    value.text = tag.name .. '(' .. value.foldername .. ')'
+                else
+                    value.text = value.foldername
+                end
+            end
+
             value.local_tagname = tag.name
             value.is_zip = false
             value.vipEnabled = tag.vipEnabled
@@ -124,53 +138,48 @@ function LocalServiceWorld:GetSharedWorldList()
             if output and #output > 0 then
                 for _, item in ipairs(output) do
                     local bLoadedWorld
-                    local xmlRoot = ParaXML.LuaXML_ParseFile(folderPath .. "/" .. item.filename .. "/tag.xml")
-        
-                    if xmlRoot then
-                        for node in commonlib.XPath.eachNode(xmlRoot, "/pe:mcml/pe:world") do
-                            if node.attr then
-                                local display_name = node.attr.name or item.filename
-                                local filenameUTF8 = commonlib.Encoding.DefaultToUtf8(item.filename)
-        
-                                if filenameUTF8 ~= node.attr.name then
-                                    -- show dir name if differs from world name
-                                    display_name = format("%s(%s)", node.attr.name or "", filenameUTF8)
-                                end
+                    local tag = LocalService:GetTag(folderPath .. "/" .. item.filename .. "/")
+                    if tag then
+                        local display_name = tag.name or tag.seed or ''--item.filename
+                        local filenameUTF8 = tag.seed or ''--commonlib.Encoding.DefaultToUtf8(item.filename)
 
-                                local worldpath = folderPath .. "/" .. item.filename
-                                local remotefile = "local://" .. worldpath
-                                local worldUsername = Mod.WorldShare:GetWorldData("username", worldpath .. "/") or ""
-
-                                -- only add world with the same nid
-                                AddWorldToDS(
-                                    {
-                                        worldpath = worldpath,
-                                        remotefile = remotefile,
-                                        foldername = filenameUTF8,
-                                        Title = display_name,
-                                        writedate = item.writedate, filesize=item.filesize,
-                                        nid = node.attr.nid,
-                                        -- world's new property
-                                        author = item.author or "None",
-                                        mode = item.mode or "survival",
-                                        -- the max value of the progress is 1
-                                        progress = item.progress or "0",
-                                        -- the format of costTime:  "day:hour:minute"
-                                        costTime = item.progress or "0:0:0",
-                                        -- maybe grade is "primary" or "middle" or "adventure" or "difficulty" or "ultimate"
-                                        grade = item.grade or "primary",
-                                        ip = item.ip or "127.0.0.1",
-                                        order = item.order,
-                                        IsFolder=true, time_text=item.time_text,
-                                        text = worldUsername .. "/" .. display_name,
-                                        shared = true,
-                                    }
-                                )
-        
-                                bLoadedWorld = true
-                                break
-                            end
+                        if filenameUTF8 ~= tag.name then
+                            -- show dir name if differs from world name
+                            display_name = format("%s(%s)", tag.name or "", filenameUTF8)
                         end
+
+                        local worldpath = folderPath .. "/" .. item.filename
+                        local remotefile = "local://" .. worldpath
+                        local worldUsername = Mod.WorldShare:GetWorldData("username", worldpath .. "/") or ""
+
+                        -- only add world with the same nid
+                        AddWorldToDS(
+                            {
+                                worldpath = worldpath,
+                                remotefile = remotefile,
+                                foldername = filenameUTF8,
+                                Title = display_name,
+                                writedate = item.writedate, filesize=item.filesize,
+                                nid = tag.nid,
+                                -- world's new property
+                                author = item.author or "None",
+                                mode = item.mode or "survival",
+                                -- the max value of the progress is 1
+                                progress = item.progress or "0",
+                                -- the format of costTime:  "day:hour:minute"
+                                costTime = item.progress or "0:0:0",
+                                -- maybe grade is "primary" or "middle" or "adventure" or "difficulty" or "ultimate"
+                                grade = item.grade or "primary",
+                                ip = item.ip or "127.0.0.1",
+                                order = item.order,
+                                IsFolder=true, time_text=item.time_text,
+                                text = worldUsername .. "/" .. display_name,
+                                shared = true,
+                            }
+                        )
+
+                        bLoadedWorld = true
+                        break
                     end
 
                     if not bLoadedWorld and ParaIO.DoesFileExist(folderPath .. "/" .. item.filename .. "/worldconfig.txt") then
@@ -229,10 +238,10 @@ function LocalServiceWorld:MergeInternetLocalWorldList(currentWorldList)
 
     for CKey, CItem in ipairs(currentWorldList) do
         for IKey, IItem in ipairs(internetLocalWorldList) do
-            if not CItem.shared and IItem.foldername == CItem.foldername then
-                if IItem.is_zip == CItem.is_zip then 
+            if not CItem.shared and IItem.foldername == CItem.real_foldername then
+                if IItem.is_zip == CItem.is_zip then
                     for key, value in pairs(IItem) do
-                        if(key ~= "revision") then
+                        if key ~= "revision" and key ~= 'foldername' and key ~= 'text' then
                             CItem[key] = value
                         end
                     end

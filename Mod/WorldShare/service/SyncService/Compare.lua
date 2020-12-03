@@ -275,9 +275,9 @@ function Compare:GetCurrentWorldInfo(callback)
             local worldpath = ParaWorld.GetWorldDirectory()
             local shared = string.match(worldpath, "shared") == "shared" and true or nil
 
-            local foldername = Mod.WorldShare.Utils:GetFolderName() or ''
+            local realFoldername = Mod.WorldShare.Utils:GetFolderName() or ''
             for key, item in ipairs(currentWorldList) do
-                if item.foldername == foldername and
+                if item.real_foldername == realFoldername and
                    item.shared == shared and 
                    not item.is_zip then
                     searchCurrentWorld = item
@@ -299,6 +299,7 @@ function Compare:GetCurrentWorldInfo(callback)
                 if type(worldTag) == 'table' then
                     currentWorld.kpProjectId = tonumber(worldTag.kpProjectId)
                     currentWorld.fromProjectId = tonumber(worldTag.fromProjects)
+                    currentWorld.foldername = worldTag.foldername
                 end
 
                 Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
@@ -320,7 +321,8 @@ function Compare:GetCurrentWorldInfo(callback)
             author = "None",
             costTime = "0:0:0",
             filesize = 0,
-            foldername = Mod.WorldShare.Utils.GetFolderName(),
+            real_foldername = Mod.WorldShare.Utils.GetFolderName(),
+            foldername = worldTag.seed,
             grade = "primary",
             icon = "Texture/3DMapSystem/common/page_world.png",
             ip = "127.0.0.1",

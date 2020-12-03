@@ -369,14 +369,15 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
 
         -- handle both/network newest/local newest/network only worlds
         for DKey, DItem in ipairs(remoteWorldsList) do
+            local text= ''
             local isExist = false
-            local worldpath = ""
-            local remotefile = ""
-            local localTagname = ""
-            local remoteTagname = ""
+            local worldpath = ''
+            local remotefile = ''
+            local localTagname = ''
+            local remoteTagname = ''
             local revision = 0
-            local commitId = ""
-            local remoteWorldUserId = DItem["user"] and DItem["user"]["id"] and tonumber(DItem["user"]["id"]) or 0
+            local commitId = ''
+            local remoteWorldUserId = DItem['user'] and DItem['user']['id'] and tonumber(DItem['user']['id']) or 0
             local status
             local remoteShared
             local vipEnabled = false
@@ -387,9 +388,8 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
             end
 
             for LKey, LItem in ipairs(localWorlds) do
-                if DItem["worldName"] == LItem["foldername"] and
-                   remoteShared == LItem["shared"] and
-                   not LItem.is_zip then
+                if DItem["worldName"] == LItem["foldername"] and remoteShared == LItem["shared"] and not LItem.is_zip then
+                    
                     if tonumber(LItem["revision"] or 0) == tonumber(DItem["revision"] or 0) then
                         status = 3 -- both
                         revision = LItem['revision']
@@ -405,10 +405,16 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                     worldpath = LItem["worldpath"]
                     remotefile = "local://" .. worldpath
 
-                    localTagname = LItem["local_tagname"] or LItem["foldername"]
+                    localTagname = LItem["local_tagname"] or LItem["foldername"] -- local_tagname is name in tag.xml
                     remoteTagname = DItem["extra"] and DItem["extra"]["worldTagName"] or DItem["worldName"]
                     vipEnabled = LItem["vipEnabled"] or false
                     instituteVipEnabled = LItem["instituteVipEnabled"] or false
+
+                    if remoteTagname ~= "" and remoteTagname ~= DItem['worldName'] then
+                        text = remoteTagname .. '(' .. DItem['worldName'] .. ')'
+                    else
+                        text = DItem['worldName']
+                    end
 
                     if tonumber(LItem["kpProjectId"]) ~= tonumber(DItem["projectId"]) then
                         local tag = SaveWorldHandler:new():Init(worldpath):LoadWorldInfo()
@@ -421,16 +427,16 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                 end
             end
 
-            local text = DItem["worldName"] or ""
-
             if not isExist then
                 --network only
                 status = 2
                 revision = DItem['revision']
-                remoteTagname = DItem['extra'] and DItem['extra']['worldTagName'] or text
+                remoteTagname = DItem['extra'] and DItem['extra']['worldTagName'] or DItem['worldName']
 
-                if remoteTagname ~= "" and text ~= remoteTagname then
-                    text = remoteTagname .. '(' .. text .. ')'
+                if remoteTagname ~= "" and remoteTagname ~= DItem['worldName'] then
+                    text = remoteTagname .. '(' .. DItem['worldName'] .. ')'
+                else
+                    text = DItem['worldName']
                 end
 
                 -- shared world path

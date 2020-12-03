@@ -1,0 +1,33 @@
+<body>
+    <pe:mcml>
+        <script type="text/npl">
+            local DataUpgrade = NPL.load('./DataUpgrade.lua')
+
+            function get_message()
+                local default = L'我们正在对数据进行备份和升级，请勿关闭应用...'
+
+                if not DataUpgrade.mainMsg then
+                    return default
+                else
+                    return DataUpgrade.mainMsg
+                end
+            end
+
+            function get_subtitle()
+                return DataUpgrade.subtitleMsg or ''
+            end
+        </script>
+        <style type="text/mcss" src="Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss"></style>
+        <kp:window width="600" height="400" title="<%= L'数据升级' %>">
+            <div class="theme1_header"></div>
+            <div style="padding-top: 80px;padding-left: 30px;font-size: 16px;base-font-size: 16px;">
+                <div>
+                    <%= get_message() %>
+                </div>
+                <div style="width: 530px;">
+                    <%= get_subtitle() %>
+                </div>
+            </div>
+        </kp:window>
+    </pe:mcml>
+</body>

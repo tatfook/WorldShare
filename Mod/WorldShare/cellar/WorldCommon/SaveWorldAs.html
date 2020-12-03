@@ -1,0 +1,48 @@
+<body>
+    <pe:mcml>
+        <script type="text/npl">
+            <![CDATA[
+                local page = document:GetPageCtrl()
+                local foldername = page:GetRequestParam('foldername') or ''
+
+                function close()
+                    page:CloseWindow()
+                end
+
+                function get_foldername()
+                    return foldername or ''
+                end
+
+                function confirm()
+                    if page and page.confirmCallback and type(page.confirmCallback) == 'function' then
+                        page.confirmCallback(page:GetValue('foldername'))
+                    end
+                end
+            ]]>
+        </script>
+        <style type="text/mcss" src="Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss">
+
+        </style>
+        <div width="100%" height="100%">
+            <kp:window width="500" height="220" style="" title="<%= L'世界另存为' %>" onclose="close()">
+                <div style="padding: 20px;">
+                    <div class="theme1_header"></div>
+                    <div>
+                        <div>
+                            <%= L"输入新的世界名字" %>
+                            <br/>
+                            <%= L"如果你复制的是别人的世界, 请在世界中著名原作者, 并取得对方同意" %>
+                        </div>
+                        <div>
+                            <input type="text" name='foldername' style="height: 30px;" class="theme1_white_textfield" value="<%= get_foldername() %>" />
+                        </div>
+                        <div>
+                            <input type="button" style="height: 40px;width: 90px;margin-left: 180px;margin-top: 10px;" class="theme1_orange_button" value="<%= L'确定' %>" onclick="confirm"/>
+                        </div>
+                    </div>
+                </div>
+            </kp:window>
+        </div>
+    </pe:mcml>
+</body>
+</html>
