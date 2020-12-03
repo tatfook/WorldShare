@@ -37,6 +37,12 @@ function MySchool:Show(callback)
             self.hasJoined = true
         
             for key, item in ipairs(orgData) do
+                if item and not item.fullname then
+                    item.fullname = ''
+                end
+            end
+
+            for key, item in ipairs(orgData) do
                 if item and item.type == 4 then
                     self.hasSchoolJoined = true
                     break
