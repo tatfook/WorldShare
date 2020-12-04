@@ -404,23 +404,26 @@ function WorldShare:init()
     GameLogic.GetFilters():add_filter(
         'on_exit',
         function(bForceExit, bRestart, callback)
-            local currentEnterWorld = Mod.WorldShare.Store:Get("world/currentEnterWorld")
-
-            if currentEnterWorld and currentEnterWorld.project and currentEnterWorld.project.memberCount or 0 > 1 then
-                Mod.WorldShare.MsgBox:Show(L"请稍后...")
-                -- TODO: move to service
-                local KeepworkServiceWorld = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/World.lua")
-
-                KeepworkServiceWorld:UnlockWorld(function()
-                    if callback and type(callback) == 'function' then
-                        callback()
-                    end
-                end)
-            else
-                if callback and type(callback) == 'function' then
-                    callback()
-                end
+            if callback and type(callback) == 'function' then
+                callback()
             end
+
+            -- local currentEnterWorld = Mod.WorldShare.Store:Get("world/currentEnterWorld")
+
+            -- if (currentEnterWorld and currentEnterWorld.project and currentEnterWorld.project.memberCount or 0) > 1 then
+            --     Mod.WorldShare.MsgBox:Show(L"请稍后...")
+            --     local KeepworkServiceWorld = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/World.lua")
+
+            --     KeepworkServiceWorld:UnlockWorld(function()
+            --         if callback and type(callback) == 'function' then
+            --             callback()
+            --         end
+            --     end)
+            -- else
+            --     if callback and type(callback) == 'function' then
+            --         callback()
+            --     end
+            -- end
         end
     )
 
