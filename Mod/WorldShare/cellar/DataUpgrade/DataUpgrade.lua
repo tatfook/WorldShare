@@ -223,14 +223,18 @@ function DataUpgrade:BackupAllWorlds(backUpCallback)
 
             if copyFile and copyFile.src and copyFile.dest then
                 ParaIO.CopyFile(copyFile.src, copyFile.dest, true)
-                self.subtitleMsg = format(L'正在复制：%s 到 %s', copyFile.src, copyFile.dest)
+                self.subtitleMsg = format(
+                    L'正在复制：%s 到 %s',
+                    commonlib.Encoding.DefaultToUtf8(copyFile.src),
+                    commonlib.Encoding.DefaultToUtf8(copyFile.dest)
+                )
                 self:Refresh()
             end
 
             Mod.WorldShare.Utils.SetTimeOut(function()
                 copyIndex = copyIndex + 1
                 CopyFile()
-            end, 100)
+            end, 20)
         end
 
         local function FindAllCurrentWorldFiles(path, destPath)
@@ -361,12 +365,24 @@ function DataUpgrade:RenameAllWorlds(callback)
     end
 
     local function MoveWorld(root, filename, callback)
-        local newFilename = filename .. '_' .. System.Encoding.guid.uuid()
         local currentWorldFiles = {}
         local isShared = false
+        local newFilename = ''
 
         if root == 'worlds/DesignHouse/_shared/' then
             isShared = true
+        end
+
+        local oldTag = LocalService:GetTag(root .. filename .. '/')
+        local oldProjectData = {}
+
+        -- ignore upgraded world
+        if not oldTag or not oldTag.name or oldTag.upgrade_ver then
+            if callback and type(callback) == 'function' then
+                callback()
+            end
+
+            return
         end
 
         local moveFileIndex = 1
@@ -382,7 +398,11 @@ function DataUpgrade:RenameAllWorlds(callback)
 
             -- move file
             ParaIO.MoveFile(currentFile.src, currentFile.dest)
-            self.subtitleMsg = format(L'正在移动：%s 到 %s', currentFile.src, currentFile.dest)
+            self.subtitleMsg = format(
+                L'正在移动：%s 到 %s',
+                commonlib.Encoding.DefaultToUtf8(currentFile.src),
+                commonlib.Encoding.DefaultToUtf8(currentFile.dest)
+            )
             self:Refresh()
 
             -- handle tag file
@@ -395,51 +415,39 @@ function DataUpgrade:RenameAllWorlds(callback)
                     tag.upgrade_ver = self.ver
 
                     if isShared then
-                        tag.seed = string.match(filename, "^%w+%/(.+)")
+                        tag.seed = commonlib.Encoding.DefaultToUtf8(string.match(filename, "^%w+%/(.+)"))
                     else
-                        tag.seed = filename
+                        tag.seed = commonlib.Encoding.DefaultToUtf8(filename)
                     end
                 end
 
                 if tag and type(tag) == 'table' and tag.kpProjectId then
-                    KeepworkServiceProject:GetProject(tag.kpProjectId, function(data, err)
-                        if err ~= 200 then
-                            LocalService:SetTag(newWorldpath, tag)
-
-                            Mod.WorldShare.Utils.SetTimeOut(function()
-                                moveFileIndex = moveFileIndex + 1
-                                MoveFile()
-                            end, 100)
-                            return
-                        end
-
-                        if not data or type(data) ~= 'table' or not data.username or not data.userId then
-                            LocalService:SetTag(newWorldpath, tag)
-
-                            Mod.WorldShare.Utils.SetTimeOut(function()
-                                moveFileIndex = moveFileIndex + 1
-                                MoveFile()
-                            end, 100)
-                            return
-                        end
-
-                        tag.username = data.username
-                        tag.user_id = data.userId
-
+                    if not oldProjectData or type(oldProjectData) ~= 'table' or not oldProjectData.username or not oldProjectData.userId then
                         LocalService:SetTag(newWorldpath, tag)
 
                         Mod.WorldShare.Utils.SetTimeOut(function()
                             moveFileIndex = moveFileIndex + 1
                             MoveFile()
-                        end, 100)
-                    end)
+                        end, 10)
+                        return
+                    end
+
+                    tag.username = oldProjectData.username
+                    tag.user_id = oldProjectData.userId
+
+                    LocalService:SetTag(newWorldpath, tag)
+
+                    Mod.WorldShare.Utils.SetTimeOut(function()
+                        moveFileIndex = moveFileIndex + 1
+                        MoveFile()
+                    end, 10)
                 else
                     LocalService:SetTag(newWorldpath, tag)
 
                     Mod.WorldShare.Utils.SetTimeOut(function()
                         moveFileIndex = moveFileIndex + 1
                         MoveFile()
-                    end, 100)
+                    end, 10)
                 end
 
                 return
@@ -448,7 +456,7 @@ function DataUpgrade:RenameAllWorlds(callback)
             Mod.WorldShare.Utils.SetTimeOut(function()
                 moveFileIndex = moveFileIndex + 1
                 MoveFile()
-            end, 100)
+            end, 10)
         end
 
         local function FindAllCurrentWorldFiles(path, destPath)
@@ -472,23 +480,45 @@ function DataUpgrade:RenameAllWorlds(callback)
             end
         end
 
-        local tag = LocalService:GetTag(root .. filename .. '/')
+        if oldTag and type(oldTag) == 'table' and oldTag.kpProjectId then
+            -- get uuid from api if world has project id.
+            KeepworkServiceProject:GetProject(oldTag.kpProjectId, function(data, err)
+                if err ~= 200 or not data or not data.world or not data.world.uuid then
+                    newFilename = filename .. '_' .. System.Encoding.guid.uuid()
 
-        if not tag or not tag.name or tag.upgrade_ver then
-            if callback and type(callback) == 'function' then
-                callback()
-            end
+                    ParaIO.CreateDirectory(root .. newFilename .. '/')
 
-            return
+                    FindAllCurrentWorldFiles(
+                        root .. filename .. '/',
+                        root .. newFilename .. '/'
+                    )
+                    MoveFile()
+
+                    return
+                end
+
+                oldProjectData = data
+                newFilename = filename .. '_' .. data.world.uuid
+
+                ParaIO.CreateDirectory(root .. newFilename .. '/')
+
+                FindAllCurrentWorldFiles(
+                    root .. filename .. '/',
+                    root .. newFilename .. '/'
+                )
+                MoveFile()
+            end)
+        else
+            newFilename = filename .. '_' .. System.Encoding.guid.uuid()
+
+            ParaIO.CreateDirectory(root .. newFilename .. '/')
+
+            FindAllCurrentWorldFiles(
+                root .. filename .. '/',
+                root .. newFilename .. '/'
+            )
+            MoveFile()
         end
-
-        ParaIO.CreateDirectory(root .. newFilename .. '/')
-
-        FindAllCurrentWorldFiles(
-            root .. filename .. '/',
-            root .. newFilename .. '/'
-        )
-        MoveFile()
     end
 
     -- move mine worlds
