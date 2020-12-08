@@ -457,6 +457,7 @@ function WorldShare:init()
     GameLogic.GetFilters():add_filter(
         'qiniu_upload_file',
         function(token, key, filename, content, callback)
+            local QiniuRootApi = NPL.load("(gl)Mod/WorldShare/api/Qiniu/Root.lua")
             QiniuRootApi:Upload(token, key, filename, content, callback, callback)
         end
     )

@@ -21,6 +21,10 @@ Certificate.certificateCallback = nil
 Certificate.inited = false
 
 function Certificate:OnWorldLoad()
+    if not KeepworkServiceSession:IsSignedIn() then
+        return
+    end
+
     if not KeepworkServiceSession:IsRealName() then
         if not self.inited then
             self.inited = true
@@ -99,7 +103,6 @@ function Certificate:ShowSchoolPage()
         params._page.Confirm = function(cellphone, realname)
             KeepworkServiceSession:TextingToInviteRealname(cellphone, realname, function(data, err)
                 if err ~= 200 then
-                    GameLogic.AddBBS(nil, L'发送短信失败，请稍后再试', 3000, '255 0 0')
                     return
                 end
                 params._page:CloseWindow()
