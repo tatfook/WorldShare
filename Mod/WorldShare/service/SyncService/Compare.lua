@@ -299,7 +299,12 @@ function Compare:GetCurrentWorldInfo(callback)
                 if type(worldTag) == 'table' then
                     currentWorld.kpProjectId = tonumber(worldTag.kpProjectId)
                     currentWorld.fromProjectId = tonumber(worldTag.fromProjects)
-                    currentWorld.foldername = worldTag.foldername
+
+                    if worldTag and worldTag.seed ~= '' then
+                        currentWorld.foldername = worldTag.seed
+                    else
+                        currentWorld.foldername = currentWorld.real_foldername
+                    end
                 end
 
                 Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
@@ -322,7 +327,7 @@ function Compare:GetCurrentWorldInfo(callback)
             costTime = "0:0:0",
             filesize = 0,
             real_foldername = Mod.WorldShare.Utils.GetFolderName(),
-            foldername = worldTag.seed,
+            foldername = (worldTag.seed and worldTag.seed ~= '') and worldTag.seed or Mod.WorldShare.Utils.GetFolderName(),
             grade = "primary",
             icon = "Texture/3DMapSystem/common/page_world.png",
             ip = "127.0.0.1",

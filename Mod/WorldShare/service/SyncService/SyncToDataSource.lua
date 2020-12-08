@@ -64,7 +64,7 @@ function SyncToDataSource:Init(callback)
     
                         if currentWorld and currentWorld.kpProjectId then
                             local tag = LocalService:GetTag(currentWorld.worldpath)
-    
+
                             if type(tag) == 'table' then
                                 tag.kpProjectId = currentWorld.kpProjectId
                                 LocalService:SetTag(currentWorld.worldpath, tag)
