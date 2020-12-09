@@ -352,6 +352,9 @@ function Compare:GetCurrentWorldInfo(callback)
             currentWorld.fromProjectId = tonumber(worldTag.fromProjects)
         end
 
+        echo('from world load!!!', true)
+        echo(currentWorld, true)
+
         Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
     end
 

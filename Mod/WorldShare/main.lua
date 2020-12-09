@@ -101,6 +101,8 @@ local Permission = NPL.load('(gl)Mod/WorldShare/cellar/Permission/Permission.lua
 local LoginModal = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua')
 local Menu = NPL.load('(gl)Mod/WorldShare/cellar/Menu/Menu.lua')
 local Beginner = NPL.load('(gl)Mod/WorldShare/cellar/Beginner/Beginner.lua')
+local Certificate = NPL.load("(gl)Mod/WorldShare/cellar/Certificate/Certificate.lua")
+
 -- service
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
 local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
@@ -320,21 +322,6 @@ function WorldShare:init()
     GameLogic.GetFilters():add_filter(
         'show_certificate_page',
         function(callback)
-            if not KeepworkServiceSession:IsRealName() then
-                NPL.load('(gl)script/apps/Aries/Creator/Game/Login/TeacherAgent/TeacherAgent.lua');
-                local TeacherAgent = commonlib.gettable('MyCompany.Aries.Creator.Game.Teacher.TeacherAgent');
-                TeacherAgent:AddTaskButton('award', 'Texture/Aries/Creator/keepwork/paracraft_guide_32bits.png#484 458 90 91', function() 
-                    local Certificate = NPL.load('(gl)Mod/WorldShare/cellar/Certificate/Certificate.lua')
-                    Certificate:Init(function(result)
-                        if result then
-                            TeacherAgent:RemoveTaskButton('award')
-                            TeacherAgent:SetEnabled(false)
-                            GameLogic.AddBBS(nil, L'领取成功', 3000, '0 255 0')
-                        end
-                    end)
-                end)
-                TeacherAgent:SetEnabled(true)
-            end
             Beginner:Show(callback)
             return false
         end
@@ -422,23 +409,26 @@ function WorldShare:init()
     GameLogic.GetFilters():add_filter(
         'on_exit',
         function(bForceExit, bRestart, callback)
-            local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
-
-            if currentEnterWorld and currentEnterWorld.project and currentEnterWorld.project.memberCount or 0 > 1 then
-                Mod.WorldShare.MsgBox:Show(L'请稍后...')
-                -- TODO: move to service
-                local KeepworkServiceWorld = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/World.lua')
-
-                KeepworkServiceWorld:UnlockWorld(function()
-                    if callback and type(callback) == 'function' then
-                        callback()
-                    end
-                end)
-            else
-                if callback and type(callback) == 'function' then
-                    callback()
-                end
+            if callback and type(callback) == 'function' then
+                callback()
             end
+
+            -- local currentEnterWorld = Mod.WorldShare.Store:Get("world/currentEnterWorld")
+
+            -- if (currentEnterWorld and currentEnterWorld.project and currentEnterWorld.project.memberCount or 0) > 1 then
+            --     Mod.WorldShare.MsgBox:Show(L"请稍后...")
+            --     local KeepworkServiceWorld = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/World.lua")
+
+            --     KeepworkServiceWorld:UnlockWorld(function()
+            --         if callback and type(callback) == 'function' then
+            --             callback()
+            --         end
+            --     end)
+            -- else
+            --     if callback and type(callback) == 'function' then
+            --         callback()
+            --     end
+            -- end
         end
     )
 
@@ -472,6 +462,7 @@ function WorldShare:init()
     GameLogic.GetFilters():add_filter(
         'qiniu_upload_file',
         function(token, key, filename, content, callback)
+            local QiniuRootApi = NPL.load("(gl)Mod/WorldShare/api/Qiniu/Root.lua")
             QiniuRootApi:Upload(token, key, filename, content, callback, callback)
         end
     )
@@ -693,7 +684,6 @@ function WorldShare:OnWorldLoad()
     Store:Set('world/loadWorldFinish', true)
 
     UserConsole:ClosePage()
-    HistoryManager:OnWorldLoad()
 
     local curLesson = Store:Getter('lesson/GetCurLesson')
 
@@ -701,6 +691,9 @@ function WorldShare:OnWorldLoad()
     if not curLesson then
         SyncMain:OnWorldLoad()
     end
+
+    HistoryManager:OnWorldLoad()
+    Certificate:OnWorldLoad()
 
     Store:Subscribe('user/Logout', function()
         Compare:RefreshWorldList(function()

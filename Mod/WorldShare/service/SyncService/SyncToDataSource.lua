@@ -127,6 +127,8 @@ function SyncToDataSource:IsProjectExist(callback)
         return false
     end
 
+    echo(self.currentWorld, true)
+
     KeepworkServiceWorld:GetWorld(
         self.currentWorld.foldername,
         self.currentWorld.shared,

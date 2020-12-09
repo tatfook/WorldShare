@@ -128,17 +128,32 @@ function DataUpgrade:ExecuteList(step, callback)
         step = 1
     end
 
-    if not self.checkList[step] or not self[self.checkList[step]] then
-        if callback and type(callback) == 'function' then
-            callback()
-        end
-        return
-    end
+    local execFinished = false
+    local timer = commonlib.Timer:new(
+        {
+            callbackFunc = function(timer)
+                if not execFinished then
+                    execFinished = true
 
-    self[self.checkList[step]](self, function()
-        step = step + 1
-        self:ExecuteList(step, callback)
-    end)
+                    if not self.checkList[step] or not self[self.checkList[step]] then
+                        timer:Change(nil, nil)
+
+                        if callback and type(callback) == 'function' then
+                            callback()
+                        end
+                        return
+                    end
+
+                    self[self.checkList[step]](self, function()
+                        step = step + 1
+                        execFinished = false
+                    end)
+                end
+            end
+        }
+    )
+
+    timer:Change(0, 200)
 end
 
 function DataUpgrade:CheckNetwork(callback)
@@ -209,16 +224,6 @@ function DataUpgrade:BackupAllWorlds(backUpCallback)
         local currentWorldFiles = {}
 
         local function CopyFile()
-            -- copy file
-
-            if not currentWorldFiles[copyIndex] then
-                if callback and type(callback) == 'function' then
-                    callback()
-                end
-
-                return
-            end
-
             local copyFile = currentWorldFiles[copyIndex]
 
             if copyFile and copyFile.src and copyFile.dest then
@@ -230,11 +235,6 @@ function DataUpgrade:BackupAllWorlds(backUpCallback)
                 )
                 self:Refresh()
             end
-
-            Mod.WorldShare.Utils.SetTimeOut(function()
-                copyIndex = copyIndex + 1
-                CopyFile()
-            end, 20)
         end
 
         local function FindAllCurrentWorldFiles(path, destPath)
@@ -266,51 +266,101 @@ function DataUpgrade:BackupAllWorlds(backUpCallback)
 
         ParaIO.CreateDirectory(destPath)
         FindAllCurrentWorldFiles(path, destPath)
-        CopyFile()
+
+        local timer = commonlib.Timer:new(
+            {
+                callbackFunc = function(timer)
+                    if not currentWorldFiles[copyIndex] then
+                        timer:Change(nil, nil)
+
+                        if callback and type(callback) == 'function' then
+                            callback()
+                        end
+
+                        return
+                    end
+
+                    CopyFile()
+                    copyIndex = copyIndex + 1
+                end
+            }
+        )
+
+        timer:Change(0, 20)
     end
 
     -- copy mine worlds
     local mineWorldsIndex = 1
     local function CopyMineWorlds(callback)
-        local filename = mineWorlds[mineWorldsIndex]
+        local execFinished = false
+        local timer = commonlib.Timer:new(
+            {
+                callbackFunc = function(timer)
+                    if not execFinished then
+                        execFinished = true
 
-        if not filename then
-            if callback and type(callback) == 'function' then
-                callback()
-            end
-            return
-        end
+                        local filename = mineWorlds[mineWorldsIndex]
 
-        CopyWorld(
-            'worlds/DesignHouse/' .. filename,
-            'temp/backup_worlds/' .. filename,
-            function()
-                mineWorldsIndex = mineWorldsIndex + 1
-                CopyMineWorlds(callback)
-            end
+                        if not filename then
+                            timer:Change(nil, nil)
+
+                            if callback and type(callback) == 'function' then
+                                callback()
+                            end
+                            return
+                        end
+
+                        CopyWorld(
+                            'worlds/DesignHouse/' .. filename,
+                            'temp/backup_worlds/' .. filename,
+                            function()
+                                mineWorldsIndex = mineWorldsIndex + 1
+                                execFinished = false
+                            end
+                        )
+                    end
+                end
+            }
         )
+
+        timer:Change(0, 200)
     end
 
     -- copy shared worlds
     local sharedWorldsIndex = 1
     local function CopySharedWorlds(callback)
-        local filename = sharedWorlds[sharedWorldsIndex]
+        local execFinished = false
+        local timer = commonlib.Timer:new(
+            {
+                callbackFunc = function(timer)
+                    if not execFinished then
+                        execFinished = true
 
-        if not filename then
-            if callback and type(callback) == 'function' then
-                callback()
-            end
-            return
-        end
+                        local filename = sharedWorlds[sharedWorldsIndex]
 
-        CopyWorld(
-            'worlds/DesignHouse/_shared/' .. filename,
-            'temp/backup_worlds/_shared/' .. filename,
-            function()
-                sharedWorldsIndex = sharedWorldsIndex + 1
-                CopySharedWorlds(callback)
-            end
+                        if not filename then
+                            timer:Change(nil, nil)
+
+                            if callback and type(callback) == 'function' then
+                                callback()
+                            end
+                            return
+                        end
+
+                        CopyWorld(
+                            'worlds/DesignHouse/_shared/' .. filename,
+                            'temp/backup_worlds/_shared/' .. filename,
+                            function()
+                                sharedWorldsIndex = sharedWorldsIndex + 1
+                                execFinished = false
+                            end
+                        )
+                    end
+                end
+            }
         )
+
+        timer:Change(0, 200)
     end
 
     ParaIO.CreateDirectory('temp/backup_worlds/')
@@ -368,6 +418,7 @@ function DataUpgrade:RenameAllWorlds(callback)
         local currentWorldFiles = {}
         local isShared = false
         local newFilename = ''
+        local moveFileIndex = 1
 
         if root == 'worlds/DesignHouse/_shared/' then
             isShared = true
@@ -385,14 +436,10 @@ function DataUpgrade:RenameAllWorlds(callback)
             return
         end
 
-        local moveFileIndex = 1
-        local function MoveFile()
+        local function MoveFile(finishFun)
             local currentFile = currentWorldFiles[moveFileIndex]
 
             if not currentFile then
-                if callback and type(callback) == 'function' then
-                    callback()
-                end
                 return
             end
 
@@ -425,10 +472,11 @@ function DataUpgrade:RenameAllWorlds(callback)
                     if not oldProjectData or type(oldProjectData) ~= 'table' or not oldProjectData.username or not oldProjectData.userId then
                         LocalService:SetTag(newWorldpath, tag)
 
-                        Mod.WorldShare.Utils.SetTimeOut(function()
-                            moveFileIndex = moveFileIndex + 1
-                            MoveFile()
-                        end, 10)
+                        moveFileIndex = moveFileIndex + 1
+                        if finishFun and type(finishFun) == 'function' then
+                            finishFun()
+                        end
+
                         return
                     end
 
@@ -437,26 +485,26 @@ function DataUpgrade:RenameAllWorlds(callback)
 
                     LocalService:SetTag(newWorldpath, tag)
 
-                    Mod.WorldShare.Utils.SetTimeOut(function()
-                        moveFileIndex = moveFileIndex + 1
-                        MoveFile()
-                    end, 10)
+                    moveFileIndex = moveFileIndex + 1
+                    if finishFun and type(finishFun) == 'function' then
+                        finishFun()
+                    end
                 else
                     LocalService:SetTag(newWorldpath, tag)
 
-                    Mod.WorldShare.Utils.SetTimeOut(function()
-                        moveFileIndex = moveFileIndex + 1
-                        MoveFile()
-                    end, 10)
+                    moveFileIndex = moveFileIndex + 1
+                    if finishFun and type(finishFun) == 'function' then
+                        finishFun()
+                    end
                 end
 
                 return
             end
 
-            Mod.WorldShare.Utils.SetTimeOut(function()
-                moveFileIndex = moveFileIndex + 1
-                MoveFile()
-            end, 10)
+            moveFileIndex = moveFileIndex + 1
+            if finishFun and type(finishFun) == 'function' then
+                finishFun()
+            end
         end
 
         local function FindAllCurrentWorldFiles(path, destPath)
@@ -480,6 +528,30 @@ function DataUpgrade:RenameAllWorlds(callback)
             end
         end
 
+        local execFinished = false
+        local timer = commonlib.Timer:new(
+            {
+                callbackFunc = function(timer)
+                    if not execFinished then
+                        execFinished = true
+
+                        local currentFile = currentWorldFiles[moveFileIndex]
+
+                        if not currentFile then
+                            if callback and type(callback) == 'function' then
+                                callback()
+                            end
+                            return
+                        end
+
+                        MoveFile(function()
+                            execFinished = false
+                        end)
+                    end
+                end
+            }
+        )
+
         if oldTag and type(oldTag) == 'table' and oldTag.kpProjectId then
             -- get uuid from api if world has project id.
             KeepworkServiceProject:GetProject(oldTag.kpProjectId, function(data, err)
@@ -492,8 +564,8 @@ function DataUpgrade:RenameAllWorlds(callback)
                         root .. filename .. '/',
                         root .. newFilename .. '/'
                     )
-                    MoveFile()
 
+                    timer:Change(0, 10)
                     return
                 end
 
@@ -506,7 +578,8 @@ function DataUpgrade:RenameAllWorlds(callback)
                     root .. filename .. '/',
                     root .. newFilename .. '/'
                 )
-                MoveFile()
+
+                timer:Change(0, 10)
             end)
         else
             newFilename = filename .. '_' .. System.Encoding.guid.uuid()
@@ -517,52 +590,83 @@ function DataUpgrade:RenameAllWorlds(callback)
                 root .. filename .. '/',
                 root .. newFilename .. '/'
             )
-            MoveFile()
+
+            timer:Change(0, 10)
         end
     end
 
     -- move mine worlds
     local mineWorldsIndex = 1
     local function MoveMineWorlds(callback)
-        local filename = mineWorlds[mineWorldsIndex]
-    
-        if not filename then
-            if callback and type(callback) == 'function' then
-                callback()
-            end
-            return
-        end
+        local execFinished = false
+        local timer = commonlib.Timer:new(
+            {
+                callbackFunc = function(timer)
+                    if not execFinished then
+                        execFinished = true
 
-        MoveWorld(
-            'worlds/DesignHouse/',
-            filename,
-            function()
-                mineWorldsIndex = mineWorldsIndex + 1
-                MoveMineWorlds(callback)
-            end
+                        local filename = mineWorlds[mineWorldsIndex]
+
+                        if not filename then
+                            timer:Change(nil, nil)
+
+                            if callback and type(callback) == 'function' then
+                                callback()
+                            end
+                            return
+                        end
+
+                        MoveWorld(
+                            'worlds/DesignHouse/',
+                            filename,
+                            function()
+                                mineWorldsIndex = mineWorldsIndex + 1
+                                execFinished = false
+                            end
+                        )
+                    end
+                end
+            }
         )
+
+        timer:Change(0, 200)
     end
 
     -- move shared worlds
     local sharedWorldsIndex = 1
     local function MoveSharedWorlds(callback)
-        local filename = sharedWorlds[sharedWorldsIndex]
+        local execFinished = false
+        local timer = commonlib.Timer:new(
+            {
+                callbackFunc = function(timer)
+                    if not execFinished then
+                        execFinished = true
 
-        if not filename then
-            if callback and type(callback) == 'function' then
-                callback()
-            end
-            return
-        end
+                        local filename = sharedWorlds[sharedWorldsIndex]
 
-        MoveWorld(
-            'worlds/DesignHouse/_shared/',
-            filename,
-            function()
-                sharedWorldsIndex = sharedWorldsIndex + 1
-                MoveSharedWorlds(callback)
-            end
+                        if not filename then
+                            timer:Change(nil, nil)
+
+                            if callback and type(callback) == 'function' then
+                                callback()
+                            end
+                            return
+                        end
+
+                        MoveWorld(
+                            'worlds/DesignHouse/_shared/',
+                            filename,
+                            function()
+                                sharedWorldsIndex = sharedWorldsIndex + 1
+                                MoveSharedWorlds(callback)
+                            end
+                        )
+                    end
+                end
+            }
         )
+
+        timer:Change(0, 200)
     end
 
     MoveMineWorlds(function()
