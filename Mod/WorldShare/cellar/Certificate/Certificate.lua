@@ -21,6 +21,12 @@ Certificate.certificateCallback = nil
 Certificate.inited = false
 
 function Certificate:OnWorldLoad()
+    local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
+
+    if currentEnterWorld.kpProjectId and currentEnterWorld.kpProjectId == '29477' then
+        return
+    end
+
     if not KeepworkServiceSession:IsSignedIn() then
         return
     end

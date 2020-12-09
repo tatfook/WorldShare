@@ -669,8 +669,6 @@ function WorldShare:OnWorldLoad()
     Store:Set('world/loadWorldFinish', true)
 
     UserConsole:ClosePage()
-    HistoryManager:OnWorldLoad()
-    Certificate:OnWorldLoad()
 
     local curLesson = Store:Getter('lesson/GetCurLesson')
 
@@ -678,6 +676,9 @@ function WorldShare:OnWorldLoad()
     if not curLesson then
         SyncMain:OnWorldLoad()
     end
+
+    HistoryManager:OnWorldLoad()
+    Certificate:OnWorldLoad()
 
     Store:Subscribe('user/Logout', function()
         Compare:RefreshWorldList(function()
