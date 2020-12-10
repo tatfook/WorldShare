@@ -621,6 +621,14 @@ function WorldShare:init()
         end
     )
 
+    -- filter show certificate icon
+    GameLogic.GetFilters():add_filter(
+        'show_certificate',
+        function(callback)
+            Certificate:Init(callback)
+        end
+    )
+
     -- send udp online msg
     SocketService:StartUDPService()
 
@@ -679,7 +687,7 @@ function WorldShare:OnWorldLoad()
     end
 
     HistoryManager:OnWorldLoad()
-    Certificate:OnWorldLoad()
+    -- Certificate:OnWorldLoad()
 
     Store:Subscribe('user/Logout', function()
         Compare:RefreshWorldList(function()
