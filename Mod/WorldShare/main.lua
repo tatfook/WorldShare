@@ -55,6 +55,7 @@ NPL.load('(gl)script/apps/Aries/Creator/Game/Login/RemoteServerList.lua')
 NPL.load('(gl)script/apps/Aries/Creator/Game/Login/DownloadWorld.lua')
 NPL.load('(gl)script/apps/Aries/Creator/Game/Login/RemoteWorld.lua')
 NPL.load('(gl)script/apps/Aries/Creator/Game/Login/TeacherAgent/TeacherAgent.lua')
+NPL.load("(gl)script/apps/Aries/Creator/Game/Login/TeacherAgent/TeacherIcon.lua")
 
 -- include aries creator game areas
 NPL.load('(gl)script/apps/Aries/Creator/Game/Areas/ShareWorldPage.lua')
