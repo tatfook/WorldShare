@@ -10,7 +10,8 @@ local Certificate = NPL.load("(gl)Mod/WorldShare/cellar/Certificate/Certificate.
 ]]
 
 -- libs
-local TeacherAgent = commonlib.gettable("MyCompany.Aries.Creator.Game.Teacher.TeacherAgent");
+local TeacherAgent = commonlib.gettable("MyCompany.Aries.Creator.Game.Teacher.TeacherAgent")
+local TeacherIcon = commonlib.gettable("MyCompany.Aries.Creator.Game.Teacher.TeacherIcon")
 
 -- service
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
@@ -21,6 +22,16 @@ Certificate.certificateCallback = nil
 Certificate.inited = false
 
 function Certificate:OnWorldLoad()
+    local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
+
+    if currentEnterWorld.kpProjectId and currentEnterWorld.kpProjectId == '29477' then
+        return
+    end
+
+    if not KeepworkServiceSession:IsSignedIn() then
+        return
+    end
+
     if not KeepworkServiceSession:IsRealName() then
         if not self.inited then
             self.inited = true
@@ -34,6 +45,7 @@ function Certificate:OnWorldLoad()
                 end)
             end)
             TeacherAgent:SetEnabled(true)
+            TeacherIcon.SetBouncing(true)
         else
             TeacherAgent:ShowIcon(true)
         end
@@ -61,7 +73,7 @@ end
 function Certificate:ShowCertificatePage()
     local params = Mod.WorldShare.Utils.ShowWindow(
         800,
-        450,
+        400,
         '(ws)Certificate',
         'Mod.WorldShare.Certificate'
     )
@@ -74,8 +86,8 @@ end
 
 function Certificate:ShowCertificateTypePage()
     local params = Mod.WorldShare.Utils.ShowWindow(
-        700,
-        480,
+        605,
+        410,
         '(ws)Certificate/CertificateType.html',
         'Mod.WorldShare.Certificate.CertificateType'
     )
@@ -99,7 +111,6 @@ function Certificate:ShowSchoolPage()
         params._page.Confirm = function(cellphone, realname)
             KeepworkServiceSession:TextingToInviteRealname(cellphone, realname, function(data, err)
                 if err ~= 200 then
-                    GameLogic.AddBBS(nil, L'发送短信失败，请稍后再试', 3000, '255 0 0')
                     return
                 end
                 params._page:CloseWindow()
@@ -141,7 +152,7 @@ end
 function Certificate:ShowSuccessPage()
     local params = Mod.WorldShare.Utils.ShowWindow(
         700,
-        480,
+        360,
         '(ws)Certificate/Success.html',
         'Mod.WorldShare.Certificate.Success'
     )

@@ -12,6 +12,7 @@
                 end
 
                 function sel_school()
+                    GameLogic.GetFilters():apply_filters("user_behavior", 1, "click.world.certificate.sel_school")
                     if page.SelSchool then
                         page.SelSchool()
                         page:CloseWindow()
@@ -19,6 +20,7 @@
                 end
 
                 function sel_my_home()
+                    GameLogic.GetFilters():apply_filters("user_behavior", 1, "click.world.certificate.sel_my_home")
                     if page.SelMyHome then
                         page.SelMyHome()
                         page:CloseWindow()
@@ -32,11 +34,9 @@
             <kp:window width="605" height="410" onclose="close()">
                 <div class="theme1_header"></div>
                 <div style="padding: 10px;">
-                    <div style="float: left;background: url(Texture/Aries/Creator/keepwork/paracraft_guide_32bits.png#656 30 295 348);width: 295px;height: 348px;">
-                        <input type="button" class="theme1_green_button" style="font-size: 20px;base-font-size: 20px;width: 180px;height: 50px;margin-top: 290px;margin-left: 60px;" value="<%= L'我在学校' %>" onclick="sel_school()" />
+                    <div style="float: left;background: url(Texture/Aries/Creator/keepwork/paracraft_guide_32bits.png#656 30 296 353);width: 295px;height: 348px;" onclick="sel_school()">
                     </div>
-                    <div style="float: left;background: url(Texture/Aries/Creator/keepwork/paracraft_guide_32bits.png#656 388 295 348);width: 290px;height: 348px;">
-                        <input type="button" class="theme1_orange_button" style="font-size: 20px;base-font-size: 20px;width: 180px;height: 50px;margin-top: 290px;margin-left: 60px;" value="<%= L'我在家里' %>" onclick="sel_my_home()" />
+                    <div style="float: left;background: url(Texture/Aries/Creator/keepwork/paracraft_guide_32bits.png#656 398 296 353);width: 290px;height: 348px;" onclick="sel_my_home()">
                     </div>
                 </div>
             </kp:window>

@@ -24,6 +24,10 @@ local EventGatewayEventsApi = NPL.export()
 ]]
 -- return: object
 function EventGatewayEventsApi:Send(category, action, data, extra, success, error)
+    if not category or not action or not data then
+        return
+    end
+
     local params = {
         category = category,
         action = action,

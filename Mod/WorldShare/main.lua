@@ -55,6 +55,7 @@ NPL.load('(gl)script/apps/Aries/Creator/Game/Login/RemoteServerList.lua')
 NPL.load('(gl)script/apps/Aries/Creator/Game/Login/DownloadWorld.lua')
 NPL.load('(gl)script/apps/Aries/Creator/Game/Login/RemoteWorld.lua')
 NPL.load('(gl)script/apps/Aries/Creator/Game/Login/TeacherAgent/TeacherAgent.lua')
+NPL.load("(gl)script/apps/Aries/Creator/Game/Login/TeacherAgent/TeacherIcon.lua")
 
 -- include aries creator game areas
 NPL.load('(gl)script/apps/Aries/Creator/Game/Areas/ShareWorldPage.lua')
@@ -457,6 +458,7 @@ function WorldShare:init()
     GameLogic.GetFilters():add_filter(
         'qiniu_upload_file',
         function(token, key, filename, content, callback)
+            local QiniuRootApi = NPL.load("(gl)Mod/WorldShare/api/Qiniu/Root.lua")
             QiniuRootApi:Upload(token, key, filename, content, callback, callback)
         end
     )
@@ -668,8 +670,6 @@ function WorldShare:OnWorldLoad()
     Store:Set('world/loadWorldFinish', true)
 
     UserConsole:ClosePage()
-    HistoryManager:OnWorldLoad()
-    Certificate:OnWorldLoad()
 
     local curLesson = Store:Getter('lesson/GetCurLesson')
 
@@ -677,6 +677,9 @@ function WorldShare:OnWorldLoad()
     if not curLesson then
         SyncMain:OnWorldLoad()
     end
+
+    HistoryManager:OnWorldLoad()
+    Certificate:OnWorldLoad()
 
     Store:Subscribe('user/Logout', function()
         Compare:RefreshWorldList(function()
