@@ -12,6 +12,7 @@
                 end
 
                 function sel_school()
+                    GameLogic.GetFilters():apply_filters("user_behavior", 1, "click.world.certificate.sel_school")
                     if page.SelSchool then
                         page.SelSchool()
                         page:CloseWindow()
@@ -19,6 +20,7 @@
                 end
 
                 function sel_my_home()
+                    GameLogic.GetFilters():apply_filters("user_behavior", 1, "click.world.certificate.sel_my_home")
                     if page.SelMyHome then
                         page.SelMyHome()
                         page:CloseWindow()

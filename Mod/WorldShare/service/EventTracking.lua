@@ -89,6 +89,14 @@ EventTrackingService.map = {
             actor = {
                 addNPC = 'click.world.actor.addNPC', -- 添加NPC
                 edit = 'click.world.actor.edit', -- 编辑角色
+            },
+            certificate = {
+                certificate_now = 'click.world.certificate.certificate_now', -- 我要认证
+                sel_school = 'click.world.certificate.sel_school', -- 我在学校
+                sel_my_home = 'click.world.certificate.sel_my_home', -- 我在家里
+                get_phone_captcha = 'click.world.certificate.get_phone_captcha', -- 我在家里-获取验证码
+                bind = 'click.world.certificate.bind', -- 我在家里-确认实名
+                send_msg_to_parent = 'click.world.certificate.send_msg_to_parent', -- 发送短信给父母
             }
         },
         mini_map = { -- 小地图
@@ -203,6 +211,10 @@ EventTrackingService.map = {
             continue_game = "click.system_setting.continue_game", -- 继续创作
             create_new_world = "click.system_setting.create_new_world", -- 新建世界
             open_server_page = "click.system_setting.open_server_page", -- 架设私服
+        },
+        quest_action = { -- 任务系统
+            setvalue = 'click.quest_action.setvalue', -- 设置任务虚拟目标进度
+            do_finish = 'click.quest_action.do_finish', -- 执行完成任务
         }
     }
 }

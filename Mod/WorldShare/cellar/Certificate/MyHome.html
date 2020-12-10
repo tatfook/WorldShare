@@ -19,9 +19,12 @@
                         page.certificateCallback(false)
                     end
                     page:CloseWindow()
+                    page.closed = true
                 end
 
                 function bind()
+                    GameLogic.GetFilters():apply_filters("user_behavior", 1, "click.world.certificate.bind")
+
                     local phonenumber = page:GetValue("phonenumber")
                     local phonecaptcha = page:GetValue("phonecaptcha")
 
@@ -67,6 +70,8 @@
                 end
 
                 function get_phone_captcha()
+                    GameLogic.GetFilters():apply_filters("user_behavior", 1, "click.world.certificate.get_phone_captcha")
+
                     if not Validated:Phone(page:GetValue("phonenumber")) then
                         GameLogic.AddBBS(nil, L"手机格式错误", 3000, "255 0 0")
                         return false
@@ -121,6 +126,9 @@
                             end
                         else
                             Mod.WorldShare.Utils.SetTimeOut(function()
+                                if page.closed then
+                                    return
+                                end
                                 checkRealName()
                             end, 1000)
                         end
