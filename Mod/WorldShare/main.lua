@@ -119,6 +119,9 @@ local Utils = NPL.load('(gl)Mod/WorldShare/helper/Utils.lua')
 local WorldShareCommand = NPL.load('(gl)Mod/WorldShare/command/Command.lua')
 local MenuCommand = NPL.load('(gl)Mod/WorldShare/command/Menu.lua')
 
+-- filters
+local Filters = NPL.load('(gl)Mod/WorldShare/filters/Filters.lua')
+
 local WorldShare = commonlib.inherit(commonlib.gettable('Mod.ModBase'), commonlib.gettable('Mod.WorldShare'))
 
 WorldShare:Property({'Name', 'WorldShare', 'GetName', 'SetName', { auto = true }})
@@ -137,6 +140,9 @@ WorldShare.Utils = Utils
 LOG.std(nil, 'info', 'WorldShare', 'world share version %s', WorldShare.version)
 
 function WorldShare:init()
+    -- init all filters
+    Filters:Init()
+
     -- replace load world page
     GameLogic.GetFilters():add_filter(
         'ShowLoginModePage',
