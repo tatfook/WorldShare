@@ -89,6 +89,7 @@ function EventTrackingDatabase:SaveAllData(allData)
 end
 
 function EventTrackingDatabase:SaveToDisk()
+    local playerController = GameLogic.GetPlayerController()
     return playerController:SaveLocalData("event_tracking", self.tempAllData, true)
 end
 
