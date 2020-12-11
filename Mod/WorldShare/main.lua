@@ -411,6 +411,8 @@ function WorldShare:init()
     GameLogic.GetFilters():add_filter(
         'on_exit',
         function(bForceExit, bRestart, callback)
+            EventTrackingDatabase:SaveToDisk()
+
             if callback and type(callback) == 'function' then
                 callback()
             end
