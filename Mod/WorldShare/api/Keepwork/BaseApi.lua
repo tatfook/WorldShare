@@ -93,15 +93,5 @@ end
 
 -- public
 function KeepworkBaseApi:ErrorCollect(method, fullUrl, url, error)
-    local GoogleAnalytics = NPL.load("GoogleAnalytics")
-    local Logger = GoogleAnalytics.LogCollector:new():init()
-
-    return function(data, err)
-        -- send directly
-        Logger:collect("worldshare_api_error", "API: " .. method .. " " .. url, format("httpstatus: %d, url: %s, content: %s", err, fullUrl, NPL.ToJson(data, true)))
-
-        if type(error) == 'function' then
-            error(data, err)
-        end
-    end
+    return BaseApi:Logger(method, fullUrl, url, error)
 end
