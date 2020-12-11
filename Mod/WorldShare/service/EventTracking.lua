@@ -308,6 +308,10 @@ function EventTrackingService:GetAction(action)
     end
 end
 
+function EventTrackingService:SaveToDisk()
+    EventTrackingDatabase:SaveToDisk()
+end
+
 -- eventType: 1 is one click event, 2 is duration event
 function EventTrackingService:Send(eventType, action, extra, offlineMode)
     if not offlineMode and not KeepworkServiceSession:IsSignedIn() then
