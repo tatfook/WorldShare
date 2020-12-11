@@ -39,11 +39,12 @@
                     end
 
                     -- only classification
+                    Mod.WorldShare.MsgBox:Show(L'请稍候...')
                     RegisterModal:Classification(phonenumber, phonecaptcha, function()
-                        if page and page.Success then
-                            page.Success()
-                        end
-                        page:CloseWindow()
+                        -- if page and page.Success then
+                        --    page.Success()
+                        -- end
+                        -- page:CloseWindow()
                     end)
                 end
 
@@ -122,6 +123,7 @@
                                 if page and page.Success then
                                     page.Success()
                                 end
+                                Mod.WorldShare.MsgBox:Close()
                                 page:CloseWindow()
                             end
                         else
