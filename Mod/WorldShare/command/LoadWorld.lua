@@ -98,10 +98,16 @@ function LoadWorldCommand:Init()
                 refreshMode = 'force'
             end
 
+            local failed = nil
+
+            if options and options.failed then
+                failed = true
+            end
+
             local pid = UserConsole:GetProjectId(cmd_text)
 
             if pid then
-                UserConsole:HandleWorldId(pid, refreshMode)
+                UserConsole:HandleWorldId(pid, refreshMode, failed)
                 return false
             else
                 return cmd_text

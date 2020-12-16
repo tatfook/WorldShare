@@ -191,7 +191,7 @@ function KeepworkServiceProject:RemoveProject(kpProjectId, callback)
         return false
     end
 
-    KeepworkProjectsApi:RemoveProject(tonumber(kpProjectId), callback)
+    KeepworkProjectsApi:RemoveProject(tonumber(kpProjectId), callback, callback)
 end
 
 function KeepworkServiceProject:GenerateMiniProgramCode(projectId, callback)

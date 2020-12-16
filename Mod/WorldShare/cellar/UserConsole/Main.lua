@@ -32,6 +32,7 @@ local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkServ
 local KeepworkServiceProject = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Project.lua")
 local KeepworkServiceWorld = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/World.lua")
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
+local LocalServiceWorld = NPL.load("(gl)Mod/WorldShare/service/LocalService/LocalServiceWorld.lua")
 local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
 local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
 
@@ -206,7 +207,7 @@ function UserConsole:GetProjectId(url)
     return pid or false
 end
 
-function UserConsole:HandleWorldId(pid, refreshMode)
+function UserConsole:HandleWorldId(pid, refreshMode, failed)
     if not pid then
         return false
     end
@@ -444,6 +445,17 @@ function UserConsole:HandleWorldId(pid, refreshMode)
 
             if err == 404 then
                 GameLogic.AddBBS(nil, L"未找到对应内容", 3000, "255 0 0")
+
+                if failed then
+                    _guihelper.MessageBox(
+                        L'未能成功进入该地图，将帮您传送到【创意空间】。 ',
+                        function()
+                            local mainWorldProjectId = LocalServiceWorld:GetMainWorldProjectId()
+                            self:HandleWorldId(mainWorldProjectId, true)
+                        end,
+                        _guihelper.MessageBoxButtons.OK
+                    )
+                end
                 return false
             end
 

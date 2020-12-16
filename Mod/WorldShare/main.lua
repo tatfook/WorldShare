@@ -56,6 +56,7 @@ NPL.load('(gl)script/apps/Aries/Creator/Game/Login/DownloadWorld.lua')
 NPL.load('(gl)script/apps/Aries/Creator/Game/Login/RemoteWorld.lua')
 NPL.load('(gl)script/apps/Aries/Creator/Game/Login/TeacherAgent/TeacherAgent.lua')
 NPL.load("(gl)script/apps/Aries/Creator/Game/Login/TeacherAgent/TeacherIcon.lua")
+NPL.load('(gl)script/apps/Aries/Creator/Game/Login/ParaWorldLessons.lua')
 
 -- include aries creator game areas
 NPL.load('(gl)script/apps/Aries/Creator/Game/Areas/ShareWorldPage.lua')
@@ -68,8 +69,8 @@ NPL.load('(gl)script/apps/Aries/Creator/Game/Network/NetworkMain.lua')
 -- include aries creator game world
 NPL.load('(gl)script/apps/Aries/Creator/Game/World/SaveWorldHandler.lua')
 
--- include aries creator game login
-NPL.load('(gl)script/apps/Aries/Creator/Game/Login/ParaWorldLessons.lua')
+-- include aries creator game tasks
+NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/ParaWorld/ParaWorldLoginAdapter.lua");
 
 -- include aries creator game nplbrowser
 NPL.load('(gl)script/apps/Aries/Creator/Game/NplBrowser/NplBrowserLoaderPage.lua')

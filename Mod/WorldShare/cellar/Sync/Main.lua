@@ -20,7 +20,7 @@ local Permission = NPL.load("(gl)Mod/WorldShare/cellar/Permission/Permission.lua
 -- service
 local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
-local LocalServiceWorld = NPL.load("(gl)Mod/WorldShare/service/LocalService/World.lua")
+local LocalServiceWorld = NPL.load("(gl)Mod/WorldShare/service/LocalService/LocalServiceWorld.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 local SyncToLocal = NPL.load("(gl)Mod/WorldShare/service/SyncService/SyncToLocal.lua")
 local SyncToDataSource = NPL.load("(gl)Mod/WorldShare/service/SyncService/SyncToDataSource.lua")
