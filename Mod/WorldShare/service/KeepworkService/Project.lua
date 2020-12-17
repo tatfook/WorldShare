@@ -16,6 +16,7 @@ local KeepworkService = NPL.load("../KeepworkService.lua")
 
 -- api
 local KeepworkProjectsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Projects.lua")
+local KeepworkProjectStarApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/ProjectStar.lua")
 local KeepworkWorldsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Worlds.lua")
 local KeepworkMembersApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Members.lua")
 local KeepworkAppliesApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Applies.lua")
@@ -213,4 +214,9 @@ function KeepworkServiceProject:GenerateMiniProgramCode(projectId, callback)
             callback(false)
         end
     )
+end
+
+-- get favorited projects
+function KeepworkServiceProject:GetFavoritedProjects(projectIds, callback)
+    KeepworkProjectStarApi:Search(projectIds, callback, callback)
 end
