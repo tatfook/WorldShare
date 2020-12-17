@@ -524,16 +524,6 @@ function WorldShare:init()
         end
     )
 
-    -- filter show school page
-    GameLogic.GetFilters():add_filter(
-        'show_school_page',
-        function()
-            local MySchool = NPL.load("(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua")
-            MySchool:Show()
-            return Mod.WorldShare.Store:Get('page/Mod.WorldShare.MySchool')
-        end
-    )
-
     -- filter show server page
     GameLogic.GetFilters():add_filter(
         'show_server_page',
