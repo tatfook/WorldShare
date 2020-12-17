@@ -453,7 +453,7 @@ function UserConsole:HandleWorldId(pid, refreshMode, failed)
                             local mainWorldProjectId = LocalServiceWorld:GetMainWorldProjectId()
                             self:HandleWorldId(mainWorldProjectId, true)
                         end,
-                        _guihelper.MessageBoxButtons.OK
+                        _guihelper.MessageBoxButtons.OK_CustomLabel
                     )
                 end
                 return false
@@ -542,6 +542,17 @@ function UserConsole:HandleWorldId(pid, refreshMode, failed)
                     CacheProjectId:SetProjectIdInfo(pid, data.world)
                 else
                     GameLogic.AddBBS(nil, L"未找到对应内容", 3000, "255 0 0")
+                    
+                    if failed then
+                        _guihelper.MessageBox(
+                            L'未能成功进入该地图，将帮您传送到【创意空间】。 ',
+                            function()
+                                local mainWorldProjectId = LocalServiceWorld:GetMainWorldProjectId()
+                                self:HandleWorldId(mainWorldProjectId, true)
+                            end,
+                            _guihelper.MessageBoxButtons.OK_CustomLabel
+                        )
+                    end
                 end
             end
         end
