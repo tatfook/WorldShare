@@ -20,6 +20,7 @@ function MySchoolFilter:Init()
         'cellar.my_school.after_selected_school',
         function(callback)
             MySchool:Show(callback)
+            return Mod.WorldShare.Store:Get('page/Mod.WorldShare.MySchool')
         end
     )
 end
