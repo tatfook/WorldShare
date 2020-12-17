@@ -407,7 +407,7 @@
                         </div>
                         <div style="margin-bottom:12px;">
                             <div style="<%='float:left;min-width:65px;' .. get_english_style('min-width:80px;') %>"><%= L"密码：" %></div>
-                            <input type="text" PasswordChar="*" class="bbs_text text_field" EmptyText='<%= L"请输入密码" %>' style="height: 30px;" name="password" />
+                            <input type="text" PasswordChar="*" SkipAutoBadWordFilter="true" class="bbs_text text_field" EmptyText='<%= L"请输入密码" %>' style="height: 30px;" name="password" />
                             <input name="checkboxPassword" type="checkbox" checked="false" iconsize="22" style="position: relative;margin-left: -25px;margin-top: 5px;" CheckedBG="Texture/Aries/Common/Teen/map/players_shown_32bits.png;0 0 22 22" UncheckedBG="Texture/Aries/Common/Teen/map/players_hidden_32bits.png;0 0 22 22" onclick="set_show_password"/>
                         </div>
                         <div style="margin-bottom:12px;">
