@@ -11,11 +11,15 @@ Filters:Init()
 ]]
 
 -- load all filters
-local Session = NPL.load('./service/KeepworkService/Session.lua')
+local SessionFilter = NPL.load('./service/KeepworkService/SessionFilter.lua')
+local MySchoolFilter = NPL.load('./cellar/MySchool/MySchoolFilter.lua')
 
 local Filters = NPL.export()
 
 function Filters:Init()
     -- init session filter
-    Session:Init()
+    SessionFilter:Init()
+
+    -- init myschool filter
+    MySchoolFilter:Init()
 end
