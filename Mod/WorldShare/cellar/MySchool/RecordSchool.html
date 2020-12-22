@@ -123,7 +123,7 @@
                             <select name="kind" DataSource="<%= get_kinds() %>" style="margin-left: 10px;width:88px;height: 26px;" onselect="select_kind"></select>
                         </div>
                         <div style="margin-bottom: 10px;">
-                            <input type="text" name="schoolname" class="bbs_text" style="width: 380px;height: 26px;" EmptyText="<%= L'请输入学校全名' %>"/>
+                            <input type="text" name="schoolname" SkipAutoBadWordFilter="true" class="bbs_text" style="width: 380px;height: 26px;" EmptyText="<%= L'请输入学校全名' %>"/>
                         </div>
                         <div style="width: 380px;">
                             <%= L'*管理员人工审核后将会尽快将您的学校添加到列表，请稍候再试。' %>

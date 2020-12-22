@@ -5,13 +5,14 @@ Date:  2020.2.12
 Place: Foshan
 use the lib:
 ------------------------------------------------------------
-local LocalServiceWorld = NPL.load("(gl)Mod/WorldShare/service/LocalService/World.lua")
+local LocalServiceWorld = NPL.load("(gl)Mod/WorldShare/service/LocalService/LocalServiceWorld.lua")
 ------------------------------------------------------------
 ]]
 
 -- service
-local LocalService = NPL.load("../LocalService")
-local KeepworkServiceSession = NPL.load("../KeepworkService/Session.lua")
+local LocalService = NPL.load('../LocalService.lua')
+local KeepworkService = NPL.load('../KeepworkService.lua')
+local KeepworkServiceSession = NPL.load('../KeepworkService/Session.lua')
 
 -- libs
 local LocalLoadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalLoadWorld")
@@ -20,6 +21,7 @@ local SaveWorldHandler = commonlib.gettable("MyCompany.Aries.Game.SaveWorldHandl
 local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
 local RemoteServerList = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.RemoteServerList")
 local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
+local ParaWorldLoginAdapter = commonlib.gettable("MyCompany.Aries.Game.Tasks.ParaWorld.ParaWorldLoginAdapter")
 
 local LocalServiceWorld = NPL.export()
 
@@ -319,4 +321,18 @@ function LocalServiceWorld:SetWorldInstanceByFoldername(foldername)
     Mod.WorldShare.Store:Set('world/currentWorld', currentWorld)
 
     return currentWorld
+end
+
+function LocalServiceWorld:GetMainWorldProjectId()
+    if not ParaWorldLoginAdapter or not ParaWorldLoginAdapter.ids then
+        return false
+    end
+
+    local ids = ParaWorldLoginAdapter.ids[KeepworkService:GetEnv()]
+
+    if ids and ids[1] then
+        return ids[1]
+    else
+        return false
+    end
 end

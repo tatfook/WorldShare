@@ -32,7 +32,7 @@ function KeepworkReposApi:GetRepoPath(foldername, username)
     end
 end
 
--- url: /repos/:repoPath/download
+-- url: /repos/:repoPath/download?ref=:ref
 -- method: GET
 -- params:
 --[[

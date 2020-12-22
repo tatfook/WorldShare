@@ -25,6 +25,12 @@ local ReloadWorldCommand = NPL.load("(gl)Mod/WorldShare/command/ReloadWorld.lua"
 local WorldShareCommand = NPL.export()
 
 function WorldShareCommand:Init()
+    if self.inited then
+        return
+    end
+
+    self.inited = true
+
     MenuCommand:Init()
     LoadWorldCommand:Init()
     local pipe = PipeCommand:Init()

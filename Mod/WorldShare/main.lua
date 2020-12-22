@@ -55,6 +55,8 @@ NPL.load('(gl)script/apps/Aries/Creator/Game/Login/RemoteServerList.lua')
 NPL.load('(gl)script/apps/Aries/Creator/Game/Login/DownloadWorld.lua')
 NPL.load('(gl)script/apps/Aries/Creator/Game/Login/RemoteWorld.lua')
 NPL.load('(gl)script/apps/Aries/Creator/Game/Login/TeacherAgent/TeacherAgent.lua')
+NPL.load("(gl)script/apps/Aries/Creator/Game/Login/TeacherAgent/TeacherIcon.lua")
+NPL.load('(gl)script/apps/Aries/Creator/Game/Login/ParaWorldLessons.lua')
 
 -- include aries creator game areas
 NPL.load('(gl)script/apps/Aries/Creator/Game/Areas/ShareWorldPage.lua')
@@ -67,8 +69,8 @@ NPL.load('(gl)script/apps/Aries/Creator/Game/Network/NetworkMain.lua')
 -- include aries creator game world
 NPL.load('(gl)script/apps/Aries/Creator/Game/World/SaveWorldHandler.lua')
 
--- include aries creator game login
-NPL.load('(gl)script/apps/Aries/Creator/Game/Login/ParaWorldLessons.lua')
+-- include aries creator game tasks
+NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/ParaWorld/ParaWorldLoginAdapter.lua");
 
 -- include aries creator game nplbrowser
 NPL.load('(gl)script/apps/Aries/Creator/Game/NplBrowser/NplBrowserLoaderPage.lua')
@@ -119,6 +121,9 @@ local Utils = NPL.load('(gl)Mod/WorldShare/helper/Utils.lua')
 local WorldShareCommand = NPL.load('(gl)Mod/WorldShare/command/Command.lua')
 local MenuCommand = NPL.load('(gl)Mod/WorldShare/command/Menu.lua')
 
+-- filters
+local Filters = NPL.load('(gl)Mod/WorldShare/filters/Filters.lua')
+
 local WorldShare = commonlib.inherit(commonlib.gettable('Mod.ModBase'), commonlib.gettable('Mod.WorldShare'))
 
 WorldShare:Property({'Name', 'WorldShare', 'GetName', 'SetName', { auto = true }})
@@ -139,6 +144,8 @@ LOG.std(nil, 'info', 'WorldShare', 'world share version %s', WorldShare.version)
 function WorldShare:init()
     -- check was the data is upgraded
     DataUpgrade:Init()
+    -- init all filters
+    Filters:Init()
 
     -- replace load world page
     GameLogic.GetFilters():add_filter(
@@ -409,6 +416,8 @@ function WorldShare:init()
     GameLogic.GetFilters():add_filter(
         'on_exit',
         function(bForceExit, bRestart, callback)
+            EventTrackingService:SaveToDisk()
+
             if callback and type(callback) == 'function' then
                 callback()
             end
@@ -519,16 +528,6 @@ function WorldShare:init()
         end
     )
 
-    -- filter show school page
-    GameLogic.GetFilters():add_filter(
-        'show_school_page',
-        function()
-            local MySchool = NPL.load('(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua')
-            MySchool:Show()
-            return Mod.WorldShare.Store:Get('page/Mod.WorldShare.MySchool')
-        end
-    )
-
     -- filter show server page
     GameLogic.GetFilters():add_filter(
         'show_server_page',
@@ -635,6 +634,14 @@ function WorldShare:init()
         end
     )
 
+    -- filter show certificate icon
+    GameLogic.GetFilters():add_filter(
+        'show_certificate',
+        function(callback)
+            Certificate:Init(callback)
+        end
+    )
+
     -- send udp online msg
     SocketService:StartUDPService()
 
@@ -693,7 +700,7 @@ function WorldShare:OnWorldLoad()
     end
 
     HistoryManager:OnWorldLoad()
-    Certificate:OnWorldLoad()
+    -- Certificate:OnWorldLoad()
 
     Store:Subscribe('user/Logout', function()
         Compare:RefreshWorldList(function()

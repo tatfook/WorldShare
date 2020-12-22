@@ -25,7 +25,8 @@ local UserConsole = NPL.load('(gl)Mod/WorldShare/cellar/UserConsole/Main.lua')
 
 -- service
 local Compare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
-local LocalServiceWorld = NPL.load('(gl)Mod/WorldShare/service/LocalService/World.lua')
+local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
+local LocalServiceWorld = NPL.load('(gl)Mod/WorldShare/service/LocalService/LocalServiceWorld.lua')
 
 local CreateWorld = NPL.export()
 
@@ -89,7 +90,19 @@ function CreateWorld.OnClickCreateWorld(worldsTemplate)
 		if errorMsg then
 			_guihelper.MessageBox(errorMsg);
 		end
-	else
+    else
+        -- set kp project id if existed
+        local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+        
+        if currentWorld and currentWorld.foldername == worldName then
+            local worldTag = LocalService:GetTag(worldpath)
+
+            if worldTag and type(worldTag) == 'table' then
+                worldTag.kpProjectId = currentWorld.kpProjectId
+                LocalService:SetTag(worldpath, worldTag)
+            end
+        end
+
 		LOG.std(nil, "info", "Mod.WorldShare.cellar.CreateNewWorld.CreateWorld", "new world created at %s", worldpath)
 		CreateNewWorld.ClosePage()
 		WorldCommon.OpenWorld(worldpath, true)

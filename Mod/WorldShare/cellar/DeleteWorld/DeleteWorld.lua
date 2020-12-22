@@ -121,17 +121,22 @@ function DeleteWorld:DeleteRemote()
     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
     _guihelper.MessageBox(
-        format(L"确定删除远程世界(项目):%s?", currentWorld.foldername or ""),
+        format(L'确定删除远程世界(项目):%s?', currentWorld.foldername or ''),
         function(res)
             if res and res == 6 then
                 KeepworkServiceProject:RemoveProject(
                     currentWorld.kpProjectId,
                     function(data, err)
-                        self:ClosePage()
-
                         if err ~= 204 and err ~= 200 then
-                            GameLogic.AddBBS(nil, format("%s:%d", L"服务器返回错误状态码", err), 3000, "255 0 0")
+                            if data and type(data) == 'table' and data.message then
+                                GameLogic.AddBBS(nil, format(L'删除失败，原因：%s(%s)', data.message or '' , data.code or ''), 8000, '255 0 0')
+                            else
+                                GameLogic.AddBBS(nil, format(L'删除失败(%s)',  err or ''), 3000, '255 0 0')
+                            end
+                            return
                         end
+
+                        self:ClosePage()
 
                         if currentWorld and currentWorld.worldpath and #currentWorld.worldpath > 0 then
                             local tag = LocalService:GetTag(currentWorld.worldpath)

@@ -19,9 +19,12 @@
                         page.certificateCallback(false)
                     end
                     page:CloseWindow()
+                    page.closed = true
                 end
 
                 function bind()
+                    GameLogic.GetFilters():apply_filters("user_behavior", 1, "click.world.certificate.bind")
+
                     local phonenumber = page:GetValue("phonenumber")
                     local phonecaptcha = page:GetValue("phonecaptcha")
 
@@ -36,11 +39,12 @@
                     end
 
                     -- only classification
+                    Mod.WorldShare.MsgBox:Show(L'请稍候...')
                     RegisterModal:Classification(phonenumber, phonecaptcha, function()
-                        if page and page.Success then
-                            page.Success()
-                        end
-                        page:CloseWindow()
+                        -- if page and page.Success then
+                        --    page.Success()
+                        -- end
+                        -- page:CloseWindow()
                     end)
                 end
 
@@ -67,6 +71,8 @@
                 end
 
                 function get_phone_captcha()
+                    GameLogic.GetFilters():apply_filters("user_behavior", 1, "click.world.certificate.get_phone_captcha")
+
                     if not Validated:Phone(page:GetValue("phonenumber")) then
                         GameLogic.AddBBS(nil, L"手机格式错误", 3000, "255 0 0")
                         return false
@@ -117,10 +123,14 @@
                                 if page and page.Success then
                                     page.Success()
                                 end
+                                Mod.WorldShare.MsgBox:Close()
                                 page:CloseWindow()
                             end
                         else
                             Mod.WorldShare.Utils.SetTimeOut(function()
+                                if page.closed then
+                                    return
+                                end
                                 checkRealName()
                             end, 1000)
                         end
@@ -135,30 +145,30 @@
         <div width="100%" height="100%">
             <kp:window width="800" height="670" onclose="close()">
                 <div class="theme1_header"></div>
-                <div style="padding: 30px;">
+                <div style="padding: 30px;padding-top: 20px;">
                     <div style="margin-left: 136px;">
                         <img style="width: 465px;height: 40px;" src="Texture/Aries/Creator/keepwork/paracraft_guide_32bits.png#15 237 465 40" />
                     </div>
-                    <div style="font-size: 18px;base-font-size: 18px;margin-left: 135px;margin-top: 20px;">
+                    <div style="font-size: 18px;base-font-size: 18px;margin-left: 135px;margin-top: 10px;">
                         <%= L'手机号' %>
                         <input type="text" style="width: 400px;height: 30px;margin-left: 5px;" class="theme1_white_textfield" onfocusout="check_phone_number()" name="phonenumber"/>
                     </div>
-                    <div style="font-size: 18px;base-font-size: 18px;margin-left: 135px;margin-top: 20px;">
+                    <div style="font-size: 18px;base-font-size: 18px;margin-left: 135px;margin-top: 10px;">
                         <%= L'验证码' %>
                         <input type="text" style="width: 300px;height: 30px;margin-left: 5px;" class="theme1_white_textfield" name="phonecaptcha"/>
                         <input type="button" style="width: 110px;height: 35px;" name="getPhoneCaptcha" class="theme1_green_button" value="<%= L'获取验证码' %>" onclick="get_phone_captcha()"/>
                     </div>
-                    <div style="margin-left: 340px;margin-top: 10px;">
+                    <div style="margin-left: 330px;margin-top: 10px;">
                         <input type="button" style="width: 80px;height: 35px;" class="theme1_baby_bule_button" value="<%= L'确认' %>" onclick="bind()" />
                     </div>
                     <div style="margin-left: 136px;margin-top: 10px;">
                         <img style="width: 465px;height: 39px;" src="Texture/Aries/Creator/keepwork/paracraft_guide_32bits.png#14 290 465 39" />
                     </div>
-                    <div style="margin-left: 220px;margin-top: 20px;">
-                        <img style="width: 288px;height: 109px;" src="Texture/Aries/Creator/keepwork/paracraft_guide_32bits.png#32 650 288 109" />
+                    <div style="margin-left: 180px;margin-top: 10px;">
+                        <img style="width: 397px;height: 176px;" src="Texture/Aries/Creator/keepwork/paracraft_guide_32bits.png#30 623 397 176" />
                     </div>
-                    <div style="margin-left: 200px;margin-top: 20px;">
-                        <img style="width: 311px;height: 177px;" src="Texture/Aries/Creator/keepwork/paracraft_guide_32bits.png#12 814 311 177" />
+                    <div style="margin-left: 213px;margin-top: 5px;">
+                        <img style="width: 311px;height: 177px;" src="Texture/Aries/Creator/keepwork/paracraft_guide_32bits.png#10 814 314 185" />
                     </div>
                 </div>
             </kp:window>

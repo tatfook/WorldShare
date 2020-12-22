@@ -31,7 +31,7 @@ local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua"
 local GitEncoding = NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua")
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
-local LocalServiceWorld = NPL.load("../LocalService/World.lua")
+local LocalServiceWorld = NPL.load("../LocalService/LocalServiceWorld.lua")
 local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 local KeepworkServiceWorld = NPL.load("../KeepworkService/World.lua")
@@ -285,6 +285,21 @@ function Compare:GetCurrentWorldInfo(callback)
                 end
             end
 
+            if not searchCurrentWorld then
+                local worldTag = LocalService:GetTag(worldpath)
+
+                if worldTag.kpProjectId then
+                    -- keepwork created world
+
+                    for key, item in ipairs(currentWorldList) do
+                        if tonumber(item.kpProjectId) == tonumber(worldTag.kpProjectId) and not item.is_zip then
+                            searchCurrentWorld = item
+                            break
+                        end
+                    end
+                end
+            end
+
             if searchCurrentWorld then
                 currentWorld = searchCurrentWorld
 
@@ -297,8 +312,10 @@ function Compare:GetCurrentWorldInfo(callback)
                 local worldTag = LocalService:GetTag(currentWorld.worldpath)
 
                 if type(worldTag) == 'table' then
-                    currentWorld.kpProjectId = tonumber(worldTag.kpProjectId)
-                    currentWorld.fromProjectId = tonumber(worldTag.fromProjects)
+                    if worldTag.kpProjectId and worldTag.fromProjects then
+                        currentWorld.kpProjectId = tonumber(worldTag.kpProjectId)
+                        currentWorld.fromProjectId = tonumber(worldTag.fromProjects)
+                    end
 
                     if worldTag and worldTag.seed ~= '' then
                         currentWorld.foldername = worldTag.seed
@@ -347,13 +364,10 @@ function Compare:GetCurrentWorldInfo(callback)
             currentWorld.status = 1
         end
 
-        if type(worldTag) == 'table' then
+        if type(worldTag) == 'table' and worldTag.kpProjectId and worldTag.fromProjects then
             currentWorld.kpProjectId = tonumber(worldTag.kpProjectId)
             currentWorld.fromProjectId = tonumber(worldTag.fromProjects)
         end
-
-        echo('from world load!!!', true)
-        echo(currentWorld, true)
 
         Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
     end

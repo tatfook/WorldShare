@@ -134,7 +134,7 @@ function KeepworkProjectsApi:SearchForParacraft(xPerPage, xPage, params, success
 end
 
 -- url: /projects/%d
--- method: DELTE
+-- method: DELETE
 -- return: object
 function KeepworkProjectsApi:RemoveProject(kpProjectId, success, error)
     if type(kpProjectId) ~= 'number' then

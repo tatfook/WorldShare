@@ -73,13 +73,24 @@ local EventTrackingDatabase = NPL.export()
 function EventTrackingDatabase:GetAllData()
     local playerController = GameLogic.GetPlayerController()
 
-    return playerController:LoadLocalData("event_tracking", {}, true)
+    if not self.tempAllData then
+        self.tempAllData = playerController:LoadLocalData("event_tracking", {}, true)
+    end
+
+    return self.tempAllData
 end
 
 function EventTrackingDatabase:SaveAllData(allData)
     local playerController = GameLogic.GetPlayerController()
 
-    return playerController:SaveLocalData("event_tracking", allData, true)
+    self.tempAllData = allData
+
+    return self.tempAllData
+end
+
+function EventTrackingDatabase:SaveToDisk()
+    local playerController = GameLogic.GetPlayerController()
+    return playerController:SaveLocalData("event_tracking", self.tempAllData, true)
 end
 
 function EventTrackingDatabase:PutPacket(userId, action, packet)

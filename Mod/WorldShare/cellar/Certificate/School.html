@@ -15,6 +15,8 @@
                 end
 
                 function confirm()
+                    GameLogic.GetFilters():apply_filters("user_behavior", 1, "click.world.certificate.send_msg_to_parent")
+
                     local cellphone = page:GetValue('cellphone')
                     local realname = page:GetValue('realname')
 
@@ -50,11 +52,11 @@
                     <div style="margin-left: 90px;margin-top: 10px;">
                         <img style="width: 567px;height: 40px;" src="Texture/Aries/Creator/keepwork/paracraft_guide_32bits.png#12 388 567 40" />
                     </div>
-                    <div style="margin-left: 150px;margin-top: 20px;">
+                    <div style="margin-left: 160px;margin-top: 20px;">
                         <img style="width: 429px;height: 168px;" src="Texture/Aries/Creator/keepwork/paracraft_guide_32bits.png#31 442 429 168" />
                     </div>
-                    <div style="margin-left: 200px;margin-top: 20px;">
-                        <img style="width: 311px;height: 177px;" src="Texture/Aries/Creator/keepwork/paracraft_guide_32bits.png#12 814 311 177" />
+                    <div style="margin-left: 213px;margin-top: 20px;">
+                        <img style="width: 311px;height: 177px;" src="Texture/Aries/Creator/keepwork/paracraft_guide_32bits.png#10 814 314 185" />
                     </div>
                 </div>
             </kp:window>

@@ -12,6 +12,8 @@
                 end
 
                 function certificate_now()
+                    GameLogic.GetFilters():apply_filters("user_behavior", 1, "click.world.certificate.certificate_now")
+
                     if page.CertificateNow then
                         page.CertificateNow()
                         page:CloseWindow()
