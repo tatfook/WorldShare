@@ -19,6 +19,8 @@ local RegisterModal = NPL.load("(gl)Mod/WorldShare/cellar/RegisterModal/Register
 
 local MainLogin = NPL.export()
 
+MainLogin.curTab = 1
+
 function MainLogin:Show()
     Mod.WorldShare.Utils.ShowWindow({
         url = "Mod/WorldShare/cellar/MainLogin/MainLogin.html", 
@@ -112,28 +114,70 @@ function MainLogin:Close()
     end
 end
 
+function MainLogin:SaveField()
+    local MainLoginPage = Mod.WorldShare.Store:Get("page/MainLogin")
+
+    if not MainLoginPage then
+        return false
+    end
+
+    -- login
+    local showAccount = MainLoginPage:GetValue('showaccount')
+    local account = MainLoginPage:GetValue('account')
+    local password = MainLoginPage:GetValue('password')
+    local autoLogin = MainLoginPage:GetValue('autoLogin')
+    local rememberMe = MainLoginPage:GetValue('rememberMe')
+
+    MainLoginPage:SetValue('showaccount', showAccount)
+    MainLoginPage:SetValue('account', account)
+    MainLoginPage:SetValue('password', password)
+    MainLoginPage:SetValue('autoLogin', autoLogin)
+    MainLoginPage:SetValue('rememberMe', rememberMe)
+
+    -- register
+    local registerAccount = MainLoginPage:GetValue('register_account')
+    local registerAccountPassword = MainLoginPage:GetValue('register_account_password')
+    local captcha = MainLoginPage:GetValue('captcha')
+    local agree = MainLoginPage:GetValue('agree')
+    local phonenumber = MainLoginPage:GetValue('phonenumber')
+    local phonecaptcha = MainLoginPage:GetValue('phonecaptcha')
+    local phonepassword = MainLoginPage:GetValue('phonepassword')
+
+    MainLoginPage:SetValue('register_account', registerAccount)
+    MainLoginPage:SetValue('register_account_password', registerAccountPassword)
+    MainLoginPage:SetValue('captcha', captcha)
+    MainLoginPage:SetValue('agree', agree)
+    MainLoginPage:SetValue('phonenumber', phonenumber)
+    MainLoginPage:SetValue('phonecaptcha', phonecaptcha)
+    MainLoginPage:SetValue('phonepassword', phonepassword)
+end
+
 function MainLogin:LoginAction()
     local MainLoginPage = Mod.WorldShare.Store:Get("page/MainLogin")
 
     if not MainLoginPage then
         return false
     end
-    
+
+    MainLoginPage:FindControl('account_field_error').visible = false
+    MainLoginPage:FindControl('password_field_error').visible = false
+
     local account = MainLoginPage:GetValue("account")
     local password = MainLoginPage:GetValue("password")
     local autoLogin = MainLoginPage:GetValue("autoLogin")
     local rememberMe = MainLoginPage:GetValue("rememberMe")
 
     if not account or account == "" then
-        GameLogic.AddBBS(nil, L"账号不能为空", 3000, "255 0 0")
+        MainLoginPage:SetUIValue('account_field_error_msg', L"*账号不能为空")
+        MainLoginPage:FindControl('account_field_error').visible = true
         return false
     end
 
     if not password or password == "" then
-        GameLogic.AddBBS(nil, L"密码不能为空", 3000, "255 0 0")
+        MainLoginPage:SetUIValue('password_field_error_msg', L"*密码不能为空")
+        MainLoginPage:FindControl('password_field_error').visible = true
         return false
     end
-
 
     Mod.WorldShare.MsgBox:Show(L"正在登录，请稍候...", 24000, L"链接超时", 300, 120)
 
@@ -141,7 +185,8 @@ function MainLogin:LoginAction()
         Mod.WorldShare.MsgBox:Close()
 
         if not bSucceed then
-            GameLogic.AddBBS(nil, format(L"登录失败了, 错误信息：%s", message), 5000, "255 0 0")
+            MainLoginPage:SetUIValue('account_field_error_msg', format(L"*%s", message))
+            MainLoginPage:FindControl('account_field_error').visible = true
             return
         end
 
@@ -167,9 +212,11 @@ function MainLogin:LoginAction()
                 Mod.WorldShare.MsgBox:Close()
 
                 if response and response.code and response.message then
-                    GameLogic.AddBBS(nil, format(L"登录失败了, 错误信息：%s(%d)", response.message, response.code), 5000, "255 0 0")
+                    MainLoginPage:SetUIValue('account_field_error_msg', format(L"*%s(%d)", response.message, response.code))
+                    MainLoginPage:FindControl('account_field_error').visible = true
                 else
-                    GameLogic.AddBBS(nil, format(L"登录失败了, 系统维护中, 错误码：%d", err), 5000, "255 0 0")
+                    MainLoginPage:SetUIValue('account_field_error_msg', format(L"*系统维护中(%d)", err))
+                    MainLoginPage:FindControl('account_field_error').visible = true
                 end
 
                 return false

@@ -26,6 +26,10 @@
                     local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepWorkService/Session.lua")
                     local EventTrackingService = NPL.load("(gl)Mod/WorldShare/service/EventTracking.lua")
 
+                    -- helper
+                    local BroadcastHelper = commonlib.gettable("CommonCtrl.BroadcastHelper")
+                    local Validated = NPL.load("(gl)Mod/WorldShare/helper/Validated.lua")
+
                     local page = document:GetPageCtrl()
                     Mod.WorldShare.Store:Set("page/MainLogin", page)
 
@@ -112,12 +116,126 @@
                     end
 
                     function register()
-                        RegisterModal:ShowPage(function()
+                        if MainLogin.accountExist then
+                            page:SetUIValue('register_account_field_error_msg', L"*账号已存在，请使用其他账号")
+                            page:FindControl('register_account_field_error').visible = true
+                            return false
+                        end
+
+                        local account = page:GetValue("register_account")
+                        local password = page:GetValue("register_account_password")
+                        local captcha = page:GetValue("captcha")
+                        local agree = page:GetValue("agree")
+
+                        if not agree then
+                            page:SetUIValue('agree_field_error_msg', L"*您未同意用户协议")
+                            page:FindControl('agree_field_error_error').visible = true
+                            return false
+                        end
+
+                        if not account or account == "" then
+                            page:SetUIValue('register_account_field_error_msg', L"*账号不能为空")
+                            page:FindControl('register_account_field_error').visible = true
+                            return false
+                        end
+
+                        if #password < 6 then
+                            page:SetUIValue('register_account_password_field_error_msg', L"*密码最少为6位")
+                            page:FindControl('egister_account_password_field_error').visible = true
+                            return false
+                        end
+
+                        if not captcha or captcha == "" then
+                            page:SetUIValue('captcha_field_error_msg', L"*验证码不能为空")
+                            page:FindControl('captcha_field_error').visible = true
+                            return false
+                        end
+
+                        RegisterModal.account = account
+                        RegisterModal.password = password
+                        RegisterModal.captcha = captcha
+                        RegisterModal.agree = agree
+                        RegisterModal.phonenumber = ""
+                        RegisterModal.phonecaptcha = ""
+                        RegisterModal.bindphone = nil
+
+                        RegisterModal.callback = function()
                             MySchool:ShowJoinSchool(function()
                                 MainLogin:EnterUserConsole()
                                 WorldList:RefreshCurrentServerList()
                             end)
-                        end)
+                        end
+
+                        RegisterModal:Register(page)
+                    end
+
+                    function next()
+                        local phonenumber = page:GetValue("phonenumber")
+                        local phonecaptcha = page:GetValue("phonecaptcha")
+                        local phonepassword = page:GetValue("phonepassword")
+                        local agree = page:GetValue("phone_agree")
+
+                        if not agree then
+                            page:SetUIValue('phone_agree_field_error_msg', L"*您未同意用户协议")
+                            page:FindControl('phone_agree_field_error').visible = true
+                            return
+                        end
+
+                        if not Validated:Phone(phonenumber) then
+                            page:SetUIValue('phonenumber_field_error_msg', L"*手机格式错误")
+                            page:FindControl('phonenumber_field_error').visible = true
+                            return
+                        end
+ 
+                        if #phonecaptcha == 0 then
+                            page:SetUIValue('phonecaptcha_field_error_msg', L"*手机验证码不能为空")
+                            page:FindControl('phonecaptcha_field_error').visible = true
+                            return
+                        end
+
+                        if #phonepassword < 6 then
+                            page:SetUIValue('phonepassword_field_error_msg', L"*密码少于6位")
+                            page:FindControl('phonepassword_field_error').visible = true
+                            return
+                        end
+
+                        if phonenumberExist then
+                            page:SetUIValue('phonenumber_field_error_msg', L"*手机号码已存在")
+                            page:FindControl('phonenumber_field_error').visible = true
+                            return
+                        end
+
+                        page:FindControl('register_phonenumber_step_1').visible = false
+                        page:FindControl('register_phonenumber_step_2').visible = true
+                    end
+
+                    function phone_register()
+                        if MainLogin.phoneAccountExist then
+                            page:SetUIValue('phone_register_account_field_error_msg', L"*账号已存在，请使用其他账号")
+                            page:FindControl('phone_register_account_field_error').visible = true
+                            return false
+                        end
+
+                        local phonenumber = page:GetValue("phonenumber")
+                        local phonecaptcha = page:GetValue("phonecaptcha")
+                        local phonepassword = page:GetValue("phonepassword")
+                        local account = page:GetValue("phone_register_account")
+                        
+                        RegisterModal.account = account
+                        RegisterModal.password = phonepassword
+                        RegisterModal.phonenumber = phonenumber
+                        RegisterModal.captcha = ""
+                        RegisterModal.phonecaptcha = phonecaptcha
+                        RegisterModal.bindphone = true
+
+                        RegisterModal.callback = function()
+                            MySchool:ShowJoinSchool(function()
+                                MainLogin:EnterUserConsole()
+                                WorldList:RefreshCurrentServerList()
+                            end)
+                        end
+
+                        RegisterModal:Register(page)
                     end
 
                     function set_remember_me()
@@ -164,12 +282,275 @@
                             return false
                         end
                     end
+
+                    function get_cur_tab()
+                        return MainLogin.curTab
+                    end
+
+                    function set_login_tab()
+                        MainLogin.curTab = 1
+
+                        page:Refresh(0.01)
+                    end
+
+                    function set_register_tab()
+                        MainLogin.curTab = 2
+
+                        page:Refresh(0.01)
+
+                        update_captcha()
+                    end
+
+                    function get_register_mode()
+                        return RegisterModal.m_mode
+                    end
+
+                    function user_agreement()
+                        RegisterModal:ShowUserAgreementPage()
+                    end
+
+                    function set_register_mode()
+                        BroadcastHelper.Clear()
+
+                        local beSeted = false
+
+                        if RegisterModal.m_mode == 'account' then
+                            RegisterModal.m_mode = "phonenumber"
+                            beSeted = true
+                        end
+
+                        if not beSeted and RegisterModal.m_mode == 'phonenumber' then
+                            RegisterModal.m_mode = "account"
+                        end
+
+                        page:Refresh(0.01)
+                    end
+
+                    function update_captcha()
+                        KeepworkServiceSession:FetchCaptcha(function()
+                            page:SetUIBackground('captcha_show', KeepworkServiceSession:GetCaptcha())
+                        end)
+                    end
+
+                    function checkout_phonecaptcha()
+                        local photocaptcha = page:GetValue('phonecaptcha')
+
+                        if photocaptcha and #photocaptcha == 0 then
+                            page:SetUIValue('phonecaptcha_field_error_msg', L"*手机验证码不能为空")
+                            page:FindControl('phonecaptcha_field_error').visible = true
+                        else
+                            page:FindControl('phonecaptcha_field_error').visible = false
+                        end
+                    end
+
+                    function get_phone_captcha()
+                        if #page:GetValue("phonenumber") ~= 11 then
+                            GameLogic.AddBBS(nil, L"手机号码位数不对", 3000, "255 0 0")
+                            return false
+                        end
+
+                        if phonenumberExist then
+                            GameLogic.AddBBS(nil, L"手机号已存在", 3000, "255 0 0")
+                            return false
+                        end
+
+                        if isClickedGetPhoneCaptcha then
+                           return false 
+                        end
+
+                        isClickedGetPhoneCaptcha = true
+
+                        local times = 60
+
+                        local timer = commonlib.Timer:new({
+                            callbackFunc = function(timer)
+                                page:SetValue("getPhonecaptcha", format("%s(%ds)", L"重新发送", times))
+
+                                if times == 0 then
+                                    isClickedGetPhoneCaptcha = false
+                                    page:SetValue("getPhonecaptcha", L"获取验证码")
+                                    timer:Change(nil, nil)
+                                end
+
+                                times = times - 1
+                            end
+                        })
+
+                        KeepworkServiceSession:GetPhoneCaptcha(page:GetValue("phonenumber"), function(data, err)
+                            if err == 400 and data and data.code and data.message then
+                                isClickedGetPhoneCaptcha = false
+                                page:SetValue("getPhonecaptcha", L"获取验证码")
+                                GameLogic.AddBBS(nil, format("%s%s(%d)", L"获取验证码失败，错误信息：", data.message, data.code), 3000, "255 0 0")
+                                timer:Change(nil, nil)
+                            end
+                        end)
+
+                        timer:Change(1000, 1000)
+                    end
+
+                    function show_notice()
+                        page:FindControl('notice').visible = true
+                    end
+
+                    function show_notice1()
+                        page:FindControl('notice1').visible = true
+                    end
+
+                    function hide_notice()
+                        page:FindControl('notice').visible = false
+
+                        local username = page:GetValue("register_account")
+
+                        if not username or #username == 0 then
+                            page:SetUIValue('register_account_field_error_msg', L"*账号不能为空")
+                            page:FindControl('register_account_field_error').visible = true
+                            return false
+                        end
+
+                        KeepworkServiceSession:CheckUsernameExist(username, function(bIsExist)
+                            if bIsExist then
+                                MainLogin.accountExist = true
+                                page:SetUIValue('register_account_field_error_msg', L"*账号已存在，请使用其他账号")
+                                page:FindControl('register_account_field_error').visible = true
+                                return false
+                            else
+                                MainLogin.accountExist = false
+                                page:FindControl('register_account_field_error').visible = false
+                                return false
+                            end
+                        end)
+                    end
+
+                    function hide_notice1()
+                        page:FindControl('notice1').visible = false
+
+                        local username = page:GetValue("phone_register_account")
+
+                        if not username or #username == 0 then
+                            page:SetUIValue('phone_register_account_field_error_msg', L"*账号不能为空")
+                            page:FindControl('phone_register_account_field_error').visible = true
+                            return false
+                        end
+
+                        KeepworkServiceSession:CheckUsernameExist(username, function(bIsExist)
+                            if bIsExist then
+                                MainLogin.phoneAccountExist = true
+                                page:SetUIValue('phone_register_account_field_error_msg', L"*账号已存在，请使用其他账号")
+                                page:FindControl('phone_register_account_field_error').visible = true
+                                return false
+                            else
+                                MainLogin.phoneAccountExist = false
+                                page:FindControl('phone_register_account_field_error').visible = false
+                                return false
+                            end
+                        end)
+                    end
+
+                    function set_personal_web(name, mcmlNode)
+                        local personal_web_path = mcmlNode:GetUIValue()
+                        page:SetUIValue('personalweb', 'https://keepwork.com/u/' .. personal_web_path)
+                    end
+
+                    function set_personal_web1(name, mcmlNode)
+                        local personal_web_path = mcmlNode:GetUIValue() 
+                        page:SetUIValue('personalweb1', 'https://keepwork.com/u/' .. personal_web_path)
+                    end
+
+                    function set_register_agree()
+                        if not page:GetValue('agree') then
+                            page:SetUIValue('agree_field_error_msg', L"*您未同意用户协议")
+                            page:FindControl('agree_field_error').visible = true
+                        else
+                            page:FindControl('agree_field_error').visible = false
+                        end
+                    end
+
+                    function set_phone_agree()
+                        if not page:GetValue('phone_agree') then
+                            page:SetUIValue('phone_agree_field_error_msg', L"*您未同意用户协议")
+                            page:FindControl('phone_agree_field_error').visible = true
+                        else
+                            page:FindControl('phone_agree_field_error').visible = false
+                        end
+                    end
+
+                    function check_register_password()
+                        local password = page:GetValue('register_account_password')
+
+                        if #password < 6 then
+                            page:SetUIValue('register_account_password_field_error_msg', L"*密码最少为6位")
+                            page:FindControl('register_account_password_field_error').visible = true
+                        else
+                            page:FindControl('register_account_password_field_error').visible = false
+                        end
+                    end
+
+                    function check_captcha()
+                        local captcha = page:GetValue('captcha')
+
+                        if not captcha or #captcha == 0 then
+                            page:SetUIValue('captcha_field_error_msg', L"*验证码不能为空")
+                            page:FindControl('captcha_field_error').visible = true
+                        else
+                            page:FindControl('captcha_field_error').visible = false
+                        end
+                    end
+
+                    function get_register_phonenumber_step()
+                        return MainLogin.curPhonenumberStep
+                    end
+
+                    function check_phone_number()
+                        local phonenumber = page:GetValue("phonenumber")
+
+                        if phonenumber and #phonenumber == 0 then
+                            page:SetUIValue('phonenumber_field_error_msg', L"*手机号不能为空")
+                            page:FindControl('phonenumber_field_error').visible = true
+                            return                           
+                        end
+
+                        if not Validated:Phone(phonenumber) then
+                            page:SetUIValue('phonenumber_field_error_msg', L"*手机号码格式错误")
+                            page:FindControl('phonenumber_field_error').visible = true
+                            return false
+                        end
+
+                        KeepworkServiceSession:CheckPhonenumberExist(phonenumber, function(bIsExist)
+                            if bIsExist then
+                                phonenumberExist = true
+                                page:SetUIValue('phonenumber_field_error_msg', L"*手机号码已存在")
+                                page:FindControl('phonenumber_field_error').visible = true
+                            else
+                                phonenumberExist = false
+                                page:FindControl('phonenumber_field_error').visible = false
+                            end
+                        end)
+                    end
+
+                    function check_phone_password()
+                        local phonepassword = page:GetValue("phonepassword")
+
+                        if phonepassword and #phonepassword == 0 then
+                            page:SetUIValue('phonepassword_field_error_msg', L"*密码不能为空")
+                            page:FindControl('phonepassword_field_error').visible = true
+                            return
+                        end
+
+                        if #phonepassword < 6 then
+                            page:SetUIValue('phonepassword_field_error_msg', L"*密码少于6位")
+                            page:FindControl('phonepassword_field_error').visible = true
+                            return
+                        end
+
+                        page:FindControl('phonepassword_field_error').visible = false
+                    end
                 ]]>
             </script>
             <style type="text/mcss">
                 {
-                    user_login = {
+                    session_window = {
                         width = 320,
+                        ['min-height'] = 320,
                         ["base-font-size"] = 16,
                         ["font-size"] = 16,
                         color = "#ffffff",
@@ -216,58 +597,309 @@
                     <%=Rebranding:GetValue("titleaddon")%>
                 </div>
                 <div style="position:relative;margin-left:100px;margin-top: 80px;padding-top: 50px;background:url(Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#267 89 34 34:8 8 8 8)">
-                    <div name="login" class="user_login">
-                        <pe:if condition="<%= login_text() ~= nil %>">
-                            <div style="margin-bottom:15px;"><%= login_text()%></div>
-                        </pe:if>
-                        <div style="margin-bottom:12px;">
-                            <div style="<%='float:left;min-width:65px;' .. get_english_style('min-width:73px;') %>"><%= L"账号：" %></div>
-                            <select name="account"
-                                    DataSource="<%= get_history_users() %>"
-                                    EmptyText='<%= L"账户名/邮箱/手机号" %>'
-                                    onselect="<%= select_account %>"
-                                    onremove="<%= remove_account %>"
-                                    class="bbs_text text_field"
-                                    style="height: 30px;">
-                            </select>
-                            <input name="showaccount" onchange="write_accout" type="text" class="bbs_text" style="height: 30px;margin-left: -165px; width: 140px;" EmptyText='<%= L"账户名/邮箱/手机号" %>' />
-                        </div>
-                        <div style="margin-bottom:12px;">
-                            <div style="float:left;min-width:65px"><%= L"密码：" %></div>
-                            <input type="text" PasswordChar="*" SkipAutoBadWordFilter="true" class="bbs_text text_field" style="height: 30px;" name="password" />
-                        </div>
-                        <div>
-                            <div>
-                                <input type="checkbox" style="float:left;margin-top:3px;min-width:90px;" name="rememberMe" onclick="set_remember_me()"/><div style="float:left" for="rememberMe"><%= L"记住密码?" %></div>
+                    <div name="login" class="session_window">
+                        <div style="margin-left: 75px;">
+                            <div onclick="set_login_tab()" style="float: left">
+                                <div style="width: 35px;text-align: center">登录</div>
+                                <pe:if condition="<%= (get_cur_tab() == 1) %>">
+                                    <div style="background-color: #edb853;width: 35px;height: 2px;"></div>
+                                </pe:if>
                             </div>
-                            <!--
-                            <div>
-                                <input type="checkbox" style="float:left;margin-top:3px;min-width:90px;" name="autoLogin" onclick="set_auto_login()"/><div style="float:left" for="autoLogin"><%= L"自动登录" %></div>    
+                            <div onclick="set_register_tab()" style="float: left;margin-left: 20px;">
+                                <div style="width: 35px;text-align: center">注册</div>
+                                <pe:if condition="<%= (get_cur_tab() == 2) %>">
+                                    <div style="background-color: #edb853;width: 35px;height: 2px;"></div>
+                                </pe:if>
                             </div>
-							-->
                         </div>
-                        <div style="margin-top:15px;margin-bottom:15px;">
-                            <input type="button" class="offline_button mc_light_grey_button_with_fillet" onclick="use_offline()" value="<%= L'离线模式' %>" />
-                            <input type="button" DefaultButton="true" class="login_button" onclick="login()" value='<%= L"登 录"%>' />
-                        </div>
-                        <pe:if condition="<%= is_support_third_party_login() %>">
+                        <!-- login area -->
+                        <pe:if condition="<%= (get_cur_tab() == 1) %>">
                             <div>
-                                <div style="base-font-size: 14px;font-size: 14px;">
-                                    <div style="width: 50px;height: 1px;background-color: #6d6d6e;float:left;margin-top: 10px;margin-left: 20px;margin-right: 2px;"></div>
-                                    <%= L"第三方账号登录" %>
-                                    <div style="width: 50px;height: 1px;background-color: #6d6d6e;float:left;margin-top: 10px;margin-left: 2px;"></div>
+                                <pe:if condition="<%= login_text() ~= nil %>">
+                                    <div style="margin-bottom:15px;"><%= login_text() %></div>
+                                </pe:if>
+                                <pe:container name="account_field_error" visible="false" style="display:none;background:">
+                                    <!-- error message -->
+                                    <div>
+                                        <label style="font-size: 12px;base-font-size: 12px;color: #EB2222;margin-left: 62px;" name="account_field_error_msg" />
+                                    </div>
+                                </pe:container>
+                                <div>
+                                    <div style="<%='float:left;min-width:65px;' .. get_english_style('min-width:73px;') %>"><%= L"账号：" %></div>
+                                    <select name="account"
+                                            DataSource="<%= get_history_users() %>"
+                                            EmptyText='<%= L"账户名/邮箱/手机号" %>'
+                                            onselect="<%= select_account %>"
+                                            onremove="<%= remove_account %>"
+                                            class="bbs_text text_field"
+                                            style="height: 30px;">
+                                    </select>
+                                    <input name="showaccount" onchange="write_accout" type="text" class="bbs_text" style="height: 30px;margin-left: -165px; width: 140px;" EmptyText='<%= L"账户名/邮箱/手机号" %>' />
                                 </div>
-                                <div style="margin-top: 5px;margin-bottom: 5px;">
-                                    <div onclick="login_with_wx()" style="width: 44px;height: 44px;background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#245 135 44 44);float: left;margin-left: 40px;"></div>
-                                    <div onclick="login_with_qq()" style="width: 44px;height: 44px;background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#301 135 44 44);float: left;margin-left: 80x;"></div>
+                                <pe:container name="password_field_error" visible="false" style="display:none;background:">
+                                    <!-- error message -->
+                                    <div>
+                                        <label style="font-size: 12px;base-font-size: 12px;color: #EB2222;margin-left: 62px;" name="password_field_error_msg" />
+                                    </div>
+                                </pe:container>
+                                <div style="margin-bottom:12px;">
+                                    <div style="float:left;min-width:65px"><%= L"密码：" %></div>
+                                    <input type="text" PasswordChar="*" SkipAutoBadWordFilter="true" class="bbs_text text_field" style="height: 30px;" name="password" />
                                 </div>
+                                <div>
+                                    <div style="float: left;">
+                                        <input type="checkbox" style="float:left;margin-top:3px;min-width:90px;" name="rememberMe" onclick="set_remember_me()"/><div style="float:left" for="rememberMe"><%= L"记住密码?" %></div>
+                                    </div>
+                                    <!--
+                                    <div>
+                                        <input type="checkbox" style="float:left;margin-top:3px;min-width:90px;" name="autoLogin" onclick="set_auto_login()"/><div style="float:left" for="autoLogin"><%= L"自动登录" %></div>    
+                                    </div>
+                                    -->
+                                    <div style="float:left;margin-left: 85px;" onclick="forget_password()">找回密码</div>
+                                </div>
+                                <div style="margin-top:15px;margin-bottom:15px;">
+                                    <input type="button" class="offline_button mc_light_grey_button_with_fillet" onclick="use_offline()" value="<%= L'离线模式' %>" />
+                                    <input type="button" DefaultButton="true" class="login_button" onclick="login()" value='<%= L"登 录"%>' />
+                                </div>
+                                <pe:if condition="<%= is_support_third_party_login() %>">
+                                    <div>
+                                        <div style="base-font-size: 14px;font-size: 14px;">
+                                            <div style="width: 50px;height: 1px;background-color: #6d6d6e;float:left;margin-top: 10px;margin-left: 20px;margin-right: 2px;"></div>
+                                            <%= L"第三方账号登录" %>
+                                            <div style="width: 50px;height: 1px;background-color: #6d6d6e;float:left;margin-top: 10px;margin-left: 2px;"></div>
+                                        </div>
+                                        <div style="margin-top: 5px;margin-bottom: 5px;">
+                                            <div onclick="login_with_wx()" style="width: 44px;height: 44px;background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#245 135 44 44);float: left;margin-left: 40px;"></div>
+                                            <div onclick="login_with_qq()" style="width: 44px;height: 44px;background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#301 135 44 44);float: left;margin-left: 80x;"></div>
+                                        </div>
+                                    </div>
+                                </pe:if>
                             </div>
                         </pe:if>
-                        <div style="<%='text-align:left;margin-left:55px;' .. get_english_style('margin-left:15px;')%>">
-                            <a name="forgot" onclick="forget_password()" style="background:url();height:30px;width:150px;font-size: 14px;color: #ffffff;"><%= L"忘记密码" %></a>
-                            <span style="color:#ffffff;">|</span>
-                            <a name="register" onclick="register()" style="background:url();height:30px;width:150px;font-size: 14px;color: #fe5927;"><%= L"点击注册" %></a>
-                        </div>
+                        <!-- register area -->
+                        <pe:if condition="<%= (get_cur_tab() == 2) %>">
+                            <div style="margin-top: 5px;">
+                                <div style="">
+                                    <div style="position: relative;font-size: 13px;">
+                                        <%=L"填写基本注册信息"%>
+                                    </div>
+                                    <pe:if condition="<%= get_register_mode() == 'account'%>">
+                                        <div onclick="set_register_mode"
+                                            align="right"
+                                            style="font-size: 13px;width: 112px;margin-right: -10px;color:#65A3C6;">
+                                            <%=L"使用手机号注册"%>
+                                        </div>
+                                    </pe:if>
+                                    <pe:if condition="<%= get_register_mode() == 'phonenumber'%>">
+                                        <div onclick="set_register_mode"
+                                            align="right"
+                                            style="font-size: 13px;width: 100px;margin-right: -12px;color:#65A3C6;">
+                                            <%=L"使用账号注册"%>
+                                        </div>
+                                    </pe:if>
+                                </div>
+                                <pe:if condition="<%= get_register_mode() == 'account'%>">
+                                    <pe:container name="register_account_field_error" visible="false" style="display:none;background:">
+                                        <!-- error message -->
+                                        <div>
+                                            <label style="font-size: 12px;base-font-size: 12px;color: #EB2222;margin-left: 62px;" name="register_account_field_error_msg" />
+                                        </div>
+                                    </pe:container>
+                                    <div style="">
+                                        <div style="<%='float:left;min-width:65px;' .. get_english_style('min-width:80px;') %>"><%= L"账户：" %></div>
+                                        <input type="text"
+                                               class="bbs_text text_field"
+                                               onfocusin="show_notice()"
+                                               onfocusout="hide_notice()"
+                                               onchange="set_personal_web"
+                                               EmptyText='<%= L"请输入账号" %>'
+                                               style="height: 30px;"
+                                               name="register_account" />
+                                        <pe:container name="notice" visible="false" style="display:none;position:relative;background:">
+                                            <div style="margin-top:-140px;margin-left: 20px; width: 290px; height: 100px;padding: 8px;font-size: 12px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#72 20 16 16:3 3 3 3);">
+                                                <div><%= L'账户名注册成功不可更改' %></div>
+                                                <div><%= L'推荐使用英文字母、数字组合（例如：keep123）' %></div>
+                                                <div><%= L'个人网站地址：' %></div>
+                                                <div>
+                                                    <pe:label name="personalweb" value="https://keepwork.com/u/" style="color:#409eff;font-size:12px;" />
+                                                </div>
+                                            </div>
+                                        </pe:container>
+                                    </div>
+                                    <pe:container name="register_account_password_field_error" visible="false" style="display:none;background:">
+                                        <!-- error message -->
+                                        <div>
+                                            <label style="font-size: 12px;base-font-size: 12px;color: #EB2222;margin-left: 62px;" name="register_account_password_field_error_msg" />
+                                        </div>
+                                    </pe:container>
+                                    <div>
+                                        <div style="<%='float:left;min-width:65px;' .. get_english_style('min-width:80px;') %>"><%= L"密码：" %></div>
+                                        <input type="text" onfocusout="check_register_password" PasswordChar="*" SkipAutoBadWordFilter="true" class="bbs_text text_field" EmptyText='<%= L"请输入密码" %>' style="height: 30px;" name="register_account_password" />
+                                        <input name="checkbox_password" type="checkbox" checked="false" iconsize="22" style="position: relative;margin-left: -25px;margin-top: 5px;" CheckedBG="Texture/Aries/Common/Teen/map/players_shown_32bits.png;0 0 22 22" UncheckedBG="Texture/Aries/Common/Teen/map/players_hidden_32bits.png;0 0 22 22" onclick="set_show_password"/>
+                                    </div>
+                                    <pe:container name="captcha_field_error" visible="false" style="display:none;background:">
+                                        <!-- error message -->
+                                        <div>
+                                            <label style="font-size: 12px;base-font-size: 12px;color: #EB2222;margin-left: 62px;" name="captcha_field_error_msg" />
+                                        </div>
+                                    </pe:container>
+                                    <div style="">
+                                        <div style="<%='float:left;min-width:65px;' .. get_english_style('min-width:80px;') %>"><%= L"验证码：" %></div>
+                                        <input type="text" onfocusout="check_captcha" class="bbs_text text_field" EmptyText='<%= L"请输入验证码" %>' style="<%= 'height: 30px;width: 100px;' .. get_english_style('width:140px;') %>" name="captcha" />
+                                        <div style="float:left;background-color: #e9f4ff;margin-left: 5px;width: 60px; height: 30px;padding: 4px;">
+                                            <input type="button" style="height: 26px;width: 56px;" name="captcha_show" onclick="update_captcha" />
+                                        </div>
+                                    </div>
+                                    <pe:container name="agree_field_error" visible="false" style="display:none;background:">
+                                        <!-- error message -->
+                                        <div>
+                                            <label style="font-size: 12px;base-font-size: 12px;color: #EB2222;margin-left: 62px;" name="agree_field_error_msg" />
+                                        </div>
+                                    </pe:container>
+                                    <div style="width: 250px;margin-top: 5px;margin-bottom: 5px;">
+                                        <input type="checkbox" style="float:left;margin-top:3px;min-width:90px;" name="agree" onclick="set_register_agree" checked="checked"/>
+                                        <div style="float:left; color: white;font-size: 12px;margin-top:1px;">
+                                            <div style="float:left;width: 2px;"></div>
+                                            <%= L"我同意" %>
+                                            <div style="float:left;color: #65A3C6" onclick="user_agreement()"><%= L"《Paracraft用户协议》" %></div>
+                                            <%= L"中的内容" %>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <input type="button"
+                                               class="login_button"
+                                               style="margin-top: 10px;margin-left:50px;width: 140px;"
+                                               onclick="register()"
+                                               value='<%= L"注册"%>' />
+                                    </div>
+                                </pe:if>
+                                <pe:if condition="<%= get_register_mode() == 'phonenumber' %>">
+                                    <pe:container name="register_phonenumber_step_1" visible="true" style="display:none;position: relative;background:">
+                                        <div style="color: #FFFFFF;">
+                                            <pe:container name="phonenumber_field_error" visible="false" style="display:none;background:">
+                                                <!-- error message -->
+                                                <div>
+                                                    <label style="font-size: 12px;base-font-size: 12px;color: #EB2222;margin-left: 62px;" name="phonenumber_field_error_msg" />
+                                                </div>
+                                            </pe:container>
+                                            <div style="">
+                                                <div style="<%='float:left;min-width:65px;' .. get_english_style('min-width:120px;') %>"><%= L"手机号：" %></div>
+                                                <input type="text"
+                                                       class="bbs_text text_field"
+                                                       EmptyText='<%= L"请输入密码" %>'
+                                                       style="<%= 'height: 30px;'  .. get_english_style('width:160px;') %>"
+                                                       onfocusout="check_phone_number()"
+                                                       name="phonenumber" />
+                                            </div>
+                                            <pe:container name="phonecaptcha_field_error" visible="false" style="display:none;background:">
+                                                <!-- error message -->
+                                                <div>
+                                                    <label style="font-size: 12px;base-font-size: 12px;color: #EB2222;margin-left: 62px;" name="phonecaptcha_field_error_msg" />
+                                                </div>
+                                            </pe:container>
+                                            <div style="">
+                                                <div style="<%='float:left;min-width:65px;' .. get_english_style('min-width:75px;') %>"><%= L"验证码：" %></div>
+                                                <input type="text" onfocusout="checkout_phonecaptcha" class="bbs_text text_field" EmptyText='<%= L"请输入验证码" %>' style="height: 30px;width: 85px;" name="phonecaptcha" />
+                                                <input
+                                                    type="button"
+                                                    name="get_phone_captcha"
+                                                    class="mc_light_grey_button_with_fillet"
+                                                    style="margin-left:5px;width: 75px;height:30px;font-size: 13px;"
+                                                    onclick="get_phone_captcha()"
+                                                    disabled="disabled"
+                                                    value='<%= L"获取验证码"%>'
+                                                />
+                                            </div>
+                                            <pe:container name="phonepassword_field_error" visible="false" style="display:none;background:">
+                                                <!-- error message -->
+                                                <div>
+                                                    <label style="font-size: 12px;base-font-size: 12px;color: #EB2222;margin-left: 62px;" name="phonepassword_field_error_msg" />
+                                                </div>
+                                            </pe:container>
+                                            <div>
+                                                <div style="<%='float:left;min-width:65px;' .. get_english_style('min-width:120px;') %>"><%= L"密码：" %></div>
+                                                <input type="text"
+                                                       onfocusout="check_phone_password"
+                                                       PasswordChar="*"
+                                                       class="bbs_text text_field"
+                                                       EmptyText='<%= L"请输入密码" %>'
+                                                       style="<%= 'height: 30px;'  .. get_english_style('width:160px;') %>"
+                                                       name="phonepassword" />
+                                                <input name="checkboxPhonePassword"
+                                                       type="checkbox"
+                                                       checked="false"
+                                                       iconsize="22"
+                                                       style="position: relative;margin-left: -25px;margin-top: 5px;"
+                                                       CheckedBG="Texture/Aries/Common/Teen/map/players_shown_32bits.png;0 0 22 22"
+                                                       UncheckedBG="Texture/Aries/Common/Teen/map/players_hidden_32bits.png;0 0 22 22"
+                                                       onclick="set_show_password"/>
+                                            </div>
+                                            <pe:container name="phone_agree_field_error" visible="false" style="display:none;background:">
+                                                <!-- error message -->
+                                                <div>
+                                                    <label style="font-size: 12px;base-font-size: 12px;color: #EB2222;margin-left: 62px;" name="phone_agree_field_error_msg" />
+                                                </div>
+                                            </pe:container>
+                                            <div style="width: 250px;margin-bottom: 5px;">
+                                                <input type="checkbox" style="float:left;margin-top:3px;min-width:90px;" name="phone_agree" onclick="set_phone_agree" checked="checked"/>
+                                                <div style="float:left; color: white;font-size: 12px;margin-top:1px;">
+                                                    <div style="float:left;width: 2px;"></div>
+                                                    <%= L"我同意" %>
+                                                    <div style="float:left;color: #65A3C6" onclick="user_agreement()"><%= L"《Paracraft用户协议》" %></div>
+                                                    <%= L"中的内容" %>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <input type="button" 
+                                                       class="login_button"
+                                                       style="margin-left:50px;width: 140px;"
+                                                       onclick="next()"
+                                                       value='<%= L"下一步"%>' />
+                                            </div>
+                                        </div>
+                                    </pe:container>
+                                    <pe:container name="register_phonenumber_step_2" visible="false" style="display:none;position: relative;background:">
+                                        <div style="color: #FFFFFF;margin-top: 40px;">
+                                            <div style="margin-top: 10px;font-size: 13px;"><%= L"为自己取一个个性账号名吧" %></div>
+                                            <div style="margin-top:10px;">
+                                                <pe:container name="phone_register_account_field_error" visible="false" style="display:none;background:">
+                                                    <!-- error message -->
+                                                    <div>
+                                                        <label style="font-size: 12px;base-font-size: 12px;color: #EB2222;margin-left: 62px;" name="phone_register_account_field_error_msg" />
+                                                    </div>
+                                                </pe:container>
+                                                <div style="<%='float:left;min-width:65px;' %>"><%= L"账户：" %></div>
+                                                <input type="text"
+                                                    class="bbs_text text_field"
+                                                    onfocusin="show_notice1()"
+                                                    onfocusout="hide_notice1()"
+                                                    onchange="set_personal_web1"
+                                                    EmptyText='<%= L"请输入账号" %>'
+                                                    style="height: 30px;"
+                                                    name="phone_register_account" />
+                                                <pe:container name="notice1" visible="false" style="display:none;position:relative;background:">
+                                                    <div style="margin-top:-140px;margin-left: 20px; width: 290px; height: 100px;padding: 8px;font-size: 12px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#72 20 16 16:3 3 3 3);">
+                                                        <div><%= L'账户名注册成功不可更改' %></div>
+                                                        <div><%= L'推荐使用英文字母、数字组合（例如：keep123）' %></div>
+                                                        <div><%= L'个人网站地址：' %></div>
+                                                        <div>
+                                                            <pe:label name="personalweb1" value="https://keepwork.com/u/" style="color:#409eff;font-size:12px;" />
+                                                        </div>
+                                                    </div>
+                                                </pe:container>
+                                            </div>
+                                            <div>
+                                                <input type="button"
+                                                       class="login_button"
+                                                       style="margin-top: 10px;margin-left:60px;width: 120px;"
+                                                       onclick="phone_register()"
+                                                       value='<%= L"注册"%>' />
+                                            </div>
+                                        </div>
+                                    </pe:container>
+                                </pe:if>
+                            </div>
+                        </pe:if>
                     </div>
                 </div>
             </pe:container>
