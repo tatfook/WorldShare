@@ -172,6 +172,8 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
         return false
     end
 
+    echo(response, true)
+
     -- login api success ↓
     local token = response["token"] or System.User.keepworktoken
     local userId = response["id"] or 0
@@ -207,6 +209,10 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
     
     if response.student and response.student == 1 then
         userType.student = true
+    end
+
+    if response.freeStudent and response.freeStudent == 1 then
+        userType.freeStudent = true
     end
 
     if not userType.teacher and not userType.student and not userType.orgAdmin then

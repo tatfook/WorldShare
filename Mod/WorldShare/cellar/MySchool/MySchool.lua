@@ -63,27 +63,29 @@ function MySchool:Show(callback)
             end
         end
 
-        self.allData[#self.allData + 1] = {
-            element_type = 1,
-            title = 'Texture/Aries/Creator/keepwork/my_school_32bits.png#6 31 85 18'
-        }
-
-        for key, item in ipairs(self.schoolData) do
-            item.element_type = 2
-            self.allData[#self.allData + 1] = item
+        if self.schoolData and #self.schoolData > 0 then
+            self.allData[#self.allData + 1] = {
+                element_type = 1,
+                title = 'Texture/Aries/Creator/keepwork/my_school_32bits.png#6 31 85 18'
+            }
+    
+            for key, item in ipairs(self.schoolData) do
+                item.element_type = 2
+                self.allData[#self.allData + 1] = item
+            end
         end
 
-        self.allData[#self.allData + 1] = {
-            element_type = 1,
-            title = 'Texture/Aries/Creator/keepwork/my_school_32bits.png#6 7 85 18'
-        }
-
-        for key, item in ipairs(self.orgData) do
-            item.element_type = 2
-            self.allData[#self.allData + 1] = item
+        if self.orgData and #self.orgData > 0 then
+            self.allData[#self.allData + 1] = {
+                element_type = 1,
+                title = 'Texture/Aries/Creator/keepwork/my_school_32bits.png#6 7 85 18'
+            }
+    
+            for key, item in ipairs(self.orgData) do
+                item.element_type = 2
+                self.allData[#self.allData + 1] = item
+            end
         end
-
-        echo(self.allData, true)
 
         params._page:Refresh(0.01)
     end)
@@ -483,7 +485,7 @@ function MySchool:OpenTeachingPlanCenter(orgUrl)
         return
     end
 
-    if userType.student then
+    if userType.student or userType.freeStudent then
         local url = '/org/' .. orgUrl .. '/student'
         Mod.WorldShare.Utils.OpenKeepworkUrlByToken(url)
         return
