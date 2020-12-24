@@ -20,9 +20,9 @@ local VipNotice = NPL.export()
 
 VipNotice.onlyRecharge = false;
 
-function VipNotice:Init(bEnable, callback)
+function VipNotice:Init(bEnable, from, callback)
     VipNotice.callback = callback
-
+    VipNotice.from = from;
     if not KeepworkService:IsSignedIn() then
         Mod.WorldShare.Store:Set("user/loginText", L"您需要登录并成为VIP用户，才能使用此功能")
         LoginModal:Init(function(bSuccesed)
@@ -48,9 +48,43 @@ end
 
 function VipNotice:ShowPage()
     GameLogic.GetFilters():apply_filters('user_behavior', 1, 'click.vip.vip_popup')
-    Mod.WorldShare.Utils.ShowWindow(0, 0, "Mod/WorldShare/cellar/VipNotice/VipNotice.html", "VipNotice", 0, 0, "_fi", false, 101)
+    NPL.load("(gl)Mod/WorldShare/cellar/VipNotice/QRCodeWnd.lua");
+    self.QRCodeWnd = commonlib.gettable("Mod.WorldShare.cellar.VipNotice.QRCodeWnd");
+    self.QRCodeWnd:Show();
+    
+    local params = {
+		url = "Mod/WorldShare/cellar/VipNotice/VipNotice.html", 
+		name = "VipNotice.ShowPage", 
+		isShowTitleBar = false,
+		DestroyOnClose = true,
+		bToggleShowHide=false, 
+		style = CommonCtrl.WindowFrame.ContainerStyle,
+		allowDrag = false,
+		click_through = false, 
+		bShow = true,
+		isTopLevel = true,
+		app_key = MyCompany.Aries.Creator.Game.Desktop.App.app_key, 
+		directPosition = true,
+			align = "_ct",
+			x = -700/2,
+			y = -570/2,
+			width = 700,
+			height = 570,
+	};
+	System.App.Commands.Call("File.MCMLWindowFrame", params);
+    
+    --Mod.WorldShare.Utils.ShowWindow(0, 0, "Mod/WorldShare/cellar/VipNotice/VipNotice.html", "VipNotice", 0, 0, "_fi", false, 0)
 end
 
 function VipNotice:RefreshVipInfo()
     UserInfo:LoginWithToken(VipNotice.callback);
+end
+
+function VipNotice:Close()
+    self.QRCodeWnd:Hide();
+end
+
+function VipNotice:GetQRCode()
+    local qrcode = string.format("%s/p/qr/purchase?userId=%s&from=%s",KeepworkService:GetKeepworkUrl(), Mod.WorldShare.Store:Get('user/userId'), VipNotice.from);
+    return qrcode;
 end

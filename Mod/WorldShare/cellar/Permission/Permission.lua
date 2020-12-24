@@ -67,6 +67,7 @@ function Permission:ShowFailDialog(authName)
     if authName == "OnlineTeaching" then
         _guihelper.MessageBox(L"此功能需要教师权限")
     else
-        VipNotice:Init(false);
     end
+    VipNotice:Init(false, KeepworkServicePermission.AllAuth[authName]);
+
 end
