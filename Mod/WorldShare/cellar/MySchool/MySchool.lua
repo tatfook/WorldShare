@@ -20,6 +20,7 @@ function MySchool:Show(callback)
     self.hasSchoolJoined = false
     self.schoolData = {}
     self.orgData = {}
+    self.allData = {}
     self.callback = callback
     self.searchText = ""
 
@@ -30,10 +31,10 @@ function MySchool:Show(callback)
     KeepworkServiceSchoolAndOrg:GetUserAllOrgs(function(orgData)
         Mod.WorldShare.MsgBox:Close()
 
-        self.hasJoined = false
+        echo(orgData, true)
 
+        self.hasJoined = false
         if type(orgData) == "table" and #orgData > 0 then
-            self.orgData = orgData
             self.hasJoined = true
         
             for key, item in ipairs(orgData) do
@@ -49,6 +50,40 @@ function MySchool:Show(callback)
                 end
             end
         end
+
+        for key, item in ipairs(orgData) do
+            if item.type ~= 4 then
+                -- org data
+                self.orgData[#self.orgData + 1] = item
+            end
+
+            if item.type == 4 then
+                -- school data
+                self.schoolData[#self.schoolData + 1] = item
+            end
+        end
+
+        self.allData[#self.allData + 1] = {
+            element_type = 1,
+            title = 'Texture/Aries/Creator/keepwork/my_school_32bits.png#6 31 85 18'
+        }
+
+        for key, item in ipairs(self.schoolData) do
+            item.element_type = 2
+            self.allData[#self.allData + 1] = item
+        end
+
+        self.allData[#self.allData + 1] = {
+            element_type = 1,
+            title = 'Texture/Aries/Creator/keepwork/my_school_32bits.png#6 7 85 18'
+        }
+
+        for key, item in ipairs(self.orgData) do
+            item.element_type = 2
+            self.allData[#self.allData + 1] = item
+        end
+
+        echo(self.allData, true)
 
         params._page:Refresh(0.01)
     end)

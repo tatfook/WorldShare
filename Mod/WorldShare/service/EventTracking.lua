@@ -227,15 +227,15 @@ EventTrackingService.map = {
         },
         home = { -- 家园
             click_avatar = 'click.home.click_avatar', -- 头像点击次数
-            click_block = 'click.home.click_block', -- 方块点击次数
+            click_code_block = 'click.home.click_code_block', -- 代码方块点击次数
             thumbs_up = 'click.home.click.thumbs_up', -- 点赞点击次数
             favorited = 'click.home.click.favorited', -- 收藏点击次数
         },
-        sun_s_art_of_war_game = {
+        sun_s_art_of_war_game = { -- 孙子兵法
             night_road = 'click.sun_s_art_of_war_game.night_road', -- 关卡“夜路前行”点击次数
             click_pay = 'click.sun_s_art_of_war_game.click_pay', -- 孙子兵法中点击已完成支付用户会员人数
         },
-        vip = {
+        vip = { -- VIP
             vip_popup = 'click.vip.vip_popup', -- 弹出会员弹窗次数
             parents_help = 'click.vip.parents_help', -- "找家长续费" 点击次数
             payment_completed = 'click.vip.payment_completed', -- “已完成支付” 点击次数

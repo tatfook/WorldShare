@@ -22,6 +22,7 @@
                     end
 
                     function open()
+                        GameLogic.GetFilters():apply_filters('user_behavior', 1, 'click.vip.parents_help')
                         ParaGlobal.ShellExecute("open", KeepworkService:GetKeepworkUrl() .. "/vip", "", "", 1)
                         firstOpen = false;
                         page:Refresh(0);
@@ -32,6 +33,7 @@
                     end
 
                     function refreshVip()
+                        GameLogic.GetFilters():apply_filters('user_behavior', 1, 'click.vip.payment_completed')
                         VipNotice.RefreshVipInfo();
                         page:CloseWindow();
                     end

@@ -47,6 +47,7 @@ function VipNotice:CheckVip(bEnable)
 end
 
 function VipNotice:ShowPage()
+    GameLogic.GetFilters():apply_filters('user_behavior', 1, 'click.vip.vip_popup')
     Mod.WorldShare.Utils.ShowWindow(0, 0, "Mod/WorldShare/cellar/VipNotice/VipNotice.html", "VipNotice", 0, 0, "_fi", false, 101)
 end
 

@@ -55,7 +55,7 @@
                 end
 
                 function get_data()
-                    return MySchool.orgData
+                    return MySchool.allData
                 end
 
                 function has_school_joined()
@@ -193,6 +193,16 @@
 
                     MySchool:OpenTeachingPlanCenter(curData.orgUrl)
                 end
+
+                function get_container_style()
+                    local cur_data = get_data()
+
+                    if #cur_data > 4 then
+                        return 'padding: 16px;'
+                    else
+                        return 'padding: 24px;'
+                    end
+                end
             ]]>
         </script>
         <style type="text/mcss" src="Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss">
@@ -209,86 +219,94 @@
                 }
             }
         </style>
-        <kp:window width="600" height="380" icon="Texture/Aries/Creator/keepwork/Window/title/biaoti_xuexiao_32bits.png" onclose="close()">
+        <kp:window
+            width="600"
+            height="380"
+            icon="Texture/Aries/Creator/keepwork/Window/title/biaoti_wodexuexiao_32bits.png"
+            icon_width="156"
+            onclose="close()">
             <div width="100%" height="100%">
                 <div style="width: 600px; height: 40px;">
-                    <div style="margin-left: 120px;margin-top: 14px;font-size: 14px;base-font-size: 14px;color: #ffffff;"><%=L"我的学校"%></div>
                 </div>
                 <pe:if condition="<%= has_joined(1) %>">
-                    <div style="padding: 15px;">
-                        <div style="color: white;height: 265px;;margin-bottom: 10px">
+                    <div style="<%= get_container_style() %>">
+                        <div style="color: white;height: 265px;margin-bottom: 10px">
                             <pe:gridview
                                 RememberScrollPos="true"
                                 AllowPaging="false"
-                                VerticalScrollBarStep="50"
-                                DefaultNodeHeight="85"
+                                DefaultNodeHeight="20"
                                 ItemsPerLine="1"
                                 DataSource="<%= get_data() %>"
                             >
                                 <Columns>
-                                    <pe:if condition="<%= Eval('type') == 4 %>">
-                                        <div style="width: 550px;height: 100px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#435 212 30 30:11 11 11 11);float: left;margin-bottom: 10px;margin-right: 10px;">
-                                            <div style="position: relative;width: 550px;height: 100px;">
-                                                <div style="margin-left: 220px;margin-top: 60px;width: 330px;height: 35px;">
-                                                    <div style="float: left;width: 100px;height: 35px;">
-                                                        <pe:if condition="<%= has_project_id() %>">
-                                                            <input type="button" class="theme1_baby_bule_button" name='<%= Eval("index") %>' style="height: 35px;width: 100px;" value="<%= L'3D校园' %>" onclick="enter_world()"/>
-                                                        </pe:if>
-                                                    </div>
-                                                    <div style="float: left;width: 105px;height: 35px;margin-left: 5px;">
-                                                        <input type="button" class="theme1_lime_button" name='<%= Eval("index") %>' style="height: 35px;width: 110px;" value="<%= L'首页' %>" onclick="open_page()"/>
-                                                    </div>
-                                                    <div style="float: left;width: 105px;height: 35px;">
-                                                        <input type="button" class="theme1_lime_button" name='<%= Eval("index") %>' style="height: 35px;width: 110px;margin-left: 5px;" value="<%= L'教学中心' %>" onclick="open_teaching_plan_center()"/>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div style="float:left; margin-left: 10px;margin-top: 10px;">
-                                                <div style="position: relative;width: 120px;height: 80px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#394 211 32 32:9 9 9 9);"></div>
-                                                <div style="width: 120px;height: 80px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#287 346 170 99);"></div>
-                                            </div>
-                                            <div style="float:left; margin-left: 10px;margin-top: 10px;width: 350px;color: #000000">
-                                                <div><%= get_name() %></div>
-                                                <div style="font-size: 12px;color:#555555;"><%= Eval('fullname') %></div>
-                                            </div>
-                                        </div>
+                                    <pe:if condition="<%= Eval('element_type') == 1 %>">
+                                        <div style="<%= 'position: relative;background: url(' .. Eval('title') .. ');width: 85px;height: 18px;'  %>"></div>
                                     </pe:if>
-                                    <pe:if condition="<%= Eval('type') ~= 4 %>">
-                                        <div style="width: 550px;height: 100px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#435 212 30 30:11 11 11 11);float: left;margin-bottom: 10px;margin-right: 10px;">
-                                            <div style="position: relative;width: 550px;height: 100px;">
-                                                <!-- <div style="margin-left: 325px;margin-top: 60px;width: 225px;height: 35px;">
-                                                    <div style="float: left;width: 100px;height: 35px;">
-                                                        <pe:if condition="<%= has_project_id() %>">
-                                                            <input type="button" class="theme1_baby_bule_button" name='<%= Eval("index") %>' style="height: 35px;width: 100px;" value="<%= L'进入机构世界' %>" onclick="enter_world()"/>
-                                                        </pe:if>
-                                                    </div>
-                                                    <div style="float: left;width: 105px;height: 35px;">
-                                                        <input type="button" class="theme1_lime_button" name='<%= Eval("index") %>' style="height: 35px;width: 110px;margin-left: 5px;" value="<%= L'进入机构主页' %>" onclick="open_page()" />
-                                                    </div>
-                                                </div> -->
-                                                <div style="margin-left: 220px;margin-top: 60px;width: 330px;height: 35px;">
-                                                    <div style="float: left;width: 100px;height: 35px;">
-                                                        <pe:if condition="<%= has_project_id() %>">
-                                                            <input type="button" class="theme1_baby_bule_button" name='<%= Eval("index") %>' style="height: 35px;width: 100px;" value="<%= L'3D校园' %>" onclick="enter_world()"/>
-                                                        </pe:if>
-                                                    </div>
-                                                    <div style="float: left;width: 105px;height: 35px;margin-left: 5px;">
-                                                        <input type="button" class="theme1_lime_button" name='<%= Eval("index") %>' style="height: 35px;width: 110px;" value="<%= L'首页' %>" onclick="open_page()"/>
-                                                    </div>
-                                                    <div style="float: left;width: 105px;height: 35px;">
-                                                        <input type="button" class="theme1_lime_button" name='<%= Eval("index") %>' style="height: 35px;width: 110px;margin-left: 5px;" value="<%= L'教学中心' %>" onclick="open_teaching_plan_center()"/>
+                                    <pe:if condition="<%= Eval('element_type') == 2 %>">
+                                        <pe:if condition="<%= Eval('type') == 4 %>">
+                                            <div style="width: 550px;height: 100px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#435 212 30 30:11 11 11 11);float: left;margin-bottom: 10px;margin-right: 10px;">
+                                                <div style="position: relative;width: 550px;height: 100px;">
+                                                    <div style="margin-left: 220px;margin-top: 60px;width: 330px;height: 35px;">
+                                                        <div style="float: left;width: 100px;height: 35px;">
+                                                            <pe:if condition="<%= has_project_id() %>">
+                                                                <input type="button" class="theme1_baby_bule_button" name='<%= Eval("index") %>' style="height: 35px;width: 100px;" value="<%= L'3D校园' %>" onclick="enter_world()"/>
+                                                            </pe:if>
+                                                        </div>
+                                                        <div style="float: left;width: 105px;height: 35px;margin-left: 5px;">
+                                                            <input type="button" class="theme1_lime_button" name='<%= Eval("index") %>' style="height: 35px;width: 110px;" value="<%= L'首页' %>" onclick="open_page()"/>
+                                                        </div>
+                                                        <div style="float: left;width: 105px;height: 35px;">
+                                                            <input type="button" class="theme1_lime_button" name='<%= Eval("index") %>' style="height: 35px;width: 110px;margin-left: 5px;" value="<%= L'教学中心' %>" onclick="open_teaching_plan_center()"/>
+                                                        </div>
                                                     </div>
                                                 </div>
+                                                <div style="float:left; margin-left: 10px;margin-top: 10px;">
+                                                    <div style="position: relative;width: 120px;height: 80px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#394 211 32 32:9 9 9 9);"></div>
+                                                    <div style="width: 120px;height: 80px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#287 346 170 99);"></div>
+                                                </div>
+                                                <div style="float:left; margin-left: 10px;margin-top: 10px;width: 350px;color: #000000">
+                                                    <div><%= get_name() %></div>
+                                                    <div style="font-size: 12px;color:#555555;"><%= Eval('fullname') %></div>
+                                                </div>
                                             </div>
-                                            <div style="float:left; margin-left: 10px;margin-top: 10px;">
-                                                <div style="position: relative;width: 120px;height: 80px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#394 211 32 32:9 9 9 9);"></div>
-                                                <div style="<%= 'width: 120px;height: 80px;background:url(' .. (Eval('logo') or 'Texture/Aries/Creator/keepwork/worldshare_32bits.png#287 346 170 99') .. ');' %>"></div>
+                                        </pe:if>
+                                        <pe:if condition="<%= Eval('type') ~= 4 %>">
+                                            <div style="width: 550px;height: 100px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#435 212 30 30:11 11 11 11);float: left;margin-bottom: 10px;margin-right: 10px;">
+                                                <div style="position: relative;width: 550px;height: 100px;">
+                                                    <!-- <div style="margin-left: 325px;margin-top: 60px;width: 225px;height: 35px;">
+                                                        <div style="float: left;width: 100px;height: 35px;">
+                                                            <pe:if condition="<%= has_project_id() %>">
+                                                                <input type="button" class="theme1_baby_bule_button" name='<%= Eval("index") %>' style="height: 35px;width: 100px;" value="<%= L'进入机构世界' %>" onclick="enter_world()"/>
+                                                            </pe:if>
+                                                        </div>
+                                                        <div style="float: left;width: 105px;height: 35px;">
+                                                            <input type="button" class="theme1_lime_button" name='<%= Eval("index") %>' style="height: 35px;width: 110px;margin-left: 5px;" value="<%= L'进入机构主页' %>" onclick="open_page()" />
+                                                        </div>
+                                                    </div> -->
+                                                    <div style="margin-left: 220px;margin-top: 60px;width: 330px;height: 35px;">
+                                                        <div style="float: left;width: 100px;height: 35px;">
+                                                            <pe:if condition="<%= has_project_id() %>">
+                                                                <input type="button" class="theme1_baby_bule_button" name='<%= Eval("index") %>' style="height: 35px;width: 100px;" value="<%= L'3D校园' %>" onclick="enter_world()"/>
+                                                            </pe:if>
+                                                        </div>
+                                                        <div style="float: left;width: 105px;height: 35px;margin-left: 5px;">
+                                                            <input type="button" class="theme1_lime_button" name='<%= Eval("index") %>' style="height: 35px;width: 110px;" value="<%= L'首页' %>" onclick="open_page()"/>
+                                                        </div>
+                                                        <div style="float: left;width: 105px;height: 35px;">
+                                                            <input type="button" class="theme1_lime_button" name='<%= Eval("index") %>' style="height: 35px;width: 110px;margin-left: 5px;" value="<%= L'教学中心' %>" onclick="open_teaching_plan_center()"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div style="float:left; margin-left: 10px;margin-top: 10px;">
+                                                    <div style="position: relative;width: 120px;height: 80px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#394 211 32 32:9 9 9 9);"></div>
+                                                    <div style="<%= 'width: 120px;height: 80px;background:url(' .. (Eval('logo') or 'Texture/Aries/Creator/keepwork/worldshare_32bits.png#287 346 170 99') .. ');' %>"></div>
+                                                </div>
+                                                <div style="float:left; margin-left: 10px;margin-top: 10px;width: 350px;color: #000000">
+                                                    <div><%= get_name() %></div>
+                                                    <div style="font-size: 12px;color:#555555;"><%= Eval('fullname') %></div>
+                                                </div>
                                             </div>
-                                            <div style="float:left; margin-left: 10px;margin-top: 10px;width: 350px;color: #000000">
-                                                <div><%= get_name() %></div>
-                                                <div style="font-size: 12px;color:#555555;"><%= Eval('fullname') %></div>
-                                            </div>
-                                        </div>
+                                        </pe:if>
                                     </pe:if>
                                 </Columns>
                             </pe:gridview>
