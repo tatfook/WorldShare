@@ -852,3 +852,7 @@ end
 function KeepworkServiceSession:TextingToInviteRealname(cellphone, name, callback)
     KeepworkUsersApi:TextingToInviteRealname(cellphone, name, callback, callback)
 end
+
+function KeepworkServiceSession:CellphoneCaptchaVerify(cellphone, cellphone_captcha, callback)
+    KeepworkUsersApi:CellphoneCaptchaVerify(cellphone, cellphone_captcha, callback, callback)
+end

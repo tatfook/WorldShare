@@ -207,8 +207,16 @@
                             return
                         end
 
-                        page:FindControl('register_phonenumber_step_1').visible = false
-                        page:FindControl('register_phonenumber_step_2').visible = true
+                        KeepworkServiceSession:CellphoneCaptchaVerify(phonenumber, phonecaptcha, function(data, err)
+                            if err == 400 then
+                                page:SetUIValue('phonenumber_field_error_msg', L"*手机验证码错误")
+                                page:FindControl('phonenumber_field_error').visible = true
+                                return
+                            end
+
+                            page:FindControl('register_phonenumber_step_1').visible = false
+                            page:FindControl('register_phonenumber_step_2').visible = true
+                        end)
                     end
 
                     function phone_register()
@@ -545,6 +553,8 @@
                         else
                             phonepassword = page:GetValue('phonepassword_hide')
                         end
+
+                        page:SetValue('phonepassword', phonepassword)
 
                         if phonepassword and #phonepassword == 0 then
                             page:SetUIValue('phonepassword_field_error_msg', L"*密码不能为空")

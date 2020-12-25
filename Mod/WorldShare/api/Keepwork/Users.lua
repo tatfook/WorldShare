@@ -355,3 +355,25 @@ function KeepworkUsersApi:TextingToInviteRealname(cellphone, name, success, erro
 
     KeepworkBaseApi:Post('/users/textingToInviteRealname', params, nil, success, error)
 end
+
+-- url:/users/cellphone_captcha_verify
+-- method: POST
+-- header:
+-- params:
+--[[
+    cellphone string necessary
+    captcha string necessary
+]]
+-- return: object
+function KeepworkUsersApi:CellphoneCaptchaVerify(cellphone, captcha, success, error)
+    if not cellphone or not captcha then
+        return false
+    end
+
+    local params = {
+        cellphone = cellphone,
+        captcha = captcha
+    }
+
+    KeepworkBaseApi:Post('/users/cellphone_captcha_verify', params, nil, success, error)
+end
