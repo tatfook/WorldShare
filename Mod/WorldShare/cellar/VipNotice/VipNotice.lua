@@ -15,7 +15,8 @@ local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua
 -- UI
 local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
 local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua")
-
+NPL.load("(gl)script/ide/System/Windows/Window.lua");
+local Window = commonlib.gettable("System.Windows.Window");
 local VipNotice = NPL.export()
 
 VipNotice.TypeNames = {
@@ -65,31 +66,21 @@ function VipNotice:CheckVip(bEnable)
     end
 end
 
-function VipNotice:ShowPage()
-    local params = {
-		url = "Mod/WorldShare/cellar/VipNotice/VipNotice.html", 
-		name = "VipNotice.ShowPage", 
-		isShowTitleBar = false,
-		DestroyOnClose = true,
-		bToggleShowHide=false, 
-		style = CommonCtrl.WindowFrame.ContainerStyle,
-		allowDrag = false,
-		click_through = false, 
-		bShow = true,
-		isTopLevel = true,
-		app_key = MyCompany.Aries.Creator.Game.Desktop.App.app_key, 
-		directPosition = true,
-			align = "_ct",
-			x = -700/2,
-			y = -570/2,
-			width = 700,
-			height = 570,
-	};
-	System.App.Commands.Call("File.MCMLWindowFrame", params);
-    
-    NPL.load("(gl)Mod/WorldShare/cellar/VipNotice/QRCodeWnd.lua");
-    self.QRCodeWnd = commonlib.gettable("Mod.WorldShare.cellar.VipNotice.QRCodeWnd");
-    self.QRCodeWnd:Show();
+function VipNotice:ShowPage()  
+    local width = 750;
+	local height = 530;
+	if(not VipNotice.window) then
+		local window = Window:new();
+		window:EnableSelfPaint(true);
+		window:SetAutoClearBackground(true);
+		VipNotice.window = window;
+	end
+	VipNotice.window:SetCanDrag(true);
+	VipNotice.window:Show({
+		name="VipNotice", 
+		url="Mod/WorldShare/cellar/VipNotice/VipNotice.html",
+		alignment="_ct", left=-width/2, top=-height/2, width = width, height = height, zorder = 1,
+	});
     
    --Mod.WorldShare.Utils.ShowWindow(0, 0, "Mod/WorldShare/cellar/VipNotice/VipNotice.html", "VipNotice", 0, 0, "_fi", false, 0)
     GameLogic.GetFilters():apply_filters('user_behavior', 1, 'click.vip.vip_popup')
@@ -100,7 +91,10 @@ function VipNotice:RefreshVipInfo()
 end
 
 function VipNotice:Close()
-    self.QRCodeWnd:Hide();
+    if VipNotice.window then
+        VipNotice.window:CloseWindow(true)
+        VipNotice.window = nil
+    end
 end
 
 function VipNotice:GetQRCode()

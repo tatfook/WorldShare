@@ -27,7 +27,7 @@ function QRCodeSurface:paintEvent(painter)
 	if(self:width() <= 0) then
 		return;
 	end
-	self:DrawBackground(painter);
+	--self:DrawBackground(painter);
 	self:DrawSome(painter);
 end
 

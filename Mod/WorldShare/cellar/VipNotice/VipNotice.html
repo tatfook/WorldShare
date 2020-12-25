@@ -14,7 +14,7 @@
                     local page = document:GetPageCtrl()
 
                     function close()
-                        page:CloseWindow()
+                        --page:CloseWindow()
                         VipNotice:Close();
                     end
 
@@ -50,6 +50,10 @@
                     function show_get_vip_member_by_code_page()
                         page:CloseWindow()
                         GetVipMemberByCode:Show()
+                    end
+
+                    function get_type_name()
+                        return VipNotice:GetTypeName()
                     end
                 ]]>
             </script>
@@ -188,13 +192,19 @@
                 </pe:if>
             </div>
             -->
-           <kp:window width="700"
-                       height="570"
-                       icon="Texture/Aries/Creator/keepwork/Window/title/biaoti_vip_32bits.png"
-                       onclose="close">
-                <div style="margin-left: 10px;margin-top:42px;width: 666px; height: 522px; background: url(Texture/Aries/Creator/keepwork/vip/bj_666X522_32bits.png#0 0 666 522);">
+            <!-- <div style="margin-left: 10px;margin-top:42px;width: 750px; height: 530px; background: url(Texture/Aries/Creator/keepwork/vip/bj_750X530_32bits.png#0 0 750 530);">
+                
+            </div>-->
+            <div style="width: 750px; height: 530px; background: url(Texture/Aries/Creator/keepwork/vip/bj_750X530_32bits.png#0 0 750 530);">
+                <!--title-->
+                <div style="width: 750px; height: 60px;">
+                    <input type="button" style="margin-left: 710px; margin-top: 20x; width:22px;height:22px;background: url(Texture/Aries/Creator/keepwork/vip/guanbi_32bits.png#0 0 22 22);" onclick="close()"/>
+                    <div style="margin-top: -16px; margin-left: 280px; font-size: 18px;base-font-size: 19px;color: #333333; font-weight: bold;"><%=get_type_name()%></div>
+                </div>   
+                <div style="width: 180px; height: 180px; margin-top: 126px; margin-left: 60px;">
+                    <pe:custom src="QRCodeSurface.lua" classns="Paracraft.Controls.QRCodeSurface" style="width:180px;height:180px;"></pe:custom>
                 </div>
-            </kp:window>
+            </div>
         </pe:mcml>
     </body>
 </html>
