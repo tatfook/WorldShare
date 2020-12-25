@@ -18,6 +18,25 @@ local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua")
 
 local VipNotice = NPL.export()
 
+VipNotice.TypeNames = {
+    a_school_management_system = L"此功能需求开通VIP",
+    t_online_teaching = L"此功能需求开通VIP",
+    s_online_learning = L"此功能需求开通VIP",
+    vip_world_data_save_as = L"此功能需求开通VIP",
+    vip_skin_of_all_protagonists = L"此功能需求开通VIP",
+    vip_python_code_block = L"此功能需求开通VIP",
+    vip_video_plugin_watermark_removal = L"此功能需求开通VIP",
+    vip_lan_40_people_online = L"此功能需求开通VIP",
+    vip_wan_networking = L"此功能需求开通VIP",
+    vip_online_world_data_50mb = L"此功能需求开通VIP",
+    MakeApp = L"此功能需求开通VIP",
+    ChangeAvatarSkin = L"此功能需求开通VIP",
+    t_create_vip_world = L"此功能需求开通VIP",
+    vip_code_game_art_of_war = L"此功能需求开通VIP",
+    vip_weekly_training = L"此功能需求开通VIP",
+    daily_note = L"此功能需求开通VIP",
+    fly_on_paraworld = L"此功能需求开通VIP",
+}
 VipNotice.onlyRecharge = false;
 
 function VipNotice:Init(bEnable, from, callback)
@@ -47,11 +66,6 @@ function VipNotice:CheckVip(bEnable)
 end
 
 function VipNotice:ShowPage()
-    GameLogic.GetFilters():apply_filters('user_behavior', 1, 'click.vip.vip_popup')
-    NPL.load("(gl)Mod/WorldShare/cellar/VipNotice/QRCodeWnd.lua");
-    self.QRCodeWnd = commonlib.gettable("Mod.WorldShare.cellar.VipNotice.QRCodeWnd");
-    self.QRCodeWnd:Show();
-    
     local params = {
 		url = "Mod/WorldShare/cellar/VipNotice/VipNotice.html", 
 		name = "VipNotice.ShowPage", 
@@ -73,7 +87,12 @@ function VipNotice:ShowPage()
 	};
 	System.App.Commands.Call("File.MCMLWindowFrame", params);
     
-    --Mod.WorldShare.Utils.ShowWindow(0, 0, "Mod/WorldShare/cellar/VipNotice/VipNotice.html", "VipNotice", 0, 0, "_fi", false, 0)
+    NPL.load("(gl)Mod/WorldShare/cellar/VipNotice/QRCodeWnd.lua");
+    self.QRCodeWnd = commonlib.gettable("Mod.WorldShare.cellar.VipNotice.QRCodeWnd");
+    self.QRCodeWnd:Show();
+    
+   --Mod.WorldShare.Utils.ShowWindow(0, 0, "Mod/WorldShare/cellar/VipNotice/VipNotice.html", "VipNotice", 0, 0, "_fi", false, 0)
+    GameLogic.GetFilters():apply_filters('user_behavior', 1, 'click.vip.vip_popup')
 end
 
 function VipNotice:RefreshVipInfo()
@@ -87,4 +106,8 @@ end
 function VipNotice:GetQRCode()
     local qrcode = string.format("%s/p/qr/purchase?userId=%s&from=%s",KeepworkService:GetKeepworkUrl(), Mod.WorldShare.Store:Get('user/userId'), VipNotice.from);
     return qrcode;
+end
+
+function VipNotice:GetTypeName()
+    return VipNotice.TypeNames[VipNotice.from] or L"此功能需求开通VIP";
 end

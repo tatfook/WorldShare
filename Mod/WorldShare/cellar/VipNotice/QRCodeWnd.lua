@@ -32,5 +32,5 @@ function QRCodeWnd:Show()
 end
 
 function QRCodeWnd:Hide()
-	self.window:hide();
+	self.window:CloseWindow(true);
 end
