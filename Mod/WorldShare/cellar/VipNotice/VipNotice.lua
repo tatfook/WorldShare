@@ -81,9 +81,9 @@ function VipNotice:ShowPage()
 		url="Mod/WorldShare/cellar/VipNotice/VipNotice.html",
 		alignment="_ct", left=-width/2, top=-height/2, width = width, height = height, zorder = 1,
 	});
-    
+
    --Mod.WorldShare.Utils.ShowWindow(0, 0, "Mod/WorldShare/cellar/VipNotice/VipNotice.html", "VipNotice", 0, 0, "_fi", false, 0)
-    GameLogic.GetFilters():apply_filters('user_behavior', 1, 'click.vip.vip_popup')
+    GameLogic.GetFilters():apply_filters('user_behavior', 1, 'click.vip.funnel.open', { from = self.from })
 end
 
 function VipNotice:RefreshVipInfo()
