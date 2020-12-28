@@ -34,7 +34,7 @@ VipNotice.TypeNames = {
     ChangeAvatarSkin = L"开通会员尽享精彩形象",
     t_create_vip_world = L"开通会员创建特殊权限世界",
     vip_code_game_art_of_war = L"开通会员畅享玩学课堂",
-    vip_weekly_training = L"马上开通会员激活功能",
+    vip_weekly_training = L"开通会员畅享每周实战",
     daily_note = L"开通会员随意观看每日成长视频",
     fly_on_paraworld = L"开通会员马上飞行!",
 }
@@ -103,5 +103,5 @@ function VipNotice:GetQRCode()
 end
 
 function VipNotice:GetTypeName()
-    return VipNotice.TypeNames[VipNotice.from] or L"此功能需要开通会员";
+    return VipNotice.TypeNames[VipNotice.from] or L"马上开通会员激活功能";
 end
