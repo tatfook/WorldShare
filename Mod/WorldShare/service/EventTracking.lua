@@ -224,6 +224,7 @@ EventTrackingService.map = {
             knowledge_bean = 'click.promotion.knowledge_bean', -- 知识豆兑换次数
             skin = 'click.promotion.skin', -- 皮肤兑换次数
             partake = 'click.promotion.partake', -- 参与活动人数（记录用户获取的第一个帽子）
+            turnable = 'click.promotion.turnable', -- 活动转盘点击次数
         },
         home = { -- 家园
             click_avatar = 'click.home.click_avatar', -- 头像点击次数
@@ -236,11 +237,11 @@ EventTrackingService.map = {
             click_pay = 'click.sun_s_art_of_war_game.click_pay', -- 孙子兵法中点击已完成支付用户会员人数
         },
         vip = { -- VIP
-            vip_popup = 'click.vip.vip_popup', -- 弹出会员弹窗次数
+            vip_popup = 'click.vip.vip_popup', -- 弹出会员弹窗次数(废弃)
             parents_help = 'click.vip.parents_help', -- "找家长续费" 点击次数
             payment_completed = 'click.vip.payment_completed', -- “已完成支付” 点击次数
             funnel = {
-                open = 'click.vip.funnel.open' --
+                open = 'click.vip.funnel.open' -- 弹出会员弹窗次数
             }
         }
     }
