@@ -571,7 +571,7 @@ function WorldShare:init()
     GameLogic.GetFilters():add_filter(
         'login_with_token',
         function(callback)
-            local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/Login/UserInfo.lua")
+            local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua")
             UserInfo:LoginWithToken(callback)
         end
     )
