@@ -40,7 +40,16 @@ VipNotice.TypeNames = {
 }
 VipNotice.onlyRecharge = false;
 
+-- from 表示VIP的功能入口，必填
 function VipNotice:Init(bEnable, from, callback)
+    local debug = ParaEngine.GetAppCommandLineByParam("debug", false);
+    if(debug == true or debug =="true" or debug == "True")then
+        if (from == nil or from == "" or VipNotice.TypeNames[from] == nil) then
+            _guihelper.MessageBox(string.format(L"VIP入口为无效值：%s 。", from));
+            return;
+        end
+    end
+
     VipNotice.callback = callback
     VipNotice.from = from;
     if not KeepworkService:IsSignedIn() then

@@ -232,7 +232,8 @@ function WorldShare:init()
     )
 
     -- vip notice
-    GameLogic.GetFilters():add_filter(
+    -- from 表示VIP的功能入口，必填
+   GameLogic.GetFilters():add_filter(
         'VipNotice',
         function(bEnabled, from, callback)
             VipNotice:Init(bEnabled, from, callback)
