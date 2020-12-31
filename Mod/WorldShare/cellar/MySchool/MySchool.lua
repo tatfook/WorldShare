@@ -12,6 +12,7 @@ local MySchool = NPL.load("(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua")
 -- service
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 local KeepworkServiceSchoolAndOrg = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/SchoolAndOrg.lua")
+local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
 
 local MySchool = NPL.export()
 
@@ -465,27 +466,29 @@ function MySchool:OpenTeachingPlanCenter(orgUrl)
         return false
     end
 
-    local userType = Mod.WorldShare.Store:Get('user/userType')
+    KeepworkServiceSession:SetUserLevels(nil, function()
+        local userType = Mod.WorldShare.Store:Get('user/userType')
 
-    if not userType or type(userType) ~= 'table' then
-        return false
-    end
+        if not userType or type(userType) ~= 'table' then
+            return false
+        end
 
-    if userType.orgAdmin then
-        local url = '/org/' .. orgUrl .. '/admin/packages'
-        Mod.WorldShare.Utils.OpenKeepworkUrlByToken(url)
-        return
-    end
+        if userType.orgAdmin then
+            local url = '/org/' .. orgUrl .. '/admin/packages'
+            Mod.WorldShare.Utils.OpenKeepworkUrlByToken(url)
+            return
+        end
 
-    if userType.teacher then
-        local url = '/org/' .. orgUrl .. '/teacher/teach'
-        Mod.WorldShare.Utils.OpenKeepworkUrlByToken(url)
-        return
-    end
+        if userType.teacher then
+            local url = '/org/' .. orgUrl .. '/teacher/teach'
+            Mod.WorldShare.Utils.OpenKeepworkUrlByToken(url)
+            return
+        end
 
-    if userType.student or userType.freeStudent then
-        local url = '/org/' .. orgUrl .. '/student'
-        Mod.WorldShare.Utils.OpenKeepworkUrlByToken(url)
-        return
-    end
+        if userType.student or userType.freeStudent then
+            local url = '/org/' .. orgUrl .. '/student'
+            Mod.WorldShare.Utils.OpenKeepworkUrlByToken(url)
+            return
+        end
+    end)
 end

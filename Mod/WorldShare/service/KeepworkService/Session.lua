@@ -165,6 +165,48 @@ function KeepworkServiceSession:LoginWithToken(token, callback)
     KeepworkUsersApi:Profile(token, callback, callback)
 end
 
+function KeepworkServiceSession:SetUserLevels(response, callback)
+    local userType = {}
+
+    local function Handle()
+        if response.orgAdmin and response.orgAdmin == 1 then
+            userType.orgAdmin = true
+        end
+    
+        if response.tLevel and response.tLevel > 0 then
+            userType.teacher = true
+            Mod.WorldShare.Store:Set("user/tLevel", response.tLevel)
+        end
+        
+        if response.student and response.student == 1 then
+            userType.student = true
+        end
+    
+        if response.freeStudent and response.freeStudent == 1 then
+            userType.freeStudent = true
+        end
+    
+        if not userType.teacher and not userType.student and not userType.orgAdmin then
+            userType.plain = true
+        end
+    
+        Mod.WorldShare.Store:Set("user/userType", userType)
+
+        if callback and type(callback) == 'function' then
+            callback()
+        end
+    end
+
+    if not response then
+        self:Profile(function(data, err)
+            response = data
+            Handle()
+        end)
+    else
+        Handle()
+    end
+end
+
 function KeepworkServiceSession:LoginResponse(response, err, callback)
     if err ~= 200 or type(response) ~= "table" then
         return false
@@ -192,30 +234,7 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
 
     Mod.WorldShare.Store:Set('world/paraWorldId', paraWorldId)
 
-    local userType = {}
-
-    if response.orgAdmin and response.orgAdmin == 1 then
-        userType.orgAdmin = true
-    end
-
-    if response.tLevel and response.tLevel > 0 then
-        userType.teacher = true
-        Mod.WorldShare.Store:Set("user/tLevel", response.tLevel)
-    end
-    
-    if response.student and response.student == 1 then
-        userType.student = true
-    end
-
-    if response.freeStudent and response.freeStudent == 1 then
-        userType.freeStudent = true
-    end
-
-    if not userType.teacher and not userType.student and not userType.orgAdmin then
-        userType.plain = true
-    end
-
-    Mod.WorldShare.Store:Set("user/userType", userType)
+    self:SetUserLevels(response)
 
     if response.vip and response.vip == 1 then
         Mod.WorldShare.Store:Set("user/isVip", true)
@@ -539,6 +558,10 @@ end
 
 -- @param usertoken: keepwork user token
 function KeepworkServiceSession:Profile(callback, token)
+    if not token then
+        token = Mod.WorldShare.Store:Get('user/token')
+    end
+
     KeepworkUsersApi:Profile(token, callback, callback)
 end
 
