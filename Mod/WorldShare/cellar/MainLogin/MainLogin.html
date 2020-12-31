@@ -168,7 +168,12 @@
                             end)
                         end
 
-                        RegisterModal:Register(page)
+                        RegisterModal:Register(page, function(_result)
+                            if _result == false then
+                                page:SetUIValue('captcha_field_error_msg', L"*验证码错误")
+                                page:FindControl('captcha_field_error').visible = true
+                            end
+                        end)
                     end
 
                     function next()
@@ -308,6 +313,29 @@
 
                         page:Refresh(0.01)
 
+                        Mod.WorldShare.Utils.SetTimeOut(function()
+                            local register_account_password_show = page:FindControl('register_account_password_show')
+                            local register_account_password_hide = page:FindControl('register_account_password_hide')
+                            local phonepassword_hide = page:FindControl('phonepassword_hide')
+                            local phonepassword_show = page:FindControl('phonepassword_show')
+
+                            if register_account_password_show then
+                                register_account_password_show.visible = false
+                            end
+
+                            if register_account_password_hide then
+                                register_account_password_hide.visible = true
+                            end
+
+                            if phonepassword_hide then
+                                phonepassword_hide.visible = true
+                            end
+
+                            if phonepassword_show then
+                                phonepassword_show.visible = false
+                            end
+                        end, 200)
+
                         update_captcha()
                     end
 
@@ -320,8 +348,6 @@
                     end
 
                     function set_register_mode()
-                        BroadcastHelper.Clear()
-
                         local beSeted = false
 
                         if RegisterModal.m_mode == 'account' then
@@ -334,6 +360,30 @@
                         end
 
                         page:Refresh(0.01)
+
+                        if RegisterModal.m_mode == 'phonenumber' then
+                            Mod.WorldShare.Utils.SetTimeOut(function()
+                                if page:FindControl('phonepassword_hide') then
+                                    page:FindControl('phonepassword_hide').visible = false
+                                end
+
+                                if page:FindControl('phonepassword_show') then
+                                    page:FindControl('phonepassword_show').visible = true
+                                end
+                            end, 200)
+                        end
+
+                        if RegisterModal.m_mode == 'account' then
+                            Mod.WorldShare.Utils.SetTimeOut(function()
+                                if page:FindControl('register_account_password_hide') then
+                                    page:FindControl('register_account_password_hide').visible = true
+                                end
+
+                                if page:FindControl('register_account_password_show') then
+                                    page:FindControl('register_account_password_show').visible = false
+                                end
+                            end, 200)
+                        end
                     end
 
                     function update_captcha()
@@ -374,11 +424,11 @@
 
                         local timer = commonlib.Timer:new({
                             callbackFunc = function(timer)
-                                page:SetValue("getPhonecaptcha", format("%s(%ds)", L"重新发送", times))
+                                page:SetValue("get_phone_captcha", format("%s(%ds)", L"重新发送", times))
 
                                 if times == 0 then
                                     isClickedGetPhoneCaptcha = false
-                                    page:SetValue("getPhonecaptcha", L"获取验证码")
+                                    page:SetValue("get_phone_captcha", L"获取验证码")
                                     timer:Change(nil, nil)
                                 end
 
@@ -579,8 +629,8 @@
                             page:SetValue('register_account_password_hide', val)
                             page:SetValue('register_account_password', val)
 
-                            page:FindControl('show_password').visible = false
-                            page:FindControl('hide_password').visible = true
+                            page:FindControl('register_account_password_show').visible = false
+                            page:FindControl('register_account_password_hide').visible = true
                         else
                             be_show_password = true
 
@@ -588,8 +638,8 @@
                             page:SetValue('register_account_password_show', val)
                             page:SetValue('register_account_password', val)
 
-                            page:FindControl('show_password').visible = true
-                            page:FindControl('hide_password').visible = false
+                            page:FindControl('register_account_password_show').visible = true
+                            page:FindControl('register_account_password_hide').visible = false
                         end
                     end
 
@@ -601,8 +651,8 @@
                             page:SetValue('phonepassword_hide', val)
                             page:SetValue('phonepassword', val)
 
-                            page:FindControl('show_phone_password').visible = false
-                            page:FindControl('hide_phone_password').visible = true
+                            page:FindControl('phonepassword_show').visible = false
+                            page:FindControl('phonepassword_hide').visible = true
                         else
                             be_show_phone_password = true
 
@@ -610,8 +660,8 @@
                             page:SetValue('phonepassword_show', val)
                             page:SetValue('phonepassword', val)
 
-                            page:FindControl('show_phone_password').visible = true
-                            page:FindControl('hide_phone_password').visible = false
+                            page:FindControl('phonepassword_show').visible = true
+                            page:FindControl('phonepassword_hide').visible = false
                         end
                     end
                 ]]>
@@ -805,12 +855,23 @@
                                     <div>
                                         <div style="<%='float:left;min-width:65px;' .. get_english_style('min-width:80px;') %>"><%= L"密码：" %></div>
                                         <div style="float: left;width: 165px;">
-                                            <pe:container name="show_password" visible="false" style="display:none;position:relative;background:">
-                                                <input type="text" onfocusout="check_register_password" SkipAutoBadWordFilter="true" class="bbs_text text_field" EmptyText='<%= L"请输入密码" %>' style="height: 30px;" name="register_account_password_show" />
-                                            </pe:container>
-                                            <pe:container name="hide_password" visible="true" style="float:left; display:none;position:relative;background:">
-                                                <input type="text" onfocusout="check_register_password" PasswordChar="*" SkipAutoBadWordFilter="true" class="bbs_text text_field" EmptyText='<%= L"请输入密码" %>' style="height: 30px;" name="register_account_password_hide" />
-                                            </pe:container>
+                                            <input type="text"
+                                                   onfocusout="check_register_password"
+                                                   SkipAutoBadWordFilter="true"
+                                                   class="bbs_text text_field"
+                                                   EmptyText='<%= L"请输入密码" %>'
+                                                   style="height: 30px;"
+                                                   name="register_account_password_show"
+                                                   visible="false" />
+                                            <input type="text"
+                                                   onfocusout="check_register_password"
+                                                   PasswordChar="*"
+                                                   SkipAutoBadWordFilter="true"
+                                                   class="bbs_text text_field"
+                                                   EmptyText='<%= L"请输入密码" %>'
+                                                   style="height: 30px;margin-left: -165px;"
+                                                   name="register_account_password_hide"
+                                                   visible="true" />
                                             <input type="hidden" name="register_account_password" value="" />
                                         </div>
                                         <input name="checkbox_password" type="checkbox" checked="false" iconsize="22" style="position: relative;margin-left: -25px;margin-top: 5px;" CheckedBG="Texture/Aries/Common/Teen/map/players_shown_32bits.png;0 0 22 22" UncheckedBG="Texture/Aries/Common/Teen/map/players_hidden_32bits.png;0 0 22 22" onclick="set_show_password"/>
@@ -860,7 +921,7 @@
                                                     <label style="font-size: 12px;base-font-size: 12px;color: #EB2222;margin-left: 62px;" name="phonenumber_field_error_msg" />
                                                 </div>
                                             </pe:container>
-                                            <div style="">
+                                            <div>
                                                 <div style="<%='float:left;min-width:65px;' .. get_english_style('min-width:120px;') %>"><%= L"手机号：" %></div>
                                                 <input type="text"
                                                        class="bbs_text text_field"
@@ -897,23 +958,21 @@
                                             <div>
                                                 <div style="<%='float:left;min-width:65px;' .. get_english_style('min-width:120px;') %>"><%= L"密码：" %></div>
                                                 <div style="float: left;width: 165px;">
-                                                    <pe:container name="show_phone_password" visible="false" style="display:none;position:relative;background:">
-                                                        <input type="text"
+                                                    <input type="text"
                                                            onfocusout="check_phone_password"
                                                            class="bbs_text text_field"
                                                            EmptyText='<%= L"请输入密码" %>'
                                                            style="<%= 'height: 30px;'  .. get_english_style('width:160px;') %>"
-                                                           name="phonepassword_show" />
-                                                    </pe:container>
-                                                    <pe:container name="hide_phone_password" visible="true" style="display:none;position:relative;background:">
-                                                        <input type="text"
+                                                           name="phonepassword_show"
+                                                           visible="false" />
+                                                    <input type="text"
                                                            onfocusout="check_phone_password"
                                                            PasswordChar="*"
                                                            class="bbs_text text_field"
                                                            EmptyText='<%= L"请输入密码" %>'
-                                                           style="<%= 'height: 30px;'  .. get_english_style('width:160px;') %>"
-                                                           name="phonepassword_hide" />
-                                                    </pe:container>
+                                                           style="<%= 'height: 30px;margin-left: -165px;'  .. get_english_style('width:160px;') %>"
+                                                           name="phonepassword_hide"
+                                                           visible="true" />
                                                     <input type="hidden" name="phonepassword" value="" />
                                                 </div>
                                                 <input name="checkboxPhonePassword"
@@ -947,6 +1006,8 @@
                                                        onclick="next()"
                                                        value='<%= L"下一步"%>' />
                                             </div>
+                                            <form name="register_phonenumber_step_1_form">
+                                            </form>
                                         </div>
                                     </pe:container>
                                     <pe:container name="register_phonenumber_step_2" visible="false" style="display:none;position: relative;background:">

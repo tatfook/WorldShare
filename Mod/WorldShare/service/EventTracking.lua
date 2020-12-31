@@ -24,6 +24,7 @@ local EventTrackingDatabase = NPL.load("(gl)Mod/WorldShare/database/EventTrackin
 local EventTrackingService = NPL.export()
 
 EventTrackingService.firstInit = false
+EventTrackingService.firstSave = false
 EventTrackingService.timeInterval = 10000 * 6 -- 60 seconds
 EventTrackingService.currentLoop = nil
 EventTrackingService.map = {
@@ -243,6 +244,9 @@ EventTrackingService.map = {
             funnel = {
                 open = 'click.vip.funnel.open' -- 弹出会员弹窗次数
             }
+        },
+        beginner = {
+            catation = 'click.beginner.catation' -- 领取奖状
         }
     }
 }
@@ -368,8 +372,9 @@ function EventTrackingService:Send(eventType, action, extra, offlineMode)
             return false
         end
 
-        -- prevent send not started event
-        if extra.ended and dataPacket.duration == 0 then
+        -- prevent send and remove not started event 
+        if extra.ended and (dataPacket.duration == 0 or dataPacket.endAt == 0) then
+            EventTrackingDatabase:RemovePacket(userId, action, dataPacket)
             return false
         end
     end
@@ -422,6 +427,24 @@ function EventTrackingService:Loop()
                 callbackFunc = function()
                     -- send not finish event
                     local allData = EventTrackingDatabase:GetAllData()
+                    local finishedCount = 0
+                    local dataTatol = 0
+
+                    for key, item in ipairs(allData) do
+                        local unitinfo = item.unitinfo
+                        dataTatol = dataTatol + #unitinfo
+                    end
+
+                    local function firstTimeSave()
+                        if firstSave then
+                            return
+                        end
+
+                        if finishedCount == dataTatol then
+                            EventTrackingDatabase:SaveToDisk()
+                            firstSave = true
+                        end
+                    end
 
                     for key, item in ipairs(allData) do
                         local userId = item.userId
@@ -441,22 +464,33 @@ function EventTrackingService:Loop()
                                         uItem.packet,
                                         nil,
                                         function(data, err)
+                                            finishedCount = finishedCount + 1
+
                                             if err ~= 200 then
+                                                firstTimeSave()
                                                 return false
                                             end
 
                                             -- remove packet
                                             -- we won't remove record if endAt == 0
+                                            local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
-                                            if uItem.packet.endAt and uItem.packet.endAt == 0 then
-                                                return
+                                            if currentEnterWorld and
+                                               currentEnterWorld.kpProjectId and
+                                               tonumber(currentEnterWorld.kpProjectId) == tonumber(uItem.packet.projectId) then
+                                                if uItem.packet.endAt and uItem.packet.endAt == 0 then
+                                                    firstTimeSave()
+                                                    return
+                                                end
                                             end
 
                                             EventTrackingDatabase:RemovePacket(userId, uItem.action, uItem.packet)
+                                            firstTimeSave()
                                         end,
                                         function(data, err)
                                             -- fail
                                             -- do nothing...
+                                            firstTimeSave()
                                         end
                                     )
                                 end

@@ -703,14 +703,6 @@ function WorldShare:OnWorldLoad()
 
     EventTrackingService:Send(2, 'duration.world.stay', { started = true })
 
-    if GameLogic.GameMode:GetMode() == 'editor' then
-        EventTrackingService:Send(1, 'click.world.edit')
-        EventTrackingService:Send(2, 'duration.world.edit', { started = true })
-    else
-        EventTrackingService:Send(1, 'click.world.play')
-        EventTrackingService:Send(2, 'duration.world.play', { started = true })
-    end
-
     Mod.WorldShare.Store:Remove("world/currentRemoteWorld")
 end
 
@@ -721,12 +713,8 @@ function WorldShare:OnLeaveWorld()
 
     if isEnterWorld then
         EventTrackingService:Send(2, 'duration.world.stay', { ended = true })
-
-        if GameLogic.GameMode:GetMode() == 'editor' then
-            EventTrackingService:Send(2, 'duration.world.edit', { ended = true })
-        else
-            EventTrackingService:Send(2, 'duration.world.play', { ended = true })
-        end
+        EventTrackingService:Send(2, 'duration.world.edit', { ended = true })
+        EventTrackingService:Send(2, 'duration.world.play', { ended = true })
     end
 
     Store:Remove('world/currentWorld')

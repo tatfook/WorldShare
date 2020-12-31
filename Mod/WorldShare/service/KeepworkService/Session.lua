@@ -17,7 +17,7 @@ local KeepworkServiceSchoolAndOrg = NPL.load("(gl)Mod/WorldShare/service/Keepwor
 
 -- api
 local KeepworkUsersApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Users.lua")
-local KeepworkKeepworksApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Keepworks.lua")
+local KeepworkKeepworksApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/KeepworkKeepworksApi.lua")
 local KeepworkOauthUsersApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/OauthUsers.lua")
 local AccountingOrgApi = NPL.load("(gl)Mod/WorldShare/api/Accounting/Org.lua")
 local KeepworkSocketApi = NPL.load("(gl)Mod/WorldShare/api/Socket/Socket.lua")
@@ -35,8 +35,6 @@ local Config = NPL.load("(gl)Mod/WorldShare/config/Config.lua")
 local Encoding = commonlib.gettable("commonlib.Encoding")
 
 local KeepworkServiceSession = NPL.export()
-
-KeepworkServiceSession.captchaKey = ''
 
 function KeepworkServiceSession:LongConnectionInit(callback)
     local connection = KeepworkSocketApi:Connect()
@@ -171,8 +169,6 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
     if err ~= 200 or type(response) ~= "table" then
         return false
     end
-
-    echo(response, true)
 
     -- login api success ↓
     local token = response["token"] or System.User.keepworktoken
@@ -344,7 +340,7 @@ function KeepworkServiceSession:Register(username, password, captcha, cellphone,
         params = {
             username = username,
             password = password,
-            key = self.captchaKey,
+            key = Mod.WorldShare.Store:Get('user/captchaKey'),
             captcha = captcha,
             channel = 3
         }
@@ -463,7 +459,7 @@ end
 function KeepworkServiceSession:FetchCaptcha(callback)
     KeepworkKeepworksApi:FetchCaptcha(function(data, err)
         if err == 200 and type(data) == 'table' then
-            self.captchaKey = data.key
+            Mod.WorldShare.Store:Set('user/captchaKey', data.key)
 
             if type(callback) == 'function' then
                 callback()
@@ -473,11 +469,12 @@ function KeepworkServiceSession:FetchCaptcha(callback)
 end
 
 function KeepworkServiceSession:GetCaptcha()
-    if not self.captchaKey or type(self.captchaKey) ~= 'string' then
+    local captchaKey = Mod.WorldShare.Store:Get('user/captchaKey')
+    if not captchaKey or type(captchaKey) ~= 'string' then
         return ''
     end
 
-    return KeepworkService:GetCoreApi() .. '/keepworks/captcha/' .. self.captchaKey
+    return KeepworkService:GetCoreApi() .. '/keepworks/captcha/' .. captchaKey
 end
 
 function KeepworkServiceSession:GetPhoneCaptcha(phone, callback)
@@ -855,4 +852,8 @@ end
 
 function KeepworkServiceSession:CellphoneCaptchaVerify(cellphone, cellphone_captcha, callback)
     KeepworkUsersApi:CellphoneCaptchaVerify(cellphone, cellphone_captcha, callback, callback)
+end
+
+function KeepworkServiceSession:CaptchaVerify(captcha, callback)
+    KeepworkKeepworksApi:SvgCaptcha(Mod.WorldShare.Store:Get('user/captchaKey'), captcha, callback, callback)
 end
