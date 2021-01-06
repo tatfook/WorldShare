@@ -21,6 +21,7 @@ local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkServ
 -- UI
 local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
 local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua")
+local Certificate = NPL.load('(gl)Mod/WorldShare/cellar/Certificate/Certificate.lua')
 
 local RegisterModal = NPL.export()
 
@@ -60,23 +61,30 @@ function RegisterModal:ShowBindingPage()
 end
 
 function RegisterModal:ShowClassificationPage(callback, forceCallback)
-    local params = Mod.WorldShare.Utils.ShowWindow(
-        520,
-        320,
-        "Mod/WorldShare/cellar/Theme/RegisterModal/BindPhoneInAccountRegister.html",
-        "Mod.WorldShare.RegisterModal.BindPhoneInAccountRegister",
-        nil,
-        nil,
-        nil,
-        nil,
-        10
-    )
+    Certificate:Init(function(result)
+        if result == true or forceCallback == true then
+            if callback and type(callback) == 'function' then
+                callback()
+            end
+        end
+    end)
+    -- local params = Mod.WorldShare.Utils.ShowWindow(
+    --     520,
+    --     320,
+    --     "Mod/WorldShare/cellar/Theme/RegisterModal/BindPhoneInAccountRegister.html",
+    --     "Mod.WorldShare.RegisterModal.BindPhoneInAccountRegister",
+    --     nil,
+    --     nil,
+    --     nil,
+    --     nil,
+    --     10
+    -- )
 
-    params._page.forceCallback = forceCallback
+    -- params._page.forceCallback = forceCallback
 
-    if type(callback) == "function" then
-        params._page.callback = callback
-    end
+    -- if type(callback) == "function" then
+    --     params._page.callback = callback
+    -- end
 end
 
 function RegisterModal:GetServerList()

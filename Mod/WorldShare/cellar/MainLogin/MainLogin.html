@@ -364,11 +364,11 @@
                         if RegisterModal.m_mode == 'phonenumber' then
                             Mod.WorldShare.Utils.SetTimeOut(function()
                                 if page:FindControl('phonepassword_hide') then
-                                    page:FindControl('phonepassword_hide').visible = false
+                                    page:FindControl('phonepassword_hide').visible = true
                                 end
 
                                 if page:FindControl('phonepassword_show') then
-                                    page:FindControl('phonepassword_show').visible = true
+                                    page:FindControl('phonepassword_show').visible = false
                                 end
                             end, 200)
                         end
