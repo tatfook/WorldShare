@@ -98,7 +98,6 @@ local HistoryManager = NPL.load('(gl)Mod/WorldShare/cellar/HistoryManager/Histor
 local WorldExitDialog = NPL.load('(gl)Mod/WorldShare/cellar/WorldExitDialog/WorldExitDialog.lua')
 local PreventIndulge = NPL.load('(gl)Mod/WorldShare/cellar/PreventIndulge/PreventIndulge.lua')
 local Grade = NPL.load('(gl)Mod/WorldShare/cellar/Grade/Grade.lua')
-local VipNotice = NPL.load('(gl)Mod/WorldShare/cellar/VipNotice/VipNotice.lua')
 local Permission = NPL.load('(gl)Mod/WorldShare/cellar/Permission/Permission.lua')
 local LoginModal = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua')
 local Menu = NPL.load('(gl)Mod/WorldShare/cellar/Menu/Menu.lua')
@@ -228,16 +227,6 @@ function WorldShare:init()
         'save_world_info',
         function(ctx, node)
             LocalService:SaveWorldInfo(ctx, node)
-        end
-    )
-
-    -- vip notice
-    -- from 表示VIP的功能入口，必填
-   GameLogic.GetFilters():add_filter(
-        'VipNotice',
-        function(bEnabled, from, callback)
-            VipNotice:Init(bEnabled, from, callback)
-            return true
         end
     )
 
