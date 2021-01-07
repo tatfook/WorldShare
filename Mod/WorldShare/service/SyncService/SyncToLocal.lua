@@ -196,6 +196,15 @@ function SyncToLocal:HandleCompareList()
     if self.compareListTotal < self.compareListIndex then
         Mod.WorldShare.Store:Set('world/currentWorld', self.currentWorld)
         KeepworkService:SetCurrentCommitId()
+
+        -- update world tag info
+        local tag = LocalService:GetTag(self.currentWorld.worldpath)
+
+        if tag and not tag.upgrade_ver then
+            tag.upgrade_ver = 1
+            LocalService:SetTag(self.currentWorld.worldpath, tag)
+        end
+
         -- sync finish
         self:SetFinish(true)
         self.callback(false, {
@@ -293,7 +302,7 @@ function SyncToLocal:DownloadOne(file, callback)
                 msg = format(L"%s （%s） 下载成功", currentRemoteItem.path, Mod.WorldShare.Utils.FormatFileSize(size, "KB"))
             })
 
-            if type(callback) == "function" then
+            if callback and type(callback) == "function" then
                 callback()
             end
         end
@@ -405,6 +414,14 @@ function SyncToLocal:DownloadZIP()
         function(bSuccess, downloadPath)
             LocalService:MoveZipToFolder(self.currentWorld.worldpath, downloadPath)
             KeepworkService:SetCurrentCommitId()
+
+            -- update world tag info
+            local tag = LocalService:GetTag(self.currentWorld.worldpath)
+            
+            if tag and not tag.upgrade_ver then
+                tag.upgrade_ver = 1
+                LocalService:SetTag(self.currentWorld.worldpath, tag)
+            end
 
             self:SetFinish(true)
             self.callback(false, {

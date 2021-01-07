@@ -98,7 +98,6 @@ local HistoryManager = NPL.load('(gl)Mod/WorldShare/cellar/HistoryManager/Histor
 local WorldExitDialog = NPL.load('(gl)Mod/WorldShare/cellar/WorldExitDialog/WorldExitDialog.lua')
 local PreventIndulge = NPL.load('(gl)Mod/WorldShare/cellar/PreventIndulge/PreventIndulge.lua')
 local Grade = NPL.load('(gl)Mod/WorldShare/cellar/Grade/Grade.lua')
-local VipNotice = NPL.load('(gl)Mod/WorldShare/cellar/VipNotice/VipNotice.lua')
 local Permission = NPL.load('(gl)Mod/WorldShare/cellar/Permission/Permission.lua')
 local LoginModal = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua')
 local Menu = NPL.load('(gl)Mod/WorldShare/cellar/Menu/Menu.lua')
@@ -232,15 +231,6 @@ function WorldShare:init()
         'save_world_info',
         function(ctx, node)
             LocalService:SaveWorldInfo(ctx, node)
-        end
-    )
-
-    -- vip notice
-    GameLogic.GetFilters():add_filter(
-        'VipNotice',
-        function(bEnabled, callback)
-            VipNotice:Init(bEnabled, callback)
-            return true
         end
     )
 
@@ -575,7 +565,7 @@ function WorldShare:init()
     GameLogic.GetFilters():add_filter(
         'login_with_token',
         function(callback)
-            local UserInfo = NPL.load('(gl)Mod/WorldShare/cellar/Login/UserInfo.lua')
+            local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua")
             UserInfo:LoginWithToken(callback)
         end
     )
@@ -716,15 +706,7 @@ function WorldShare:OnWorldLoad()
 
     EventTrackingService:Send(2, 'duration.world.stay', { started = true })
 
-    if GameLogic.GameMode:GetMode() == 'editor' then
-        EventTrackingService:Send(1, 'click.world.edit')
-        EventTrackingService:Send(2, 'duration.world.edit', { started = true })
-    else
-        EventTrackingService:Send(1, 'click.world.play')
-        EventTrackingService:Send(2, 'duration.world.play', { started = true })
-    end
-
-    Mod.WorldShare.Store:Remove('world/currentRemoteWorld')
+    Mod.WorldShare.Store:Remove("world/currentRemoteWorld")
 end
 
 function WorldShare:OnLeaveWorld()
@@ -734,12 +716,8 @@ function WorldShare:OnLeaveWorld()
 
     if isEnterWorld then
         EventTrackingService:Send(2, 'duration.world.stay', { ended = true })
-
-        if GameLogic.GameMode:GetMode() == 'editor' then
-            EventTrackingService:Send(2, 'duration.world.edit', { ended = true })
-        else
-            EventTrackingService:Send(2, 'duration.world.play', { ended = true })
-        end
+        EventTrackingService:Send(2, 'duration.world.edit', { ended = true })
+        EventTrackingService:Send(2, 'duration.world.play', { ended = true })
     end
 
     Store:Remove('world/currentWorld')

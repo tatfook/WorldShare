@@ -168,6 +168,14 @@ function SyncToDataSource:Start()
         self:HandleCompareList()
     end
 
+    -- update world tag info
+    local tag = LocalService:GetTag(self.currentWorld.worldpath)
+
+    if tag and not tag.upgrade_ver then
+        tag.upgrade_ver = 1
+        LocalService:SetTag(self.currentWorld.worldpath, tag)
+    end
+
     GitService:GetTree(
         self.currentWorld.foldername,
         self.currentWorld.user and self.currentWorld.user.username or nil,

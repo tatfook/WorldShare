@@ -12,6 +12,7 @@ local MySchool = NPL.load("(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua")
 -- service
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 local KeepworkServiceSchoolAndOrg = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/SchoolAndOrg.lua")
+local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
 
 local MySchool = NPL.export()
 
@@ -20,6 +21,7 @@ function MySchool:Show(callback)
     self.hasSchoolJoined = false
     self.schoolData = {}
     self.orgData = {}
+    self.allData = {}
     self.callback = callback
     self.searchText = ""
 
@@ -31,9 +33,7 @@ function MySchool:Show(callback)
         Mod.WorldShare.MsgBox:Close()
 
         self.hasJoined = false
-
         if type(orgData) == "table" and #orgData > 0 then
-            self.orgData = orgData
             self.hasJoined = true
         
             for key, item in ipairs(orgData) do
@@ -47,6 +47,42 @@ function MySchool:Show(callback)
                     self.hasSchoolJoined = true
                     break
                 end
+            end
+        end
+
+        for key, item in ipairs(orgData) do
+            if item.type ~= 4 then
+                -- org data
+                self.orgData[#self.orgData + 1] = item
+            end
+
+            if item.type == 4 then
+                -- school data
+                self.schoolData[#self.schoolData + 1] = item
+            end
+        end
+
+        if self.schoolData and #self.schoolData > 0 then
+            self.allData[#self.allData + 1] = {
+                element_type = 1,
+                title = 'Texture/Aries/Creator/keepwork/my_school_32bits.png#6 31 85 18'
+            }
+    
+            for key, item in ipairs(self.schoolData) do
+                item.element_type = 2
+                self.allData[#self.allData + 1] = item
+            end
+        end
+
+        if self.orgData and #self.orgData > 0 then
+            self.allData[#self.allData + 1] = {
+                element_type = 1,
+                title = 'Texture/Aries/Creator/keepwork/my_school_32bits.png#6 7 85 18'
+            }
+    
+            for key, item in ipairs(self.orgData) do
+                item.element_type = 2
+                self.allData[#self.allData + 1] = item
             end
         end
 
@@ -430,27 +466,29 @@ function MySchool:OpenTeachingPlanCenter(orgUrl)
         return false
     end
 
-    local userType = Mod.WorldShare.Store:Get('user/userType')
+    KeepworkServiceSession:SetUserLevels(nil, function()
+        local userType = Mod.WorldShare.Store:Get('user/userType')
 
-    if not userType or type(userType) ~= 'table' then
-        return false
-    end
+        if not userType or type(userType) ~= 'table' then
+            return false
+        end
 
-    if userType.orgAdmin then
-        local url = '/org/' .. orgUrl .. '/admin/packages'
-        Mod.WorldShare.Utils.OpenKeepworkUrlByToken(url)
-        return
-    end
+        if userType.orgAdmin then
+            local url = '/org/' .. orgUrl .. '/admin/packages'
+            Mod.WorldShare.Utils.OpenKeepworkUrlByToken(url)
+            return
+        end
 
-    if userType.teacher then
-        local url = '/org/' .. orgUrl .. '/teacher/teach'
-        Mod.WorldShare.Utils.OpenKeepworkUrlByToken(url)
-        return
-    end
+        if userType.teacher then
+            local url = '/org/' .. orgUrl .. '/teacher/teach'
+            Mod.WorldShare.Utils.OpenKeepworkUrlByToken(url)
+            return
+        end
 
-    if userType.student then
-        local url = '/org/' .. orgUrl .. '/student'
-        Mod.WorldShare.Utils.OpenKeepworkUrlByToken(url)
-        return
-    end
+        if userType.student or userType.freeStudent then
+            local url = '/org/' .. orgUrl .. '/student'
+            Mod.WorldShare.Utils.OpenKeepworkUrlByToken(url)
+            return
+        end
+    end)
 end

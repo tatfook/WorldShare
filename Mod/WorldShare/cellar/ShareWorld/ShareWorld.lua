@@ -183,6 +183,13 @@ function ShareWorld:OnClick()
 				end
 			end);
             self:ClosePage()
+
+            if self:GetCurrentRevision() > self:GetRemoteRevision() then
+                local ActWeek = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/ActWeek/ActWeek.lua")
+                if ActWeek then
+                    ActWeek.AchieveActTarget()
+                end
+            end
         end)
     end
 

@@ -449,12 +449,20 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                         DItem['uuid'] or ''
                     )
                 else
-                    worldpath = format(
-                        "%s/%s_%s/",
-                        Mod.WorldShare.Utils.GetWorldFolderFullPath(),
-                        commonlib.Encoding.Utf8ToDefault(DItem["worldName"]),
-                        DItem['uuid'] or ''
-                    )
+                    if string.match(DItem["worldName"], "(.+)_main$") then
+                        worldpath = format(
+                            "%s/%s/",
+                            Mod.WorldShare.Utils.GetWorldFolderFullPath(),
+                            commonlib.Encoding.Utf8ToDefault(DItem["worldName"])
+                        )
+                    else
+                        worldpath = format(
+                            "%s/%s_%s/",
+                            Mod.WorldShare.Utils.GetWorldFolderFullPath(),
+                            commonlib.Encoding.Utf8ToDefault(DItem["worldName"]),
+                            DItem['uuid'] or ''
+                        )
+                    end
                 end
 
                 remotefile = "local://" .. worldpath

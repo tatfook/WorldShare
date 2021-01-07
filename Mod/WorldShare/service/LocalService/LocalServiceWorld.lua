@@ -60,10 +60,28 @@ function LocalServiceWorld:GetWorldList()
         localWorlds[#localWorlds + 1] = item
     end
 
+    local filterLocalWorlds = {}
+
+    -- not upgrade world filter
+    for key, item in ipairs(localWorlds) do
+        if item.IsFolder then
+            -- fixed wrong world path
+            item.worldpath = item.worldpath .. '/'
+
+            local tag = LocalService:GetTag(item.worldpath)
+
+            if string.match(item.foldername, "(.+)_main$") or tag and tag.upgrade_ver then
+                filterLocalWorlds[#filterLocalWorlds + 1] = item
+            end
+        else
+            filterLocalWorlds[#filterLocalWorlds + 1] = item
+        end
+    end
+
+    localWorlds = filterLocalWorlds
+
     for key, value in ipairs(localWorlds) do
         if value.IsFolder then
-            value.worldpath = value.worldpath .. '/'
-
             local worldRevision = WorldRevision:new():init(value.worldpath)
             value.revision = worldRevision:GetDiskRevision()
 
