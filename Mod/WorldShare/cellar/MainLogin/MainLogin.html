@@ -809,20 +809,20 @@
                         <pe:if condition="<%= (get_cur_tab() == 2) %>">
                             <div style="margin-top: 5px;">
                                 <div style="">
-                                    <div style="position: relative;font-size: 13px;">
+                                    <div style="position: relative;base-font-size: 13px;font-size: 13px;">
                                         <%=L"填写基本注册信息"%>
                                     </div>
                                     <pe:if condition="<%= get_register_mode() == 'account'%>">
                                         <div onclick="set_register_mode"
                                             align="right"
-                                            style="font-size: 13px;width: 112px;margin-right: -10px;color:#65A3C6;">
+                                            style="base-font-size: 13px;font-size: 13px;width: 112px;margin-right: -10px;color:#65A3C6;">
                                             <%=L"使用手机号注册"%>
                                         </div>
                                     </pe:if>
                                     <pe:if condition="<%= get_register_mode() == 'phonenumber'%>">
                                         <div onclick="set_register_mode"
                                             align="right"
-                                            style="font-size: 13px;width: 100px;margin-right: -12px;color:#65A3C6;">
+                                            style="base-font-size: 13px;font-size: 13px;width: 100px;margin-right: -12px;color:#65A3C6;">
                                             <%=L"使用账号注册"%>
                                         </div>
                                     </pe:if>
