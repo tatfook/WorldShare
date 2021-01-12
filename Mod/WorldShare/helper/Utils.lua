@@ -391,3 +391,49 @@ function Utils.OpenKeepworkUrlByToken(url)
         ParaGlobal.ShellExecute('open', openUrl, "", "", 1)
     end)
 end
+
+function Utils.WordsLimit(text)
+    if _guihelper.GetTextWidth(text) > 150 then
+        local function chsize(char)
+            if not char then
+                return 0
+            elseif char > 240 then
+                return 4
+            elseif char > 225 then
+                return 3
+            elseif char > 192 then
+                return 2
+            else
+                return 1
+            end
+        end
+
+        local len = 0
+        local count = 0
+        local currentIndex = 1
+
+        while currentIndex <= #text do
+            local charsizenum = chsize(string.byte(text, currentIndex))
+
+            currentIndex = currentIndex + charsizenum
+
+            if len >= 25 then
+                break
+            end
+
+            if charsizenum ~= 0 then
+                count = count + 1
+
+                if charsizenum >= 3 then
+                    len = len + 3.2
+                else
+                    len = len + 1.5
+                end
+            end
+        end
+
+        text = System.Core.UniString:new(text):sub(1, count).text .. '...'
+    end
+
+    return text
+end

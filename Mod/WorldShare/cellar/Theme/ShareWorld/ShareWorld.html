@@ -16,7 +16,7 @@
                 end
 
                 function worldname()
-                    return Mod.WorldShare.Store:Getter('world/GetWorldTextName')
+                    return Mod.WorldShare.Utils.WordsLimit(Mod.WorldShare.Store:Getter('world/GetWorldTextName'))
                 end
 
                 function snapshot()
