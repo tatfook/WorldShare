@@ -15,6 +15,10 @@
                     GameLogic.RunCommand("/menu file.openworlddir");
                 end
 
+                function get_full_world_name()
+                    return Mod.WorldShare.Store:Getter('world/GetWorldTextName')
+                end
+
                 function worldname()
                     return Mod.WorldShare.Utils.WordsLimit(Mod.WorldShare.Store:Getter('world/GetWorldTextName'))
                 end
@@ -97,9 +101,15 @@
                         <div style="float:right;padding-left:28px;">
                             <div style="font-size:18px;base-font-size:18;margin-bottom:25px;">
                                 <%= worldname() %>
-                                <input type="button" class="theme1_gray_button" width="30" height="30" style="margin-left:3px;margin-top:0px;font-size:11px;height:18px;color:#ffffff;" value='...' onclick="open_world()"/>
+                                <input type="button"
+                                       class="theme1_gray_button"
+                                       width="30"
+                                       height="30"
+                                       style="margin-left:3px;margin-top:0px;font-size:11px;height:18px;color:#ffffff;"
+                                       value='...'
+                                       tooltip='<%= get_full_world_name() %>'
+                                       onclick="open_world()"/>
                             </div>
-
                             <div class="info"><%=L"大小：" %><%= size() %></div>
                             <div class="info"><%=L"远程版本号：" %><%= remote_revision() %></div>
                             <div class="info"><%=L"本地版本号：" %><%= current_revision() %></div>
