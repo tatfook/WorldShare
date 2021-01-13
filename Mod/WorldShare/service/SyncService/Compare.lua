@@ -368,20 +368,42 @@ function Compare:GetCurrentWorldInfo(callback)
         Mod.WorldShare.Store:Set("world/currentEnterWorld", currentWorld)
 
         KeepworkServiceProject:GetProject(currentWorld.kpProjectId, function(data, err)
-            if data and type(data) == 'table' and data.username and data.userId then
-                currentWorld.user = {
-                    id = data.userId,
-                    username = data.username
-                }
+            local function Handle()
+                if data and type(data) == 'table' and data.username and data.userId then
+                    currentWorld.user = {
+                        id = data.userId,
+                        username = data.username
+                    }
+                end
+
+                currentWorld.memberCount = data.memberCount
+    
+                Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
+                Mod.WorldShare.Store:Set("world/currentEnterWorld", currentWorld)
+    
+                DesktopMenu.LoadMenuItems(true)
+    
+                if type(callback) == 'function' then
+                    callback()
+                end
             end
 
-            Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
-            Mod.WorldShare.Store:Set("world/currentEnterWorld", currentWorld)
+            if data and data.memberCount and type(data.memberCount) == 'number' and data.memberCount > 1 then
+                KeepworkServiceProject:GetMembers(currentWorld.kpProjectId, function(data, err)
+                    if data and type(data) == 'table' then
+                        local members = {}
 
-            DesktopMenu.LoadMenuItems(true)
+                        for key, item in ipairs(data) do
+                            members[#members + 1] = item.username
+                        end
 
-            if type(callback) == 'function' then
-                callback()
+                        currentWorld.members = members
+                    end
+
+                    Handle()
+                end)
+            else
+                Handle()
             end
         end)
     else

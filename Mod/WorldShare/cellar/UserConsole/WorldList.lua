@@ -338,35 +338,36 @@ function WorldList:EnterWorld(index)
                                     local curTimestamp = Mod.WorldShare.Utils:GetCurrentTime(true)
                                     local lastLockTimestamp = Mod.WorldShare.Utils:DatetimeToTimestamp(data.lastLockTime)
     
-                                    if (curTimestamp - lastLockTimestamp) > 60 then
-                                        canLocked = true
-                                    else
-                                        canLocked = false
-                                        Mod.WorldShare.MsgBox:Close()
+                                    canLocked = true
+                                    -- if (curTimestamp - lastLockTimestamp) > 60 then
+                                    --     canLocked = true
+                                    -- else
+                                    --     canLocked = false
+                                    --     Mod.WorldShare.MsgBox:Close()
         
-                                        Mod.WorldShare.MsgBox:Dialog(
-                                            "MultiPlayerWorldOccupy",
-                                            format(
-                                                L"此账号已在其他地方占用此世界，请退出后再或者以只读模式打开世界",
-                                                data.owner.username,
-                                                currentWorld.foldername,
-                                                data.owner.username
-                                            ),
-                                            {
-                                                Title = L"世界被占用",
-                                                Yes = L"知道了",
-                                                No = L"只读模式打开"
-                                            },
-                                            function(res)
-                                                if res and res == _guihelper.DialogResult.No then
-                                                    Mod.WorldShare.Store:Set("world/readonly", true)
-                                                    InternetLoadWorld.EnterWorld()
-                                                    UserConsole:ClosePage()
-                                                end
-                                            end,
-                                            _guihelper.MessageBoxButtons.YesNo
-                                        )
-                                    end
+                                    --     Mod.WorldShare.MsgBox:Dialog(
+                                    --         "MultiPlayerWorldOccupy",
+                                    --         format(
+                                    --             L"此账号已在其他地方占用此世界，请退出后再或者以只读模式打开世界",
+                                    --             data.owner.username,
+                                    --             currentWorld.foldername,
+                                    --             data.owner.username
+                                    --         ),
+                                    --         {
+                                    --             Title = L"世界被占用",
+                                    --             Yes = L"知道了",
+                                    --             No = L"只读模式打开"
+                                    --         },
+                                    --         function(res)
+                                    --             if res and res == _guihelper.DialogResult.No then
+                                    --                 Mod.WorldShare.Store:Set("world/readonly", true)
+                                    --                 InternetLoadWorld.EnterWorld()
+                                    --                 UserConsole:ClosePage()
+                                    --             end
+                                    --         end,
+                                    --         _guihelper.MessageBoxButtons.YesNo
+                                    --     )
+                                    -- end
                                 end
                             else
                                 Mod.WorldShare.MsgBox:Dialog(
