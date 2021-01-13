@@ -364,6 +364,9 @@ function Compare:GetCurrentWorldInfo(callback)
     end
 
     if currentWorld.kpProjectId then
+        -- avoid network error
+        Mod.WorldShare.Store:Set("world/currentEnterWorld", currentWorld)
+
         KeepworkServiceProject:GetProject(currentWorld.kpProjectId, function(data, err)
             if data and type(data) == 'table' and data.username and data.userId then
                 currentWorld.user = {
