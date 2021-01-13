@@ -663,9 +663,6 @@ function WorldShare:OnLogin()
 end
 
 function WorldShare:OnWorldLoad()
-    Store:Set('world/isEnterWorld', true)
-    Store:Set('world/loadWorldFinish', true)
-
     UserConsole:ClosePage()
 
     local curLesson = Store:Getter('lesson/GetCurLesson')
@@ -693,6 +690,8 @@ function WorldShare:OnWorldLoad()
     EventTrackingService:Send(2, 'duration.world.stay', { started = true })
 
     Mod.WorldShare.Store:Remove("world/currentRemoteWorld")
+    Mod.WorldShare.Store:Set('world/isEnterWorld', true)
+    Mod.WorldShare.Store:Set('world/loadWorldFinish', true)
 end
 
 function WorldShare:OnLeaveWorld()

@@ -14,6 +14,7 @@ local KeepworkService = NPL.load("../KeepworkService.lua")
 local GitGatewayService = NPL.load("../GitGatewayService.lua")
 local KpChatChannel = NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/ChatSystem/KpChatChannel.lua")
 local KeepworkServiceSchoolAndOrg = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/SchoolAndOrg.lua")
+local SyncServiceCompare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
 
 -- api
 local KeepworkUsersApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Users.lua")
@@ -267,6 +268,7 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
     -- for follow api
     Mod.WorldShare.Store:Set('user/token', token)
 
+    -- get user orginfo
     KeepworkServiceSchoolAndOrg:GetMyAllOrgsAndSchools(function(schoolData, orgData)
         if not schoolData and not orgData then
             if callback and type(callback) == "function" then
@@ -296,9 +298,18 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
         local Login = Mod.WorldShare.Store:Action("user/Login")
         Login(token, userId, username, nickname, realname)
 
-        if callback and type(callback) == "function" then
-            callback(true)
-        end
+        -- update enter world info
+        if Mod.WorldShare.Store:Get('world/isEnterWorld') then
+            SyncServiceCompare:GetCurrentWorldInfo(function()
+                if callback and type(callback) == "function" then
+                    callback(true)
+                end
+            end)
+        else
+            if callback and type(callback) == "function" then
+                callback(true)
+            end
+        end        
     end)
 
     self:ResetIndulge()

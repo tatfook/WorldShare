@@ -35,6 +35,14 @@ end
 function MemberManager:ShowApply()
     LoginModal:CheckSignedIn(L"请先登录!", function(bSucceed)
         if bSucceed then
+            local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
+            local userId = Mod.WorldShare.Store:Get('user/userId')
+
+            if currentEnterWorld and currentEnterWorld.user and currentEnterWorld.user.id == userId then
+                _guihelper.MessageBox(L"此项属于你，无需申请")
+                return
+            end
+
             Mod.WorldShare.Utils.ShowWindow(400, 260, "(ws)MemberManager/Apply.html", "Mod.WorldShare.MemberManager.Apply")
         end
     end)

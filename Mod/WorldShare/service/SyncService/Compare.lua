@@ -23,18 +23,23 @@ local WorldRevision = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevi
 local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 local DesktopMenu = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.DesktopMenu")
 
+-- service 
+local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
+local LocalServiceWorld = NPL.load("../LocalService/LocalServiceWorld.lua")
+local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
+local KeepworkServiceWorld = NPL.load("../KeepworkService/World.lua")
+local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
+local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
+
+-- helper
+local GitEncoding = NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua")
+local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
+
 -- UI
 local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
 local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
 local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua")
 local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
-local GitEncoding = NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua")
-local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
-local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
-local LocalServiceWorld = NPL.load("../LocalService/LocalServiceWorld.lua")
-local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
-local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
-local KeepworkServiceWorld = NPL.load("../KeepworkService/World.lua")
 local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
 
 local Compare = NPL.export()
@@ -358,12 +363,32 @@ function Compare:GetCurrentWorldInfo(callback)
         KeepworkServiceWorld:UpdateLockHeartbeatStart(currentWorld.kpProjectId, "exclusive", currentWorld.revision, nil, nil)
     end
 
-    Mod.WorldShare.Store:Set("world/currentEnterWorld", currentWorld)
+    if currentWorld.kpProjectId then
+        KeepworkServiceProject:GetProject(currentWorld.kpProjectId, function(data, err)
+            if data and type(data) == 'table' and data.username and data.userId then
+                currentWorld.user = {
+                    id = data.userId,
+                    username = data.username
+                }
+            end
 
-    DesktopMenu.LoadMenuItems(true)
+            Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
+            Mod.WorldShare.Store:Set("world/currentEnterWorld", currentWorld)
 
-    if type(callback) == 'function' then
-        callback()
+            DesktopMenu.LoadMenuItems(true)
+
+            if type(callback) == 'function' then
+                callback()
+            end
+        end)
+    else
+        Mod.WorldShare.Store:Set("world/currentEnterWorld", currentWorld)
+
+        DesktopMenu.LoadMenuItems(true)
+
+        if type(callback) == 'function' then
+            callback()
+        end
     end
 end
 
