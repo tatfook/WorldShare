@@ -28,6 +28,11 @@ function LoadWorldCommand:Init()
     GameLogic.GetFilters():add_filter(
         "cmd_loadworld", 
         function(cmd_text, options)
+            if options and options.fork then
+                self:Fork(cmd_text)
+                return
+            end
+
             if options and not options.s then
                 local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
@@ -92,11 +97,6 @@ function LoadWorldCommand:Init()
 
             if options and options.personal then
                 CommandManager:RunCommand("/loadpersonalworld " .. cmd_text)
-                return
-            end
-
-            if options and options.fork then
-                self:Fork(cmd_text)
                 return
             end
 
@@ -171,12 +171,7 @@ function LoadWorldCommand:Fork(cmdText)
                 LocalService:SetTag(worldPath, tag)
 
                 Mod.WorldShare.MsgBox:Close()
-
-                _guihelper.MessageBox(format(L"世界已经成功保存到: %s, 是否现在打开?", worldName), function(res)
-					if(res and res == _guihelper.DialogResult.Yes) then
-						WorldCommon.OpenWorld(worldPath, true)
-					end
-				end, _guihelper.MessageBoxButtons.YesNo)
+                WorldCommon.OpenWorld(worldPath, true)
             end
         )
     end)
