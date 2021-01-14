@@ -5,18 +5,21 @@ Date: 2020.10.9
 Desc: 
 use the lib:
 ------------------------------------------------------------
-local LoadWorldCommand = NPL.load("(gl)Mod/WorldShare/command/LoadWorld.lua")
+local LoadWorldCommand = NPL.load('(gl)Mod/WorldShare/command/LoadWorld.lua')
 -------------------------------------------------------
 ]]
 
 -- UI
-local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
+local UserConsole = NPL.load('(gl)Mod/WorldShare/cellar/UserConsole/Main.lua')
 
 -- service
-local KeepworkServiceProject = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Project.lua")
+local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
+local GitService = NPL.load('(gl)Mod/WorldShare/service/GitService.lua')
+local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
 
 -- libs
-local CommandManager = commonlib.gettable("MyCompany.Aries.Game.CommandManager")
+local CommandManager = commonlib.gettable('MyCompany.Aries.Game.CommandManager')
+local WorldCommon = commonlib.gettable('MyCompany.Aries.Creator.WorldCommon')
 
 local LoadWorldCommand = NPL.export()
 
@@ -83,13 +86,18 @@ function LoadWorldCommand:Init()
                             _guihelper.MessageBoxButtons.YesNo
                         )
                     end
-                    return false
+                    return
                 end
             end
 
             if options and options.personal then
                 CommandManager:RunCommand("/loadpersonalworld " .. cmd_text)
-                return false
+                return
+            end
+
+            if options and options.fork then
+                self:Fork(cmd_text)
+                return
             end
 
             local refreshMode = nil
@@ -114,4 +122,62 @@ function LoadWorldCommand:Init()
             end
         end
     )
+end
+
+function LoadWorldCommand:Fork(cmdText)
+    local projectId, worldName = string.match(cmdText, "^(%w+)[ ]+(%w+)$")
+
+    if not projectId or not worldName or type(tonumber(projectId)) ~= 'number' then
+        return
+    end
+
+    projectId = tonumber(projectId)
+
+    local worldPath = 'worlds/DesignHouse/' .. commonlib.Encoding.Utf8ToDefault(worldName)
+
+    if ParaIO.DoesFileExist(worldPath .. '/tag.xml', false) then
+        WorldCommon.OpenWorld(worldPath, true)
+        return
+    end
+
+    Mod.WorldShare.MsgBox:Show(L"请稍候...")
+
+    KeepworkServiceProject:GetProject(projectId, function(data, err)
+        if not data or
+           type(data) ~= 'table' or
+           not data.name or
+           not data.username or
+           not data.world or
+           not data.world.commitId then
+            return
+        end
+
+        GitService:DownloadZIP(
+            data.name,
+            data.username,
+            data.world.commitId,
+            function(bSuccess, downloadPath)
+                LocalService:MoveZipToFolder(worldPath, downloadPath)
+
+                local tag = LocalService:GetTag(worldPath)
+                
+                if not tag and type(tag) ~= 'table' then
+                    return
+                end
+
+                tag.fromProjects = tag.kpProjectId
+                tag.kpProjectId = nil
+
+                LocalService:SetTag(worldPath, tag)
+
+                Mod.WorldShare.MsgBox:Close()
+
+                _guihelper.MessageBox(format(L"世界已经成功保存到: %s, 是否现在打开?", worldName), function(res)
+					if(res and res == _guihelper.DialogResult.Yes) then
+						WorldCommon.OpenWorld(worldPath, true)
+					end
+				end, _guihelper.MessageBoxButtons.YesNo)
+            end
+        )
+    end)
 end
