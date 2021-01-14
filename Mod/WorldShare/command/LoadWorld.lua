@@ -29,7 +29,7 @@ function LoadWorldCommand:Init()
         "cmd_loadworld", 
         function(cmd_text, options)
             if options and options.fork then
-                self:Fork(cmd_text)
+                self:Fork(cmd_text, options)
                 return
             end
 
@@ -124,7 +124,7 @@ function LoadWorldCommand:Init()
     )
 end
 
-function LoadWorldCommand:Fork(cmdText)
+function LoadWorldCommand:Fork(cmdText, options)
     local projectId, worldName = string.match(cmdText, "^(%w+)[ ]+(%w+)$")
 
     if not projectId or not worldName or type(tonumber(projectId)) ~= 'number' then
@@ -134,9 +134,29 @@ function LoadWorldCommand:Fork(cmdText)
     projectId = tonumber(projectId)
 
     local worldPath = 'worlds/DesignHouse/' .. commonlib.Encoding.Utf8ToDefault(worldName)
+    local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
     if ParaIO.DoesFileExist(worldPath .. '/tag.xml', false) then
-        WorldCommon.OpenWorld(worldPath, true)
+        local tag = LocalService:GetTag(worldPath)
+
+        if not tag or type(tag) ~= 'table' or not tag.name then
+            return
+        end
+
+        if options.s then
+            WorldCommon.OpenWorld(worldPath, true)
+        else
+            _guihelper.MessageBox(
+                format(L"即将离开【%s】进入【%s】", currentEnterWorld.text, tag.name),
+                function(res)
+                    if res and res == _guihelper.DialogResult.Yes then
+                        WorldCommon.OpenWorld(worldPath, true)
+                    end
+                end,
+                _guihelper.MessageBoxButtons.YesNo
+            )
+        end
+
         return
     end
 
@@ -171,7 +191,20 @@ function LoadWorldCommand:Fork(cmdText)
                 LocalService:SetTag(worldPath, tag)
 
                 Mod.WorldShare.MsgBox:Close()
-                WorldCommon.OpenWorld(worldPath, true)
+
+                if options.s then
+                    WorldCommon.OpenWorld(worldPath, true)
+                else
+                    _guihelper.MessageBox(
+                        format(L"即将离开【%s】进入【%s】", currentEnterWorld.text, data.name),
+                        function(res)
+                            if res and res == _guihelper.DialogResult.Yes then
+                                WorldCommon.OpenWorld(worldPath, true)
+                            end
+                        end,
+                        _guihelper.MessageBoxButtons.YesNo
+                    )
+                end
             end
         )
     end)
