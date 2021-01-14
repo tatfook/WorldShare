@@ -214,12 +214,13 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
     end
 
     -- login api success ↓
-    local token = response["token"] or System.User.keepworktoken
+    local token = response["token"]
     local userId = response["id"] or 0
     local username = response["username"] or ""
     local nickname = response["nickname"] or ""
     local realname = response['realname'] or ""
     local paraWorldId = response['paraWorldId'] or nil
+    local isVipSchool = false
 
     if not response.realname then
         Mod.WorldShare.Store:Set("user/isVerified", false)
@@ -241,6 +242,10 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
         Mod.WorldShare.Store:Set("user/isVip", true)
     else
         Mod.WorldShare.Store:Set("user/isVip", false)
+    end
+
+    if response.school and response.school.isVip == 1 then
+        isVipSchool = true
     end
 
     Mod.WorldShare.Store:Set('user/bLoginSuccessed', true)
@@ -296,7 +301,7 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
         end
 
         local Login = Mod.WorldShare.Store:Action("user/Login")
-        Login(token, userId, username, nickname, realname)
+        Login(token, userId, username, nickname, realname, isVipSchool)
 
         -- update enter world info
         if Mod.WorldShare.Store:Get('world/isEnterWorld') then

@@ -22,12 +22,13 @@ function UserStore:Action()
             self.token = token
             commonlib.setfield("System.User.keepworktoken", token)
         end,
-        Login = function(token, userId, username, nickname, realname)
+        Login = function(token, userId, username, nickname, realname, isVipSchool)
             self.token = token
             self.userId = userId
             self.username = username
             self.nickname = nickname
             self.realname = realname
+            self.isVipSchool = isVipSchool
 
             commonlib.setfield("System.User.keepworktoken", self.token)
             commonlib.setfield("System.User.username", self.username)
@@ -36,6 +37,7 @@ function UserStore:Action()
             commonlib.setfield("System.User.realname", self.realname)
             commonlib.setfield("System.User.userType", self.userType)
             commonlib.setfield("System.User.isVip", self.isVip)
+            commonlib.setfield("System.User.isVipSchool", self.isVipSchool)
 
             self:onLogin()
         end,
