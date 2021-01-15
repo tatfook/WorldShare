@@ -250,7 +250,7 @@ function ShareWorld:ShowWorldCode(projectId)
                 return false
             end
 
-            Mod.WorldShare.Utils.ShowWindow(520, 305, "Mod/WorldShare/cellar/ShareWorld/Code.html?wxacode=".. wxacode or "", "Mod.WorldShare.ShareWorld.Code")
+            Mod.WorldShare.Utils.ShowWindow(520, 305, "Mod/WorldShare/cellar/ShareWorld/Code.html?wxacode=".. (wxacode or ""), "Mod.WorldShare.ShareWorld.Code")
         end
     )
 end
