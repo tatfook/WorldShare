@@ -55,7 +55,8 @@ function LoadPersonalWorldCommand:Init()
                         local username = Mod.WorldShare.Store:Get('user/username')
                         
                         if data.username ~= username then
-                            _guihelper.MessageBox(L"不能加载非自己的世界")
+                            _guihelper.MessageBox(L"您正在试图加载的个人世界非您的个人世界，操作已被取消！")
+                            return
                         end
     
                         WorldList:RefreshCurrentServerList(function()

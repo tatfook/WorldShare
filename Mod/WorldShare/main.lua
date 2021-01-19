@@ -673,7 +673,7 @@ function WorldShare:OnWorldLoad()
     end
 
     HistoryManager:OnWorldLoad()
-    -- Certificate:OnWorldLoad()
+    WorldShareCommand:OnWorldLoad()
 
     Store:Subscribe('user/Logout', function()
         Compare:RefreshWorldList(function()

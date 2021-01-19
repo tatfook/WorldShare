@@ -24,6 +24,8 @@ local ReloadWorldCommand = NPL.load("(gl)Mod/WorldShare/command/ReloadWorld.lua"
 
 local WorldShareCommand = NPL.export()
 
+WorldShareCommand.afterLoadWorldCommands = {}
+
 function WorldShareCommand:Init()
     if self.inited then
         return
@@ -46,4 +48,29 @@ function WorldShareCommand:Init()
     end)
 
     CommandManager:Init()
+end
+
+function WorldShareCommand:PushAfterLoadWorldCommand(command)
+    self.afterLoadWorldCommands[#self.afterLoadWorldCommands + 1] = command
+end
+
+function WorldShareCommand:PopAfterLoadWorldCommand()
+    self.afterLoadWorldCommands[#self.afterLoadWorldCommands] = nil
+end
+
+function WorldShareCommand:ExecAfterLoadWorldCommands()
+    local beExist = true
+
+    while beExist do
+        if #self.afterLoadWorldCommands > 0 then
+            GameLogic.RunCommand(self.afterLoadWorldCommands[#self.afterLoadWorldCommands])
+            self:PopAfterLoadWorldCommand()
+        else
+            beExist = false
+        end
+    end
+end
+
+function WorldShareCommand:OnWorldLoad()
+    self:ExecAfterLoadWorldCommands()
 end
