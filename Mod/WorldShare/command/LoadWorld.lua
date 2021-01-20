@@ -9,8 +9,8 @@ local LoadWorldCommand = NPL.load('(gl)Mod/WorldShare/command/LoadWorld.lua')
 -------------------------------------------------------
 ]]
 
--- UI
-local UserConsole = NPL.load('(gl)Mod/WorldShare/cellar/UserConsole/Main.lua')
+-- bottles
+local CommonLoadWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/CommonLoadWorld.lua')
 
 -- service
 local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
@@ -181,7 +181,7 @@ function LoadWorldCommand:Init()
             end
 
             -- enter read only world
-            UserConsole:HandleWorldId(pid, refreshMode, failed)
+            CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
 
             return false
         end
