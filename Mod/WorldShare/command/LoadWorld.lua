@@ -148,19 +148,19 @@ function LoadWorldCommand:Init()
 
                 local command = string.match(cmd_text, "|[ ]+(%/[%w]+)[ ]+")
                 if command == '/sendevent' then
-                    local execCommand = string.match(cmd_text, "|[ ]+(%/[%w]+[ ]+[ %w]+)$")
+                    local execCommand = string.match(cmd_text, "|[ ]+(%/[%w]+[ ]+[ {}=,%w]+)$")
                     local event = string.match(cmd_text, "|[ ]+%/[%w]+[ ]+([%w]+)")
-                    
+
                     if currentEnterWorld and
                        type(currentEnterWorld) == 'table' and
                        currentEnterWorld.kpProjectId and
                        tonumber(pid) == tonumber(currentEnterWorld.kpProjectId) then
                         if string.match(event, '^global') then
-                            GameLogic.RunCommand(execCommand)
+                            GameLogic.RunCommand(execCommand or '')
                         end
                     else
                         if string.match(event, '^global') then
-                            WorldShareCommand:PushAfterLoadWorldCommand(execCommand)
+                            WorldShareCommand:PushAfterLoadWorldCommand(execCommand or '')
                         end
 
                         CommandManager:RunCommand('/loadworld -s ' .. pid)
