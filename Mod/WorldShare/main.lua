@@ -386,6 +386,7 @@ function WorldShare:init()
     GameLogic.GetFilters():add_filter(
         'get_keepwork_url',
         function()
+            local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
             return KeepworkService:GetKeepworkUrl()
         end
     )
