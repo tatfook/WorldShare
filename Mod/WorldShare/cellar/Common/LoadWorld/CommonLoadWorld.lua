@@ -272,7 +272,7 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                         L'未能成功进入该地图，将帮您传送到【创意空间】。 ',
                         function()
                             local mainWorldProjectId = LocalServiceWorld:GetMainWorldProjectId()
-                            self:HandleWorldId(mainWorldProjectId, true)
+                            self:EnterWorldById(mainWorldProjectId, true)
                         end,
                         _guihelper.MessageBoxButtons.OK_CustomLabel
                     )
@@ -289,7 +289,7 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                 if not KeepworkService:IsSignedIn() then
                     LoginModal:CheckSignedIn(L"该项目需要登录后访问", function(bIsSuccessed)
                         if bIsSuccessed then
-                            self:HandleWorldId(pid, refreshMode)
+                            self:EnterWorldById(pid, refreshMode)
                         end
                     end)
                     return false
@@ -323,7 +323,7 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                     if not KeepworkService:IsSignedIn() then
                         LoginModal:CheckSignedIn(L"该项目需要登录后访问", function(bIsSuccessed)
                             if bIsSuccessed then
-                                self:HandleWorldId(pid, refreshMode)
+                                self:EnterWorldById(pid, refreshMode)
                             end
                         end)
                         return false
@@ -369,7 +369,7 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                             L'未能成功进入该地图，将帮您传送到【创意空间】。 ',
                             function()
                                 local mainWorldProjectId = LocalServiceWorld:GetMainWorldProjectId()
-                                self:HandleWorldId(mainWorldProjectId, true)
+                                self:EnterWorldById(mainWorldProjectId, true)
                             end,
                             _guihelper.MessageBoxButtons.OK_CustomLabel
                         )
