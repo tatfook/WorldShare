@@ -228,6 +228,9 @@ EventTrackingService.map = {
             turnable = 'click.promotion.turnable', -- 活动转盘点击次数
             weekend = 'click.promotion.weekend', -- 点击周末创造
             hour_of_code = 'click.promotion.hour_of_code', -- 一小时编程课程
+            winter_camp = {
+                first_page = 'click.promotion.winter_camp.first_page', -- 冬令营主页
+            }
         },
         home = { -- 家园
             click_avatar = 'click.home.click_avatar', -- 头像点击次数
