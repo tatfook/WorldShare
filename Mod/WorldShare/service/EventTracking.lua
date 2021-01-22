@@ -246,6 +246,9 @@ EventTrackingService.map = {
                 open = 'click.vip.funnel.open' -- 弹出会员弹窗次数
             }
         },
+        macro = { -- 宏
+            task = 'click.macro.task', -- 任务
+        },
         beginner = {
             catation = 'click.beginner.catation' -- 领取奖状
         }
