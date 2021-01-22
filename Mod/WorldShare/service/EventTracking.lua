@@ -230,6 +230,7 @@ EventTrackingService.map = {
             hour_of_code = 'click.promotion.hour_of_code', -- 一小时编程课程
             winter_camp = {
                 first_page = 'click.promotion.winter_camp.first_page', -- 冬令营主页
+                notification = 'click.promotion.winter_camp.notification', -- 冬令营通知
             }
         },
         home = { -- 家园
