@@ -148,7 +148,7 @@ function LoadWorldCommand:Init()
 
                 local command = string.match(cmd_text, "|[ ]+(%/[%w]+)[ ]+")
                 if command == '/sendevent' then
-                    local execCommand = string.match(cmd_text, "|[ ]+(%/[%w]+[ ]+[ {}=,%w]+)$")
+                    local execCommand = string.match(cmd_text, "|[ ]+(%/[%w]+[ ]+[ {}=_,%w]+)$")
                     local event = string.match(cmd_text, "|[ ]+%/[%w]+[ ]+([%w]+)")
 
                     if currentEnterWorld and
