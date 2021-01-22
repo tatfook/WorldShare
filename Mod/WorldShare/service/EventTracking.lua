@@ -227,8 +227,12 @@ EventTrackingService.map = {
             partake = 'click.promotion.partake', -- 参与活动人数（记录用户获取的第一个帽子）
             turnable = 'click.promotion.turnable', -- 活动转盘点击次数
             weekend = 'click.promotion.weekend', -- 点击周末创造
-            hour_of_code = 'click.promotion.hour_of_code', -- 一小时编程课程
             winter_camp = {
+                lessons = {
+                    ai = 'click.promotion.winter_camp.lessons.ai', -- AI云游学
+                    epidemic = 'click.promotion.winter_camp.lessons.epidemic', -- 防疫教学
+                    hour_of_code = 'click.promotion.winter_camp.lessons.hour_of_code', -- 一小时编程课程
+                },
                 first_page = 'click.promotion.winter_camp.first_page', -- 冬令营主页
                 notification = 'click.promotion.winter_camp.notification', -- 冬令营通知
             }
