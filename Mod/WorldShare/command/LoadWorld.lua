@@ -189,7 +189,7 @@ function LoadWorldCommand:Init()
 end
 
 function LoadWorldCommand:Fork(cmdText, options)
-    local projectId, worldName = string.match(cmdText, "^(%w+)[ ]+(%w+)$")
+    local projectId, worldName = string.match(cmdText, "^(%w+)[ ]+(.+)$")
 
     if not projectId or not worldName or type(tonumber(projectId)) ~= 'number' then
         return
