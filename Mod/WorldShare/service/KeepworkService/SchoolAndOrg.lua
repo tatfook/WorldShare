@@ -16,6 +16,9 @@ local KeepworkRegionsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Regions.lua
 local KeepworkSchoolsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Schools.lua")
 local AccountingOrgActivateCodeApi = NPL.load("(gl)Mod/WorldShare/api/Accounting/OrgActivateCode.lua")
 
+-- service
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+
 local KeepworkServiceSchoolAndOrg = NPL.export()
 
 function KeepworkServiceSchoolAndOrg:GetUserAllOrgs(callback)
@@ -159,6 +162,18 @@ function KeepworkServiceSchoolAndOrg:ChangeSchool(schoolId, callback)
         if err == 200 then
             if type(callback) == "function" then
                 callback(true)
+
+                -- update field 
+                KeepworkServiceSession:Profile(function(response, err)
+                    local isVipSchool = false
+
+                    if response and response.school and response.school.isVip == 1 then
+                        isVipSchool = true
+                    end
+
+                    local SetIsVipSchool = Mod.WorldShare.Store:Action("user/SetIsVipSchool")
+                    SetIsVipSchool(isVipSchool)
+                end)
             else
                 callback(false)
             end

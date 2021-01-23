@@ -22,6 +22,10 @@ function UserStore:Action()
             self.token = token
             commonlib.setfield("System.User.keepworktoken", token)
         end,
+        SetIsVipSchool = function(isVipSchool)
+            self.isVipSchool = isVipSchool
+            commonlib.setfield("System.User.isVipSchool", self.isVipSchool)
+        end,
         Login = function(token, userId, username, nickname, realname, isVipSchool)
             self.token = token
             self.userId = userId
