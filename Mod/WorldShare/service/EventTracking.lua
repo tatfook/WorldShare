@@ -34,6 +34,9 @@ EventTrackingService.map = {
             edit = 'duration.world.edit', -- 用户编辑世界时间
             play = 'duration.world.play'  -- 用户播放世界时间
         },
+        macro = { -- 宏
+            task = 'duration.macro.task', -- 任务
+        },
         learning_daily = 'duration.learning_daily' -- 成长日记
     },
     click = {
