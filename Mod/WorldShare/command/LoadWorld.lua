@@ -164,7 +164,7 @@ function LoadWorldCommand:Init()
                         end
 
                         if options and options.force then
-                            CommandManager:RunCommand('/loadworld -s -force' .. pid)
+                            CommandManager:RunCommand('/loadworld -s -force ' .. pid)
                         else
                             CommandManager:RunCommand('/loadworld -s ' .. pid)
                         end
