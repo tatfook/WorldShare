@@ -174,7 +174,7 @@ function RegisterModal:Register(page, callback)
         end)
     end
 
-    if self.captcha then
+    if self.captcha and self.captcha ~= '' then
         -- account register
         KeepworkServiceSession:CaptchaVerify(self.captcha, function(data, err)
             if data ~= nil and type(data) == 'string' and data == "false" then
