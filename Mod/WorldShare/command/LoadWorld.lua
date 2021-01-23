@@ -88,7 +88,7 @@ function LoadWorldCommand:Init()
                         CommandManager:RunCommand('/loadworld -s ' .. optionsStr .. cmd_text)
                     end
                 end
-    
+
                 local pid = string.match(cmd_text, '(%d+)')
                 if pid then
                     Mod.WorldShare.MsgBox:Show(L"请稍候...")
@@ -163,7 +163,11 @@ function LoadWorldCommand:Init()
                             WorldShareCommand:PushAfterLoadWorldCommand(execCommand or '')
                         end
 
-                        CommandManager:RunCommand('/loadworld -s ' .. pid)
+                        if options and options.force then
+                            CommandManager:RunCommand('/loadworld -s -force' .. pid)
+                        else
+                            CommandManager:RunCommand('/loadworld -s ' .. pid)
+                        end
                     end
                 end
                 return false
