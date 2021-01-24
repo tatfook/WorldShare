@@ -368,6 +368,13 @@ function Compare:GetCurrentWorldInfo(callback)
         Mod.WorldShare.Store:Set("world/currentEnterWorld", currentWorld)
 
         KeepworkServiceProject:GetProject(currentWorld.kpProjectId, function(data, err)
+            if not data or type(data) ~= 'table' then
+                if callback and type(callback) == 'function' then
+                    callback()
+                end
+                return
+            end
+
             local function Handle()
                 if data and type(data) == 'table' and data.username and data.userId then
                     currentWorld.user = {
@@ -383,7 +390,7 @@ function Compare:GetCurrentWorldInfo(callback)
     
                 DesktopMenu.LoadMenuItems(true)
     
-                if type(callback) == 'function' then
+                if callback and type(callback) == 'function' then
                     callback()
                 end
             end
