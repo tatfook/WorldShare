@@ -161,8 +161,6 @@ function KeepworkServiceSchoolAndOrg:ChangeSchool(schoolId, callback)
     KeepworkUsersApi:ChangeSchool(schoolId, function(data, err)
         if err == 200 then
             if type(callback) == "function" then
-                callback(true)
-
                 -- update field 
                 KeepworkServiceSession:Profile(function(response, err)
                     local isVipSchool = false
@@ -173,6 +171,8 @@ function KeepworkServiceSchoolAndOrg:ChangeSchool(schoolId, callback)
 
                     local SetIsVipSchool = Mod.WorldShare.Store:Action("user/SetIsVipSchool")
                     SetIsVipSchool(isVipSchool)
+
+                    callback(true)
                 end)
             else
                 callback(false)
