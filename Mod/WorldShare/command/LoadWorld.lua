@@ -61,6 +61,8 @@ function LoadWorldCommand:Init()
                     else
                         CommandManager:RunCommand('/loadworld -s ' .. optionsStr .. cmd_text)
                     end
+
+                    return false
                 end
 
                 if cmd_text == 'home' then
@@ -87,6 +89,8 @@ function LoadWorldCommand:Init()
                     else
                         CommandManager:RunCommand('/loadworld -s ' .. optionsStr .. cmd_text)
                     end
+
+                    return false
                 end
 
                 local pid = string.match(cmd_text, '(%d+)')
@@ -126,6 +130,10 @@ function LoadWorldCommand:Init()
                 end
 
                 return false
+            end
+
+            if cmd_text == 'home' then
+                return cmd_text
             end
 
             if cmd_text:match("^https?://") then
