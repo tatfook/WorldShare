@@ -19,9 +19,14 @@ local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua
 
 local Beginner = NPL.export()
 
+Beginner.inited = false
 Beginner.guideWorldIds = { 40499, 40499, 40513, 40514, 40516 }
 
 function Beginner:OnWorldLoad()
+    if self.inited then
+        return
+    end
+
     local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
     if currentEnterWorld and type(currentEnterWorld) == 'table' and currentEnterWorld.kpProjectId then
@@ -37,6 +42,7 @@ function Beginner:OnWorldLoad()
 
     Mod.WorldShare.Utils.SetTimeOut(function()
         self:Show()
+        self.inited = true
     end, 5000)
 end
 
