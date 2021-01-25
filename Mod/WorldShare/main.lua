@@ -312,13 +312,13 @@ function WorldShare:init()
     )
 
     -- filter show certificate page
-    GameLogic.GetFilters():add_filter(
-        'show_certificate_page',
-        function(callback)
-            Beginner:Show(callback)
-            return false
-        end
-    )
+    -- GameLogic.GetFilters():add_filter(
+    --     'show_certificate_page',
+    --     function(callback)
+    --         Beginner:Show(callback)
+    --         return false
+    --     end
+    -- )
 
     -- filter is signed in
     GameLogic.GetFilters():add_filter(
@@ -664,6 +664,11 @@ function WorldShare:OnLogin()
 end
 
 function WorldShare:OnWorldLoad()
+    if System.options.loginmode ~= 'offline' then
+        -- open from MainLogin:EnterUserConsole
+        Mod.WorldShare.MsgBox:Close()
+    end
+
     UserConsole:ClosePage()
 
     local curLesson = Store:Getter('lesson/GetCurLesson')
@@ -675,6 +680,7 @@ function WorldShare:OnWorldLoad()
 
     HistoryManager:OnWorldLoad()
     WorldShareCommand:OnWorldLoad()
+    Beginner:OnWorldLoad()
 
     Store:Subscribe('user/Logout', function()
         Compare:RefreshWorldList(function()

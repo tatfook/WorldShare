@@ -295,7 +295,7 @@
                 ]]>
             </script>
             <style type="text/mcss" src="Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss"></style>
-            <kp:window width="600" height="420" icon="Texture/Aries/Creator/keepwork/Window/title/biaoti_xuexiao_32bits.png" onclose="close()">
+            <kp:window width="600" height="420" icon="Texture/Aries/Creator/keepwork/Window/title/biaoti_xuexiao_32bits.png">
                 <div style="width: 600px; height: 40px;">
                     <div style="margin-left: 120px;margin-top: 14px;font-size: 14px;base-font-size: 14px;color: #ffffff;"><%=L"加入学校"%></div>
                 </div>
@@ -322,8 +322,9 @@
                             </div>
                         </div>
                     </div>
-                    <div style="margin-top: 10px;margin-left: 220px;">
+                    <div style="margin-top: 10px;margin-left: 105px;">
                         <input type="button" class="theme1_orange_button" style="height: 35px;width: 105px;margin-left: 140px;" value="<%= L'确定' %>" onclick="confirm()"/>
+                        <input type="button" class="theme1_gray_button" style="height: 35px;width: 105px;margin-left: 10px;" value="<%= L'跳过' %>" onclick="close()"/>
                     </div>
                 </div>
             </kp:window>

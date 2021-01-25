@@ -15,23 +15,56 @@ local CommandManager = commonlib.gettable("MyCompany.Aries.Game.CommandManager")
 
 -- service
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
 
 local Beginner = NPL.export()
 
-Beginner.inited = false
+function Beginner:OnWorldLoad()
+    local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
+
+    if currentEnterWorld and type(currentEnterWorld) == 'table' and currentEnterWorld.kpProjectId then
+        if tonumber(currentEnterWorld.kpProjectId) == self:GetBeginnerWorldId() or
+           tonumber(currentEnterWorld.kpProjectId) == self:GetGuideWorldId() then
+            return
+        end
+    end
+
+    Mod.WorldShare.Utils.SetTimeOut(function()
+        self:Show()
+    end, 5000)
+end
+
+function Beginner:GetBeginnerWorldId()
+    if KeepworkService:GetEnv() == 'ONLINE' then
+        return 29477
+    elseif KeepworkService:GetEnv() == 'RELEASE' then
+        return 1376
+    else
+        return 0
+    end
+end
+
+function Beginner:GetGuideWorldId()
+    if KeepworkService:GetEnv() == 'ONLINE' then
+        return 40499
+    elseif KeepworkService:GetEnv() == 'RELEASE' then
+        return 1457
+    else
+        return 0
+    end
+end
 
 function Beginner:Show(callback)
     if not KeepworkServiceSession:IsSignedIn() then
         return
     end
 
-    if not self.inited and not KeepWorkItemManager.HasGSItem(60000) then
+    if not KeepWorkItemManager.HasGSItem(60001) then
         _guihelper.MessageBox(
             L"是否进入新手教学？",
             function(res)
                 if res and res == _guihelper.DialogResult.OK then
-                    CommandManager:RunCommand('/loadworld -s 29477')
-                    self.inited = true
+                    CommandManager:RunCommand('/loadworld -s -force ' .. self:GetBeginnerWorldId())
                 end
 
                 if res and res == _guihelper.DialogResult.Cancel then
@@ -39,10 +72,30 @@ function Beginner:Show(callback)
                         callback()
                     end
                 end
-
-                KeepWorkItemManager.DoExtendedCost(40000)
             end,
             _guihelper.MessageBoxButtons.OKCancel_CustomLabel
         )
+
+        return
+    end
+
+    if not KeepWorkItemManager.HasGSItem(60007) then
+        _guihelper.MessageBox(
+            L"是否参观3D校园？",
+            function(res)
+                if res and res == _guihelper.DialogResult.OK then
+                    CommandManager:RunCommand('/loadworld -s -force ' .. self:GetGuideWorldId())
+                end
+
+                if res and res == _guihelper.DialogResult.Cancel then
+                    if callback and type(callback) == 'function' then
+                        callback()
+                    end
+                end
+            end,
+            _guihelper.MessageBoxButtons.OKCancel_CustomLabel
+        )
+
+        return
     end
 end

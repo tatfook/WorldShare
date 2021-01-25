@@ -196,11 +196,103 @@ function MySchool:ShowJoinSchool(callback)
     end
 end
 
+function MySchool:ShowJoinSchoolAfterRegister(callback)
+    self.provinces = {
+        {
+            text = L"省",
+            value = 0,
+            selected = true,
+        }
+    }
+
+    self.cities = {
+        {
+            text = L"市",
+            value = 0,
+            selected = true,
+        }
+    }
+
+    self.areas = {
+        {
+            text = L"区",
+            value = 0,
+            selected = true,
+        }
+    }
+
+    self.kinds = {
+        {
+            text = L"学校类型",
+            value = 0,
+            selected = true,
+        },
+        {
+            text = L"小学",
+            value = L"小学"
+        },
+        {
+            text = L"中学",
+            value = L"中学"
+        },
+        {
+            text = L"大学",
+            value = L"大学",
+        },
+        {
+            text = L"综合",
+            value = L"综合",
+        }
+    }
+
+    self:SetResult({
+        {
+            text = L"在这里显示筛选的结果",
+            value = 0,
+            selected = true,
+        },
+    })
+
+    self.curId = 0
+    self.kind = nil
+    self.joinSchoolCallback = callback
+
+    local params1 = Mod.WorldShare.Utils.ShowWindow(600, 420, "(ws)Theme/MySchool/JoinSchoolAfterRegister.html", "Mod.WorldShare.JoinSchoolAfterRegister", nil, nil, nil, false, 1)
+    local params2 = Mod.WorldShare.Utils.ShowWindow(380, 100, "(ws)Theme/MySchool/JoinSchoolResult.html", "Mod.WorldShare.JoinSchoolResult", nil, 20, nil, false, 2)
+
+    self:GetProvinces(function(data)
+        if type(data) ~= "table" then
+            return false
+        end
+
+        self.provinces = data
+
+        self:RefreshJoinSchool()
+    end)
+
+    params1._page.OnClose = function()
+        if params2._page then
+            params2._page:CloseWindow()
+        end
+    end
+end
+
 function MySchool:RefreshJoinSchool()
     local JoinSchoolPage = Mod.WorldShare.Store:Get("page/Mod.WorldShare.JoinSchool")
+    local JoinSchoolAfterRegisterPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.JoinSchoolAfterRegister')
 
     if JoinSchoolPage then
         JoinSchoolPage:Refresh(0.01)
+
+        local JoinSchoolResultPage = Mod.WorldShare.Store:Get("page/Mod.WorldShare.JoinSchoolResult")
+
+        if JoinSchoolResultPage then
+            JoinSchoolResultPage:Refresh(0.01)
+        end
+    end
+
+    if JoinSchoolAfterRegisterPage then
+        JoinSchoolAfterRegisterPage:Refresh(0.01)
 
         local JoinSchoolResultPage = Mod.WorldShare.Store:Get("page/Mod.WorldShare.JoinSchoolResult")
 

@@ -232,23 +232,30 @@ function MainLogin:LoginAction()
 end
 
 function MainLogin:EnterUserConsole(isOffline)
-    ParaWorldLessons.CheckShowOnStartup(function(bBeginLessons)
-        if not bBeginLessons then
-            System.options.loginmode = "local"
+    -- ParaWorldLessons.CheckShowOnStartup(function(bBeginLessons)
+    --     if not bBeginLessons then
+            
+    --     end
+    -- end)
 
-            if isOffline then
-                System.options.loginmode = "offline"
-            end
+    System.options.loginmode = "local"
 
-            local MainLoginPage = Mod.WorldShare.Store:Get("page/MainLogin")
+    if isOffline then
+        System.options.loginmode = "offline"
+    end
 
-            if MainLoginPage then
-                MainLoginPage:CloseWindow()
-            end
+    local MainLoginPage = Mod.WorldShare.Store:Get("page/MainLogin")
 
-            GameMainLogin:next_step({IsLoginModeSelected = true})
-        end
-    end)
+    if MainLoginPage then
+        MainLoginPage:CloseWindow()
+    end
+
+    if System.options.loginmode ~= 'offline' then
+        -- close at on world load
+        Mod.WorldShare.MsgBox:Show(L'请稍候...', 12000)
+    end
+
+    GameMainLogin:next_step({IsLoginModeSelected = true})
 end
 
 function MainLogin:SetAutoLogin()

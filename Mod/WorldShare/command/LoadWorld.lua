@@ -99,7 +99,7 @@ function LoadWorldCommand:Init()
                     KeepworkServiceProject:GetProject(pid, function(data, err)
                         Mod.WorldShare.MsgBox:Close()
                         if err ~= 200 or not data or type(data) ~='table' or not data.name then
-                            GameLogic.AddBBS(nil, L"加载世界失败，无法在服务器找到该资源", 300, '255 0 0')
+                            GameLogic.AddBBS(nil, L"加载世界失败，无法在服务器找到该资源", 3000, '255 0 0')
                             return
                         end
 
