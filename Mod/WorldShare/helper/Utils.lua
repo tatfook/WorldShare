@@ -30,7 +30,7 @@ local self = Utils
 -- @param allowDrag Is allow window drag
 -- @param window z-axis order
 -- @return table
-function Utils.ShowWindow(option, height, url, name, x, y, align, allowDrag, zorder)
+function Utils.ShowWindow(option, height, url, name, x, y, align, allowDrag, zorder, isTopLevel)
     local params
 
     if type(option) == 'table' then
@@ -62,8 +62,12 @@ function Utils.ShowWindow(option, height, url, name, x, y, align, allowDrag, zor
             width = width,
             height = height,
             cancelShowAnimation = true,
-            bToggleShowHide = true
+            bToggleShowHide = true,
         }
+
+        if isTopLevel then
+            params.isTopLevel = isTopLevel
+        end
     end
 
     local matchUrl, matched = string.gsub(params.url, "^%(ws%)", "") -- ws: worldshare

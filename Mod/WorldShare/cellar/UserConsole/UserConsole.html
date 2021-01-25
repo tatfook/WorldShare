@@ -44,6 +44,10 @@
                 local current_item_index = 1
                 local temp_modify_worldname = ''
 
+                function old_version_notice()
+                    _guihelper.MessageBox(L'只有最新版才能登录， 否则只能用离线版，请退出程序后更新。')
+                end
+
                 function is_modifying()
                     return do_modify
                 end
@@ -259,12 +263,22 @@
                 end
 
                 function register()
+                    if System.options.isForceOffline then
+                        old_version_notice()
+                        return
+                    end
+
                     RegisterModal:ShowPage(function()
                         WorldList:RefreshCurrentServerList()
                     end)
                 end
 
                 function login()
+                    if System.options.isForceOffline then
+                        old_version_notice()
+                        return
+                    end
+
                     UserInfo:OnClickLogin()
                 end
 
@@ -273,6 +287,11 @@
                 end
 
                 function close()
+                    if System.options.isForceOffline then
+                        old_version_notice()
+                        return
+                    end
+
                     if System.options.mc == true then
                         if Mod.WorldShare.Store:Get("world/isEnterWorld") then
                             UserConsole:ClosePage()

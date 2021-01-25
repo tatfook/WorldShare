@@ -16,7 +16,7 @@ MsgBox.allMsg = {}
 MsgBox.allMsgBox = commonlib.Array:new()
 MsgBox.customLabels = {}
 
-function MsgBox:Show(msg, sec, overtimeMsg, width, height, index, align)
+function MsgBox:Show(msg, sec, overtimeMsg, width, height, index, align, isTopLevel)
     self.msgIdCount = self.msgIdCount + 1
 
     local msgId = self.msgIdCount
@@ -33,7 +33,8 @@ function MsgBox:Show(msg, sec, overtimeMsg, width, height, index, align)
         0,
         align or "_fi",
         false,
-        index or 11
+        index or 11,
+        isTopLevel
     )
 
     params._page.OnClose = function()

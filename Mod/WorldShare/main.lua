@@ -405,6 +405,12 @@ function WorldShare:init()
         function(bForceExit, bRestart, callback)
             EventTrackingService:SaveToDisk()
 
+            if System.options.isForceOffline then
+                local Desktop = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop");
+                Desktop.ForceExit()
+                return
+            end
+
             if callback and type(callback) == 'function' then
                 callback()
             end
