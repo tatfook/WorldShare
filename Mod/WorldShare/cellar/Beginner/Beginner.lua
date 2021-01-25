@@ -19,12 +19,18 @@ local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua
 
 local Beginner = NPL.export()
 
+Beginner.guideWorldIds = { 40499, 40499, 40513, 40514, 40516 }
+
 function Beginner:OnWorldLoad()
     local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
     if currentEnterWorld and type(currentEnterWorld) == 'table' and currentEnterWorld.kpProjectId then
         if tonumber(currentEnterWorld.kpProjectId) == self:GetBeginnerWorldId() or
            tonumber(currentEnterWorld.kpProjectId) == self:GetGuideWorldId() then
+            return
+        end
+
+        if self:InGuideWorld(tonumber(currentEnterWorld.kpProjectId)) then
             return
         end
     end
@@ -52,6 +58,16 @@ function Beginner:GetGuideWorldId()
     else
         return 0
     end
+end
+
+function Beginner:InGuideWorld(id)
+    for key, item in ipairs(self.guideWorldIds) do
+        if item == id then
+            return true
+        end
+    end
+
+    return false
 end
 
 function Beginner:Show(callback)
