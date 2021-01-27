@@ -59,6 +59,14 @@ function LoadWorldCommand:Init()
                             _guihelper.MessageBoxButtons.YesNo
                         )
                     else
+                        local optionsStr = ''
+        
+                        for key, item in pairs(options) do
+                            if key ~= 's' then
+                                optionsStr = optionsStr .. '-' .. key .. ' '
+                            end
+                        end
+
                         CommandManager:RunCommand('/loadworld -s ' .. optionsStr .. cmd_text)
                     end
 
