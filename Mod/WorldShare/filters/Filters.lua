@@ -16,7 +16,7 @@ local MySchoolFilter = NPL.load('./cellar/MySchool/MySchoolFilter.lua')
 local VipNoticeFilter = NPL.load('./cellar/VipNotice/VipNoticeFilter.lua')
 local ClientUpdateDialogFilter = NPL.load('(gl)Mod/WorldShare/filters/cellar/ClientUpdateDialog/ClientUpdateDialogFilter.lua')
 local MsgBoxFilter = NPL.load('(gl)Mod/WorldShare/filters/cellar/Common/MsgBox/MsgBoxFilter.lua')
-local OnLoadBlockRegionFilter = NPL.load('(gl)Mod/WorldShare/filters/libs/OnLoadBlockRegionFilter.lua')
+local OnWorldInitialRegionsLoadedFilter = NPL.load('(gl)Mod/WorldShare/filters/libs/OnWorldInitialRegionsLoadedFilter.lua')
 
 local Filters = NPL.export()
 
@@ -37,5 +37,5 @@ function Filters:Init()
     MsgBoxFilter:Init()
 
     -- init on load block region filter
-    OnLoadBlockRegionFilter:Init()
+    OnWorldInitialRegionsLoadedFilter:Init()
 end

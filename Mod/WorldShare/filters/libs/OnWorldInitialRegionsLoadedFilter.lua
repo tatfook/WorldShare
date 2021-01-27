@@ -1,23 +1,23 @@
 --[[
-Title: OnLoadBlockRegionFilter
+Title: OnWorldInitialRegionsLoadedFilter
 Author(s):  Big
 Date: 2021.1.27
 Desc: 
 use the lib:
 ------------------------------------------------------------
-local OnLoadBlockRegionFilter = NPL.load('(gl)Mod/WorldShare/filters/libs/OnLoadBlockRegionFilter.lua')
-OnLoadBlockRegionFilter:Init()
+local OnWorldInitialRegionsLoadedFilter = NPL.load('(gl)Mod/WorldShare/filters/libs/OnWorldInitialRegionsLoadedFilter.lua')
+OnWorldInitialRegionsLoadedFilter:Init()
 ------------------------------------------------------------
 ]]
 
 -- commands
 local WorldShareCommand = NPL.load("(gl)Mod/WorldShare/command/Command.lua")
 
-local OnLoadBlockRegionFilter = NPL.export()
+local OnWorldInitialRegionsLoadedFilter = NPL.export()
 
 local timer
 
-function OnLoadBlockRegionFilter:Init()
+function OnWorldInitialRegionsLoadedFilter:Init()
     GameLogic.GetFilters():add_filter(
         'OnLoadBlockRegion',
         function()
