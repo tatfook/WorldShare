@@ -19,7 +19,7 @@ local timer
 
 function OnWorldInitialRegionsLoadedFilter:Init()
     GameLogic.GetFilters():add_filter(
-        'OnLoadBlockRegion',
+        'OnWorldInitialRegionsLoaded',
         function()
             if Mod.WorldShare.Store:Get('world/isLoadWorldCommandExec') then
                 return
