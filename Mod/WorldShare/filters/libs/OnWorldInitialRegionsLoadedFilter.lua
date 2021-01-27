@@ -21,24 +21,7 @@ function OnWorldInitialRegionsLoadedFilter:Init()
     GameLogic.GetFilters():add_filter(
         'OnWorldInitialRegionsLoaded',
         function()
-            if Mod.WorldShare.Store:Get('world/isLoadWorldCommandExec') then
-                return
-            end
-
-            if not timer then
-                timer = commonlib.Timer:new(
-                    {
-                        callbackFunc = function()
-                            WorldShareCommand:ExecAfterLoadWorldCommands()
-                            Mod.WorldShare.Store:Set('world/isLoadWorldCommandExec', true)
-                            timer = nil
-                        end
-                    }
-                )
-                timer:Change(2000)
-            else
-                timer:Change(2000)
-            end
+            WorldShareCommand:ExecAfterLoadWorldCommands()
 
             return true
         end
