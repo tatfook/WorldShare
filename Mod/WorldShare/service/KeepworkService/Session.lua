@@ -300,9 +300,6 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
             Mod.WorldShare.Store:Set('user/hasJoinedSchoolOrOrg', false)
         end
 
-        local Login = Mod.WorldShare.Store:Action("user/Login")
-        Login(token, userId, username, nickname, realname, isVipSchool)
-
         -- update enter world info
         if Mod.WorldShare.Store:Get('world/isEnterWorld') then
             SyncServiceCompare:GetCurrentWorldInfo(function()
@@ -314,7 +311,10 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
             if callback and type(callback) == "function" then
                 callback(true)
             end
-        end        
+        end
+
+        local Login = Mod.WorldShare.Store:Action("user/Login")
+        Login(token, userId, username, nickname, realname, isVipSchool)
     end)
 
     self:ResetIndulge()

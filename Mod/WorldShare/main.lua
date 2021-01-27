@@ -677,28 +677,27 @@ function WorldShare:OnWorldLoad()
 
     UserConsole:ClosePage()
 
-    local curLesson = Store:Getter('lesson/GetCurLesson')
-
+    -- local curLesson = Store:Getter('lesson/GetCurLesson')
     -- if enter with lesson method, we will not check revision
-    if not curLesson then
-        SyncMain:OnWorldLoad()
-    end
-
+    -- if not curLesson then
+    -- end
+    
+    SyncMain:OnWorldLoad()
     HistoryManager:OnWorldLoad()
     WorldShareCommand:OnWorldLoad()
     Beginner:OnWorldLoad()
 
-    Store:Subscribe('user/Logout', function()
-        Compare:RefreshWorldList(function()
-            Compare:GetCurrentWorldInfo()
-        end)
-    end)
+    -- Store:Subscribe('user/Logout', function()
+    --     Compare:RefreshWorldList(function()
+    --         Compare:GetCurrentWorldInfo()
+    --     end)
+    -- end)
 
-    Store:Subscribe('user/Login', function()
-        Compare:RefreshWorldList(function()
-            Compare:GetCurrentWorldInfo()
-        end)
-    end)
+    -- Store:Subscribe('user/Login', function()
+    --     Compare:RefreshWorldList(function()
+    --         Compare:GetCurrentWorldInfo()
+    --     end)
+    -- end)
 
     EventTrackingService:Send(2, 'duration.world.stay', { started = true })
 
