@@ -72,7 +72,7 @@ function WorldShareCommand:ExecAfterLoadWorldCommands()
 end
 
 function WorldShareCommand:OnWorldLoad()
-    Mod.WorldShare.Utils.SetTimeOut(function()
-        self:ExecAfterLoadWorldCommands()
-    end, 1000)
+    -- Mod.WorldShare.Utils.SetTimeOut(function()
+    --     self:ExecAfterLoadWorldCommands()
+    -- end, 1000)
 end
