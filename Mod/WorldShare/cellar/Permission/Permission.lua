@@ -10,8 +10,11 @@ local Permission = NPL.load("(gl)Mod/WorldShare/cellar/Permission/Permission.lua
 ------------------------------------------------------------
 ]]
 
+-- service
 local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
 local KeepworkServicePermission = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Permission.lua")
+
+-- bottles
 local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
 local VipNotice = NPL.load("(gl)Mod/WorldShare/cellar/VipNotice/VipNotice.lua")
 
@@ -23,15 +26,15 @@ function Permission:CheckPermission(authName, bOpenUIIfNot, callback)
     end
 
     if bOpenUIIfNot then
-        LoginModal:CheckSignedIn(L"此功能需要特殊权限，请先登录", function(result)
+        LoginModal:CheckSignedIn(L'您需要登录并成为VIP用户，才能使用此功能', function(result)
             if not result then
                 return false
             end
 
             local function Handle()
-                KeepworkServicePermission:Authentication(authName, function(result)
+                KeepworkServicePermission:Authentication(authName, function(result, key, desc)
                     if result == false then
-                        self:ShowFailDialog(authName)
+                        self:ShowFailDialog(key, desc)
                     end
 
                     if type(callback) == "function" then
@@ -63,12 +66,6 @@ function Permission:CheckPermission(authName, bOpenUIIfNot, callback)
     end
 end
 
-function Permission:ShowFailDialog(authName)
-    --[[
-    if authName == "OnlineTeaching" then
-        _guihelper.MessageBox(L"此功能需要教师权限")
-    else
-    end
-    ]]
-    VipNotice:Init(false, KeepworkServicePermission.AllAuth[authName]);
+function Permission:ShowFailDialog(key, desc)
+    VipNotice:ShowPage(key, desc)
 end

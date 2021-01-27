@@ -5,45 +5,114 @@ Date:  2020.05.20
 Place: Foshan
 use the lib:
 ------------------------------------------------------------
-local KeepworkServicePermission = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Permission.lua")
+local KeepworkServicePermission = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Permission.lua')
 ------------------------------------------------------------
 ]]
 
-local KeepworkPermissionsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Permissions.lua")
+local KeepworkPermissionsApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/Permissions.lua')
 
 local KeepworkServicePermission = NPL.export()
 
 KeepworkServicePermission.AllAuth = {
-    SchoolManagementSystem = "a_school_management_system",
-    OnlineTeaching = "t_online_teaching",
-    OnlineLearning = "s_online_learning",
-    WorldDataSaveAs = "vip_world_data_save_as",
-    SkinOfAllProtagonists = "vip_skin_of_all_protagonists",
-    PythonCodeBlock = "vip_python_code_block",
-    VideoPluginWatermarkRemoval = "vip_video_plugin_watermark_removal",
-    Lan40PeopleOnline = "vip_lan_40_people_online",
-    WanNetworking = "vip_wan_networking",
-    OnlineWorldData50Mb = "vip_online_world_data_50mb",
-    MakeApp = "MakeApp",
-    ChangeAvatarSkin = "ChangeAvatarSkin",
-    CreateVipWorld = "t_create_vip_world",
-    VipCodeGameArtOfWar = "vip_code_game_art_of_war",
-    VipWeeklyTraining = "vip_weekly_training",
+    SchoolManagementSystem = {
+        key = 'a_school_management_system',
+        desc = L'马上开通会员激活功能'
+    },
+    OnlineTeaching = {
+        key = 't_online_teaching',
+        desc = L'马上开通会员激活功能'
+    },
+    OnlineLearning = {
+        key = 's_online_learning',
+        desc =  L'马上开通会员激活功能'
+    },
+    WorldDataSaveAs = {
+        key = 'vip_world_data_save_as',
+        desc = L'马上开通会员激活功能',
+    },
+    SkinOfAllProtagonists = {
+        key = 'vip_skin_of_all_protagonists',
+        desc = L'开通会员激活全部皮肤'
+    },
+    PythonCodeBlock = {
+        key = 'vip_python_code_block',
+        desc = L'开通会员使用Python方块'
+    },
+    VideoPluginWatermarkRemoval = {
+        key = 'vip_video_plugin_watermark_removal',
+        desc = L'开通会员去除视频水印'
+    },
+    Lan40PeopleOnline = {
+        key = 'vip_lan_40_people_online',
+        desc = L'开通会员扩展联网人数'
+    },
+    WanNetworking = {
+        key = 'vip_wan_networking',
+        desc = L'开通会员组建互联网服务器'
+    },
+    OnlineWorldData50Mb = {
+        key = 'vip_online_world_data_50mb',
+        desc = L'开通会员存储大型作品'
+    },
+    MakeApp = {
+        key = 'MakeApp',
+        desc = L'开通会员创建自己的App'
+    },
+    ChangeAvatarSkin = {
+        key = 'ChangeAvatarSkin',
+        desc = L'开通会员尽享精彩形象'
+    },
+    CreateVipWorld = {
+        key = 't_create_vip_world',
+        desc = L'开通会员创建特殊权限世界'
+    },
+    VipCodeGameArtOfWar = {
+        key = 'vip_code_game_art_of_war',
+        desc = L'开通会员畅享玩学课堂'
+    },
+    VipWeeklyTraining = {
+        key = 'vip_weekly_training',
+        desc = L'开通会员畅享每周实战'
+    },
+    DailyNote = {
+        key = 'daily_note',
+        desc = L'开通会员随意观看每日成长视频'
+    },
+    FlyOnParaWorld = {
+        key = 'fly_on_paraworld',
+        desc = L'开通会员马上飞行!'
+    },
+    VipGoods = {
+        key = 'vip_goods',
+        desc = L'VIPGOODS'
+    },
 }
 
 function KeepworkServicePermission:GetAuth(authName)
-    return self.AllAuth[authName]
+    if self.AllAuth[authName] then
+        return self.AllAuth[authName].key
+    end
+
+    return
+end
+
+function KeepworkServicePermission:GetAuthDesc(authName)
+    if self.AllAuth[authName] then
+        return self.AllAuth[authName].desc
+    end
+
+    return L'马上开通会员激活功能'
 end
 
 function KeepworkServicePermission:Authentication(authName, callback)
     if not self:GetAuth(authName) then
-        if Mod.WorldShare.Store:Get("user/isVip") then
-            if type(callback) == "function" then
-                callback(true)
+        if Mod.WorldShare.Store:Get('user/isVip') then
+            if type(callback) == 'function' then
+                callback(true, self:GetAuth(authName), self:GetAuthDesc(authName))
             end
         else
-            if type(callback) == "function" then
-                callback(false)
+            if type(callback) == 'function' then
+                callback(false, self:GetAuth(authName), self:GetAuthDesc(authName))
             end
         end
 
@@ -54,17 +123,17 @@ function KeepworkServicePermission:Authentication(authName, callback)
         self:GetAuth(authName),
         function(data, err)
             if data and data.data == true then
-                if type(callback) == "function" then
-                    callback(true)
+                if type(callback) == 'function' then
+                    callback(true, self:GetAuth(authName), self:GetAuthDesc(authName))
                 end
             else
-                if type(callback) == "function" then
-                    callback(false)
+                if type(callback) == 'function' then
+                    callback(false, self:GetAuth(authName), self:GetAuthDesc(authName))
                 end
             end
         end,
         function(data, err)
-            callback(false)
+            callback(false, self:GetAuth(authName), self:GetAuthDesc(authName))
         end
     )
 end

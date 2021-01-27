@@ -32,6 +32,7 @@ NPL.load('(gl)script/ide/System/Encoding/basexx.lua')
 
 -- include ide system windows
 NPL.load('(gl)script/ide/System/Windows/Screen.lua')
+NPL.load('(gl)script/ide/System/Windows/Window.lua')
 
 -- include ide system scene
 NPL.load('(gl)script/ide/System/Scene/Viewports/ViewportManager.lua')
@@ -57,6 +58,9 @@ NPL.load('(gl)script/apps/Aries/Creator/Game/Login/RemoteWorld.lua')
 NPL.load('(gl)script/apps/Aries/Creator/Game/Login/TeacherAgent/TeacherAgent.lua')
 NPL.load("(gl)script/apps/Aries/Creator/Game/Login/TeacherAgent/TeacherIcon.lua")
 NPL.load('(gl)script/apps/Aries/Creator/Game/Login/ParaWorldLessons.lua')
+
+-- include aries create game movie
+NPL.load("(gl)script/apps/Aries/Creator/Game/Movie/QREncode.lua")
 
 -- include aries creator game areas
 NPL.load('(gl)script/apps/Aries/Creator/Game/Areas/ShareWorldPage.lua')

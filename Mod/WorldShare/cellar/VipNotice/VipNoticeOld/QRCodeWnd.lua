@@ -10,27 +10,37 @@ local QRCodeWnd = commonlib.gettable("Mod.WorldShare.cellar.VipNotice.QRCodeWnd"
 QRCodeWnd:Show();
 -------------------------------------------------------
 ]]
-NPL.load("(gl)script/ide/System/Windows/Window.lua");
-local Window = commonlib.gettable("System.Windows.Window");
+
+-- libs
+local Window = commonlib.gettable("System.Windows.Window")
+
 local QRCodeWnd = commonlib.inherit(nil, commonlib.gettable("Mod.WorldShare.cellar.VipNotice.QRCodeWnd"))
 
 function QRCodeWnd:Show()
-	local width = 144;
-	local height = 144;
-	if(not self.window) then
-		local window = Window:new();
-		window:EnableSelfPaint(true);
-		window:SetAutoClearBackground(false);
-		self.window = window;
+	local width = 144
+	local height = 144
+
+	if (not self.window) then
+		local window = Window:new()
+
+		window:EnableSelfPaint(true)
+		window:SetAutoClearBackground(false)
+
+		self.window = window
 	end
-	
+
 	self.window:Show({
-		name="QRCodeWnd", 
-		url="Mod/WorldShare/cellar/VipNotice/QRCodeWnd.html",
-		alignment="_ct", left=-221, top=-156, width = width, height = height, zorder = 1,
-	});
+		name = "QRCodeWnd", 
+		url = "Mod/WorldShare/cellar/VipNotice/QRCode/QRCodeWnd.html",
+		alignment = "_ct",
+		left = -221,
+		top = -156,
+		width = width,
+		height = height,
+		zorder = 1,
+	})
 end
 
 function QRCodeWnd:Hide()
-	self.window:CloseWindow(true);
+	self.window:CloseWindow(true)
 end

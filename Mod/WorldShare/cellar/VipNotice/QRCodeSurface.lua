@@ -13,8 +13,11 @@ window:EnableSelfPaint(true);
 window:SetAutoClearBackground(false);
 -------------------------------------------------------
 ]]
-NPL.load("(gl)script/apps/Aries/Creator/Game/Movie/QREncode.lua");
-local QREncode = commonlib.gettable("MyCompany.Aries.Game.Movie.QREncode");
+
+-- libs
+local QREncode = commonlib.gettable("MyCompany.Aries.Game.Movie.QREncode")
+
+-- bottles
 local VipNotice = NPL.load("(gl)Mod/WorldShare/cellar/VipNotice/VipNotice.lua")
 
 local QRCodeSurface = commonlib.inherit(commonlib.gettable("System.Windows.UIElement"), commonlib.gettable("Paracraft.Controls.QRCodeSurface"));
