@@ -21,11 +21,16 @@ function OnLoadBlockRegionFilter:Init()
     GameLogic.GetFilters():add_filter(
         'OnLoadBlockRegion',
         function()
+            if Mod.WorldShare.Store:Get('world/isLoadWorldCommandExec') then
+                return
+            end
+
             if not timer then
                 timer = commonlib.Timer:new(
                     {
                         callbackFunc = function()
                             WorldShareCommand:ExecAfterLoadWorldCommands()
+                            Mod.WorldShare.Store:Set('world/isLoadWorldCommandExec', true)
                             timer = nil
                         end
                     }
