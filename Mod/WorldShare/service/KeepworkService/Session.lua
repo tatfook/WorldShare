@@ -294,10 +294,10 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
             Mod.WorldShare.Store:Set('user/myOrg', orgData[1] or {})
         end
 
-        if hasJoinedSchool or hasJoinedSchool then
-            Mod.WorldShare.Store:Set('user/hasJoinedSchoolOrOrg', true)
+        if hasJoinedSchool then
+            Mod.WorldShare.Store:Set('user/hasJoinedSchool', true)
         else
-            Mod.WorldShare.Store:Set('user/hasJoinedSchoolOrOrg', false)
+            Mod.WorldShare.Store:Set('user/hasJoinedSchool', false)
         end
 
         local Login = Mod.WorldShare.Store:Action("user/Login")

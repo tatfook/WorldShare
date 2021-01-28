@@ -6,16 +6,20 @@ place: Foshan
 Desc: 
 use the lib:
 ------------------------------------------------------------
-local MainLogin = NPL.load("(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua")
+local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
 ------------------------------------------------------------
 ]]
-local ParaWorldLessons = commonlib.gettable("MyCompany.Aries.Game.MainLogin.ParaWorldLessons")
-local GameMainLogin = commonlib.gettable("MyCompany.Aries.Game.MainLogin")
+-- libs
+local ParaWorldLessons = commonlib.gettable('MyCompany.Aries.Game.MainLogin.ParaWorldLessons')
+local GameMainLogin = commonlib.gettable('MyCompany.Aries.Game.MainLogin')
 
-local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepWorkService/Session.lua")
-local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
-local SessionsData = NPL.load("(gl)Mod/WorldShare/database/SessionsData.lua")
-local RegisterModal = NPL.load("(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua")
+-- service
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepWorkService/Session.lua')
+local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
+local SessionsData = NPL.load('(gl)Mod/WorldShare/database/SessionsData.lua')
+
+-- bottles
+local RegisterModal = NPL.load('(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua')
 
 local MainLogin = NPL.export()
 
@@ -23,15 +27,15 @@ MainLogin.curTab = 1
 
 function MainLogin:Show()
     Mod.WorldShare.Utils.ShowWindow({
-        url = "Mod/WorldShare/cellar/MainLogin/MainLogin.html", 
-        name = "MainLogin", 
+        url = 'Mod/WorldShare/cellar/MainLogin/MainLogin.html', 
+        name = 'MainLogin', 
         isShowTitleBar = false,
         DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
         style = CommonCtrl.WindowFrame.ContainerStyle,
         zorder = -1,
         allowDrag = false,
         directPosition = true,
-            align = "_fi",
+            align = '_fi',
             x = 0,
             y = 0,
             width = 0,
@@ -61,14 +65,14 @@ function MainLogin:Show()
     --     self.notFirstTimeShown = true
 
     --     if System.User.keepworktoken then
-    --         Mod.WorldShare.MsgBox:Show(L"正在登录，请稍候...", 24000, L"链接超时", 300, 120)
+    --         Mod.WorldShare.MsgBox:Show(L'正在登录，请稍候...', 24000, L'链接超时', 300, 120)
 
     --         KeepworkServiceSession:LoginWithToken(
     --             System.User.keepworktoken,
     --             function(response, err)
     --                 Mod.WorldShare.MsgBox:Close()
 
-    --                 if(err == 200 and type(response) == "table" and response.username) then
+    --                 if(err == 200 and type(response) == 'table' and response.username) then
     --                     self:EnterUserConsole()
     --                 else
     --                     -- token expired
@@ -79,7 +83,7 @@ function MainLogin:Show()
 
     --         Mod.WorldShare.Store:Set('user/AfterLogined', function(bIsSucceed)
 	-- 			-- OnKeepWorkLogin
-	-- 			GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", bIsSucceed)
+	-- 			GameLogic.GetFilters():apply_filters('OnKeepWorkLogin', bIsSucceed)
 	-- 		end)
 
     --         return
@@ -94,7 +98,7 @@ function MainLogin:Show()
 
     Mod.WorldShare.Store:Set('user/AfterLogined', function(bIsSucceed)
         -- OnKeepWorkLogin
-        GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", bIsSucceed)
+        GameLogic.GetFilters():apply_filters('OnKeepWorkLogin', bIsSucceed)
     end)
 end
 
@@ -115,7 +119,7 @@ function MainLogin:Close()
 end
 
 function MainLogin:SaveField()
-    local MainLoginPage = Mod.WorldShare.Store:Get("page/MainLogin")
+    local MainLoginPage = Mod.WorldShare.Store:Get('page/MainLogin')
 
     if not MainLoginPage then
         return false
@@ -152,8 +156,8 @@ function MainLogin:SaveField()
     MainLoginPage:SetValue('phonepassword', phonepassword)
 end
 
-function MainLogin:LoginAction()
-    local MainLoginPage = Mod.WorldShare.Store:Get("page/MainLogin")
+function MainLogin:LoginAction(callback)
+    local MainLoginPage = Mod.WorldShare.Store:Get('page/MainLogin')
 
     if not MainLoginPage then
         return false
@@ -162,35 +166,39 @@ function MainLogin:LoginAction()
     MainLoginPage:FindControl('account_field_error').visible = false
     MainLoginPage:FindControl('password_field_error').visible = false
 
-    local account = MainLoginPage:GetValue("account")
-    local password = MainLoginPage:GetValue("password")
-    local autoLogin = MainLoginPage:GetValue("autoLogin")
-    local rememberMe = MainLoginPage:GetValue("rememberMe")
+    local account = MainLoginPage:GetValue('account')
+    local password = MainLoginPage:GetValue('password')
+    local autoLogin = MainLoginPage:GetValue('autoLogin')
+    local rememberMe = MainLoginPage:GetValue('rememberMe')
 
-    if not account or account == "" then
-        MainLoginPage:SetUIValue('account_field_error_msg', L"*账号不能为空")
+    if not account or account == '' then
+        MainLoginPage:SetUIValue('account_field_error_msg', L'*账号不能为空')
         MainLoginPage:FindControl('account_field_error').visible = true
         return false
     end
 
-    if not password or password == "" then
-        MainLoginPage:SetUIValue('password_field_error_msg', L"*密码不能为空")
+    if not password or password == '' then
+        MainLoginPage:SetUIValue('password_field_error_msg', L'*密码不能为空')
         MainLoginPage:FindControl('password_field_error').visible = true
         return false
     end
 
-    Mod.WorldShare.MsgBox:Show(L"正在登录，请稍候...", 24000, L"链接超时", 300, 120)
+    Mod.WorldShare.MsgBox:Show(L'正在登录，请稍候...', 24000, L'链接超时', 300, 120)
 
     local function HandleLogined(bSucceed, message)
         Mod.WorldShare.MsgBox:Close()
 
+        if callback and type(callback) == 'function' then
+            callback(bSucceed)
+        end
+
         if not bSucceed then
-            MainLoginPage:SetUIValue('account_field_error_msg', format(L"*%s", message))
+            MainLoginPage:SetUIValue('account_field_error_msg', format(L'*%s', message))
             MainLoginPage:FindControl('account_field_error').visible = true
             return
         end
 
-        self:EnterUserConsole()
+        -- self:EnterUserConsole()
 
         -- if not Mod.WorldShare.Store:Get('user/isBind') then
         --     RegisterModal:ShowBindingPage()
@@ -212,10 +220,10 @@ function MainLogin:LoginAction()
                 Mod.WorldShare.MsgBox:Close()
 
                 if response and response.code and response.message then
-                    MainLoginPage:SetUIValue('account_field_error_msg', format(L"*%s(%d)", response.message, response.code))
+                    MainLoginPage:SetUIValue('account_field_error_msg', format(L'*%s(%d)', response.message, response.code))
                     MainLoginPage:FindControl('account_field_error').visible = true
                 else
-                    MainLoginPage:SetUIValue('account_field_error_msg', format(L"*系统维护中(%d)", err))
+                    MainLoginPage:SetUIValue('account_field_error_msg', format(L'*系统维护中(%d)', err))
                     MainLoginPage:FindControl('account_field_error').visible = true
                 end
 
@@ -238,13 +246,13 @@ function MainLogin:EnterUserConsole(isOffline)
     --     end
     -- end)
 
-    System.options.loginmode = "local"
+    System.options.loginmode = 'local'
 
     if isOffline then
-        System.options.loginmode = "offline"
+        System.options.loginmode = 'offline'
     end
 
-    local MainLoginPage = Mod.WorldShare.Store:Get("page/MainLogin")
+    local MainLoginPage = Mod.WorldShare.Store:Get('page/MainLogin')
 
     if MainLoginPage then
         MainLoginPage:CloseWindow()
@@ -259,54 +267,54 @@ function MainLogin:EnterUserConsole(isOffline)
 end
 
 function MainLogin:SetAutoLogin()
-    local MainLoginPage = Mod.WorldShare.Store:Get("page/MainLogin")
+    local MainLoginPage = Mod.WorldShare.Store:Get('page/MainLogin')
 
     if not MainLoginPage then
         return false
     end
 
-    local autoLogin = MainLoginPage:GetValue("autoLogin")
-    local rememberMe = MainLoginPage:GetValue("rememberMe")
-    local account = MainLoginPage:GetValue("showaccount")
-    local password = MainLoginPage:GetValue("password")
+    local autoLogin = MainLoginPage:GetValue('autoLogin')
+    local rememberMe = MainLoginPage:GetValue('rememberMe')
+    local account = MainLoginPage:GetValue('showaccount')
+    local password = MainLoginPage:GetValue('password')
 
     if autoLogin then
-        MainLoginPage:SetValue("rememberMe", true)
+        MainLoginPage:SetValue('rememberMe', true)
     else
-        MainLoginPage:SetValue("rememberMe", rememberMe)
+        MainLoginPage:SetValue('rememberMe', rememberMe)
     end
 
-    MainLoginPage:SetValue("autoLogin", autoLogin)
-    MainLoginPage:SetValue("password", password)
-    MainLoginPage:SetValue("account", account)
-    MainLoginPage:SetValue("showaccount", account)
+    MainLoginPage:SetValue('autoLogin', autoLogin)
+    MainLoginPage:SetValue('password', password)
+    MainLoginPage:SetValue('account', account)
+    MainLoginPage:SetValue('showaccount', account)
     self.account = string.lower(account)
 
     self:Refresh()
 end
 
 function MainLogin:SetRememberMe()
-    local MainLoginPage = Mod.WorldShare.Store:Get("page/MainLogin")
+    local MainLoginPage = Mod.WorldShare.Store:Get('page/MainLogin')
 
     if not MainLoginPage then
         return false
     end
 
-    local autoLogin = MainLoginPage:GetValue("autoLogin")
-    local password = MainLoginPage:GetValue("password")
-    local rememberMe = MainLoginPage:GetValue("rememberMe")
-    local account = MainLoginPage:GetValue("showaccount")
+    local autoLogin = MainLoginPage:GetValue('autoLogin')
+    local password = MainLoginPage:GetValue('password')
+    local rememberMe = MainLoginPage:GetValue('rememberMe')
+    local account = MainLoginPage:GetValue('showaccount')
 
     if rememberMe then
-        MainLoginPage:SetValue("autoLogin", autoLogin)
+        MainLoginPage:SetValue('autoLogin', autoLogin)
     else
-        MainLoginPage:SetValue("autoLogin", false)
+        MainLoginPage:SetValue('autoLogin', false)
     end
 
-    MainLoginPage:SetValue("rememberMe", rememberMe)
-    MainLoginPage:SetValue("password", password)
-    MainLoginPage:SetValue("account", account)
-    MainLoginPage:SetValue("showaccount", account)
+    MainLoginPage:SetValue('rememberMe', rememberMe)
+    MainLoginPage:SetValue('password', password)
+    MainLoginPage:SetValue('account', account)
+    MainLoginPage:SetValue('showaccount', account)
     self.account = string.lower(account)
 
     self:Refresh()
@@ -351,9 +359,9 @@ function MainLogin:SelectAccount(username)
 
     self.account = session and session.account or ''
 
-    MainLoginPage:SetValue("autoLogin", session.autoLogin)
-    MainLoginPage:SetValue("rememberMe", session.rememberMe)
-    MainLoginPage:SetValue("password", session.password)
+    MainLoginPage:SetValue('autoLogin', session.autoLogin)
+    MainLoginPage:SetValue('rememberMe', session.rememberMe)
+    MainLoginPage:SetValue('password', session.password)
     MainLoginPage:SetValue('showaccount', session.account or '')
 
     self:Refresh()
@@ -371,10 +379,10 @@ function MainLogin:RemoveAccount(username)
     if self.account == username then
         self.account = nil
 
-        MainLoginPage:SetValue("autoLogin", false)
-        MainLoginPage:SetValue("rememberMe", false)
-        MainLoginPage:SetValue("password", "")
-        MainLoginPage:SetValue("showaccount", "")
+        MainLoginPage:SetValue('autoLogin', false)
+        MainLoginPage:SetValue('rememberMe', false)
+        MainLoginPage:SetValue('password', '')
+        MainLoginPage:SetValue('showaccount', '')
     end
 
     self:Refresh()

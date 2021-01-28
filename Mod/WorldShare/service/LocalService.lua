@@ -154,6 +154,13 @@ function LocalService:Write(worldpath, path, content)
 end
 
 function LocalService:Delete(worldpath, filename)
+    -- fixed remove file fail on mac
+    local matchStr = string.match(worldpath, "(.+)/$")
+
+    if matchStr then
+        worldpath = matchStr
+    end
+
     local deletePath = format("%s/%s", worldpath, CommonlibEncoding.Utf8ToDefault(filename or ''))
 
     ParaIO.DeleteFile(deletePath)
