@@ -279,6 +279,10 @@ function EventTrackingService:Init()
     self:Loop()
 end
 
+function EventTrackingService:GetServerTime()
+    return Mod.WorldShare.Store:Get('world/currentServerTime')
+end
+
 function EventTrackingService:GenerateDataPacket(eventType, userId, action, started)
     if not userId or not action then
         return
@@ -295,7 +299,7 @@ function EventTrackingService:GenerateDataPacket(eventType, userId, action, star
         return {
             userId = userId,
             projectId = projectId,
-            currentAt = os.time(),
+            currentAt = self:GetServerTime(),
             traceId = System.Encoding.guid.uuid()
         }
     elseif eventType == 2 then -- duration event
@@ -308,7 +312,7 @@ function EventTrackingService:GenerateDataPacket(eventType, userId, action, star
         local previousUnitinfo = EventTrackingDatabase:GetPacket(userId, action)
 
         if not previousUnitinfo then
-            unitinfo.beginAt = os.time()
+            unitinfo.beginAt = self:GetServerTime()
             unitinfo.endAt = 0
             unitinfo.duration = 0
             unitinfo.traceId = System.Encoding.guid.uuid()
@@ -316,11 +320,11 @@ function EventTrackingService:GenerateDataPacket(eventType, userId, action, star
             if started then
                 unitinfo.beginAt = previousUnitinfo.beginAt
                 unitinfo.endAt = 0
-                unitinfo.duration = os.time() - previousUnitinfo.beginAt
+                unitinfo.duration = self:GetServerTime() - previousUnitinfo.beginAt
                 unitinfo.traceId = previousUnitinfo.traceId
             else
                 unitinfo.beginAt = previousUnitinfo.beginAt
-                unitinfo.endAt = os.time()
+                unitinfo.endAt = self:GetServerTime()
                 unitinfo.duration = unitinfo.endAt - previousUnitinfo.beginAt
                 unitinfo.traceId = previousUnitinfo.traceId
             end
@@ -470,7 +474,7 @@ function EventTrackingService:Loop()
                             for uKey, uItem in ipairs(unitinfo) do
                                 if uItem and uItem.packet then
                                     if uItem.packet.endAt and uItem.packet.endAt == 0 then
-                                        uItem.packet.duration = os.time() - uItem.packet.beginAt
+                                        uItem.packet.duration = self:GetServerTime() - uItem.packet.beginAt
                                     end
 
                                     -- send and remove cache

@@ -39,3 +39,11 @@ function KeepworkKeepworksApi:SvgCaptcha(key, captcha, success, error)
 
     KeepworkBaseApi:Post('/keepworks/svg_captcha', params, { notTokenRequest = true }, success, error)
 end
+
+-- url: /keepworks/currentTime
+-- method: GET
+-- params: [[]]
+-- return: object
+function KeepworkKeepworksApi:CurrentTime(success, error)
+    KeepworkBaseApi:Get('/keepworks/currentTime', nil, { notTokenRequest = true }, success, error)
+end

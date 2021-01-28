@@ -700,8 +700,12 @@ function KeepworkServiceSession:RenewToken()
 end
 
 function KeepworkServiceSession:PreventIndulge(callback)
+    local currentServerTime = 0
+
     local function Handle()
-        local times = 1000
+        currentServerTime = currentServerTime + 1
+        Mod.WorldShare.Store:Set('world/currentServerTime', currentServerTime)
+
         self.gameTime = (self.gameTime or 0) + 1
 
         -- 40 minutes
@@ -726,20 +730,30 @@ function KeepworkServiceSession:PreventIndulge(callback)
         end
 
         -- 22:30
-        if os.date("%H:%M", os.time()) == '22:30' then
+        if os.date("%H:%M", currentServerTime) == '22:30' then
             if type(callback) == 'function' then
                 callback('22:30')
             end
-
-            times = 60 * 1000
         end
-
-        Mod.WorldShare.Utils.SetTimeOut(function()
-            Handle()
-        end, times)
     end
 
-    Handle()
+    KeepworkKeepworksApi:CurrentTime(function(data, err)
+        if not data or not data.timestamp then
+            return
+        end
+
+        currentServerTime = math.floor(data.timestamp / 1000)
+
+        if not self.preventInduleTimer then
+            self.preventInduleTimer = commonlib.Timer:new(
+                {
+                    callbackFunc = Handle
+                }
+            )
+
+            self.preventInduleTimer:Change(0, 1000)
+        end
+    end)
 end
 
 function KeepworkServiceSession:ResetIndulge()
