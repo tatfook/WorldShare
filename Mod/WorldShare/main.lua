@@ -110,7 +110,6 @@ local Certificate = NPL.load("(gl)Mod/WorldShare/cellar/Certificate/Certificate.
 
 -- service
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
-local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
 local EventTrackingService = NPL.load('(gl)Mod/WorldShare/service/EventTracking.lua')
 local Compare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
 
@@ -215,22 +214,6 @@ function WorldShare:init()
         'OnClickCreateWorld',
         function()
             return CreateWorld.OnClickCreateWorld()
-        end
-    )
-
-    -- replcae implement local world event
-    GameLogic.GetFilters():add_filter(
-        'load_world_info',
-        function(ctx, node)
-            LocalService:LoadWorldInfo(ctx, node)
-        end
-    )
-
-    -- replace implement save world event
-    GameLogic.GetFilters():add_filter(
-        'save_world_info',
-        function(ctx, node)
-            LocalService:SaveWorldInfo(ctx, node)
         end
     )
 

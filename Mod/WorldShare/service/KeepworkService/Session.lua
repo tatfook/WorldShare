@@ -292,6 +292,13 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
         if type(orgData) == "table" and #orgData > 0 then
             hasJoinedOrg = true
             Mod.WorldShare.Store:Set('user/myOrg', orgData[1] or {})
+
+            for key, item in ipairs(orgData) do
+                if item and item.type and item.type == 4 then
+                    hasJoinedSchool = true
+                    break
+                end
+            end
         end
 
         if hasJoinedSchool then
@@ -867,7 +874,7 @@ function KeepworkServiceSession:ActiveVipByCode(key, callback)
         return false
     end
 
-    AccountingVipCodeApi:Activate(key, callback, callback)
+    AccountingVipCodeApi:Activate(Mod.WorldShare.Utils.RemoveLineEnding(key), callback, callback)
 end
 
 function KeepworkServiceSession:GetUsersByUsernames(usernames, callback)

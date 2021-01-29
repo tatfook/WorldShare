@@ -15,8 +15,6 @@ local WorldShareCommand = NPL.load("(gl)Mod/WorldShare/command/Command.lua")
 
 local OnWorldInitialRegionsLoadedFilter = NPL.export()
 
-local timer
-
 function OnWorldInitialRegionsLoadedFilter:Init()
     GameLogic.GetFilters():add_filter(
         'OnWorldInitialRegionsLoaded',

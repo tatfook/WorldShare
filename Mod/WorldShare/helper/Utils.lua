@@ -441,3 +441,11 @@ function Utils.WordsLimit(text)
 
     return text
 end
+
+function Utils.RemoveLineEnding(str)
+    str = string.gsub(str, " ", "")
+    str = string.gsub(str, "\r", "")
+    str = string.gsub(str, "\n", "")
+
+    return str
+end

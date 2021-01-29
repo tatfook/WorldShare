@@ -189,9 +189,7 @@ function KeepworkServiceSchoolAndOrg:JoinInstitute(code, callback)
         realname = Mod.WorldShare.Store:Get("user/username")
     end
 
-    code = string.gsub(code, " ", "")
-    code = string.gsub(code, "\r", "")
-    code = string.gsub(code, "\n", "")
+    code = Mod.WorldShare.Utils.RemoveLineEnding(code)
 
     AccountingOrgActivateCodeApi:Activate(
         code,

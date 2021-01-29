@@ -107,7 +107,19 @@
                     end
 
                     function login()
-                        MainLogin:LoginAction()
+                        MainLogin:LoginAction(function(b_succeed)
+                            if not b_succeed then
+                                return
+                            end
+
+                            if not Mod.WorldShare.Store:Get('user/hasJoinedSchool') then
+                                MySchool:ShowJoinSchoolAfterRegister(function()
+                                    MainLogin:EnterUserConsole()
+                                end)
+                            else
+                                MainLogin:EnterUserConsole()
+                            end
+                        end)
                     end
 
                     function forget_password()

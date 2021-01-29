@@ -11,18 +11,20 @@ Filters:Init()
 ]]
 
 -- load all filters
-local SessionFilter = NPL.load('./service/KeepworkService/SessionFilter.lua')
-local MySchoolFilter = NPL.load('./cellar/MySchool/MySchoolFilter.lua')
-local VipNoticeFilter = NPL.load('./cellar/VipNotice/VipNoticeFilter.lua')
+local KeepworkServiceSessionFilter = NPL.load('(gl)Mod/WorldShare/filters/service/KeepworkService/KeepworkServiceSessionFilter.lua')
+local MySchoolFilter = NPL.load('(gl)Mod/WorldShare/filters/cellar/MySchool/MySchoolFilter.lua')
+local VipNoticeFilter = NPL.load('(gl)Mod/WorldShare/filters/cellar/VipNotice/VipNoticeFilter.lua')
 local ClientUpdateDialogFilter = NPL.load('(gl)Mod/WorldShare/filters/cellar/ClientUpdateDialog/ClientUpdateDialogFilter.lua')
 local MsgBoxFilter = NPL.load('(gl)Mod/WorldShare/filters/cellar/Common/MsgBox/MsgBoxFilter.lua')
 local OnWorldInitialRegionsLoadedFilter = NPL.load('(gl)Mod/WorldShare/filters/libs/OnWorldInitialRegionsLoadedFilter.lua')
+local WorldInfoFilter = NPL.load('(gl)Mod/WorldShare/filters/libs/WorldInfoFilter.lua')
+local LocalServiceWorldFilter = NPL.load('(gl)Mod/WorldShare/filters/service/LocalService/LocalServiceWorldFilter.lua')
 
 local Filters = NPL.export()
 
 function Filters:Init()
     -- init session filter
-    SessionFilter:Init()
+    KeepworkServiceSessionFilter:Init()
 
     -- init myschool filter
     MySchoolFilter:Init()
@@ -38,4 +40,10 @@ function Filters:Init()
 
     -- init on load block region filter
     OnWorldInitialRegionsLoadedFilter:Init()
+
+    -- init world info filter
+    WorldInfoFilter:Init()
+
+    -- init local service world filter
+    LocalServiceWorldFilter:Init()
 end

@@ -383,34 +383,6 @@ function LocalService:GetTag(worldDir)
     end
 end
 
-function LocalService:SaveWorldInfo(ctx, node)
-    if (type(ctx) ~= 'table' or
-        type(node) ~= 'table' or
-        type(node.attr) ~= 'table') then
-        return false
-    end
-
-    node.attr.clientversion = self:GetClientVersion() or ctx.clientversion
-    node.attr.vipEnabled = ctx.vipEnabled or false
-    node.attr.institueVipEnabled = ctx.institueVipEnabled or false
-
-    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
-    node.attr.kpProjectId = currentWorld and currentWorld.kpProjectId or ctx.kpProjectId
-end
-
-function LocalService:LoadWorldInfo(ctx, node)
-    if (type(ctx) ~= 'table' or
-        type(node) ~= 'table' or
-        type(node.attr) ~= 'table') then
-        return false
-    end
-
-    ctx.clientversion = node.attr.clientversion
-    ctx.kpProjectId = node.attr.kpProjectId
-    ctx.vipEnabled = node.attr.vipEnabled
-    ctx.institueVipEnabled = node.attr.institueVipEnabled
-end
-
 function LocalService:GetClientVersion(node)
     return System and System.options and System.options.ClientVersion and System.options.ClientVersion
 end
