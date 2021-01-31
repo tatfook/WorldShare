@@ -101,7 +101,8 @@ EventTrackingService.map = {
                 get_phone_captcha = 'click.world.certificate.get_phone_captcha', -- 我在家里-获取验证码
                 bind = 'click.world.certificate.bind', -- 我在家里-确认实名
                 send_msg_to_parent = 'click.world.certificate.send_msg_to_parent', -- 发送短信给父母
-            }
+            },
+            npc = 'click.world.npc', -- 点击世界中的NPC
         },
         mini_map = { -- 小地图
             paraworld_list = 'click.mini_map.paraworld_list', -- 显示所有并行世界
