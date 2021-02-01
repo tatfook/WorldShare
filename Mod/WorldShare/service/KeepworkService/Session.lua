@@ -707,7 +707,7 @@ function KeepworkServiceSession:RenewToken()
 end
 
 function KeepworkServiceSession:PreventIndulge(callback)
-    local currentServerTime = 0
+    local currentServerTime = os.time()
 
     local function Handle()
         currentServerTime = currentServerTime + 1
@@ -744,23 +744,37 @@ function KeepworkServiceSession:PreventIndulge(callback)
         end
     end
 
-    KeepworkKeepworksApi:CurrentTime(function(data, err)
-        if not data or not data.timestamp then
-            return
+    KeepworkKeepworksApi:CurrentTime(
+        function(data, err)
+            if not data or not data.timestamp then
+                return
+            end
+
+            currentServerTime = math.floor(data.timestamp / 1000)
+
+            if not self.preventInduleTimer then
+                self.preventInduleTimer = commonlib.Timer:new(
+                    {
+                        callbackFunc = Handle
+                    }
+                )
+
+                self.preventInduleTimer:Change(0, 1000)
+            end
+        end,
+        function()
+            -- degraded mode
+            if not self.preventInduleTimer then
+                self.preventInduleTimer = commonlib.Timer:new(
+                    {
+                        callbackFunc = Handle
+                    }
+                )
+
+                self.preventInduleTimer:Change(0, 1000)
+            end
         end
-
-        currentServerTime = math.floor(data.timestamp / 1000)
-
-        if not self.preventInduleTimer then
-            self.preventInduleTimer = commonlib.Timer:new(
-                {
-                    callbackFunc = Handle
-                }
-            )
-
-            self.preventInduleTimer:Change(0, 1000)
-        end
-    end)
+    )
 end
 
 function KeepworkServiceSession:ResetIndulge()

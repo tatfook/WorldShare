@@ -475,6 +475,10 @@ function EventTrackingService:Loop()
                             for uKey, uItem in ipairs(unitinfo) do
                                 if uItem and uItem.packet then
                                     if uItem.packet.endAt and uItem.packet.endAt == 0 then
+                                        if not self:GetServerTime() or not uItem.packet.beginAt then
+                                            return
+                                        end
+
                                         uItem.packet.duration = self:GetServerTime() - uItem.packet.beginAt
                                     end
 
