@@ -364,6 +364,12 @@ function Compare:GetCurrentWorldInfo(callback)
     end
 
     if currentWorld.kpProjectId then
+        if GameLogic.options:IsCommunityWorld() then
+            currentWorld.communityWorld = true
+        else
+            currentWorld.communityWorld = false
+        end
+
         -- avoid network error
         Mod.WorldShare.Store:Set("world/currentEnterWorld", currentWorld)
 

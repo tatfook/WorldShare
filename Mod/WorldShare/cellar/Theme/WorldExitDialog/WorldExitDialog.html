@@ -21,6 +21,7 @@
                 -- lib
                 local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
                 local os = commonlib.gettable("System.os")
+                local Desktop = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop")
 
                 WorldExitDialog:OnInit()
 
@@ -251,6 +252,72 @@
                         end
                     end
                 end
+
+                function is_community_world_exit()
+                    if KeepworkServiceSession:IsSignedIn() then
+                        local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
+                        if currentEnterWorld.communityWorld then
+                            local userId = Mod.WorldShare.Store:Get('user/userId') or 0
+
+                            if tonumber(userId) == tonumber(currentEnterWorld.user.id) then
+                                if currentEnterWorld.members and type(currentEnterWorld.members) == 'table' then
+                                    local username = Mod.WorldShare.Store:Get('user/username')
+
+                                    for key, item in ipairs(currentEnterWorld.members) do
+                                        if username == item then
+                                            return false
+                                        end
+                                    end
+
+                                    return true
+                                else
+                                    return false
+                                end
+                            else
+                                return true
+                            end
+                        else
+                            return false
+                        end
+                    else
+                        return false
+                    end
+                end
+
+                function get_last_world_name()
+                    local lastWorld = Mod.WorldShare.Store:Get('world/lastWorld')
+
+                    if lastWorld then
+                        return format(L'你确定要离开当前世界，返回 <span style="color:#ff6a00">%s</span>', lastWorld.text)
+                    else
+                        return ''
+                    end
+                end
+
+                function go_back()
+                    local lastWorld = Mod.WorldShare.Store:Get('world/lastWorld')
+
+                    if not lastWorld then
+                        _guihelper.MessageBox(L'没有上次浏览世界的记录')
+                        return
+                    end
+
+                    if lastWorld.kpProjectId then
+                        local userId = Mod.WorldShare.Store:Get('world/userId')
+
+                        if tonumber(lastWorld.user.id) == tonumber(userId) then
+                            GameLogic.RunCommand(format('/loadworld -s -personal %d', lastWorld.kpProjectId))
+                        else
+                            GameLogic.RunCommand(format('/loadworld -s %d', lastWorld.kpProjectId))
+                        end
+                    else
+                        WorldCommon.OpenWorld(lastWorld.worldpath)
+                    end
+                end
+
+                function force_exit()
+                    Desktop.ForceExit(true)
+                end
             ]]>
         </script>
         <style type="text/mcss" src="Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss">
@@ -375,21 +442,33 @@
                                 </a>
                             </pe:if>
                         </div>
-                        <div style="margin-top:5x;base-font-size:15px;font-size:15px;">
-                            <%= L"您上次保存世界是:"%> <span style="color:#ff6a00"><%=format(L"%d秒前", get_elapsed_unsaved_seconds())%></span>
-                            <%= notice() %>
-                        </div>
-                        <div style="margin-top:10x;">
-                            <pe:if condition="<%= GameLogic.IsReadOnly() %>">
-                                <input type="button" onclick="save_as()" value='<%=L"另存为..." %>' class="theme1_orange_button" style="min-width:130px;height:45px;" />
-                            </pe:if>
-                            <pe:if condition="<%= not GameLogic.IsReadOnly() %>">
-                                <input type="button" onclick="on_click_save_and_exit()" value='<%=L"保存并退出" %>' class="theme1_orange_button" style="min-width:130px;height:50px;" />
-                            </pe:if>
-                            <input type="button" onclick="on_click_exit_without_save()" value='<%=L"直接退出" %>' class="theme1_gray_button" style="margin-left:25px;min-width:130px;height:50px;" />
-                            <input type="button" onclick="reload()" value='<%=L"重启世界" %>' class="theme1_gray_button" style="margin-left:25px;min-width:130px;height:50px;" />
-                            <input type="button" onclick="on_click_cancel()" value='<%=L"取消" %>' class="theme1_gray_button" style="margin-left:25x;min-width:130px;height:50px;" />
-                        </div>
+                        <pe:if condition='<%= is_community_world_exit() %>'>
+                            <div style="margin-top:5x;base-font-size:15px;font-size:15px;">
+                                <%= get_last_world_name() %>
+                            </div>
+                            <div style="margin-top: 10px;">
+                                <input type="button" onclick="go_back()" value='<%=L"返回" %>' class="theme1_orange_button" style="margin-left:50px;min-width:130px;height:50px;" />
+                                <input type="button" onclick="force_exit()" value='<%=L"返回到登录" %>' class="theme1_gray_button" style="margin-left:60px;min-width:130px;height:50px;" />
+                                <input type="button" onclick="on_click_cancel()" value='<%=L"取消" %>' class="theme1_gray_button" style="margin-left:60px;min-width:130px;height:50px;" />
+                            </div>
+                        </pe:if>
+                        <pe:if condition='<%= not is_community_world_exit() %>'>
+                            <div style="margin-top:5x;base-font-size:15px;font-size:15px;">
+                                <%= L"您上次保存世界是:"%> <span style="color:#ff6a00"><%=format(L"%d秒前", get_elapsed_unsaved_seconds())%></span>
+                                <%= notice() %>
+                            </div>
+                            <div style="margin-top:10x;">
+                                <pe:if condition="<%= GameLogic.IsReadOnly() %>">
+                                    <input type="button" onclick="save_as()" value='<%=L"另存为..." %>' class="theme1_orange_button" style="min-width:130px;height:45px;" />
+                                </pe:if>
+                                <pe:if condition="<%= not GameLogic.IsReadOnly() %>">
+                                    <input type="button" onclick="on_click_save_and_exit()" value='<%=L"保存并退出" %>' class="theme1_orange_button" style="min-width:130px;height:50px;" />
+                                </pe:if>
+                                <input type="button" onclick="on_click_exit_without_save()" value='<%=L"直接退出" %>' class="theme1_gray_button" style="margin-left:25px;min-width:130px;height:50px;" />
+                                <input type="button" onclick="reload()" value='<%=L"重启世界" %>' class="theme1_gray_button" style="margin-left:25px;min-width:130px;height:50px;" />
+                                <input type="button" onclick="on_click_cancel()" value='<%=L"取消" %>' class="theme1_gray_button" style="margin-left:25x;min-width:130px;height:50px;" />
+                            </div>
+                        </pe:if>
                     </div>
                 </div>
             </div>

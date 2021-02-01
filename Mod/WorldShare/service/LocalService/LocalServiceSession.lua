@@ -44,6 +44,10 @@ function LocalServiceSession:OnWorldLoad()
 end
 
 function LocalServiceSession:OnWillLeaveWorld()
+    -- record last enter world
+    Mod.WorldShare.Store:Set('world/lastWorld', Mod.WorldShare.Store:Get('world/currentEnterWorld'))
+
+    -- set actor last position
     if GameLogic.options:IsCommunityWorld() then
         if not KeepworkServiceSession:IsSignedIn() or not Mod.WorldShare.Store:Get('world/isEnterWorld') then
             return
