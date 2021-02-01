@@ -23,8 +23,8 @@ function LocalServiceWorldFilter:Init()
         end
     )
 
-     -- filter set community world
-     GameLogic.GetFilters():add_filter(
+    -- filter set community world
+    GameLogic.GetFilters():add_filter(
         'service.local_service_world.set_community_world',
         function(bValue)
             LocalServiceWorld:SetCommunityWorld(bValue)

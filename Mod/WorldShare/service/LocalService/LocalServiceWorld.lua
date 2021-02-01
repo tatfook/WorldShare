@@ -329,11 +329,15 @@ function LocalServiceWorld:GetMainWorldProjectId()
 end
 
 function LocalServiceWorld:SetCommunityWorld(bValue)
-    WorldCommon:SetWorldTag('communityWorld', bValue)
+    WorldCommon.SetWorldTag('communityWorld', bValue)
 end
 
 function LocalServiceWorld:IsCommunityWorld()
-    return WorldCommon:GetWorldTag('communityWorld')
+    if WorldCommon.GetWorldTag('communityWorld') == 'true' then
+        return true
+    else
+        return false
+    end
 end
 
 -- exec from save_world_info filter

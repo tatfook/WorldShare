@@ -17,6 +17,12 @@
                         end
                     end
 
+                    function set_community(value)
+                        if not GameLogic.IsReadOnly() then
+                            GameLogic.options:SetCommunityWorld(value)
+                        end
+                    end
+
                     function set_vip(value)
                         if not GameLogic.IsReadOnly() then
                             GameLogic.IsVip("CreateVipWorld", true, function(result)
@@ -58,14 +64,19 @@
             </script>
             <style type="type/mcss">
             </style>
-            <aries:window mode="thin" title="<%= L'项目设置' %>" width="505" height="270" onclose="close()">
+            <aries:window mode="thin" title="<%= L'项目设置' %>" width="505" height="350" onclose="close()">
                 <div style="color: #FFFFFF;padding: 15px;font-size: 14px;">
                     <div><%= L"内容保护：" %></div>
                     <div style="margin-left: 20px;">
                         <div><input type="checkbox" checked="<%=GameLogic.options:HasCopyright()%>" onclick="ban" /><%= L"禁止另存" %></div>
                         <div><%= L"*为本世界设置保护，其他人无法另存该世界的内容。" %></div>
                     </div>
-                    <div style="margin-top: 20px;"><%= L"权限访问" %></div>
+                    <div style="margin-top: 10px;"><%= L"社区世界：" %></div>
+                    <div style="margin-left: 20px;">
+                        <div><input type="checkbox" checked="<%=GameLogic.options:IsCommunityWorld()%>" onclick="set_community" /><%= L"开启社区世界" %></div>
+                        <div><%= L"*为本世界添加社区世界属性。" %></div>
+                    </div>
+                    <div style="margin-top: 10px;"><%= L"权限访问" %></div>
                     <div style="margin-left: 20px;">
                         <div>
                             <div><input type="radio" name="public" value="public" onclick="set_public"/><%= L"公开世界" %></div>
