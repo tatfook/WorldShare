@@ -175,7 +175,7 @@ function LoadWorldCommand:Init()
                     if tonumber(lastWorld.user.id) == tonumber(userId) then
                         GameLogic.RunCommand(format('/loadworld -s -personal %d', lastWorld.kpProjectId))
                     else
-                        GameLogic.RunCommand(format('/loadworld -s %d', lastWorld.kpProjectId))
+                        GameLogic.RunCommand(format('/loadworld -s -force %d', lastWorld.kpProjectId))
                     end
                 else
                     WorldCommon.OpenWorld(lastWorld.worldpath)
