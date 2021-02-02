@@ -102,8 +102,15 @@ function LoadWorldCommand:Init()
                 end
 
                 if cmd_text == 'back' then
+                    local lastWorld = Mod.WorldShare.Store:Get('world/lastWorld')
+
+                    if not lastWorld then
+                        _guihelper.MessageBox(L'没有上一级的世界了')
+                        return
+                    end
+
                     _guihelper.MessageBox(
-                        format(L"是否返回上一个世界？"),
+                        format(L"是否返回世界：%s？", lastWorld.text or ''),
                         function(res)
                             if res and res == _guihelper.DialogResult.Yes then
                                 CommandManager:RunCommand('/loadworld -s back')
@@ -165,7 +172,7 @@ function LoadWorldCommand:Init()
                 local lastWorld = Mod.WorldShare.Store:Get('world/lastWorld')
 
                 if not lastWorld then
-                    _guihelper.MessageBox(L'没有上次浏览世界的记录')
+                    _guihelper.MessageBox(L'没有上一级的世界了')
                     return
                 end
 
