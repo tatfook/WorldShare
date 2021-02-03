@@ -42,16 +42,6 @@ local CacheProjectId = NPL.load("(gl)Mod/WorldShare/database/CacheProjectId.lua"
 
 local UserConsole = NPL.export()
 
-function UserConsole:ShowKickOutPage(reason)
-    if self.isKickOutPageOpened then
-        return false
-    end
-
-    self.isKickOutPageOpened = true
-    UserInfo:Logout('KICKOUT')
-    Mod.WorldShare.Utils.ShowWindow(0, 0, "Mod/WorldShare/cellar/UserConsole/KickOut.html?reason=" .. reason or 1, "LoginModal.KickOut", 0, 0, "_fi", false, 15)
-end
-
 -- this is called from ParaWorld Login App
 function UserConsole:CheckShowUserWorlds()
     if System.options.showUserWorldsOnce then

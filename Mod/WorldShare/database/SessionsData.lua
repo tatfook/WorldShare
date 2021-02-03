@@ -6,7 +6,7 @@ place: Foshan
 Desc: 
 use the lib:
 ------------------------------------------------------------
-local SessionsData = NPL.load("(gl)Mod/WorldShare/database/SessionData.lua")
+local SessionsData = NPL.load("(gl)Mod/WorldShare/database/SessionsData.lua")
 ------------------------------------------------------------
 ]] local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
@@ -99,6 +99,14 @@ end
 function SessionsData:SaveSession(session)
     if not session or not session.account or not session.loginServer then
         return false
+    end
+
+    if not session.allPositions then
+        local oldSession = self:GetSessionByUsername(session.account)
+
+        if oldSession.allPositions then
+            session.allPositions = oldSession.allPositions
+        end
     end
 
     session.account = string.lower(session.account)

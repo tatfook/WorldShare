@@ -94,6 +94,7 @@ local Cef3Manager = commonlib.gettable('Mod.WorldShare.service.Cef3Manager')
 
 -- bottles
 local UserConsole = NPL.load('(gl)Mod/WorldShare/cellar/UserConsole/Main.lua')
+local KickOut = NPL.load('(gl)Mod/WorldShare/cellar/Common/KickOut/KickOut.lua')
 local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
 local HistoryManager = NPL.load('(gl)Mod/WorldShare/cellar/HistoryManager/HistoryManager.lua')
 local PreventIndulge = NPL.load('(gl)Mod/WorldShare/cellar/PreventIndulge/PreventIndulge.lua')
@@ -166,8 +167,7 @@ function WorldShare:init()
                 reason = result.payload.reason
             end
 
-            Mod.WorldShare.Store:Action('user/Logout')()
-            UserConsole:ShowKickOutPage(reason)
+            KickOut:ShowKickOutPage(reason)
         end
     end)
 
