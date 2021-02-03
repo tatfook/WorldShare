@@ -16,7 +16,7 @@ local KeepworkServiceProject = NPL.load("(gl)Mod/WorldShare/service/KeepworkServ
 local OpusSetting = NPL.export()
 
 function OpusSetting:Show()
-    local params = Mod.WorldShare.Utils.ShowWindow(505 , 270, "(ws)OpusSetting", "Mod.WorldShare.OpusSetting")
+    local params = Mod.WorldShare.Utils.ShowWindow(505 , 350, "(ws)OpusSetting", "Mod.WorldShare.OpusSetting")
 
     local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
 
