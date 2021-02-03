@@ -333,11 +333,7 @@ function LocalServiceWorld:SetCommunityWorld(bValue)
 end
 
 function LocalServiceWorld:IsCommunityWorld()
-    if WorldCommon.GetWorldTag('communityWorld') == 'true' then
-        return true
-    else
-        return false
-    end
+    return WorldCommon.GetWorldTag('communityWorld')
 end
 
 -- exec from save_world_info filter
@@ -356,3 +352,14 @@ function LocalServiceWorld:SaveWorldInfo(ctx, node)
     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
     node.attr.kpProjectId = currentWorld and currentWorld.kpProjectId or ctx.kpProjectId
 end
+
+function LocalServiceWorld:LoadWorldInfo(ctx, node)
+    if (type(ctx) ~= 'table' or
+        type(node) ~= 'table' or
+        type(node.attr) ~= 'table') then
+        return false
+    end
+
+    ctx.communityWorld = ctx.communityWorld == 'true' or ctx.communityWorld == true
+end
+

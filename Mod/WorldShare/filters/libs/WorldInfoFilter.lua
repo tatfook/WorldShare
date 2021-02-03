@@ -23,4 +23,11 @@ function WorldInfoFilter:Init()
             LocalServiceWorld:SaveWorldInfo(ctx, node)
         end
     )
+
+    GameLogic.GetFilters():add_filter(
+        'load_world_info',
+        function(ctx, node)
+            LocalServiceWorld:LoadWorldInfo(ctx, node)
+        end
+    )
 end
