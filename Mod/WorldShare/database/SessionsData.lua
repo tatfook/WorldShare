@@ -236,7 +236,7 @@ function SessionsData:SetUserLastPosition(x, y, z, cameraLiftupAngle, cameraRotY
     end
 
     if beExist then
-        curItem.lastPosition = { x = x, y = y, z = z }
+        curItem.position = { x = x, y = y, z = z }
         curItem.orientation = { cameraLiftupAngle = cameraLiftupAngle , cameraRotY = cameraRotY }
     else
         curItem = {
