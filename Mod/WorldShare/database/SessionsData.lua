@@ -104,7 +104,7 @@ function SessionsData:SaveSession(session)
     if not session.allPositions then
         local oldSession = self:GetSessionByUsername(session.account)
 
-        if oldSession.allPositions then
+        if oldSession and oldSession.allPositions then
             session.allPositions = oldSession.allPositions
         end
     end

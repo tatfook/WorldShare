@@ -24,16 +24,21 @@ function KickOut:ShowKickOutPage(reason)
 
     self.isKickOutPageOpened = true
 
-    if KeepworkServiceSession:IsSignedIn() then
-        -- OnKeepWorkLogout
-        KeepworkServiceSession:Logout('KICKOUT', function()
-            NplBrowserPlugin.CloseAllBrowsers()
-            GameLogic.GetFilters():apply_filters("OnKeepWorkLogout", true)
-        end)
-    else
-        -- OnKeepWorkLogout
-        GameLogic.GetFilters():apply_filters("OnKeepWorkLogout", false)
-    end
+    NplBrowserPlugin.CloseAllBrowsers()
 
-    Mod.WorldShare.Utils.ShowWindow(0, 0, "Mod/WorldShare/cellar/Common/KickOut/KickOut.html?reason=" .. reason or 1, "Mod.WorldShare.Common.KickOut", 0, 0, "_fi", false, 1000)
+    Mod.WorldShare.MsgBox:Show(L'您的账号已经其他地方登陆，正在登出...', nil, nil, 350, nil, 1000)
+    Mod.WorldShare.Utils.SetTimeOut(function()
+        Mod.WorldShare.MsgBox:Close()
+        if KeepworkServiceSession:IsSignedIn() then
+            -- OnKeepWorkLogout
+            KeepworkServiceSession:Logout('KICKOUT', function()
+                GameLogic.GetFilters():apply_filters("OnKeepWorkLogout", true)
+            end)
+        else
+            -- OnKeepWorkLogout
+            GameLogic.GetFilters():apply_filters("OnKeepWorkLogout", false)
+        end
+    
+        Mod.WorldShare.Utils.ShowWindow(0, 0, "Mod/WorldShare/cellar/Common/KickOut/KickOut.html?reason=" .. reason or 1, "Mod.WorldShare.Common.KickOut", 0, 0, "_fi", false, 1000)
+    end, 2000)
 end
