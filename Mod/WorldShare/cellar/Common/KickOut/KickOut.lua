@@ -26,7 +26,7 @@ function KickOut:ShowKickOutPage(reason)
 
     NplBrowserPlugin.CloseAllBrowsers()
 
-    Mod.WorldShare.MsgBox:Show(L'您的账号已经其他地方登陆，正在登出...', nil, nil, 350, nil, 1000)
+    Mod.WorldShare.MsgBox:Show(L'您的账号已经在其他地方登录，正在登出...', nil, nil, 460, nil, 1000)
     Mod.WorldShare.Utils.SetTimeOut(function()
         Mod.WorldShare.MsgBox:Close()
         if KeepworkServiceSession:IsSignedIn() then
