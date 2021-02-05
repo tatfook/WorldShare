@@ -224,7 +224,8 @@ EventTrackingService.map = {
             click_go_button = 'click.quest_action.click_go_button', -- 任务“前往”按键点击次数
         },
         promotion = { -- 活动
-            announcement = 'click.promotion.announcement', -- 公告点击次数
+            -- 公告点击次数 访问营地|go_to_camp, 人工智能课程|AI_class, 换装系统|clothes_sys, 春节资源|sf_res, 实名认证|realname
+            announcement = 'click.promotion.announcement', 
             horm = 'click.promotion.horm', -- 喇叭点击次数
             knowledge_bean = 'click.promotion.knowledge_bean', -- 知识豆兑换次数
             skin = 'click.promotion.skin', -- 皮肤兑换次数
