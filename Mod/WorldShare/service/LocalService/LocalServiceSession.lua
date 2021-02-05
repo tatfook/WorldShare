@@ -26,7 +26,7 @@ function LocalServiceSession:OnWorldLoad()
 
         -- go to user last position
         local userLastPosition = SessionsData:GetUserLastPosition()
-        echo(userLastPosition, true)
+
         if userLastPosition and type(userLastPosition) == 'table' then
             GameLogic.RunCommand(
                 format(

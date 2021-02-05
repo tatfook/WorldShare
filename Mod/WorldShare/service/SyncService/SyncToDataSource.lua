@@ -153,7 +153,7 @@ function SyncToDataSource:Start()
 
     local function Handle(data, err)
         if type(data) ~= 'table' then
-            self.callback(false, L"获取列表失败")
+            self.callback(false, L"获取列表失败（上传）")
             self:SetFinish(true)
             return false
         end

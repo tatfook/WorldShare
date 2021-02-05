@@ -172,7 +172,9 @@ function KeepworkServiceWorld:GetWorld(foldername, shared, callback)
                 end
             else
                 -- remote world info shared
-                if shared then
+                local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+
+                if shared and item.user.username == currentWorld.user.username then
                     callback(item)
                     return true
                 end
@@ -390,34 +392,44 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                 if DItem["worldName"] == LItem["foldername"] and
                    remoteShared == LItem["shared"] and
                    not LItem.is_zip then
-                    if tonumber(LItem["revision"] or 0) == tonumber(DItem["revision"] or 0) then
-                        status = 3 -- both
-                        revision = LItem['revision']
-                    elseif tonumber(LItem["revision"] or 0) > tonumber(DItem["revision"] or 0) then
-                        status = 4 -- network newest
-                        revision = DItem['revision'] -- use remote revision beacause remote is newest
-                    elseif tonumber(LItem["revision"] or 0) < tonumber(DItem["revision"] or 0) then
-                        status = 5 -- local newest
-                        revision = LItem['revision'] or 0
+                    local function Handle()
+                        if tonumber(LItem["revision"] or 0) == tonumber(DItem["revision"] or 0) then
+                            status = 3 -- both
+                            revision = LItem['revision']
+                        elseif tonumber(LItem["revision"] or 0) > tonumber(DItem["revision"] or 0) then
+                            status = 4 -- network newest
+                            revision = DItem['revision'] -- use remote revision beacause remote is newest
+                        elseif tonumber(LItem["revision"] or 0) < tonumber(DItem["revision"] or 0) then
+                            status = 5 -- local newest
+                            revision = LItem['revision'] or 0
+                        end
+    
+                        isExist = true
+                        worldpath = LItem["worldpath"]
+                        remotefile = "local://" .. worldpath
+    
+                        localTagname = LItem["local_tagname"] or LItem["foldername"]
+                        remoteTagname = DItem["extra"] and DItem["extra"]["worldTagName"] or DItem["worldName"]
+                        vipEnabled = LItem["vipEnabled"] or false
+                        instituteVipEnabled = LItem["instituteVipEnabled"] or false
+    
+                        if tonumber(LItem["kpProjectId"]) ~= tonumber(DItem["projectId"]) then
+                            local tag = SaveWorldHandler:new():Init(worldpath):LoadWorldInfo()
+    
+                            tag.kpProjectId = DItem['projectId']
+                            LocalService:SetTag(worldpath, tag)
+                        end
                     end
 
-                    isExist = true
-                    worldpath = LItem["worldpath"]
-                    remotefile = "local://" .. worldpath
-
-                    localTagname = LItem["local_tagname"] or LItem["foldername"]
-                    remoteTagname = DItem["extra"] and DItem["extra"]["worldTagName"] or DItem["worldName"]
-                    vipEnabled = LItem["vipEnabled"] or false
-                    instituteVipEnabled = LItem["instituteVipEnabled"] or false
-
-                    if tonumber(LItem["kpProjectId"]) ~= tonumber(DItem["projectId"]) then
-                        local tag = SaveWorldHandler:new():Init(worldpath):LoadWorldInfo()
-
-                        tag.kpProjectId = DItem['projectId']
-                        LocalService:SetTag(worldpath, tag)
+                    if remoteShared then
+                        if LItem['user']['username'] == DItem['user']['username'] then
+                            Handle()
+                            break
+                        end
+                    else
+                        Handle()
+                        break
                     end
-
-                    break
                 end
             end
 

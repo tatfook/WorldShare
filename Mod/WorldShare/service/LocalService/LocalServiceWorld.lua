@@ -166,6 +166,9 @@ function LocalServiceWorld:GetSharedWorldList()
                                         IsFolder=true, time_text=item.time_text,
                                         text = worldUsername .. "/" .. display_name,
                                         shared = true,
+                                        user = {
+                                            username = worldUsername,
+                                        },
                                     }
                                 )
         
