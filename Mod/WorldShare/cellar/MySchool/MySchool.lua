@@ -472,6 +472,23 @@ function MySchool:GetSearchSchoolResultByName(name, callback)
         return false
     end
 
+    if type(tonumber(name)) == 'number' then
+        KeepworkServiceSchoolAndOrg:SearchSchoolBySchoolId(tonumber(name), function(data)
+            self:SetResult(data)
+
+            for key, item in ipairs(self.result) do
+                item.text = item.name or ""
+                item.value = item.id
+            end
+    
+            if callback and type(callback) == "function" then
+                callback(self.result)
+            end
+        end)
+
+        return
+    end
+
     KeepworkServiceSchoolAndOrg:SearchSchoolByName(name, self.curId, self.kind, function(data)
         self:SetResult(data)
 
@@ -502,6 +519,7 @@ function MySchool:SetResult(data)
     self.result = data
     
     if self.result and type(self.result) == 'table' then
+        -- find out same school name
         for aKey, aItem in ipairs(self.result) do
             local sameName = false
 
@@ -529,9 +547,9 @@ function MySchool:SetResult(data)
             if item and item.region and item.sameName then
                 local regionString = ''
 
-                if item.region.country and item.region.country.name then
-                    regionString = regionString .. item.region.country.name
-                end
+                -- if item.region.country and item.region.country.name then
+                --     regionString = regionString .. item.region.country.name
+                -- end
 
                 if item.region.state and item.region.state.name then
                     regionString = regionString .. item.region.state.name
@@ -548,6 +566,11 @@ function MySchool:SetResult(data)
                 regionString = '（' .. regionString .. '）'
 
                 item.name = item.name .. regionString
+            end
+
+            -- add id
+            if item and item.id and item.name then
+                item.name = item.id .. ' ' .. item.name
             end
         end
     end

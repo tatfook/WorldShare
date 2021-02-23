@@ -717,17 +717,17 @@
                         local user_info = {}
                         local count = 0
 
-                        if user.tLevel >= 1 then
+                        if user and user.tLevel and type(user.tLevel) == 'number' and user.tLevel >= 1 then
                             user_info.tLevel = 1
                             count = count + 1
                         end
                             
-                        if user.student == 1 then
+                        if user and user.student and type(user.student) == 'number' and user.student == 1 then
                             user_info.student = 1
                             count = count + 1
                         end
                             
-                        if user.vip == 1 then
+                        if user and user.vip and type(user.vip) == 'number' and user.vip == 1 then
                             user_info.vip = 1
                             count = count + 1
                         end
