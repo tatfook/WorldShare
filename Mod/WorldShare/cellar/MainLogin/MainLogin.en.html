@@ -36,7 +36,7 @@
                     function use_offline()
                         KeepworkServiceSession:Logout()
                         MainLogin:EnterUserConsole(true)
-                        EventTrackingService:Send(1, 'click.main_login.offline_enter', nil, true)
+                        EventTrackingService:Send(1, 'click.main_login.offline_enter', { machineId = ParaEngine.GetAttributeObject():GetField("MachineID","") }, true)
                     end
 
                     function OnOpenModulePage()

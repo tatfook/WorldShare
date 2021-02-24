@@ -58,6 +58,8 @@ function MySchool:Show(callback)
 
             if item.type == 4 then
                 -- school data
+                item.originName = item.name
+                item.name = (item.schoolId or '') .. ' ' .. item.name
                 self.schoolData[#self.schoolData + 1] = item
             end
         end
@@ -134,7 +136,7 @@ function MySchool:ShowJoinSchool(callback)
 
     self.areas = {
         {
-            text = L"区",
+            text = L"区（县）",
             value = 0,
             selected = true,
         }
@@ -215,7 +217,7 @@ function MySchool:ShowJoinSchoolAfterRegister(callback)
 
     self.areas = {
         {
-            text = L"区",
+            text = L"区（县）",
             value = 0,
             selected = true,
         }
@@ -325,7 +327,7 @@ function MySchool:ShowRecordSchool()
 
     self.areas = {
         {
-            text = L"区",
+            text = L"区（县）",
             value = 0,
             selected = true,
         }
@@ -430,7 +432,7 @@ function MySchool:GetAreas(id, callback)
             end
 
             data[#data + 1] = {
-                text = L"区",
+                text = L"区（县）",
                 value = 0,
                 selected = true,
             }
