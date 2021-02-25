@@ -112,14 +112,11 @@ function Filters:Init()
     GameLogic.GetFilters():add_filter(
         'InternetLoadWorld.ShowPage',
         function(bEnable, bShow)
-            local worldsharebeat = ParaEngine.GetAppCommandLineByParam('worldsharebeat', nil)
-
-            if worldsharebeat and worldsharebeat == 'true' then
-                UserConsoleCreate:Show()
-            else
+            if mouse_button == 'right' then
                 UserConsole:ShowPage()
+            else
+                UserConsoleCreate:Show()
             end
-            -- UserConsoleCreate:Show()
             return false
         end
     )
