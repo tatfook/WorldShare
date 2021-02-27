@@ -1,0 +1,274 @@
+<html>
+    <body> 
+        <pe:mcml>
+            <script type="text/npl">
+                <![CDATA[
+                    NPL.load('(gl)script/apps/Aries/Creator/Game/Login/Rebranding.lua')
+                    
+                    -- load lib
+                    Rebranding = commonlib.gettable('MyCompany.Aries.Creator.Game.Rebranding')
+                    local GameMainLogin = commonlib.gettable('MyCompany.Aries.Game.MainLogin')
+
+                    -- load UI
+                    local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
+                    local LoginModal = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua')
+                    local RegisterModal = NPL.load('(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua')
+                    local WorldList = NPL.load('(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua')
+                    
+                    -- service
+                    local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepWorkService/Session.lua')
+                    local EventTrackingService = NPL.load('(gl)Mod/WorldShare/service/EventTracking.lua')
+
+                    -- helper
+                    local BroadcastHelper = commonlib.gettable('CommonCtrl.BroadcastHelper')
+                    local Validated = NPL.load('(gl)Mod/WorldShare/helper/Validated.lua')
+
+                    local page = document:GetPageCtrl()
+                    Mod.WorldShare.Store:Set('page/MainLogin', page)
+                    local be_show_password = false
+                    local be_show_phone_password = false
+
+                    function GetModDes()
+                        local modname = ParaEngine.GetAppCommandLineByParam('mod','')
+                        local s = string.format(L'当前Mod:%s',modname)
+                        return s
+                    end
+
+                    function OnCustomCharacter()
+                    end
+
+                    function OnClickDonate()
+                        GameMainLogin.donate_window = GameMainLogin.donate_window or System.Windows.Window:new()
+                        GameMainLogin.donate_window:Show({url='script/apps/Aries/Creator/Game/Login/DonatePage.html', alignment='_rb', left=-210, top=-200, width=200, height=200, zorder=10, allowDrag=true})
+                        ParaGlobal.ShellExecute('open', L'http://www.nplproject.com/paracraft-donation', '', '', 1)
+                    end
+
+                    function OnClickCredits()
+                        ParaGlobal.ShellExecute('open', L'https://keepwork.com/official/paracraft/credits', '', '', 1)
+                    end
+
+                    function login_text()
+                        return Mod.WorldShare.Store:Get('user/loginText')
+                    end
+
+                    function get_english_style(styleStr)
+                        if Mod.WorldShare.Utils.IsEnglish() then
+                            return styleStr
+                        else
+                            return ''
+                        end
+                    end
+
+                    function get_history_users()
+                        return MainLogin:GetHistoryUsers()
+                    end
+
+                    function next()
+                        local phonenumber = page:GetValue('phonenumber')
+                        local phonecaptcha = page:GetValue('phonecaptcha')
+                        local phonepassword = page:GetValue('phonepassword')
+                        local agree = page:GetValue('phone_agree')
+
+                        if not agree then
+                            page:SetUIValue('phone_agree_field_error_msg', L'*您未同意用户协议')
+                            page:FindControl('phone_agree_field_error').visible = true
+                            return
+                        end
+
+                        if not Validated:Phone(phonenumber) then
+                            page:SetUIValue('phonenumber_field_error_msg', L'*手机格式错误')
+                            page:FindControl('phonenumber_field_error').visible = true
+                            return
+                        end
+ 
+                        if #phonecaptcha == 0 then
+                            page:SetUIValue('phonecaptcha_field_error_msg', L'*手机验证码不能为空')
+                            page:FindControl('phonecaptcha_field_error').visible = true
+                            return
+                        end
+
+                        if #phonepassword < 6 then
+                            page:SetUIValue('phonepassword_field_error_msg', L'*密码少于6位')
+                            page:FindControl('phonepassword_field_error').visible = true
+                            return
+                        end
+
+                        if phonenumberExist then
+                            page:SetUIValue('phonenumber_field_error_msg', L'*手机号码已存在')
+                            page:FindControl('phonenumber_field_error').visible = true
+                            return
+                        end
+
+                        KeepworkServiceSession:CellphoneCaptchaVerify(phonenumber, phonecaptcha, function(data, err)
+                            if err == 400 then
+                                page:SetUIValue('phonenumber_field_error_msg', L'*手机验证码错误')
+                                page:FindControl('phonenumber_field_error').visible = true
+                                return
+                            end
+
+                            page:FindControl('register_phonenumber_step_1').visible = false
+                            page:FindControl('register_phonenumber_step_2').visible = true
+                        end)
+                    end
+
+                    function set_remember_me()
+                        MainLogin:SetRememberMe()
+                    end
+
+                    function set_auto_login()
+                        MainLogin:SetAutoLogin()
+                    end
+
+                    function write_accout(name, mcmlNode)
+                        local username = mcmlNode:GetUIValue()
+                        page:SetValue('account', username)
+                    end
+
+                    function get_cur_tab()
+                        return MainLogin.curTab
+                    end
+
+                    function set_login_tab()
+                        MainLogin.curTab = 1
+
+                        page:Refresh(0.01)
+                    end
+
+                    function set_register_tab()
+                        MainLogin.curTab = 2
+
+                        page:Refresh(0.01)
+
+                        Mod.WorldShare.Utils.SetTimeOut(function()
+                            local register_account_password_show = page:FindControl('register_account_password_show')
+                            local register_account_password_hide = page:FindControl('register_account_password_hide')
+                            local phonepassword_hide = page:FindControl('phonepassword_hide')
+                            local phonepassword_show = page:FindControl('phonepassword_show')
+
+                            if register_account_password_show then
+                                register_account_password_show.visible = false
+                            end
+
+                            if register_account_password_hide then
+                                register_account_password_hide.visible = true
+                            end
+
+                            if phonepassword_hide then
+                                phonepassword_hide.visible = true
+                            end
+
+                            if phonepassword_show then
+                                phonepassword_show.visible = false
+                            end
+                        end, 200)
+
+                        update_captcha()
+                    end
+
+                    function set_register_mode()
+                        local beSeted = false
+
+                        if RegisterModal.m_mode == 'account' then
+                            RegisterModal.m_mode = 'phonenumber'
+                            beSeted = true
+                        end
+
+                        if not beSeted and RegisterModal.m_mode == 'phonenumber' then
+                            RegisterModal.m_mode = 'account'
+                        end
+
+                        page:Refresh(0.01)
+
+                        if RegisterModal.m_mode == 'phonenumber' then
+                            Mod.WorldShare.Utils.SetTimeOut(function()
+                                if page:FindControl('phonepassword_hide') then
+                                    page:FindControl('phonepassword_hide').visible = true
+                                end
+
+                                if page:FindControl('phonepassword_show') then
+                                    page:FindControl('phonepassword_show').visible = false
+                                end
+                            end, 200)
+                        end
+
+                        if RegisterModal.m_mode == 'account' then
+                            Mod.WorldShare.Utils.SetTimeOut(function()
+                                if page:FindControl('register_account_password_hide') then
+                                    page:FindControl('register_account_password_hide').visible = true
+                                end
+
+                                if page:FindControl('register_account_password_show') then
+                                    page:FindControl('register_account_password_show').visible = false
+                                end
+                            end, 200)
+                        end
+                    end
+
+                    function update_captcha()
+                        KeepworkServiceSession:FetchCaptcha(function()
+                            page:SetUIBackground('captcha_show', KeepworkServiceSession:GetCaptcha())
+                        end)
+                    end
+                ]]>
+            </script>
+            <style type="text/mcss">
+                {
+                    session_window = {
+                        width = 320,
+                        ['min-height'] = 320,
+                        ["base-font-size"] = 16,
+                        ["font-size"] = 16,
+                        color = "#ffffff",
+                        ["padding-right"] = 40,
+                        ["padding-left"] = 40,
+                        ["padding-top"] = 20,
+                        ["padding-bottom"] = 10,
+                    },
+                    text_field = {
+                        background = "Texture/Aries/Creator/keepwork/worldshare_32bits.png;72 20 16 16:3 3 3 3",
+                        border = "none",
+                        width = 165,
+                    },
+                    offline_button = {
+                        ["margin-left"] = 0,
+                        width = 75,
+                        height = 33,
+                        ["font-size"] = 14,
+                    },
+                    login_button = {
+                        ["margin-left"] = 5,
+                        width = 150,
+                        height = 33,
+                        textcolor = "#000000",
+                        color = "#000000",
+                        ["font-size"] = 18
+                        background = "Texture/Aries/Creator/keepwork/worldshare_32bits.png;149 104 17 16:4 4 4 4",
+                    },
+                }
+            </style>
+            <pe:container alignment="_ct" ClickThrough="true" style="position:relative;background:;margin-left:-260px;margin-top:-300px;width:520px;height:500px;">
+                <div style='<%="position:relative;margin-left:130px;margin-top: 0px;width: 270px;height: 225px;background:url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#643 421 270 225);"%>'></div>
+                <pe:if condition='<%=Rebranding:GetValue("companylogo") ~= nil %>'>
+                    <div style='<%=format("position:relative;margin-top:15px;margin-left:-220px;width:256px;height:64px;background:url(%s)", Rebranding:GetValue("companylogo"))%>'></div>
+                </pe:if>
+                <pe:if condition='<%=Rebranding:GetValue("company")~=nil and not Rebranding:GetValue("companylogo")%>'>
+                    <div style="position:relative;margin-top:15px;margin-left:-220px;color:#572712"><%=Rebranding:GetValue("company")%></div>
+                </pe:if>
+                <div style="position:relative;margin-left:0px;width:520px;margin-top:150px;font-size:14px;font-weight:bold;color:#572712;shadow-quality:8;shadow-color:#f0cec8c4;text-shadow:true;text-align:center">
+                    <%=Rebranding:GetValue("titleaddon")%>
+                </div>
+                
+            </pe:container>
+            <!--persistent setting button-->
+            <pe:container alignment="_ctb" ClickThrough="true" style="position:relative;background:;margin-left:70px;width:400px;height:105px;">
+                <!--<input type="button" enabled="false" value='<%=L"更多设定..." %>' class="mc_big_button" style="margin-top:16px;font-size:14px;width:256px;height:36px;" onclick="OnCustomCharacter" />-->
+                <pe:if condition='<%= System.options.isDevEnv == true %>'>
+                    <div style="margin-left:-40px;margin-top:6px;font-size:14px;width:336px;height:36px;color:#FF3030;text-align:center;font-weight:bold">
+                        <%=L"开发者模式" %><br/>
+                        <%= GetModDes()%>
+                    </div>
+                </pe:if>
+            </pe:container>
+        </pe:mcml>
+    </body>
+</html>

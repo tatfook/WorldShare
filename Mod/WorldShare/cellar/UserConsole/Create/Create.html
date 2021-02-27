@@ -1072,12 +1072,23 @@
                                 </pe:if>
                             </pe:if>
                         </div>
-                        <div class="theme1_black_textfield" style="margin-top: 0;width: 220px;height: 30px;float: left;margin-left: 220px;">
-                            <input type="text" name="search_text" style="textcolor: #ffffff;width: 220px;height: 30px;background: ''" spacing="4" EmptyText='<%=L"搜索列表项目"%>' onfocusout="search" value="<%= get_last_serch_text() %>"/>
-                            <div class="list_search_button">
-                                <input type="button" class="list_search_button_click theme1_gray2_button" value='<%=L"搜索"%>' onclick="search()" />
+                        <!-- create button -->
+                        <pe:if condition="<%= is_signed_in() %>">
+                            <div class="theme1_black_textfield" style="margin-top: 0;width: 220px;height: 30px;float: left;margin-left: 220px;">
+                                <input type="text" name="search_text" style="textcolor: #ffffff;width: 220px;height: 30px;background: ''" spacing="4" EmptyText='<%=L"搜索列表项目"%>' onfocusout="search" value="<%= get_last_serch_text() %>"/>
+                                <div class="list_search_button">
+                                    <input type="button" class="list_search_button_click theme1_gray2_button" value='<%=L"搜索"%>' onclick="search()" />
+                                </div>
                             </div>
-                        </div>
+                        </pe:if>
+                        <pe:if condition="<%= not is_signed_in() %>">
+                            <div class="theme1_black_textfield" style="margin-top: 0;width: 220px;height: 30px;float: left;margin-left: 415px;">
+                                <input type="text" name="search_text" style="textcolor: #ffffff;width: 220px;height: 30px;background: ''" spacing="4" EmptyText='<%=L"搜索列表项目"%>' onfocusout="search" value="<%= get_last_serch_text() %>"/>
+                                <div class="list_search_button">
+                                    <input type="button" class="list_search_button_click theme1_gray2_button" value='<%=L"搜索"%>' onclick="search()" />
+                                </div>
+                            </div>
+                        </pe:if>
                         <div style="float:left;margin-left:10px;height: 37px;width:130px;margin-top: -3px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#264 46 38 34:12 12 14 12)">
                             <input type="button"
                                    style="position: relative;width: 130px;height: 37px;background:"
@@ -1099,7 +1110,7 @@
                                 RememberScrollPos="true"
                                 AllowPaging="false"
                                 VerticalScrollBarStep="80"
-                                DefaultNodeHeight="260"
+                                DefaultNodeHeight="270"
                                 CellPadding="0"
                                 ItemsPerLine="3"
                                 name="gw_world_ds">

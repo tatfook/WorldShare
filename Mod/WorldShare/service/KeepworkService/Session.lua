@@ -356,6 +356,130 @@ function KeepworkServiceSession:Logout(mode, callback)
     end
 end
 
+function KeepworkServiceSession:RegisterWithAccount(username, password, callback)
+    if not username or not password then
+        return
+    end
+
+    local params = {
+        username = username,
+        password = password,
+        channel = 3
+    }
+
+    KeepworkUsersApi:Register(
+        params,
+        function(registerData, err)
+            if registerData.id then
+                self:Login(
+                    username,
+                    password,
+                    function(loginData, err)
+                        if err ~= 200 then
+                            registerData.message = L'注册成功，登录失败'
+                            registerData.code = 9
+
+                            if type(callback) == 'function' then
+                                callback(registerData)
+                            end
+
+                            return false
+                        end
+
+                        loginData.autoLogin = autoLogin
+                        loginData.rememberMe = rememberMe
+                        loginData.password = password
+
+                        self:LoginResponse(loginData, err, function()
+                            if type(callback) == 'function' then
+                                callback(registerData)
+                            end
+                        end)
+                    end
+                )
+                return true
+            end
+
+            if type(callback) == 'function' then
+                callback(registerData)
+            end
+        end,
+        function(data, err)
+            if type(callback) == 'function' then
+                if type(data) == 'table' and data.code then
+                    callback(data)
+                else
+                    callback({ message = L"未知错误", code = err})
+                end
+            end
+        end,
+        { 400 }
+    )
+end
+
+function KeepworkServiceSession:RegisterWithPhone(cellphone, cellphoneCaptcha, password, callback)
+    if not cellphone or not cellphoneCaptcha or not password then
+        return
+    end
+
+    local params = {
+        cellphone = cellphone,
+        captcha = cellphoneCaptcha,
+        password = password,
+        channel = 3
+    }
+
+    KeepworkUsersApi:Register(
+        params,
+        function(registerData, err)
+            if registerData.id then
+                self:Login(
+                    username,
+                    password,
+                    function(loginData, err)
+                        if err ~= 200 then
+                            registerData.message = L'注册成功，登录失败'
+                            registerData.code = 9
+
+                            if type(callback) == 'function' then
+                                callback(registerData)
+                            end
+
+                            return false
+                        end
+
+                        loginData.autoLogin = autoLogin
+                        loginData.rememberMe = rememberMe
+                        loginData.password = password
+
+                        self:LoginResponse(loginData, err, function()
+                            if type(callback) == 'function' then
+                                callback(registerData)
+                            end
+                        end)
+                    end
+                )
+                return true
+            end
+
+            if type(callback) == 'function' then
+                callback(registerData)
+            end
+        end,
+        function(data, err)
+            echo(data, true)
+            if type(callback) == 'function' then
+                if type(data) == 'table' and data.code then
+                    callback(data)
+                else
+                    callback({ message = L"未知错误", code = err})
+                end
+            end
+        end,
+        { 400 }
+    )
+end
+
 function KeepworkServiceSession:Register(username, password, captcha, cellphone, cellphoneCaptcha, isBind, callback)
     if type(username) ~= 'string' or
        type(password) ~= 'string' or

@@ -1,0 +1,71 @@
+<html>
+    <body> 
+        <pe:mcml>
+            <script type='text/npl'>
+                <![CDATA[
+                    -- bottles
+                    local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
+
+                    function close()
+                        local MainLoginSelectPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Select')
+
+                        if MainLoginSelectPage then
+                            MainLoginSelectPage:CloseWindow()
+                        end
+                    end
+
+                    function login()
+                        close()
+                        MainLogin:ShowLogin()
+                    end
+
+                    function register()
+                        close()
+                        MainLogin:ShowRegister()
+                    end
+
+                    function parent()
+                        close()
+                        MainLogin:ShowParent()
+                    end
+                ]]>
+            </script>
+            <style type='text/mcss' src='Mod/WorldShare/cellar/Theme/Mcss/MainLoginMcss.mcss'>
+                {
+                    container_size = {
+                        ['margin-left'] = -160,
+                        ['margin-top'] = -95,
+                    },
+                    main_area = {
+                        width = 320,
+                        height = 340,
+                        ['base-font-size'] = 16,
+                        ['font-size'] = 16,
+                        color = '#ffffff',
+                        ['padding-top'] = 20,
+                        ['padding-left'] = 40,
+                        ['padding-right'] = 40,
+                    },
+                }
+            </style>
+             <pe:container alignment='_ct' ClickThrough='true' class='main_login_container_bg container_size'>
+                <div class='main_area'>
+                    <div style='margin-top: 40px;margin-bottom: 15px;'>
+                        <img style='width: 240px;height: 29.5px;' src='Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#285 349 260 32' />
+                    </div>
+                    <div>
+                        <div style='margin-top: 20px;'>
+                            <input type='button' class='main_login_blue_button' value='登录' onclick="login"/>
+                        </div>
+                        <div style='margin-top: 20px;'>
+                            <input type='button' class='main_login_blue_button' value='注册' onclick="register"/>
+                        </div>
+                    </div>
+                    <div>
+                        <input type='button' style='margin-left: 195px;margin-top: 20px;width: 55px;height: 59px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#533 8 55 59)' onclick="parent"/>
+                    </div>
+                </div>
+             </pe:container>
+        </pe:mcml>
+    </body>
+</html>

@@ -12,6 +12,7 @@ local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
 -- libs
 local ParaWorldLessons = commonlib.gettable('MyCompany.Aries.Game.MainLogin.ParaWorldLessons')
 local GameMainLogin = commonlib.gettable('MyCompany.Aries.Game.MainLogin')
+local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua")
 
 -- service
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepWorkService/Session.lua')
@@ -23,11 +24,18 @@ local RegisterModal = NPL.load('(gl)Mod/WorldShare/cellar/RegisterModal/Register
 
 local MainLogin = NPL.export()
 
-MainLogin.curTab = 1
+-- for register
+MainLogin.m_mode = "account"
+MainLogin.account = ""
+MainLogin.password = ""
+MainLogin.phonenumber = ""
+MainLogin.phonepassword = ""
+MainLogin.phonecaptcha = ""
+MainLogin.bindphone = nil
 
 function MainLogin:Show()
     Mod.WorldShare.Utils.ShowWindow({
-        url = 'Mod/WorldShare/cellar/MainLogin/MainLogin.html', 
+        url = 'Mod/WorldShare/cellar/Theme/MainLogin/MainLogin.html', 
         name = 'MainLogin', 
         isShowTitleBar = false,
         DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
@@ -35,11 +43,11 @@ function MainLogin:Show()
         zorder = -1,
         allowDrag = false,
         directPosition = true,
-            align = '_fi',
-            x = 0,
-            y = 0,
-            width = 0,
-            height = 0,
+        align = '_fi',
+        x = 0,
+        y = 0,
+        width = 0,
+        height = 0,
         cancelShowAnimation = true,
     })
 
@@ -49,57 +57,119 @@ function MainLogin:Show()
         return false
     end
 
+    self:ShowExtra()
+    self:ShowSelect()
+
+    -- self:Refresh()
+
+    -- Mod.WorldShare.Store:Set('user/AfterLogined', function(bIsSucceed)
+    --     -- OnKeepWorkLogin
+    --     GameLogic.GetFilters():apply_filters('OnKeepWorkLogin', bIsSucceed)
+    -- end)
+end
+
+function MainLogin:ShowSelect()
+    Mod.WorldShare.Utils.ShowWindow(
+        0,
+        0,
+        'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginSelect.html',
+        'Mod.WorldShare.cellar.MainLogin.Select',
+        0,
+        0,
+        '_fi',
+        false,
+        -1
+    )
+end
+
+function MainLogin:ShowLogin()
+    Mod.WorldShare.Utils.ShowWindow(
+        0,
+        0,
+        'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginLogin.html',
+        'Mod.WorldShare.cellar.MainLogin.Login',
+        0,
+        0,
+        '_fi',
+        false,
+        -1
+    )
+
+    local MainLoginLoginPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Login')
+
+    if not MainLoginLoginPage then
+        return
+    end
+
     local PWDInfo = KeepworkServiceSession:LoadSigninInfo()
 
     if PWDInfo then
-        MainLoginPage:SetValue('autoLogin', PWDInfo.autoLogin or false)
-        MainLoginPage:SetValue('rememberMe', PWDInfo.rememberMe or false)
-        MainLoginPage:SetValue('password', PWDInfo.password or '')
-        MainLoginPage:SetValue('showaccount', PWDInfo.account or '')
+        MainLoginLoginPage:SetUIValue('account', PWDInfo.account or '')
         self.account = PWDInfo.account
     end
+end
 
-    self:Refresh()
+function MainLogin:ShowRegister()
+    Mod.WorldShare.Utils.ShowWindow(
+        0,
+        0,
+        'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginRegister.html',
+        'Mod.WorldShare.cellar.MainLogin.Register',
+        0,
+        0,
+        '_fi',
+        false,
+        -1
+    )
+end
 
-    -- if not self.notFirstTimeShown then
-    --     self.notFirstTimeShown = true
+function MainLogin:ShowParent()
+    Mod.WorldShare.Utils.ShowWindow(
+        0,
+        0,
+        'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginParent.html',
+        'Mod.WorldShare.cellar.MainLogin.Parent',
+        0,
+        0,
+        '_fi',
+        false,
+        -1
+    )
+end
 
-    --     if System.User.keepworktoken then
-    --         Mod.WorldShare.MsgBox:Show(L'正在登录，请稍候...', 24000, L'链接超时', 300, 120)
+function MainLogin:ShowWhere(callback)
+    local params = Mod.WorldShare.Utils.ShowWindow(
+        0,
+        0,
+        'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginWhere.html',
+        'Mod.WorldShare.cellar.MainLogin.Where',
+        0,
+        0,
+        '_fi',
+        false,
+        -1
+    )
 
-    --         KeepworkServiceSession:LoginWithToken(
-    --             System.User.keepworktoken,
-    --             function(response, err)
-    --                 Mod.WorldShare.MsgBox:Close()
+    params._page.callback = function(where)
+        if callback and type(callback) == 'function' then
+            callback(where)
+        end
+    end
+end
 
-    --                 if(err == 200 and type(response) == 'table' and response.username) then
-    --                     self:EnterUserConsole()
-    --                 else
-    --                     -- token expired
-    --                     System.User.keepworktoken = nil;
-    --                 end
-    --             end
-    --         )
-
-    --         Mod.WorldShare.Store:Set('user/AfterLogined', function(bIsSucceed)
-	-- 			-- OnKeepWorkLogin
-	-- 			GameLogic.GetFilters():apply_filters('OnKeepWorkLogin', bIsSucceed)
-	-- 		end)
-
-    --         return
-    --     end
-
-    --     -- if PWDInfo and PWDInfo.autoLogin then
-    --     --     Mod.WorldShare.Utils.SetTimeOut(function()
-    --     --         self:EnterUserConsole()
-    --     --     end, 100)
-    --     -- end
-    -- end
-
-    Mod.WorldShare.Store:Set('user/AfterLogined', function(bIsSucceed)
-        -- OnKeepWorkLogin
-        GameLogic.GetFilters():apply_filters('OnKeepWorkLogin', bIsSucceed)
-    end)
+function MainLogin:ShowExtra()
+    Mod.WorldShare.Utils.ShowWindow(
+        300,
+        130,
+        'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginExtra.html',
+        'Mod.WorldShare.cellar.MainLogin.Extra',
+        700,
+        160,
+        '_rb',
+        false,
+        1
+    )
+    
 end
 
 function MainLogin:Refresh(times)
@@ -116,48 +186,72 @@ function MainLogin:Close()
     if MainLoginPage then
         MainLoginPage:CloseWindow()
     end
+
+    local MainLoginLoginPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Login')
+
+    if MainLoginLoginPage then
+        MainLoginLoginPage:CloseWindow()
+    end
+
+    local MainLoginRegisterPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Register')
+
+    if MainLoginRegisterPage then
+        MainLoginRegisterPage:CloseWindow()
+    end
+
+    local MainLoginParentPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Parent')
+
+    if MainLoginParentPage then
+        MainLoginParentPage:CloseWindow()
+    end
+
+    local MainLoginSelectPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Select')
+
+    if MainLoginSelectPage then
+        MainLoginSelectPage:CloseWindow()
+    end
 end
 
 function MainLogin:SaveField()
-    local MainLoginPage = Mod.WorldShare.Store:Get('page/MainLogin')
+    -- local MainLoginPage = Mod.WorldShare.Store:Get('page/MainLogin')
 
-    if not MainLoginPage then
-        return false
-    end
+    -- if not MainLoginPage then
+    --     return false
+    -- end
 
-    -- login
-    local showAccount = MainLoginPage:GetValue('showaccount')
-    local account = MainLoginPage:GetValue('account')
-    local password = MainLoginPage:GetValue('password')
-    local autoLogin = MainLoginPage:GetValue('autoLogin')
-    local rememberMe = MainLoginPage:GetValue('rememberMe')
+    -- -- login
+    -- local showAccount = MainLoginPage:GetValue('showaccount')
+    -- local account = MainLoginPage:GetValue('account')
+    -- local password = MainLoginPage:GetValue('password')
+    -- local autoLogin = MainLoginPage:GetValue('autoLogin')
+    -- local rememberMe = MainLoginPage:GetValue('rememberMe')
 
-    MainLoginPage:SetValue('showaccount', showAccount)
-    MainLoginPage:SetValue('account', account)
-    MainLoginPage:SetValue('password', password)
-    MainLoginPage:SetValue('autoLogin', autoLogin)
-    MainLoginPage:SetValue('rememberMe', rememberMe)
+    -- MainLoginPage:SetValue('showaccount', showAccount)
+    -- MainLoginPage:SetValue('account', account)
+    -- MainLoginPage:SetValue('password', password)
+    -- MainLoginPage:SetValue('autoLogin', autoLogin)
+    -- MainLoginPage:SetValue('rememberMe', rememberMe)
 
-    -- register
-    local registerAccount = MainLoginPage:GetValue('register_account')
-    local registerAccountPassword = MainLoginPage:GetValue('register_account_password')
-    local captcha = MainLoginPage:GetValue('captcha')
-    local agree = MainLoginPage:GetValue('agree')
-    local phonenumber = MainLoginPage:GetValue('phonenumber')
-    local phonecaptcha = MainLoginPage:GetValue('phonecaptcha')
-    local phonepassword = MainLoginPage:GetValue('phonepassword')
+    -- -- register
+    -- local registerAccount = MainLoginPage:GetValue('register_account')
+    -- local registerAccountPassword = MainLoginPage:GetValue('register_account_password')
+    -- local captcha = MainLoginPage:GetValue('captcha')
+    -- local agree = MainLoginPage:GetValue('agree')
+    -- local phonenumber = MainLoginPage:GetValue('phonenumber')
+    -- local phonecaptcha = MainLoginPage:GetValue('phonecaptcha')
+    -- local phonepassword = MainLoginPage:GetValue('phonepassword')
 
-    MainLoginPage:SetValue('register_account', registerAccount)
-    MainLoginPage:SetValue('register_account_password', registerAccountPassword)
-    MainLoginPage:SetValue('captcha', captcha)
-    MainLoginPage:SetValue('agree', agree)
-    MainLoginPage:SetValue('phonenumber', phonenumber)
-    MainLoginPage:SetValue('phonecaptcha', phonecaptcha)
-    MainLoginPage:SetValue('phonepassword', phonepassword)
+    -- MainLoginPage:SetValue('register_account', registerAccount)
+    -- MainLoginPage:SetValue('register_account_password', registerAccountPassword)
+    -- MainLoginPage:SetValue('captcha', captcha)
+    -- MainLoginPage:SetValue('agree', agree)
+    -- MainLoginPage:SetValue('phonenumber', phonenumber)
+    -- MainLoginPage:SetValue('phonecaptcha', phonecaptcha)
+    -- MainLoginPage:SetValue('phonepassword', phonepassword)
 end
 
 function MainLogin:LoginAction(callback)
-    local MainLoginPage = Mod.WorldShare.Store:Get('page/MainLogin')
+    local MainLoginPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Login')
 
     if not MainLoginPage then
         return false
@@ -239,24 +333,116 @@ function MainLogin:LoginAction(callback)
     )
 end
 
-function MainLogin:EnterUserConsole(isOffline)
-    -- ParaWorldLessons.CheckShowOnStartup(function(bBeginLessons)
-    --     if not bBeginLessons then
-            
-    --     end
-    -- end)
+function MainLogin:RegisterWithAccount(callback)
+    if not self.account or self.account == "" then
+        return false
+    end
 
+    if #self.password < 4 then
+        return false
+    end
+
+    Mod.WorldShare.MsgBox:Show(L"正在注册，请稍候...", 10000, L"链接超时", 500, 120)
+
+    KeepworkServiceSession:RegisterWithAccount(self.account, self.password, function(state)
+        Mod.WorldShare.MsgBox:Close()
+
+        if not state then
+            GameLogic.AddBBS(nil, L"未知错误", 5000, "0 255 0")
+            return
+        end
+
+        if state.id then
+            if state.code then
+                GameLogic.AddBBS(nil, format("%s%s(%d)", L"错误信息：", state.message or "", state.code or 0), 5000, "255 0 0")
+            else
+                -- set default user role
+                local filename = UserInfo.GetValidAvatarFilename('boy01')
+                GameLogic.options:SetMainPlayerAssetName(filename)
+
+                -- register success
+                -- OnKeepWorkLogin
+                GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", true)
+
+                GameLogic.AddBBS(nil, L"注册成功", 5000, "0 255 0")
+            end
+
+            if self.callback and type(self.callback) == 'function' then
+                self.callback(true)
+            end
+
+            if callback and type(callback) == 'function' then
+                callback(true)
+            end
+
+            return
+        end
+
+        GameLogic.AddBBS(nil, format("%s%s(%d)", L"注册失败，错误信息：", state.message or "", state.code or 0), 5000, "255 0 0")
+    end)
+end
+
+function MainLogin:RegisterWithPhone(callback)
+    if not self.phonenumber or self.phonenumber == "" then
+        return false
+    end
+
+    if not self.phonecaptcha or self.phonecaptcha == "" then
+        return false
+    end
+
+    if #self.password < 4 then
+        return false
+    end
+
+    Mod.WorldShare.MsgBox:Show(L"正在注册，请稍候...", 10000, L"链接超时", 500, 120)
+
+    KeepworkServiceSession:RegisterWithPhone(self.phonenumber, self.phonecaptcha, self.password, function(state)
+        Mod.WorldShare.MsgBox:Close()
+
+        if not state then
+            GameLogic.AddBBS(nil, L"未知错误", 5000, "0 255 0")
+            return
+        end
+
+        if state.id then
+            if state.code then
+                GameLogic.AddBBS(nil, format("%s%s(%d)", L"错误信息：", state.message or "", state.code or 0), 5000, "255 0 0")
+            else
+                -- set default user role
+                local filename = UserInfo.GetValidAvatarFilename('boy01')
+                GameLogic.options:SetMainPlayerAssetName(filename)
+
+                -- register success
+                -- OnKeepWorkLogin
+                GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", true)
+
+                GameLogic.AddBBS(nil, L"注册成功", 5000, "0 255 0")
+            end
+
+            if self.callback and type(self.callback) == 'function' then
+                self.callback(true)
+            end
+
+            if callback and type(callback) == 'function' then
+                callback(true)
+            end
+
+            return
+        end
+
+        GameLogic.AddBBS(nil, format("%s%s(%d)", L"注册失败，错误信息：", state.message or "", state.code or 0), 5000, "255 0 0")
+    end)
+end
+
+function MainLogin:EnterUserConsole(isOffline)
     System.options.loginmode = 'local'
 
     if isOffline then
         System.options.loginmode = 'offline'
     end
 
-    local MainLoginPage = Mod.WorldShare.Store:Get('page/MainLogin')
-
-    if MainLoginPage then
-        MainLoginPage:CloseWindow()
-    end
+    self:Close()
 
     if System.options.loginmode ~= 'offline' then
         -- close at on world load

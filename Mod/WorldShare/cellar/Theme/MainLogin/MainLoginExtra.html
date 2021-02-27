@@ -1,0 +1,66 @@
+<html>
+    <body> 
+        <pe:mcml>
+            <script type="text/npl">
+                <![CDATA[
+                    function GetModCountAsString()
+                        NPL.load('(gl)script/apps/Aries/Creator/Game/Mod/ModManager.lua')
+                        local ModManager = commonlib.gettable('Mod.ModManager')
+                        local pluginloader = ModManager:GetLoader()
+                        local nCount = pluginloader:GetActiveModCount()
+
+                        if nCount > 0 then
+                            return format('(%d)', nCount)
+                        else
+                            return ''
+                        end
+                    end
+
+                    function OnOpenModulePage()
+                        NPL.load('(gl)script/apps/Aries/Creator/Game/Login/SelectModulePage.lua');
+                        local SelectModulePage = commonlib.gettable('MyCompany.Aries.Game.MainLogin.SelectModulePage')
+                        SelectModulePage.ShowPage()
+                    end
+
+                    function OnChangeLanguagePage()
+                        NPL.load('(gl)script/apps/Aries/Creator/Game/Common/Translation.lua')
+
+                        local Translation = commonlib.gettable('MyCompany.Aries.Game.Common.Translation')
+                        Translation.ShowPage(function()
+                            page:Refresh(0.01)
+                        end)
+                    end
+
+                    function OnClickCustomerService()
+                        ParaGlobal.ShellExecute('open', L'https://keepwork.com/official/docs/FAQ/questions', '', '', 1)
+                    end
+                ]]>
+            </script>
+            <style type="text/mcss" src='Mod/WorldShare/cellar/Theme/Mcss/MainLoginMcss.mcss'>
+                {
+                   
+                }
+            </style>
+            <div>
+                <pe:if condition='<%= System.options.isDevEnv == false %>'>
+                    <pe:if  condition='<%= System.os.GetPlatform() ~= "ios" and System.os.GetPlatform() ~= "android" %>'>
+                        <input type="button"
+                               style="width: 80px;height: 44px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#284 523 80 44)"
+                               onclick="OnOpenModulePage" /> 
+                    </pe:if>        
+                </pe:if>
+                <!-- <input type="button" value='<%=L"语言..." %>' spacing="20" class="mc_big_button" style="margin-top:5px;margin-right:10px;color:#572712;font-size:14px;min-width:120px;height:36px;" onclick="OnChangeLanguagePage" /> -->
+                <input type="button"
+                       style="margin-left: 20px;width: 80px;height: 44px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#284 471 80 44)"
+                       onclick="OnClickCustomerService" />
+                <!-- <input type="button" value='<%=L"致谢"%>' align="right" style="position:relative;margin-right:10px;margin-top:45px;padding:5px;padding-left:10px;padding-right:10px;font-size:14px;font-weight:bold;color:#ffffffcc;background:url(Texture/whitedot.png);background-color:#00000080" onclick="OnClickCredits" /> -->
+                <!--<pe:if condition='<%=Rebranding:GetValue("donation")~="false"%>'>
+                    <input type="button" value='<%=L"捐赠" %>' align="right" spacing="20" class="mc_light_grey_button_with_fillet" style="font-size:14px;height:36px;margin-right:20px" onclick="OnClickDonate" />
+                </pe:if>-->
+                <!--<div style="position:relative;margin-left:0px;margin-top:5px;padding:5px;padding-left:10px;padding-right:10px;font-size:14px;font-weight:bold;color:#ffffffcc;background:url(Texture/whitedot.png);background-color:#00000080">
+                    <%=L"点击任意位置继续"%>
+                </div>-->
+            </div>
+        </pe:mcml>
+    </body>
+</html>

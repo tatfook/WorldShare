@@ -45,14 +45,17 @@ local Desktop = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop")
 local MenuCommand = NPL.load('(gl)Mod/WorldShare/command/Menu.lua')
 
 -- load all filters
-local KeepworkServiceSessionFilter = NPL.load('(gl)Mod/WorldShare/filters/service/KeepworkService/KeepworkServiceSessionFilter.lua')
 local MySchoolFilter = NPL.load('(gl)Mod/WorldShare/filters/cellar/MySchool/MySchoolFilter.lua')
 local VipNoticeFilter = NPL.load('(gl)Mod/WorldShare/filters/cellar/VipNotice/VipNoticeFilter.lua')
 local ClientUpdateDialogFilter = NPL.load('(gl)Mod/WorldShare/filters/cellar/ClientUpdateDialog/ClientUpdateDialogFilter.lua')
 local MsgBoxFilter = NPL.load('(gl)Mod/WorldShare/filters/cellar/Common/MsgBox/MsgBoxFilter.lua')
+local MainLoginFilter = NPL.load('(gl)Mod/WorldShare/filters/cellar/MainLogin/MainLoginFilter.lua')
+
+local KeepworkServiceSessionFilter = NPL.load('(gl)Mod/WorldShare/filters/service/KeepworkService/KeepworkServiceSessionFilter.lua')
+local LocalServiceWorldFilter = NPL.load('(gl)Mod/WorldShare/filters/service/LocalService/LocalServiceWorldFilter.lua')
+
 local OnWorldInitialRegionsLoadedFilter = NPL.load('(gl)Mod/WorldShare/filters/libs/OnWorldInitialRegionsLoadedFilter.lua')
 local WorldInfoFilter = NPL.load('(gl)Mod/WorldShare/filters/libs/WorldInfoFilter.lua')
-local LocalServiceWorldFilter = NPL.load('(gl)Mod/WorldShare/filters/service/LocalService/LocalServiceWorldFilter.lua')
 
 local Filters = NPL.export()
 
@@ -81,14 +84,8 @@ function Filters:Init()
     -- init local service world filter
     LocalServiceWorldFilter:Init()
 
-    -- replace load world page
-    GameLogic.GetFilters():add_filter(
-        'ShowLoginModePage',
-        function()
-            MainLogin:Show()
-            return false
-        end
-    )
+    -- init main login filter
+    MainLoginFilter:Init()
 
     GameLogic.GetFilters():add_filter(
         'ShowClientUpdaterNotice',

@@ -1,0 +1,68 @@
+<html>
+    <body> 
+        <pe:mcml>
+            <script type="text/npl">
+                <![CDATA[
+                    local page = document:GetPageCtrl()
+
+                    function close()
+                        page:CloseWindow()
+                    end
+
+                    function at_home()
+                        page.callback('HOME')
+                        close()
+                    end
+
+                    function at_school()
+                        page.callback('SCHOOL')
+                        close()
+                    end
+                ]]>
+            </script>
+            <style type="text/mcss" src='Mod/WorldShare/cellar/Theme/Mcss/MainLoginMcss.mcss'>
+                {
+                    container_size = {
+                        ['margin-left'] = -160,
+                        ['margin-top'] = -95,
+                        background = 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#602 12 339 382:80 80 80 80'
+                    },
+                    main_area = {
+                        width = 320,
+                        ['min-height'] = 320,
+                        ["base-font-size"] = 16,
+                        ["font-size"] = 16,
+                        color = "#ffffff",
+                        ["padding-top"] = 20,
+                        ["padding-left"] = 40,
+                        ["padding-right"] = 40,
+                    },
+                }
+            </style>
+            <pe:container alignment='_ct' ClickThrough='true' class='main_login_container_bg container_size'>
+                <div class='main_area'>
+                    <div style='width: 161px;
+                                height: 32px;
+                                margin-top: 40px;
+                                margin-left: 42px;
+                                background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#284 392 161 32)'></div>
+                    <div style='margin-top: 30px;'>
+                        <input type='button'
+                               style='float: left;
+                                      width: 112px;
+                                      height: 122px;
+                                      background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#12 467 112 122)'
+                                      onclick="at_home" />
+                        <input type='button'
+                               style='float: left;
+                                      width: 112px;
+                                      height: 122px;
+                                      margin-left: 16px;
+                                      background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#153 467 112 122)'
+                                      onclick="at_school" />
+                    </div>
+                </div>
+            </pe:container>
+        </pe:mcml>
+    </body>
+</html>

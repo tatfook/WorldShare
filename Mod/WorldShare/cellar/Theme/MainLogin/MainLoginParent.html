@@ -1,0 +1,74 @@
+<html>
+    <body> 
+        <pe:mcml>
+            <script type="text/npl">
+                <![CDATA[
+                    -- bottles
+                    local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
+
+                    function close()
+                        local MainLoginParentPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Parent')
+
+                        if MainLoginParentPage then
+                            MainLoginParentPage:CloseWindow()
+                        end
+                    end
+
+                    function back()
+                        close()
+                        MainLogin:ShowSelect()
+                    end
+                ]]>
+            </script>
+            <style type="text/mcss" src='Mod/WorldShare/cellar/Theme/Mcss/MainLoginMcss.mcss'>
+                {
+                    container_size = {
+                        ['margin-left'] = -160,
+                        ['margin-top'] = -95,
+                        background = 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#602 12 339 382:80 80 80 80'
+                    },
+                    main_area = {
+                        width = 320,
+                        ['min-height'] = 320,
+                        ["base-font-size"] = 16,
+                        ["font-size"] = 16,
+                        color = "#ffffff",
+                        ["padding-top"] = 10,
+                        ["padding-left"] = 40,
+                        ["padding-right"] = 40,
+                    },
+                }
+            </style>
+            <pe:container alignment='_ct' ClickThrough='true' class='main_login_container_bg container_size'>
+                <div style='padding-top: 12px;padding-left: 18px;'>
+                    <div class='main_login_title_bg' style='float: left;width: 172px;height: 49px;'>
+                        <img style='margin-top: 13px;margin-left: 30px;width: 53px;height: 24px;' src='Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#133 421 53 24' />
+                    </div>
+                    <div style='float: left;margin-left: 70px;margin-top: 10px;'>
+                        <input type='button' class='main_login_back_button' onclick="back"/>
+                    </div>
+                </div>
+                <div class="main_area">
+                    <div style='width: 240px;
+                                height: 22.69px;
+                                margin-top: 0px;
+                                margin-left: 0px;
+                                background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#284 308 275 26)'></div>
+                    <div style="margin-top: 10px;text-align: center;color: #EDB853;base-font-size: 14px;font-size: 14px;">
+                        <div>孩子成长动态数据</div>
+                        <div>关注孩子创作的作品</div>
+                        <div>最新教育咨询</div>
+                    </div>
+                    <div style="width: 160px;
+                                height: 160px;
+                                margin-top: 10px;
+                                margin-left: 40px;
+                                padding: 5px;
+                                background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#383 465 160 160)">
+                        <img style='width: 150px;height: 150px;' src="Texture/Aries/Creator/paracraft/paracraft_miniprogram.png" />
+                    </div>
+                </div>
+            </pe:container>
+        </pe:mcml>
+    </body>
+</html>
