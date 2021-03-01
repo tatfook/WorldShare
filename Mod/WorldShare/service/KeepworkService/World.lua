@@ -49,14 +49,14 @@ function KeepworkServiceWorld:GetSingleFileByCommitId(pid, commitId, filename, c
         end
 
         if not commitId then
-            commitId = world
+            commitId = world.commitId
         end
 
         GitService:GetContentWithRaw(
             world.worldName,
             username,
             filename,
-            world.commitId,
+            commitId,
             function(content, err)
                 if callback and type(callback) == 'function' then
                     callback(content)
