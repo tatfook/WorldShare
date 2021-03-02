@@ -309,7 +309,7 @@
                         local username = page:GetValue('register_account')
 
                         if not Validated:Account(username) then
-                            page:SetUIValue('register_account_field_error_msg', L'*请输入非数字开头的字母、数字组合形式的账号')
+                            page:SetUIValue('register_account_field_error_msg', L'*账号需非数字开头的字母、数字组合形式')
                             page:FindControl('register_account_field_error').visible = true
                             callback(false)
                             return
@@ -478,7 +478,7 @@
                         local username = page:GetValue('phone_register_account')
 
                         if not Validated:Account(username) then
-                            page:SetUIValue('phone_account_field_error_msg', L'*请输入非数字开头的字母、数字组合形式的账号')
+                            page:SetUIValue('phone_account_field_error_msg', L'*账号需非数字开头的字母、数字组合形式')
                             page:FindControl('phone_account_field_error').visible = true
                             page:SetUIBackground('phone_register_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 197 258 44')
                             return
