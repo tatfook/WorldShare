@@ -166,10 +166,9 @@
                         MainLogin.agree = agree
 
                         MainLogin.callback = function()
-                            MySchool:ShowJoinSchoolAfterRegister(function()
-                                MainLogin:EnterUserConsole()
-                                WorldList:RefreshCurrentServerList()
-                            end)
+                            page:SetValue('account_result', account)
+                            page:SetValue('password_result', password)
+                            set_finish()
                         end
 
                         MainLogin:RegisterWithAccount()
@@ -191,10 +190,7 @@
                         MainLogin.phonecaptcha = phonecaptcha
 
                         MainLogin.callback = function()
-                            MySchool:ShowJoinSchoolAfterRegister(function()
-                                MainLogin:EnterUserConsole()
-                                WorldList:RefreshCurrentServerList()
-                            end)
+                            set_finish()
                         end
 
                         MainLogin:RegisterWithPhone()
@@ -207,7 +203,12 @@
 
                     function finish()
                         close()
-                        MainLogin:ShowWhere()
+                        MainLogin:ShowWhere(function()
+                            MySchool:ShowJoinSchoolAfterRegister(function()
+                                MainLogin:EnterUserConsole()
+                                WorldList:RefreshCurrentServerList()
+                            end)
+                        end)
                     end
 
                     function set_register_agree()
@@ -512,106 +513,134 @@
                         </pe:container>
                         <!-- phone number register -->
                         <pe:container name='phone_register_mode' visible='false' style='position: relative;width: 240px;height: 240px;background:;margin-top: -260px;'>
-                            <div style="color: #FFFFFF;">
-                                <pe:container name="phone_field_error" visible="false" style="display:none;background:">
-                                    <!-- error message -->
-                                    <div>
-                                        <label style="font-size: 12px;base-font-size: 12px;color: #EB2222;" name="phone_field_error_msg" />
-                                    </div>
-                                </pe:container>
-                                <div style='width: 240px;height: 131.25px;padding-left: 10px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#9 96 256 140)'>
-                                    <div>
-                                        <input type="text"
-                                            EmptyText='<%= L"请输入手机号" %>'
-                                            style='background:;textcolor: #FFFFFF;height: 30px;width: 200px;margin-top: 12px;font-size: 12px;'
-                                            onfocusout="check_phone_number()"
-                                            name="phonenumber" />
-                                    </div>
-                                    <div>
-                                        <input type="text"
-                                            onfocusout="checkout_phonecaptcha"
-                                            EmptyText='<%= L"请输入验证码" %>'
-                                            style='background:;textcolor: #FFFFFF;height: 30px;width: 130px;margin-top: 12px;font-size: 12px;'
-                                            name="phonecaptcha" />
-                                        <input
-                                            type="button"
-                                            name="get_phone_captcha"
-                                            style="margin-top: 7px;
-                                                margin-left:5px;
-                                                color: #3E9CE5;
-                                                font-size: 12px;
-                                                base-font-size: 12px;
-                                                width: 80px;
-                                                height:30px;
-                                                background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#331 70 90 22:5 5 5 5)"
-                                            onclick="get_phone_captcha()"
-                                            disabled="disabled"
-                                            value='<%= L"获取验证码"%>'
-                                        />
-                                    </div>
-                                    <div>
-                                        <div style="float: left;width: 200px;">
-                                            <input type="text"
-                                                onfocusout="check_phone_password"
-                                                EmptyText='<%= L"请输入4位数字或以上的密码" %>'
-                                                style='background:;textcolor: #FFFFFF;height: 30px;width: 200px;margin-top: 12px;font-size: 12px;'
-                                                name="phonepassword_show"
-                                                visible="false" />
-                                            <input type="text"
-                                                onfocusout="check_phone_password"
-                                                PasswordChar="*"
-                                                EmptyText='<%= L"请输入4位数字或以上的密码" %>'
-                                                style='background:;textcolor: #FFFFFF;height: 30px;width: 200px;margin-top: 12px;font-size: 12px;margin-left: -200px;'
-                                                name="phonepassword_hide"
-                                                visible="true" />
-                                            <input type="hidden" name="phonepassword" value="" />
+                            <pe:container name='phone_register_mode_step_1' visible='true' style='position: relative;'>
+                                <div style="color: #FFFFFF;">
+                                    <pe:container name="phone_field_error" visible="false" style="display:none;background:">
+                                        <!-- error message -->
+                                        <div>
+                                            <label style="font-size: 12px;base-font-size: 12px;color: #EB2222;" name="phone_field_error_msg" />
                                         </div>
-                                        <input name="checkboxPhonePassword"
-                                                type="checkbox"
-                                                checked="false"
-                                                iconsize="20"
-                                                CheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#272 52 20 20"
-                                                UncheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#297 52 20 20"
-                                                style="position: relative;margin-left: -5px;margin-top: 12px;"
-                                                onclick="set_show_password1"/>
+                                    </pe:container>
+                                    <div style='width: 240px;height: 131.25px;padding-left: 10px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#9 96 256 140)'>
+                                        <div>
+                                            <input type="text"
+                                                EmptyText='<%= L"请输入手机号" %>'
+                                                style='background:;textcolor: #FFFFFF;height: 30px;width: 200px;margin-top: 12px;font-size: 12px;'
+                                                onfocusout="check_phone_number()"
+                                                name="phonenumber" />
+                                        </div>
+                                        <div>
+                                            <input type="text"
+                                                onfocusout="checkout_phonecaptcha"
+                                                EmptyText='<%= L"请输入验证码" %>'
+                                                style='background:;textcolor: #FFFFFF;height: 30px;width: 130px;margin-top: 12px;font-size: 12px;'
+                                                name="phonecaptcha" />
+                                            <input
+                                                type="button"
+                                                name="get_phone_captcha"
+                                                style="margin-top: 7px;
+                                                    margin-left:5px;
+                                                    color: #3E9CE5;
+                                                    font-size: 12px;
+                                                    base-font-size: 12px;
+                                                    width: 80px;
+                                                    height:30px;
+                                                    background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#331 70 90 22:5 5 5 5)"
+                                                onclick="get_phone_captcha()"
+                                                disabled="disabled"
+                                                value='<%= L"获取验证码"%>'
+                                            />
+                                        </div>
+                                        <div>
+                                            <div style="float: left;width: 200px;">
+                                                <input type="text"
+                                                    onfocusout="check_phone_password"
+                                                    EmptyText='<%= L"请输入4位数字或以上的密码" %>'
+                                                    style='background:;textcolor: #FFFFFF;height: 30px;width: 200px;margin-top: 12px;font-size: 12px;'
+                                                    name="phonepassword_show"
+                                                    visible="false" />
+                                                <input type="text"
+                                                    onfocusout="check_phone_password"
+                                                    PasswordChar="*"
+                                                    EmptyText='<%= L"请输入4位数字或以上的密码" %>'
+                                                    style='background:;textcolor: #FFFFFF;height: 30px;width: 200px;margin-top: 12px;font-size: 12px;margin-left: -200px;'
+                                                    name="phonepassword_hide"
+                                                    visible="true" />
+                                                <input type="hidden" name="phonepassword" value="" />
+                                            </div>
+                                            <input name="checkboxPhonePassword"
+                                                    type="checkbox"
+                                                    checked="false"
+                                                    iconsize="20"
+                                                    CheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#272 52 20 20"
+                                                    UncheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#297 52 20 20"
+                                                    style="position: relative;margin-left: -5px;margin-top: 12px;"
+                                                    onclick="set_show_password1"/>
+                                        </div>
                                     </div>
-                                </div>
-                                <pe:container name="phone_agree_field_error" visible="false" style="display:none;background:">
-                                    <!-- error message -->
+                                    <pe:container name="phone_agree_field_error" visible="false" style="display:none;background:">
+                                        <!-- error message -->
+                                        <div>
+                                            <label style="font-size: 12px;base-font-size: 12px;color: #EB2222;margin-left: 62px;" name="phone_agree_field_error_msg" />
+                                        </div>
+                                    </pe:container>
+                                    <div style="width: 240px;margin-top: 0px;margin-bottom: 5px;">
+                                        <input type="checkbox"
+                                            iconsize="12"
+                                            CheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#275 79 12 12"
+                                            UncheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#295 79 12 12"
+                                            style="float:left;margin-top:3px;min-width:90px;"
+                                            name="phone_agree"
+                                            onclick="set_phone_agree"
+                                            checked="checked"/>
+                                        <div style="float:left; color: white;base-font-size: 11px;font-size: 11px;margin-left: 4px;">
+                                            <div style="float:left;width: 2px;"></div>
+                                            <%= L"我同意" %>
+                                            <div style="float:left;color: #EDB853" onclick="user_agreement()"><%= L"《Paracraft用户协议》" %></div>
+                                            <%= L"中的内容" %>
+                                        </div>
+                                    </div>
                                     <div>
-                                        <label style="font-size: 12px;base-font-size: 12px;color: #EB2222;margin-left: 62px;" name="phone_agree_field_error_msg" />
-                                    </div>
-                                </pe:container>
-                                <div style="width: 240px;margin-top: 0px;margin-bottom: 5px;">
-                                    <input type="checkbox"
-                                        iconsize="12"
-                                        CheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#275 79 12 12"
-                                        UncheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#295 79 12 12"
-                                        style="float:left;margin-top:3px;min-width:90px;"
-                                        name="phone_agree"
-                                        onclick="set_phone_agree"
-                                        checked="checked"/>
-                                    <div style="float:left; color: white;base-font-size: 11px;font-size: 11px;margin-left: 4px;">
-                                        <div style="float:left;width: 2px;"></div>
-                                        <%= L"我同意" %>
-                                        <div style="float:left;color: #EDB853" onclick="user_agreement()"><%= L"《Paracraft用户协议》" %></div>
-                                        <%= L"中的内容" %>
+                                        <input type="button"
+                                            class="main_login_blue_button"
+                                            style="margin-top: 10px"
+                                            onclick="phone_register()"
+                                            value='<%= L"下一步"%>' />
                                     </div>
                                 </div>
-                                <div>
-                                    <input type="button"
-                                        class="main_login_blue_button"
-                                        style="margin-top: 10px"
-                                        onclick="phone_register()"
-                                        value='<%= L"注册"%>' />
-                                </div>
-                            </div>
+                            </pe:container>
+                            <pe:container name='phone_register_mode_step_2' visible='false' style="position: relative;">
+                                
+                            </pe:container>
                         </pe:container>
                     </pe:container>
-                    <pe:container name='register_finish' visible='false' style='position: relative;width: 240px;height: 230px;margin-top: -230px;background:;'>
+                    <pe:container name='register_finish' visible='false' style='position: relative;width: 240px;height: 260px;margin-top: -260px;background:;'>
                         <div>
                             <div style="margin-top: 10px;width: 240px;height: 25.26px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#287 269 247 26)"></div>
-                            <div style="margin-top: 25px;width: 240px;height: 86.25px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#9 242 256 92)"></div>
+                            <div style="margin-top: 25px;width: 240px;height: 86.25px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#9 242 256 92)">
+                                <div style="margin-left: 65px;margin-top: 11px;">
+                                    <input type='text'
+                                           name='account_result'
+                                           style='width: 160px;
+                                                  height: 28px;
+                                                  font-weight: bolder;
+                                                  base-font-size: 16px;
+                                                  font-size: 16px;
+                                                  text-singleline: true;
+                                                  background:;' value='' />
+                                </div>
+                                <div style="margin-left: 65px;margin-top: 12px;">
+                                    <input type='text'
+                                           name='password_result'
+                                           style='width: 160px;
+                                                  height: 28px;
+                                                  font-weight: bolder;
+                                                  base-font-size: 16px;
+                                                  font-size: 16px;
+                                                  text-singleline: true;
+                                                  background:;' value='' />
+                                </div>
+                            </div>
                             <div style="width: 240px;margin-top: 5px;text-align: center;base-font-size: 10.5px;font-size: 10.5px;color: #FFFFFF">
                                 找个稳妥的地方抄下来！你需要这个来储存作品。
                             </div>

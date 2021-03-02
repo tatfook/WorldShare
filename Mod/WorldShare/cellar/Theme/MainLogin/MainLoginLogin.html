@@ -14,6 +14,11 @@
                     local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepWorkService/Session.lua')
                     local EventTrackingService = NPL.load('(gl)Mod/WorldShare/service/EventTracking.lua')
 
+                    -- helper
+                    local Validated = NPL.load('(gl)Mod/WorldShare/helper/Validated.lua')
+
+                    local page = document:GetPageCtrl()
+
                     function get_history_users()
                         return MainLogin:GetHistoryUsers()
                     end
@@ -109,6 +114,35 @@
                             end)
                         end)
                     end
+
+                    function update_login_button_status()
+                        local account = page:GetValue('account')
+                        local password = page:GetValue('password')
+
+                        local beSuccess = true
+
+                        if not Validated:Account(account) then
+                            page:SetUIValue('account_field_error_msg', L'*账号不合法')
+                            page:FindControl('account_field_error').visible = true
+                            beSuccess = false
+                        else
+                            page:FindControl('account_field_error').visible = false
+                        end
+
+                        if not Validated:Password(password) then
+                            page:SetUIValue('password_field_error_msg', L'*密码不合法')
+                            page:FindControl('password_field_error').visible = true
+                            beSuccess = false
+                        else
+                            page:FindControl('password_field_error').visible = false
+                        end
+
+                        if beSuccess then
+                            page:SetUIBackground('login_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 98 258 44')
+                        else
+                            page:SetUIBackground('login_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 197 258 44')
+                        end
+                    end
                 ]]>
             </script>
             <style type='text/mcss' src='Mod/WorldShare/cellar/Theme/Mcss/MainLoginMcss.mcss'>
@@ -156,6 +190,7 @@
                             <input type='text'
                                    name='account'
                                    style='background:;textcolor: #FFFFFF;height: 30px;width: 190px;margin-top: 10px;font-size: 16px;'
+                                   onchange='update_login_button_status'
                                    EmptyText='<%= L"请输入您的账号/手机号" %>'
                                    MoveViewWhenAttachWithIME='true' />
                         </div>
@@ -165,6 +200,7 @@
                                    PasswordChar='*'
                                    SkipAutoBadWordFilter='true'
                                    style='background:;textcolor: #FFFFFF;height: 30px;width: 190px;margin-top: 10px;font-size: 16px;'
+                                   onchange='update_login_button_status'
                                    EmptyText='<%= L"请输入密码" %>'
                                    MoveViewWhenAttachWithIME='true' />
                         </div>
@@ -174,7 +210,7 @@
                         <div style='float:left;base-font-size: 13px;font-size: 13px;color: #9A9DA2;margin-left: 120px;' onclick='use_offline()'><%= L"离线模式" %></div>
                     </div>
                     <div style='margin-top:5px;margin-bottom:10px;'>
-                        <input type='button' DefaultButton='true' class='main_login_blue_button' onclick='login()' value='<%= L"登录"%>' />
+                        <input type='button' name='login_button' DefaultButton='true' class='main_login_gray_button' onclick='login()' value='<%= L"登录"%>' />
                     </div>
                     <pe:if condition='<%= is_support_third_party_login() %>'>
                         <div>

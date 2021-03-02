@@ -310,6 +310,8 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
         local Login = Mod.WorldShare.Store:Action("user/Login")
         Login(token, userId, username, nickname, realname, isVipSchool)
 
+        GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", true);
+
         -- update enter world info
         if Mod.WorldShare.Store:Get('world/isEnterWorld') then
             SyncServiceCompare:GetCurrentWorldInfo(function()
@@ -434,7 +436,7 @@ function KeepworkServiceSession:RegisterWithPhone(cellphone, cellphoneCaptcha, p
         function(registerData, err)
             if registerData.id then
                 self:Login(
-                    username,
+                    cellphone,
                     password,
                     function(loginData, err)
                         if err ~= 200 then
@@ -467,7 +469,6 @@ function KeepworkServiceSession:RegisterWithPhone(cellphone, cellphoneCaptcha, p
             end
         end,
         function(data, err)
-            echo(data, true)
             if type(callback) == 'function' then
                 if type(data) == 'table' and data.code then
                     callback(data)

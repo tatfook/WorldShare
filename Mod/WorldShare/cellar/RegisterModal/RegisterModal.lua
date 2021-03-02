@@ -143,8 +143,6 @@ function RegisterModal:Register(page, callback)
                     GameLogic.options:SetMainPlayerAssetName(filename)
     
                     -- register success
-                    -- OnKeepWorkLogin
-                    GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", true)
                     
                     -- if self.m_mode == "account" then
                     --     self:ShowClassificationPage(function()

@@ -22,6 +22,9 @@ local SessionsData = NPL.load('(gl)Mod/WorldShare/database/SessionsData.lua')
 -- bottles
 local RegisterModal = NPL.load('(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua')
 
+-- helper
+local Validated = NPL.load('(gl)Mod/WorldShare/helper/Validated.lua')
+
 local MainLogin = NPL.export()
 
 -- for register
@@ -61,11 +64,6 @@ function MainLogin:Show()
     self:ShowSelect()
 
     -- self:Refresh()
-
-    -- Mod.WorldShare.Store:Set('user/AfterLogined', function(bIsSucceed)
-    --     -- OnKeepWorkLogin
-    --     GameLogic.GetFilters():apply_filters('OnKeepWorkLogin', bIsSucceed)
-    -- end)
 end
 
 function MainLogin:ShowSelect()
@@ -265,14 +263,14 @@ function MainLogin:LoginAction(callback)
     local autoLogin = MainLoginPage:GetValue('autoLogin')
     local rememberMe = MainLoginPage:GetValue('rememberMe')
 
-    if not account or account == '' then
-        MainLoginPage:SetUIValue('account_field_error_msg', L'*账号不能为空')
+    if not Validated:Account(account) then
+        MainLoginPage:SetUIValue('account_field_error_msg', L'*账号不合法')
         MainLoginPage:FindControl('account_field_error').visible = true
         return false
     end
 
-    if not password or password == '' then
-        MainLoginPage:SetUIValue('password_field_error_msg', L'*密码不能为空')
+    if not Validated:Password(password) then
+        MainLoginPage:SetUIValue('password_field_error_msg', L'*密码不合法')
         MainLoginPage:FindControl('password_field_error').visible = true
         return false
     end
@@ -361,10 +359,6 @@ function MainLogin:RegisterWithAccount(callback)
                 GameLogic.options:SetMainPlayerAssetName(filename)
 
                 -- register success
-                -- OnKeepWorkLogin
-                GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", true)
-
-                GameLogic.AddBBS(nil, L"注册成功", 5000, "0 255 0")
             end
 
             if self.callback and type(self.callback) == 'function' then
@@ -414,10 +408,6 @@ function MainLogin:RegisterWithPhone(callback)
                 GameLogic.options:SetMainPlayerAssetName(filename)
 
                 -- register success
-                -- OnKeepWorkLogin
-                GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", true)
-
-                GameLogic.AddBBS(nil, L"注册成功", 5000, "0 255 0")
             end
 
             if self.callback and type(self.callback) == 'function' then

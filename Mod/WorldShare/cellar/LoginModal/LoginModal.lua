@@ -34,18 +34,12 @@ local LoginModal = NPL.export()
 function LoginModal:Init(callback)
     Mod.WorldShare.Store:Remove('user/AfterLogined')
 
-    if type(callback) == "function" then
+    if callback and type(callback) == "function" then
         Mod.WorldShare.Store:Set('user/AfterLogined', function(bIsSucceed)
-            -- OnKeepWorkLogin
-            GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", bIsSucceed)
             return callback(bIsSucceed)
         end)
-    else
-        Mod.WorldShare.Store:Set('user/AfterLogined', function(bIsSucceed)
-            -- OnKeepWorkLogin
-            GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", bIsSucceed)
-        end)
     end
+
     self:ShowPage()
 end
 

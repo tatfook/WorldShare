@@ -101,11 +101,10 @@ function ThirdPartyLogin:Init(thirdPartyType, callback)
                     -- login again to enter world
                     local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua")
                     UserInfo:LoginWithToken(function()
-						GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", true);
-                        if type(self.callback) == "function" then
+                        if self.callback and type(self.callback) == "function" then
                             self.callback()
                         end      
-		            end);
+		            end)
                 else
                     if data and data.token then
                         Mod.WorldShare.Store:Set("user/authToken", data.token)
@@ -241,8 +240,6 @@ function ThirdPartyLogin:RegisterAndBind(account, password, authToken)
                 GameLogic.AddBBS(nil, format("%s%s(%d)", L"错误信息：", state.message or "", state.code or 0), 5000, "255 0 0")
             else
                 -- register success
-                -- OnKeepWorkLogin
-                GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", true)
 
                 GameLogic.AddBBS(nil, L"注册成功，绑定第三方账号成功", 5000, "0 255 0")
 
@@ -281,9 +278,6 @@ function ThirdPartyLogin:LoginAndBind(account, password, authToken)
             if CreateOrBindThirdPartyAccountPage then
                 CreateOrBindThirdPartyAccountPage:CloseWindow()
             end
-
-            -- OnKeepWorkLogin
-            GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", true)
     
             GameLogic.AddBBS(nil, L"登录成功，绑定第三方账号成功", 5000, "0 255 0")
 

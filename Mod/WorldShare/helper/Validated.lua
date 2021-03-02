@@ -11,7 +11,11 @@ local Validated = NPL.load("(gl)Mod/WorldShare/helper/Validated.lua")
 local Validated = NPL.export()
 
 function Validated:Account(str)
-    if not str or #str == 0 then
+    if not str or
+       type(str) ~= 'string' or
+       str == '' or
+       #str < 3 or
+       #str > 20  then
         return false
     else
         return true
@@ -38,10 +42,12 @@ function Validated:Password(str)
     if not str or
        type(str) ~= "string" or
        str == '' or
-       #str < 6 or
-       #str > 64 then
+       #str < 4 or
+       #str > 24 then
+        echo(111111111, true)
         return false
     else
+        echo(222222222, true)
         return true
     end
 end
