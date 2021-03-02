@@ -419,16 +419,18 @@ function KeepworkServiceSession:RegisterWithAccount(username, password, callback
     )
 end
 
-function KeepworkServiceSession:RegisterWithPhone(cellphone, cellphoneCaptcha, password, callback)
+function KeepworkServiceSession:RegisterWithPhone(username, cellphone, cellphoneCaptcha, password, callback)
     if not cellphone or not cellphoneCaptcha or not password then
         return
     end
 
     local params = {
+        username = username,
         cellphone = cellphone,
         captcha = cellphoneCaptcha,
         password = password,
-        channel = 3
+        channel = 3,
+        isBind = true
     }
 
     KeepworkUsersApi:Register(
@@ -436,7 +438,7 @@ function KeepworkServiceSession:RegisterWithPhone(cellphone, cellphoneCaptcha, p
         function(registerData, err)
             if registerData.id then
                 self:Login(
-                    cellphone,
+                    username,
                     password,
                     function(loginData, err)
                         if err ~= 200 then

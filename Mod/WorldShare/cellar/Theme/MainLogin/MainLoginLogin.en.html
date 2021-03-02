@@ -1,0 +1,230 @@
+<html>
+    <body> 
+        <pe:mcml>
+            <script type='text/npl'>
+                <![CDATA[
+                    -- bottles
+                    local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
+                    local ForgetPassword = NPL.load('(gl)Mod/WorldShare/cellar/ForgetPassword/ForgetPassword.lua')
+                    local ThirdPartyLogin = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/ThirdPartyLogin.lua')
+                    local UserConsole = NPL.load('(gl)Mod/WorldShare/cellar/UserConsole/Main.lua')
+                    local MySchool = NPL.load('(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua')
+
+                    -- service
+                    local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepWorkService/Session.lua')
+                    local EventTrackingService = NPL.load('(gl)Mod/WorldShare/service/EventTracking.lua')
+
+                    -- helper
+                    local Validated = NPL.load('(gl)Mod/WorldShare/helper/Validated.lua')
+
+                    local page = document:GetPageCtrl()
+
+                    function get_history_users()
+                        return MainLogin:GetHistoryUsers()
+                    end
+
+                    function remove_account(username)
+                        MainLogin:RemoveAccount(username)
+                    end
+
+                    function is_support_third_party_login()
+                        if System.os.GetPlatform() == 'win32' or System.os.GetPlatform() == 'mac' then
+                            return true
+                        else
+                            return false
+                        end
+                    end
+
+                    function login_with_wx()
+                        ThirdPartyLogin:Init('WECHAT', function()
+                            UserConsole.notFirstTimeShown = nil
+
+                            MainLogin:ShowWhere(function(where)
+                                -- TODO: record where
+
+                                if not Mod.WorldShare.Store:Get('user/hasJoinedSchool') then
+                                    MySchool:ShowJoinSchoolAfterRegister(function()
+                                        MainLogin:EnterUserConsole()
+                                    end)
+                                else
+                                    MainLogin:EnterUserConsole()
+                                end
+                            end)
+                        end)
+                    end
+
+                    function login_with_qq()
+                        ThirdPartyLogin:Init('QQ', function()
+                            UserConsole.notFirstTimeShown = nil
+
+                            MainLogin:ShowWhere(function(where)
+                                -- TODO: record where
+
+                                if not Mod.WorldShare.Store:Get('user/hasJoinedSchool') then
+                                    MySchool:ShowJoinSchoolAfterRegister(function()
+                                        MainLogin:EnterUserConsole()
+                                    end)
+                                else
+                                    MainLogin:EnterUserConsole()
+                                end
+                            end)
+                        end)
+                    end
+
+                    -- @param name: 'local', 'internet'
+                    function use_offline()
+                        KeepworkServiceSession:Logout()
+                        MainLogin:EnterUserConsole(true)
+                        EventTrackingService:Send(1, 'click.main_login.offline_enter', { machineId = ParaEngine.GetAttributeObject():GetField('MachineID','') }, true)
+                    end
+
+                    function close()
+                        local MainLoginLoginPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Login')
+
+                        if MainLoginLoginPage then
+                            MainLoginLoginPage:CloseWindow()
+                        end
+                    end
+
+                    function back()
+                        close()
+                        MainLogin:ShowSelect()
+                    end
+
+                    function forget_password()
+                        ForgetPassword:ShowPage()
+                    end
+
+                    function login()
+                        MainLogin:LoginAction(function(b_succeed)
+                            if not b_succeed then
+                                return
+                            end
+
+                            MainLogin:ShowWhere(function(where)
+                                -- TODO: record where
+
+                                if not Mod.WorldShare.Store:Get('user/hasJoinedSchool') then
+                                    MySchool:ShowJoinSchoolAfterRegister(function()
+                                        MainLogin:EnterUserConsole()
+                                    end)
+                                else
+                                    MainLogin:EnterUserConsole()
+                                end
+                            end)
+                        end)
+                    end
+
+                    function update_login_button_status()
+                        local account = page:GetValue('account')
+                        local password = page:GetValue('password')
+
+                        local beSuccess = true
+
+                        if not Validated:Account(account) then
+                            page:SetUIValue('account_field_error_msg', 'L'*账号不合法'')
+                            page:FindControl('account_field_error').visible = true
+                            beSuccess = false
+                        else
+                            page:FindControl('account_field_error').visible = false
+                        end
+
+                        if not Validated:Password(password) then
+                            page:SetUIValue('password_field_error_msg', L'*密码不合法')
+                            page:FindControl('password_field_error').visible = true
+                            beSuccess = false
+                        else
+                            page:FindControl('password_field_error').visible = false
+                        end
+
+                        if beSuccess then
+                            page:SetUIBackground('login_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 98 258 44')
+                        else
+                            page:SetUIBackground('login_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 197 258 44')
+                        end
+                    end
+                ]]>
+            </script>
+            <style type='text/mcss' src='Mod/WorldShare/cellar/Theme/Mcss/MainLoginMcss.mcss'>
+                {
+                    container_size = {
+                        ['margin-left'] = -160,
+                        ['margin-top'] = -100,
+                    },
+                    main_area = {
+                        width = 320,
+                        height = 320,
+                        ['base-font-size'] = 16,
+                        ['font-size'] = 16,
+                        color = '#ffffff',
+                        ['padding-top'] = 0,
+                        ['padding-left'] = 40,
+                        ['padding-right'] = 40,
+                    },
+                }
+            </style>
+            <pe:container alignment='_ct' ClickThrough='true' class='main_login_container_bg container_size'>
+                <div style='padding-top: 12px;padding-left: 18px;'>
+                    <div class='main_login_title_bg' style='float: left;width: 172px;height: 49px;'>
+                        <img style='margin-top: 13px;margin-left: 20px;width: 72px;height: 24px;' src='Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#186 782 72 24' />
+                    </div>
+                    <div style='float: left;margin-left: 70px;margin-top: 10px;'>
+                        <input type='button' class='main_login_back_button' onclick="back"/>
+                    </div>
+                </div>
+                <div class='main_area'>
+                    <pe:container name='account_field_error' visible='false' style='display:none;background:'>
+                        <!-- error message -->
+                        <div>
+                            <label style='font-size: 12px;base-font-size: 12px;color: #EB2222;' name='account_field_error_msg' />
+                        </div>
+                    </pe:container>
+                    <pe:container name='password_field_error' visible='false' style='display:none;background:'>
+                        <!-- error message -->
+                        <div>
+                            <label style='font-size: 12px;base-font-size: 12px;color: #EB2222;' name='password_field_error_msg' />
+                        </div>
+                    </pe:container>
+                    <div style='width: 240px; height: 88.1px;padding-left: 35px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#9 0 256 94)'>
+                        <div>
+                            <input type='text'
+                                   name='account'
+                                   style='background:;textcolor: #FFFFFF;height: 30px;width: 190px;margin-top: 10px;font-size: 16px;'
+                                   onchange='update_login_button_status'
+                                   EmptyText='<%= L"请输入您的账号/手机号" %>'
+                                   MoveViewWhenAttachWithIME='true' />
+                        </div>
+                        <div style='margin-bottom:12px;'>
+                            <input type='text'
+                                   name='password'
+                                   PasswordChar='*'
+                                   SkipAutoBadWordFilter='true'
+                                   style='background:;textcolor: #FFFFFF;height: 30px;width: 190px;margin-top: 10px;font-size: 16px;'
+                                   onchange='update_login_button_status'
+                                   EmptyText='<%= L"请输入密码" %>'
+                                   MoveViewWhenAttachWithIME='true' />
+                        </div>
+                    </div>
+                    <div style="margin-top: 5px;">
+                        <div style='float:left;base-font-size: 13px;font-size: 13px;' onclick='forget_password()'><%= L"找回密码" %></div>
+                        <div style='float:left;base-font-size: 13px;font-size: 13px;color: #9A9DA2;margin-left: 120px;' onclick='use_offline()'><%= L"离线模式" %></div>
+                    </div>
+                    <div style='margin-top:5px;margin-bottom:10px;'>
+                        <input type='button' name='login_button' DefaultButton='true' class='main_login_gray_button' onclick='login()' value='<%= L"登录"%>' />
+                    </div>
+                    <pe:if condition='<%= is_support_third_party_login() %>'>
+                        <div>
+                            <div style='width: 240px;text-align: center;base-font-size: 12px;font-size: 12px;color: #9A9DA2;'>
+                                <%= L'第三方账号登录' %>
+                            </div>
+                            <div style='margin-top: 10px;'>
+                                <div onclick='login_with_wx()' style='width: 44px;height: 44px;background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#245 135 44 44);float: left;margin-left: 63px;'></div>
+                                <div onclick='login_with_qq()' style='width: 44px;height: 44px;background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#301 135 44 44);float: left;margin-left: 30x;'></div>
+                            </div>
+                        </div>
+                    </pe:if>
+                </div>
+            </pe:container>
+        </pe:mcml>
+    </body>
+</html>

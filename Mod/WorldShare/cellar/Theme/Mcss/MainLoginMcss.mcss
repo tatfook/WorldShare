@@ -28,7 +28,7 @@ local MainLoginMcss = NPL.load("(gl)Mod/WorldShare/cellar/Theme/Mcss/MainLoginMc
         color = '#FFFFFFF',
         ['font-size'] = 16,
         ['base-font-size'] = 16,
-        background = 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#272 148 258 44',
+        background = 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#272 147 258 44',
         ['text-offset-y'] = -1,
     },
     main_login_gray_button = {

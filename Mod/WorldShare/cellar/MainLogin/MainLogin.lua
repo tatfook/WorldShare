@@ -62,8 +62,6 @@ function MainLogin:Show()
 
     self:ShowExtra()
     self:ShowSelect()
-
-    -- self:Refresh()
 end
 
 function MainLogin:ShowSelect()
@@ -156,13 +154,30 @@ function MainLogin:ShowWhere(callback)
 end
 
 function MainLogin:ShowExtra()
+    local width
+    local height
+    local left
+    local top
+
+    if Mod.WorldShare.Utils.IsEnglish() then
+        width = 500
+        height = 130
+        left = 1000
+        top = 160
+    else
+        width = 300
+        height = 130
+        left = 700
+        top = 160
+    end
+
     Mod.WorldShare.Utils.ShowWindow(
-        300,
-        130,
+        width,
+        height,
         'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginExtra.html',
         'Mod.WorldShare.cellar.MainLogin.Extra',
-        700,
-        160,
+        left,
+        top,
         '_rb',
         false,
         1
@@ -207,6 +222,12 @@ function MainLogin:Close()
 
     if MainLoginSelectPage then
         MainLoginSelectPage:CloseWindow()
+    end
+
+    local MainLoginExtraPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Extra')
+
+    if MainLoginExtraPage then
+        MainLoginExtraPage:CloseWindow()
     end
 end
 
@@ -332,11 +353,11 @@ function MainLogin:LoginAction(callback)
 end
 
 function MainLogin:RegisterWithAccount(callback)
-    if not self.account or self.account == "" then
+    if not Validated:Account(self.account) then
         return false
     end
 
-    if #self.password < 4 then
+    if not Validated:Password(self.password) then
         return false
     end
 
@@ -377,7 +398,15 @@ function MainLogin:RegisterWithAccount(callback)
 end
 
 function MainLogin:RegisterWithPhone(callback)
-    if not self.phonenumber or self.phonenumber == "" then
+    if not Validated:Phone(self.phonenumber) then
+        return false
+    end
+
+    if not Validated:Password(self.password) then
+        return false
+    end
+
+    if not Validated:Account(self.account) then
         return false
     end
 
@@ -385,13 +414,9 @@ function MainLogin:RegisterWithPhone(callback)
         return false
     end
 
-    if #self.password < 4 then
-        return false
-    end
-
     Mod.WorldShare.MsgBox:Show(L"正在注册，请稍候...", 10000, L"链接超时", 500, 120)
 
-    KeepworkServiceSession:RegisterWithPhone(self.phonenumber, self.phonecaptcha, self.password, function(state)
+    KeepworkServiceSession:RegisterWithPhone(self.account, self.phonenumber, self.phonecaptcha, self.password, function(state)
         Mod.WorldShare.MsgBox:Close()
 
         if not state then

@@ -48,23 +48,16 @@
                 <pe:if condition='<%= System.options.isDevEnv == false %>'>
                     <pe:if  condition='<%= System.os.GetPlatform() ~= "ios" and System.os.GetPlatform() ~= "android" %>'>
                         <input type="button"
-                               style="width: 80px;height: 44px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#284 523 80 44)"
+                               style="width: 121px;height: 44px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#283 693 121 44)"
                                onclick="OnOpenModulePage" /> 
                     </pe:if>        
                 </pe:if>
                 <input type="button"
-                       style="margin-left: 20px;width: 81px;height: 44px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#281 575 81 44)"
+                       style="margin-left: 20px;width: 131px;height: 44px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#281 831 131 44)"
                        onclick="OnChangeLanguagePage" />
                 <input type="button"
-                       style="margin-left: 20px;width: 80px;height: 44px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#284 471 80 44)"
+                       style="margin-left: 20px;width: 172px;height: 43px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#283 643 172 43)"
                        onclick="OnClickCustomerService" />
-                <!-- <input type="button" value='<%=L"致谢"%>' align="right" style="position:relative;margin-right:10px;margin-top:45px;padding:5px;padding-left:10px;padding-right:10px;font-size:14px;font-weight:bold;color:#ffffffcc;background:url(Texture/whitedot.png);background-color:#00000080" onclick="OnClickCredits" /> -->
-                <!--<pe:if condition='<%=Rebranding:GetValue("donation")~="false"%>'>
-                    <input type="button" value='<%=L"捐赠" %>' align="right" spacing="20" class="mc_light_grey_button_with_fillet" style="font-size:14px;height:36px;margin-right:20px" onclick="OnClickDonate" />
-                </pe:if>-->
-                <!--<div style="position:relative;margin-left:0px;margin-top:5px;padding:5px;padding-left:10px;padding-right:10px;font-size:14px;font-weight:bold;color:#ffffffcc;background:url(Texture/whitedot.png);background-color:#00000080">
-                    <%=L"点击任意位置继续"%>
-                </div>-->
             </div>
         </pe:mcml>
     </body>

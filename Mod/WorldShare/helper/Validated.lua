@@ -18,7 +18,12 @@ function Validated:Account(str)
        #str > 20  then
         return false
     else
-        return true
+        -- contains digits and characters
+        if string.match(str, '^%a+') and string.match(str, '%d+') then
+            return true
+        else
+            return false
+        end
     end
 end
 
@@ -44,10 +49,8 @@ function Validated:Password(str)
        str == '' or
        #str < 4 or
        #str > 24 then
-        echo(111111111, true)
         return false
     else
-        echo(222222222, true)
         return true
     end
 end
