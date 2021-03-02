@@ -197,6 +197,17 @@ function SessionsData:GetUserLastPosition(projectId, username)
     end
 end
 
+function SessionsData:SetUserLocation(where, username)
+    local session = self:GetSessionByUsername(username)
+
+    if not session or type(session) ~= 'table' then
+        return
+    end
+
+    session.where = where
+    self:SaveSession(session)
+end
+
 function SessionsData:SetUserLastPosition(x, y, z, cameraLiftupAngle, cameraRotY, projectId, username)
     if not x or not y or not z or not cameraLiftupAngle or not cameraRotY then
         return

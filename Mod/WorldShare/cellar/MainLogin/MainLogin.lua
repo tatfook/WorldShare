@@ -284,7 +284,7 @@ function MainLogin:LoginAction(callback)
     local autoLogin = MainLoginPage:GetValue('autoLogin')
     local rememberMe = MainLoginPage:GetValue('rememberMe')
 
-    if not Validated:Account(account) then
+    if not Validated:AccountCompatible(account) then
         MainLoginPage:SetUIValue('account_field_error_msg', L'*账号不合法')
         MainLoginPage:FindControl('account_field_error').visible = true
         return false

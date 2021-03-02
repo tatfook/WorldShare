@@ -19,7 +19,28 @@ function Validated:Account(str)
         return false
     else
         -- contains digits and characters
-        if string.match(str, '^%a+') and string.match(str, '%d+') then
+        if string.match(str, '%a+') and string.match(str, '%d+') then
+            if string.match(str, '^%d+') then
+                return false
+            else
+                return true
+            end
+        else
+            return false
+        end
+    end
+end
+
+function Validated:AccountCompatible(str)
+    if not str or
+       type(str) ~= 'string' or
+       str == '' or
+       #str < 3 or
+       #str > 20  then
+        return false
+    else
+        -- contains digits and characters
+        if string.match(str, '%a+') or string.match(str, '%d+') then
             return true
         else
             return false

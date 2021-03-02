@@ -3,6 +3,8 @@
         <pe:mcml>
             <script type="text/npl">
                 <![CDATA[
+                    local SessionsData = NPL.load("(gl)Mod/WorldShare/database/SessionsData.lua")
+
                     local page = document:GetPageCtrl()
 
                     function close()
@@ -10,11 +12,13 @@
                     end
 
                     function at_home()
+                        SessionsData:SetUserLocation('HOME', Mod.WorldShare.Store:Get('user/username'))
                         page.callback('HOME')
                         close()
                     end
 
                     function at_school()
+                        SessionsData:SetUserLocation('SCHOOL', Mod.WorldShare.Store:Get('user/username'))
                         page.callback('SCHOOL')
                         close()
                     end

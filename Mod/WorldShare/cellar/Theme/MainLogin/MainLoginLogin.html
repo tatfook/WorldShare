@@ -121,13 +121,23 @@
 
                         local beSuccess = true
 
-                        if not Validated:Account(account) then
+                        if not Validated:AccountCompatible(account) then
                             page:SetUIValue('account_field_error_msg', L'*账号不合法')
                             page:FindControl('account_field_error').visible = true
                             beSuccess = false
                         else
                             page:FindControl('account_field_error').visible = false
                         end
+
+                        local password
+
+                        if be_show_password then
+                            password = page:GetValue('password_show')
+                        else
+                            password = page:GetValue('password_hide')
+                        end
+
+                        page:SetValue('password', password)
 
                         if not Validated:Password(password) then
                             page:SetUIValue('password_field_error_msg', L'*密码不合法')
@@ -143,6 +153,38 @@
                             page:SetUIBackground('login_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 197 258 44')
                         end
                     end
+
+                    function set_show_password()
+                        if be_show_password then
+                        be_show_password = false
+
+                            local val = page:GetValue('password_show')
+                            page:SetValue('password_hide', val)
+                            page:SetValue('password', val)
+
+                            page:FindControl('password_show').visible = false
+                            page:FindControl('password_hide').visible = true
+                        else
+                            be_show_password = true
+
+                            local val = page:GetValue('password_hide')
+                            page:SetValue('password_show', val)
+                            page:SetValue('password', val)
+
+                            page:FindControl('password_show').visible = true
+                            page:FindControl('password_hide').visible = false
+                        end
+                    end
+
+                    -- don't remove
+                    Mod.WorldShare.Utils.SetTimeOut(function()
+                        local val = page:GetValue('password_show')
+                        page:SetValue('password_hide', val)
+                        page:SetValue('password', val)
+
+                        page:FindControl('password_show').visible = false
+                        page:FindControl('password_hide').visible = true
+                    end, 0)
                 ]]>
             </script>
             <style type='text/mcss' src='Mod/WorldShare/cellar/Theme/Mcss/MainLoginMcss.mcss'>
@@ -195,14 +237,31 @@
                                    MoveViewWhenAttachWithIME='true' />
                         </div>
                         <div style='margin-bottom:12px;'>
-                            <input type='text'
-                                   name='password'
-                                   PasswordChar='*'
-                                   SkipAutoBadWordFilter='true'
-                                   style='background:;textcolor: #FFFFFF;height: 30px;width: 190px;margin-top: 10px;font-size: 16px;'
-                                   onchange='update_login_button_status'
-                                   EmptyText='<%= L"请输入密码" %>'
-                                   MoveViewWhenAttachWithIME='true' />
+                            <div style="float: left;width: 190px;">
+                                <input type='text'
+                                        name='password_show'
+                                        style='background:;textcolor: #FFFFFF;height: 30px;width: 190px;margin-top: 10px;font-size: 16px;'
+                                        onchange='update_login_button_status'
+                                        SkipAutoBadWordFilter="true"
+                                        EmptyText='<%= L"请输入密码" %>'
+                                        MoveViewWhenAttachWithIME='true' />
+                                <input type='text'
+                                        name='password_hide'
+                                        PasswordChar="*"
+                                        style='background:;textcolor: #FFFFFF;height: 30px;margin-left: -190px;width: 190px;margin-top: 10px;font-size: 16px;'
+                                        onchange='update_login_button_status'
+                                        SkipAutoBadWordFilter="true"
+                                        EmptyText='<%= L"请输入密码" %>'
+                                        MoveViewWhenAttachWithIME='true' />
+                                <input type="hidden" name="password" value="" />
+                            </div>
+                            <input type="checkbox"
+                                    checked="false"
+                                    iconsize="20"
+                                    CheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#272 52 20 20"
+                                    UncheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#297 52 20 20"
+                                    style="position: relative;margin-left: -12px;margin-top: 14px;"
+                                    onclick="set_show_password"/>
                         </div>
                     </div>
                     <div style="margin-top: 5px;">

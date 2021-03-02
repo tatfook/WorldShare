@@ -309,7 +309,7 @@
                         local username = page:GetValue('register_account')
 
                         if not Validated:Account(username) then
-                            page:SetUIValue('register_account_field_error_msg', L'*请输入以字母开头、字母、数字组合形式的账号')
+                            page:SetUIValue('register_account_field_error_msg', L'*请输入非数字开头的字母、数字组合形式的账号')
                             page:FindControl('register_account_field_error').visible = true
                             callback(false)
                             return
@@ -478,7 +478,7 @@
                         local username = page:GetValue('phone_register_account')
 
                         if not Validated:Account(username) then
-                            page:SetUIValue('phone_account_field_error_msg', L'*请输入以字母开头、字母、数字组合形式的账号')
+                            page:SetUIValue('phone_account_field_error_msg', L'*请输入非数字开头的字母、数字组合形式的账号')
                             page:FindControl('phone_account_field_error').visible = true
                             page:SetUIBackground('phone_register_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 197 258 44')
                             return
@@ -671,6 +671,7 @@
                                                 <input type="text"
                                                     onchange='update_register_phone_next_button_status'
                                                     EmptyText='<%= L"请输入4位数字或以上的密码" %>'
+                                                    SkipAutoBadWordFilter="true"
                                                     style='background:;textcolor: #FFFFFF;height: 30px;width: 200px;margin-top: 12px;font-size: 12px;'
                                                     name="phonepassword_show"
                                                     onfocusin='set_phone_register_show_field'
@@ -679,6 +680,7 @@
                                                     onchange='update_register_phone_next_button_status'
                                                     PasswordChar="*"
                                                     EmptyText='<%= L"请输入4位数字或以上的密码" %>'
+                                                    SkipAutoBadWordFilter="true"
                                                     style='background:;textcolor: #FFFFFF;height: 30px;width: 200px;margin-top: 12px;font-size: 12px;margin-left: -200px;'
                                                     name="phonepassword_hide"
                                                     onfocusin='set_phone_register_show_field'
@@ -788,8 +790,10 @@
                                                   background:;' value='' />
                                 </div>
                             </div>
-                            <div style="width: 240px;margin-top: 5px;text-align: center;base-font-size: 10.5px;font-size: 10.5px;color: #FFFFFF">
-                                <%= L'找个稳妥的地方抄下来！你需要这个来储存作品。' %>
+                            <div style="width: 240px;margin-top: 5px;text-align: center;base-font-size: 12px;font-size: 12px;color: #FFFFFF">
+                                <%= L'找个稳妥的地方抄下来！' %>
+                                <br />
+                                <%= L'你需要这个来储存作品。' %>
                             </div>
                             <div style="margin-top: 30px;">
                                 <input type="button"
