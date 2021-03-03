@@ -1,19 +1,18 @@
 <html>
-    <body> 
+    <body>
         <pe:mcml>
-            <script type="text/npl">
+            <script type="text/npl" refresh="false">
                 <![CDATA[
-                    -- bottles
-                    local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
-                    local MySchool = NPL.load('(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua')
+                    -- helper
+                    local Validated = NPL.load("(gl)Mod/WorldShare/helper/Validated.lua")
 
                     -- service
-                    local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepWorkService/Session.lua')
+                    local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
+                    
+                    -- UI
+                    local RegisterModal = NPL.load("(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua")
 
-                    -- helper
-                    local Validated = NPL.load('(gl)Mod/WorldShare/helper/Validated.lua')
-
-                    local page = document:GetPageCtrl()
+                    page = document:GetPageCtrl()
 
                     local be_show_password = false
                     local account_agree = true
@@ -24,20 +23,11 @@
                     local phone_account_exist = false
 
                     function close()
-                        local MainLoginRegisterPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Register')
-
-                        if MainLoginRegisterPage then
-                            MainLoginRegisterPage:CloseWindow()
-                        end
+                        page:CloseWindow()
                     end
 
-                    function back()
-                        close()
-                        MainLogin:ShowSelect()
-                    end
-
-                    function get_register_mode()
-                        return MainLogin.m_mode
+                    function user_agreement()
+                        RegisterModal:ShowUserAgreementPage()
                     end
 
                     function set_account_mode()
@@ -62,14 +52,73 @@
                         page:FindControl('phone_register_mode').visible = true
                     end
 
-                    -- don't remove, beacause set account mode button realtime
-                    Mod.WorldShare.Utils.SetTimeOut(function()
-                        set_account_mode()
-                    end, 0)
+                    function check_register_password()
+                        local password
 
-                    function set_finish()
-                        page:FindControl('register_not_finish').visible = false
-                        page:FindControl('register_finish').visible = true
+                        if be_show_password then
+                            password = page:GetValue('register_account_password_show')
+                        else
+                            password = page:GetValue('register_account_password_hide')
+                        end
+
+                        page:SetValue('register_account_password', password)
+
+                        if not Validated:Password(password) then
+                            page:SetUIValue('register_account_password_field_error_msg', L'*密码不合法')
+                            page:FindControl('register_account_password_field_error').visible = true
+                            return false
+                        else
+                            page:FindControl('register_account_password_field_error').visible = false
+                            return true
+                        end
+                    end
+
+                    function check_account(callback)
+                        if not callback or type(callback) ~='function' then
+                            return false
+                        end
+
+                        local username = page:GetValue('register_account')
+
+                        if not Validated:Account(username) then
+                            page:SetUIValue('register_account_field_error_msg', L'*账号需非数字开头的字母、数字组合形式')
+                            page:FindControl('register_account_field_error').visible = true
+                            callback(false)
+                            return
+                        end
+
+                        KeepworkServiceSession:CheckUsernameExist(username, function(bIsExist)
+                            if bIsExist then
+                                RegisterModal.accountExist = true
+                                page:SetUIValue('register_account_field_error_msg', L'*账号已存在，请使用其他账号')
+                                page:FindControl('register_account_field_error').visible = true
+                                callback(false)
+                            else
+                                RegisterModal.accountExist = false
+                                page:FindControl('register_account_field_error').visible = false
+                                callback(true)
+                            end
+                        end)
+                    end
+
+                    function update_register_account_button_status()
+                        local bRight = true    
+
+                        if not check_register_password() then
+                            bRight = false
+                        end
+
+                        check_account(function(result)
+                            if not result then
+                                bRight = false
+                            end
+
+                            if bRight then
+                                page:SetUIBackground('account_register_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 98 258 44')
+                            else
+                                page:SetUIBackground('account_register_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 197 258 44')
+                            end
+                        end)
                     end
 
                     function set_show_password()
@@ -94,16 +143,6 @@
                         end
                     end
 
-                    -- don't remove
-                    Mod.WorldShare.Utils.SetTimeOut(function()
-                        local val = page:GetValue('register_account_password_show')
-                        page:SetValue('register_account_password_hide', val)
-                        page:SetValue('register_account_password', val)
-
-                        page:FindControl('register_account_password_show').visible = false
-                        page:FindControl('register_account_password_hide').visible = true
-                    end, 0)
-
                     function set_show_password1()
                         if be_show_phone_password then
                             be_show_phone_password = false
@@ -126,18 +165,19 @@
                         end
                     end
 
-                    -- don't remove
-                    Mod.WorldShare.Utils.SetTimeOut(function()
-                        local val = page:GetValue('phonepassword_show')
-                        page:SetValue('phonepassword_hide', val)
-                        page:SetValue('phonepassword', val)
+                    function set_register_agree()
+                        account_agree = not account_agree
 
-                        page:FindControl('phonepassword_show').visible = false
-                        page:FindControl('phonepassword_hide').visible = true
-                    end, 0)
+                        if not account_agree then
+                            page:SetUIValue('agree_field_error_msg', L'*您未同意用户协议')
+                            page:FindControl('agree_field_error').visible = true
+                        else
+                            page:FindControl('agree_field_error').visible = false
+                        end
+                    end
 
                     function account_register()
-                        if MainLogin.accountExist then
+                        if RegisterModal.accountExist then
                             page:SetUIValue('register_account_field_error_msg', L'*账号已存在，请使用其他账号')
                             page:FindControl('register_account_field_error').visible = true
                             return false
@@ -164,94 +204,117 @@
                             return false
                         end
 
-                        MainLogin.account = account
-                        MainLogin.password = password
-                        MainLogin.agree = agree
+                        RegisterModal.account = account
+                        RegisterModal.password = password
+                        RegisterModal.agree = agree
 
-                        MainLogin.callback = function()
+                        RegisterModal.callback = function()
                             page:SetValue('account_result', account)
                             page:SetValue('password_result', password)
                             set_finish()
                         end
 
-                        MainLogin:RegisterWithAccount()
+                        RegisterModal:RegisterWithAccount()
                     end
 
-                    function phone_register_next()
-                        if not b_next_button_right then
+                    function checkout_phonecaptcha(callback)
+                        local phonecaptcha = page:GetValue('phonecaptcha')
+
+                        if phonecaptcha and #phonecaptcha == 0 then
+                            if phone_show_field == 'phonecaptcha' then
+                                page:SetUIValue('phone_field_error_msg', L'*手机验证码不能为空')
+                                page:FindControl('phone_field_error').visible = true
+                            end
+                            return false
+                        else
+                            if phone_show_field == 'phonecaptcha' then
+                                page:FindControl('phone_field_error').visible = false
+                            end
+                            return true
+                        end
+                    end
+
+                    function check_phone_password()
+                        local phonepassword
+
+                        if be_show_phone_password then
+                            phonepassword = page:GetValue('phonepassword_show')
+                        else
+                            phonepassword = page:GetValue('phonepassword_hide')
+                        end
+
+                        page:SetValue('phonepassword', phonepassword)
+
+                        if not Validated:Password(phonepassword) then
+                            if phone_show_field == 'phonepassword_show' or phone_show_field == 'phonepassword_hide' then
+                                page:SetUIValue('phone_field_error_msg', L'*密码不合法')
+                                page:FindControl('phone_field_error').visible = true
+                            end
+                            return false
+                        else
+                            if phone_show_field == 'phonepassword_show' or phone_show_field == 'phonepassword_hide' then
+                                page:FindControl('phone_field_error').visible = false
+                            end
+                            return true
+                        end
+                    end
+
+                    function check_phone_number(callback)
+                        if not callback or type(callback) ~='function' then
+                            return false
+                        end
+
+                        local phonenumber = page:GetValue('phonenumber')
+
+                        if not Validated:Phone(phonenumber) then
+                            if phone_show_field == 'phonenumber' then
+                                page:SetUIValue('phone_field_error_msg', L'*手机号码格式错误')
+                                page:FindControl('phone_field_error').visible = true
+                            end
+                            callback(false)
                             return
                         end
 
-                        local phonenumber = page:GetValue('phonenumber')
-                        local phonecaptcha = page:GetValue('phonecaptcha')
+                        KeepworkServiceSession:CheckPhonenumberExist(phonenumber, function(bIsExist)
+                            if bIsExist then
+                                phone_account_exist = true
+                                if phone_show_field == 'phonenumber' then
+                                    page:SetUIValue('phone_field_error_msg', L'*手机号码已存在')
+                                    page:FindControl('phone_field_error').visible = true
+                                end
+                                callback(false)
+                            else
+                                phone_account_exist = false
+                                if phone_show_field == 'phonenumber' then
+                                    page:FindControl('phone_field_error').visible = false
+                                end
+                                callback(true)
+                            end
+                        end)
+                    end
 
-                        KeepworkServiceSession:CellphoneCaptchaVerify(phonenumber, phonecaptcha, function(data, err)
-                            if err == 400 then
-                                page:SetUIValue('phone_field_error_msg', L"*手机验证码错误")
-                                page:FindControl('phone_field_error').visible = true
-                                return
+                    function update_register_phone_next_button_status()
+                        b_next_button_right = true
+
+                        if not checkout_phonecaptcha() then
+                            b_next_button_right = false
+                        end
+
+                        if not check_phone_password() then
+                            b_next_button_right = false
+                        end
+
+                        check_phone_number(function(result)
+                            if not result then
+                                b_next_button_right = false
                             end
 
-                            page:FindControl('phone_register_mode_step_1').visible = false
-                            page:FindControl('phone_register_mode_step_2').visible = true
+                            if b_next_button_right then
+                                page:SetUIBackground('phone_register_next_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 98 258 44')
+                            else
+                                page:SetUIBackground('phone_register_next_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 197 258 44')
+                            end
                         end)
-                    end
-
-                    function phone_register()
-                        local phonenumber = page:GetValue('phonenumber')
-                        local phonecaptcha = page:GetValue('phonecaptcha')
-                        local phonepassword = page:GetValue('phonepassword')
-                        local username = page:GetValue('phone_register_account')
-
-                        MainLogin.phonenumber = phonenumber
-                        MainLogin.password = phonepassword
-                        MainLogin.phonecaptcha = phonecaptcha
-                        MainLogin.account = username
-
-                        MainLogin.callback = function()
-                            page:SetValue('account_result', username)
-                            page:SetValue('password_result', phonepassword)
-                            set_finish()
-                        end
-
-                        MainLogin:RegisterWithPhone()
-                    end
-
-                    function user_agreement()
-                        local RegisterModal = NPL.load('(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua')
-                        RegisterModal:ShowUserAgreementPage()
-                    end
-
-                    function finish()
-                        close()
-                        MainLogin:ShowWhere(function()
-                            MySchool:ShowJoinSchoolAfterRegister(function()
-                                MainLogin:EnterUserConsole()
-                                WorldList:RefreshCurrentServerList()
-                            end)
-                        end)
-                    end
-
-                    function set_register_agree()
-                        account_agree = not account_agree
-
-                        if not account_agree then
-                            page:SetUIValue('agree_field_error_msg', L'*您未同意用户协议')
-                            page:FindControl('agree_field_error').visible = true
-                        else
-                            page:FindControl('agree_field_error').visible = false
-                        end
-                    end
-
-                    function set_phone_agree()
-                        phone_agree = not phone_agree
-
-                        if not phone_agree then
-                            page:SetUIValue('phone_agree_field_error_msg', L'*您未同意用户协议')
-                            page:FindControl('phone_agree_field_error').visible = true
-                        else
-                            page:FindControl('phone_agree_field_error').visible = false
-                        end
                     end
 
                     function get_phone_captcha()
@@ -301,176 +364,34 @@
                         timer:Change(1000, 1000)
                     end
 
-                    function check_account(callback)
-                        if not callback or type(callback) ~='function' then
-                            return false
+                    function set_phone_agree()
+                        phone_agree = not phone_agree
+
+                        if not phone_agree then
+                            page:SetUIValue('phone_agree_field_error_msg', L'*您未同意用户协议')
+                            page:FindControl('phone_agree_field_error').visible = true
+                        else
+                            page:FindControl('phone_agree_field_error').visible = false
                         end
+                    end
 
-                        local username = page:GetValue('register_account')
-
-                        if not Validated:Account(username) then
-                            page:SetUIValue('register_account_field_error_msg', L'*账号需非数字开头的字母、数字组合形式')
-                            page:FindControl('register_account_field_error').visible = true
-                            callback(false)
+                    function phone_register_next()
+                        if not b_next_button_right then
                             return
-                        end
-
-                        KeepworkServiceSession:CheckUsernameExist(username, function(bIsExist)
-                            if bIsExist then
-                                MainLogin.accountExist = true
-                                page:SetUIValue('register_account_field_error_msg', L'*账号已存在，请使用其他账号')
-                                page:FindControl('register_account_field_error').visible = true
-                                callback(false)
-                            else
-                                MainLogin.accountExist = false
-                                page:FindControl('register_account_field_error').visible = false
-                                callback(true)
-                            end
-                        end)
-                    end
-
-                    function check_register_password()
-                        local password
-
-                        if be_show_password then
-                            password = page:GetValue('register_account_password_show')
-                        else
-                            password = page:GetValue('register_account_password_hide')
-                        end
-
-                        page:SetValue('register_account_password', password)
-
-                        if not Validated:Password(password) then
-                            page:SetUIValue('register_account_password_field_error_msg', L'*密码不合法')
-                            page:FindControl('register_account_password_field_error').visible = true
-                            return false
-                        else
-                            page:FindControl('register_account_password_field_error').visible = false
-                            return true
-                        end
-                    end
-
-                    function update_register_account_button_status()
-                        local bRight = true    
-
-                        if not check_register_password() then
-                            bRight = false
-                        end
-
-                        check_account(function(result)
-                            if not result then
-                                bRight = false
-                            end
-
-                            if bRight then
-                                page:SetUIBackground('account_register_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 98 258 44')
-                            else
-                                page:SetUIBackground('account_register_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 197 258 44')
-                            end
-                        end)
-                    end
-
-                    function check_phone_number(callback)
-                        if not callback or type(callback) ~='function' then
-                            return false
                         end
 
                         local phonenumber = page:GetValue('phonenumber')
-
-                        if not Validated:Phone(phonenumber) then
-                            if phone_show_field == 'phonenumber' then
-                                page:SetUIValue('phone_field_error_msg', L'*手机号码格式错误')
-                                page:FindControl('phone_field_error').visible = true
-                            end
-                            callback(false)
-                            return
-                        end
-
-                        KeepworkServiceSession:CheckPhonenumberExist(phonenumber, function(bIsExist)
-                            if bIsExist then
-                                phone_account_exist = true
-                                if phone_show_field == 'phonenumber' then
-                                    page:SetUIValue('phone_field_error_msg', L'*手机号码已存在')
-                                    page:FindControl('phone_field_error').visible = true
-                                end
-                                callback(false)
-                            else
-                                phone_account_exist = false
-                                if phone_show_field == 'phonenumber' then
-                                    page:FindControl('phone_field_error').visible = false
-                                end
-                                callback(true)
-                            end
-                        end)
-                    end
-
-                    function checkout_phonecaptcha(callback)
                         local phonecaptcha = page:GetValue('phonecaptcha')
 
-                        if phonecaptcha and #phonecaptcha == 0 then
-                            if phone_show_field == 'phonecaptcha' then
-                                page:SetUIValue('phone_field_error_msg', L'*手机验证码不能为空')
+                        KeepworkServiceSession:CellphoneCaptchaVerify(phonenumber, phonecaptcha, function(data, err)
+                            if err == 400 then
+                                page:SetUIValue('phone_field_error_msg', L"*手机验证码错误")
                                 page:FindControl('phone_field_error').visible = true
-                            end
-                            return false
-                        else
-                            if phone_show_field == 'phonecaptcha' then
-                                page:FindControl('phone_field_error').visible = false
-                            end
-                            return true
-                        end
-                    end
-
-                    function check_phone_password()
-                        local phonepassword
-
-                        if be_show_phone_password then
-                            phonepassword = page:GetValue('phonepassword_show')
-                        else
-                            phonepassword = page:GetValue('phonepassword_hide')
-                        end
-
-                        page:SetValue('phonepassword', phonepassword)
-
-                        if not Validated:Password(phonepassword) then
-                            if phone_show_field == 'phonepassword_show' or phone_show_field == 'phonepassword_hide' then
-                                page:SetUIValue('phone_field_error_msg', L'*密码不合法')
-                                page:FindControl('phone_field_error').visible = true
-                            end
-                            return false
-                        else
-                            if phone_show_field == 'phonepassword_show' or phone_show_field == 'phonepassword_hide' then
-                                page:FindControl('phone_field_error').visible = false
-                            end
-                            return true
-                        end
-                    end
-
-                    function set_phone_register_show_field(name)
-                        phone_show_field = name
-                    end
-
-                    function update_register_phone_next_button_status()
-                        b_next_button_right = true
-
-                        if not checkout_phonecaptcha() then
-                            b_next_button_right = false
-                        end
-
-                        if not check_phone_password() then
-                            b_next_button_right = false
-                        end
-
-                        check_phone_number(function(result)
-                            if not result then
-                                b_next_button_right = false
+                                return
                             end
 
-                            if b_next_button_right then
-                                page:SetUIBackground('phone_register_next_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 98 258 44')
-                            else
-                                page:SetUIBackground('phone_register_next_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 197 258 44')
-                            end
+                            page:FindControl('phone_register_mode_step_1').visible = false
+                            page:FindControl('phone_register_mode_step_2').visible = true
                         end)
                     end
 
@@ -486,26 +407,79 @@
 
                         KeepworkServiceSession:CheckUsernameExist(username, function(b_is_exist)
                             if b_is_exist then
-                                MainLogin.accountExist = true
+                                RegisterModal.accountExist = true
                                 page:SetUIValue('phone_account_field_error_msg', L'*账号已存在，请使用其他账号')
                                 page:FindControl('phone_account_field_error').visible = true
                                 page:SetUIBackground('phone_register_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 197 258 44')
                             else
-                                MainLogin.accountExist = false
+                                RegisterModal.accountExist = false
                                 page:FindControl('phone_account_field_error').visible = false
                                 page:SetUIBackground('phone_register_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 98 258 44')
                             end
                         end)
                     end
+
+                    function phone_register()
+                        local phonenumber = page:GetValue('phonenumber')
+                        local phonecaptcha = page:GetValue('phonecaptcha')
+                        local phonepassword = page:GetValue('phonepassword')
+                        local username = page:GetValue('phone_register_account')
+
+                        RegisterModal.phonenumber = phonenumber
+                        RegisterModal.password = phonepassword
+                        RegisterModal.phonecaptcha = phonecaptcha
+                        RegisterModal.account = username
+
+                        RegisterModal.callback = function()
+                            page:SetValue('account_result', username)
+                            page:SetValue('password_result', phonepassword)
+                            set_finish()
+                        end
+
+                        RegisterModal:RegisterWithPhone()
+                    end
+
+                    function finish()
+                        close()
+                    end
+
+                    function set_finish()
+                        page:FindControl('register_not_finish').visible = false
+                        page:FindControl('register_finish').visible = true
+                    end
+
+                    function set_phone_register_show_field(name)
+                        phone_show_field = name
+                    end
+
+                    -- don't remove, beacause set account mode button realtime
+                    Mod.WorldShare.Utils.SetTimeOut(function()
+                        set_account_mode()
+                    end, 0)
+
+                    -- don't remove
+                    Mod.WorldShare.Utils.SetTimeOut(function()
+                        local val = page:GetValue('register_account_password_show')
+                        page:SetValue('register_account_password_hide', val)
+                        page:SetValue('register_account_password', val)
+
+                        page:FindControl('register_account_password_show').visible = false
+                        page:FindControl('register_account_password_hide').visible = true
+                    end, 0)
+
+                    -- don't remove
+                    Mod.WorldShare.Utils.SetTimeOut(function()
+                        local val = page:GetValue('phonepassword_show')
+                        page:SetValue('phonepassword_hide', val)
+                        page:SetValue('phonepassword', val)
+
+                        page:FindControl('phonepassword_show').visible = false
+                        page:FindControl('phonepassword_hide').visible = true
+                    end, 0)
                 ]]>
             </script>
-            <style type="text/mcss" src='Mod/WorldShare/cellar/Theme/Mcss/MainLoginMcss.mcss'>
+            <style type='text/mcss' src='Mod/WorldShare/cellar/Theme/Mcss/MainLoginMcss.mcss'>
                 {
-                    container_size = {
-                        ['margin-left'] = -160,
-                        ['margin-top'] = -100,
-                        background = 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#602 12 339 382:80 80 80 80'
-                    },
                     main_area = {
                         width = 320,
                         ['min-height'] = 320,
@@ -518,13 +492,13 @@
                     },
                 }
             </style>
-            <pe:container alignment='_ct' ClickThrough='true' class='main_login_container_bg container_size'>
+            <pe:container ClickThrough='true' class='main_login_container_bg'>
                 <div style='padding-top: 12px;padding-left: 18px;'>
                     <div class='main_login_title_bg' style='float: left;width: 172px;height: 49px;'>
-                        <img style='margin-top: 13px;margin-left: 30px;width: 53px;height: 24px;' src='Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#12 421 53 24' />
+                        <img style='margin-top: 15px;margin-left: 8px;width: 120px;height: 20.9px;' src='Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#25 780 143 25' />
                     </div>
                     <div style='float: left;margin-left: 70px;margin-top: 10px;'>
-                        <input type='button' class='main_login_back_button' onclick="back"/>
+                        <input type='button' class='main_login_close_button' onclick='close'/>
                     </div>
                 </div>
                 <div class='main_area'>

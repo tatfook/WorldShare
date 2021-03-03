@@ -340,6 +340,10 @@ function MainLogin:LoginAction(callback)
                     MainLoginPage:FindControl('account_field_error').visible = true
                 end
 
+                if callback and type(callback) == 'function' then
+                    callback(false)
+                end
+
                 return false
             end
 

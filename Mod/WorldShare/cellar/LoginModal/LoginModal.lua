@@ -71,7 +71,17 @@ function LoginModal:ShowPage()
         return false
     end
 
-    local params = Mod.WorldShare.Utils.ShowWindow(320, 470, "Mod/WorldShare/cellar/LoginModal/LoginModal.html", "Mod.WorldShare.LoginModal", nil, nil, nil, nil, 12)
+    local params = Mod.WorldShare.Utils.ShowWindow(
+        320,
+        430,
+        'Mod/WorldShare/cellar/Theme/LoginModal/LoginModal.html',
+        'Mod.WorldShare.LoginModal',
+        nil,
+        nil,
+        nil,
+        nil,
+        12
+    )
 
     local LoginModalPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.LoginModal')
 
@@ -82,15 +92,9 @@ function LoginModal:ShowPage()
     local PWDInfo = KeepworkServiceSession:LoadSigninInfo()
 
     if PWDInfo then
-        LoginModalPage:SetValue('autoLogin', PWDInfo.autoLogin or false)
-        LoginModalPage:SetValue('rememberMe', PWDInfo.rememberMe or false)
-        LoginModalPage:SetValue('password', PWDInfo.password or '')
-        LoginModalPage:SetValue('showaccount', PWDInfo.account or '')
-
+        LoginModalPage:SetUIValue('account', PWDInfo.account or '')
         self.account = PWDInfo.account
     end
-
-    self:Refresh(0.01)
 end
 
 function LoginModal:ClosePage()

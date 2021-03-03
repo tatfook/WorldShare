@@ -39,6 +39,8 @@
                         ThirdPartyLogin:Init('WECHAT', function()
                             UserConsole.notFirstTimeShown = nil
 
+                            close()
+
                             MainLogin:ShowWhere(function(where)
                                 -- TODO: record where
 
@@ -56,6 +58,8 @@
                     function login_with_qq()
                         ThirdPartyLogin:Init('QQ', function()
                             UserConsole.notFirstTimeShown = nil
+
+                            close()
 
                             MainLogin:ShowWhere(function(where)
                                 -- TODO: record where
@@ -96,14 +100,22 @@
                     end
 
                     function login()
+                        if is_login then
+                            return
+                        end
+
+                        is_login = true
+
                         MainLogin:LoginAction(function(b_succeed)
+                            is_login = false
+
                             if not b_succeed then
                                 return
                             end
 
-                            MainLogin:ShowWhere(function(where)
-                                -- TODO: record where
+                            close()
 
+                            MainLogin:ShowWhere(function(where)
                                 if not Mod.WorldShare.Store:Get('user/hasJoinedSchool') then
                                     MySchool:ShowJoinSchoolAfterRegister(function()
                                         MainLogin:EnterUserConsole()

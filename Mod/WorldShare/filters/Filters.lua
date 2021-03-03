@@ -57,6 +57,7 @@ local LocalServiceWorldFilter = NPL.load('(gl)Mod/WorldShare/filters/service/Loc
 local OnWorldInitialRegionsLoadedFilter = NPL.load('(gl)Mod/WorldShare/filters/libs/OnWorldInitialRegionsLoadedFilter.lua')
 local WorldInfoFilter = NPL.load('(gl)Mod/WorldShare/filters/libs/WorldInfoFilter.lua')
 local GitServiceFilter = NPL.load('(gl)Mod/WorldShare/filters/service/GitServiceFilter.lua')
+local KeepworkProjectsApiFilter = NPL.load('(gl)Mod/WorldShare/filters/api/Keepwork/KeepworkProjectsApiFilter.lua')
 
 local Filters = NPL.export()
 
@@ -90,6 +91,9 @@ function Filters:Init()
 
     -- init git service filter
     GitServiceFilter:Init()
+
+    -- init keepwork projects api filter
+    KeepworkProjectsApiFilter:Init()
 
     GameLogic.GetFilters():add_filter(
         'ShowClientUpdaterNotice',

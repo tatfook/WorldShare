@@ -160,3 +160,24 @@ function KeepworkProjectsApi:ShareWxacode(projectId, success, error)
 
     KeepworkBaseApi:Post('/projects/shareWxacode', { projectId = projectId }, nil, success, error)
 end
+
+-- url: /projects/queryByWorldNameAndUsername
+-- method: POST
+-- params:
+--[[
+    worldName string necessary
+    username string necessary
+]]
+-- return: object
+function KeepworkProjectsApi:QueryByWorldNameAndUsername(worldName, username, success, error)
+    if not worldName or type(worldName) ~= 'string' or not username or type(username) ~= 'string' then
+        return false
+    end
+
+    local parmas = {
+        worldName = worldName,
+        username = username
+    }
+
+    KeepworkBaseApi:Post('/projects/queryByWorldNameAndUsername', parmas, nil, success, error)
+end

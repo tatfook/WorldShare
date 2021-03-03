@@ -14,7 +14,7 @@ function Validated:Account(str)
     if not str or
        type(str) ~= 'string' or
        str == '' or
-       #str < 3 or
+       #str <= 3 or
        #str > 20  then
         return false
     else
@@ -35,7 +35,7 @@ function Validated:AccountCompatible(str)
     if not str or
        type(str) ~= 'string' or
        str == '' or
-       #str < 3 or
+       #str <= 3 or
        #str > 20  then
         return false
     else

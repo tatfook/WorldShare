@@ -1,30 +1,81 @@
 <html>
-    <body> 
+    <body>
         <pe:mcml>
-            <script type='text/npl'>
+            <script type="text/npl" refresh="false">
                 <![CDATA[
                     -- bottles
-                    local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
-                    local ForgetPassword = NPL.load('(gl)Mod/WorldShare/cellar/ForgetPassword/ForgetPassword.lua')
-                    local ThirdPartyLogin = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/ThirdPartyLogin.lua')
-                    local UserConsole = NPL.load('(gl)Mod/WorldShare/cellar/UserConsole/Main.lua')
-                    local MySchool = NPL.load('(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua')
-
-                    -- service
-                    local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepWorkService/Session.lua')
-                    local EventTrackingService = NPL.load('(gl)Mod/WorldShare/service/EventTracking.lua')
+                    local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
+                    local ThirdPartyLogin = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/ThirdPartyLogin.lua")
+                    local RegisterModal = NPL.load("(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua")
+                    local ForgetPassword = NPL.load("(gl)Mod/WorldShare/cellar/ForgetPassword/ForgetPassword.lua")
 
                     -- helper
                     local Validated = NPL.load('(gl)Mod/WorldShare/helper/Validated.lua')
 
-                    local page = document:GetPageCtrl()
+                    page = document:GetPageCtrl()
 
                     function get_history_users()
-                        return MainLogin:GetHistoryUsers()
+                        return LoginModal:GetHistoryUsers()
                     end
 
-                    function remove_account(username)
-                        MainLogin:RemoveAccount(username)
+                    function login()
+                        if System.options.isForceOffline then
+                            _guihelper.MessageBox(L'只有最新版才能登录， 否则只能用离线版，请退出程序后更新。')
+                            return
+                        end
+                        LoginModal:LoginAction()
+                    end
+
+                    function login_text()
+                        return Mod.WorldShare.Store:Get("user/loginText")
+                    end
+
+                    function close()
+                        LoginModal:Close()
+                    end
+
+                    function register()
+                        if System.options.isForceOffline then
+                            _guihelper.MessageBox(L'只有最新版才能登录， 否则只能用离线版，请退出程序后更新。')
+                            return
+                        end
+
+                        LoginModal:Close('REGISTER')
+                        RegisterModal:ShowPage()
+                    end
+
+                    function forget_password()
+                        LoginModal:Close('FORGET')
+                        ForgetPassword:ShowPage()
+                    end
+
+                    function write_accout(name, mcmlNode)
+                        local username = mcmlNode:GetUIValue()
+                        page:SetValue("account", username)
+                    end
+
+                    function login_with_wx()
+                        local callback = LoginModal:Close('THIRD')
+                        ThirdPartyLogin:Init('WECHAT', function()
+                            if type(callback) == 'function' then
+                                callback()
+                                Mod.WorldShare.Utils.SetTimeOut(function()
+                                    ParaUI.GetUIObject("root"):Focus()
+                                end, 2000)
+                            end
+                        end)
+                    end
+
+                    function login_with_qq()
+                        local callback = LoginModal:Close('THIRD')
+                        ThirdPartyLogin:Init('QQ', function()
+                            if type(callback) == 'function' then
+                                callback()
+                                Mod.WorldShare.Utils.SetTimeOut(function()
+                                    ParaUI.GetUIObject("root"):Focus()
+                                end, 2000)
+                            end
+                        end)
                     end
 
                     function is_support_third_party_login()
@@ -33,98 +84,6 @@
                         else
                             return false
                         end
-                    end
-
-                    function login_with_wx()
-                        ThirdPartyLogin:Init('WECHAT', function()
-                            UserConsole.notFirstTimeShown = nil
-
-                            close()
-
-                            MainLogin:ShowWhere(function(where)
-                                -- TODO: record where
-
-                                if not Mod.WorldShare.Store:Get('user/hasJoinedSchool') then
-                                    MySchool:ShowJoinSchoolAfterRegister(function()
-                                        MainLogin:EnterUserConsole()
-                                    end)
-                                else
-                                    MainLogin:EnterUserConsole()
-                                end
-                            end)
-                        end)
-                    end
-
-                    function login_with_qq()
-                        ThirdPartyLogin:Init('QQ', function()
-                            UserConsole.notFirstTimeShown = nil
-
-                            close()
-
-                            MainLogin:ShowWhere(function(where)
-                                -- TODO: record where
-
-                                if not Mod.WorldShare.Store:Get('user/hasJoinedSchool') then
-                                    MySchool:ShowJoinSchoolAfterRegister(function()
-                                        MainLogin:EnterUserConsole()
-                                    end)
-                                else
-                                    MainLogin:EnterUserConsole()
-                                end
-                            end)
-                        end)
-                    end
-
-                    -- @param name: 'local', 'internet'
-                    function use_offline()
-                        KeepworkServiceSession:Logout()
-                        MainLogin:EnterUserConsole(true)
-                        EventTrackingService:Send(1, 'click.main_login.offline_enter', { machineId = ParaEngine.GetAttributeObject():GetField('MachineID','') }, true)
-                    end
-
-                    function close()
-                        local MainLoginLoginPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Login')
-
-                        if MainLoginLoginPage then
-                            MainLoginLoginPage:CloseWindow()
-                        end
-                    end
-
-                    function back()
-                        close()
-                        MainLogin:ShowSelect()
-                    end
-
-                    function forget_password()
-                        ForgetPassword:ShowPage()
-                    end
-
-                    function login()
-                        if is_login then
-                            return
-                        end
-
-                        is_login = true
-
-                        MainLogin:LoginAction(function(b_succeed)
-                            is_login = false
-
-                            if not b_succeed then
-                                return
-                            end
-
-                            close()
-
-                            MainLogin:ShowWhere(function(where)
-                                if not Mod.WorldShare.Store:Get('user/hasJoinedSchool') then
-                                    MySchool:ShowJoinSchoolAfterRegister(function()
-                                        MainLogin:EnterUserConsole()
-                                    end)
-                                else
-                                    MainLogin:EnterUserConsole()
-                                end
-                            end)
-                        end)
                     end
 
                     function update_login_button_status()
@@ -201,32 +160,31 @@
             </script>
             <style type='text/mcss' src='Mod/WorldShare/cellar/Theme/Mcss/MainLoginMcss.mcss'>
                 {
-                    container_size = {
-                        ['margin-left'] = -160,
-                        ['margin-top'] = -100,
-                    },
                     main_area = {
                         width = 320,
-                        height = 320,
+                        height = 350,
                         ['base-font-size'] = 16,
                         ['font-size'] = 16,
                         color = '#ffffff',
                         ['padding-top'] = 0,
                         ['padding-left'] = 40,
-                        ['padding-right'] = 40,
+                        ['padding-right'] = 40
                     },
                 }
             </style>
-            <pe:container alignment='_ct' ClickThrough='true' class='main_login_container_bg container_size'>
+            <pe:container ClickThrough='true' height='430' class='main_login_container_bg'>
                 <div style='padding-top: 12px;padding-left: 18px;'>
                     <div class='main_login_title_bg' style='float: left;width: 172px;height: 49px;'>
                         <img style='margin-top: 13px;margin-left: 30px;width: 54px;height: 23px;' src='Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#72 422 54 23' />
                     </div>
                     <div style='float: left;margin-left: 70px;margin-top: 10px;'>
-                        <input type='button' class='main_login_back_button' onclick="back"/>
+                        <input type='button' class='main_login_close_button' onclick="close"/>
                     </div>
                 </div>
                 <div class='main_area'>
+                    <pe:if condition="<%= login_text() ~= nil%>">
+                        <div style="margin-top:10px;"><%= login_text()%></div>
+                    </pe:if>
                     <pe:container name='account_field_error' visible='false' style='display:none;background:'>
                         <!-- error message -->
                         <div>
@@ -276,17 +234,27 @@
                                     onclick="set_show_password"/>
                         </div>
                     </div>
-                    <div style="margin-top: 5px;">
-                        <div style='float:left;base-font-size: 13px;font-size: 13px;' onclick='forget_password()'><%= L"找回密码" %></div>
-                        <div style='float:left;base-font-size: 13px;font-size: 13px;color: #9A9DA2;margin-left: 120px;' onclick='use_offline()'><%= L"离线模式" %></div>
+                    <div style="margin-top: 10px;padding-left: 110px;">
+                        <a name="forgot"
+                           onclick="forget_password()"
+                           style="background:;
+                                  base-font-size: 13px;
+                                  font-size: 13px;
+                                  color: #9A9DA2;">
+                           <%= L"忘记密码" %>
+                        </a>
+                        <span style="color:#9A9DA2;">|</span>
+                        <a name="register"
+                           onclick="register()"
+                           style="background:;
+                                  base-font-size: 13px;
+                                  font-size: 13px;
+                                  color: #ED8853;">
+                           <%= L"点击注册" %>
+                        </a>
                     </div>
-                    <div style='margin-top:5px;margin-bottom:10px;'>
-                        <input type='button'
-                               name='login_button'
-                               DefaultButton='true'
-                               class='main_login_gray_button'
-                               onclick='login()'
-                               value='<%= L"登录"%>' />
+                    <div style='margin-top:10px;margin-bottom:10px;'>
+                        <input type='button' name='login_button' DefaultButton='true' class='main_login_gray_button' onclick='login()' value='<%= L"登录"%>' />
                     </div>
                     <pe:if condition='<%= is_support_third_party_login() %>'>
                         <div>

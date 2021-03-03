@@ -17,6 +17,9 @@ local Cef3Manager = commonlib.gettable("Mod.WorldShare.service.Cef3Manager")
 local NplBrowserPlugin = commonlib.gettable("NplBrowser.NplBrowserPlugin")
 local GameLogic = commonlib.gettable("MyCompany.Aries.Game.GameLogic")
 
+-- bottles
+local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua")
+
 -- service
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
@@ -98,8 +101,7 @@ function ThirdPartyLogin:Init(thirdPartyType, callback)
 
                 if bExisted then
                     Mod.WorldShare.Store:Set("user/token", data.token)
-                    -- login again to enter world
-                    local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua")
+
                     UserInfo:LoginWithToken(function()
                         if self.callback and type(self.callback) == "function" then
                             self.callback()

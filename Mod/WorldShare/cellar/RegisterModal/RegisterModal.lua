@@ -18,7 +18,7 @@ local Validated = NPL.load("(gl)Mod/WorldShare/helper/Validated.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
 
--- UI
+-- bottles
 local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
 local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua")
 local Certificate = NPL.load('(gl)Mod/WorldShare/cellar/Certificate/Certificate.lua')
@@ -49,7 +49,12 @@ function RegisterModal:ShowPage(callback)
     self.phonecaptcha = ""
     self.bindphone = nil
 
-    Mod.WorldShare.Utils.ShowWindow(360, 360, "Mod/WorldShare/cellar/RegisterModal/RegisterModal.html", "Mod.WorldShare.RegisterModal")
+    Mod.WorldShare.Utils.ShowWindow(
+        320,
+        360,
+        'Mod/WorldShare/cellar/Theme/RegisterModal/RegisterModal.html',
+        'Mod.WorldShare.RegisterModal'
+    )
 end
 
 function RegisterModal:ShowUserAgreementPage()
@@ -68,126 +73,104 @@ function RegisterModal:ShowClassificationPage(callback, forceCallback)
             end
         end
     end)
-    -- local params = Mod.WorldShare.Utils.ShowWindow(
-    --     520,
-    --     320,
-    --     "Mod/WorldShare/cellar/Theme/RegisterModal/BindPhoneInAccountRegister.html",
-    --     "Mod.WorldShare.RegisterModal.BindPhoneInAccountRegister",
-    --     nil,
-    --     nil,
-    --     nil,
-    --     nil,
-    --     10
-    -- )
-
-    -- params._page.forceCallback = forceCallback
-
-    -- if type(callback) == "function" then
-    --     params._page.callback = callback
-    -- end
 end
 
-function RegisterModal:GetServerList()
-    local serverList = KeepworkService:GetServerList()
+function RegisterModal:RegisterWithAccount(callback)
+    if not Validated:Account(self.account) then
+        return false
+    end
 
-    if self.registerServer then
-        for key, item in ipairs(serverList) do
-            item.selected = nil
-            if item.value == self.registerServer then
-                item.selected = true
-            end
+    if not Validated:Password(self.password) then
+        return false
+    end
+
+    Mod.WorldShare.MsgBox:Show(L"正在注册，请稍候...", 10000, L"链接超时", 500, 120)
+
+    KeepworkServiceSession:RegisterWithAccount(self.account, self.password, function(state)
+        Mod.WorldShare.MsgBox:Close()
+
+        if not state then
+            GameLogic.AddBBS(nil, L"未知错误", 5000, "0 255 0")
+            return
         end
-    end
 
-    return serverList
+        if state.id then
+            if state.code then
+                GameLogic.AddBBS(nil, format("%s%s(%d)", L"错误信息：", state.message or "", state.code or 0), 5000, "255 0 0")
+            else
+                -- set default user role
+                local filename = UserInfo.GetValidAvatarFilename('boy01')
+                GameLogic.options:SetMainPlayerAssetName(filename)
+
+                -- register success
+            end
+
+            if self.callback and type(self.callback) == 'function' then
+                self.callback(true)
+            end
+
+            if callback and type(callback) == 'function' then
+                callback(true)
+            end
+
+            return
+        end
+
+        GameLogic.AddBBS(nil, format("%s%s(%d)", L"注册失败，错误信息：", state.message or "", state.code or 0), 5000, "255 0 0")
+    end)
 end
 
-function RegisterModal:Register(page, callback)
-    if not self.account or self.account == "" then
+function RegisterModal:RegisterWithPhone(callback)
+    if not Validated:Phone(self.phonenumber) then
         return false
     end
 
-    if #self.password < 6 then
+    if not Validated:Password(self.password) then
         return false
     end
 
-    if #self.phonenumber == 0 and (not self.captcha or self.captcha == "") then
+    if not Validated:Account(self.account) then
         return false
     end
 
-    if #self.phonenumber > 0 and not Validated:Phone(self.phonenumber) then
+    if not self.phonecaptcha or self.phonecaptcha == "" then
         return false
     end
 
-    if #self.phonenumber > 0 and #self.phonecaptcha == 0 then
-        return false
-    end
+    Mod.WorldShare.MsgBox:Show(L"正在注册，请稍候...", 10000, L"链接超时", 500, 120)
 
-    local function Register()
-        Mod.WorldShare.MsgBox:Show(L"正在注册，请稍候...", 10000, L"链接超时", 500, 120)
-    
-        KeepworkServiceSession:Register(self.account, self.password, self.captcha, self.phonenumber, self.phonecaptcha, self.bindphone, function(state)
-            Mod.WorldShare.MsgBox:Close()
-    
-            if not state then
-                GameLogic.AddBBS(nil, L"未知错误", 5000, "0 255 0")
-                return
+    KeepworkServiceSession:RegisterWithPhone(self.account, self.phonenumber, self.phonecaptcha, self.password, function(state)
+        Mod.WorldShare.MsgBox:Close()
+
+        if not state then
+            GameLogic.AddBBS(nil, L"未知错误", 5000, "0 255 0")
+            return
+        end
+
+        if state.id then
+            if state.code then
+                GameLogic.AddBBS(nil, format("%s%s(%d)", L"错误信息：", state.message or "", state.code or 0), 5000, "255 0 0")
+            else
+                -- set default user role
+                local filename = UserInfo.GetValidAvatarFilename('boy01')
+                GameLogic.options:SetMainPlayerAssetName(filename)
+
+                -- register success
             end
-    
-            if state.id then
-                if state.code then
-                    GameLogic.AddBBS(nil, format("%s%s(%d)", L"错误信息：", state.message or "", state.code or 0), 5000, "255 0 0")
-                else
-                    -- set default user role
-                    local filename = UserInfo.GetValidAvatarFilename('boy01')
-                    GameLogic.options:SetMainPlayerAssetName(filename)
-    
-                    -- register success
-                    
-                    -- if self.m_mode == "account" then
-                    --     self:ShowClassificationPage(function()
-                    --         WorldList:RefreshCurrentServerList()
-                    --     end)
-                    -- end
-    
-                    GameLogic.AddBBS(nil, L"注册成功", 5000, "0 255 0")
-                end
-    
-                if page then
-                    page:CloseWindow()
-                end
-    
-                if self.callback and type(self.callback) == 'function' then
-                    self.callback(true)
-                end
 
-                if callback and type(callback) == 'function' then
-                    callback(true)
-                end
-    
-                return
+            if self.callback and type(self.callback) == 'function' then
+                self.callback(true)
             end
-    
-            GameLogic.AddBBS(nil, format("%s%s(%d)", L"注册失败，错误信息：", state.message or "", state.code or 0), 5000, "255 0 0")
-        end)
-    end
 
-    if self.captcha and self.captcha ~= '' then
-        -- account register
-        KeepworkServiceSession:CaptchaVerify(self.captcha, function(data, err)
-            if data ~= nil and type(data) == 'string' and data == "false" then
-                if callback and type(callback) == 'function' then
-                    callback(false)
-                end
-                return
+            if callback and type(callback) == 'function' then
+                callback(true)
             end
-    
-            Register()
-        end)
-    else
-        -- phone register
-        Register()
-    end
+
+            return
+        end
+
+        GameLogic.AddBBS(nil, format("%s%s(%d)", L"注册失败，错误信息：", state.message or "", state.code or 0), 5000, "255 0 0")
+    end)
 end
 
 function RegisterModal:Classification(phonenumber, captcha, callback)

@@ -152,14 +152,14 @@
                             return false
                         end
 
-                        if not account or account == '' then
-                            page:SetUIValue('register_account_field_error_msg', L'*账号不能为空')
+                        if not Validated:Account(account) then
+                            page:SetUIValue('register_account_field_error_msg', L'*账号需非数字开头的字母、数字组合形式')
                             page:FindControl('register_account_field_error').visible = true
                             return false
                         end
 
-                        if #password < 4 then
-                            page:SetUIValue('register_account_password_field_error_msg', L'*密码最少为4位')
+                        if not Validated:Password(password) then
+                            page:SetUIValue('register_account_password_field_error_msg', L'*密码不合法')
                             page:FindControl('register_account_password_field_error').visible = true
                             return false
                         end

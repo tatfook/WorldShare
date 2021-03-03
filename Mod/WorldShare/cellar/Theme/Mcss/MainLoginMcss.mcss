@@ -48,4 +48,9 @@ local MainLoginMcss = NPL.load("(gl)Mod/WorldShare/cellar/Theme/Mcss/MainLoginMc
         height = 33,
         background = 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#544 93 33 33',
     },
+    main_login_close_button = {
+        width = 40,
+        height = 40,
+        background = 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#540 145 40 40',
+    }
 }
