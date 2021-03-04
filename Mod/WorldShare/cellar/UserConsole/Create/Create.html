@@ -1034,9 +1034,11 @@
                                                         <pe:if condition='<%= not is_modifying() %>'>
                                                             <%= get_world_text() %>
                                                             <pe:if condition="<%= Eval('hasPid') %>">
-                                                                <span style="color: #9e9e9e;">
-                                                                    #<%= Eval('kpProjectId') or '' %>
-                                                                </span>
+                                                                <div style="float:left;margin-left: 2px;" tooltip='<%= L"项目ID：" .. Eval("kpProjectId") %>'>
+                                                                    <span style="color: #9e9e9e;">
+                                                                        #<%= Eval('kpProjectId') or '' %>
+                                                                    </span>
+                                                                </div>
                                                             </pe:if>
                                                             <div onclick="covert_status"
                                                                 tooltip="<%=Eval('text')%>"
@@ -1056,20 +1058,23 @@
                                                     </div>
                                                 </div>
                                                 <div style="margin-left: 20px;font-size: 12px;base-font-size: 12px;color: #9e9e9e;margin-top: 6px;">
-                                                    <div style="float:left">
-                                                        <img src="Texture/Aries/Creator/keepwork/worldshare_32bits.png#383 181 16 12" style="width: 16px;height: 12px;margin-top: 4px;" />
+                                                    <div style="float:left;" tooltip='<%= L"观看：" .. get_project_views() %>'>
+                                                        <img src="Texture/Aries/Creator/keepwork/worldshare_32bits.png#383 181 16 12"
+                                                            style="width: 16px;height: 12px;margin-top: 4px;" />
                                                         <div style="float:left;margin-left: 2px;">
                                                             <%= get_project_views() %>
                                                         </div>
                                                     </div>
-                                                    <div style="float:left;margin-left: 8px;">
-                                                        <img src="Texture/Aries/Creator/keepwork/worldshare_32bits.png#358 177 16 16" style="width: 16px;height: 16px;" />
+                                                    <div style="float:left;margin-left: 8px;" tooltip='<%= L"点赞：" .. get_project_thumbs() %>'>
+                                                        <img src="Texture/Aries/Creator/keepwork/worldshare_32bits.png#358 177 16 16"
+                                                             style="width: 16px;height: 16px;" />
                                                         <div style="float:left;margin-left: 2px;">
                                                             <%= get_project_thumbs() %>
                                                         </div>
                                                     </div>
-                                                    <div style="float:left;margin-left: 8px;">
-                                                        <img src="Texture/Aries/Creator/keepwork/worldshare_32bits.png#409 181 18 16" style="width: 18px;height: 16px;margin-top: 3px;" />
+                                                    <div style="float:left;margin-left: 8px;" tooltip='<%= L"评论：" .. get_project_comments() %>'>
+                                                        <img src="Texture/Aries/Creator/keepwork/worldshare_32bits.png#409 181 18 16"
+                                                             style="width: 18px;height: 16px;margin-top: 3px;" />
                                                         <div style="float:left;margin-left: 2px;">
                                                             <%= get_project_comments() %>
                                                         </div>
@@ -1171,9 +1176,11 @@
                                                 <div class="share_world_name">
                                                     <%= get_world_text() %>
                                                     <pe:if condition="<%= Eval('hasPid') %>">
-                                                        <span style="color: #9e9e9e;">
-                                                            #<%= Eval('kpProjectId') or '' %>
-                                                        </span>
+                                                        <div style="float:left;margin-left: 2px;" tooltip='<%= L"项目ID：" .. Eval("kpProjectId") %>'>
+                                                            <span style="color: #9e9e9e;">
+                                                                #<%= Eval('kpProjectId') or '' %>
+                                                            </span>
+                                                        </div>
                                                     </pe:if>
                                                 </div>
                                             </div>
@@ -1188,20 +1195,23 @@
                                                 </div>
                                             </div>
                                             <div style="margin-left: 20px;font-size: 12px;base-font-size: 12px;color: #9e9e9e;margin-top: 6px;">
-                                                <div style="float:left">
-                                                    <img src="Texture/Aries/Creator/keepwork/worldshare_32bits.png#383 181 16 12" style="width: 16px;height: 12px;margin-top: 4px;" />
+                                                <div style="float:left;" tooltip='<%= L"观看：" .. get_project_views() %>'>
+                                                    <img src="Texture/Aries/Creator/keepwork/worldshare_32bits.png#383 181 16 12"
+                                                        style="width: 16px;height: 12px;margin-top: 4px;" />
                                                     <div style="float:left;margin-left: 2px;">
                                                         <%= get_project_views() %>
                                                     </div>
                                                 </div>
-                                                <div style="float:left;margin-left: 8px;">
-                                                    <img src="Texture/Aries/Creator/keepwork/worldshare_32bits.png#358 177 16 16" style="width: 16px;height: 16px;" />
+                                                <div style="float:left;margin-left: 8px;" tooltip='<%= L"点赞：" .. get_project_thumbs() %>'>
+                                                    <img src="Texture/Aries/Creator/keepwork/worldshare_32bits.png#358 177 16 16"
+                                                         style="width: 16px;height: 16px;" />
                                                     <div style="float:left;margin-left: 2px;">
                                                         <%= get_project_thumbs() %>
                                                     </div>
                                                 </div>
-                                                <div style="float:left;margin-left: 8px;">
-                                                    <img src="Texture/Aries/Creator/keepwork/worldshare_32bits.png#409 181 18 16" style="width: 18px;height: 16px;margin-top: 3px;" />
+                                                <div style="float:left;margin-left: 8px;" tooltip='<%= L"评论：" .. get_project_comments() %>'>
+                                                    <img src="Texture/Aries/Creator/keepwork/worldshare_32bits.png#409 181 18 16"
+                                                         style="width: 18px;height: 16px;margin-top: 3px;" />
                                                     <div style="float:left;margin-left: 2px;">
                                                         <%= get_project_comments() %>
                                                     </div>
