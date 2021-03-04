@@ -54,7 +54,7 @@ function VipNotice:InitQRCode()
         local qrcode_width = 118
         local qrcode_height = 118
         local block_size = qrcode_width / #qrcode
-        local qrcode_ui = ParaUI.CreateUIObject("container", "qrcode", "_lt", 70, 70, qrcode_width, qrcode_height);
+        local qrcode_ui = ParaUI.CreateUIObject("container", "qrcode_vipnotice", "_lt", 70, 70, qrcode_width, qrcode_height);
         qrcode_ui:SetField("OwnerDraw", true); -- enable owner draw paint event
         qrcode_ui:SetField("SelfPaint", true);
         qrcode_ui:SetScript("ondraw", function(test)
