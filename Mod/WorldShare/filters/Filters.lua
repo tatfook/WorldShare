@@ -235,15 +235,6 @@ function Filters:Init()
         end
     )
 
-    -- filter show certificate page
-    -- GameLogic.GetFilters():add_filter(
-    --     'show_certificate_page',
-    --     function(callback)
-    --         Beginner:Show(callback)
-    --         return false
-    --     end
-    -- )
-
     -- filter is signed in
     GameLogic.GetFilters():add_filter(
         'is_signed_in',
