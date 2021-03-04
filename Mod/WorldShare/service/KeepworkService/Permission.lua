@@ -84,7 +84,7 @@ KeepworkServicePermission.AllAuth = {
     },
     VipGoods = {
         key = 'vip_goods',
-        desc = L'VIPGOODS'
+        desc = L'拥有会员创造道具'
     },
 }
 
