@@ -11,103 +11,65 @@ local VipNotice = NPL.load('(gl)Mod/WorldShare/cellar/VipNotice/VipNotice.lua')
 ]]
 -- service
 local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
-
--- UI
-local LoginModal = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua')
-local UserInfo = NPL.load('(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua')
-
--- libs
-local Window = commonlib.gettable('System.Windows.Window')
+--lib
+local QREncode = NPL.load("(gl)script/apps/Aries/Creator/Game/Movie/QREncode.lua");
 
 local VipNotice = NPL.export()
+local page
 
--- VipNotice.onlyRecharge = false;
-
--- from 表示VIP的功能入口，必填
-function VipNotice:Init(bEnable, from, callback)
-    -- local debug = ParaEngine.GetAppCommandLineByParam('debug', false);
-    -- if(debug == true or debug =='true' or debug == 'True')then
-    --     if (from == nil or from == '' or VipNotice.TypeNames[from] == nil) then
-    --         _guihelper.MessageBox(string.format(L'VIP入口为无效值：%s 。', from));
-    --         return;
-    --     end
-    -- end
-
-    -- VipNotice.callback = callback
-    -- VipNotice.from = from
-    -- if not KeepworkService:IsSignedIn() then
-    --     Mod.WorldShare.Store:Set('user/loginText', L'您需要登录并成为VIP用户，才能使用此功能')
-    --     LoginModal:Init(function(bSuccesed)
-    --         if bSuccesed then
-    --             self:CheckVip(bEnable)
-    --         end
-    --     end)
-    -- else
-    --     self:CheckVip(bEnable)
-    -- end
+function VipNotice:InitUI()
+    page = document:GetPageCtrl(); 
 end
 
--- function VipNotice:CheckVip(bEnable)
---     if (not Mod.WorldShare.Store:Get('user/isVip') or bEnable) then
---         VipNotice.onlyRecharge = bEnable;
---         self:ShowPage()
---     else
---         if type(self.callback) == 'function' then
---             VipNotice.callback()
---         end
---     end
--- end
-
 function VipNotice:ShowPage(key, desc)  
-    local width = 750
-    local height = 530
-
+    local width = 784
+    local height = 536
     self.key = key
     self.desc = desc
-    
-    if not VipNotice.window then
-		local window = Window:new()
-		window:EnableSelfPaint(true)
-		window:SetAutoClearBackground(true)
-		VipNotice.window = window
-    end
-
-    VipNotice.window:SetCanDrag(true)
-
-	VipNotice.window:Show({
-		name = 'Mod.WorldShare.VipNotice', 
-		url = 'Mod/WorldShare/cellar/VipNotice/VipNotice.html',
-        alignment = '_ct',
-        left = -width / 2,
-        top = -height / 2,
-        width = width,
-        height = height,
-        zorder = 1,
-    })
-
+    Mod.WorldShare.Utils.ShowWindow(width, height, "Mod/WorldShare/cellar/VipNotice/VipNotice.html", "VipNotice", width, height ,"_ct", true, 1)
+    VipNotice:InitQRCode()
     GameLogic.GetFilters():apply_filters('user_behavior', 1, 'click.vip.funnel.open', { from = key })
 end
 
--- function VipNotice:RefreshVipInfo()
---     UserInfo:LoginWithToken(VipNotice.callback);
--- end
-
 function VipNotice:Close()
-    if VipNotice.window then
-        VipNotice.window:CloseWindow(true)
-        VipNotice.window = nil
+    if page then
+        page:CloseWindow()
     end
 end
 
-function VipNotice:GetQRCode()
-    local qrcode = string.format(
+function VipNotice:GetQRCodeUrl()
+    local qrcode_url = string.format(
         '%s/p/qr/purchase?userId=%s&from=%s',
         KeepworkService:GetKeepworkUrl(),
         Mod.WorldShare.Store:Get('user/userId'),
         self.key
     )
+    return qrcode_url
+end
 
-    return qrcode
+function VipNotice:InitQRCode()
+    local parent  = page:GetParentUIObject()
+    local ret,qrcode = QREncode.qrcode(VipNotice:GetQRCodeUrl())
+    if ret then        
+        local qrcode_width = 118
+        local qrcode_height = 118
+        local block_size = qrcode_width / #qrcode
+        local qrcode_ui = ParaUI.CreateUIObject("container", "qrcode", "_lt", 70, 70, qrcode_width, qrcode_height);
+        qrcode_ui:SetField("OwnerDraw", true); -- enable owner draw paint event
+        qrcode_ui:SetField("SelfPaint", true);
+        qrcode_ui:SetScript("ondraw", function(test)
+            for i = 1, #(qrcode) do
+                for j = 1, #(qrcode[i]) do
+                    local code = qrcode[i][j];
+                    if (code < 0) then
+                        ParaPainter.SetPen("#000000ff");
+                        ParaPainter.DrawRect((i-1) * block_size, (j-1) * block_size, block_size, block_size);
+                    end
+                end
+            end            
+        end);
+        parent:AddChild(qrcode_ui);
+    end
 end
 
 function VipNotice:GetTypeName()

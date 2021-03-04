@@ -5,67 +5,25 @@
                 <![CDATA[
                     -- UI
                     local VipNotice = NPL.load("(gl)Mod/WorldShare/cellar/VipNotice/VipNotice.lua")
-                    local GetVipMemberByCode = NPL.load("(gl)Mod/WorldShare/cellar/Vip/GetVipMemberByCode/GetVipMemberByCode.lua")
-
-                    -- service
-                    local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
-
-                    local firstOpen = true;
-                    local page = document:GetPageCtrl()
-
+                    VipNotice:InitUI()
                     function close()
-                        -- page:CloseWindow()
                         VipNotice:Close();
                     end
-
-                    function get_window_style(w,h)
-                        return Mod.WorldShare.Utils.FixCenter(w, h)
-                    end
-
-                    function open()
-                        GameLogic.GetFilters():apply_filters('user_behavior', 1, 'click.vip.parents_help')
-                        ParaGlobal.ShellExecute("open", KeepworkService:GetKeepworkUrl() .. "/vip", "", "", 1)
-                        firstOpen = false;
-                        page:Refresh(0);
-                    end
-
-                    function isFirstOpen()
-                        return firstOpen;
-                    end
-
-                    function refreshVip()
-                        GameLogic.GetFilters():apply_filters('user_behavior', 1, 'click.vip.payment_completed')
-                        VipNotice.RefreshVipInfo();
-                        page:CloseWindow();
-                    end
-
-                    function isVip()
-                        return Mod.WorldShare.Store:Get('user/isVip');
-                    end
-
-                    function onlyRecharge()
-                        return VipNotice.onlyRecharge;
-                    end
-
-                    function show_get_vip_member_by_code_page()
-                        page:CloseWindow()
-                        GetVipMemberByCode:Show()
-                    end
-
                     function get_type_name()
-                        return VipNotice:GetTypeName()
+                        return "("..VipNotice:GetTypeName()..")"
                     end
                 ]]>
             </script>
-            <div style="width: 750px; height: 530px; background: url(Texture/Aries/Creator/keepwork/vip/bj_750X530_32bits.png#0 0 750 530);">
+            <div style="width: 784px; height: 536px; background: url(Texture/Aries/Creator/keepwork/vip/bj_784x536_32bits.png#0 0 784 536);">
                 <!--title-->
-                <div style="width: 750px; height: 60px;">
-                    <input type="button" style="margin-left: 710px; margin-top: 20x; width:22px;height:22px;background: url(Texture/Aries/Creator/keepwork/vip/guanbi_32bits.png#0 0 22 22);" onclick="close()"/>
-                    <div style="margin-top: -16px; text-align: center; font-size: 18px;base-font-size: 19px;color: #333333; font-weight: bold;"><%= get_type_name() %></div>
+                <div style="width: 784px; height: 60px;">
+                    <input type="button" style="margin-left: 740px; margin-top: 20x; width:22px;height:22px;background: url(Texture/Aries/Creator/keepwork/vip/guanbi_32bits.png#0 0 22 22);" onclick="close()"/>                    
                 </div>
-                <div style="width: 180px; height: 180px; margin-top: 126px; margin-left: 60px;">
-                    <pe:custom src="QRCodeSurface.lua" classns="Paracraft.Controls.QRCodeSurface" style="width:180px;height:180px;"></pe:custom>
-                </div>
+                <!-- type_name -->
+                <div style="margin-top: 408px;">
+                    <div style="text-align: center; font-size: 24px;base-font-size: 24px;color: #9B2010; font-weight: bold;"><%= L"开通会员" %></div>
+                    <div style="margin-top: -2px; text-align: center; font-size: 12px;base-font-size: 12px;color: #9B2010; font-weight: bold;"><%= get_type_name() %></div>
+                </div>   
             </div>
         </pe:mcml>
     </body>
