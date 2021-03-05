@@ -23,7 +23,6 @@ local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua"
 local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
 local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
 local HistoryManager = NPL.load("(gl)Mod/WorldShare/cellar/HistoryManager/HistoryManager.lua")
-local BrowseRemoteWorlds = NPL.load("(gl)Mod/WorldShare/cellar/BrowseRemoteWorlds/BrowseRemoteWorlds.lua")
 local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
 local CommonLoadWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/CommonLoadWorld.lua')
 
@@ -42,27 +41,12 @@ local CacheProjectId = NPL.load("(gl)Mod/WorldShare/database/CacheProjectId.lua"
 
 local UserConsole = NPL.export()
 
--- this is called from ParaWorld Login App
-function UserConsole:CheckShowUserWorlds()
-    if System.options.showUserWorldsOnce then
-        UserConsole.OnClickOfficialWorlds(function()
-            System.options.showUserWorldsOnce = nil
-            self:ClosePage()
-        end)
-        return true
-    end
-end
-
 function UserConsole:ShowPage()
     local UserConsolePage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.UserConsole')
 
     if UserConsolePage then
         WorldList:RefreshCurrentServerList()
         return true
-    end
-
-    if self:CheckShowUserWorlds() then
-        return false
     end
 
     local params = Mod.WorldShare.Utils.ShowWindow(850, 490, "(ws)UserConsole", "Mod.WorldShare.UserConsole")
@@ -163,11 +147,6 @@ function UserConsole.OnImportWorld()
 end
 
 function UserConsole.OnClickOfficialWorlds(callback)
-    if ParaUI.IsKeyPressed(DIK_SCANCODE.DIK_LCONTROL) or ParaUI.IsKeyPressed(DIK_SCANCODE.DIK_RCONTROL) then
-        BrowseRemoteWorlds.ShowPage(callback)
-        return true
-    end
-
     Mod.WorldShare.Store:Set("world/personalMode", true)
 
     if ExplorerApp then
