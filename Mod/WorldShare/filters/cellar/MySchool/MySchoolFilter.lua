@@ -17,6 +17,13 @@ local MySchoolFilter = NPL.export()
 
 function MySchoolFilter:Init()
     GameLogic.GetFilters():add_filter(
+        'cellar.my_school.select_school',
+        function(callback)
+            MySchool:ShowJoinSchool(callback)
+        end
+    )
+
+    GameLogic.GetFilters():add_filter(
         'cellar.my_school.after_selected_school',
         function(callback)
             MySchool:Show(callback)
