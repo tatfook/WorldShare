@@ -8,7 +8,8 @@ use the lib:
 local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
 ------------------------------------------------------------
 ]]
--- UI
+
+-- bottles
 local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
 local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
 local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
@@ -30,9 +31,8 @@ local Compare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
 -- helper
 local GitEncoding = NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua")
 
-local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
+-- libs
 local WorldShare = commonlib.gettable("Mod.WorldShare")
-local Encoding = commonlib.gettable("commonlib.Encoding")
 local WorldRevision = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision")
 local SaveWorldHandler = commonlib.gettable("MyCompany.Aries.Game.SaveWorldHandler")
 
@@ -50,16 +50,17 @@ function SyncMain:ShowNewVersionFoundPage(callback)
     params._page.afterSyncCallback = callback
 end
 
-function SyncMain:ShowStartSyncPage(useOffline)
-    SyncMain:ShowDialog("Mod/WorldShare/cellar/Theme/Sync/StartSync.html?useOffline=" .. (useOffline and "true" or "false"), "Mod.WorldShare.StartSync")
-end
+function SyncMain:ShowStartSyncPage(useOffline, callback)
+    local params = SyncMain:ShowDialog(
+        'Mod/WorldShare/cellar/Theme/Sync/StartSync.html?useOffline=' .. (useOffline and 'true' or 'false'),
+        'Mod.WorldShare.StartSync'
+    )
 
-function SyncMain:SetStartSyncPage()
-    Mod.WorldShare.Store:Set('page/StartSync', document:GetPageCtrl())
+    params._page.afterSyncCallback = callback
 end
 
 function SyncMain:CloseStartSyncPage()
-    local StartSyncPage = Mod.WorldShare.Store:Get('page/StartSync')
+    local StartSyncPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.StartSync')
 
     if StartSyncPage then
         StartSyncPage:CloseWindow()
@@ -71,47 +72,23 @@ function SyncMain:ShowBeyondVolume(bEnabled)
 end
 
 function SyncMain:CloseBeyondVolumePage()
-    local BeyondVolumePage = Mod.WorldShare.Store:Get('page/BeyondVolume')
+    local BeyondVolumePage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.BeyondVolume')
 
-    if (BeyondVolumePage) then
+    if BeyondVolumePage then
         BeyondVolumePage:CloseWindow()
     end
 end
 
-function SyncMain:ShowStartSyncUseLocalPage()
-    SyncMain:ShowDialog("Mod/WorldShare/cellar/Sync/Templates/UseLocal.html", "Mod.WorldShare.StartSyncUseLocal")
+function SyncMain:ShowStartSyncUseLocalPage(callback)
+    local params = SyncMain:ShowDialog("Mod/WorldShare/cellar/Sync/Templates/UseLocal.html", "Mod.WorldShare.StartSyncUseLocal")
+
+    params._page.afterSyncCallback = callback
 end
 
-function SyncMain:SetStartSyncUseLocalPage()
-    Mod.WorldShare.Store:Set('page/StartSyncUseLocal', document.GetPageCtrl())
-end
+function SyncMain:ShowStartSyncUseDataSourcePage(callback)
+    local params = SyncMain:ShowDialog('Mod/WorldShare/cellar/Sync/Templates/UseDataSource.html', 'Mod.WorldShare.StartSyncUseDataSource')
 
-function SyncMain:CloseStartSyncUseLocalPage()
-    local StartSyncUseLocalPage = Mod.WorldShare.Store:Get('page/StartSyncUseLocal')
-
-    if StartSyncUseLocalPage then
-        StartSyncUseLocalPage:CloseWindow()
-    end
-end
-
-function SyncMain:ShowStartSyncUseDataSourcePage()
-    local params = SyncMain:ShowDialog("Mod/WorldShare/cellar/Sync/Templates/UseDataSource.html", "StartSyncUseDataSource")
-
-    params._page.OnClose = function()
-        Mod.WorldShare.Store:Remove('page/StartSyncUseDataSource')
-    end
-end
-
-function SyncMain:SetStartSyncUseDataSourcePage()
-    Mod.WorldShare.Store:Set('page/StartSyncUseDataSource', document.GetPageCtrl())
-end
-
-function SyncMain:CloseStartSyncUseDataSourcePage()
-    local StartSyncUseDataSourcePage = Mod.WorldShare.Store:Get('page/StartSyncUseDataSource')
-
-    if (StartSyncUseDataSourcePage) then
-        StartSyncUseDataSourcePage:CloseWindow()
-    end
+    params._page.afterSyncCallback = callback
 end
 
 function SyncMain:ShowDialog(url, name)
@@ -126,7 +103,7 @@ function SyncMain:BackupWorld()
     revision:Backup()
 end
 
-function SyncMain:SyncToLocal(callback, isRefreshWorldList, noShownResult)
+function SyncMain:SyncToLocal(callback, _, noShownResult)
     local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
 
     if not currentWorld.kpProjectId then
@@ -188,10 +165,6 @@ function SyncMain:SyncToLocal(callback, isRefreshWorldList, noShownResult)
 
                 if callback and type(callback) == 'function' then
                     callback(result, option)
-                end
-
-                if isRefreshWorldList == nil or isRefreshWorldList == true then
-                    WorldList:RefreshCurrentServerList()
                 end
             end)
 
@@ -309,8 +282,6 @@ function SyncMain:SyncToDataSource(callback)
             if type(callback) == 'function' then
                 callback(result, option)
             end
-    
-            WorldList:RefreshCurrentServerList()
         end)
 
         -- load sync progress UI

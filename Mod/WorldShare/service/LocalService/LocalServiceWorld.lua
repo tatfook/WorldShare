@@ -366,3 +366,16 @@ function LocalServiceWorld:LoadWorldInfo(ctx, node)
     ctx.communityWorld = ctx.communityWorld == 'true' or ctx.communityWorld == true
 end
 
+function LocalServiceWorld:CheckWorldIsCorrect(world)
+    if not world or type(world) ~= 'table' or not world.worldpath then
+        return
+    end
+
+    local output = commonlib.Files.Find({}, world.worldpath, 0, 500, "worldconfig.txt")
+
+    if not output or #output == 0 then
+        return false
+    else
+        return true
+    end
+end

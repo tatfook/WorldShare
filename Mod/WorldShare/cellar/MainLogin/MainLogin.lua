@@ -36,6 +36,12 @@ MainLogin.phonepassword = ""
 MainLogin.phonecaptcha = ""
 MainLogin.bindphone = nil
 
+function MainLogin:Init()
+    if System.options.mc == true then
+        GameMainLogin:next_step({ IsLoginModeSelected = false })
+    end
+end
+
 function MainLogin:Show()
     Mod.WorldShare.Utils.ShowWindow({
         url = 'Mod/WorldShare/cellar/Theme/MainLogin/MainLogin.html', 

@@ -6,31 +6,34 @@ place: Foshan
 Desc: 
 use the lib:
 ------------------------------------------------------------
-local DeleteWorld = NPL.load("(gl)Mod/WorldShare/cellar/DeleteWorld/DeleteWorld.lua")
+local DeleteWorld = NPL.load('(gl)Mod/WorldShare/cellar/DeleteWorld/DeleteWorld.lua')
 ------------------------------------------------------------
 ]]
-local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 
-local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
-local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
-local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
-local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
-local KeepworkServiceProject = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Project.lua")
-local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
-local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
+-- libs
+local WorldCommon = commonlib.gettable('MyCompany.Aries.Creator.WorldCommon')
+
+-- service
+local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
+local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
 
 local DeleteWorld = NPL.export()
 
 function DeleteWorld:ShowPage()
-    local params = Mod.WorldShare.Utils.ShowWindow(0, 0, "Mod/WorldShare/cellar/Theme/DeleteWorld/DeleteWorld.html", "DeleteWorld", 0, 0, "_fi", false)
-end
-
-function DeleteWorld:SetPage()
-    Mod.WorldShare.Store:Set("page/DeleteWorld", document:GetPageCtrl())
+    Mod.WorldShare.Utils.ShowWindow(
+        0,
+        0,
+        'Mod/WorldShare/cellar/Theme/DeleteWorld/DeleteWorld.html',
+        'Mod.WorldShare.DeleteWorld',
+        0,
+        0,
+        '_fi',
+        false
+    )
 end
 
 function DeleteWorld:ClosePage()
-    local DeleteWorldPage = Mod.WorldShare.Store:Get("page/DeleteWorld")
+    local DeleteWorldPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.DeleteWorld')
 
     if DeleteWorldPage then
         DeleteWorldPage:CloseWindow()
@@ -38,12 +41,12 @@ function DeleteWorld:ClosePage()
 end
 
 function DeleteWorld.GetSelectWorld()
-    return Mod.WorldShare.Store:Get("world/currentWorld")
+    return Mod.WorldShare.Store:Get('world/currentWorld')
 end
 
-function DeleteWorld:DeleteWorld()
-    local isEnterWorld = Mod.WorldShare.Store:Get("world/isEnterWorld")
-    local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
+function DeleteWorld:DeleteWorld(callback)
+    local isEnterWorld = Mod.WorldShare.Store:Get('world/isEnterWorld')
+    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
     if not currentWorld then
         return false
@@ -54,19 +57,20 @@ function DeleteWorld:DeleteWorld()
 
         if currentWorld.foldername == worldTag.name and
            GameLogic.IsReadOnly() == currentWorld.is_zip then
-            _guihelper.MessageBox(L"不能刪除正在编辑的世界")
+            _guihelper.MessageBox(L'不能刪除正在编辑的世界')
             return false
         end
     end
 
+    self.afterDeleteWorldCallback = callback
     self:ShowPage()
 end
 
 function DeleteWorld:DeleteLocal(callback)
-    local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
+    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
     if not currentWorld then
-        GameLogic.AddBBS(nil, L"删除失败", 3000, "255 0 0")
+        GameLogic.AddBBS(nil, L'删除失败(NO INSTANCE)', 3000, '255 0 0')
         return false
     end
 
@@ -77,14 +81,18 @@ function DeleteWorld:DeleteLocal(callback)
 
         if currentWorld.is_zip then
             if ParaIO.DeleteFile(currentWorld.worldpath) then
-                if type(callback) == "function" then
+                if type(callback) == 'function' then
                     callback()
                 else
                     self:ClosePage()
-                    WorldList:RefreshCurrentServerList()
+
+                    if self.afterDeleteWorldCallback and type(self.afterDeleteWorldCallback) == 'function' then
+                        self.afterDeleteWorldCallback()
+                        self.afterDeleteWorldCallback = nil
+                    end
                 end
             else
-                GameLogic.AddBBS(nil, L"无法删除可能您没有足够的权限", 3000, "255 0 0")
+                GameLogic.AddBBS(nil, L'无法删除，可能您没有足够的权限', 3000, '255 0 0')
             end
         else
             if GameLogic.RemoveWorldFileWatcher then
@@ -92,21 +100,25 @@ function DeleteWorld:DeleteLocal(callback)
             end
 
             if commonlib.Files.DeleteFolder(currentWorld.worldpath) then
-                if type(callback) == "function" then
+                if type(callback) == 'function' then
                     callback()
                 else
                     self:ClosePage()
-                    WorldList:RefreshCurrentServerList()
+
+                    if self.afterDeleteWorldCallback and type(self.afterDeleteWorldCallback) == 'function' then
+                        self.afterDeleteWorldCallback()
+                        self.afterDeleteWorldCallback = nil
+                    end
                 end
             else
-                GameLogic.AddBBS(nil, L"无法删除可能您没有足够的权限", 3000, "255 0 0")
+                GameLogic.AddBBS(nil, L'无法删除，可能您没有足够的权限', 3000, '255 0 0')
             end
         end
     end
 
     if currentWorld.status ~= 2 then
         _guihelper.MessageBox(
-            format(L"确定删除本地世界:%s?", currentWorld.text or ""),
+            format(L'确定删除本地世界:%s?', currentWorld.text or ''),
             function(res)
                 if res and res == _guihelper.DialogResult.Yes then
                     Delete()
@@ -147,7 +159,10 @@ function DeleteWorld:DeleteRemote()
                             end
                         end
 
-                        WorldList:RefreshCurrentServerList()
+                        if self.afterDeleteWorldCallback and type(self.afterDeleteWorldCallback) == 'function' then
+                            self.afterDeleteWorldCallback()
+                            self.afterDeleteWorldCallback = nil
+                        end
                     end
                 )
             end

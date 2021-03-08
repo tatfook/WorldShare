@@ -11,8 +11,6 @@
                     local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
                     SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
 
-                    SyncMain:SetStartSyncPage()
-
                     page_ctrl = document:GetPageCtrl()
                     use_offline = page_ctrl:GetRequestParam("useOffline")
 
@@ -21,9 +19,9 @@
 
                         SyncMain:CheckTagName(function()
                             if SyncMain.GetCurrentRevision() < SyncMain.GetRemoteRevision() then
-                                SyncMain:ShowStartSyncUseLocalPage()
+                                SyncMain:ShowStartSyncUseLocalPage(page_ctrl.afterSyncCallback)
                             elseif SyncMain.GetCurrentRevision() >= SyncMain.GetRemoteRevision() then
-                                SyncMain:SyncToDataSource()
+                                SyncMain:SyncToDataSource(page_ctrl.afterSyncCallback)
                             end
                         end)
                     end
@@ -32,9 +30,9 @@
                         SyncMain:CloseStartSyncPage()
 
                         if SyncMain.GetRemoteRevision() < SyncMain.GetCurrentRevision() then
-                            SyncMain:ShowStartSyncUseDataSourcePage();
+                            SyncMain:ShowStartSyncUseDataSourcePage(page_ctrl.afterSyncCallback);
                         elseif SyncMain.GetRemoteRevision() >= SyncMain.GetCurrentRevision() then
-                            SyncMain:SyncToLocal()
+                            SyncMain:SyncToLocal(page_ctrl.afterSyncCallback)
                         end
                     end
 

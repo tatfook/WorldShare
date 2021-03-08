@@ -13,7 +13,7 @@ Filters:Init()
 -- bottles
 local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
 local UserConsole = NPL.load('(gl)Mod/WorldShare/cellar/UserConsole/Main.lua')
-local UserConsoleCreate = NPL.load('(gl)Mod/WorldShare/cellar/UserConsole/Create/Create.lua')
+local Create = NPL.load('(gl)Mod/WorldShare/cellar/Create/Create.lua')
 local WorldExitDialog = NPL.load('(gl)Mod/WorldShare/cellar/WorldExitDialog/WorldExitDialog.lua')
 local ShareWorld = NPL.load('(gl)Mod/WorldShare/cellar/ShareWorld/ShareWorld.lua')
 local CreateWorld = NPL.load('(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua')
@@ -120,7 +120,7 @@ function Filters:Init()
             if mouse_button == 'right' then
                 UserConsole:ShowPage()
             else
-                UserConsoleCreate:Show()
+                Create:Show()
             end
             return false
         end
@@ -383,8 +383,8 @@ function Filters:Init()
     GameLogic.GetFilters():add_filter(
         'show_create_page',
         function()
-            UserConsoleCreate:Show()
-		    return Mod.WorldShare.Store:Get('page/Mod.WorldShare.UserConsole')
+            Create:Show()
+		    return Mod.WorldShare.Store:Get('page/Mod.WorldShare.Create')
         end
     )
 

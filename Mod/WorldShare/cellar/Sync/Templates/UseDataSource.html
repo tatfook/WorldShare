@@ -9,32 +9,34 @@
         <script type="text/npl" refresh="false">
             <![CDATA[
                 SyncMain = NPL.load("../Main.lua")
-                Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
-                Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 
-                SyncMain:SetStartSyncUseDataSourcePage()
+                page = document:GetPageCtrl()
+
+                function close()
+                    page:CloseWindow()
+                end
 
                 function replace()
                     SyncMain:BackupWorld()
-                    SyncMain:CloseStartSyncUseDataSourcePage()
-                    SyncMain:SyncToLocal()
+                    SyncMain:SyncToLocal(page.afterSyncCallback)
+                    close()
             	end
 
                 function cancel()
-                    SyncMain:CloseStartSyncUseDataSourcePage()
-                    SyncMain:ShowStartSyncPage()
+                    SyncMain:ShowStartSyncPage(page.afterSyncCallback)
+                    close()
                 end
 
                 function get_window_style()
-                    return Utils.FixCenter(500, 270)
+                    return Mod.WorldShare.Utils.FixCenter(500, 270)
                 end
 
                 function get_current_revision()
-                    return Store:Get("world/currentRevision") or ''
+                    return Mod.WorldShare.Store:Get("world/currentRevision") or ''
                 end
 
                 function get_remote_revision()
-                    return Store:Get("world/remoteRevision") or ''
+                    return Mod.WorldShare.Store:Get("world/remoteRevision") or ''
                 end
              ]]>
         </script>

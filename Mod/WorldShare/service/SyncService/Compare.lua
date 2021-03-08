@@ -478,6 +478,7 @@ function Compare:RefreshWorldList(callback, statusFilter)
                     end
 
                     currentWorldList = filterCurrentWorldList
+                    LocalServiceWorld:SetInternetLocalWorldList(currentWorldList)
                 end
 
                 if statusFilter and statusFilter == "ONLINE" then
@@ -493,6 +494,7 @@ function Compare:RefreshWorldList(callback, statusFilter)
                     end
 
                     currentWorldList = filterCurrentWorldList
+                    LocalServiceWorld:SetInternetLocalWorldList(currentWorldList)
                 end
 
                 local searchText = Mod.WorldShare.Store:Get("world/searchText")
@@ -546,6 +548,32 @@ function Compare.SortWorldList(currentWorldList)
                     currentWorldList[j + 1] = tmp
                 end
             end
+        end
+    end
+end
+
+function Compare:GetSelectedWorld(index)
+    local compareWorldList = Mod.WorldShare.Store:Get('world/compareWorldList')
+
+    if compareWorldList then
+        return compareWorldList[index]
+    else
+        return nil
+    end
+end
+
+function Compare:GetWorldIndexByFoldername(foldername, share, iszip)
+    local currentWorldList = Mod.WorldShare.Store:Get("world/compareWorldList")
+
+    if not currentWorldList or type(currentWorldList) ~= 'table' then
+        return false
+    end
+
+    for index, item in ipairs(currentWorldList) do
+        if foldername == item.foldername and
+           share == item.shared and
+           iszip == item.is_zip then
+            return index
         end
     end
 end

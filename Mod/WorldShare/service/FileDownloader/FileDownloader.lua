@@ -101,7 +101,7 @@ function FileDownloader:Start(src, dest, callbackFunc, cachePolicy)
                 id = label_id,
                 label = format(L"%s: 正在下载中,请耐心等待", self.text),
                 max_duration = 20000,
-                color = "255 0 0",
+                color = "255 188 67",
                 scaling = 1.1,
                 bold = true,
                 shadow = true
@@ -160,10 +160,10 @@ function FileDownloader:Start(src, dest, callbackFunc, cachePolicy)
 
                 BroadcastHelper.PushLabel(
                     {
-                        id = "noWrap",
-                        label = format(L"文件%s: %s", self.text, text),
+                        id = label_id,
+                        label = format(L"%s: %s", self.text, text),
                         max_duration = 10000,
-                        color = "255 0 0",
+                        color = "255 188 67",
                         scaling = 1.1,
                         bold = true,
                         shadow = true
