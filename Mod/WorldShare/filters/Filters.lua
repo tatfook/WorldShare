@@ -526,4 +526,13 @@ function Filters:Init()
             Certificate:Init(callback)
         end
     )
+
+    -- filter show panorama
+    GameLogic.GetFilters():add_filter(
+        'show_panorama',
+        function(callback)
+            local Panorama = NPL.load("(gl)Mod/WorldShare/cellar/Panorama/Panorama.lua")
+            Panorama:ShowCreate(true)
+        end
+    )
 end
