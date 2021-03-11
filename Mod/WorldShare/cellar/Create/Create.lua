@@ -204,7 +204,7 @@ function Create:EnterWorld(index, skip)
     end
 
     -- vip world step
-    if VipTypeWorld:IsVipWorld(currentSelectedWorld) then
+    if VipTypeWorld:IsVipWorld(currentSelectedWorld) and not self.vipVerified then
         if not KeepworkServiceSession:IsSignedIn() then
             LoginModal:CheckSignedIn(L'此世界为VIP世界，需要登陆后才能继续', function(bIsSuccessed)
                 if bIsSuccessed then
@@ -220,12 +220,16 @@ function Create:EnterWorld(index, skip)
             end)
             return
         else
-            if not VipTypeWorld:CheckVipWorld(currentSelectedWorld) then
-                _guihelper.MessageBox(L'你没有权限进入此世界（VIP）')
-                return
-            end
+            GameLogic.IsVip('Vip', true, function(result)
+                if result then
+                    self.vipVerified = true
+                    self:EnterWorld(index)
+                end
+            end, 'Vip')
         end
     end
+
+    self.vipVerified = false
 
     -- institute vip step
     if VipTypeWorld:IsInstituteVipWorld(currentSelectedWorld) and not self.instituteVerified then

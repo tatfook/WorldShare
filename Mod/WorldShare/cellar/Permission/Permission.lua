@@ -53,7 +53,7 @@ function Permission:CheckPermission(authName, bOpenUIIfNot, callback, uiType)
                         end
 
                         if uiType == 'Teacher' then
-                            _guihelper.MessageBox(L'此功能需要特殊权限')
+                            _guihelper.MessageBox(L'此功能需要教师权限，如需获取请联系管理员或者客服咨询')
                         end
 
                         if uiType == 'Institute' then
