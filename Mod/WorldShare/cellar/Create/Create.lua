@@ -218,7 +218,6 @@ function Create:EnterWorld(index, skip)
                     end)
                 end
             end)
-            return
         else
             GameLogic.IsVip('Vip', true, function(result)
                 if result then
@@ -227,6 +226,8 @@ function Create:EnterWorld(index, skip)
                 end
             end, 'Vip')
         end
+
+        return
     end
 
     self.vipVerified = false
