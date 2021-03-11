@@ -24,6 +24,7 @@ local Compare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
 local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
 local LocalServiceWorld = NPL.load('(gl)Mod/WorldShare/service/LocalService/LocalServiceWorld.lua')
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
 local SyncToLocal = NPL.load('(gl)Mod/WorldShare/service/SyncService/SyncToLocal.lua')
 
 local Create = NPL.export()
@@ -34,8 +35,7 @@ function Create:Show()
     local CreatePage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Create')
 
     if CreatePage then
-        self:GetWorldList(self.statusFilter)
-        return true
+        self:Close()
     end
 
     Create.currentMenuSelectIndex = 1
@@ -188,7 +188,7 @@ function Create:GetWorldList(statusFilter, callback)
     end, statusFilter)
 end
 
-function Create:EnterWorld(index, allowOffline)
+function Create:EnterWorld(index, skip)
     local currentSelectedWorld = Compare:GetSelectedWorld(index)
 
     if not currentSelectedWorld or type(currentSelectedWorld) ~= 'table' then
@@ -205,67 +205,119 @@ function Create:EnterWorld(index, allowOffline)
 
     -- vip world step
     if VipTypeWorld:IsVipWorld(currentSelectedWorld) then
-        local isSignedIn = LoginModal:CheckSignedIn(L'此世界为VIP世界，需要登陆后才能继续', function(bIsSuccessed)
-            if bIsSuccessed then
-                self:GetWorldList(self.statusFilter, function()
-                    local index = Compare:GetWorldIndexByFoldername(
-                        currentSelectedWorld.foldername,
-                        currentSelectedWorld.shared,
-                        currentSelectedWorld.is_zip
-                    )
-                    self:EnterWorld(index)
-                end)
-            end
-        end)
-
-        if not isSignedIn then
+        if not KeepworkServiceSession:IsSignedIn() then
+            LoginModal:CheckSignedIn(L'此世界为VIP世界，需要登陆后才能继续', function(bIsSuccessed)
+                if bIsSuccessed then
+                    self:GetWorldList(self.statusFilter, function()
+                        local index = Compare:GetWorldIndexByFoldername(
+                            currentSelectedWorld.foldername,
+                            currentSelectedWorld.shared,
+                            currentSelectedWorld.is_zip
+                        )
+                        self:EnterWorld(index)
+                    end)
+                end
+            end)
             return
         else
             if not VipTypeWorld:CheckVipWorld(currentSelectedWorld) then
+                _guihelper.MessageBox(L'你没有权限进入此世界（VIP）')
                 return
             end
         end
     end
 
-    -- share world step
-    if ShareTypeWorld:IsSharedWorld(currentSelectedWorld) and not allowOffline then
-        if not LoginModal:CheckSignedIn(L'此世界为多人世界，请先登录', function(bIsSuccessed)
-            if bIsSuccessed then
-                self:GetWorldList(self.statusFilter, function()
-                    local index = Compare:GetWorldIndexByFoldername(
-                        currentSelectedWorld.foldername,
-                        currentSelectedWorld.shared,
-                        currentSelectedWorld.is_zip
-                    )
+    -- institute vip step
+    if VipTypeWorld:IsInstituteVipWorld(currentSelectedWorld) and not self.instituteVerified then
+        if not KeepworkServiceSession:IsSignedIn() then
+            LoginModal:CheckSignedIn(L'此世界为机构VIP世界，需要登陆后才能继续', function(bIsSuccessed)
+                if bIsSuccessed then
+                    self:GetWorldList(self.statusFilter, function()
+                        local index = Compare:GetWorldIndexByFoldername(
+                            currentSelectedWorld.foldername,
+                            currentSelectedWorld.shared,
+                            currentSelectedWorld.is_zip
+                        )
+                        self:EnterWorld(index)
+                    end)
+                end
+            end)
+        else
+            VipTypeWorld:CheckInstituteVipWorld(currentSelectedWorld, function(result)
+                if result then
+                    self.instituteVerified = true
                     self:EnterWorld(index)
-                end)
-            else
-                Mod.WorldShare.MsgBox:Dialog(
-                    'MultiPlayerWorldLogin',
-                    L'此世界为多人世界，请登录后再打开世界，或者以只读模式打开世界',
-                    {
-                        Title = L'多人世界',
-                        Yes = L'知道了',
-                        No = L'只读模式打开'
-                    },
-                    function(res)
-                        if res and res == _guihelper.DialogResult.No then
-                            self:EnterWorld(index, true)
-                        end
-                    end,
-                    _guihelper.MessageBoxButtons.YesNo
-                )
-            end
-        end) then
+                else
+                    _guihelper.MessageBox(L'你没有权限进入此世界（机构VIP）')
+                end
+            end)
+        end
+        return
+    end
+
+    self.instituteVerified = false
+
+    -- share world step
+    if ShareTypeWorld:IsSharedWorld(currentSelectedWorld) and not skip then
+        if not KeepworkServiceSession:IsSignedIn() then
+            LoginModal:CheckSignedIn(L'此世界为多人世界，请先登录', function(bIsSuccessed)
+                if bIsSuccessed then
+                    self:GetWorldList(self.statusFilter, function()
+                        local index = Compare:GetWorldIndexByFoldername(
+                            currentSelectedWorld.foldername,
+                            currentSelectedWorld.shared,
+                            currentSelectedWorld.is_zip
+                        )
+                        self:EnterWorld(index)
+                    end)
+                else
+                    Mod.WorldShare.MsgBox:Dialog(
+                        'MultiPlayerWorldLogin',
+                        L'此世界为多人世界，请登录后再打开世界，或者以只读模式打开世界',
+                        {
+                            Title = L'多人世界',
+                            Yes = L'知道了',
+                            No = L'只读模式打开'
+                        },
+                        function(res)
+                            if res and res == _guihelper.DialogResult.No then
+                                Mod.WorldShare.Store:Set('world/readonly', true)
+                                self:EnterWorld(index, true)
+                            end
+                        end,
+                        _guihelper.MessageBoxButtons.YesNo
+                    )
+                end
+            end)
+
+            return
+        else
+            KeepworkServiceProject:GetMembers(currentSelectedWorld.kpProjectId, function(data, err)
+                if not data or type(data) ~= 'table' then
+                    return
+                end
+
+                local userId = Mod.WorldShare.Store:Get('user/userId')
+
+                for key, item in ipairs(data) do
+                    if item.userId == userId then
+                        self:EnterWorld(index, true)
+                        return
+                    end
+                end
+
+                _guihelper.MessageBox(L'你没有权限进入此世界')
+            end)
             return
         end
     end
 
     -- uploaded step
     if currentSelectedWorld.kpProjectId and
+       currentSelectedWorld.kpProjectId ~= 0 and
        not KeepworkServiceSession:IsSignedIn() and
-       not allowOffline then
-        if not LoginModal:CheckSignedIn(L'请先登录', function(result)
+       not skip then
+        LoginModal:CheckSignedIn(L'请先登录', function(result)
             if result then
                 if result == 'THIRD' then
                     return function()
@@ -292,9 +344,8 @@ function Create:EnterWorld(index, allowOffline)
             else
                 self:EnterWorld(index, true)
             end
-        end) then
-            return
-        end
+        end)
+        return
     end
 
     -- set current world
@@ -388,7 +439,6 @@ function Create:DeleteWorld(worldIndex)
     self:OnSwitchWorld(worldIndex)
 
     DeleteWorld:DeleteWorld(function()
-        echo(11111111111, true)
         self:GetWorldList(self.statusFilter)
     end)
 end

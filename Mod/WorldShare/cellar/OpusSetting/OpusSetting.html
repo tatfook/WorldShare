@@ -23,16 +23,6 @@
                         end
                     end
 
-                    function set_vip(value)
-                        if not GameLogic.IsReadOnly() then
-                            GameLogic.IsVip("CreateVipWorld", true, function(result)
-                                if result then
-                                    GameLogic.options:SetVipWorld(value)
-                                end
-                            end)
-                        end
-                    end
-
                     function set_public(val)
                         if val == "public" then
                             page:SetValue("private", false)
@@ -50,15 +40,41 @@
                     end
 
                     function set_vip(val)
-                        WorldCommon.SetWorldTag("vipEnabled", val)
-                        WorldCommon.SaveWorldTag()
-                        OpusSetting:SetVip(val)
+                        if not GameLogic.IsReadOnly() then
+                            GameLogic.IsVip(
+                                'Vip',
+                                true,
+                                function(result)
+                                    if result then
+                                        WorldCommon.SetWorldTag("isVipWorld", val)
+                                        WorldCommon.SaveWorldTag()
+                                        OpusSetting:SetVip(val)
+                                    else
+                                        page:SetValue('vip_checkbox', OpusSetting.isVipWorld)
+                                    end
+                                end,
+                                'Vip'
+                            )
+                        end
                     end
 
                     function set_institute_vip(val)
-                        WorldCommon.SetWorldTag("institueVipEnabled", val)
-                        WorldCommon.SaveWorldTag()
-                        OpusSetting:SetInstituteVip(val)
+                        if not GameLogic.IsReadOnly() then
+                            GameLogic.IsVip(
+                                'Teacher',
+                                true,
+                                function(result)
+                                    if result then
+                                        WorldCommon.SetWorldTag("instituteVipEnabled", val)
+                                        WorldCommon.SaveWorldTag()
+                                        OpusSetting:SetInstituteVip(val)
+                                    else
+                                        page:SetValue('institute_vip_checkbox', OpusSetting.instituteVipEnabled)
+                                    end
+                                end,
+                                'Teacher'
+                            )
+                        end
                     end
                 ]]>
             </script>

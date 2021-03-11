@@ -33,7 +33,7 @@ local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkServ
 local ShareWorld = NPL.export()
 
 function ShareWorld:Init(bEnabled, callback)
-	ShareWorld.callback = callback;
+	ShareWorld.callback = callback
     local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
 
     if GameLogic.IsReadOnly() or not currentWorld or currentWorld.is_zip then

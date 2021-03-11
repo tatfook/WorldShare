@@ -106,7 +106,7 @@ end
 function SyncMain:SyncToLocal(callback, _, noShownResult)
     local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
 
-    if not currentWorld.kpProjectId then
+    if not currentWorld.kpProjectId or currentWorld.kpProjectId == 0 then
         return false
     end
 
@@ -420,7 +420,7 @@ function SyncMain:CheckAndUpdatedByFoldername(foldername, callback)
         return false
     end
 
-    if currentWorld.kpProjectId then
+    if currentWorld.kpProjectId and currentWorld.kpProjectId ~= 0 then
         self:CheckAndUpdated(callback)
     else
         KeepworkServiceProject:GetProjectIdByWorldName(currentWorld.foldername, false, function(projectId)

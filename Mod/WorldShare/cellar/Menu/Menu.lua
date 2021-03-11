@@ -30,7 +30,7 @@ function Menu:Init(menuItems)
     local currentEnterWorld = Mod.WorldShare.Store:Get("world/currentEnterWorld") or {}
     local projectMenu = {}
 
-    if currentEnterWorld and currentEnterWorld.kpProjectId then
+    if currentEnterWorld and currentEnterWorld.kpProjectId and currentEnterWorld.kpProjectId ~= 0 then
         if KeepworkServiceSession:IsSignedIn() then
             local username = Mod.WorldShare.Store:Get("user/username")
 

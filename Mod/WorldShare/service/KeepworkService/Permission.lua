@@ -62,7 +62,7 @@ KeepworkServicePermission.AllAuth = {
         key = 'ChangeAvatarSkin',
         desc = L'尽享精彩形象'
     },
-    CreateVipWorld = {
+    TeacherCreateVipWorld = {
         key = 't_create_vip_world',
         desc = L'创建特殊权限世界'
     },
@@ -86,6 +86,10 @@ KeepworkServicePermission.AllAuth = {
         key = 'vip_goods',
         desc = L'拥有会员创造道具'
     },
+    IsOrgan = {
+        key = 'is_organ',
+        desc = L'需要机构会员权限'
+    }
 }
 
 function KeepworkServicePermission:GetAuth(authName)
@@ -106,17 +110,39 @@ end
 
 function KeepworkServicePermission:Authentication(authName, callback)
     if not self:GetAuth(authName) then
-        if Mod.WorldShare.Store:Get('user/isVip') then
-            if type(callback) == 'function' then
-                callback(true, self:GetAuth(authName), self:GetAuthDesc(authName))
+        if authName == '' or authName == 'Vip' then -- Vip
+            if Mod.WorldShare.Store:Get('user/isVip') then
+                if type(callback) == 'function' then
+                    callback(true, 'vip', '')
+                end
+
+                return
             end
-        else
-            if type(callback) == 'function' then
-                callback(false, self:GetAuth(authName), self:GetAuthDesc(authName))
+        elseif authName == 'Student' then
+            local userType = Mod.WorldShare.Store:Get("user/userType") or {}
+            if userType.student then
+                if type(callback) == 'function' then
+                    callback(true, 'student', '')
+                end
+
+                return
+            end
+        elseif authName == 'Teacher' then
+            local userType = Mod.WorldShare.Store:Get("user/userType") or {}
+            if userType.teacher then
+                if type(callback) == 'function' then
+                    callback(true, 'teacher', '')
+                end
+
+                return
             end
         end
 
-        return false
+        if type(callback) == 'function' then
+            callback(false, authName, L'马上激活功能')
+        end
+
+        return
     end
 
     KeepworkPermissionsApi:Check(

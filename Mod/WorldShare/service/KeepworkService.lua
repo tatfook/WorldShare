@@ -82,7 +82,7 @@ end
 function KeepworkService:GetShareUrl()
     local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
 
-    if not currentWorld or not currentWorld.kpProjectId then
+    if not currentWorld or not currentWorld.kpProjectId or currentWorld.kpProjectId == 0 then
         return ''
     end
 

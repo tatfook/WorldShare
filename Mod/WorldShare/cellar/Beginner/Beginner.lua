@@ -29,7 +29,10 @@ function Beginner:OnWorldLoad()
 
     local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
-    if currentEnterWorld and type(currentEnterWorld) == 'table' and currentEnterWorld.kpProjectId then
+    if currentEnterWorld and
+       type(currentEnterWorld) == 'table' and
+       currentEnterWorld.kpProjectId and
+       currentEnterWorld.kpProjectId ~= 0 then
         if tonumber(currentEnterWorld.kpProjectId) == self:GetBeginnerWorldId() or
            tonumber(currentEnterWorld.kpProjectId) == self:GetGuideWorldId() then
             return

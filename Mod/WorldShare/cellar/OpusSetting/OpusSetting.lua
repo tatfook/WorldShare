@@ -20,7 +20,7 @@ function OpusSetting:Show()
 
     local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
 
-    if not currentWorld or not currentWorld.kpProjectId then
+    if not currentWorld or not currentWorld.kpProjectId or currentWorld.kpProjectId == 0 then
         return false
     end
 
@@ -35,16 +35,24 @@ function OpusSetting:Show()
                 params._page:GetNode("public"):SetAttribute("checked", "checked")
                 params._page:SetValue("private", false)
 
-                if data.extra and data.extra.vipEnabled and data.extra.vipEnabled  == 1 then
+                if data.extra and
+                   ((data.extra.vipEnabled and
+                   data.extra.vipEnabled == 1) or
+                   (data.extra.isVipWorld and
+                   data.extra.isVipWorld == 1)) then
                     params._page:SetValue("vip_checkbox", true)
+                    self.isVipWorld = true
                 else
                     params._page:SetValue("vip_checkbox", false)
+                    self.isVipWorld = false
                 end
 
                 if data.extra and data.extra.instituteVipEnabled and data.extra.instituteVipEnabled == 1 then
                     params._page:SetValue("institute_vip_checkbox", true)
+                    self.instituteVipEnabled = true
                 else
                     params._page:SetValue("institute_vip_checkbox", false)
+                    self.instituteVipEnabled = false
                 end
 
             elseif data.visibility == 1 then
@@ -60,7 +68,7 @@ end
 function OpusSetting:SetPublic(value)
     local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
 
-    if not currentWorld or not currentWorld.kpProjectId then
+    if not currentWorld or not currentWorld.kpProjectId or currentWorld.kpProjectId == 0 then
         return false
     end
 
@@ -84,7 +92,7 @@ end
 function OpusSetting:SetVip(value)
     local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
 
-    if not currentWorld or not currentWorld.kpProjectId then
+    if not currentWorld or not currentWorld.kpProjectId or currentWorld.kpProjectId == 0 then
         return false
     end
 
@@ -93,14 +101,15 @@ function OpusSetting:SetVip(value)
     }
 
     if value then
-        params.extra.vipEnabled = 1
+        params.extra.isVipWorld = 1
     else
-        params.extra.vipEnabled = 0
+        params.extra.isVipWorld = 0
     end
 
     KeepworkServiceProject:UpdateProject(currentWorld.kpProjectId, params, function(data, err)
         if err == 200 then
             GameLogic.AddBBS(nil, L"设置成功", 3000, "0 255 0")
+            self.isVipWorld = value
         else
             GameLogic.AddBBS(nil, L"设置失败", 3000, "255 0 0")
         end
@@ -110,7 +119,7 @@ end
 function OpusSetting:SetInstituteVip(value)
     local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
 
-    if not currentWorld or not currentWorld.kpProjectId then
+    if not currentWorld or not currentWorld.kpProjectId or currentWorld.kpProjectId == 0 then
         return false
     end
 
@@ -127,6 +136,7 @@ function OpusSetting:SetInstituteVip(value)
     KeepworkServiceProject:UpdateProject(currentWorld.kpProjectId, params, function(data, err)
         if err == 200 then
             GameLogic.AddBBS(nil, L"设置成功", 3000, "0 255 0")
+            self.instituteVipEnabled = value
         else
             GameLogic.AddBBS(nil, L"设置失败", 3000, "255 0 0")
         end

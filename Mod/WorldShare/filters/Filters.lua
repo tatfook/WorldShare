@@ -157,8 +157,8 @@ function Filters:Init()
     -- filter KeepworkPremission
     GameLogic.GetFilters():add_filter(
         'KeepworkPermission',
-        function(bEnabled, authName, bOpenUIIfNot, callback)
-            Permission:CheckPermission(authName, bOpenUIIfNot, callback)
+        function(bEnabled, authName, bOpenUIIfNot, callback, uiType)
+            Permission:CheckPermission(authName, bOpenUIIfNot, callback, uiType)
 
             return true
         end
@@ -524,15 +524,6 @@ function Filters:Init()
         'show_certificate',
         function(callback)
             Certificate:Init(callback)
-        end
-    )
-
-    -- filter show panorama
-    GameLogic.GetFilters():add_filter(
-        'show_panorama',
-        function(callback)
-            local Panorama = NPL.load("(gl)Mod/WorldShare/cellar/Panorama/Panorama.lua")
-            Panorama:ShowCreate(true)
         end
     )
 end

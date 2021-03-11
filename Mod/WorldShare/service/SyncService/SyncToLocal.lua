@@ -385,7 +385,7 @@ function SyncToLocal:DeleteOne(file, callback)
 end
 
 function SyncToLocal:DownloadZIP()
-    if not self.currentWorld or not self.currentWorld.kpProjectId then
+    if not self.currentWorld or not self.currentWorld.kpProjectId or self.currentWorld.kpProjectId == 0 then
         return false
     end
 

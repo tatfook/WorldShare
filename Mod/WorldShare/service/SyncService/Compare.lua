@@ -22,11 +22,13 @@ local Encoding = commonlib.gettable("commonlib.Encoding")
 local WorldRevision = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision")
 local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 local DesktopMenu = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.DesktopMenu")
+local DesktopMenuPage = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.DesktopMenuPage")
 
 -- service 
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local LocalServiceWorld = NPL.load("../LocalService/LocalServiceWorld.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
 local KeepworkServiceWorld = NPL.load("../KeepworkService/World.lua")
 local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
 local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
@@ -93,7 +95,7 @@ function Compare:GetCompareResult()
         return false
     end
 
-    if currentWorld.status == 1 then
+    if currentWorld.status == 1 or not currentWorld.status then
         CreateWorld:CheckRevision()
         local currentRevision = WorldRevision:new():init(currentWorld.worldpath):Checkout()
         Mod.WorldShare.Store:Set("world/currentRevision", currentRevision)
@@ -156,7 +158,7 @@ function Compare:CompareRevision()
             end
         end
 
-        if currentWorld and not currentWorld.kpProjectId then
+        if currentWorld and not currentWorld.kpProjectId or currentWorld.kpProjectId == 0 then
             self:SetFinish(true)
             self.callback(false)
             return true
@@ -233,6 +235,48 @@ end
 function Compare:GetCurrentWorldInfo(callback)
     local currentWorld
 
+    Mod.WorldShare.MsgBox:Show(L'正在准备数据，请稍候...')
+
+    local function afterGetInstance()
+        Mod.WorldShare.MsgBox:Close()
+    
+        -- lock share world
+        if KeepworkService:IsSignedIn() and
+           not GameLogic.IsReadOnly() and
+           Mod.WorldShare.Utils:IsSharedWorld(currentWorld) and
+           currentWorld.kpProjectId and
+           currentWorld.kpProjectId ~= 0 and
+           currentWorld.status ~= 1 then
+            KeepworkServiceWorld:UpdateLockHeartbeatStart(
+                currentWorld.kpProjectId,
+                "exclusive",
+                currentWorld.revision,
+                nil,
+                nil
+            )
+        end
+
+        Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
+        Mod.WorldShare.Store:Set("world/currentEnterWorld", currentWorld)
+
+        -- update world tag
+        if currentWorld.kpProjectId and currentWorld.kpProjectId ~= 0 then
+            WorldCommon.SetWorldTag('kpProjectId', currentWorld.kpProjectId)
+        else
+            WorldCommon.SetWorldTag('kpProjectId', nil)
+        end
+
+        DesktopMenu.LoadMenuItems(true)
+        DesktopMenuPage.OnWorldLoaded()
+        DesktopMenuPage.Refresh()
+
+        GameLogic.options:ResetWindowTitle() -- update newset worldinfo
+
+        if callback and type(callback) == 'function' then
+            callback()
+        end
+    end
+
     if Mod.WorldShare.Store:Get("world/readonly") then
         System.World.readonly = true
         GameLogic.options:ResetWindowTitle()
@@ -243,189 +287,190 @@ function Compare:GetCurrentWorldInfo(callback)
         local originWorldPath = ParaWorld.GetWorldDirectory()
         local worldTag = WorldCommon.GetWorldInfo() or {}
 
-        currentWorld = {
-            IsFolder = false,
-            is_zip = true,
-            Title = worldTag.name,
-            text = worldTag.name,
-            author = "None",
-            costTime = "0:0:0",
-            filesize = 0,
-            foldername = Mod.WorldShare.Utils.GetFolderName(),
-            grade = "primary",
-            icon = "Texture/3DMapSystem/common/page_world.png",
-            ip = "127.0.0.1",
-            mode = "survival",
-            modifyTime = 0,
-            nid = "",
-            order = 0,
-            preview = "",
-            progress = "0",
-            size = 0,
-            worldpath = originWorldPath,
-            kpProjectId = worldTag.kpProjectId,
-            fromProjectId = tonumber(worldTag.fromProjects)
-        }
+        if KeepworkServiceSession:IsSignedIn() then
+            currentWorld = KeepworkServiceWorld:GenerateWorldInstance({
+                IsFolder = false,
+                is_zip = true,
+                Title = worldTag.name,
+                text = worldTag.name,
+                foldername = Mod.WorldShare.Utils.GetFolderName(),
+                worldpath = originWorldPath,
+                kpProjectId = worldTag.kpProjectId,
+                fromProjectId = worldTag.fromProjects,
+            })
+        else
+            currentWorld = LocalServiceWorld:GenerateWorldInstance({
+                IsFolder = false,
+                is_zip = true,
+                Title = worldTag.name,
+                text = worldTag.name,
+                foldername = Mod.WorldShare.Utils.GetFolderName(),
+                worldpath = originWorldPath,
+                kpProjectId = worldTag.kpProjectId,
+                fromProjectId = worldTag.fromProjects,
+            })
+        end
 
         local currentRemoteWorld = Mod.WorldShare.Store:Get('world/currentRemoteWorld')
         currentWorld.remoteWorld = commonlib.copy(currentRemoteWorld)
 
-        Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
         Mod.WorldShare.Store:Set("world/currentRevision", GameLogic.options:GetRevision())
+        afterGetInstance()
     else
-        local currentWorldList = Mod.WorldShare.Store:Get("world/compareWorldList")
-    
-        if currentWorldList then
-            local searchCurrentWorld = nil
-            local worldpath = ParaWorld.GetWorldDirectory()
-            local shared = string.match(worldpath, "shared") == "shared" and true or nil
-
-            local foldername = Mod.WorldShare.Utils:GetFolderName() or ''
-            for key, item in ipairs(currentWorldList) do
-                if item.foldername == foldername and
-                   item.shared == shared and 
-                   not item.is_zip then
-                    searchCurrentWorld = item
-                    break
-                end
-            end
-
-            if searchCurrentWorld then
-                currentWorld = searchCurrentWorld
-
-                if currentWorld.status == 2 then
-                    currentWorld.status = 3
-                    currentWorld.worldpath = worldpath
-                    currentWorld.local_tagname = currentWorld.remote_tagname
-                end
-
-                local worldTag = LocalService:GetTag(currentWorld.worldpath)
-
-                if type(worldTag) == 'table' then
-                    currentWorld.kpProjectId = tonumber(worldTag.kpProjectId)
-                    currentWorld.fromProjectId = tonumber(worldTag.fromProjects)
-                end
-
-                Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
-            end
-        end
-    end
-
-    if not currentWorld then
         local worldpath = ParaWorld.GetWorldDirectory()
 
         WorldCommon.LoadWorldTag(worldpath)
         local worldTag = WorldCommon.GetWorldInfo() or {}
+        local local_tagname
 
-        currentWorld = {
-            IsFolder = true,
-            is_zip = false,
-            Title = worldTag.name,
-            text = worldTag.name,
-            author = "None",
-            costTime = "0:0:0",
-            filesize = 0,
-            foldername = Mod.WorldShare.Utils.GetFolderName(),
-            grade = "primary",
-            icon = "Texture/3DMapSystem/common/page_world.png",
-            ip = "127.0.0.1",
-            mode = "survival",
-            modifyTime = 0,
-            nid = "",
-            order = 0,
-            preview = "",
-            progress = "0",
-            size = 0,
-            worldpath = worldpath, 
-        }
-
-        if worldTag.kpProjectId then
-            currentWorld.kpProjectId = worldTag.kpProjectId
+        if worldTag.local_tagname then
+            local_tagname = worldTag.local_tagname
         else
-            currentWorld.status = 1
+            local_tagname = worldTag.name
         end
 
-        if type(worldTag) == 'table' then
-            currentWorld.kpProjectId = tonumber(worldTag.kpProjectId)
-            currentWorld.fromProjectId = tonumber(worldTag.fromProjects)
-        end
+        if KeepworkServiceSession:IsSignedIn() and worldTag.kpProjectId and worldTag.kpProjectId ~= 0 then
+            local kpProjectId = worldTag.kpProjectId
+            local fromProjectId = worldTag.fromProjectId
 
-        Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
-    end
+            KeepworkServiceProject:GetProject(kpProjectId, function(data, err)
+                data = data or {}
 
-    -- for offline world
-    if not KeepworkService:IsSignedIn() and currentWorld.shared then
-        System.World.readonly = true
-        GameLogic.options:ResetWindowTitle()
-    end
+                local shared = false
 
-    if not GameLogic.IsReadOnly() and (currentWorld.project and currentWorld.project.memberCount or 0) > 1 then
-        KeepworkServiceWorld:UpdateLockHeartbeatStart(currentWorld.kpProjectId, "exclusive", currentWorld.revision, nil, nil)
-    end
-
-    if currentWorld.kpProjectId then
-        if GameLogic.options:IsCommunityWorld() then
-            currentWorld.communityWorld = true
-        else
-            currentWorld.communityWorld = false
-        end
-
-        -- avoid network error
-        Mod.WorldShare.Store:Set("world/currentEnterWorld", currentWorld)
-
-        KeepworkServiceProject:GetProject(currentWorld.kpProjectId, function(data, err)
-            if not data or type(data) ~= 'table' then
-                if callback and type(callback) == 'function' then
-                    callback()
-                end
-                return
-            end
-
-            local function Handle()
-                if data and type(data) == 'table' and data.username and data.userId then
-                    currentWorld.user = {
-                        id = data.userId,
-                        username = data.username
-                    }
+                if data and data.memberCount and data.memberCount > 1 then
+                    shared = true
                 end
 
-                currentWorld.memberCount = data.memberCount
+                if not shared then
+                    local userId = Mod.WorldShare.Store:Get('user/userId')
     
-                Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
-                Mod.WorldShare.Store:Set("world/currentEnterWorld", currentWorld)
+                    if userId ~= data.userId then
+                        -- covert to new world when different user world
+                        currentWorld = LocalServiceWorld:GenerateWorldInstance({
+                            IsFolder = true,
+                            is_zip = false,
+                            Title = worldTag.name,
+                            text = worldTag.name,
+                            foldername = Mod.WorldShare.Utils.GetFolderName(),
+                            worldpath = worldpath,
+                            kpProjectId = 0,
+                            fromProjectId = fromProjectId,
+                            local_tagname = local_tagname,
+                            revision = WorldRevision:new():init(worldpath):GetDiskRevision(),
+                            communityWorld = worldTag.communityWorld,
+                            isVipWorld = worldTag.isVipWorld,
+                            instituteVipEnabled = worldTag.instituteVipEnabled
+                        })
     
-                DesktopMenu.LoadMenuItems(true)
-    
-                if callback and type(callback) == 'function' then
-                    callback()
+                        afterGetInstance()
+                        return
+                    end
                 end
-            end
 
-            if data and data.memberCount and type(data.memberCount) == 'number' and data.memberCount > 1 then
-                KeepworkServiceProject:GetMembers(currentWorld.kpProjectId, function(data, err)
-                    if data and type(data) == 'table' then
+                self:Init(function(result)
+                    local status
+        
+                    if result == self.JUSTLOCAL then
+                        status = 1
+                    elseif result == self.JUSTREMOTE then
+                        status = 2
+                    elseif result == self.REMOTEBIGGER then
+                        status = 5
+                    elseif result == self.LOCALBIGGER then
+                        status = 4
+                    elseif result == self.EQUAL then
+                        status = 3
+                    end
+
+                    KeepworkServiceProject:GetMembers(kpProjectId, function(membersData, err)
                         local members = {}
-
-                        for key, item in ipairs(data) do
+    
+                        for key, item in ipairs(membersData) do
                             members[#members + 1] = item.username
                         end
 
-                        currentWorld.members = members
-                    end
+                        if data and data.project then
+                            if data.project.visibility == 0 then
+                                data.project.visibility = 0
+                            else
+                                data.project.visibility = 1
+                            end
+                        end
 
-                    Handle()
+                        currentWorld = KeepworkServiceWorld:GenerateWorldInstance({
+                            IsFolder = true,
+                            is_zip = false,
+                            Title = worldTag.name,
+                            text = worldTag.name,
+                            foldername = Mod.WorldShare.Utils.GetFolderName(),
+                            worldpath = worldpath,
+                            kpProjectId = kpProjectId,
+                            fromProjectId = fromProjectId,
+                            local_tagname = local_tagname,
+                            remote_tagname = data.extra.worldTagName,
+                            status = status,
+                            revision = data.revision,
+                            lastCommitId = data.commitId, 
+                            project = data.project,
+                            user = {
+                                id = data.userId,
+                                username = data.username,
+                            },
+                            shared = shared,
+                            communityWorld = worldTag.communityWorld,
+                            isVipWorld = worldTag.isVipWorld,
+                            instituteVipEnabled = worldTag.instituteVipEnabled,
+                            memberCount = data.memberCount,
+                            members = members,
+                        })
+
+                        local username = Mod.WorldShare.Store:Get('user/username')
+                        local bIsExisted = false
+
+                        for key, item in ipairs(members) do
+                            if item == username then
+                                bIsExisted = true
+                            end
+                        end
+
+                        if bIsExisted then
+                            System.World.readonly = false
+                            GameLogic.options:ResetWindowTitle()
+                        else
+                            System.World.readonly = true
+                            GameLogic.options:ResetWindowTitle()
+                        end
+
+                        afterGetInstance()
+                    end)
                 end)
-            else
-                Handle()
+            end)
+
+            return
+        else
+            currentWorld = LocalServiceWorld:GenerateWorldInstance({
+                IsFolder = true,
+                is_zip = false,
+                Title = worldTag.name,
+                text = worldTag.name,
+                foldername = Mod.WorldShare.Utils.GetFolderName(),
+                worldpath = worldpath,
+                kpProjectId = kpProjectId,
+                fromProjectId = fromProjectId,
+                local_tagname = local_tagname,
+                revision = WorldRevision:new():init(worldpath):GetDiskRevision(),
+                communityWorld = worldTag.communityWorld,
+                isVipWorld = worldTag.isVipWorld,
+                instituteVipEnabled = worldTag.instituteVipEnabled
+            })
+
+            if Mod.WorldShare.Utils:IsSharedWorld(currentWorld) then
+                System.World.readonly = true
+                GameLogic.options:ResetWindowTitle()
             end
-        end)
-    else
-        Mod.WorldShare.Store:Set("world/currentEnterWorld", currentWorld)
 
-        DesktopMenu.LoadMenuItems(true)
-
-        if type(callback) == 'function' then
-            callback()
+            afterGetInstance()
         end
     end
 end
@@ -471,8 +516,7 @@ function Compare:RefreshWorldList(callback, statusFilter)
                     for key, item in ipairs(currentWorldList) do
                         if item and
                            type(item) == 'table' and
-                           (type(item.status) == 'number' or type(item.status) == 'string') and
-                           tonumber(item.status) ~= 2 then
+                           (not item.status or tonumber(item.status) ~= 2) then
                             filterCurrentWorldList[#filterCurrentWorldList + 1] = item
                         end
                     end
@@ -487,8 +531,9 @@ function Compare:RefreshWorldList(callback, statusFilter)
                     for key, item in ipairs(currentWorldList) do
                         if item and
                            type(item) == 'table' and
-                           (type(item.status) == 'number' or type(item.status) == 'string') and
-                           tonumber(item.status) ~= 1 then
+                           item.status and
+                           tonumber(item.status) ~= 1
+                            then
                             filterCurrentWorldList[#filterCurrentWorldList + 1] = item
                         end
                     end

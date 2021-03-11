@@ -37,7 +37,7 @@ function KeepworkServicePanorama:Upload(callback, recursive)
 
     local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
-    if not currentEnterWorld or not currentEnterWorld.kpProjectId then
+    if not currentEnterWorld or not currentEnterWorld.kpProjectId or currentEnterWorld.kpProjectId == 0 then
         return false
     end
 
@@ -87,7 +87,7 @@ function KeepworkServicePanorama:GenerateMiniProgramCode(callback)
     
     local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
-    if not currentEnterWorld or not currentEnterWorld.kpProjectId then
+    if not currentEnterWorld or not currentEnterWorld.kpProjectId or currentEnterWorld.kpProjectId == 0 then
         return false
     end
 

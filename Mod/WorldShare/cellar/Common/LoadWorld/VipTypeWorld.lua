@@ -15,8 +15,7 @@ local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkServ
 local VipTypeWorld = NPL.export()
 
 function VipTypeWorld:IsVipWorld(world)
-    if world.vipEnabled == 'true' or
-       world.instituteVipEnabled == 'true' then
+    if world.isVipWorld then
         return true
     else
         return false
@@ -28,8 +27,7 @@ function VipTypeWorld:CheckVipWorld(world, callback)
         return false
     end
 
-    if world.vipEnabled == 'true' or
-       world.instituteVipEnabled == 'true' then
+    if world.isVipWorld then
         if not KeepworkServiceSession:IsSignedIn() then
             return false
         end
@@ -43,27 +41,55 @@ function VipTypeWorld:CheckVipWorld(world, callback)
 
         local isVip = Mod.WorldShare.Store:Get('user/isVip')
 
-        if world.vipEnabled == 'true' then
-            if isVip then
-                canEnter = true
-            end
-        end
-
-        local userType = Mod.WorldShare.Store:Get('user/userType')
-
-        if world.instituteVipEnabled == 'true' then
-            if userType.student then
-                canEnter = true
-            end
+        if isVip then
+            canEnter = true
         end
 
         if not canEnter then
-            _guihelper.MessageBox(L'你没有权限进入此世界')
             return false
         end
 
         return canEnter
     else
         return true
+    end
+end
+
+function VipTypeWorld:IsInstituteVipWorld(world)
+    if world.instituteVipEnabled then
+        return true
+    else
+        return false
+    end
+end
+
+function VipTypeWorld:CheckInstituteVipWorld(world, callback)
+    if not world or type(world) ~= 'table' then
+        return false
+    end
+
+    if world.instituteVipEnabled then
+        if not KeepworkServiceSession:IsSignedIn() then
+            if callback and type(callback) == 'function' then
+                callback(false)
+            end
+            return
+        end
+
+        GameLogic.IsVip('IsOrgan', true, function(result)
+            if result then
+                if callback and type(callback) == 'function' then
+                    callback(true)
+                end
+            else
+                if callback and type(callback) == 'function' then
+                    callback(false)
+                end
+            end
+        end, 'Institute')
+    else
+        if callback and type(callback) == 'function' then
+            callback(false)
+        end
     end
 end
