@@ -176,7 +176,7 @@ function LoadWorldCommand:Init()
                     return
                 end
 
-                if lastWorld.kpProjectId then
+                if lastWorld.kpProjectId and lastWorld.kpProjectId ~= 0 then
                     local userId = Mod.WorldShare.Store:Get('world/userId')
 
                     if tonumber(lastWorld.user.id) == tonumber(userId) then
@@ -213,6 +213,7 @@ function LoadWorldCommand:Init()
                     if currentEnterWorld and
                        type(currentEnterWorld) == 'table' and
                        currentEnterWorld.kpProjectId and
+                       currentEnterWorld.kpProjectId ~= 0 and
                        tonumber(pid) == tonumber(currentEnterWorld.kpProjectId) then
                         if string.match(event, '^global') then
                             GameLogic.RunCommand(execCommand or '')

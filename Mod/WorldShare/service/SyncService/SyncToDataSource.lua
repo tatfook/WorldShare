@@ -62,7 +62,7 @@ function SyncToDataSource:Init(callback)
                     KeepworkServiceProject:GetProjectIdByWorldName(self.currentWorld.foldername, self.currentWorld.shared, function(pid)
                         currentWorld = Mod.WorldShare.Store:Get('world/currentWorld') 
     
-                        if currentWorld and currentWorld.kpProjectId then
+                        if currentWorld and currentWorld.kpProjectId and currentWorld.kpProjectId ~= 0 then
                             local tag = LocalService:GetTag(currentWorld.worldpath)
     
                             if type(tag) == 'table' then
@@ -91,7 +91,7 @@ function SyncToDataSource:Init(callback)
     
                             currentWorld.kpProjectId = data.id
     
-                            if currentWorld and currentWorld.kpProjectId then
+                            if currentWorld and currentWorld.kpProjectId and currentWorld.kpProjectId ~= 0 then
                                 local tag = LocalService:GetTag(currentWorld.worldpath)
     
                                 if type(tag) == 'table' then
@@ -559,7 +559,6 @@ function SyncToDataSource:UpdateRecord(callback)
             worldInfo.revision = Mod.WorldShare.Store:Get("world/currentRevision")
             worldInfo.fileSize = filesTotals
             worldInfo.commitId = lastCommitSha
-            -- worldInfo.username = username
             worldInfo.archiveUrl = format('%s/repos/%s/archive.zip?ref=%s', KeepworkService:GetApiCdnApi(), repoPath, lastCommitSha)
 
             -- set world type
@@ -593,42 +592,75 @@ function SyncToDataSource:UpdateRecord(callback)
                     worldInfo,
                     self.currentWorld.shared,
                     function(data, err)
-                        if (err ~= 200) then
+                        if err ~= 200 then
                             self.callback(false, L"更新服务器列表失败")
                             self:SetFinish(true)
-                            return false
-                        end
-        
-                        if type(callback) == 'function' then
-                            callback()
-                        end
-                    end
-                )
-
-                KeepworkServiceProject:GetProject(
-                    self.currentWorld.kpProjectId,
-                    function(data)
-                        local extra = {}
-
-                        if Mod.WorldShare.Store:Get('world/isPreviewUpdated') then
-                            extra.imageUrl = preview
+                            return
                         end
 
-                        extra.worldTagName = self.currentWorld.local_tagname
-
-                        KeepworkServiceProject:UpdateProject(
+                        KeepworkServiceProject:GetProject(
                             self.currentWorld.kpProjectId,
-                            {
-                                extra = extra
-                            }
-                        )
+                            function(data)
+                                local extra = {}
+        
+                                if Mod.WorldShare.Store:Get('world/isPreviewUpdated') then
+                                    extra.imageUrl = preview
+                                end
+        
+                                extra.worldTagName = self.currentWorld.local_tagname
 
-                        Mod.WorldShare.Store:Remove('world/isPreviewUpdated')
+                                KeepworkServiceProject:UpdateProject(
+                                    self.currentWorld.kpProjectId,
+                                    {
+                                        extra = extra
+                                    }
+                                )
+
+                                Mod.WorldShare.Store:Remove('world/isPreviewUpdated')
+        
+                                if not self.currentWorld.status then
+                                    -- covert to online instance
+                                    self.currentWorld = KeepworkServiceWorld:GenerateWorldInstance({
+                                        Title = self.currentWorld.Title,
+                                        text = self.currentWorld.text,
+                                        foldername = self.currentWorld.foldername or '',
+                                        revision = Mod.WorldShare.Store:Get("world/currentRevision"),
+                                        size = filesTotals,
+                                        modifyTime = os.time(),
+                                        lastCommitId = self.currentWorld.lastCommitId, 
+                                        worldpath = self.currentWorld.worldpath,
+                                        status = 3,
+                                        project = data.project,
+                                        user = {
+                                            id = data.userId,
+                                            username = data.username,
+                                        },
+                                        kpProjectId = self.currentWorld.kpProjectId,
+                                        fromProjectId = self.currentWorld.fromProjectId,
+                                        local_tagname = self.currentWorld.local_tagname,
+                                        remote_tagname = self.currentWorld.local_tagname,
+                                        IsFolder = true,
+                                        is_zip = false,
+                                        shared = self.currentWorld.shared,
+                                        communityWorld = self.currentWorld.communityWorld,
+                                        isVipWorld = self.currentWorld.isVipWorld,
+                                        instituteVipEnabled = self.currentWorld.instituteVipEnabled,
+                                        memberCount = data.memberCount,
+                                        members = {}, -- updated at enter world
+                                    })
+                                end
+
+                                Mod.WorldShare.Store:Set("world/currentWorld", self.currentWorld)
+                                KeepworkService:SetCurrentCommitId()
+
+                                if callback and type(callback) == 'function' then
+                                    callback()
+                                end
+                            end
+                        )
                     end
                 )
 
-                Mod.WorldShare.Store:Set("world/currentWorld", self.currentWorld)
-                KeepworkService:SetCurrentCommitId()
             end
 
             StorageFilesApi:Token('preview.jpg', function(data, err)
@@ -647,6 +679,7 @@ function SyncToDataSource:UpdateRecord(callback)
 
                 if not self.currentWorld or
                    not self.currentWorld.kpProjectId or
+                   self.currentWorld.kpProjectId == 0 or
                    not lastCommitSha then
                     return false
                 end

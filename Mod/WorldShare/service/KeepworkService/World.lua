@@ -15,6 +15,7 @@ local SaveWorldHandler = commonlib.gettable("MyCompany.Aries.Game.SaveWorldHandl
 
 -- service
 local KeepworkService = NPL.load('../KeepworkService.lua')
+local LocalServiceWorld = NPL.load('(gl)Mod/WorldShare/service/LocalService/LocalServiceWorld.lua')
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
 
@@ -104,30 +105,53 @@ function KeepworkServiceWorld:SetWorldInstanceByPid(pid, callback)
 
         local worldTag = LocalService:GetTag(worldpath)
 
-        local currentWorld = {
+        local local_tagname
+
+        if worldTag.local_tagname then
+            local_tagname = worldTag.local_tagname
+        else
+            local_tagname = worldTag.name
+        end
+
+
+        local shared = false
+
+        if KeepworkServiceSession:IsSignedIn() then
+            local userId = Mod.WorldShare.Store:Get('user/userId')
+
+            if data.user.id ~= 0 and tonumber(data.user.id) ~= (userId) then
+                shared = true
+            end
+        end
+
+        local currentWorld = self:GenerateWorldInstance({
             kpProjectId = pid,
+            fromProjectId = data.fromProjectId,
             IsFolder = true,
             is_zip = false,
             Title = foldername,
             text = foldername,
-            author = "None",
-            costTime = "0:0:0",
-            filesize = 0,
             foldername = foldername,
-            grade = "primary",
-            icon = "Texture/3DMapSystem/common/page_world.png",
-            ip = "127.0.0.1",
-            mode = "survival",
-            modifyTime = 0,
-            nid = "",
-            order = 0,
-            preview = "",
-            progress = "0",
-            size = 0,
             worldpath = worldpath,
             status = status,
-            kpProjectId = pid,
-        }
+            revision = data.revision,
+            size = data.fileSize,
+            modifyTime = Mod.WorldShare.Utils:UnifiedTimestampFormat(data.updatedAt),
+            lastCommitId = data.commitId, 
+            project = data.project,
+            user = {
+                id = data.userId,
+                username = data.username,
+            },
+            local_tagname = local_tagname,
+            remote_tagname =  data.extra.worldTagName,
+            shared = shared,
+            communityWorld = worldTag.communityWorld == 'true' or worldTag.communityWorld == true,
+            isVipWorld = worldTag.isVipWorld == 'true' or worldTag.isVipWorld == true,
+            instituteVipEnabled =  worldTag.instituteVipEnabled == 'true' or worldTag.instituteVipEnabled == true,
+            memberCount = data.memberCount,
+            members = {}
+        })
 
         Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
 
@@ -372,57 +396,59 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
         -- handle both/network newest/local newest/network only worlds
         for DKey, DItem in ipairs(remoteWorldsList) do
             local isExist = false
+            local text = DItem.worldName or ""
             local worldpath = ""
-            local remotefile = ""
             local localTagname = ""
             local remoteTagname = ""
             local revision = 0
             local commitId = ""
-            local remoteWorldUserId = DItem["user"] and DItem["user"]["id"] and tonumber(DItem["user"]["id"]) or 0
+            local remoteWorldUserId = DItem.user and DItem.user.id and tonumber(DItem.user.id) or 0
             local status
-            local remoteShared
-            local vipEnabled = false
-            local instituteVipEnabled =false
+            local remoteShared = false
+            local isVipWorld
+            local instituteVipEnabled
 
             if remoteWorldUserId ~= 0 and tonumber(remoteWorldUserId) ~= (userId) then
                 remoteShared = true
             end
 
             for LKey, LItem in ipairs(localWorlds) do
-                if DItem["worldName"] == LItem["foldername"] and
-                   remoteShared == LItem["shared"] and
+                if DItem.worldName == LItem.foldername and
+                   remoteShared == LItem.shared and
                    not LItem.is_zip then
                     local function Handle()
-                        if tonumber(LItem["revision"] or 0) == tonumber(DItem["revision"] or 0) then
+                        if tonumber(LItem.revision or 0) == tonumber(DItem.revision or 0) then
                             status = 3 -- both
-                            revision = LItem['revision']
-                        elseif tonumber(LItem["revision"] or 0) > tonumber(DItem["revision"] or 0) then
+                            revision = LItem.revision
+                        elseif tonumber(LItem.revision or 0) > tonumber(DItem.revision or 0) then
                             status = 4 -- network newest
-                            revision = DItem['revision'] -- use remote revision beacause remote is newest
-                        elseif tonumber(LItem["revision"] or 0) < tonumber(DItem["revision"] or 0) then
+                            revision = DItem.revision -- use remote revision beacause remote is newest
+                        elseif tonumber(LItem.revision or 0) < tonumber(DItem.revision or 0) then
                             status = 5 -- local newest
-                            revision = LItem['revision'] or 0
+                            revision = LItem.revision or 0
                         end
     
                         isExist = true
-                        worldpath = LItem["worldpath"]
-                        remotefile = "local://" .. worldpath
+
+                        worldpath = LItem.worldpath
+                        localTagname = LItem.local_tagname or LItem.foldername
+                        remoteTagname = DItem.extra and DItem.extra.worldTagName or DItem.worldName
+                        isVipWorld = LItem.isVipWorld
+                        instituteVipEnabled = LItem.instituteVipEnabled
     
-                        localTagname = LItem["local_tagname"] or LItem["foldername"]
-                        remoteTagname = DItem["extra"] and DItem["extra"]["worldTagName"] or DItem["worldName"]
-                        vipEnabled = LItem["vipEnabled"] or false
-                        instituteVipEnabled = LItem["instituteVipEnabled"] or false
-    
-                        if tonumber(LItem["kpProjectId"]) ~= tonumber(DItem["projectId"]) then
+                        -- update project id for different user
+                        if tonumber(LItem.kpProjectId) ~= tonumber(DItem.projectId) then
                             local tag = SaveWorldHandler:new():Init(worldpath):LoadWorldInfo()
     
-                            tag.kpProjectId = DItem['projectId']
+                            tag.kpProjectId = DItem.projectId
                             LocalService:SetTag(worldpath, tag)
                         end
                     end
 
                     if remoteShared then
-                        if LItem['user']['username'] == DItem['user']['username'] then
+                        -- avoid upload same name share world
+                        local sharedUsername = Mod.WorldShare:GetWorldData("username", LItem.worldpath)
+                        if sharedUsername == DItem.user.username then
                             Handle()
                             break
                         end
@@ -433,73 +459,76 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                 end
             end
 
-            local text = DItem["worldName"] or ""
-
             if not isExist then
                 --network only
                 status = 2
-                revision = DItem['revision']
-                remoteTagname = DItem['extra'] and DItem['extra']['worldTagName'] or text
+                revision = DItem.revision
+                remoteTagname = DItem.extra and DItem.extra.worldTagName or text
 
                 if remoteTagname ~= "" and text ~= remoteTagname then
                     text = remoteTagname .. '(' .. text .. ')'
                 end
 
-                -- shared world path
                 if remoteWorldUserId ~= 0 and remoteWorldUserId ~= tonumber(userId) then
+                    -- shared world path
                     worldpath = format(
                         "%s/_shared/%s/%s/",
                         Mod.WorldShare.Utils.GetWorldFolderFullPath(),
-                        DItem["user"]["username"],
-                        commonlib.Encoding.Utf8ToDefault(DItem["worldName"])
+                        DItem.user.username,
+                        commonlib.Encoding.Utf8ToDefault(DItem.worldName)
                     )
                 else
+                    -- mine world path
                     worldpath = format(
                         "%s/%s/",
                         Mod.WorldShare.Utils.GetWorldFolderFullPath(),
-                        commonlib.Encoding.Utf8ToDefault(DItem["worldName"])
+                        commonlib.Encoding.Utf8ToDefault(DItem.worldName)
                     )
                 end
-
-                remotefile = "local://" .. worldpath
             end
 
             -- shared world text
             if remoteShared then
-                if DItem['extra'] and DItem['extra']['worldTagName'] then
-                    text = (DItem['user'] and DItem['user']['username'] or '') .. '/' .. (DItem['extra'] and DItem['extra']['worldTagName'] or '') .. '(' .. text .. ')'
+                if DItem.extra and DItem.extra.worldTagName then
+                    text = (DItem.user and DItem.user.username or '') .. '/' .. (DItem.extra and DItem.extra.worldTagName or '') .. '(' .. text .. ')'
                 else
-                    text = (DItem['user'] and DItem['user']['username'] or '') .. '/' .. text
+                    text = (DItem.user and DItem.user.username or '') .. '/' .. text
                 end
             end
 
-            currentWorld = {
+            if DItem.project.visibility == 0 then
+                DItem.project.visibility = 0
+            else
+                DItem.project.visibility = 1
+            end
+
+            currentWorld = self:GenerateWorldInstance({
+                Title = text,
                 text = text,
-                foldername = DItem["worldName"],
+                foldername = DItem.worldName,
                 revision = revision,
-                size = DItem["fileSize"],
-                modifyTime = Mod.WorldShare.Utils:UnifiedTimestampFormat(DItem["updatedAt"]),
-                lastCommitId = DItem["commitId"], 
+                size = DItem.fileSize,
+                modifyTime = Mod.WorldShare.Utils:UnifiedTimestampFormat(DItem.updatedAt),
+                lastCommitId = DItem.commitId, 
                 worldpath = worldpath,
-                remotefile = remotefile,
                 status = status,
-                project = DItem["project"] or {},
-                user = DItem["user"] or {},
-                kpProjectId = DItem["projectId"],
-                hasPid = true,
+                project = DItem.project,
+                user = {
+                    id = DItem.user.userId,
+                    username = DItem.user.username,
+                },
+                kpProjectId = DItem.projectId,
+                fromProjectId = DItem.fromProjectId,
                 local_tagname = localTagname,
                 remote_tagname = remoteTagname,
+                IsFolder = true,
                 is_zip = false,
                 shared = remoteShared,
-                vipEnabled = vipEnabled,
-                instituteVipEnabled = instituteVipEnabled
-            }
-
-            if currentWorld.project.visibility == 0 then
-                currentWorld.project.visibility = 0
-            else
-                currentWorld.project.visibility = 1
-            end
+                isVipWorld = isVipWorld or false,
+                instituteVipEnabled = instituteVipEnabled or false,
+                memberCount = DItem.memberCount,
+                members = {}
+            })
 
             currentWorldList:push_back(currentWorld)
         end
@@ -509,15 +538,15 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
             local isExist = false
 
             for DKey, DItem in ipairs(remoteWorldsList) do
-                local remoteWorldUserId = DItem["user"] and DItem["user"]["id"] and tonumber(DItem["user"]["id"]) or 0
-                local remoteShared
+                local remoteWorldUserId = DItem.user and DItem.user.id and tonumber(DItem.user.id) or 0
+                local remoteShared = false
 
                 if remoteWorldUserId ~= 0 and tonumber(remoteWorldUserId) ~= (userId) then
                     remoteShared = true
                 end
 
-                if LItem["foldername"] == DItem["worldName"] and
-                   LItem["shared"] == remoteShared and
+                if LItem.foldername == DItem.worldName and
+                   LItem.shared == remoteShared and
                    not LItem.is_zip then
                     isExist = true
                     break
@@ -525,13 +554,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
             end
 
             if not isExist then
-                currentWorld = LItem
-                currentWorld.modifyTime = Mod.WorldShare.Utils:UnifiedTimestampFormat(currentWorld.writedate)
-                currentWorld.text = currentWorld.text
-                currentWorld.local_tagname = LItem['local_tagname']
-                currentWorld.status = 1 --local only
-                currentWorld.is_zip = LItem['is_zip'] or false
-                currentWorld.project = { visibility = 0 }
+                currentWorld = LocalServiceWorld:GenerateWorldInstance(LItem)
 
                 currentWorldList:push_back(currentWorld)
             end
@@ -539,4 +562,38 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
 
         callback(currentWorldList)
     end)
+end
+
+function KeepworkServiceWorld:GenerateWorldInstance(params)
+    if not params or type(params) ~= 'table' then
+        return {}
+    end
+
+    return {
+        Title = params.Title or '',
+        text = params.text or '',
+        foldername = params.foldername or '',
+        revision = params.revision or 0,
+        size = params.size or 0,
+        modifyTime = params.modifyTime or '',
+        lastCommitId = params.lastCommitId or '', 
+        worldpath = params.worldpath or '',
+        remotefile = format("local://%s", (params.worldpath or '')),
+        status = params.status or 0,
+        project = params.project or {},
+        user = params.user or {}, -- { id = xxxx, username = xxxx }
+        kpProjectId = params.kpProjectId and tonumber(params.kpProjectId) or 0,
+        fromProjectId = params.fromProjectId and tonumber(params.fromProjectId) or 0,
+        hasPid = params.kpProjectId and params.kpProjectId ~= 0 and true or false,
+        local_tagname = params.local_tagname or '',
+        remote_tagname = params.remote_tagname or '',
+        IsFolder = params.IsFolder == 'true' or params.IsFolder == true,
+        is_zip = params.is_zip == 'true' or params.is_zip == true,
+        shared = params.shared or false,
+        communityWorld = params.communityWorld or false,
+        isVipWorld = params.isVipWorld or false,
+        instituteVipEnabled = params.instituteVipEnabled or false,
+        memberCount = params.memberCount or 0,
+        members = params.members or {},
+    }
 end

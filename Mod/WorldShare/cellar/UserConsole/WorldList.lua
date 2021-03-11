@@ -212,7 +212,7 @@ function WorldList:EnterWorld(index)
     end
 
     -- vip world
-    if currentWorld.vipEnabled == "true" or currentWorld.instituteVipEnabled == "true" then
+    if currentWorld.isVipWorld or currentWorld.instituteVipEnabled then
         if not KeepworkService:IsSignedIn() then
             LoginModal:CheckSignedIn(L"此操作需要登陆后继续", function(bIsSuccessed)
                 if bIsSuccessed then
@@ -530,7 +530,7 @@ function WorldList:EnterWorld(index)
         Mod.WorldShare.Store:Set("explorer/mode", "mine")
     end
 
-    if not KeepworkService:IsSignedIn() and currentWorld.kpProjectId then
+    if not KeepworkService:IsSignedIn() and currentWorld.kpProjectId and currentWorld.kpProjectId ~= 0 then
         LoginModal:Init(function(result)
             if result then
                 if result == 'THIRD' then

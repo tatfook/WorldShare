@@ -20,13 +20,27 @@ local VipNotice = NPL.load("(gl)Mod/WorldShare/cellar/VipNotice/VipNotice.lua")
 
 local Permission = NPL.export()
 
-function Permission:CheckPermission(authName, bOpenUIIfNot, callback)
+function Permission:CheckPermission(authName, bOpenUIIfNot, callback, uiType)
     if not authName or type(authName) ~= "string" then
         authName = ""
     end
 
     if bOpenUIIfNot then
-        LoginModal:CheckSignedIn(L'您需要登录并成为VIP用户，才能使用此功能', function(result)
+        local desc = ''
+
+        if not uiType or uiType == 'Vip' then
+            desc = L'您需要登录并成为VIP用户，才能使用此功能'
+        end
+
+        if uiType == 'Teacher' then
+            desc = L'此功能需要特殊权限，请先登录'
+        end
+
+        if uiType == 'Institute' then
+            desc = L'此功能需要特殊权限，请先登录'
+        end
+
+        LoginModal:CheckSignedIn(desc, function(result)
             if not result then
                 return false
             end
@@ -34,10 +48,20 @@ function Permission:CheckPermission(authName, bOpenUIIfNot, callback)
             local function Handle()
                 KeepworkServicePermission:Authentication(authName, function(result, key, desc)
                     if result == false then
-                        self:ShowFailDialog(key, desc)
+                        if not uiType or uiType == 'Vip' then
+                            self:ShowFailDialog(key, desc)
+                        end
+
+                        if uiType == 'Teacher' then
+                            _guihelper.MessageBox(L'此功能需要教师权限，如需获取请联系管理员或者客服咨询')
+                        end
+
+                        if uiType == 'Institute' then
+                            _guihelper.MessageBox(desc)
+                        end
                     end
 
-                    if type(callback) == "function" then
+                    if callback and type(callback) == "function" then
                         callback(result)
                     end
                 end)

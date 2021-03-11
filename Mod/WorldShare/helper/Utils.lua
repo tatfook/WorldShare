@@ -449,3 +449,25 @@ function Utils.RemoveLineEnding(str)
 
     return str
 end
+
+function Utils:IsSharedWorld(world)
+    if type(world) ~= 'table' then
+        return false
+    end
+
+    if world.shared then
+        return true
+    end
+
+    if type(world.project) == 'table' and ((world.project.memberCount or 0) > 1) then
+        return true
+    end
+
+    local shared = string.match(world.worldpath or '', 'shared') == 'shared' and true or false
+
+    if shared then
+        return true
+    end
+
+    return false
+end

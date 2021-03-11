@@ -221,7 +221,7 @@ function UserConsole:WorldRename(currentItemIndex, tempModifyWorldname, callback
         Mod.WorldShare.Store:Set('world/currentWorld', currentWorld)
     end
 
-    if KeepworkService:IsSignedIn() and currentWorld.status ~= 1 and currentWorld.kpProjectId then
+    if KeepworkService:IsSignedIn() and currentWorld.status ~= 1 and currentWorld.kpProjectId and currentWorld.kpProjectId ~= 0 then
         -- update project info
 
         if tag then

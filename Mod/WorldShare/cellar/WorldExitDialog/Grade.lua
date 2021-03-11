@@ -31,7 +31,7 @@ function Grade:UpdateScore(score, callback)
     local username = Mod.WorldShare.Store:Get('user/username')
     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
-    if not username or not currentWorld.kpProjectId then
+    if not username or not currentWorld.kpProjectId or currentWorld.kpProjectId == 0 then
         return false
     end
 

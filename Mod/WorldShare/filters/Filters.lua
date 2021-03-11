@@ -157,8 +157,8 @@ function Filters:Init()
     -- filter KeepworkPremission
     GameLogic.GetFilters():add_filter(
         'KeepworkPermission',
-        function(bEnabled, authName, bOpenUIIfNot, callback)
-            Permission:CheckPermission(authName, bOpenUIIfNot, callback)
+        function(bEnabled, authName, bOpenUIIfNot, callback, uiType)
+            Permission:CheckPermission(authName, bOpenUIIfNot, callback, uiType)
 
             return true
         end

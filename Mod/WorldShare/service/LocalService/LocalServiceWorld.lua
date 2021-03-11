@@ -27,8 +27,6 @@ local LocalServiceWorld = NPL.export()
 
 function LocalServiceWorld:GetWorldList()
     local localWorlds = LocalLoadWorld.BuildLocalWorldList(true)
-    local sharedWorldList = self:GetSharedWorldList()
-
     local filterLocalWorlds = {}
 
     -- not main world filter
@@ -56,51 +54,68 @@ function LocalServiceWorld:GetWorldList()
 
     localWorlds = filterLocalWorlds
 
+    local sharedWorldList = self:GetSharedWorldList()
+
     for key, item in ipairs(sharedWorldList) do
         localWorlds[#localWorlds + 1] = item
     end
 
+    local worldList = {}
+
     for key, value in ipairs(localWorlds) do
+        local foldername = ''
+        local Title = ''
+        local text = ''
+        local is_zip
+        local revision = 0
+        local kpProjectId = 0
+        local size = 0
+        local local_tagname = ''
+        local isVipWorld = false
+        local instituteVipEnabled = false
+        local modifyTime = Mod.WorldShare.Utils:UnifiedTimestampFormat(value.writedate)
+
         if value.IsFolder then
             value.worldpath = value.worldpath .. '/'
-
-            local worldRevision = WorldRevision:new():init(value.worldpath)
-            value.revision = worldRevision:GetDiskRevision()
+            is_zip = false
+            revision = WorldRevision:new():init(value.worldpath):GetDiskRevision()
+            foldername = value.foldername
+            Title = value.Title
+            text = value.Title
 
             local tag = SaveWorldHandler:new():Init(value.worldpath):LoadWorldInfo()
-
-            if type(tag) ~= 'table' then
-                return false
-            end
-
-            if tag.kpProjectId then
-                value.kpProjectId = tag.kpProjectId
-                value.hasPid = true
-            else
-                value.hasPid = false
-            end
-
-            if tag.size then
-                value.size = tag.size
-            else
-                value.size = 0
-            end
-
-            value.local_tagname = tag.name
-            value.is_zip = false
-            value.vipEnabled = tag.vipEnabled
-            value.institueEnabled = tag.instituteEnabled
+            kpProjectId = tag.kpProjectId
+            size = tag.size
+            local_tagname = tag.name
+            isVipWorld = tag.isVipWorld
+            instituteVipEnabled = tag.instituteVipEnabled
         else
-            value.foldername = value.Title
-            value.text = value.Title
-            value.is_zip = true
-            value.remotefile = format("local://%s", value.worldpath)
+            foldername = value.Title
+            Title = value.Title
+            text = value.Title
+            
+            is_zip = true
         end
 
-        value.modifyTime = Mod.WorldShare.Utils:UnifiedTimestampFormat(value.writedate)
+        worldList[#worldList + 1] = self:GenerateWorldInstance({
+            IsFolder = value.IsFolder,
+            is_zip = is_zip,
+            kpProjectId = kpProjectId,
+            Title = Title,
+            text = text,
+            size = size,
+            foldername = foldername,
+            modifyTime = modifyTime,
+            worldpath = value.worldpath,
+            local_tagname = local_tagname,
+            revision = revision,
+            isVipWorld = isVipWorld,
+            instituteVipEnabled = instituteVipEnabled,
+            shared = value.shared or false
+        })
     end
 
-    return localWorlds
+    return worldList
 end
 
 function LocalServiceWorld:GetSharedWorldList()
@@ -149,8 +164,9 @@ function LocalServiceWorld:GetSharedWorldList()
                                         worldpath = worldpath,
                                         remotefile = remotefile,
                                         foldername = filenameUTF8,
-                                        Title = display_name,
-                                        writedate = item.writedate, filesize=item.filesize,
+                                        Title = worldUsername .. "/" .. display_name,
+                                        writedate = item.writedate,
+                                        filesize = item.filesize,
                                         nid = node.attr.nid,
                                         -- world's new property
                                         author = item.author or "None",
@@ -163,12 +179,9 @@ function LocalServiceWorld:GetSharedWorldList()
                                         grade = item.grade or "primary",
                                         ip = item.ip or "127.0.0.1",
                                         order = item.order,
-                                        IsFolder=true, time_text=item.time_text,
-                                        text = worldUsername .. "/" .. display_name,
+                                        IsFolder = true,
+                                        time_text = item.time_text,
                                         shared = true,
-                                        user = {
-                                            username = worldUsername,
-                                        },
                                     }
                                 )
         
@@ -230,23 +243,6 @@ function LocalServiceWorld:SetInternetLocalWorldList(currentWorldList)
 end
 
 function LocalServiceWorld:MergeInternetLocalWorldList(currentWorldList)
-    local internetLocalWorldList = self:GetInternetLocalWorldList()
-
-    for CKey, CItem in ipairs(currentWorldList) do
-        for IKey, IItem in ipairs(internetLocalWorldList) do
-            if not CItem.shared and IItem.foldername == CItem.foldername then
-                if IItem.is_zip == CItem.is_zip then 
-                    for key, value in pairs(IItem) do
-                        if(key ~= "revision") then
-                            CItem[key] = value
-                        end
-                    end
-                    break
-                end
-            end
-        end
-    end
-
     InternetLoadWorld.cur_ds = currentWorldList
     
     return currentWorldList
@@ -257,14 +253,15 @@ function LocalServiceWorld:SetWorldInstanceByFoldername(foldername)
         return false
     end
 
-    local worldpath = Mod.WorldShare.Utils.GetWorldFolderFullPath() .. '/'  .. foldername .. '/'
+    local worldpath = Mod.WorldShare.Utils.GetWorldFolderFullPath() .. '/' ..
+                      commonlib.Encoding.Utf8ToDefault(foldername) .. '/'
 
-    local currentWorldList = Mod.WorldShare.Store:Get("world/compareWorldList")
+    local currentWorldList = self:GetWorldList()
     local currentWorld = nil
 
     if currentWorldList then
-        local searchCurrentWorld = nil
-        local shared = string.match(worldpath, "shared") == "shared" and true or nil
+        local searchCurrentWorld
+        local shared = string.match(worldpath, "shared") == "shared" and true or false
 
         for key, item in ipairs(currentWorldList) do
             if item.foldername == foldername and
@@ -282,34 +279,33 @@ function LocalServiceWorld:SetWorldInstanceByFoldername(foldername)
 
     if not currentWorld then
         local worldTag = LocalService:GetTag(worldpath) or {}
+        local revision = WorldRevision:new():init(worldpath):GetDiskRevision()
+        local shared = string.match(worldpath, "shared") == "shared" and true or false
+        local local_tagname
 
-        currentWorld = {
+        if worldTag.local_tagname then
+            local_tagname = worldTag.local_tagname
+        else
+            local_tagname = worldTag.name
+        end
+        
+        currentWorld = self:GenerateWorldInstance({
             IsFolder = true,
             is_zip = false,
-            Title = worldTag.name or '',
-            text = worldTag.name or '',
-            author = "None",
-            costTime = "0:0:0",
-            filesize = 0,
+            Title = worldTag.name,
+            text = worldTag.name,
             foldername = foldername,
-            grade = "primary",
-            icon = "Texture/3DMapSystem/common/page_world.png",
-            ip = "127.0.0.1",
-            mode = "survival",
-            modifyTime = 0,
-            nid = "",
-            order = 0,
-            preview = "",
-            progress = "0",
-            size = 0,
             worldpath = worldpath,
-            remotefile = format("local://%s", worldpath)
-        }
-
-        if type(worldTag) == 'table' then
-            currentWorld.kpProjectId = tonumber(worldTag.kpProjectId)
-            currentWorld.fromProjectId = tonumber(worldTag.fromProjects)
-        end
+            kpProjectId = worldTag.kpProjectId,
+            fromProjectId = worldTag.fromProjects,
+            local_tagname = local_tagname,
+            modifyTime = 0,
+            revision = revision,
+            isVipWorld = worldTag.isVipWorld == 'true' or worldTag.isVipWorld == true,
+            communityWorld = worldTag.communityWorld == 'true' or worldTag.communityWorld == true,
+            instituteVipEnabled = worldTag.instituteVipEnabled == 'true' or worldTag.instituteVipEnabled == true,
+            shared = shared
+        })
     end
 
     Mod.WorldShare.Store:Set('world/currentWorld', currentWorld)
@@ -347,23 +343,23 @@ function LocalServiceWorld:SaveWorldInfo(ctx, node)
         return false
     end
 
-    node.attr.clientversion = LocalService:GetClientVersion() or ctx.clientversion
-    node.attr.vipEnabled = ctx.vipEnabled or false
-    node.attr.institueVipEnabled = ctx.institueVipEnabled or false
-    node.attr.communityWorld = ctx.communityWorld or false
-
     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+
+    node.attr.clientversion = LocalService:GetClientVersion() or ctx.clientversion
+    node.attr.communityWorld = ctx.communityWorld or false
+    node.attr.instituteVipEnabled = ctx.instituteVipEnabled or false
     node.attr.kpProjectId = currentWorld and currentWorld.kpProjectId or ctx.kpProjectId
 end
 
 function LocalServiceWorld:LoadWorldInfo(ctx, node)
-    if (type(ctx) ~= 'table' or
-        type(node) ~= 'table' or
-        type(node.attr) ~= 'table') then
+    if type(ctx) ~= 'table' or
+       type(node) ~= 'table' or
+       type(node.attr) ~= 'table' then
         return false
     end
 
     ctx.communityWorld = ctx.communityWorld == 'true' or ctx.communityWorld == true
+    ctx.instituteVipEnabled = ctx.instituteVipEnabled == 'true' or ctx.instituteVipEnabled == true
 end
 
 function LocalServiceWorld:CheckWorldIsCorrect(world)
@@ -378,4 +374,31 @@ function LocalServiceWorld:CheckWorldIsCorrect(world)
     else
         return true
     end
+end
+
+function LocalServiceWorld:GenerateWorldInstance(params)
+    if not params or type(params) ~= 'table' then
+        return {}
+    end
+
+    return {
+        IsFolder = params.IsFolder == 'true' or params.IsFolder == true,
+        is_zip = params.is_zip == 'true' or params.is_zip == true,
+        kpProjectId = params.kpProjectId and tonumber(params.kpProjectId) or 0,
+        fromProjectId = params.fromProjectId and tonumber(params.fromProjectId) or 0,
+        hasPid = params.kpProjectId and params.kpProjectId ~= 0 and true or false,
+        Title = params.Title or '',
+        text = params.text or '',
+        size = params.size or 0,
+        foldername = params.foldername or '',
+        modifyTime = params.modifyTime or '',
+        worldpath = params.worldpath or '',
+        remotefile = format("local://%s", (params.worldpath or '')),
+        revision = params.revision or 0,
+        isVipWorld = params.isVipWorld or false,
+        communityWorld = params.communityWorld or false,
+        instituteVipEnabled = params.instituteVipEnabled or false,
+        local_tagname = params.local_tagname or '',
+        shared = params.shared or false
+    }
 end

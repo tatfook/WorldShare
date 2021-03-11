@@ -44,7 +44,8 @@
                     local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
                     if not currentWorld or not currentWorld.kpProjectId or
-                       not currentEnterWorld or not currentEnterWorld.kpProjectId then
+                       not currentEnterWorld or not currentEnterWorld.kpProjectId or
+                       currentEnterWorld.kpProjectId == 0 then
                         return false
                     end
 

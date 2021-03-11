@@ -75,7 +75,7 @@ function KeepworkServiceProject:Apply(message, callback)
 
     local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
 
-    if not currentWorld or not currentWorld.kpProjectId then
+    if not currentWorld or not currentWorld.kpProjectId or currentWorld.kpProjectId == 0 then
         return false
     end
 
@@ -161,7 +161,7 @@ function KeepworkServiceProject:GetProjectId()
     WorldCommon.LoadWorldTag()
     local tagInfo = WorldCommon.GetWorldInfo()
 
-    if tagInfo and tagInfo.kpProjectId then
+    if tagInfo and tagInfo.kpProjectId and tagInfo.kpProjectId ~= 0 then
         return tagInfo.kpProjectId
     end
 end

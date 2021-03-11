@@ -100,7 +100,7 @@
                 function open_keepwork_project()
                     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
-                    if currentWorld and currentWorld.kpProjectId then
+                    if currentWorld and currentWorld.kpProjectId and currentWorld.kpProjectId ~= 0 then
                         ParaGlobal.ShellExecute("open", format("%s/pbl/project/%d/", KeepworkService:GetKeepworkUrl(), currentWorld.kpProjectId or 0), "", "", 1)
                     end
                 end
@@ -169,7 +169,7 @@
                 function get_project_id()
                     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
-                    if currentWorld and currentWorld.kpProjectId then
+                    if currentWorld and currentWorld.kpProjectId or currentWorld.kpProjectId ~= 0 then
                         return tostring(currentWorld.kpProjectId)
                     end
 
@@ -179,7 +179,7 @@
                 function has_project_id()
                     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
-                    if currentWorld and currentWorld.kpProjectId then
+                    if currentWorld and currentWorld.kpProjectId or currentWorld.kpProjectId ~= 0 then
                         return true
                     else
                         return false

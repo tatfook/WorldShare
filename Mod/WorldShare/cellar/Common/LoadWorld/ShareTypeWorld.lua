@@ -16,19 +16,7 @@ local KeepworkServiceWorld = NPL.load('(gl)Mod/WorldShare/service/KeepworkServic
 local ShareTypeWorld = NPL.export()
 
 function ShareTypeWorld:IsSharedWorld(world)
-    if type(world) ~= 'table' then
-        return false
-    end
-
-    if world.shared then
-        return true
-    end
-
-    if type(world.project) == 'table' and ((world.project.memberCount or 0) > 1) then
-        return true
-    end
-
-    return false
+    return Mod.WorldShare.Utils:IsSharedWorld(world)
 end
 
 function ShareTypeWorld:Lock(world, callback)

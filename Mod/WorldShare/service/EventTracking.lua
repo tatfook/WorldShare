@@ -296,7 +296,7 @@ function EventTrackingService:GenerateDataPacket(eventType, userId, action, star
     local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
     local projectId
 
-    if currentEnterWorld and currentEnterWorld.kpProjectId then
+    if currentEnterWorld and currentEnterWorld.kpProjectId and currentEnterWorld.kpProjectId ~= 0 then
         projectId = currentEnterWorld.kpProjectId
     end
 
@@ -506,6 +506,7 @@ function EventTrackingService:Loop()
 
                                             if currentEnterWorld and
                                                currentEnterWorld.kpProjectId and
+                                               currentEnterWorld.kpProjectId ~= 0 and
                                                tonumber(currentEnterWorld.kpProjectId) == tonumber(uItem.packet.projectId) then
                                                 if uItem.packet.endAt and uItem.packet.endAt == 0 then
                                                     firstTimeSave()

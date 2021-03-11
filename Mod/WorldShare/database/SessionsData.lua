@@ -175,7 +175,7 @@ function SessionsData:GetUserLastPosition(projectId, username)
     if not projectId then
         local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
-        if not currentEnterWorld or not currentEnterWorld.kpProjectId then
+        if not currentEnterWorld or not currentEnterWorld.kpProjectId or currentWorld.kpProjectId == 0 then
             return
         end
 
@@ -220,7 +220,7 @@ function SessionsData:SetUserLastPosition(x, y, z, cameraLiftupAngle, cameraRotY
     if not projectId then
         local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
-        if not currentEnterWorld or not currentEnterWorld.kpProjectId then
+        if not currentEnterWorld or not currentEnterWorld.kpProjectId or currentWorld.kpProjectId == 0 then
             return
         end
 

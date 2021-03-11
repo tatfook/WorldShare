@@ -319,7 +319,11 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                 end
             else
                 -- vip enter
-                if data and data.extra and data.extra.vipEnabled == 1 or data.extra.institudeEnabled == 1 then
+                if data and
+                   data.extra and
+                   not self.vipVerified and
+                   ((data.extra.vipEnabled and data.extra.vipEnabled == 1) or
+                   (data.extra.isVipWorld and data.extra.isVipWorld == 1)) then
                     if not KeepworkService:IsSignedIn() then
                         LoginModal:CheckSignedIn(L"该项目需要登录后访问", function(bIsSuccessed)
                             if bIsSuccessed then
@@ -329,33 +333,47 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                         return false
                     end
     
-                    local userType = Mod.WorldShare.Store:Get("user/userType")
                     local username = Mod.WorldShare.Store:Get("user/username")
-                    local isVip = Mod.WorldShare.Store:Get("user/isVip")
 
-                    local canEnter = false
-
-                    if data.username and data.username == username then
-                        canEnter = true
-                    end
-
-                    if data.extra.vipEnabled == 1 then
-                        if isVip then
-                            canEnter = true
-                        end
-                    end
-
-                    if data.extra.institudeEnabled == 1 then
-                        if userType.student then
-                            canEnter = true
-                        end
-                    end
-
-                    if not canEnter then
-                        _guihelper.MessageBox(L"你没有权限进入此世界")
-                        return false
+                    if data.username and data.username ~= username then
+                        GameLogic.IsVip('Vip', true, function(result)
+                            if result then
+                                self.vipVerified = true
+                                self:EnterWorldById(pid, refreshMode)
+                            end
+                        end, 'Vip')
                     end
                 end
+
+                self.vipVerified = false
+
+                -- vip institute enter
+                if data and
+                   data.extra and
+                   data.extra.instituteVipEnabled and
+                   data.extra.instituteVipEnabled == 1 and
+                   not self.instituteVerified then
+                    if not KeepworkService:IsSignedIn() then
+                        LoginModal:CheckSignedIn(L"该项目需要登录后访问", function(bIsSuccessed)
+                            if bIsSuccessed then
+                                self:EnterWorldById(pid, refreshMode)
+                            end
+                        end)
+                        return
+                    else
+                        GameLogic.IsVip('IsOrgan', true, function(result)
+                            if result then
+                                self.instituteVerified = true
+                                self:EnterWorldById(pid, refreshMode)
+                            else
+                                _guihelper.MessageBox(L"你没有权限进入此世界（机构VIP）")
+                            end
+                        end, 'Institute')
+                    end
+                    return
+                end
+
+                self.instituteVerified = false
 
                 if data.world and data.world.archiveUrl and #data.world.archiveUrl > 0 then
                     Mod.WorldShare.Store:Set('world/openKpProjectId', pid)

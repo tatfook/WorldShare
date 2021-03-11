@@ -86,7 +86,7 @@ function WorldExitDialog.ShowPage(callback)
 
     if GameLogic.IsReadOnly() then
         if KeepworkService:IsSignedIn() then
-            if currentWorld.kpProjectId then
+            if currentWorld.kpProjectId and currentWorld.kpProjectId ~= 0 then
                 Grade:IsRated(currentWorld.kpProjectId, function(isRated)
                     self.isRated = isRated
                     Handle()
@@ -106,7 +106,7 @@ function WorldExitDialog.ShowPage(callback)
                     return false
                 end
 
-                if currentWorld and currentWorld.kpProjectId then
+                if currentWorld and currentWorld.kpProjectId and currentWorld.kpProjectId ~= 0 then
                     KeepworkServiceProject:GetProject(currentWorld.kpProjectId, function(data)
                         if data and data.world and data.world.worldName then
                             self.currentWorldKeepworkInfo = data
@@ -134,7 +134,7 @@ function WorldExitDialog:IsUserWorld()
     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
     local userId = Mod.WorldShare.Store:Get('user/userId')
 
-    if currentWorld and currentWorld.kpProjectId and userId then
+    if currentWorld and currentWorld.kpProjectId and currentWorld.kpProjectId ~= 0 and userId then
         if self.currentWorldKeepworkInfo and self.currentWorldKeepworkInfo.userId and self.currentWorldKeepworkInfo.userId == userId then
             return true
         else
@@ -221,7 +221,7 @@ function WorldExitDialog:CanSetStart()
         LoginModal:Init(function()
             local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
-            if currentWorld and currentWorld.kpProjectId then
+            if currentWorld and currentWorld.kpProjectId and currentWorld.kpProjectId ~= 0 then
                 KeepworkServiceProject:GetProject(tonumber(currentWorld.kpProjectId), function(data)
                     if data and data.world and data.world.worldName then
                         self.currentWorldKeepworkInfo = data
