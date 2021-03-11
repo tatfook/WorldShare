@@ -177,7 +177,7 @@ function LoadWorldCommand:Init()
                 end
 
                 if lastWorld.kpProjectId and lastWorld.kpProjectId ~= 0 then
-                    local userId = Mod.WorldShare.Store:Get('world/userId')
+                    local userId = Mod.WorldShare.Store:Get('user/userId')
 
                     if tonumber(lastWorld.user.id) == tonumber(userId) then
                         GameLogic.RunCommand(format('/loadworld -s -personal %d', lastWorld.kpProjectId))
