@@ -319,9 +319,9 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                 end
             else
                 -- vip enter
-                if data and
+                if not self.vipVerified and
+                   data and
                    data.extra and
-                   not self.vipVerified and
                    ((data.extra.vipEnabled and data.extra.vipEnabled == 1) or
                    (data.extra.isVipWorld and data.extra.isVipWorld == 1)) then
                     if not KeepworkService:IsSignedIn() then
@@ -330,19 +330,20 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                                 self:EnterWorldById(pid, refreshMode)
                             end
                         end)
-                        return false
-                    end
+                    else
+                        local username = Mod.WorldShare.Store:Get("user/username")
     
-                    local username = Mod.WorldShare.Store:Get("user/username")
-
-                    if data.username and data.username ~= username then
-                        GameLogic.IsVip('Vip', true, function(result)
-                            if result then
-                                self.vipVerified = true
-                                self:EnterWorldById(pid, refreshMode)
-                            end
-                        end, 'Vip')
+                        if data.username and data.username ~= username then
+                            GameLogic.IsVip('Vip', true, function(result)
+                                if result then
+                                    self.vipVerified = true
+                                    self:EnterWorldById(pid, refreshMode)
+                                end
+                            end, 'Vip')
+                        end
                     end
+
+                    return
                 end
 
                 self.vipVerified = false
