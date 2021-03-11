@@ -106,6 +106,8 @@ function OpusSetting:SetVip(value)
         params.extra.isVipWorld = 0
     end
 
+    params.extra.vipEnabled = 0
+
     KeepworkServiceProject:UpdateProject(currentWorld.kpProjectId, params, function(data, err)
         if err == 200 then
             GameLogic.AddBBS(nil, L"设置成功", 3000, "0 255 0")
