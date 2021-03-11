@@ -496,10 +496,12 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                 end
             end
 
-            if DItem.project.visibility == 0 then
-                DItem.project.visibility = 0
-            else
-                DItem.project.visibility = 1
+            if DItem.project then
+                if DItem.project.visibility == 0 then
+                    DItem.project.visibility = 0
+                else
+                    DItem.project.visibility = 1
+                end
             end
 
             currentWorld = self:GenerateWorldInstance({
