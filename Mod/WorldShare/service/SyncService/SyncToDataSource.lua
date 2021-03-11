@@ -618,9 +618,7 @@ function SyncToDataSource:UpdateRecord(callback)
 
                                 Mod.WorldShare.Store:Remove('world/isPreviewUpdated')
         
-                                echo(self.currentWorld, true)
                                 if not self.currentWorld.status then
-                                    echo('999999999999999999999999', true)
                                     -- covert to online instance
                                     self.currentWorld = KeepworkServiceWorld:GenerateWorldInstance({
                                         Title = self.currentWorld.Title,
@@ -651,7 +649,7 @@ function SyncToDataSource:UpdateRecord(callback)
                                         members = {}, -- updated at enter world
                                     })
                                 end
-                                echo(self.currentWorld, true)
+
                                 Mod.WorldShare.Store:Set("world/currentWorld", self.currentWorld)
                                 KeepworkService:SetCurrentCommitId()
 
