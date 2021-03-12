@@ -543,8 +543,7 @@ function SyncToDataSource:UpdateRecord(callback)
 
         local function HandleGetWorld(data)
             local oldWorldInfo = data or false
-            echo('--------------------------', true)
-            echo(oldWorldInfo, true)
+
             if not oldWorldInfo then
                 return false
             end
