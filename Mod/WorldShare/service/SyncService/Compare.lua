@@ -338,12 +338,12 @@ function Compare:GetCurrentWorldInfo(callback)
 
                 local userId = Mod.WorldShare.Store:Get('user/userId')
                 local shared = false
+                if data and data.memberCount and data.memberCount > 1 then
+                    shared = true
+                end
 
                 if userId ~= data.userId then
     
-                    if data and data.memberCount and data.memberCount > 1 then
-                        shared = true
-                    end
 
                     local localShared = string.match(worldpath or '', 'shared') == 'shared' and true or false
     
