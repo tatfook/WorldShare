@@ -245,8 +245,6 @@ function Create:EnterWorld(index, skip)
         return
     end
 
-    self.vipVerified = false
-
     -- institute vip step
     if VipTypeWorld:IsInstituteVipWorld(currentSelectedWorld) and not self.instituteVerified then
         if not KeepworkServiceSession:IsSignedIn() then
@@ -274,8 +272,6 @@ function Create:EnterWorld(index, skip)
         end
         return
     end
-
-    self.instituteVerified = false
 
     -- share world step
     if ShareTypeWorld:IsSharedWorld(currentSelectedWorld) and not skip then
@@ -450,6 +446,9 @@ function Create:EnterWorld(index, skip)
             end
         end)
     end
+
+    self.vipVerified = false
+    self.instituteVerified = false
 end
 
 function Create:DeleteWorld(worldIndex)
