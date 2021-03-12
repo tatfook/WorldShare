@@ -192,6 +192,7 @@ function KeepworkServiceWorld:GetWorld(foldername, shared, callback)
 
             if not localShared and not currentWorld.shared then
                 callback(item)
+                return
             else
                 if not currentWorld.shared then
                     -- illegal operation
