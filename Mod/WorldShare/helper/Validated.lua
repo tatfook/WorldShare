@@ -18,8 +18,8 @@ function Validated:Account(str)
        #str > 20  then
         return false
     else
-        -- contains digits and characters
-        if string.match(str, '%a+') and string.match(str, '%d+') then
+        -- contains digits or characters
+        if string.match(str, '%a+') or string.match(str, '%d+') then
             if string.match(str, '^%d+') then
                 return false
             else

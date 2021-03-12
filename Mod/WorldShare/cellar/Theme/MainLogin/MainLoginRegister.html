@@ -153,7 +153,7 @@
                         end
 
                         if not Validated:Account(account) then
-                            page:SetUIValue('register_account_field_error_msg', L'*账号需非数字开头的字母、数字组合形式')
+                            page:SetUIValue('register_account_field_error_msg', L'*账号需大于3位且非数字开头的字母、数字组合形式')
                             page:FindControl('register_account_field_error').visible = true
                             return false
                         end
@@ -309,7 +309,7 @@
                         local username = page:GetValue('register_account')
 
                         if not Validated:Account(username) then
-                            page:SetUIValue('register_account_field_error_msg', L'*账号需非数字开头的字母、数字组合形式')
+                            page:SetUIValue('register_account_field_error_msg', L'*账号需大于3位且非数字开头的字母、数字组合形式')
                             page:FindControl('register_account_field_error').visible = true
                             callback(false)
                             return
@@ -478,7 +478,7 @@
                         local username = page:GetValue('phone_register_account')
 
                         if not Validated:Account(username) then
-                            page:SetUIValue('phone_account_field_error_msg', L'*账号需非数字开头的字母、数字组合形式')
+                            page:SetUIValue('phone_account_field_error_msg', L'*账号需大于3位且非数字开头的字母、数字组合形式')
                             page:FindControl('phone_account_field_error').visible = true
                             page:SetUIBackground('phone_register_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 197 258 44')
                             return
@@ -543,7 +543,7 @@
                                 onclick='set_phone_mode'/>
                         </div>
                         <!-- account -->
-                        <pe:container name='account_register_mode' visible='true' style="width: 240px;height: 260px;background:;">
+                        <pe:container name='account_register_mode' visible='true' style="width: 260px;height: 260px;background:;">
                             <pe:container name="register_account_field_error" visible="false" style="display:none;background:">
                                 <!-- error message -->
                                 <div>
