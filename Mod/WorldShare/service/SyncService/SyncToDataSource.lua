@@ -132,14 +132,24 @@ function SyncToDataSource:IsProjectExist(callback)
         self.currentWorld.shared,
         function(data)
             if type(data) == 'table' then
-                callback(true)
-            else
                 if self.currentWorld.shared then
+                    local members = self.currentWorld.members or {}
+                    local username = Mod.WorldShare.Store:Get('user/username')
+                    
+                    for key, item in ipairs(members) do
+                        if item == username then
+                            callback(true)
+                            return
+                        end
+                    end
+
                     self.callback(false, L"该项目不属于您，无法上传分享")
                     self:SetFinish(true)
                 else
-                    callback(false)
+                    callback(true)
                 end
+            else
+                callback(false)
             end
         end
     )
@@ -533,7 +543,8 @@ function SyncToDataSource:UpdateRecord(callback)
 
         local function HandleGetWorld(data)
             local oldWorldInfo = data or false
-
+            echo('--------------------------', true)
+            echo(oldWorldInfo, true)
             if not oldWorldInfo then
                 return false
             end

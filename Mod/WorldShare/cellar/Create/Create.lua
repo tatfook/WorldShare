@@ -23,6 +23,7 @@ local DeleteWorld = NPL.load('(gl)Mod/WorldShare/cellar/DeleteWorld/DeleteWorld.
 local Compare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
 local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
 local LocalServiceWorld = NPL.load('(gl)Mod/WorldShare/service/LocalService/LocalServiceWorld.lua')
+local KeepworkServiceWorld = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/World.lua')
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
 local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
 local SyncToLocal = NPL.load('(gl)Mod/WorldShare/service/SyncService/SyncToLocal.lua')
@@ -306,7 +307,41 @@ function Create:EnterWorld(index, skip)
 
                 for key, item in ipairs(data) do
                     if item.userId == userId then
-                        self:EnterWorld(index, true)
+                        -- check ouccupy
+                        KeepworkServiceWorld:GetLockInfo(
+                            currentSelectedWorld.kpProjectId,
+                            function(data)
+                                if not data then
+                                    self:EnterWorld(index, true)
+                                else
+                                    if data and data.owner and data.owner.userId == userId then
+                                        self:EnterWorld(index, true)
+                                    else
+                                        Mod.WorldShare.MsgBox:Dialog(
+                                        "MultiPlayerWolrdOthersOccupy",
+                                        format(
+                                            L"%s正在以独占模式编辑世界%s，请联系%s退出编辑或者以只读模式打开世界",
+                                            data.owner.username,
+                                            currentSelectedWorld.foldername,
+                                            data.owner.username
+                                        ),
+                                        {
+                                            Title = L"世界被占用",
+                                            Yes = L"知道了",
+                                            No = L"只读模式打开"
+                                        },
+                                        function(res)
+                                            if res and res == _guihelper.DialogResult.No then
+                                                Mod.WorldShare.Store:Set("world/readonly", true)
+                                                InternetLoadWorld.EnterWorld()
+                                            end
+                                        end,
+                                        _guihelper.MessageBoxButtons.YesNo
+                                    )
+                                    end
+                                end
+                            end
+                        )
                         return
                     end
                 end

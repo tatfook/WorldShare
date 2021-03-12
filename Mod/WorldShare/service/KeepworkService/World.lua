@@ -180,7 +180,7 @@ function KeepworkServiceWorld:GetWorld(foldername, shared, callback)
         return false
     end
 
-    local userId = tonumber(Mod.WorldShare.Store:Get("user/userId"))
+    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld') or {}
 
     KeepworkWorldsApi:GetWorldByName(foldername, function(data, err)
         if type(data) ~= 'table' then
@@ -188,24 +188,32 @@ function KeepworkServiceWorld:GetWorld(foldername, shared, callback)
         end
 
         for key, item in ipairs(data) do
-            if item.user and item.user.id == userId then
-                -- remote world info mine
-                if not shared then
-                    callback(item)
-                    return true
-                end
-            else
-                -- remote world info shared
-                local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+            local localShared = string.match(currentWorld.worldpath or '', 'shared') == 'shared' and true or false
 
-                if shared and item.user.username == currentWorld.user.username then
+            if not localShared and not currentWorld.shared then
+                callback(item)
+            else
+                if not currentWorld.shared then
+                    -- illegal operation
+                    return
+                end
+
+                local shared = false
+
+                if item.user and item.project.memberCount > 1 then
+                    shared = true
+                end
+
+                if currentWorld.user.id == item.user.id and
+                   currentWorld.shared == shared then
+                    -- exist
                     callback(item)
-                    return true
+                    return
                 end
             end
         end
 
-        callback()
+        callback(false)
     end)
 end
 
