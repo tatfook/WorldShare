@@ -200,7 +200,7 @@ function KeepworkServiceWorld:GetWorld(foldername, shared, callback)
 
                 local shared = false
 
-                if item.user and item.project.memberCount > 1 then
+                if item.project and item.project.memberCount > 1 then
                     shared = true
                 end
 
