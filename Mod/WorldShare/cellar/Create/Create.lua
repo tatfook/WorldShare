@@ -159,10 +159,24 @@ function Create:Sync()
         end
 
         if result == Compare.REMOTEBIGGER or
-           result == Compare.LOCALBIGGER or
-           result == Compare.EQUAL then
-            SyncMain:ShowStartSyncPage(nil, function()
-                self:GetWorldList(self.statusFilter)
+            result == Compare.LOCALBIGGER or
+            result == Compare.EQUAL then
+
+            local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+
+            KeepworkServiceProject:GetMembers(currentWorld.kpProjectId, function(membersData, err)
+                local members = {}
+            
+                for key, item in ipairs(membersData) do
+                    members[#members + 1] = item.username
+                end
+
+                currentWorld.members = members
+                Mod.WorldShare.Store:Set('world/currentWorld', currentWorld)
+                
+                SyncMain:ShowStartSyncPage(nil, function()
+                    self:GetWorldList(self.statusFilter)
+                end)
             end)
         end
 

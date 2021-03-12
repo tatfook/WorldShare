@@ -135,7 +135,7 @@ function SyncToDataSource:IsProjectExist(callback)
                 if self.currentWorld.shared then
                     local members = self.currentWorld.members or {}
                     local username = Mod.WorldShare.Store:Get('user/username')
-                    
+
                     for key, item in ipairs(members) do
                         if item == username then
                             callback(true)

@@ -337,9 +337,9 @@ function Compare:GetCurrentWorldInfo(callback)
                 data = data or {}
 
                 local userId = Mod.WorldShare.Store:Get('user/userId')
+                local shared = false
 
                 if userId ~= data.userId then
-                    local shared = false
     
                     if data and data.memberCount and data.memberCount > 1 then
                         shared = true

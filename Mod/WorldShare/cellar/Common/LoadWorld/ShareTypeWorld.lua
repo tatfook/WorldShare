@@ -38,6 +38,8 @@ function ShareTypeWorld:Lock(world, callback)
             if not data then
                 callback(true)
             else
+                local userId = Mod.WorldShare.Store:Get('user/userId')
+
                 if data and data.owner and data.owner.userId == userId then
                     callback(true)
                 else
