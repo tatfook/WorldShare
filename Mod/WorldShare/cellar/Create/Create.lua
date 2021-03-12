@@ -308,40 +308,9 @@ function Create:EnterWorld(index, skip)
                 for key, item in ipairs(data) do
                     if item.userId == userId then
                         -- check ouccupy
-                        KeepworkServiceWorld:GetLockInfo(
-                            currentSelectedWorld.kpProjectId,
-                            function(data)
-                                if not data then
-                                    self:EnterWorld(index, true)
-                                else
-                                    if data and data.owner and data.owner.userId == userId then
-                                        self:EnterWorld(index, true)
-                                    else
-                                        Mod.WorldShare.MsgBox:Dialog(
-                                        "MultiPlayerWolrdOthersOccupy",
-                                        format(
-                                            L"%s正在以独占模式编辑世界%s，请联系%s退出编辑或者以只读模式打开世界",
-                                            data.owner.username,
-                                            currentSelectedWorld.foldername,
-                                            data.owner.username
-                                        ),
-                                        {
-                                            Title = L"世界被占用",
-                                            Yes = L"知道了",
-                                            No = L"只读模式打开"
-                                        },
-                                        function(res)
-                                            if res and res == _guihelper.DialogResult.No then
-                                                Mod.WorldShare.Store:Set("world/readonly", true)
-                                                InternetLoadWorld.EnterWorld()
-                                            end
-                                        end,
-                                        _guihelper.MessageBoxButtons.YesNo
-                                    )
-                                    end
-                                end
-                            end
-                        )
+                        ShareTypeWorld:Lock(currentSelectedWorld, function()
+                            self:EnterWorld(index, true)
+                        end)
                         return
                     end
                 end
@@ -424,13 +393,7 @@ function Create:EnterWorld(index, skip)
                                 return false
                             end
 
-                            if ShareTypeWorld:IsSharedWorld(currentWorld) then
-                                ShareTypeWorld:Lock(currentWorld, function()
-                                    InternetLoadWorld.EnterWorld()
-                                end)
-                            else
-                                InternetLoadWorld.EnterWorld()
-                            end
+                            InternetLoadWorld.EnterWorld()
                         end
                     end
                 end

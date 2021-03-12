@@ -56,7 +56,7 @@ function DeleteWorld:DeleteWorld(callback)
     if isEnterWorld then
         if currentWorld.foldername == currentEnterWorld.foldername and
            currentWorld.shared == currentEnterWorld.shared and
-           GameLogic.IsReadOnly() == currentWorld.is_zip then
+           currentWorld.is_zip == currentEnterWorld.is_zip then
             _guihelper.MessageBox(L'不能刪除正在编辑的世界')
             return false
         end

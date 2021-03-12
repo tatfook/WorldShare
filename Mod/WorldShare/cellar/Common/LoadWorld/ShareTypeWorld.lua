@@ -24,6 +24,10 @@ function ShareTypeWorld:Lock(world, callback)
         return false
     end
 
+    if not callback and type(callback) ~= 'function' then
+        return false
+    end
+
     Mod.WorldShare.MsgBox:Show(L'请稍候...')
 
     KeepworkServiceWorld:GetLockInfo(
@@ -31,60 +35,34 @@ function ShareTypeWorld:Lock(world, callback)
         function(data)
             Mod.WorldShare.MsgBox:Close()
 
-            local userId = Mod.WorldShare.Store:Get('user/userId')
-            local clientPassword = Mod.WorldShare.Store:Getter('user/GetClientPassword')
-            local canLocked = false
-
             if not data then
-                canLocked = true
+                callback(true)
             else
                 if data and data.owner and data.owner.userId == userId then
-                    canLocked = true
+                    callback(true)
                 else
                     Mod.WorldShare.MsgBox:Dialog(
-                        'MultiPlayerWolrdOthersOccupy',
-                        format(
-                            L'%s正在以独占模式编辑世界%s，请联系%s退出编辑或者以只读模式打开世界',
-                            data.owner.username,
-                            world.foldername,
-                            data.owner.username
-                        ),
-                        {
-                            Title = L'世界被占用',
-                            Yes = L'知道了',
-                            No = L'只读模式打开'
-                        },
-                        function(res)
-                            if res and res == _guihelper.DialogResult.No then
-                                Mod.WorldShare.Store:Set('world/readonly', true)
-                                
-                                if callback and type(callback) == 'function' then
-                                    callback()
-                                end
-                            end
-                        end,
-                        _guihelper.MessageBoxButtons.YesNo
-                    )
-                end
-            end
-
-            if canLocked then
-                Mod.WorldShare.MsgBox:Show(L'请稍候...')
-
-                KeepworkServiceWorld:UpdateLock(
-                    world.kpProjectId,
-                    'exclusive',
-                    world.revision,
-                    nil,
-                    clientPassword,
-                    function(data)
-                        Mod.WorldShare.MsgBox:Close()
-
-                        if callback and type(callback) == 'function' then
-                            callback()
+                    "MultiPlayerWolrdOthersOccupy",
+                    format(
+                        L"%s正在以独占模式编辑世界%s，请联系%s退出编辑或者以只读模式打开世界",
+                        data.owner.username,
+                        world.foldername,
+                        data.owner.username
+                    ),
+                    {
+                        Title = L"世界被占用",
+                        Yes = L"知道了",
+                        No = L"只读模式打开"
+                    },
+                    function(res)
+                        if res and res == _guihelper.DialogResult.No then
+                            Mod.WorldShare.Store:Set("world/readonly", true)
+                            callback(false)
                         end
-                    end
+                    end,
+                    _guihelper.MessageBoxButtons.YesNo
                 )
+                end
             end
         end
     )

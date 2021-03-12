@@ -336,16 +336,18 @@ function Compare:GetCurrentWorldInfo(callback)
             KeepworkServiceProject:GetProject(kpProjectId, function(data, err)
                 data = data or {}
 
-                local shared = false
+                local userId = Mod.WorldShare.Store:Get('user/userId')
 
-                if data and data.memberCount and data.memberCount > 1 then
-                    shared = true
-                end
-
-                if not shared then
-                    local userId = Mod.WorldShare.Store:Get('user/userId')
+                if userId ~= data.userId then
+                    local shared = false
     
-                    if userId ~= data.userId then
+                    if data and data.memberCount and data.memberCount > 1 then
+                        shared = true
+                    end
+
+                    local localShared = string.match(worldpath or '', 'shared') == 'shared' and true or false
+    
+                    if not shared or not localShared then
                         -- covert to new world when different user world
                         currentWorld = LocalServiceWorld:GenerateWorldInstance({
                             IsFolder = true,
