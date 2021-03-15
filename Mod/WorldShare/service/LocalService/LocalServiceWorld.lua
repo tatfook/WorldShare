@@ -344,11 +344,18 @@ function LocalServiceWorld:SaveWorldInfo(ctx, node)
     end
 
     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+    local kpProjectId = 0
+
+    if currentWorld and currentWorld.kpProjectId then
+        kpProjectId = currentWorld.kpProjectId or 0
+    else
+        kpProjectId = ctx.kpProjectId or 0
+    end
 
     node.attr.clientversion = LocalService:GetClientVersion() or ctx.clientversion
     node.attr.communityWorld = ctx.communityWorld or false
     node.attr.instituteVipEnabled = ctx.instituteVipEnabled or false
-    node.attr.kpProjectId = currentWorld and currentWorld.kpProjectId or ctx.kpProjectId
+    node.attr.kpProjectId = kpProjectId
 end
 
 function LocalServiceWorld:LoadWorldInfo(ctx, node)
@@ -360,6 +367,7 @@ function LocalServiceWorld:LoadWorldInfo(ctx, node)
 
     ctx.communityWorld = ctx.communityWorld == 'true' or ctx.communityWorld == true
     ctx.instituteVipEnabled = ctx.instituteVipEnabled == 'true' or ctx.instituteVipEnabled == true
+    ctx.kpProjectId = tonumber(ctx.kpProjectId) or 0
 end
 
 function LocalServiceWorld:CheckWorldIsCorrect(world)
