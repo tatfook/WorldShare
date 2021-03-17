@@ -38,31 +38,31 @@ local Encoding = commonlib.gettable("commonlib.Encoding")
 local KeepworkServiceSession = NPL.export()
 
 function KeepworkServiceSession:LongConnectionInit(callback)
-    local connection = KeepworkSocketApi:Connect()
-
-    if not connection then
-        return false
-    end
-
-    if connection.inited then
-        return nil
-    end
-
-    if not KpChatChannel.client then
-        KpChatChannel.client = connection
+    KeepworkSocketApi:Connect(function(connection)
+        if not connection then
+            return false
+        end
     
-        KpChatChannel.client:AddEventListener("OnOpen", KpChatChannel.OnOpen, KpChatChannel)
-        KpChatChannel.client:AddEventListener("OnMsg", KpChatChannel.OnMsg, KpChatChannel)
-        KpChatChannel.client:AddEventListener("OnClose", KpChatChannel.OnClose, KpChatChannel)
-    end
-
-    connection:AddEventListener("OnOpen", function(self)
-        LOG.std("KeepworkServiceSession", "debug", "LongConnectionInit", "Connected client")
-    end, connection)
-
-    connection:AddEventListener("OnMsg", self.OnMsg, connection)
-    connection.uiCallback = callback
-    connection.inited = true
+        if connection.inited then
+            return nil
+        end
+    
+        if not KpChatChannel.client then
+            KpChatChannel.client = connection
+        
+            KpChatChannel.client:AddEventListener("OnOpen", KpChatChannel.OnOpen, KpChatChannel)
+            KpChatChannel.client:AddEventListener("OnMsg", KpChatChannel.OnMsg, KpChatChannel)
+            KpChatChannel.client:AddEventListener("OnClose", KpChatChannel.OnClose, KpChatChannel)
+        end
+    
+        connection:AddEventListener("OnOpen", function(self)
+            LOG.std("KeepworkServiceSession", "debug", "LongConnectionInit", "Connected client")
+        end, connection)
+    
+        connection:AddEventListener("OnMsg", self.OnMsg, connection)
+        connection.uiCallback = callback
+        connection.inited = true
+    end)
 end
 
 function KeepworkServiceSession:OnMsg(msg)

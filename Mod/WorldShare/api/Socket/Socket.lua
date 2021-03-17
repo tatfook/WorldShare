@@ -9,9 +9,12 @@ local SocketApi = NPL.load("(gl)Mod/WorldShare/api/Socket/Socket.lua")
 ------------------------------------------------------------
 ]]
 
+-- api
 local SocketBaseApi = NPL.load("(gl)Mod/WorldShare/api/Socket/BaseApi.lua")
 
+-- libs
 local SocketIOClient = NPL.load("(gl)script/ide/System/os/network/SocketIO/SocketIOClient.lua")
+local KpChatChannel = NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/ChatSystem/KpChatChannel.lua")
 
 local SocketApi = NPL.export()
 
@@ -76,11 +79,13 @@ function SocketApi:Connect()
         self:SendPacket(pkt)
     end
 
-    self.client.connection:Connect(SocketBaseApi:GetApi())
-
-    if self.client.connection then
-        return self.client.connection
-    end
+    KpChatChannel.PreloadSocketIOUrl(function()
+        self.client.connection:Connect(SocketBaseApi:GetApi())
+    
+        if self.client.connection then
+            return self.client.connection
+        end
+    end)
 end
 
 function SocketApi:SendMsg(url, params)
