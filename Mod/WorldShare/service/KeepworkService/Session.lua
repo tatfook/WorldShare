@@ -1058,3 +1058,17 @@ end
 function KeepworkServiceSession:CaptchaVerify(captcha, callback)
     KeepworkKeepworksApi:SvgCaptcha(Mod.WorldShare.Store:Get('user/captchaKey'), captcha, callback, callback)
 end
+
+function KeepworkServiceSession:GetUserWhere()
+    if not self:IsSignedIn() then
+        return false
+    end
+
+    local session = SessionsData:GetSessionByUsername(Mod.WorldShare.Store:Get('user/username'))
+    
+    if session and type(session) == 'table' and session.where then
+        return session.where
+    else
+        return ''
+    end
+end

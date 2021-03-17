@@ -23,4 +23,12 @@ function KeepworkServiceSessionFilter:Init()
             return KeepworkServiceSession:IsRealName()
         end
     )
+
+    -- filter get user where
+    GameLogic.GetFilters():add_filter(
+        'service.session.get_user_where',
+        function()
+            return KeepworkServiceSession:GetUserWhere()
+        end
+    )
 end
