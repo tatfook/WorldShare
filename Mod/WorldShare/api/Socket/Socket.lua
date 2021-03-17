@@ -22,7 +22,7 @@ SocketApi.client = commonlib.gettable('Mod.WorldShare.api.Socket.SocketApi.clien
 
 local ack_id_counter = -1;
 
-function SocketApi:Connect()
+function SocketApi:Connect(callback)
     if self.client.connection then
         return self.client.connection
     end
@@ -82,8 +82,8 @@ function SocketApi:Connect()
     KpChatChannel.PreloadSocketIOUrl(function()
         self.client.connection:Connect(SocketBaseApi:GetApi())
     
-        if self.client.connection then
-            return self.client.connection
+        if callback and type(callback) == 'function' and self.client.connection then
+            callback(self.client.connection)
         end
     end)
 end
