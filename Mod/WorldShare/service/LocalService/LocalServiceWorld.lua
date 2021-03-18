@@ -70,7 +70,7 @@ function LocalServiceWorld:GetWorldList()
         local revision = 0
         local kpProjectId = 0
         local size = 0
-        local local_tagname = ''
+        local name = ''
         local isVipWorld = false
         local instituteVipEnabled = false
         local modifyTime = Mod.WorldShare.Utils:UnifiedTimestampFormat(value.writedate)
@@ -86,7 +86,7 @@ function LocalServiceWorld:GetWorldList()
             local tag = SaveWorldHandler:new():Init(value.worldpath):LoadWorldInfo()
             kpProjectId = tag.kpProjectId
             size = tag.size
-            local_tagname = tag.name
+            name = tag.name
             isVipWorld = tag.isVipWorld
             instituteVipEnabled = tag.instituteVipEnabled
         else
@@ -107,7 +107,7 @@ function LocalServiceWorld:GetWorldList()
             foldername = foldername,
             modifyTime = modifyTime,
             worldpath = value.worldpath,
-            local_tagname = local_tagname,
+            name = name,
             revision = revision,
             isVipWorld = isVipWorld,
             instituteVipEnabled = instituteVipEnabled,
@@ -281,14 +281,11 @@ function LocalServiceWorld:SetWorldInstanceByFoldername(foldername)
         local worldTag = LocalService:GetTag(worldpath) or {}
         local revision = WorldRevision:new():init(worldpath):GetDiskRevision()
         local shared = string.match(worldpath, "shared") == "shared" and true or false
-        local local_tagname
-
-        if worldTag.local_tagname then
-            local_tagname = worldTag.local_tagname
-        else
-            local_tagname = worldTag.name
-        end
         
+        if name ~= commonlib.Encoding.DefaultToUtf8(foldername) then
+            text = name .. '(' .. commonlib.Encoding.DefaultToUtf8(foldername) .. ')'
+        end
+
         currentWorld = self:GenerateWorldInstance({
             IsFolder = true,
             is_zip = false,
@@ -298,7 +295,7 @@ function LocalServiceWorld:SetWorldInstanceByFoldername(foldername)
             worldpath = worldpath,
             kpProjectId = worldTag.kpProjectId,
             fromProjectId = worldTag.fromProjects,
-            local_tagname = local_tagname,
+            name = worldTag.name,
             modifyTime = 0,
             revision = revision,
             isVipWorld = worldTag.isVipWorld == 'true' or worldTag.isVipWorld == true,
@@ -406,7 +403,7 @@ function LocalServiceWorld:GenerateWorldInstance(params)
         isVipWorld = params.isVipWorld or false,
         communityWorld = params.communityWorld or false,
         instituteVipEnabled = params.instituteVipEnabled or false,
-        local_tagname = params.local_tagname or '',
-        shared = params.shared or false
+        shared = params.shared or false,
+        name = params.name or '',
     }
 end

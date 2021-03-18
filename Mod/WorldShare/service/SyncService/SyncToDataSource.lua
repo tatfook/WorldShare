@@ -591,12 +591,9 @@ function SyncToDataSource:UpdateRecord(callback)
 
                 worldInfo.extra = {
                     coverUrl = preview,
-                    commitIds = commitIds
+                    commitIds = commitIds,
+                    worldTagName = self.currentWorld.name,
                 }
-
-                if self.currentWorld.local_tagname and self.currentWorld.local_tagname ~= self.currentWorld.foldername then
-                    worldInfo.extra.worldTagName = self.currentWorld.local_tagname
-                end
 
                 KeepworkServiceWorld:PushWorld(
                     worldInfo,
@@ -617,7 +614,7 @@ function SyncToDataSource:UpdateRecord(callback)
                                     extra.imageUrl = preview
                                 end
         
-                                extra.worldTagName = self.currentWorld.local_tagname
+                                extra.worldTagName = self.currentWorld.name
 
                                 KeepworkServiceProject:UpdateProject(
                                     self.currentWorld.kpProjectId,
@@ -647,8 +644,7 @@ function SyncToDataSource:UpdateRecord(callback)
                                         },
                                         kpProjectId = self.currentWorld.kpProjectId,
                                         fromProjectId = self.currentWorld.fromProjectId,
-                                        local_tagname = self.currentWorld.local_tagname,
-                                        remote_tagname = self.currentWorld.local_tagname,
+                                        name = self.currentWorld.name,
                                         IsFolder = true,
                                         is_zip = false,
                                         shared = self.currentWorld.shared,

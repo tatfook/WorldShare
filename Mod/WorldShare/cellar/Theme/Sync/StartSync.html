@@ -6,33 +6,72 @@
                     -- libs
                     local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
 
-                    -- UI
-                    local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
-                    local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
+                    -- bottles
                     SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
 
-                    page_ctrl = document:GetPageCtrl()
-                    use_offline = page_ctrl:GetRequestParam("useOffline")
+                    -- service
+                    local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
+                    local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
+
+                    page = document:GetPageCtrl()
+                    use_offline = page:GetRequestParam("useOffline")
 
                     function use_local()
                         SyncMain:CloseStartSyncPage()
 
-                        SyncMain:CheckTagName(function()
-                            if SyncMain.GetCurrentRevision() < SyncMain.GetRemoteRevision() then
-                                SyncMain:ShowStartSyncUseLocalPage(page_ctrl.afterSyncCallback)
-                            elseif SyncMain.GetCurrentRevision() >= SyncMain.GetRemoteRevision() then
-                                SyncMain:SyncToDataSource(page_ctrl.afterSyncCallback)
-                            end
-                        end)
+                        if SyncMain.GetCurrentRevision() < SyncMain.GetRemoteRevision() then
+                            SyncMain:ShowStartSyncUseLocalPage(page.afterSyncCallback)
+                        elseif SyncMain.GetCurrentRevision() >= SyncMain.GetRemoteRevision() then
+                            SyncMain:CheckTagName(function(result, remoteName)
+                                if not result or type(result) ~= 'string' then
+                                    return
+                                end
+
+                                if result == 'remote' then
+                                    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+                                    local tag = LocalService:GetTag(currentWorld.worldpath)
+                
+                                    tag.name = remoteName
+                                    currentWorld.name = remoteName
+
+                                    LocalService:SetTag(currentWorld.worldpath, tag)
+                                    Mod.WorldShare.Store:Set('world/currentWorld', currentWorld)
+                                end
+
+                                SyncMain:SyncToDataSource(page.afterSyncCallback)
+                            end)
+                        end
                     end
 
                     function use_remote()
                         SyncMain:CloseStartSyncPage()
 
                         if SyncMain.GetRemoteRevision() < SyncMain.GetCurrentRevision() then
-                            SyncMain:ShowStartSyncUseDataSourcePage(page_ctrl.afterSyncCallback);
+                            SyncMain:ShowStartSyncUseDataSourcePage(page.afterSyncCallback)
                         elseif SyncMain.GetRemoteRevision() >= SyncMain.GetCurrentRevision() then
-                            SyncMain:SyncToLocal(page_ctrl.afterSyncCallback)
+                            SyncMain:SyncToLocal(function()
+                                SyncMain:CheckTagName(function(result, remoteName)
+                                    if not result or type(result) ~= 'string' then
+                                        return
+                                    end
+
+                                    if result and result == 'remote' then
+                                        local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+                                        local tag = LocalService:GetTag(currentWorld.worldpath)
+                    
+                                        tag.name = remoteName
+                                        currentWorld.name = remoteName
+
+                                        LocalService:SetTag(currentWorld.worldpath, tag)
+                                        Mod.WorldShare.Store:Set('world/currentWorld', currentWorld)
+                                        GameLogic.AddBBS(nil, format(L'更新【%s】名称信息完成', currentWorld.foldername), 3000, '0 255 0')
+                                    end
+
+                                    if page.afterSyncCallback and type(page.afterSyncCallback) == 'function' then
+                                        page.afterSyncCallback()
+                                    end
+                                end)
+                            end)
                         end
                     end
 
@@ -63,7 +102,6 @@
                         end
 
                         InternetLoadWorld.LoadWorld(currentWorld)
-                        UserConsole:ClosePage()
                         SyncMain:CloseStartSyncPage()
                     end
 

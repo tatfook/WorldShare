@@ -318,10 +318,8 @@
                     end
 
                     function get_tagname()
-                        if Eval("local_tagname") and Eval("local_tagname") ~= "" then
-                            return Eval("local_tagname")
-                        else
-                            return Eval("remote_tagname")
+                        if Eval("name") and Eval("name") ~= "" then
+                            return Eval("name")
                         end
                     end
 

@@ -15,6 +15,7 @@ local SystemEncoding = commonlib.gettable("System.Encoding")
 local CommonlibEncoding = commonlib.gettable("commonlib.Encoding")
 local FileDownloader = commonlib.gettable("Mod.WorldShare.service.FileDownloader.FileDownloader")
 local LocalLoadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalLoadWorld")
+local SaveWorldHandler = commonlib.gettable("MyCompany.Aries.Game.SaveWorldHandler")
 
 local LocalService = NPL.export()
 
@@ -347,37 +348,33 @@ function LocalService:IsFileExistInZip(path, filter)
     end
 end
 
-function LocalService:SetTag(worldDir, newTag)
-    if (type(worldDir) == "string" and type(newTag) == "table") then
-        local tagTable = {
-            {
-                attr = newTag,
-                name = "pe:world"
-            },
-            name = "pe:mcml"
-        }
+function LocalService:SetTag(worldpath, newTag)
+    if type(worldpath) == "string" and type(newTag) == "table" then
+        local saveWorldHandler = SaveWorldHandler:new():Init(worldpath)
 
-        local xmlString = commonlib.Lua2XmlString(tagTable, true, true)
-
-        local filePath = worldDir .. "/tag.xml"
-
-        local file = ParaIO.open(filePath, "w")
-
-        file:write(xmlString, #xmlString)
-        file:close()
+        if saveWorldHandler then
+            return saveWorldHandler:SaveWorldInfo(newTag)
+        else
+            return false
+        end
     end
 end
 
-function LocalService:GetTag(worldDir)
-    if (not worldDir) then
+function LocalService:GetTag(worldpath)
+    if not worldpath then
         return {}
     end
 
-    local filePath = format("%s/tag.xml", worldDir)
-    local tag = ParaXML.LuaXML_ParseFile(filePath)
+    local saveWorldHandler = SaveWorldHandler:new():Init(worldpath)
 
-    if (type(tag) == "table" and type(tag[1]) == "table" and type(tag[1][1]) == "table") then
-        return tag[1][1]["attr"]
+    if not saveWorldHandler then
+        return {}
+    end
+
+    local tag = saveWorldHandler:LoadWorldInfo()
+
+    if tag and type(tag) == 'table' then
+        return tag
     else
         return {}
     end

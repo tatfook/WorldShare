@@ -16,6 +16,10 @@ MsgBox.allMsg = {}
 MsgBox.allMsgBox = commonlib.Array:new()
 MsgBox.customLabels = {}
 
+function MsgBox:Wait()
+    self:Show(L'请稍候...')
+end
+
 function MsgBox:Show(msg, sec, overtimeMsg, width, height, index, align, isTopLevel)
     self.msgIdCount = self.msgIdCount + 1
 

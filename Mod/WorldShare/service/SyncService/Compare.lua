@@ -321,13 +321,6 @@ function Compare:GetCurrentWorldInfo(callback)
 
         WorldCommon.LoadWorldTag(worldpath)
         local worldTag = WorldCommon.GetWorldInfo() or {}
-        local local_tagname
-
-        if worldTag.local_tagname then
-            local_tagname = worldTag.local_tagname
-        else
-            local_tagname = worldTag.name
-        end
 
         if KeepworkServiceSession:IsSignedIn() and worldTag.kpProjectId and worldTag.kpProjectId ~= 0 then
             local kpProjectId = worldTag.kpProjectId
@@ -358,7 +351,7 @@ function Compare:GetCurrentWorldInfo(callback)
                             worldpath = worldpath,
                             kpProjectId = 0,
                             fromProjectId = fromProjectId,
-                            local_tagname = local_tagname,
+                            name = worldTag.name,
                             revision = WorldRevision:new():init(worldpath):GetDiskRevision(),
                             communityWorld = worldTag.communityWorld,
                             isVipWorld = worldTag.isVipWorld,
@@ -409,8 +402,7 @@ function Compare:GetCurrentWorldInfo(callback)
                             worldpath = worldpath,
                             kpProjectId = kpProjectId,
                             fromProjectId = fromProjectId,
-                            local_tagname = local_tagname,
-                            remote_tagname = data.extra.worldTagName,
+                            name = worldTag.name,
                             status = status,
                             revision = data.revision,
                             lastCommitId = data.commitId, 
@@ -460,7 +452,7 @@ function Compare:GetCurrentWorldInfo(callback)
                 worldpath = worldpath,
                 kpProjectId = kpProjectId,
                 fromProjectId = fromProjectId,
-                local_tagname = local_tagname,
+                name = worldTag.name,
                 revision = WorldRevision:new():init(worldpath):GetDiskRevision(),
                 communityWorld = worldTag.communityWorld,
                 isVipWorld = worldTag.isVipWorld,

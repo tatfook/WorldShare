@@ -11,6 +11,7 @@ local Create = NPL.load('(gl)Mod/WorldShare/cellar/UserConsole/Create/Create.lua
 
 -- libs
 local InternetLoadWorld = commonlib.gettable('MyCompany.Aries.Creator.Game.Login.InternetLoadWorld')
+local SaveWorldHandler = commonlib.gettable("MyCompany.Aries.Game.SaveWorldHandler")
 
 -- bottles
 local LoginModal = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua')
@@ -154,7 +155,21 @@ function Create:Sync()
 
         if result == Compare.JUSTREMOTE then
             SyncMain:SyncToLocal(function()
-                self:GetWorldList(self.statusFilter)
+                SyncMain:CheckTagName(function(result, remoteName)
+                    if result and result == 'remote' then
+                        local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+                        local tag = LocalService:GetTag(currentWorld.worldpath)
+    
+                        tag.name = remoteName
+                        currentWorld.name = remoteName
+
+                        LocalService:SetTag(currentWorld.worldpath, tag)
+                        Mod.WorldShare.Store:Set('world/currentWorld', currentWorld)
+                        GameLogic.AddBBS(nil, format(L'更新【%s】名称信息完成', currentWorld.foldername), 3000, '0 255 0')
+                    end
+
+                    self:GetWorldList(self.statusFilter)
+                end)
             end)
         end
 
@@ -457,4 +472,101 @@ function Create:DeleteWorld(worldIndex)
     DeleteWorld:DeleteWorld(function()
         self:GetWorldList(self.statusFilter)
     end)
+end
+
+function Create:WorldRename(currentItemIndex, tempModifyWorldname, callback)
+    local CreatePage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Create')
+
+    if not CreatePage then
+        return false
+    end
+
+    local currentWorld = Compare:GetSelectedWorld(currentItemIndex)
+
+    if not currentWorld then
+        return false
+    end
+
+    if currentWorld.is_zip then
+        GameLogic.AddBBS(nil, L"暂不支持重命名zip世界", 3000, "255 0 0")
+        return false
+    end
+
+    if tempModifyWorldname == "" then
+        return false
+    end
+
+    if currentWorld.status ~= 2 then
+        if currentWorld.name == tempModifyWorldname then
+            return false
+        end
+
+        local tag = LocalService:GetTag(currentWorld.worldpath)
+
+        -- update local tag name
+        tag.name = tempModifyWorldname
+        currentWorld.name = tempModifyWorldname
+
+        LocalService:SetTag(currentWorld.worldpath, tag)
+        Mod.WorldShare.Store:Set('world/currentWorld', currentWorld)
+    end
+
+    if KeepworkServiceSession:IsSignedIn() and
+       currentWorld.status and
+       currentWorld.status ~= 1 and
+       currentWorld.kpProjectId and
+       currentWorld.kpProjectId ~= 0 then
+        -- update project info
+
+        local tag = LocalService:GetTag(currentWorld.worldpath)
+
+        if currentWorld.status ~= 2 then
+            -- update sync world
+            -- local world exist
+            Mod.WorldShare.Store:Set('world/currentRevision', currentWorld.revision)
+            Mod.WorldShare.Store:Set('world/currentWorld', currentWorld)
+
+            SyncMain:SyncToDataSource(function(result, msg)
+                if type(callback) == 'function' then
+                    callback()
+                end
+            end)
+        elseif currentWorld.status == 2 then
+            -- just remote world exist
+            KeepworkServiceWorld:GetWorld(currentWorld.foldername, currentWorld.shared, function(data)
+                local extra = data and data.extra or {}
+
+                extra.worldTagName = tempModifyWorldname
+
+                -- local world not exist
+                KeepworkServiceProject:UpdateProject(
+                    currentWorld.kpProjectId,
+                    {
+                        extra = extra
+                    },
+                    function()
+                        -- update world info
+                        KeepworkServiceWorld:PushWorld(
+                            {
+                                worldName = currentWorld.foldername,
+                                extra = extra
+                            },
+                            currentWorld.shared,
+                            function()
+                                if type(callback) == 'function' then
+                                    callback()
+                                end
+                            end
+                        )
+                    end
+                )
+            end)
+        end
+    else
+        if callback and type(callback) == 'function' then
+            callback()
+        end
+    end
+
+    return true
 end

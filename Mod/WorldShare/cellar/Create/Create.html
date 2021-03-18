@@ -41,12 +41,11 @@
 
                         if do_modify then
                             -- update world name
-
-                            if UserConsole:WorldRename(
+                            if Create:WorldRename(
                                 current_item_index,
                                 temp_modify_worldname,
                                 function()
-                                    WorldList:RefreshCurrentServerList(function()
+                                    Create:GetWorldList(Create.statusFilter, function()
                                         switch_world(current_item_index)
                                     end)
                                 end
@@ -318,10 +317,8 @@
                     end
 
                     function get_tagname()
-                        if Eval("local_tagname") and Eval("local_tagname") ~= "" then
-                            return Eval("local_tagname")
-                        else
-                            return Eval("remote_tagname")
+                        if Eval("name") and Eval("name") ~= "" then
+                            return Eval("name")
                         end
                     end
 

@@ -406,6 +406,14 @@ function SyncToLocal:DownloadZIP()
             LocalService:MoveZipToFolder(self.currentWorld.worldpath, downloadPath)
             KeepworkService:SetCurrentCommitId()
 
+            -- update worldinfo because world from internet
+            local tag = LocalService:GetTag(self.currentWorld.worldpath)
+
+            if tag then
+                self.currentWorld.name = tag.name
+                Mod.WorldShare.Store:Set('world/currentWorld', self.currentWorld)
+            end
+
             self:SetFinish(true)
             self.callback(false, {
                 method = 'UPDATE-PROGRESS-FINISH'

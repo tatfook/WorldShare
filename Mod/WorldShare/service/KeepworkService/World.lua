@@ -103,16 +103,7 @@ function KeepworkServiceWorld:SetWorldInstanceByPid(pid, callback)
             end
         end
 
-        local worldTag = LocalService:GetTag(worldpath)
-
-        local local_tagname
-
-        if worldTag.local_tagname then
-            local_tagname = worldTag.local_tagname
-        else
-            local_tagname = worldTag.name
-        end
-
+        local tag = LocalService:GetTag(worldpath)
 
         local shared = false
 
@@ -131,6 +122,7 @@ function KeepworkServiceWorld:SetWorldInstanceByPid(pid, callback)
             is_zip = false,
             Title = foldername,
             text = foldername,
+            name = tag.name or '',
             foldername = foldername,
             worldpath = worldpath,
             status = status,
@@ -143,8 +135,6 @@ function KeepworkServiceWorld:SetWorldInstanceByPid(pid, callback)
                 id = data.userId,
                 username = data.username,
             },
-            local_tagname = local_tagname,
-            remote_tagname =  data.extra.worldTagName,
             shared = shared,
             communityWorld = worldTag.communityWorld == 'true' or worldTag.communityWorld == true,
             isVipWorld = worldTag.isVipWorld == 'true' or worldTag.isVipWorld == true,
@@ -407,8 +397,6 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
             local isExist = false
             local text = DItem.worldName or ""
             local worldpath = ""
-            local localTagname = ""
-            local remoteTagname = ""
             local revision = 0
             local commitId = ""
             local remoteWorldUserId = DItem.user and DItem.user.id and tonumber(DItem.user.id) or 0
@@ -416,6 +404,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
             local remoteShared = false
             local isVipWorld
             local instituteVipEnabled
+            local name = ''
 
             if remoteWorldUserId ~= 0 and tonumber(remoteWorldUserId) ~= (userId) then
                 remoteShared = true
@@ -440,10 +429,9 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                         isExist = true
 
                         worldpath = LItem.worldpath
-                        localTagname = LItem.local_tagname or LItem.foldername
-                        remoteTagname = DItem.extra and DItem.extra.worldTagName or DItem.worldName
                         isVipWorld = LItem.isVipWorld
                         instituteVipEnabled = LItem.instituteVipEnabled
+                        name = LItem.name
     
                         -- update project id for different user
                         if tonumber(LItem.kpProjectId) ~= tonumber(DItem.projectId) then
@@ -472,11 +460,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                 --network only
                 status = 2
                 revision = DItem.revision
-                remoteTagname = DItem.extra and DItem.extra.worldTagName or text
-
-                if remoteTagname ~= "" and text ~= remoteTagname then
-                    text = remoteTagname .. '(' .. text .. ')'
-                end
+                name = DItem.extra and DItem.extra.worldTagName or ''
 
                 if remoteWorldUserId ~= 0 and remoteWorldUserId ~= tonumber(userId) then
                     -- shared world path
@@ -505,6 +489,14 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                 end
             end
 
+            -- recover share remark
+            if not remoteShared then
+                if DItem.extra and DItem.extra.worldTagName and
+                   text ~= DItem.extra.worldTagName then
+                    text = DItem.extra.worldTagName .. '(' .. text .. ')'
+                end
+            end
+
             if DItem.project then
                 if DItem.project.visibility == 0 then
                     DItem.project.visibility = 0
@@ -530,15 +522,14 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                 },
                 kpProjectId = DItem.projectId,
                 fromProjectId = DItem.fromProjectId,
-                local_tagname = localTagname,
-                remote_tagname = remoteTagname,
                 IsFolder = true,
                 is_zip = false,
                 shared = remoteShared,
                 isVipWorld = isVipWorld or false,
                 instituteVipEnabled = instituteVipEnabled or false,
                 memberCount = DItem.memberCount,
-                members = {}
+                members = {},
+                name = name
             })
 
             currentWorldList:push_back(currentWorld)
@@ -584,6 +575,7 @@ function KeepworkServiceWorld:GenerateWorldInstance(params)
         Title = params.Title or '',
         text = params.text or '',
         foldername = params.foldername or '',
+        name = params.name or '',
         revision = params.revision or 0,
         size = params.size or 0,
         modifyTime = params.modifyTime or '',
@@ -596,8 +588,6 @@ function KeepworkServiceWorld:GenerateWorldInstance(params)
         kpProjectId = params.kpProjectId and tonumber(params.kpProjectId) or 0,
         fromProjectId = params.fromProjectId and tonumber(params.fromProjectId) or 0,
         hasPid = params.kpProjectId and params.kpProjectId ~= 0 and true or false,
-        local_tagname = params.local_tagname or '',
-        remote_tagname = params.remote_tagname or '',
         IsFolder = params.IsFolder == 'true' or params.IsFolder == true,
         is_zip = params.is_zip == 'true' or params.is_zip == true,
         shared = params.shared or false,
