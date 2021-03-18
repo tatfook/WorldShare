@@ -15,6 +15,7 @@ local WorldCommon = commonlib.gettable('MyCompany.Aries.Creator.WorldCommon')
 
 -- service
 local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
 local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
 
 local DeleteWorld = NPL.export()
@@ -57,8 +58,15 @@ function DeleteWorld:DeleteWorld(callback)
         if currentWorld.foldername == currentEnterWorld.foldername and
            currentWorld.shared == currentEnterWorld.shared and
            currentWorld.is_zip == currentEnterWorld.is_zip then
-            _guihelper.MessageBox(L'不能刪除正在编辑的世界')
-            return false
+            if KeepworkServiceSession:IsSignedIn() then
+                if currentWorld.shared and currentWorld.kpProjectId == currentEnterWorld.kpProjectId then
+                    _guihelper.MessageBox(L'不能刪除正在编辑的世界')
+                    return false
+                end
+            else
+                _guihelper.MessageBox(L'不能刪除正在编辑的世界')
+                return false
+            end
         end
     end
 
