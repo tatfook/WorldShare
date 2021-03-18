@@ -106,7 +106,7 @@
 
                         is_login = true
 
-                        MainLogin:LoginAction(function(b_succeed)
+                        if not MainLogin:LoginAction(function(b_succeed)
                             is_login = false
 
                             if not b_succeed then
@@ -124,7 +124,9 @@
                                     MainLogin:EnterUserConsole()
                                 end
                             end)
-                        end)
+                        end) then
+                            is_login = false
+                        end
                     end
 
                     function update_login_button_status()
@@ -134,9 +136,9 @@
                         local beSuccess = true
 
                         if not Validated:AccountCompatible(account) then
-                            page:SetUIValue('account_field_error_msg', L'*账号不合法')
-                            page:FindControl('account_field_error').visible = true
-                            beSuccess = false
+                           -- page:SetUIValue('account_field_error_msg', L'*账号不合法')
+                           -- page:FindControl('account_field_error').visible = true
+                           beSuccess = false
                         else
                             page:FindControl('account_field_error').visible = false
                         end
@@ -152,8 +154,8 @@
                         page:SetValue('password', password)
 
                         if not Validated:Password(password) then
-                            page:SetUIValue('password_field_error_msg', L'*密码不合法')
-                            page:FindControl('password_field_error').visible = true
+                            -- page:SetUIValue('password_field_error_msg', L'*密码不合法')
+                            -- page:FindControl('password_field_error').visible = true
                             beSuccess = false
                         else
                             page:FindControl('password_field_error').visible = false
@@ -243,8 +245,8 @@
                         <div>
                             <input type='text'
                                    name='account'
-                                   style='background:;textcolor: #FFFFFF;height: 30px;width: 190px;margin-top: 10px;font-size: 16px;'
                                    onchange='update_login_button_status'
+                                   style='background:;textcolor: #FFFFFF;height: 30px;width: 190px;margin-top: 10px;font-size: 16px;'
                                    EmptyText='<%= L"请输入您的账号/手机号" %>'
                                    MoveViewWhenAttachWithIME='true' />
                         </div>

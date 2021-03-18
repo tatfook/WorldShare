@@ -136,7 +136,7 @@ function MySchool:ShowJoinSchool(callback)
 
     self.areas = {
         {
-            text = L"区（县）",
+            text = L"区（县、镇、街道）",
             value = 0,
             selected = true,
         }
@@ -179,7 +179,7 @@ function MySchool:ShowJoinSchool(callback)
     self.joinSchoolCallback = callback
 
     local params1 = Mod.WorldShare.Utils.ShowWindow(600, 420, "(ws)Theme/MySchool/JoinSchool.html", "Mod.WorldShare.JoinSchool", nil, nil, nil, false, 1)
-    local params2 = Mod.WorldShare.Utils.ShowWindow(380, 100, "(ws)Theme/MySchool/JoinSchoolResult.html", "Mod.WorldShare.JoinSchoolResult", nil, 20, nil, false, 2)
+    local params2 = Mod.WorldShare.Utils.ShowWindow(442, 100, "(ws)Theme/MySchool/JoinSchoolResult.html", "Mod.WorldShare.JoinSchoolResult", nil, 20, nil, false, 2)
 
     self:GetProvinces(function(data)
         if type(data) ~= "table" then
@@ -217,7 +217,7 @@ function MySchool:ShowJoinSchoolAfterRegister(callback)
 
     self.areas = {
         {
-            text = L"区（县）",
+            text = L"区（县、镇、街道）",
             value = 0,
             selected = true,
         }
@@ -260,7 +260,7 @@ function MySchool:ShowJoinSchoolAfterRegister(callback)
     self.joinSchoolCallback = callback
 
     local params1 = Mod.WorldShare.Utils.ShowWindow(600, 420, "(ws)Theme/MySchool/JoinSchoolAfterRegister.html", "Mod.WorldShare.JoinSchoolAfterRegister", nil, nil, nil, false, 1)
-    local params2 = Mod.WorldShare.Utils.ShowWindow(380, 100, "(ws)Theme/MySchool/JoinSchoolResult.html", "Mod.WorldShare.JoinSchoolResult", nil, 20, nil, false, 2)
+    local params2 = Mod.WorldShare.Utils.ShowWindow(442, 100, "(ws)Theme/MySchool/JoinSchoolResult.html", "Mod.WorldShare.JoinSchoolResult", nil, 20, nil, false, 2)
 
     self:GetProvinces(function(data)
         if type(data) ~= "table" then
@@ -327,7 +327,7 @@ function MySchool:ShowRecordSchool()
 
     self.areas = {
         {
-            text = L"区（县）",
+            text = L"区（县、镇、街道）",
             value = 0,
             selected = true,
         }
@@ -432,7 +432,7 @@ function MySchool:GetAreas(id, callback)
             end
 
             data[#data + 1] = {
-                text = L"区（县）",
+                text = L"区（县、镇、街道）",
                 value = 0,
                 selected = true,
             }

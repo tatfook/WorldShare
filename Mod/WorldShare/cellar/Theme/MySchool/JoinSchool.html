@@ -45,16 +45,17 @@
 
                     function select_province(name, value)
                         if value == 0 then
-                            return false
+                            return
                         end
 
                         MySchool.curId = value
+                        MySchool.lastProvinceId = MySchool.curId
 
                         MySchool:GetCities(value, function(data)
                             MySchool.cities = data
                             MySchool.areas = {
                                 {
-                                    text = L"区",
+                                    text = L"区（县、镇、街道）",
                                     value = 0,
                                     selected = true,
                                 }
@@ -81,10 +82,16 @@
 
                     function select_city(name, value)
                         if value == 0 then
-                            return false
+                            select_province(nil, MySchool.lastProvinceId or 0)
+                            return
+                        else
+                            MySchool.curId = value
+                            MySchool.lastCityId = MySchool.curId
                         end
 
-                        MySchool.curId = value
+                        if MySchool.curId == 0 then
+                            return
+                        end
 
                         MySchool:GetAreas(value, function(data)
                             MySchool.areas = data
@@ -110,10 +117,15 @@
 
                     function select_area(name, value)
                         if value == 0 then
-                            return false
+                            select_city(nil, MySchool.lastCityId or 0)
+                            return
+                        else
+                            MySchool.curId = value
                         end
 
-                        MySchool.curId = value
+                        if MySchool.curId == 0 then
+                            return
+                        end
 
                         if MySchool.searchText and MySchool.searchText ~= "" then
                             MySchool:GetSearchSchoolResultByName(MySchool.searchText, function()
@@ -147,7 +159,7 @@
                         end
 
                         if not MySchool.curId or MySchool.curId == 0 then
-                            return false
+                            return
                         end
 
                         MySchool:GetSearchSchoolResult(MySchool.curId, MySchool.kind, function(data)
@@ -245,10 +257,10 @@
                                 selected = true,
                             }
                         }
-                    
+
                         MySchool.areas = {
                             {
-                                text = L"区",
+                                text = L"区（县、镇、街道）",
                                 value = 0,
                                 selected = true,
                             }
@@ -299,11 +311,11 @@
                 <div style="width: 600px; height: 40px;">
                     <div style="margin-left: 120px;margin-top: 14px;font-size: 14px;base-font-size: 14px;color: #ffffff;"><%=L"加入学校"%></div>
                 </div>
-                <div width="100%" height="100%" style="padding-left: 30px;padding-top: 25px;">
+                <div width="100%" height="100%" style="padding-left: 0px;padding-top: 25px;">
                     <div style="margin-left: 80px;margin-top: 10px;">
                         <div><%= L"请输入学校名称或编号搜索：" %></div>
                         <div>
-                            <input type="text" class="bbs_text" style="width: 380px;height: 30px;" onchange="on_enter_school_name" onfocusin="select_search_by_name()" name="school_name" value="" />
+                            <input type="text" class="bbs_text" style="width: 442px;height: 30px;" onchange="on_enter_school_name" onfocusin="select_search_by_name()" name="school_name" value="" />
                         </div>
                     </div>
                     <div style="margin-left: 80px;margin-top: 10px;">
@@ -312,7 +324,7 @@
                             <div style="margin-bottom: 10px;">
                                 <select name="province" style="width:87px;height: 26px;" DataSource="<%= get_provinces() %>" onselect="select_province"></select>
                                 <select name="city" DataSource="<%= get_cities() %>" style="margin-left: 10px;width:87px;height: 26px;" onselect="select_city"></select>
-                                <select name="area" DataSource="<%= get_areas() %>" style="margin-left: 10px;width:87px;height: 26px;" onselect="select_area"></select>
+                                <select name="area" DataSource="<%= get_areas() %>" style="margin-left: 10px;width:150px;height: 26px;" onselect="select_area"></select>
                                 <select name="kind" DataSource="<%= get_kinds() %>" style="margin-left: 10px;width:88px;height: 26px;" onselect="select_kind"></select>
                             </div>
                             <div style="width: 380px;margin-bottom: 10px;height: 100px;"></div>

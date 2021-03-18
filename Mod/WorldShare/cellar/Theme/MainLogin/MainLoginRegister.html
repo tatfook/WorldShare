@@ -137,24 +137,24 @@
                     end, 0)
 
                     function account_register()
+                        local account = page:GetValue('register_account')
+                        local password = page:GetValue('register_account_password') or ''
+
+                        if not Validated:Account(account) then
+                            page:SetUIValue('register_account_field_error_msg', L'*账号需4位以上且非数字开头的字母、数字组合形式')
+                            page:FindControl('register_account_field_error').visible = true
+                            return false
+                        end
+
                         if MainLogin.accountExist then
                             page:SetUIValue('register_account_field_error_msg', L'*账号已存在，请使用其他账号')
                             page:FindControl('register_account_field_error').visible = true
                             return false
                         end
 
-                        local account = page:GetValue('register_account')
-                        local password = page:GetValue('register_account_password') or ''
-
                         if not account_agree then
                             page:SetUIValue('agree_field_error_msg', L'*您未同意用户协议')
                             page:FindControl('agree_field_error').visible = true
-                            return false
-                        end
-
-                        if not Validated:Account(account) then
-                            page:SetUIValue('register_account_field_error_msg', L'*账号需大于3位且非数字开头的字母、数字组合形式')
-                            page:FindControl('register_account_field_error').visible = true
                             return false
                         end
 
@@ -178,12 +178,39 @@
                     end
 
                     function phone_register_next()
-                        if not b_next_button_right then
+                        local phonenumber = page:GetValue('phonenumber')
+                        local phonecaptcha = page:GetValue('phonecaptcha')
+
+                        page:SetUIValue('phone_field_error_msg', '')
+                        page:FindControl('phone_field_error').visible = false
+
+                        if not Validated:Phone(phonenumber) then
+                            page:SetUIValue('phone_field_error_msg', L'*手机号码格式错误')
+                            page:FindControl('phone_field_error').visible = true
                             return
                         end
 
-                        local phonenumber = page:GetValue('phonenumber')
-                        local phonecaptcha = page:GetValue('phonecaptcha')
+                        if phone_account_exist then
+                            page:SetUIValue('phone_field_error_msg', L'*手机号码已存在')
+                            page:FindControl('phone_field_error').visible = true
+                            return
+                        end
+
+                        if not checkout_phonecaptcha() then
+                            page:SetUIValue('phone_field_error_msg', L'*手机验证码不能为空')
+                            page:FindControl('phone_field_error').visible = true
+                            return
+                        end
+
+                        if not check_phone_password() then
+                            page:SetUIValue('phone_field_error_msg', L'*密码不合法')
+                            page:FindControl('phone_field_error').visible = true
+                            return
+                        end
+
+                        if not b_next_button_right then
+                            return
+                        end
 
                         KeepworkServiceSession:CellphoneCaptchaVerify(phonenumber, phonecaptcha, function(data, err)
                             if err == 400 then
@@ -202,6 +229,12 @@
                         local phonecaptcha = page:GetValue('phonecaptcha')
                         local phonepassword = page:GetValue('phonepassword')
                         local username = page:GetValue('phone_register_account')
+
+                        if not Validated:Account(username) then
+                            page:SetUIValue('phone_account_field_error_msg', L'*账号需4位以上且非数字开头的字母、数字组合形式')
+                            page:FindControl('phone_account_field_error').visible = true
+                            return
+                        end
 
                         MainLogin.phonenumber = phonenumber
                         MainLogin.password = phonepassword
@@ -308,8 +341,8 @@
                         local username = page:GetValue('register_account')
 
                         if not Validated:Account(username) then
-                            page:SetUIValue('register_account_field_error_msg', L'*账号需大于3位且非数字开头的字母、数字组合形式')
-                            page:FindControl('register_account_field_error').visible = true
+                            -- page:SetUIValue('register_account_field_error_msg', L'*账号需大于3位且非数字开头的字母、数字组合形式')
+                            -- page:FindControl('register_account_field_error').visible = true
                             callback(false)
                             return
                         end
@@ -317,8 +350,8 @@
                         KeepworkServiceSession:CheckUsernameExist(username, function(bIsExist)
                             if bIsExist then
                                 MainLogin.accountExist = true
-                                page:SetUIValue('register_account_field_error_msg', L'*账号已存在，请使用其他账号')
-                                page:FindControl('register_account_field_error').visible = true
+                                -- page:SetUIValue('register_account_field_error_msg', L'*账号已存在，请使用其他账号')
+                                -- page:FindControl('register_account_field_error').visible = true
                                 callback(false)
                             else
                                 MainLogin.accountExist = false
@@ -340,8 +373,8 @@
                         page:SetValue('register_account_password', password)
 
                         if not Validated:Password(password) then
-                            page:SetUIValue('register_account_password_field_error_msg', L'*密码不合法')
-                            page:FindControl('register_account_password_field_error').visible = true
+                            -- page:SetUIValue('register_account_password_field_error_msg', L'*密码不合法')
+                            -- page:FindControl('register_account_password_field_error').visible = true
                             return false
                         else
                             page:FindControl('register_account_password_field_error').visible = false
@@ -378,8 +411,8 @@
 
                         if not Validated:Phone(phonenumber) then
                             if phone_show_field == 'phonenumber' then
-                                page:SetUIValue('phone_field_error_msg', L'*手机号码格式错误')
-                                page:FindControl('phone_field_error').visible = true
+                                --page:SetUIValue('phone_field_error_msg', L'*手机号码格式错误')
+                                --page:FindControl('phone_field_error').visible = true
                             end
                             callback(false)
                             return
@@ -389,8 +422,8 @@
                             if bIsExist then
                                 phone_account_exist = true
                                 if phone_show_field == 'phonenumber' then
-                                    page:SetUIValue('phone_field_error_msg', L'*手机号码已存在')
-                                    page:FindControl('phone_field_error').visible = true
+                                    --page:SetUIValue('phone_field_error_msg', L'*手机号码已存在')
+                                    --page:FindControl('phone_field_error').visible = true
                                 end
                                 callback(false)
                             else
@@ -408,8 +441,8 @@
 
                         if phonecaptcha and #phonecaptcha == 0 then
                             if phone_show_field == 'phonecaptcha' then
-                                page:SetUIValue('phone_field_error_msg', L'*手机验证码不能为空')
-                                page:FindControl('phone_field_error').visible = true
+                                --page:SetUIValue('phone_field_error_msg', L'*手机验证码不能为空')
+                                --page:FindControl('phone_field_error').visible = true
                             end
                             return false
                         else
@@ -433,8 +466,8 @@
 
                         if not Validated:Password(phonepassword) then
                             if phone_show_field == 'phonepassword_show' or phone_show_field == 'phonepassword_hide' then
-                                page:SetUIValue('phone_field_error_msg', L'*密码不合法')
-                                page:FindControl('phone_field_error').visible = true
+                                --page:SetUIValue('phone_field_error_msg', L'*密码不合法')
+                                --page:FindControl('phone_field_error').visible = true
                             end
                             return false
                         else
@@ -477,8 +510,8 @@
                         local username = page:GetValue('phone_register_account')
 
                         if not Validated:Account(username) then
-                            page:SetUIValue('phone_account_field_error_msg', L'*账号需大于3位且非数字开头的字母、数字组合形式')
-                            page:FindControl('phone_account_field_error').visible = true
+                            -- page:SetUIValue('phone_account_field_error_msg', L'*账号需大于3位且非数字开头的字母、数字组合形式')
+                            -- page:FindControl('phone_account_field_error').visible = true
                             page:SetUIBackground('phone_register_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 197 258 44')
                             return
                         end
@@ -559,7 +592,7 @@
                                 <div>
                                     <input type="text"
                                            onchange='update_register_account_button_status'
-                                           EmptyText='<%= L"请输入字母、数字组合形式的账号" %>'
+                                           EmptyText='<%= L"请输入账号" %>'
                                            style='background:;textcolor: #FFFFFF;height: 30px;width: 200px;margin-top: 12px;font-size: 12px;'
                                            name="register_account" />
                                 </div>
@@ -568,7 +601,7 @@
                                         <input type="text"
                                             onchange="update_register_account_button_status"
                                             SkipAutoBadWordFilter="true"
-                                            EmptyText='<%= L"请输入4位数字或以上的密码" %>'
+                                            EmptyText='<%= L"请输入4位以上的密码" %>'
                                             style='background:;textcolor: #FFFFFF;height: 30px;width: 200px;margin-top: 10px;font-size: 12px;'
                                             name="register_account_password_show"
                                             visible="false" />
@@ -576,7 +609,7 @@
                                             onchange="update_register_account_button_status"
                                             PasswordChar="*"
                                             SkipAutoBadWordFilter="true"
-                                            EmptyText='<%= L"请输入4位数字或以上的密码" %>'
+                                            EmptyText='<%= L"请输入4位以上的密码" %>'
                                             style='background:;textcolor: #FFFFFF;height: 30px;width: 200px;margin-top: 10px;font-size: 12px;margin-left: -200px;'
                                             name="register_account_password_hide"
                                             visible="true" />
@@ -669,7 +702,7 @@
                                             <div style="float: left;width: 200px;">
                                                 <input type="text"
                                                     onchange='update_register_phone_next_button_status'
-                                                    EmptyText='<%= L"请输入4位数字或以上的密码" %>'
+                                                    EmptyText='<%= L"请输入4位以上的密码" %>'
                                                     SkipAutoBadWordFilter="true"
                                                     style='background:;textcolor: #FFFFFF;height: 30px;width: 200px;margin-top: 12px;font-size: 12px;'
                                                     name="phonepassword_show"
@@ -679,7 +712,7 @@
                                                     onchange='update_register_phone_next_button_status'
                                                     PasswordChar="*"
                                                     SkipAutoBadWordFilter="true"
-                                                    EmptyText='<%= L"请输入4位数字或以上的密码" %>'
+                                                    EmptyText='<%= L"请输入4位以上的密码" %>'
                                                     style='background:;textcolor: #FFFFFF;height: 30px;width: 200px;margin-top: 12px;font-size: 12px;margin-left: -200px;'
                                                     name="phonepassword_hide"
                                                     onfocusin='set_phone_register_show_field'

@@ -287,18 +287,24 @@ function MainLogin:LoginAction(callback)
 
     local account = MainLoginPage:GetValue('account')
     local password = MainLoginPage:GetValue('password')
-    local autoLogin = MainLoginPage:GetValue('autoLogin')
-    local rememberMe = MainLoginPage:GetValue('rememberMe')
+    -- local autoLogin = MainLoginPage:GetValue('autoLogin')
+    -- local rememberMe = MainLoginPage:GetValue('rememberMe')
+
+    local validated = true
 
     if not Validated:AccountCompatible(account) then
         MainLoginPage:SetUIValue('account_field_error_msg', L'*账号不合法')
         MainLoginPage:FindControl('account_field_error').visible = true
-        return false
+        validated = false
     end
 
     if not Validated:Password(password) then
         MainLoginPage:SetUIValue('password_field_error_msg', L'*密码不合法')
         MainLoginPage:FindControl('password_field_error').visible = true
+        validated = false
+    end
+
+    if not validated then
         return false
     end
 

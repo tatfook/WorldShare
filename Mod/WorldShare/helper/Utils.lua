@@ -471,3 +471,94 @@ function Utils:IsSharedWorld(world)
 
     return false
 end
+
+function Utils:RecentDatetimeFormat(timestamp)
+    timestamp = tonumber(timestamp) or 0
+    local now = os.time()
+
+    local timeDiff = now - timestamp
+
+    if timeDiff < 0 then
+        return ''
+    end
+
+    ------------ min ------------
+
+    if timeDiff > 0 and timeDiff < 30 then
+        return L"刚刚"
+    end
+
+    if timeDiff >= 30 and timeDiff < 60 then
+        return L"1分钟前"
+    end
+
+    if timeDiff >= 60 and timeDiff < 120 then
+        return L"2分钟前"
+    end
+
+    if timeDiff >= 120 and timeDiff < 180 then
+        return L"3分钟前"
+    end
+
+    if timeDiff >= 180 and timeDiff < 240 then
+        return L"4分钟前"
+    end
+
+    if timeDiff >= 240 and timeDiff < 300 then
+        return L"5分钟前"
+    end
+
+    if timeDiff >= 300 and timeDiff < 360 then
+        return L"6分钟前"
+    end
+
+    if timeDiff >= 360 and timeDiff < 420 then
+        return L"7分钟前"
+    end
+
+    if timeDiff >= 420 and timeDiff < 480 then
+        return L"8分钟前"
+    end
+
+    if timeDiff >= 480 and timeDiff < 540 then
+        return L"9分钟前"
+    end
+
+    if timeDiff >= 540 and timeDiff < 600 then
+        return L"10分钟前"
+    end
+
+    ------------ hours ------------
+
+    if timeDiff >= 600 and timeDiff < 86400 then
+        local h = math.ceil(timeDiff / 3600)
+
+        return format(L"%d小时前", h)
+    end
+
+    ------------ days ------------
+
+    if timeDiff > 36000 and timeDiff < 2592000 then
+        local d = math.ceil(timeDiff / 86400)
+
+        return format(L"%d天前", d)
+    end
+
+    ------------ months ------------
+
+    if timeDiff > 2592000 and timeDiff < 31104000 then
+        local m = math.ceil(timeDiff / 2592000)
+
+        return format(L"%d个月前", m)
+    end
+
+    ------------ years ------------
+
+    if timeDiff > 31104000 and timeDiff < 622080000 then
+        local y = math.ceil(timeDiff / 31104000)
+
+        return format(L"%d年前", y)
+    end
+
+    return os.date("%Y-%m-%d %H:%M", timestamp)
+end
