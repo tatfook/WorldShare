@@ -286,36 +286,93 @@ function Compare:GetCurrentWorldInfo(callback)
     if GameLogic.IsReadOnly() then
         local originWorldPath = ParaWorld.GetWorldDirectory()
         local worldTag = WorldCommon.GetWorldInfo() or {}
+        local currentRevision = WorldRevision:new():init(originWorldPath):Checkout()
+        local localShared = string.match(worldpath or '', 'shared') == 'shared' and true or false
 
         if KeepworkServiceSession:IsSignedIn() then
-            currentWorld = KeepworkServiceWorld:GenerateWorldInstance({
-                IsFolder = false,
-                is_zip = true,
-                Title = worldTag.name,
-                text = worldTag.name,
-                foldername = Mod.WorldShare.Utils.GetFolderName(),
-                worldpath = originWorldPath,
-                kpProjectId = worldTag.kpProjectId,
-                fromProjectId = worldTag.fromProjects,
-            })
+            KeepworkServiceProject:GetProject(worldTag.kpProjectId, function(data, err)
+                local shared = false
+                if data and data.memberCount and data.memberCount > 1 then
+                    shared = true
+                end
+
+                KeepworkServiceProject:GetMembers(worldTag.kpProjectId, function(membersData, err)
+                    local members = {}
+
+                    for key, item in ipairs(membersData) do
+                        members[#members + 1] = item.username
+                    end
+
+                    if data and data.project then
+                        if data.project.visibility == 0 then
+                            data.project.visibility = 0
+                        else
+                            data.project.visibility = 1
+                        end
+                    end
+
+                    currentWorld = KeepworkServiceWorld:GenerateWorldInstance({
+                        text = worldTag.name,
+                        foldername = Mod.WorldShare.Utils.GetFolderName(),
+                        name = worldTag.name or '',
+                        revision = data.revision,
+                        size = 0,
+                        modifyTime = '',
+                        lastCommitId = data.commitId, 
+                        worldpath = originWorldPath,
+                        status = 3, -- status should be equal
+                        project = data.project,
+                        user = {
+                            id = data.userId,
+                            username = data.username,
+                        }, -- { id = xxxx, username = xxxx }
+                        kpProjectId = worldTag.kpProjectId,
+                        fromProjectId = worldTag.fromProjects,
+                        IsFolder = false,
+                        is_zip = true,
+                        shared = shared,
+                        communityWorld = worldTag.communityWorld,
+                        isVipWorld = worldTag.isVipWorld,
+                        instituteVipEnabled = worldTag.instituteVipEnabled,
+                        memberCount = data.memberCount,
+                        members = members,
+                    })
+
+                    echo(currentWorld, true)
+                    echo(data, true)
+
+                    local currentRemoteWorld = Mod.WorldShare.Store:Get('world/currentRemoteWorld')
+                    currentWorld.remoteWorld = commonlib.copy(currentRemoteWorld)
+
+                    Mod.WorldShare.Store:Set("world/currentRevision", GameLogic.options:GetRevision())
+                    afterGetInstance()
+                end)
+            end)
         else
             currentWorld = LocalServiceWorld:GenerateWorldInstance({
                 IsFolder = false,
                 is_zip = true,
-                Title = worldTag.name,
-                text = worldTag.name,
-                foldername = Mod.WorldShare.Utils.GetFolderName(),
-                worldpath = originWorldPath,
                 kpProjectId = worldTag.kpProjectId,
-                fromProjectId = worldTag.fromProjects,
+                fromProjectId = worldTag.fromProjectId,
+                text = worldTag.name,
+                size = 0,
+                foldername = Mod.WorldShare.Utils.GetFolderName(),
+                modifyTime = '',
+                worldpath = originWorldPath,
+                revision = currentRevision,
+                isVipWorld = worldTag.isVipWorld,
+                communityWorld = worldTag.communityWorld,
+                instituteVipEnabled = worldTag.instituteVipEnabled,
+                shared = localShared,
+                name = worldTag.name,
             })
+
+            local currentRemoteWorld = Mod.WorldShare.Store:Get('world/currentRemoteWorld')
+            currentWorld.remoteWorld = commonlib.copy(currentRemoteWorld)
+
+            Mod.WorldShare.Store:Set("world/currentRevision", GameLogic.options:GetRevision())
+            afterGetInstance()
         end
-
-        local currentRemoteWorld = Mod.WorldShare.Store:Get('world/currentRemoteWorld')
-        currentWorld.remoteWorld = commonlib.copy(currentRemoteWorld)
-
-        Mod.WorldShare.Store:Set("world/currentRevision", GameLogic.options:GetRevision())
-        afterGetInstance()
     else
         local worldpath = ParaWorld.GetWorldDirectory()
 
@@ -336,8 +393,6 @@ function Compare:GetCurrentWorldInfo(callback)
                 end
 
                 if userId ~= data.userId then
-    
-
                     local localShared = string.match(worldpath or '', 'shared') == 'shared' and true or false
     
                     if not shared or not localShared then
@@ -345,7 +400,6 @@ function Compare:GetCurrentWorldInfo(callback)
                         currentWorld = LocalServiceWorld:GenerateWorldInstance({
                             IsFolder = true,
                             is_zip = false,
-                            Title = worldTag.name,
                             text = worldTag.name,
                             foldername = Mod.WorldShare.Utils.GetFolderName(),
                             worldpath = worldpath,
@@ -355,7 +409,8 @@ function Compare:GetCurrentWorldInfo(callback)
                             revision = WorldRevision:new():init(worldpath):GetDiskRevision(),
                             communityWorld = worldTag.communityWorld,
                             isVipWorld = worldTag.isVipWorld,
-                            instituteVipEnabled = worldTag.instituteVipEnabled
+                            instituteVipEnabled = worldTag.instituteVipEnabled,
+                            shared = false,
                         })
     
                         afterGetInstance()
@@ -396,7 +451,6 @@ function Compare:GetCurrentWorldInfo(callback)
                         currentWorld = KeepworkServiceWorld:GenerateWorldInstance({
                             IsFolder = true,
                             is_zip = false,
-                            Title = worldTag.name,
                             text = worldTag.name,
                             foldername = Mod.WorldShare.Utils.GetFolderName(),
                             worldpath = worldpath,
@@ -417,6 +471,7 @@ function Compare:GetCurrentWorldInfo(callback)
                             instituteVipEnabled = worldTag.instituteVipEnabled,
                             memberCount = data.memberCount,
                             members = members,
+                            size = 0,
                         })
 
                         local username = Mod.WorldShare.Store:Get('user/username')
@@ -443,10 +498,11 @@ function Compare:GetCurrentWorldInfo(callback)
 
             return
         else
+            local localShared = string.match(worldpath or '', 'shared') == 'shared' and true or false
+
             currentWorld = LocalServiceWorld:GenerateWorldInstance({
                 IsFolder = true,
                 is_zip = false,
-                Title = worldTag.name,
                 text = worldTag.name,
                 foldername = Mod.WorldShare.Utils.GetFolderName(),
                 worldpath = worldpath,
@@ -456,7 +512,8 @@ function Compare:GetCurrentWorldInfo(callback)
                 revision = WorldRevision:new():init(worldpath):GetDiskRevision(),
                 communityWorld = worldTag.communityWorld,
                 isVipWorld = worldTag.isVipWorld,
-                instituteVipEnabled = worldTag.instituteVipEnabled
+                instituteVipEnabled = worldTag.instituteVipEnabled,
+                shared = localShared
             })
 
             if Mod.WorldShare.Utils:IsSharedWorld(currentWorld) then

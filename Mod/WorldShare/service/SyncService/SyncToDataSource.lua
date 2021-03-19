@@ -628,7 +628,6 @@ function SyncToDataSource:UpdateRecord(callback)
                                 if not self.currentWorld.status then
                                     -- covert to online instance
                                     self.currentWorld = KeepworkServiceWorld:GenerateWorldInstance({
-                                        Title = self.currentWorld.Title,
                                         text = self.currentWorld.text,
                                         foldername = self.currentWorld.foldername or '',
                                         revision = Mod.WorldShare.Store:Get("world/currentRevision"),

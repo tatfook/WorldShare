@@ -101,7 +101,6 @@ function LocalServiceWorld:GetWorldList()
             IsFolder = value.IsFolder,
             is_zip = is_zip,
             kpProjectId = kpProjectId,
-            Title = Title,
             text = text,
             size = size,
             foldername = foldername,
@@ -289,7 +288,6 @@ function LocalServiceWorld:SetWorldInstanceByFoldername(foldername)
         currentWorld = self:GenerateWorldInstance({
             IsFolder = true,
             is_zip = false,
-            Title = worldTag.name,
             text = worldTag.name,
             foldername = foldername,
             worldpath = worldpath,
@@ -392,7 +390,6 @@ function LocalServiceWorld:GenerateWorldInstance(params)
         kpProjectId = params.kpProjectId and tonumber(params.kpProjectId) or 0,
         fromProjectId = params.fromProjectId and tonumber(params.fromProjectId) or 0,
         hasPid = params.kpProjectId and params.kpProjectId ~= 0 and true or false,
-        Title = params.Title or '',
         text = params.text or '',
         size = params.size or 0,
         foldername = params.foldername or '',

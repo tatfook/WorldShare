@@ -120,7 +120,6 @@ function KeepworkServiceWorld:SetWorldInstanceByPid(pid, callback)
             fromProjectId = data.fromProjectId,
             IsFolder = true,
             is_zip = false,
-            Title = foldername,
             text = foldername,
             name = tag.name or '',
             foldername = foldername,
@@ -506,7 +505,6 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
             end
 
             currentWorld = self:GenerateWorldInstance({
-                Title = text,
                 text = text,
                 foldername = DItem.worldName,
                 revision = revision,
@@ -572,7 +570,6 @@ function KeepworkServiceWorld:GenerateWorldInstance(params)
     end
 
     return {
-        Title = params.Title or '',
         text = params.text or '',
         foldername = params.foldername or '',
         name = params.name or '',

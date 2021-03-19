@@ -23,6 +23,10 @@ Beginner.inited = false
 Beginner.guideWorldIds = { 40499, 40499, 40513, 40514, 40516 }
 
 function Beginner:OnWorldLoad()
+    if KeepworkServiceSession:GetUserWhere() == 'SCHOOL' then
+        return
+    end
+
     if self.inited then
         return
     end
