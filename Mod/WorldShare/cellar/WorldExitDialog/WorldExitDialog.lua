@@ -174,24 +174,24 @@ function WorldExitDialog.OnDialogResult(res)
     if res == _guihelper.DialogResult.No or res == _guihelper.DialogResult.Yes then
         local currentEnterWorld = Mod.WorldShare.Store:Get("world/currentEnterWorld")
 
-        if (currentEnterWorld.project and currentEnterWorld.project.memberCount or 0) > 1 then
+        if Mod.WorldShare.Utils:IsSharedWorld(currentEnterWorld) then
             Mod.WorldShare.MsgBox:Show(L"请稍候...")
             KeepworkServiceWorld:UnlockWorld(function()
-                if (WorldExitDialogPage.callback) then
+                if WorldExitDialogPage.callback then
                     --KeepworkServiceSession:Logout()
                     NplBrowserPlugin.CloseAllBrowsers()
                     WorldExitDialogPage.callback(res)
                 end
             end)
         else
-            if (WorldExitDialogPage.callback) then
+            if WorldExitDialogPage.callback then
                 NplBrowserPlugin.CloseAllBrowsers()
                 WorldExitDialogPage.callback(res)
             end
         end
 
     else
-        if (WorldExitDialogPage.callback) then
+        if WorldExitDialogPage.callback then
             WorldExitDialogPage.callback(res)
         end
     end

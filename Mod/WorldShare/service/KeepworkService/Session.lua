@@ -56,7 +56,11 @@ function KeepworkServiceSession:LongConnectionInit(callback)
         end
     
         connection:AddEventListener("OnOpen", function(self)
-            LOG.std("KeepworkServiceSession", "debug", "LongConnectionInit", "Connected client")
+            local isDebugSocket = false
+
+            if isDebugSocket then
+                LOG.std("KeepworkServiceSession", "debug", "LongConnectionInit", "Connected client")
+            end
         end, connection)
     
         connection:AddEventListener("OnMsg", self.OnMsg, connection)

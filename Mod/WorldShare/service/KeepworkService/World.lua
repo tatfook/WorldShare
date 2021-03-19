@@ -339,7 +339,7 @@ function KeepworkServiceWorld:UnlockWorld(callback)
     local currentEnterWorld = Mod.WorldShare.Store:Get("world/currentEnterWorld")
 
     if currentEnterWorld then
-        if (currentEnterWorld.project and currentEnterWorld.project.memberCount or 0) > 1 then
+        if Mod.WorldShare.Utils:IsSharedWorld(currentEnterWorld, true) then
             self.isUnlockFetching = true
 
             local function unlock()

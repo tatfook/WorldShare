@@ -338,9 +338,6 @@ function Compare:GetCurrentWorldInfo(callback)
                         members = members,
                     })
 
-                    echo(currentWorld, true)
-                    echo(data, true)
-
                     local currentRemoteWorld = Mod.WorldShare.Store:Get('world/currentRemoteWorld')
                     currentWorld.remoteWorld = commonlib.copy(currentRemoteWorld)
 
