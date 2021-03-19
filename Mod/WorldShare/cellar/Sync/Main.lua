@@ -294,33 +294,39 @@ end
 function SyncMain:CheckTagName(callback)
     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
-    Mod.WorldShare.MsgBox:Wait()
-    KeepworkServiceProject:GetProject(currentWorld.kpProjectId, function(data)
-        Mod.WorldShare.MsgBox:Close()
-        if data.extra and
-           data.extra.worldTagName and
-           data.extra.worldTagName ~= currentWorld.name then
-            local params = Mod.WorldShare.Utils.ShowWindow(
-                630,
-                240,
-                "Mod/WorldShare/cellar/Theme/Sync/CheckTagName.html?remote_tagname=" ..
-                    data.extra.worldTagName ..
-                    "&local_tagname=" ..
-                    currentWorld.name,
-                "Mod.WorldShare.Sync.CheckTagName"
-            )
+    if currentWorld and currentWorld.kpProjectId and currentWorld.kpProjectId ~= 0 then
+        Mod.WorldShare.MsgBox:Wait()
+        KeepworkServiceProject:GetProject(currentWorld.kpProjectId, function(data)
+            Mod.WorldShare.MsgBox:Close()
+            if data.extra and
+            data.extra.worldTagName and
+            data.extra.worldTagName ~= currentWorld.name then
+                local params = Mod.WorldShare.Utils.ShowWindow(
+                    630,
+                    240,
+                    "Mod/WorldShare/cellar/Theme/Sync/CheckTagName.html?remote_tagname=" ..
+                        data.extra.worldTagName ..
+                        "&local_tagname=" ..
+                        currentWorld.name,
+                    "Mod.WorldShare.Sync.CheckTagName"
+                )
 
-            params._page.callback = function(params)
+                params._page.callback = function(params)
+                    if callback and type(callback) == 'function' then
+                        callback(params, data.extra.worldTagName)
+                    end
+                end
+            else
                 if callback and type(callback) == 'function' then
-                    callback(params, data.extra.worldTagName)
+                    callback('')
                 end
             end
-        else
-            if callback and type(callback) == 'function' then
-                callback('')
-            end
+        end)
+    else
+        if callback and type(callback) == 'function' then
+            callback('')
         end
-    end)
+    end
 end
 
 function SyncMain.GetCurrentRevision()
