@@ -17,7 +17,8 @@
                 -- service
                 local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
                 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
-                
+                local KeepworkServiceWorld = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/World.lua")
+
                 -- lib
                 local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
                 local os = commonlib.gettable("System.os")
@@ -257,25 +258,18 @@
                     if KeepworkServiceSession:IsSignedIn() then
                         local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
                         if currentEnterWorld.communityWorld then
-                            local userId = Mod.WorldShare.Store:Get('user/userId') or 0
+                            if currentEnterWorld.members and type(currentEnterWorld.members) == 'table' then
+                                local username = Mod.WorldShare.Store:Get('user/username')
 
-                            if tonumber(userId) == tonumber(currentEnterWorld.user.id) then
-                                if currentEnterWorld.members and type(currentEnterWorld.members) == 'table' then
-                                    local username = Mod.WorldShare.Store:Get('user/username')
-
-                                    for key, item in ipairs(currentEnterWorld.members) do
-                                        if username == item then
-                                            return false
-                                        end
+                                for key, item in ipairs(currentEnterWorld.members) do
+                                    if username == item then
+                                        return false
                                     end
-
-                                    return true
-                                else
-                                    return false
                                 end
-                            else
-                                return true
+
                             end
+
+                            return true
                         else
                             return false
                         end
@@ -299,7 +293,15 @@
                 end
 
                 function force_exit()
-                    Desktop.ForceExit(true)
+                    local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
+                    if not GameLogic.IsReadOnly() and Mod.WorldShare.Utils:IsSharedWorld(currentEnterWorld) then
+                        Mod.WorldShare.MsgBox:Show(L"请稍候...")
+                        KeepworkServiceWorld:UnlockWorld(function()
+                            Desktop.ForceExit(true)
+                        end)
+                    else
+                        Desktop.ForceExit(true)
+                    end
                 end
             ]]>
         </script>
