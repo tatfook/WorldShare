@@ -84,6 +84,7 @@ function VersionChange:GetVersionSource(callback)
     KeepworkServiceWorld:GetWorld(
         self.foldername,
         currentWorld.shared,
+        currentWorld.user.id,
         function(world)
             if type(callback) ~= 'function' then
                 return false

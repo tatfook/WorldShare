@@ -178,7 +178,6 @@ function WorldExitDialog.OnDialogResult(res)
             Mod.WorldShare.MsgBox:Show(L"请稍候...")
             KeepworkServiceWorld:UnlockWorld(function()
                 if WorldExitDialogPage.callback then
-                    --KeepworkServiceSession:Logout()
                     NplBrowserPlugin.CloseAllBrowsers()
                     WorldExitDialogPage.callback(res)
                 end

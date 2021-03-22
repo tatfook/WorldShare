@@ -19,7 +19,7 @@ function Validated:Account(str)
         return false
     else
         -- contains digits or characters
-        if string.match(str, '%a+') or string.match(str, '%d+') then
+        if string.match(str, '^[%a%d]+') == str then
             if string.match(str, '^%d+') then
                 return false
             else
@@ -40,7 +40,7 @@ function Validated:AccountCompatible(str)
         return false
     else
         -- contains digits and characters
-        if string.match(str, '%a+') or string.match(str, '%d+') then
+        if string.match(str, '^[%a%d]+') == str then
             return true
         else
             return false

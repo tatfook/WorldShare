@@ -160,42 +160,32 @@ function KeepworkServiceWorld:GetWorldsList(callback)
 end
 
 -- get world by worldname
-function KeepworkServiceWorld:GetWorld(foldername, shared, callback)
-    if type(callback) ~= 'function' then
+function KeepworkServiceWorld:GetWorld(foldername, shared, worldUserId, callback)
+    if not foldername or
+       shared == nil or
+       not worldUserId or
+       not callback or
+       type(callback) ~= 'function' then
         return false
     end
 
-    if type(foldername) ~= 'string' or not KeepworkService:IsSignedIn() then
+    if not KeepworkService:IsSignedIn() then
         return false
     end
-
-    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld') or {}
 
     KeepworkWorldsApi:GetWorldByName(foldername, function(data, err)
         if type(data) ~= 'table' then
-            return false
+            return
         end
 
         for key, item in ipairs(data) do
-            local localShared = string.match(currentWorld.worldpath or '', 'shared') == 'shared' and true or false
-
-            if not localShared and not currentWorld.shared then
-                callback(item)
-                return
-            else
-                if not currentWorld.shared then
-                    -- illegal operation
+            if not shared then
+                if item.project.memberCount <= 1 then
+                    callback(item)
                     return
                 end
-
-                local shared = false
-
-                if item.project and item.project.memberCount > 1 then
-                    shared = true
-                end
-
-                if currentWorld.user.id == item.user.id and
-                   currentWorld.shared == shared then
+            else
+                if item.project.memberCount > 1 and worldUserId == item.user.id then
                     -- exist
                     callback(item)
                     return
@@ -208,26 +198,14 @@ function KeepworkServiceWorld:GetWorld(foldername, shared, callback)
 end
 
 -- updat world info
-function KeepworkServiceWorld:PushWorld(params, shared, callback)
+function KeepworkServiceWorld:PushWorld(worldId, params, callback)
     if type(params) ~= 'table' or
-       not params.worldName or
+       not worldId or
        not KeepworkService:IsSignedIn() then
         return false
     end
 
-    self:GetWorld(
-        params.worldName or '',
-        shared,
-        function(world)
-            local worldId = world and world.id or false
-
-            if not worldId then
-                return false
-            end
-
-            KeepworkWorldsApi:UpdateWorldInfo(worldId, params, callback)
-        end
-    )
+    KeepworkWorldsApi:UpdateWorldInfo(worldId, params, callback)
 end
 
 -- get world by project id

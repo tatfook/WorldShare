@@ -178,12 +178,16 @@ function ShareWorld:OnClick()
     local function Handle()
         SyncMain:CheckTagName(function()
             SyncMain:SyncToDataSource(function(result, msg)
-				if (ShareWorld.callback and type(ShareWorld.callback) == "function") then
-					ShareWorld.callback(true);
-				end
-			end);
+                Compare:GetCurrentWorldInfo(function()
+				    if self.callback and type(self.callback) == 'function' then
+                        self.callback(true)
+                    end
+                end)
+			end)
+
             self:ClosePage()
 
+            -- act week
             if self:GetCurrentRevision() > self:GetRemoteRevision() then
                 local ActWeek = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/ActWeek/ActWeek.lua")
                 if ActWeek then

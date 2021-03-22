@@ -89,19 +89,19 @@ function SyncToDataSource:Init(callback)
                                 return false
                             end
     
-                            currentWorld.kpProjectId = data.id
+                            self.currentWorld.kpProjectId = data.id
     
-                            if currentWorld and currentWorld.kpProjectId and currentWorld.kpProjectId ~= 0 then
-                                local tag = LocalService:GetTag(currentWorld.worldpath)
+                            if self.currentWorld and self.currentWorld.kpProjectId and self.currentWorld.kpProjectId ~= 0 then
+                                local tag = LocalService:GetTag(self.currentWorld.worldpath)
     
-                                if type(tag) == 'table' then
-                                    tag.kpProjectId = currentWorld.kpProjectId
+                                if tag and type(tag) == 'table' then
+                                    tag.kpProjectId = self.currentWorld.kpProjectId
     
-                                    LocalService:SetTag(currentWorld.worldpath, tag)
+                                    LocalService:SetTag(self.currentWorld.worldpath, tag)
                                 end
                             end
     
-                            Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
+                            Mod.WorldShare.Store:Set("world/currentWorld", self.currentWorld)
                             self:Start()
                         end
                     )
@@ -127,9 +127,16 @@ function SyncToDataSource:IsProjectExist(callback)
         return false
     end
 
+    local worldUserId = 0
+
+    if self.currentWorld.shared then
+        worldUserId = self.currentWorld.user.id
+    end
+
     KeepworkServiceWorld:GetWorld(
         self.currentWorld.foldername,
         self.currentWorld.shared,
+        worldUserId,
         function(data)
             if type(data) == 'table' then
                 if self.currentWorld.shared then
@@ -298,7 +305,6 @@ function SyncToDataSource:GetCompareList()
 end
 
 function SyncToDataSource:Close()
-    Compare:GetCurrentWorldInfo()
     self.callback(true, 'success')
 end
 
@@ -522,9 +528,9 @@ function SyncToDataSource:UpdateRecord(callback)
         if type(data) ~= "table" or
            not data.commitId or
            not data.message then
-            self.callback(false, L"获取Commit列表失败")
+            self.callback(false, L"获取COMMIT列表失败")
             self:SetFinish(true)
-            return false
+            return
         end
 
         local lastCommitFile = string.match(data.message, "revision.xml")
@@ -535,10 +541,9 @@ function SyncToDataSource:UpdateRecord(callback)
         if not lastCommitFile or string.lower(lastCommitFile) ~= "revision.xml" then
             self.callback(false, L"上一次同步到数据源同步失败，请重新同步世界到数据源")
             self:SetFinish(true)
-            return false
+            return
         end
 
-        local localFiles = LocalService:LoadFiles(self.currentWorld.worldpath)
         local filesTotals = self.currentWorld.size or 0
 
         local function HandleGetWorld(data)
@@ -596,8 +601,8 @@ function SyncToDataSource:UpdateRecord(callback)
                 }
 
                 KeepworkServiceWorld:PushWorld(
+                    oldWorldInfo.id,
                     worldInfo,
-                    self.currentWorld.shared,
                     function(data, err)
                         if err ~= 200 then
                             self.callback(false, L"更新服务器列表失败")
@@ -656,6 +661,8 @@ function SyncToDataSource:UpdateRecord(callback)
                                 end
 
                                 Mod.WorldShare.Store:Set("world/currentWorld", self.currentWorld)
+
+                                -- updated world mod data
                                 KeepworkService:SetCurrentCommitId()
 
                                 if callback and type(callback) == 'function' then
@@ -722,7 +729,18 @@ function SyncToDataSource:UpdateRecord(callback)
             end)
         end
 
-        KeepworkServiceWorld:GetWorld(self.currentWorld.foldername, self.currentWorld.shared, HandleGetWorld)
+        local worldUserId = 0
+
+        if self.currentWorld.shared then
+            worldUserId = self.currentWorld.user.id
+        end
+
+        KeepworkServiceWorld:GetWorld(
+            self.currentWorld.foldername,
+            self.currentWorld.shared,
+            worldUserId,
+            HandleGetWorld
+        )
     end
 
     GitService:GetCommits(

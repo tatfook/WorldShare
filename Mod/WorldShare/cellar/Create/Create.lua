@@ -533,7 +533,7 @@ function Create:WorldRename(currentItemIndex, tempModifyWorldname, callback)
             end)
         elseif currentWorld.status == 2 then
             -- just remote world exist
-            KeepworkServiceWorld:GetWorld(currentWorld.foldername, currentWorld.shared, function(data)
+            KeepworkServiceWorld:GetWorld(currentWorld.foldername, currentWorld.shared, currentWorld.user.id, function(data)
                 local extra = data and data.extra or {}
 
                 extra.worldTagName = tempModifyWorldname
@@ -544,14 +544,14 @@ function Create:WorldRename(currentItemIndex, tempModifyWorldname, callback)
                     {
                         extra = extra
                     },
-                    function()
+                    function(data, err)
                         -- update world info
                         KeepworkServiceWorld:PushWorld(
+                            data.id,
                             {
                                 worldName = currentWorld.foldername,
                                 extra = extra
                             },
-                            currentWorld.shared,
                             function()
                                 if type(callback) == 'function' then
                                     callback()

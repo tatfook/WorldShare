@@ -338,19 +338,10 @@ function LocalServiceWorld:SaveWorldInfo(ctx, node)
         return false
     end
 
-    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
-    local kpProjectId = 0
-
-    if currentWorld and currentWorld.kpProjectId then
-        kpProjectId = currentWorld.kpProjectId or 0
-    else
-        kpProjectId = ctx.kpProjectId or 0
-    end
-
     node.attr.clientversion = LocalService:GetClientVersion() or ctx.clientversion
     node.attr.communityWorld = ctx.communityWorld or false
     node.attr.instituteVipEnabled = ctx.instituteVipEnabled or false
-    node.attr.kpProjectId = kpProjectId
+    node.attr.kpProjectId = ctx.kpProjectId and tonumber(ctx.kpProjectId) or 0
 end
 
 function LocalServiceWorld:LoadWorldInfo(ctx, node)

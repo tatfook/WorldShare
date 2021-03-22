@@ -59,7 +59,12 @@ function DeleteWorld:DeleteWorld(callback)
            currentWorld.shared == currentEnterWorld.shared and
            currentWorld.is_zip == currentEnterWorld.is_zip then
             if KeepworkServiceSession:IsSignedIn() then
-                if currentWorld.shared and currentWorld.kpProjectId == currentEnterWorld.kpProjectId then
+                if currentWorld.shared then
+                    if currentWorld.kpProjectId == currentEnterWorld.kpProjectId then
+                        _guihelper.MessageBox(L'不能刪除正在编辑的世界')
+                        return false
+                    end
+                else
                     _guihelper.MessageBox(L'不能刪除正在编辑的世界')
                     return false
                 end
