@@ -15,6 +15,7 @@ local SaveWorldHandler = commonlib.gettable("MyCompany.Aries.Game.SaveWorldHandl
 
 -- service
 local KeepworkService = NPL.load('../KeepworkService.lua')
+local KeepworkServiceSession = NPL.load('./Session.lua')
 local LocalServiceWorld = NPL.load('(gl)Mod/WorldShare/service/LocalService/LocalServiceWorld.lua')
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
@@ -103,14 +104,14 @@ function KeepworkServiceWorld:SetWorldInstanceByPid(pid, callback)
             end
         end
 
-        local tag = LocalService:GetTag(worldpath)
+        local worldTag = LocalService:GetTag(worldpath)
 
         local shared = false
 
         if KeepworkServiceSession:IsSignedIn() then
             local userId = Mod.WorldShare.Store:Get('user/userId')
 
-            if data.user.id ~= 0 and tonumber(data.user.id) ~= (userId) then
+            if data.userId and tonumber(data.userId) ~= (userId) then
                 shared = true
             end
         end
@@ -121,7 +122,7 @@ function KeepworkServiceWorld:SetWorldInstanceByPid(pid, callback)
             IsFolder = true,
             is_zip = false,
             text = foldername,
-            name = tag.name or '',
+            name = worldTag.name or '',
             foldername = foldername,
             worldpath = worldpath,
             status = status,
@@ -135,9 +136,9 @@ function KeepworkServiceWorld:SetWorldInstanceByPid(pid, callback)
                 username = data.username,
             },
             shared = shared,
-            communityWorld = worldTag.communityWorld == 'true' or worldTag.communityWorld == true,
-            isVipWorld = worldTag.isVipWorld == 'true' or worldTag.isVipWorld == true,
-            instituteVipEnabled =  worldTag.instituteVipEnabled == 'true' or worldTag.instituteVipEnabled == true,
+            communityWorld = worldTag.communityWorld,
+            isVipWorld = worldTag.isVipWorld,
+            instituteVipEnabled =  worldTag.instituteVipEnabled,
             memberCount = data.memberCount,
             members = {}
         })
