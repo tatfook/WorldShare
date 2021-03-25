@@ -94,3 +94,16 @@ function KeepworkSchoolsApi:GetSchoolById(id, success, error)
 
     KeepworkBaseApi:Get('/schools', params, nil, success, error)
 end
+
+-- url: /schools/:id/classes
+-- method: GET
+-- params:
+--[[
+    id int schoolId necessary
+]]
+-- return:
+--[[
+]]
+function KeepworkSchoolsApi:Classes(schoolId, success, error)
+    KeepworkBaseApi:Get('/schools/' .. schoolId .. '/classes', nil, nil, success, error)
+end

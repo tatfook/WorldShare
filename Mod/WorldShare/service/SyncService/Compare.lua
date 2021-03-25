@@ -289,7 +289,7 @@ function Compare:GetCurrentWorldInfo(callback)
         local currentRevision = WorldRevision:new():init(originWorldPath):Checkout()
         local localShared = string.match(worldpath or '', 'shared') == 'shared' and true or false
 
-        if KeepworkServiceSession:IsSignedIn() then
+        if worldTag.kpProjectId and worldTag.kpProjectId ~= 0 then
             KeepworkServiceProject:GetProject(worldTag.kpProjectId, function(data, err)
                 local shared = false
                 if data and data.memberCount and data.memberCount > 1 then
@@ -336,16 +336,16 @@ function Compare:GetCurrentWorldInfo(callback)
                         instituteVipEnabled = worldTag.instituteVipEnabled,
                         memberCount = data.memberCount,
                         members = members,
+                        remotefile = data.world.archiveUrl,
                     })
-
-                    local currentRemoteWorld = Mod.WorldShare.Store:Get('world/currentRemoteWorld')
-                    currentWorld.remoteWorld = commonlib.copy(currentRemoteWorld)
 
                     Mod.WorldShare.Store:Set("world/currentRevision", GameLogic.options:GetRevision())
                     afterGetInstance()
                 end)
             end)
         else
+            local currentRemoteFile = Mod.WorldShare.Store:Get('world/currentRemoteFile')
+
             currentWorld = LocalServiceWorld:GenerateWorldInstance({
                 IsFolder = false,
                 is_zip = true,
@@ -362,10 +362,8 @@ function Compare:GetCurrentWorldInfo(callback)
                 instituteVipEnabled = worldTag.instituteVipEnabled,
                 shared = localShared,
                 name = worldTag.name,
+                remotefile = currentRemoteFile,
             })
-
-            local currentRemoteWorld = Mod.WorldShare.Store:Get('world/currentRemoteWorld')
-            currentWorld.remoteWorld = commonlib.copy(currentRemoteWorld)
 
             Mod.WorldShare.Store:Set("world/currentRevision", GameLogic.options:GetRevision())
             afterGetInstance()

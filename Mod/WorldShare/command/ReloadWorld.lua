@@ -12,6 +12,8 @@ local ReloadWorldCommand = NPL.load("(gl)Mod/WorldShare/command/ReloadWorld.lua"
 -- load lib
 local Commands = commonlib.gettable("MyCompany.Aries.Game.Commands")
 local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
+local RemoteWorld = commonlib.gettable('MyCompany.Aries.Creator.Game.Login.RemoteWorld')
+local InternetLoadWorld = commonlib.gettable('MyCompany.Aries.Creator.Game.Login.InternetLoadWorld')
 
 local ReloadWorldCommand = NPL.export()
 
@@ -29,10 +31,15 @@ function ReloadWorldCommand:Init()
             end
 
             if currentEnterWorld.is_zip then
-                if currentEnterWorld.remoteWorld and currentEnterWorld.remoteWorld.localpath then
-                    Mod.WorldShare.Store:Set('world/currentRemoteWorld', currentEnterWorld.remoteWorld)
-                    WorldCommon.OpenWorld(currentEnterWorld.remoteWorld.localpath)
-                end
+                local remoteWorld = RemoteWorld.LoadFromHref(currentEnterWorld.remotefile, "self")
+                InternetLoadWorld.LoadWorld(
+                    remoteWorld,
+                    nil,
+                    'auto',
+                    function(bSucceed, localWorldPath) end
+                )
+                -- local remoteWorld = RemoteWorld.LoadFromHref(currentEnterWorld.remotefile, "self")
+                -- WorldCommon.OpenWorld(remoteWorld.localpath)
             else
                 WorldCommon.OpenWorld(currentEnterWorld.worldpath)
             end

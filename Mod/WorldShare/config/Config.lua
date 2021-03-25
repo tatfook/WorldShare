@@ -22,6 +22,13 @@ Config.env = {
 Config.defaultEnv = (ParaEngine.GetAppCommandLineByParam("http_env", nil) or Config.env.ONLINE)
 Config.defaultGit = "KEEPWORK"
 
+Config.homeWorldId = {
+  ONLINE = 19759,
+  STAGE = 19759,
+  RELEASE = 1296,
+  LOCAL = 19759,
+}
+
 Config.keepworkList = {
   ONLINE = "https://keepwork.com",
   STAGE = "http://dev.kp-para.cn",

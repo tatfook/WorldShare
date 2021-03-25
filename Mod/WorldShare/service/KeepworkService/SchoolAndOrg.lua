@@ -264,3 +264,7 @@ function KeepworkServiceSchoolAndOrg:SchoolRegister(schoolType, regionId, school
             end
         end)
 end
+
+function KeepworkServiceSchoolAndOrg:GetMyClassList(schoolId, callback)
+    KeepworkSchoolsApi:Classes(schoolId, callback, callback)
+end

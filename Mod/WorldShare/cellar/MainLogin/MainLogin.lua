@@ -480,7 +480,11 @@ function MainLogin:EnterUserConsole(isOffline)
         Mod.WorldShare.MsgBox:Show(L'请稍候...', 12000)
     end
 
-    GameMainLogin:next_step({IsLoginModeSelected = true})
+    if KeepworkServiceSession:GetUserWhere() == 'HOME' then
+        GameLogic.RunCommand(format('/loadworld %s', Mod.WorldShare.Utils:GetConfig('homeWorldId')))
+    else
+        GameMainLogin:next_step({IsLoginModeSelected = true})
+    end
 end
 
 function MainLogin:SetAutoLogin()

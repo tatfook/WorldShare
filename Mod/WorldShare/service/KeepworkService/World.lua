@@ -547,6 +547,14 @@ function KeepworkServiceWorld:GenerateWorldInstance(params)
         return {}
     end
 
+    local remotefile = ''
+
+    if params.remotefile then
+        remotefile = params.remotefile
+    else
+        remotefile = format('local://%s', (params.worldpath or ''))
+    end
+
     return {
         text = params.text or '',
         foldername = params.foldername or '',
@@ -556,7 +564,7 @@ function KeepworkServiceWorld:GenerateWorldInstance(params)
         modifyTime = params.modifyTime or '',
         lastCommitId = params.lastCommitId or '', 
         worldpath = params.worldpath or '',
-        remotefile = format("local://%s", (params.worldpath or '')),
+        remotefile = remotefile,
         status = params.status or 0,
         project = params.project or {},
         user = params.user or {}, -- { id = xxxx, username = xxxx }

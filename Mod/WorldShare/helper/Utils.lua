@@ -17,6 +17,9 @@ local LocalLoadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalL
 local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
 
+-- config
+local Config = NPL.load('(gl)Mod/WorldShare/config/Config.lua')
+
 local Utils = NPL.export()
 local self = Utils
 
@@ -396,8 +399,10 @@ function Utils.OpenKeepworkUrlByToken(url)
     end)
 end
 
-function Utils.WordsLimit(text)
-    if _guihelper.GetTextWidth(text) > 150 then
+function Utils.WordsLimit(text, size)
+    size = size or 150
+
+    if _guihelper.GetTextWidth(text) > size then
         local function chsize(char)
             if not char then
                 return 0
@@ -561,4 +566,15 @@ function Utils:RecentDatetimeFormat(timestamp)
     end
 
     return os.date("%Y-%m-%d %H:%M", timestamp)
+end
+
+function Utils:GetConfig(field)
+    local env = ''
+    for key, item in pairs(Config.env) do
+        if key == Config.defaultEnv then
+            env = Config.defaultEnv
+        end
+    end
+
+    return Config[field][env]
 end

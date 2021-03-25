@@ -375,6 +375,14 @@ function LocalServiceWorld:GenerateWorldInstance(params)
         return {}
     end
 
+    local remotefile = ''
+
+    if params.remotefile then
+        remotefile = params.remotefile
+    else
+        remotefile = format('local://%s', (params.worldpath or ''))
+    end
+
     return {
         IsFolder = params.IsFolder == 'true' or params.IsFolder == true,
         is_zip = params.is_zip == 'true' or params.is_zip == true,
@@ -386,7 +394,7 @@ function LocalServiceWorld:GenerateWorldInstance(params)
         foldername = params.foldername or '',
         modifyTime = params.modifyTime or '',
         worldpath = params.worldpath or '',
-        remotefile = format("local://%s", (params.worldpath or '')),
+        remotefile = remotefile,
         revision = params.revision or 0,
         isVipWorld = params.isVipWorld or false,
         communityWorld = params.communityWorld or false,

@@ -66,33 +66,6 @@ function KeepworkProjectsApi:GetProject(kpProjectId, success, error, noTryStatus
     KeepworkBaseApi:Get(url, nil, nil, success, error, noTryStatus)
 end
 
--- -- url: 
--- function KeepworkProjectsApi:GetProjectByWorldName(foldername, success, error)
---     if type(foldername) ~= 'string' then
---         return false
---     end
-
---     local url = format("/worlds?worldName=%s", Encoding.url_encode(foldername or ''))
-
---     KeepworkBaseApi:Get(
---         url,
---         nil,
---         nil,
---         function(data, err)
---             if type(data) == 'table' then
---                 if type(success) == 'function' then
---                     success(data, err)
---                 end
---             else
---                 if type(error) == 'function' then
---                     error()
---                 end
---             end
---         end,
---         error
---     )
--- end
-
 -- url: /projects/%d/visit
 -- method: GET
 -- params:
@@ -180,4 +153,16 @@ function KeepworkProjectsApi:QueryByWorldNameAndUsername(worldName, username, su
     }
 
     KeepworkBaseApi:Post('/projects/queryByWorldNameAndUsername', parmas, nil, success, error)
+end
+
+-- url: /projects/mySchools
+-- method: GET
+-- params:
+--[[
+    x-per-page int not necessary
+    x-page int not necessary
+]]
+-- return: object
+function KeepworkProjectsApi:MySchools(xPerPage, xPage, success, error)
+    KeepworkBaseApi:Get('/projects/mySchools', nil, nil, success, error)
 end

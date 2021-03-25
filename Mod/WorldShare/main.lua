@@ -201,7 +201,6 @@ function WorldShare:OnWorldLoad()
 
     EventTrackingService:Send(2, 'duration.world.stay', { started = true })
 
-    Mod.WorldShare.Store:Remove("world/currentRemoteWorld")
     Mod.WorldShare.Store:Set('world/isEnterWorld', true)
     Mod.WorldShare.Store:Set('world/loadWorldFinish', true)
 end
