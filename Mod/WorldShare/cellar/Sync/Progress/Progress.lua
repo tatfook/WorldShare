@@ -184,7 +184,8 @@ end
 
 function Progress:Retry()
     self:Cancel(function()
-        Compare:Init(function(result)
+        local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+        Compare:Init(currentWorld.worldpath, function(result)
             if not result then
                 GameLogic.AddBBS(nil, L"同步失败", 3000, "255 0 0")
                 return false

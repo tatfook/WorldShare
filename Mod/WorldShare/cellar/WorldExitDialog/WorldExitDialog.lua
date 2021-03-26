@@ -101,7 +101,7 @@ function WorldExitDialog.ShowPage(callback)
         end
     else
         if KeepworkService:IsSignedIn() then
-            Compare:Init(function(result)
+            Compare:Init(currentWorld.worldpath, function(result)
                 if not result then
                     return false
                 end

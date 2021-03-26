@@ -137,9 +137,11 @@ function Create:Sync()
         return false
     end
 
+    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+
     Mod.WorldShare.MsgBox:Show(L"请稍候...")
 
-    Compare:Init(function(result)
+    Compare:Init(currentWorld.worldpath, function(result)
         Mod.WorldShare.MsgBox:Close()
 
         if not result then
@@ -157,7 +159,6 @@ function Create:Sync()
             SyncMain:SyncToLocal(function()
                 SyncMain:CheckTagName(function(result, remoteName)
                     if result and result == 'remote' then
-                        local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
                         local tag = LocalService:GetTag(currentWorld.worldpath)
     
                         tag.name = remoteName
@@ -174,14 +175,12 @@ function Create:Sync()
         end
 
         if result == Compare.REMOTEBIGGER or
-            result == Compare.LOCALBIGGER or
-            result == Compare.EQUAL then
-
-            local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+           result == Compare.LOCALBIGGER or
+           result == Compare.EQUAL then
 
             KeepworkServiceProject:GetMembers(currentWorld.kpProjectId, function(membersData, err)
                 local members = {}
-            
+
                 for key, item in ipairs(membersData) do
                     members[#members + 1] = item.username
                 end
@@ -391,7 +390,7 @@ function Create:EnterWorld(index, skip)
     if currentWorld.status == 2 then
         Mod.WorldShare.MsgBox:Show(L"请稍候...")
 
-        Compare:Init(function(result)
+        Compare:Init(currentWorld.worldpath, function(result)
             Mod.WorldShare.MsgBox:Close()
 
             if result ~= Compare.JUSTREMOTE then
@@ -431,7 +430,7 @@ function Create:EnterWorld(index, skip)
         end
 
         Mod.WorldShare.MsgBox:Show(L'请稍候...')
-        Compare:Init(function(result)
+        Compare:Init(currentWorld.worldpath, function(result)
             Mod.WorldShare.MsgBox:Close()
 
             if ShareTypeWorld:IsSharedWorld(currentWorld) then

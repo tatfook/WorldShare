@@ -255,53 +255,32 @@ function LocalServiceWorld:SetWorldInstanceByFoldername(foldername)
     local worldpath = Mod.WorldShare.Utils.GetWorldFolderFullPath() .. '/' ..
                       commonlib.Encoding.Utf8ToDefault(foldername) .. '/'
 
-    local currentWorldList = self:GetWorldList()
     local currentWorld = nil
 
-    if currentWorldList then
-        local searchCurrentWorld
-        local shared = string.match(worldpath, "shared") == "shared" and true or false
-
-        for key, item in ipairs(currentWorldList) do
-            if item.foldername == foldername and
-                item.shared == shared and 
-                not item.is_zip then
-                searchCurrentWorld = item
-                break
-            end
-        end
-
-        if searchCurrentWorld then
-            currentWorld = searchCurrentWorld
-        end
+    local worldTag = LocalService:GetTag(worldpath) or {}
+    local revision = WorldRevision:new():init(worldpath):GetDiskRevision()
+    local shared = string.match(worldpath, "shared") == "shared" and true or false
+    
+    if name ~= commonlib.Encoding.DefaultToUtf8(foldername) then
+        text = name .. '(' .. commonlib.Encoding.DefaultToUtf8(foldername) .. ')'
     end
 
-    if not currentWorld then
-        local worldTag = LocalService:GetTag(worldpath) or {}
-        local revision = WorldRevision:new():init(worldpath):GetDiskRevision()
-        local shared = string.match(worldpath, "shared") == "shared" and true or false
-        
-        if name ~= commonlib.Encoding.DefaultToUtf8(foldername) then
-            text = name .. '(' .. commonlib.Encoding.DefaultToUtf8(foldername) .. ')'
-        end
-
-        currentWorld = self:GenerateWorldInstance({
-            IsFolder = true,
-            is_zip = false,
-            text = worldTag.name,
-            foldername = foldername,
-            worldpath = worldpath,
-            kpProjectId = worldTag.kpProjectId,
-            fromProjectId = worldTag.fromProjects,
-            name = worldTag.name,
-            modifyTime = 0,
-            revision = revision,
-            isVipWorld = worldTag.isVipWorld == 'true' or worldTag.isVipWorld == true,
-            communityWorld = worldTag.communityWorld == 'true' or worldTag.communityWorld == true,
-            instituteVipEnabled = worldTag.instituteVipEnabled == 'true' or worldTag.instituteVipEnabled == true,
-            shared = shared
-        })
-    end
+    currentWorld = self:GenerateWorldInstance({
+        IsFolder = true,
+        is_zip = false,
+        text = worldTag.name,
+        foldername = foldername,
+        worldpath = worldpath,
+        kpProjectId = worldTag.kpProjectId,
+        fromProjectId = worldTag.fromProjects,
+        name = worldTag.name,
+        modifyTime = 0,
+        revision = revision,
+        isVipWorld = worldTag.isVipWorld,
+        communityWorld = worldTag.communityWorld,
+        instituteVipEnabled = worldTag.instituteVipEnabled,
+        shared = shared
+    })
 
     Mod.WorldShare.Store:Set('world/currentWorld', currentWorld)
 

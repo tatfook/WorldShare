@@ -41,40 +41,6 @@ function CreateWorld.OnClickCreateWorld()
     return false
 end
 
-function CreateWorld:CheckRevision(callback)
-    local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
-
-    if not currentWorld or type(currentWorld) ~= 'table' then
-        return false
-    end
-
-    if not currentWorld.is_zip and not Compare:HasRevision() then
-        Mod.WorldShare.MsgBox:Show(L"正在初始化世界...")
-        self:CreateRevisionXml()
-        Mod.WorldShare.MsgBox:Close()
-    else
-        return false
-    end
-end
-
-function CreateWorld:CreateRevisionXml()
-    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
-
-    if not currentWorld or not currentWorld.worldpath then
-        return false
-    end
-
-    local revisionPath = format("%s/revision.xml", currentWorld.worldpath)
-
-    local exist = ParaIO.DoesFileExist(revisionPath)
-
-    if not exist then
-        local file = ParaIO.open(revisionPath, "w");
-        file:WriteString("1")
-        file:close();
-    end
-end
-
 function CreateWorld:CheckSpecialCharacter(foldername)
     if string.match(foldername, "[_`~!@#$%%^&*()+=|{}':;',%[%]%.<>/?~！@#￥%……&*（）——+|{}；：”“。，、？©]+") then
         GameLogic.AddBBS(nil, L"世界名称不能含有特殊字符", 3000, "255 0 0")

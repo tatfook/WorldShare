@@ -19,6 +19,7 @@ local KeepworkServiceSession = NPL.load('./Session.lua')
 local LocalServiceWorld = NPL.load('(gl)Mod/WorldShare/service/LocalService/LocalServiceWorld.lua')
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
+local Compare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
 
 -- api
 local KeepworkWorldsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Worlds.lua")
@@ -71,83 +72,78 @@ end
 
 -- set world instance by pid 
 function KeepworkServiceWorld:SetWorldInstanceByPid(pid, callback)
+    if not KeepworkServiceSession:IsSignedIn() then
+        return
+    end
+
     self:GetWorldByProjectId(pid, function(data, err)
         if type(data) ~= 'table' or not data.worldName then
             return false
         end
 
         local foldername = data.worldName
-        local worldpath = Mod.WorldShare.Utils.GetWorldFolderFullPath() .. "/" .. commonlib.Encoding.Utf8ToDefault(foldername)
-        local status
-
-        if not ParaIO.DoesFileExist(worldpath) then
-            status = 2
-        else
-            if LocalService:IsZip(worldpath) then
-                return false
-            end
-        end
-
-        local worldRevision = WorldRevision:new():init(worldpath):Checkout()
-
-        if not data.revision then
-            return false
-        end
-
-        if tonumber(data.revision) == worldRevision then
-            status = 3
-        else
-            if tonumber(data.revision) > worldRevision then
-                status = 4
-            else
-                status = 5
-            end
-        end
-
-        local worldTag = LocalService:GetTag(worldpath)
-
         local shared = false
+        local userId = Mod.WorldShare.Store:Get('user/userId')
+        local worldPath = ''
 
-        if KeepworkServiceSession:IsSignedIn() then
-            local userId = Mod.WorldShare.Store:Get('user/userId')
+        if data.userId and tonumber(data.userId) ~= (userId) then
+            shared = true
+        end
 
-            if data.userId and tonumber(data.userId) ~= (userId) then
-                shared = true
+        if shared then
+            worldPath = Mod.WorldShare.Utils.GetWorldFolderFullPath() ..
+                        '/_shared/' ..
+                        data.username ..
+                        '/' ..
+                        commonlib.Encoding.Utf8ToDefault(foldername) ..
+                        '/'
+        else
+            worldPath = Mod.WorldShare.Utils.GetWorldFolderFullPath() ..
+                        '/' ..
+                        commonlib.Encoding.Utf8ToDefault(foldername) ..
+                        '/'
+        end
+
+        if LocalService:IsZip(worldPath) then
+            return
+        end
+
+        Compare:Init(worldPath, function(result, code)
+            local worldTag = LocalService:GetTag(worldPath)
+
+            local currentWorld = self:GenerateWorldInstance({
+                kpProjectId = pid,
+                fromProjectId = data.fromProjectId,
+                IsFolder = true,
+                is_zip = false,
+                text = foldername,
+                name = worldTag.name or '',
+                foldername = foldername,
+                worldpath = worldPath,
+                status = code,
+                revision = data.revision,
+                size = data.fileSize,
+                modifyTime = Mod.WorldShare.Utils:UnifiedTimestampFormat(data.updatedAt),
+                lastCommitId = data.commitId, 
+                project = data.project,
+                user = {
+                    id = data.userId,
+                    username = data.username,
+                },
+                shared = shared,
+                communityWorld = worldTag.communityWorld,
+                isVipWorld = worldTag.isVipWorld,
+                instituteVipEnabled =  worldTag.instituteVipEnabled,
+                memberCount = data.memberCount,
+                members = {}
+            })
+
+            Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
+
+            if callback and type(callback) == 'function' then
+                callback()
             end
-        end
-
-        local currentWorld = self:GenerateWorldInstance({
-            kpProjectId = pid,
-            fromProjectId = data.fromProjectId,
-            IsFolder = true,
-            is_zip = false,
-            text = foldername,
-            name = worldTag.name or '',
-            foldername = foldername,
-            worldpath = worldpath,
-            status = status,
-            revision = data.revision,
-            size = data.fileSize,
-            modifyTime = Mod.WorldShare.Utils:UnifiedTimestampFormat(data.updatedAt),
-            lastCommitId = data.commitId, 
-            project = data.project,
-            user = {
-                id = data.userId,
-                username = data.username,
-            },
-            shared = shared,
-            communityWorld = worldTag.communityWorld,
-            isVipWorld = worldTag.isVipWorld,
-            instituteVipEnabled =  worldTag.instituteVipEnabled,
-            memberCount = data.memberCount,
-            members = {}
-        })
-
-        Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
-
-        if callback and type(callback) == 'function' then
-            callback()
-        end
+        end)
     end)
 end
 

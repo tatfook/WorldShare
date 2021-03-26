@@ -280,6 +280,10 @@ function Utils.GetTempFolderFullPath()
     end
 end
 
+function Utils:GetWorldPathByFolderName(folderName)
+    return self.GetWorldFolderFullPath() .. '/' .. commonlib.Encoding.Utf8ToDefault(folderName) .. '/'
+end
+
 function Utils:GetFolderName()
     local originWorldPath = ParaWorld.GetWorldDirectory()
 

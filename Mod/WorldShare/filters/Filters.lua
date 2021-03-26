@@ -400,8 +400,8 @@ function Filters:Init()
     -- filter compare init
     GameLogic.GetFilters():add_filter(
         'compare_init',
-        function(callback)
-            Compare:Init(callback)
+        function(worldpath, callback)
+            Compare:Init(worldpath, callback)
         end
     )
 

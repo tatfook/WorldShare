@@ -44,17 +44,18 @@ function SyncToDataSource:Init(callback)
     self.callback = callback
 
     local function Handle()
-        local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
-        self.currentWorld = currentWorld
+        self.currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
     
         if not self.currentWorld.worldpath or self.currentWorld.worldpath == "" then
             callback(false, L"上传失败，将使用离线模式，原因：上传目录为空")
             return false
         end
-    
+
+        Compare:CheckRevision(self.currentWorld.worldpath)
+
         self:SetFinish(false)
         self:SetBroke(false)
-    
+
         self:IsProjectExist(
             function(beExisted)
                 if beExisted then

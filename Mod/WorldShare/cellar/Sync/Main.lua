@@ -22,6 +22,7 @@ local Permission = NPL.load("(gl)Mod/WorldShare/cellar/Permission/Permission.lua
 local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local LocalServiceWorld = NPL.load("(gl)Mod/WorldShare/service/LocalService/LocalServiceWorld.lua")
+local KeepworkServiceWorld = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/World.lua')
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 local SyncToLocal = NPL.load("(gl)Mod/WorldShare/service/SyncService/SyncToLocal.lua")
 local SyncToDataSource = NPL.load("(gl)Mod/WorldShare/service/SyncService/SyncToDataSource.lua")
@@ -40,7 +41,8 @@ local SyncMain = NPL.export()
 
 function SyncMain:OnWorldLoad()
     Compare:GetCurrentWorldInfo(function()
-        CreateWorld:CheckRevision()
+        local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
+        Compare:CheckRevision(currentEnterWorld.worldpath)
     end)
 end
 
@@ -404,44 +406,45 @@ function SyncMain:CheckAndUpdatedBeforeEnterMyHome(callback)
     self:CheckAndUpdatedByFoldername(foldername, callback)
 end
 
-function SyncMain:CheckAndUpdatedByFoldername(foldername, callback)
-    local currentWorld = LocalServiceWorld:SetWorldInstanceByFoldername(foldername)
+function SyncMain:CheckAndUpdatedByFoldername(folderName, callback)
+    KeepworkServiceProject:GetProjectIdByWorldName(folderName, false, function(projectId)
+        local worldPath = Mod.WorldShare.Utils:GetWorldPathByFolderName(folderName)
+        local worldTagPath = worldPath .. 'tag.xml'
+        local worldTag = LocalService:GetTag(worldPath)
 
-    if not currentWorld or not currentWorld.worldpath then
-        return false
-    end
+        if not ParaIO.DoesFileExist(worldTagPath) then
+            return
+        end
 
-    local worldTagPath = currentWorld.worldpath .. 'tag.xml'
+        if projectId and type(projectId) == 'number' then
+            -- exist
+            worldTag.kpProjectId = projectId
+            LocalService:SetTag(worldPath, worldTag)
 
-    if not ParaIO.DoesFileExist(worldTagPath) then
-        return false
-    end
+            KeepworkServiceWorld:SetWorldInstanceByPid(projectId, function()
+                self:CheckAndUpdated(callback)
+            end)
+        else
+            -- not exist
+            worldTag.kpProjectId = 0
+            LocalService:SetTag(worldPath, worldTag)
 
-    if currentWorld.kpProjectId and currentWorld.kpProjectId ~= 0 then
-        self:CheckAndUpdated(callback)
-    else
-        KeepworkServiceProject:GetProjectIdByWorldName(currentWorld.foldername, false, function(projectId)
-            if projectId and type(projectId) == 'number' then
-                currentWorld.kpProjectId = projectId
-                Mod.WorldShare.Store:Set('world/currentWorld', currentWorld)
-            end
+            LocalServiceWorld:SetWorldInstanceByFoldername(folderName)
 
             self:CheckAndUpdated(callback)
-        end)
-    end
+        end
+
+    end)
 end
 
 function SyncMain:CheckAndUpdated(callback)
-    Mod.WorldShare.MsgBox:Show(L"请稍后...")
-    Compare:Init(function(result)
-        Mod.WorldShare.MsgBox:Close()
+    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
-        if result == 'REMOTEBIGGER' then
-            self:ShowNewVersionFoundPage(callback)
-        else
-            if callback and type(callback) == 'function' then
-                callback()
-            end
+    if currentWorld.status == 5 then
+        self:ShowNewVersionFoundPage(callback)
+    else
+        if callback and type(callback) == 'function' then
+            callback()
         end
-    end)
+    end
 end

@@ -54,7 +54,7 @@ function ShareWorld:Init(bEnabled, callback)
                 function()
                     Compare:GetCurrentWorldInfo(
                         function()
-                            Compare:Init(function(result)
+                            Compare:Init(currentWorld.worldpath, function(result)
                                 if result then
                                     self:CheckRealName(function()                                        
                                         self:ShowPage()
@@ -76,7 +76,7 @@ function ShareWorld:Init(bEnabled, callback)
     end
 
     Mod.WorldShare.MsgBox:Show(L"请稍候...")
-    Compare:Init(function(result)
+    Compare:Init(currentWorld.worldpath, function(result)
         Mod.WorldShare.MsgBox:Close()
         if result then
             self:CheckRealName(function()

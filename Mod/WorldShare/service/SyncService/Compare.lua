@@ -59,11 +59,12 @@ Compare.LOCALBIGGER = LOCALBIGGER
 Compare.EQUAL = EQUAL
 Compare.compareFinish = true
 
-function Compare:Init(callback)
+function Compare:Init(worldPath, callback)
     if type(callback) ~= 'function' then
         return false
     end
 
+    self.worldPath = worldPath
     self.callback = callback
 
     Mod.WorldShare.Store:Set("world/currentRevision", 0)
@@ -74,7 +75,7 @@ function Compare:Init(callback)
     end
 
     self:SetFinish(false)
-    self:GetCompareResult()
+    self:CompareRevision()
 end
 
 function Compare:IsCompareFinish()
@@ -85,151 +86,72 @@ function Compare:SetFinish(value)
     self.compareFinish = value
 end
 
-function Compare:GetCompareResult()
-    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
-
-    if not currentWorld or currentWorld.is_zip then
-        self:SetFinish(true)
-        self.callback(false)
-
-        return false
-    end
-
-    if currentWorld.status == 1 or not currentWorld.status then
-        CreateWorld:CheckRevision()
-        local currentRevision = WorldRevision:new():init(currentWorld.worldpath):Checkout()
-        Mod.WorldShare.Store:Set("world/currentRevision", currentRevision)
-
-        self:SetFinish(true)
-        self.callback(JUSTLOCAL)
-        return true
-    end
-
-    if currentWorld.status == 2 then
-        self:SetFinish(true)
-        self.callback(JUSTREMOTE)
-        return true
-    end
-
-    self:CompareRevision()
-end
-
--- create revision try times
-Compare.createRevisionTimes = 0
-
 function Compare:CompareRevision()
-    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+    local worldTagPath = self.worldPath .. 'tag.xml'
 
-    if not currentWorld or not currentWorld.worldpath then
+    if not ParaIO.DoesFileExist(worldTagPath) then
         self:SetFinish(true)
-        self.callback(false)
-        return false
+        self.callback(self.JUSTREMOTE, 2)
+        return
     end
 
-    local currentRevision = WorldRevision:new():init(currentWorld.worldpath):Checkout()
-    local remoteRevision = 0
+    local worldTag = LocalService:GetTag(self.worldPath)
 
-    if self:HasRevision() then
-        self.createRevisionTimes = 0
-
-        local function CompareRevision(currentRevision, remoteRevision)
-            if remoteRevision == 0 then
-                currentWorld.status = 1
-                Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
-                return JUSTLOCAL
-            end
-
-            if currentRevision < remoteRevision then
-                currentWorld.status = 4
-                Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
-                return REMOTEBIGGER
-            end
-
-            if currentRevision > remoteRevision then
-                currentWorld.status = 5
-                Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
-                return LOCALBIGGER
-            end
-
-            if currentRevision == remoteRevision then
-                currentWorld.status = 3
-                Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
-                return EQUAL
-            end
-        end
-
-        if currentWorld and not currentWorld.kpProjectId or currentWorld.kpProjectId == 0 then
-            self:SetFinish(true)
-            self.callback(false)
-            return true
-        end
-
-        local function HandleRevision(data, err)
-            if err == 0 or err == 502 then
-                self:SetFinish(true)
-                self.callback(false)
-                return false
-            end
-
-            currentRevision = tonumber(currentRevision) or 0
-            remoteRevision = tonumber(data) or 0
-
-            self:UpdateSelectWorldInCurrentWorldList(currentWorld.foldername, remoteRevision)
-
-            Mod.WorldShare.Store:Set("world/currentRevision", currentRevision)
-            Mod.WorldShare.Store:Set("world/remoteRevision", remoteRevision)
-
-            local result = CompareRevision(currentRevision, remoteRevision)
-
-            self:SetFinish(true)
-            self.callback(result)
-        end
-
-        GitService:GetWorldRevision(currentWorld.kpProjectId, true, HandleRevision)
-    else
-        self.createRevisionTimes = self.createRevisionTimes + 1
-
-        if self.createRevisionTimes > 3 then
-            self.createRevisionTimes = 0
-            self:SetFinish(true)
-            return false
-        end
-
-        CreateWorld:CheckRevision()
-        self:CompareRevision(callback)
+    if worldTag and worldTag.kpProjectId == 0 then
+        self:SetFinish(true)
+        self.callback(self.JUSTLOCAL, 1)
+        return
     end
+
+    local localRevision = WorldRevision:new():init(self.worldPath):Checkout()
+
+    local function HandleRevision(data, err)
+        if err == 0 or err == 502 then
+            self:SetFinish(true)
+            self.callback()
+            return
+        end
+
+        local remoteRevision = tonumber(data) or 0
+
+        Mod.WorldShare.Store:Set("world/currentRevision", localRevision)
+        Mod.WorldShare.Store:Set("world/remoteRevision", remoteRevision)
+
+        self:SetFinish(true)
+
+        if localRevision < remoteRevision then
+            self.callback(self.REMOTEBIGGER, 5)
+            return
+        end
+
+        if localRevision > remoteRevision then
+            self.callback(self.LOCALBIGGER, 4)
+            return
+        end
+
+        if localRevision == remoteRevision then
+            self.callback(self.EQUAL, 3)
+            return
+        end
+    end
+
+    GitService:GetWorldRevision(worldTag.kpProjectId, true, HandleRevision)
 end
 
 function Compare:UpdateSelectWorldInCurrentWorldList(worldName, remoteRevision)
-    local currentWorldList = Mod.WorldShare.Store:Get('world/compareWorldList')
+    -- local currentWorldList = Mod.WorldShare.Store:Get('world/compareWorldList')
 
-    if not currentWorldList or not worldName then
-        return false
-    end
+    -- if not currentWorldList or not worldName then
+    --     return false
+    -- end
 
-    for key, item in ipairs(currentWorldList) do
-        if item.worldName == worldName then
-            item.revision = remoteRevision
-        end
-    end
+    -- for key, item in ipairs(currentWorldList) do
+    --     if item.worldName == worldName then
+    --         item.revision = remoteRevision
+    --     end
+    -- end
 
-    Mod.WorldShare.Store:Set('world/compareWorldList', currentWorldList)
-end
-
-function Compare:HasRevision()
-    local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
-
-    local localFiles = LocalService:LoadFiles(currentWorld and currentWorld.worldpath)
-    local hasRevision = false
-
-    for key, file in ipairs(localFiles) do
-        if string.lower(file.filename) == "revision.xml" then
-            hasRevision = true
-            break
-        end
-    end
-
-    return hasRevision
+    -- Mod.WorldShare.Store:Set('world/compareWorldList', currentWorldList)
 end
 
 function Compare:GetCurrentWorldInfo(callback)
@@ -413,9 +335,9 @@ function Compare:GetCurrentWorldInfo(callback)
                     end
                 end
 
-                self:Init(function(result)
+                self:Init(worldpath, function(result)
                     local status
-        
+
                     if result == self.JUSTLOCAL then
                         status = 1
                     elseif result == self.JUSTREMOTE then
@@ -667,4 +589,16 @@ function Compare:GetWorldIndexByFoldername(foldername, share, iszip)
             return index
         end
     end
+end
+
+function Compare:CheckRevision(worldPath, callback)
+    local revisionPath = worldPath .. 'revision.xml'
+
+    if ParaIO.DoesFileExist(revisionPath) then
+       return
+    end
+
+    local file = ParaIO.open(revisionPath, "w");
+    file:WriteString("1")
+    file:close();
 end
