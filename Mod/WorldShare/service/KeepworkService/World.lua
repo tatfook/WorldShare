@@ -82,15 +82,16 @@ function KeepworkServiceWorld:SetWorldInstanceByPid(pid, callback)
         end
 
         local foldername = data.worldName
+        local sharedFolder = false
         local shared = false
         local userId = Mod.WorldShare.Store:Get('user/userId')
         local worldPath = ''
 
         if data.userId and tonumber(data.userId) ~= (userId) then
-            shared = true
+            sharedFolder = true
         end
 
-        if shared then
+        if sharedFolder then
             worldPath = Mod.WorldShare.Utils.GetWorldFolderFullPath() ..
                         '/_shared/' ..
                         data.username ..
@@ -102,6 +103,10 @@ function KeepworkServiceWorld:SetWorldInstanceByPid(pid, callback)
                         '/' ..
                         commonlib.Encoding.Utf8ToDefault(foldername) ..
                         '/'
+        end
+
+        if data and data.memberCount > 1 then
+            shared = true
         end
 
         if LocalService:IsZip(worldPath) then
@@ -380,14 +385,12 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
             local instituteVipEnabled
             local name = ''
 
-            if remoteWorldUserId ~= 0 and tonumber(remoteWorldUserId) ~= (userId) then
+            if DItem.project and DItem.project.memberCount and DItem.project.memberCount > 1 then
                 remoteShared = true
             end
 
             for LKey, LItem in ipairs(localWorlds) do
-                if DItem.worldName == LItem.foldername and
-                   remoteShared == LItem.shared and
-                   not LItem.is_zip then
+                if DItem.worldName == LItem.foldername and not LItem.is_zip then
                     local function Handle()
                         if tonumber(LItem.revision or 0) == tonumber(DItem.revision or 0) then
                             status = 3 -- both
@@ -416,16 +419,17 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                         end
                     end
 
-                    if remoteShared then
-                        -- avoid upload same name share world
-                        local sharedUsername = Mod.WorldShare:GetWorldData("username", LItem.worldpath)
-                        if sharedUsername == DItem.user.username then
-                            Handle()
-                            break
-                        end
+                    if remoteWorldUserId == tonumber(userId) then
+                        Handle() -- myself world
                     else
-                        Handle()
-                        break
+                        if remoteShared == LItem.shared then
+                            -- avoid upload same name share world
+                            local sharedUsername = Mod.WorldShare:GetWorldData("username", LItem.worldpath)
+
+                            if sharedUsername == DItem.user.username then
+                                Handle()
+                            end
+                        end
                     end
                 end
             end
@@ -455,7 +459,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
             end
 
             -- shared world text
-            if remoteShared then
+            if remoteWorldUserId ~= tonumber(userId) and remoteShared then
                 if DItem.extra and DItem.extra.worldTagName then
                     text = (DItem.user and DItem.user.username or '') .. '/' .. (DItem.extra and DItem.extra.worldTagName or '') .. '(' .. text .. ')'
                 else
@@ -500,7 +504,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                 shared = remoteShared,
                 isVipWorld = isVipWorld or false,
                 instituteVipEnabled = instituteVipEnabled or false,
-                memberCount = DItem.memberCount,
+                memberCount = DItem.project.memberCount,
                 members = {},
                 name = name
             })
