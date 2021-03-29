@@ -104,7 +104,7 @@ function KeepworkServiceWorld:SetWorldInstanceByPid(pid, callback)
                         commonlib.Encoding.Utf8ToDefault(foldername) ..
                         '/'
         end
-
+        echo(data, true)
         if data and data.memberCount > 1 then
             shared = true
         end
@@ -225,6 +225,9 @@ function KeepworkServiceWorld:GetWorldByProjectId(kpProjectId, callback)
             callback(nil, err)
             return false
         end
+
+        -- for set instance by id
+        data.world.memberCount = data.memberCount
 
         callback(data.world, err)
     end)
