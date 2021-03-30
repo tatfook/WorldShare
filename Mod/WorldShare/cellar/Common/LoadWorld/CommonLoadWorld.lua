@@ -26,7 +26,118 @@ local LoginModal = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua
 -- databse
 local CacheProjectId = NPL.load('(gl)Mod/WorldShare/database/CacheProjectId.lua')
 
+-- api
+local KeepworkBaseApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/BaseApi.lua")
+
 local CommonLoadWorld = NPL.export()
+
+function CommonLoadWorld:EnterCourseWorld(aiCourseId, preRelease, releaseId)
+    if not aiCourseId or type(preRelease) ~= 'boolean' or not releaseId then
+        return
+    end
+
+    preRelease = preRelease == true and 'true' or 'false'
+
+    local url = format(
+        '%s/ai/courses/download?preRelease=%s&aiCourseId=%s&releaseId=%s',
+        KeepworkBaseApi:GetCdnApi(),
+        preRelease,
+        aiCourseId,
+        releaseId
+    )
+
+    Mod.WorldShare.Store:Set('world/currentRemoteFile', url)
+
+    local function LoadWorld(world, refreshMode)
+        if world then
+            if refreshMode == 'never' then
+                if not LocalService:IsFileExistInZip(world:GetLocalFileName(), ":worldconfig.txt") then
+                    refreshMode = 'force'
+                end
+            end
+
+            local url = world:GetLocalFileName()
+            DownloadWorld.ShowPage(url)
+            InternetLoadWorld.LoadWorld(
+                world,
+                nil,
+                refreshMode,
+                function(bSucceed, localWorldPath)
+                    DownloadWorld.Close()
+                end
+            )
+        end
+    end
+
+    local world = RemoteWorld.LoadFromHref(url, 'self')
+    local token = Mod.WorldShare.Store:Get('user/token')
+
+    if token then
+        world:SetHttpHeaders({Authorization = format("Bearer %s", token)})
+    end
+
+    local fileUrl = world:GetLocalFileName()
+
+    if ParaIO.DoesFileExist(fileUrl) then
+        LoadWorld(world, 'never')
+    else
+        LoadWorld(world, 'force')
+    end
+end
+
+function CommonLoadWorld:EnterHomeworkWorld(aiHomeworkId, preRelease, releaseId)
+    if not aiHomeworkId or type(preRelease) ~= 'boolean' or not releaseId then
+        return
+    end
+
+    preRelease = preRelease == true and 'true' or 'false'
+
+    local url = format(
+        '%s/ai/homeworks/download?preRelease=%s&aiHomeworkId=%s&releaseId=%s',
+        KeepworkBaseApi:GetCdnApi(),
+        preRelease,
+        aiHomeworkId,
+        releaseId
+    )
+
+    Mod.WorldShare.Store:Set('world/currentRemoteFile', url)
+
+    local function LoadWorld(world, refreshMode)
+        if world then
+            if refreshMode == 'never' then
+                if not LocalService:IsFileExistInZip(world:GetLocalFileName(), ":worldconfig.txt") then
+                    refreshMode = 'force'
+                end
+            end
+
+            local url = world:GetLocalFileName()
+            DownloadWorld.ShowPage(url)
+            InternetLoadWorld.LoadWorld(
+                world,
+                nil,
+                refreshMode,
+                function(bSucceed, localWorldPath)
+                    DownloadWorld.Close()
+                end
+            )
+        end
+    end
+
+    local world = RemoteWorld.LoadFromHref(url, 'self')
+    local token = Mod.WorldShare.Store:Get('user/token')
+
+    if token then
+        world:SetHttpHeaders({Authorization = format("Bearer %s", token)})
+    end
+
+    local fileUrl = world:GetLocalFileName()
+
+    if ParaIO.DoesFileExist(fileUrl) then
+        LoadWorld(world, 'never')
+    else
+        LoadWorld(world, 'force')
+    end
+end
 
 function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
     if not pid then

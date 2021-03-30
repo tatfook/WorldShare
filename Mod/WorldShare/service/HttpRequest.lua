@@ -61,6 +61,14 @@ function HttpRequest:GetUrl(params, callback, noTryStatus, timeout, noShowLog)
             if type(value) == 'string' or type(value) == 'number' then
                 paramsString = paramsString .. key .. "=" .. value .. "&"
             end
+
+            if type(value) == 'boolean' then
+                if value then
+                    paramsString = paramsString .. key .. '=true&'
+                else
+                    paramsString = paramsString .. key .. '=false&'
+                end
+            end
         end
 
         paramsString = string.sub(paramsString, 1, -2)

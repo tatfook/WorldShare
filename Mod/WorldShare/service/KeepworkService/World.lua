@@ -104,7 +104,7 @@ function KeepworkServiceWorld:SetWorldInstanceByPid(pid, callback)
                         commonlib.Encoding.Utf8ToDefault(foldername) ..
                         '/'
         end
-        echo(data, true)
+
         if data and data.memberCount > 1 then
             shared = true
         end
