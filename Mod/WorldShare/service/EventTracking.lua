@@ -413,6 +413,11 @@ function EventTrackingService:Send(eventType, action, extra, offlineMode)
         end
     end
 
+    local abPath = GameLogic.GetABPath();
+    if (abPath and abPath ~= "") then
+        dataPacket["abPath"] = abPath;
+    end
+
     if EventTrackingDatabase:PutPacket(userId, action, dataPacket) then
         EventGatewayEventsApi:Send(
             "behavior",
