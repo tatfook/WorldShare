@@ -24,19 +24,37 @@ local VersionChange = NPL.export()
 
 function VersionChange:Init(foldername)
     if not KeepworkService:IsSignedIn() then
-        _guihelper.MessageBox(L"登录后才能继续")
         return false
     end
 
-    local isEnterWorld = Mod.WorldShare.Store:Get("world/isEnterWorld")
+    local isEnterWorld = Mod.WorldShare.Store:Get('world/isEnterWorld')
+    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+    local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
     if isEnterWorld then
-        local worldTag = WorldCommon.GetWorldInfo()
-
-        if foldername == worldTag.name then
-            GameLogic.AddBBS(nil, L"不能切换当前编辑的世界", 3000, "255 0 0")
-            return
+        if currentWorld.foldername == currentEnterWorld.foldername and
+           currentWorld.shared == currentEnterWorld.shared and
+           currentWorld.is_zip == currentEnterWorld.is_zip then
+            if KeepworkServiceSession:IsSignedIn() then
+                if currentWorld.shared then
+                    if currentWorld.kpProjectId == currentEnterWorld.kpProjectId then
+                        _guihelper.MessageBox(L'不能切换当前编辑的世界')
+                        return false
+                    end
+                else
+                    _guihelper.MessageBox(L'不能切换当前编辑的世界')
+                    return false
+                end
+            else
+                _guihelper.MessageBox(L'不能切换当前编辑的世界')
+                return false
+            end
         end
+    end
+
+    if not currentWorld.status then
+        _guihelper.MessageBox(L"此世界仅在本地，无需切换版本")
+        return
     end
 
     Mod.WorldShare.MsgBox:Show(L"请稍候...")

@@ -424,7 +424,7 @@ function Create:EnterWorld(index, skip)
             end)
         end)
     else
-        if currentWorld.status == 1 then
+        if currentWorld.status == 1 or not currentWorld.status then
             InternetLoadWorld.EnterWorld()
             return
         end
