@@ -36,7 +36,10 @@ function KeepworkProjectStarApi:Search(projectIds, success, error)
         projectId = {
             ['$in'] = projectIds
         },
-        userId = userId
+        userId = userId,
+        createdAt = {
+            ['$gt'] = os.date('%Y-%m-%d', os.time())
+        }
     }
 
     KeepworkBaseApi:Post('/projectStars/search', params, nil, success, error)

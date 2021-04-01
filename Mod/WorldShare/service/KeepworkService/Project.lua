@@ -217,6 +217,6 @@ function KeepworkServiceProject:GenerateMiniProgramCode(projectId, callback)
 end
 
 -- get favorited projects
-function KeepworkServiceProject:GetFavoritedProjects(projectIds, callback)
+function KeepworkServiceProject:GetStaredProjects(projectIds, callback)
     KeepworkProjectStarApi:Search(projectIds, callback, callback)
 end
