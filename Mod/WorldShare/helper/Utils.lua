@@ -582,3 +582,21 @@ function Utils:GetConfig(field)
 
     return Config[field][env]
 end
+
+function Utils.ShortNumber(num)
+    if type(num) ~= 'number' then
+        return 0
+    end
+    
+    if num < 1000 then
+        return num
+    end
+
+    if num >= 1000 and num <= 100000 then
+        return math.floor(num / 1000) .. 'k'
+    end
+
+    if num > 100000 then
+        return 0
+    end
+end
