@@ -17,6 +17,7 @@ local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua
 local KeepworkServiceWorld = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/World.lua")
 local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
 local SyncToLocal = NPL.load("(gl)Mod/WorldShare/service/SyncService/SyncToLocal.lua")
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
 
 local Encoding = commonlib.gettable("commonlib.Encoding")
 
