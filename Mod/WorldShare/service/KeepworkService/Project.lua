@@ -23,6 +23,14 @@ local KeepworkAppliesApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Applies.lua
 
 local KeepworkServiceProject = NPL.export()
 
+function KeepworkServiceProject:OnWorldLoad()
+    local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
+
+    if currentEnterWorld and currentEnterWorld.kpProjectId then
+        self:Visit(currentEnterWorld.kpProjectId)
+    end
+end
+
 -- This api will create a keepwork paracraft project and associated with paracraft world.
 function KeepworkServiceProject:CreateProject(foldername, callback)
     if not KeepworkService:IsSignedIn() or not foldername then

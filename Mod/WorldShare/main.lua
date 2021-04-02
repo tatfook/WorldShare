@@ -104,6 +104,7 @@ local Beginner = NPL.load('(gl)Mod/WorldShare/cellar/Beginner/Beginner.lua')
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
 local EventTrackingService = NPL.load('(gl)Mod/WorldShare/service/EventTracking.lua')
 local LocalServiceSession = NPL.load('(gl)Mod/WorldShare/service/LocalService/LocalServiceSession.lua')
+local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
 
 -- helper
 local Store = NPL.load('(gl)Mod/WorldShare/store/Store.lua')
@@ -198,6 +199,7 @@ function WorldShare:OnWorldLoad()
     WorldShareCommand:OnWorldLoad()
     Beginner:OnWorldLoad()
     LocalServiceSession:OnWorldLoad()
+    KeepworkServiceProject:OnWorldLoad()
 
     EventTrackingService:Send(2, 'duration.world.stay', { started = true })
 
