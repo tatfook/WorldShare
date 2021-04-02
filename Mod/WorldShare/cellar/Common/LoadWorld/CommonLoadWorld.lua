@@ -244,7 +244,7 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                     local params = Mod.WorldShare.Utils.ShowWindow(
                         0,
                         0,
-                        "Mod/WorldShare/cellar/UserConsole/ProjectIdEnter.html?project_id=" 
+                        "Mod/WorldShare/cellar/Common/LoadWorld/ProjectIdEnter.html?project_id=" 
                             .. pid
                             .. "&remote_revision=" .. remoteRevision
                             .. "&local_revision=" .. localRevision
@@ -330,7 +330,7 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
         local params = Mod.WorldShare.Utils.ShowWindow(
             0,
             0,
-            "Mod/WorldShare/cellar/UserConsole/ProjectIdEnter.html?project_id=" 
+            "Mod/WorldShare/cellar/Common/LoadWorld/ProjectIdEnter.html?project_id=" 
                 .. pid
                 .. "&remote_revision=" .. 0
                 .. "&local_revision=" .. localRevision

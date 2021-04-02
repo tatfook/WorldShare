@@ -237,44 +237,6 @@ function MainLogin:Close()
     end
 end
 
-function MainLogin:SaveField()
-    -- local MainLoginPage = Mod.WorldShare.Store:Get('page/MainLogin')
-
-    -- if not MainLoginPage then
-    --     return false
-    -- end
-
-    -- -- login
-    -- local showAccount = MainLoginPage:GetValue('showaccount')
-    -- local account = MainLoginPage:GetValue('account')
-    -- local password = MainLoginPage:GetValue('password')
-    -- local autoLogin = MainLoginPage:GetValue('autoLogin')
-    -- local rememberMe = MainLoginPage:GetValue('rememberMe')
-
-    -- MainLoginPage:SetValue('showaccount', showAccount)
-    -- MainLoginPage:SetValue('account', account)
-    -- MainLoginPage:SetValue('password', password)
-    -- MainLoginPage:SetValue('autoLogin', autoLogin)
-    -- MainLoginPage:SetValue('rememberMe', rememberMe)
-
-    -- -- register
-    -- local registerAccount = MainLoginPage:GetValue('register_account')
-    -- local registerAccountPassword = MainLoginPage:GetValue('register_account_password')
-    -- local captcha = MainLoginPage:GetValue('captcha')
-    -- local agree = MainLoginPage:GetValue('agree')
-    -- local phonenumber = MainLoginPage:GetValue('phonenumber')
-    -- local phonecaptcha = MainLoginPage:GetValue('phonecaptcha')
-    -- local phonepassword = MainLoginPage:GetValue('phonepassword')
-
-    -- MainLoginPage:SetValue('register_account', registerAccount)
-    -- MainLoginPage:SetValue('register_account_password', registerAccountPassword)
-    -- MainLoginPage:SetValue('captcha', captcha)
-    -- MainLoginPage:SetValue('agree', agree)
-    -- MainLoginPage:SetValue('phonenumber', phonenumber)
-    -- MainLoginPage:SetValue('phonecaptcha', phonecaptcha)
-    -- MainLoginPage:SetValue('phonepassword', phonepassword)
-end
-
 function MainLogin:LoginAction(callback)
     local MainLoginPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Login')
 
@@ -322,12 +284,6 @@ function MainLogin:LoginAction(callback)
             MainLoginPage:FindControl('account_field_error').visible = true
             return
         end
-
-        -- self:EnterUserConsole()
-
-        -- if not Mod.WorldShare.Store:Get('user/isBind') then
-        --     RegisterModal:ShowBindingPage()
-        -- end
 
         local AfterLogined = Mod.WorldShare.Store:Get('user/AfterLogined')
 
@@ -481,7 +437,7 @@ function MainLogin:EnterUserConsole(isOffline)
     end
 
     if KeepworkServiceSession:GetUserWhere() == 'HOME' then
-        GameLogic.RunCommand(format('/loadworld %s', Mod.WorldShare.Utils:GetConfig('homeWorldId')))
+        GameLogic.RunCommand(format('/loadworld -s -force %s', Mod.WorldShare.Utils:GetConfig('homeWorldId')))
     else
         GameMainLogin:next_step({IsLoginModeSelected = true})
     end

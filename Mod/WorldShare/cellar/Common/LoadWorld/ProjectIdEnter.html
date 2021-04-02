@@ -1,0 +1,97 @@
+<html>
+<body>
+    <pe:mcml>
+        <script type="text/npl" refresh="false">
+            <![CDATA[
+                local page = document:GetPageCtrl()
+                local project_id = page:GetRequestParam("project_id") or 0
+                local local_revision = tonumber(page:GetRequestParam("local_revision")) or 0
+                local remote_revision = tonumber(page:GetRequestParam("remote_revision")) or 0
+                local world_name = page:GetRequestParam("world_name") or ""
+                
+                function get_window_style()
+                    return Mod.WorldShare.Utils.FixCenter(500, 270)
+                end
+
+                function get_bigger_style(type)
+                    if type == 'remote' and tonumber(remote_revision) > tonumber(local_revision) then
+                        return 'theme1_orange_button'
+                    end
+
+                    if type == 'local' and tonumber(local_revision) > tonumber(remote_revision) then
+                        return 'theme1_orange_button'
+                    end
+
+                    return "theme1_gray_button"
+                end
+
+                function close(params)
+                    if type(page.callback) == 'function' then
+                        page.callback(params)
+                    end
+
+                    page:CloseWindow()
+                end
+
+                function get_project_id()
+                    return project_id
+                end
+
+                function get_world_name()
+                    return world_name .. L'（只读）'
+                end
+
+                function get_remote_revision()
+                    return remote_revision
+                end
+
+                function get_local_revision()
+                    return local_revision
+                end
+             ]]>
+        </script>
+        <style type="text/mcss" src="Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss"></style>
+        <kp:window width="500" height="270" style="<%= get_window_style()%>"  title='<%=L"提示" %>' onclose="close()">
+            <div style="height: 40px;"></div>
+            <div style="padding-left: 45px;
+                        padding-top: 10px;
+                        font-size:16px;
+                        base-font-size:16px;">
+                <div style="margin-left:80px;margin-top:20px;">
+                    <%= L"项目ID：" %>
+                    <%= get_project_id() %>
+                </div>
+                <div style="margin-left:80px;margin-top:20px;">
+                    <%= L"世界名字：" %>
+                    <%= get_world_name() %>
+                </div>
+                <div style="margin-left:80px;margin-top:20px;">
+                    <%= L"远程版本号：" %>
+                    <pe:if condition="<%= get_remote_revision() == 0 %>">
+                        <%= L"正在获取..."%>
+                    </pe:if>
+                    <pe:if condition="<%= get_remote_revision() ~= 0 %>">
+                        <%= get_remote_revision() %>
+                        <input type="button"
+                               class="<%= get_bigger_style('remote') %>"
+                               onclick="close"
+                               name="remote"
+                               style="margin-left:10px;width: 130px;height:30px;"
+                               value='<%=L"同步远程版本" %>' />
+                    </pe:if>
+                </div>
+                <div style="margin-left:80px;margin-top:20px;">
+                    <%= L"本地版本号：" %>
+                    <%= get_local_revision() %>
+                    <input type="button"
+                           class="<%= get_bigger_style('local') %>"
+                           onclick="close"
+                           name="local"
+                           style="margin-left:10px;width: 130px;height:30px;"  
+                           value='<%=L"使用本地版本" %>' />
+                </div>
+            </div>
+        </kp:window>
+    </pe:mcml>
+</body>
+</html>

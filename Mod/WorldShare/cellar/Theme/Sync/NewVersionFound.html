@@ -56,7 +56,7 @@
         </script>
         <style type="text/mcss" src="Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss"></style>
         <div width="100%" height="100%">
-            <kp:window width="500" height="270" style="<%= get_window_style()%>"  title='<%=L"与数据源同步" %>' onclose="close()">
+            <kp:window width="500" height="270" style="<%= get_window_style()%>"  title='<%=L"发现新版本" %>' onclose="close()">
                 <div style="height: 40px;"></div>
                 <div style="padding-top:20px;padding-left: 50px;font-size:18px;base-font-size:18px;color:#000000">
                     <div>
@@ -69,11 +69,20 @@
                     <div style="margin-left:80px;margin-top:20px;">
                         <%= L"远程版本号：" %>
                 		<%= SyncMain.GetRemoteRevision()%>
-                        <input onclick="use_remote()" class="theme1_orange_button" name="remote" style="<%= 'margin-left:10px;width: 130px;height:30px;' %>" type="button" value='<%=L"同步远程版本" %>' />
+                        <input onclick="use_remote()"
+                               class="theme1_orange_button"
+                               name="remote"
+                               style="margin-left:10px;width: 130px;height:30px;"
+                               type="button"
+                               value='<%=L"同步远程版本" %>' />
 	                </div>
 	                <div style="margin-left:80px;margin-top:20px;">
                         <%=L"本地版本号：" %><%= SyncMain.GetCurrentRevision() %>
-                        <input onclick="use_local()" class="theme1_gray_button" style="margin-left:10px;width: 130px;height:30px;" type="button" value='<%=L"进入本地版本" %>' />
+                        <input onclick="use_local()"
+                               class="theme1_gray_button"
+                               style="margin-left:10px;width: 130px;height:30px;"
+                               type="button"
+                               value='<%=L"进入本地版本" %>' />
 	                </div>
             	</div>
             </kp:window>
