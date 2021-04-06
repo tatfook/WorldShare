@@ -189,6 +189,9 @@ function GitKeepworkService:GetWorldRevision(kpProjectId, isGetMine, callback)
                     end
                 end
             )
+        end,
+        function(_, err)
+            callback(0, err)
         end
     )
 end

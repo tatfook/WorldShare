@@ -38,6 +38,18 @@ function CreateWorld.OnClickCreateWorld()
 
     Mod.WorldShare.Store:Remove("world/currentWorld")
 
+    local currentWorldList = Mod.WorldShare.Store:Get('world/compareWorldList')
+
+    local beExisted = false
+    local foldername = CreateNewWorld.page:GetValue('new_world_name')
+
+    for key, item in ipairs(currentWorldList) do
+        if item.foldername == foldername then
+            _guihelper.MessageBox(L'世界名已存在，请列表中进入')
+            return true
+        end
+    end
+
     return false
 end
 

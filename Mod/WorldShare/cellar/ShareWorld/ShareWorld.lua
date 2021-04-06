@@ -34,10 +34,10 @@ local ShareWorld = NPL.export()
 
 function ShareWorld:Init(bEnabled, callback)
 	ShareWorld.callback = callback
-    local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
+    local currentEnterWorld = Mod.WorldShare.Store:Get("world/currentEnterWorld")
 
-    if GameLogic.IsReadOnly() or not currentWorld or currentWorld.is_zip then
-        self:ShowWorldCode(currentWorld.kpProjectId)
+    if GameLogic.IsReadOnly() or not currentEnterWorld or currentEnterWorld.is_zip then
+        self:ShowWorldCode(currentEnterWorld.kpProjectId)
         return false
     end
 
@@ -49,12 +49,12 @@ function ShareWorld:Init(bEnabled, callback)
     if not KeepworkService:IsSignedIn() then
         function Handle()
             KeepworkServiceProject:GetProjectIdByWorldName(
-                currentWorld.foldername,
-                currentWorld.shared,
+                currentEnterWorld.foldername,
+                currentEnterWorld.shared,
                 function()
                     Compare:GetCurrentWorldInfo(
                         function()
-                            Compare:Init(currentWorld.worldpath, function(result)
+                            Compare:Init(currentEnterWorld.worldpath, function(result)
                                 if result then
                                     self:CheckRealName(function()                                        
                                         self:ShowPage()
@@ -76,7 +76,7 @@ function ShareWorld:Init(bEnabled, callback)
     end
 
     Mod.WorldShare.MsgBox:Show(L"请稍候...")
-    Compare:Init(currentWorld.worldpath, function(result)
+    Compare:Init(currentEnterWorld.worldpath, function(result)
         Mod.WorldShare.MsgBox:Close()
         if result then
             self:CheckRealName(function()
@@ -176,6 +176,8 @@ function ShareWorld:OnClick()
     end
 
     local function Handle()
+        Mod.WorldShare.Store:Set('world/currentWorld', Mod.WorldShare.Store:Get('world/currentEnterWorld'))
+
         SyncMain:CheckTagName(function()
             SyncMain:SyncToDataSource(function(result, msg)
                 Compare:GetCurrentWorldInfo(function()
@@ -257,4 +259,21 @@ function ShareWorld:ShowWorldCode(projectId)
             Mod.WorldShare.Utils.ShowWindow(520, 305, "Mod/WorldShare/cellar/ShareWorld/Code.html?wxacode=".. (wxacode or ""), "Mod.WorldShare.ShareWorld.Code")
         end
     )
+end
+
+-- get keepwork project url
+function ShareWorld:GetShareUrl()
+    local currentEnterWorld = Mod.WorldShare.Store:Get("world/currentEnterWorld")
+
+    if not currentEnterWorld or not currentEnterWorld.kpProjectId or currentEnterWorld.kpProjectId == 0 then
+        return ''
+    end
+
+    return format("%s/pbl/project/%d/", KeepworkService:GetKeepworkUrl(), currentEnterWorld.kpProjectId)
+end
+
+function ShareWorld:GetWorldName()
+    local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
+
+    return currentEnterWorld.text
 end

@@ -16,11 +16,11 @@
                 end
 
                 function get_full_world_name()
-                    return Mod.WorldShare.Store:Getter('world/GetWorldTextName')
+                    return ShareWorld:GetWorldName()
                 end
 
                 function worldname()
-                    return Mod.WorldShare.Utils.WordsLimit(Mod.WorldShare.Store:Getter('world/GetWorldTextName'))
+                    return Mod.WorldShare.Utils.WordsLimit(ShareWorld:GetWorldName())
                 end
 
                 function snapshot()
@@ -48,17 +48,17 @@
                 end
 
                 function get_world_url()
-                    local url = KeepworkService:GetShareUrl()
+                    local url = ShareWorld:GetShareUrl()
 
                     if #url == 0 then
                         return L"此世界暂未分享"
                     else
-                        return KeepworkService:GetShareUrl()
+                        return ShareWorld:GetShareUrl()
                     end
                 end
 
                 function has_url()
-                    local url = KeepworkService:GetShareUrl()
+                    local url = ShareWorld:GetShareUrl()
 
                     if #url == 0 then
                         return false

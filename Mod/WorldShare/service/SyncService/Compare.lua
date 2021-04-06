@@ -97,13 +97,20 @@ function Compare:CompareRevision()
 
     local worldTag = LocalService:GetTag(self.worldPath)
 
+    -- Entered world project Id may be changed
+    local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
+    if currentEnterWorld.worldpath == self.worldPath then
+        worldTag.kpProjectId = currentEnterWorld.kpProjectId
+    end
+
+    local localRevision = WorldRevision:new():init(self.worldPath):Checkout()
+
     if worldTag and worldTag.kpProjectId == 0 then
+        Mod.WorldShare.Store:Set("world/currentRevision", localRevision)
         self:SetFinish(true)
         self.callback(self.JUSTLOCAL, 1)
         return
     end
-
-    local localRevision = WorldRevision:new():init(self.worldPath):Checkout()
 
     local function HandleRevision(data, err)
         if err == 0 or err == 502 then
