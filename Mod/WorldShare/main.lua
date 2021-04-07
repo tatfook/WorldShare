@@ -197,7 +197,7 @@ function WorldShare:OnWorldLoad()
     SyncMain:OnWorldLoad()
     HistoryManager:OnWorldLoad()
     WorldShareCommand:OnWorldLoad()
-    Beginner:OnWorldLoad()
+    -- Beginner:OnWorldLoad()
     LocalServiceSession:OnWorldLoad()
     KeepworkServiceProject:OnWorldLoad()
 
