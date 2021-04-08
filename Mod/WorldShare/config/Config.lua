@@ -24,9 +24,16 @@ Config.defaultGit = "KEEPWORK"
 
 Config.homeWorldId = {
   ONLINE = 19759,
-  STAGE = 19759,
   RELEASE = 1296,
-  LOCAL = 19759,
+  STAGE = 0,
+  LOCAL = 0,
+}
+
+Config.schoolWorldId = {
+  ONLINE = 52217,
+  RELEASE = 20617,
+  STAGE = 0,
+  LOCAL = 0
 }
 
 Config.keepworkList = {

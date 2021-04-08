@@ -438,6 +438,8 @@ function MainLogin:EnterUserConsole(isOffline)
 
     if KeepworkServiceSession:GetUserWhere() == 'HOME' then
         GameLogic.RunCommand(format('/loadworld -s -force %s', Mod.WorldShare.Utils:GetConfig('homeWorldId')))
+    elseif KeepworkServiceSession:GetUserWhere() == 'SCHOOL' then
+        GameLogic.RunCommand(format('/loadworld -s -force %s', Mod.WorldShare.Utils:GetConfig('schoolWorldId')))
     else
         GameMainLogin:next_step({IsLoginModeSelected = true})
     end
