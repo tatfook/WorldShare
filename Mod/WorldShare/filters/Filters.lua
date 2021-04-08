@@ -543,7 +543,7 @@ function Filters:Init()
     -- filter download remote world show bbs
     GameLogic.GetFilters():add_filter(
         'download_remote_world_show_bbs',
-        function(callback)
+        function()
             return false
         end
     )

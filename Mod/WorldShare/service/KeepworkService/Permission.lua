@@ -112,7 +112,7 @@ function KeepworkServicePermission:Authentication(authName, callback)
     if not self:GetAuth(authName) then
         if authName == '' or authName == 'Vip' then -- Vip
             if Mod.WorldShare.Store:Get('user/isVip') then
-                if type(callback) == 'function' then
+                if callback and type(callback) == 'function' then
                     callback(true, 'vip', '')
                 end
 
@@ -121,7 +121,7 @@ function KeepworkServicePermission:Authentication(authName, callback)
         elseif authName == 'Student' then
             local userType = Mod.WorldShare.Store:Get("user/userType") or {}
             if userType.student then
-                if type(callback) == 'function' then
+                if callback and type(callback) == 'function' then
                     callback(true, 'student', '')
                 end
 
@@ -130,7 +130,7 @@ function KeepworkServicePermission:Authentication(authName, callback)
         elseif authName == 'Teacher' then
             local userType = Mod.WorldShare.Store:Get("user/userType") or {}
             if userType.teacher then
-                if type(callback) == 'function' then
+                if callback and type(callback) == 'function' then
                     callback(true, 'teacher', '')
                 end
 
@@ -138,8 +138,23 @@ function KeepworkServicePermission:Authentication(authName, callback)
             end
         end
 
-        if type(callback) == 'function' then
+        if callback and type(callback) == 'function' then
             callback(false, authName, L'马上激活功能')
+        end
+
+        return
+    end
+
+    -- check permission locally
+    if authName == 'FlyOnParaWorld' then
+        if Mod.WorldShare.Store:Get('user/isVip') then
+            if callback and type(callback) == 'function' then
+                callback(true, self:GetAuth(authName), self:GetAuthDesc(authName))
+            end
+        else
+            if callback and type(callback) == 'function' then
+                callback(false, self:GetAuth(authName), self:GetAuthDesc(authName))
+            end
         end
 
         return
@@ -149,17 +164,19 @@ function KeepworkServicePermission:Authentication(authName, callback)
         self:GetAuth(authName),
         function(data, err)
             if data and data.data == true then
-                if type(callback) == 'function' then
+                if callback and type(callback) == 'function' then
                     callback(true, self:GetAuth(authName), self:GetAuthDesc(authName))
                 end
             else
-                if type(callback) == 'function' then
+                if callback and type(callback) == 'function' then
                     callback(false, self:GetAuth(authName), self:GetAuthDesc(authName))
                 end
             end
         end,
         function(data, err)
-            callback(false, self:GetAuth(authName), self:GetAuthDesc(authName))
+            if callback and type(callback) == 'function' then
+                callback(false, self:GetAuth(authName), self:GetAuthDesc(authName))
+            end
         end
     )
 end

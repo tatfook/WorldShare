@@ -46,25 +46,39 @@ function Permission:CheckPermission(authName, bOpenUIIfNot, callback, uiType)
             end
 
             local function Handle()
-                KeepworkServicePermission:Authentication(authName, function(result, key, desc)
-                    if result == false then
-                        if not uiType or uiType == 'Vip' then
-                            self:ShowFailDialog(key, desc)
+                -- update user info
+                KeepworkServiceSession:Profile(
+                    function(response)
+                        -- update user vip info
+                        if response.vip and response.vip == 1 then
+                            Mod.WorldShare.Store:Set("user/isVip", true)
+                        else
+                            Mod.WorldShare.Store:Set("user/isVip", false)
                         end
 
-                        if uiType == 'Teacher' then
-                            _guihelper.MessageBox(L'此功能需要教师权限，如需获取请联系管理员或者客服咨询')
-                        end
+                        KeepworkServiceSession:SetUserLevels(response)
 
-                        if uiType == 'Institute' then
-                            _guihelper.MessageBox(desc)
-                        end
+                        KeepworkServicePermission:Authentication(authName, function(result, key, desc)
+                            if result == false then
+                                if not uiType or uiType == 'Vip' then
+                                    self:ShowFailDialog(key, desc)
+                                end
+        
+                                if uiType == 'Teacher' then
+                                    _guihelper.MessageBox(L'此功能需要教师权限，如需获取请联系管理员或者客服咨询')
+                                end
+        
+                                if uiType == 'Institute' then
+                                    _guihelper.MessageBox(desc)
+                                end
+                            end
+        
+                            if callback and type(callback) == "function" then
+                                callback(result)
+                            end
+                        end)
                     end
-
-                    if callback and type(callback) == "function" then
-                        callback(result)
-                    end
-                end)
+                )
             end
 
             if result == 'REGISTER' or result == 'FORGET' then
