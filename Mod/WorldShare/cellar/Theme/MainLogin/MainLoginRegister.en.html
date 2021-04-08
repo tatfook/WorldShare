@@ -528,7 +528,7 @@
                 </div>
                 <div class='main_area'>
                     <!-- register finish -->
-                    <pe:container name='register_not_finish' visible='true' style='width: 240px;height: 260px;background:;'>
+                    <pe:container name='register_not_finish' visible='false' style='width: 240px;height: 260px;background:;'>
                         <div style="width: 240px;height: 24.37px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#5 345 256 26)">
                             <input type='button'
                                 name='account_button'
@@ -762,9 +762,10 @@
                             </pe:container>
                         </pe:container>
                     </pe:container>
-                    <pe:container name='register_finish' visible='false' style='position: relative;width: 240px;height: 260px;margin-top: -260px;background:;'>
+                    <pe:container name='register_finish' visible='true' style='position: relative;width: 240px;height: 260px;margin-top: -260px;background:;'>
                         <div>
                             <div style="margin-top: 10px;width: 240px;height: 43.95px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#471 771 273 50)"></div>
+                            <div style="margin-top: 10px;width: 240px;height: 21.09px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#472 929 273 24)"></div>
                             <div style="margin-top: 8px;width: 240px;height: 86.25px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#9 832 256 92)">
                                 <div style="margin-left: 105px;margin-top: 11px;">
                                     <input type='text'
@@ -788,11 +789,6 @@
                                                   text-singleline: true;
                                                   background:;' value='' />
                                 </div>
-                            </div>
-                            <div style="width: 240px;margin-top: 5px;text-align: center;base-font-size: 12px;font-size: 12px;color: #FFFFFF">
-                                <%= L'找个稳妥的地方抄下来！' %>
-                                <br />
-                                <%= L'你需要这个来储存作品。' %>
                             </div>
                             <div style="margin-top: 30px;">
                                 <input type="button"
