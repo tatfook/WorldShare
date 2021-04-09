@@ -66,11 +66,11 @@
                     function OnClickDonate()
                         GameMainLogin.donate_window = GameMainLogin.donate_window or System.Windows.Window:new()
                         GameMainLogin.donate_window:Show({url="script/apps/Aries/Creator/Game/Login/DonatePage.html", alignment="_rb", left=-210, top=-200, width=200, height=200, zorder=10, allowDrag=true})
-                        ParaGlobal.ShellExecute("open", L"http://www.nplproject.com/paracraft-donation", "", "", 1)
+                        ParaGlobal.ShellExecute("open", "http://www.nplproject.com/paracraft-donation", "", "", 1)
                     end
 
                     function OnClickCredits()
-                        ParaGlobal.ShellExecute("open", L"https://keepwork.com/official/paracraft/credits", "", "", 1)
+                        ParaGlobal.ShellExecute("open", "https://keepwork.com/official/paracraft/credits", "", "", 1)
                     end
                         
                     function GetModCountAsString()
@@ -87,7 +87,7 @@
                     end
 
                     function OnClickCustomerService()
-                        ParaGlobal.ShellExecute("open", L"https://keepwork.com/official/docs/FAQ/questions", "", "", 1)
+                        ParaGlobal.ShellExecute("open", "https://keepwork.com/official/docs/FAQ/questions", "", "", 1)
                     end
 
                     function login_text()
@@ -128,7 +128,7 @@
 
                     function register()
                         if MainLogin.accountExist then
-                            page:SetUIValue('register_account_field_error_msg', L"*Account already exists, please use another account")
+                            page:SetUIValue('register_account_field_error_msg', "*Account already exists, please use another account")
                             page:FindControl('register_account_field_error').visible = true
                             return false
                         end
@@ -139,25 +139,25 @@
                         local agree = page:GetValue("agree")
 
                         if not agree then
-                            page:SetUIValue('agree_field_error_msg', L"*You did not agree to the user agreement")
+                            page:SetUIValue('agree_field_error_msg', "*You did not agree to the user agreement")
                             page:FindControl('agree_field_error_error').visible = true
                             return false
                         end
 
                         if not account or account == "" then
-                            page:SetUIValue('register_account_field_error_msg', L"*Account number cannot be empty")
+                            page:SetUIValue('register_account_field_error_msg', "*Account number cannot be empty")
                             page:FindControl('register_account_field_error').visible = true
                             return false
                         end
 
                         if #password < 6 then
-                            page:SetUIValue('register_account_password_field_error_msg', L"*The password must be at least 6 digits")
+                            page:SetUIValue('register_account_password_field_error_msg', "*The password must be at least 6 digits")
                             page:FindControl('egister_account_password_field_error').visible = true
                             return false
                         end
 
                         if not captcha or captcha == "" then
-                            page:SetUIValue('captcha_field_error_msg', L"*Verification code cannot be empty")
+                            page:SetUIValue('captcha_field_error_msg', "*Verification code cannot be empty")
                             page:FindControl('captcha_field_error').visible = true
                             return false
                         end
@@ -179,7 +179,7 @@
 
                         RegisterModal:Register(page, function(_result)
                             if _result == false then
-                                page:SetUIValue('captcha_field_error_msg', L"*Verification code error")
+                                page:SetUIValue('captcha_field_error_msg', "*Verification code error")
                                 page:FindControl('captcha_field_error').visible = true
                             end
                         end)
@@ -192,38 +192,38 @@
                         local agree = page:GetValue("phone_agree")
 
                         if not agree then
-                            page:SetUIValue('phone_agree_field_error_msg', L"*You did not agree to the user agreement")
+                            page:SetUIValue('phone_agree_field_error_msg', "*You did not agree to the user agreement")
                             page:FindControl('phone_agree_field_error').visible = true
                             return
                         end
 
                         if not Validated:Phone(phonenumber) then
-                            page:SetUIValue('phonenumber_field_error_msg', L"*Phone format error")
+                            page:SetUIValue('phonenumber_field_error_msg', "*Phone format error")
                             page:FindControl('phonenumber_field_error').visible = true
                             return
                         end
  
                         if #phonecaptcha == 0 then
-                            page:SetUIValue('phonecaptcha_field_error_msg', L"*Mobile phone verification code cannot be empty")
+                            page:SetUIValue('phonecaptcha_field_error_msg', "*Mobile phone verification code cannot be empty")
                             page:FindControl('phonecaptcha_field_error').visible = true
                             return
                         end
 
                         if #phonepassword < 6 then
-                            page:SetUIValue('phonepassword_field_error_msg', L"*The password is less than 6 digits")
+                            page:SetUIValue('phonepassword_field_error_msg', "*The password is less than 6 digits")
                             page:FindControl('phonepassword_field_error').visible = true
                             return
                         end
 
                         if phonenumberExist then
-                            page:SetUIValue('phonenumber_field_error_msg', L"*Mobile number already exists")
+                            page:SetUIValue('phonenumber_field_error_msg', "*Mobile number already exists")
                             page:FindControl('phonenumber_field_error').visible = true
                             return
                         end
 
                         KeepworkServiceSession:CellphoneCaptchaVerify(phonenumber, phonecaptcha, function(data, err)
                             if err == 400 then
-                                page:SetUIValue('phonenumber_field_error_msg', L"*Mobile phone verification code error")
+                                page:SetUIValue('phonenumber_field_error_msg', "*Mobile phone verification code error")
                                 page:FindControl('phonenumber_field_error').visible = true
                                 return
                             end
@@ -235,7 +235,7 @@
 
                     function phone_register()
                         if MainLogin.phoneAccountExist then
-                            page:SetUIValue('phone_register_account_field_error_msg', L"*Account already exists, please use another account")
+                            page:SetUIValue('phone_register_account_field_error_msg', "*Account already exists, please use another account")
                             page:FindControl('phone_register_account_field_error').visible = true
                             return false
                         end
@@ -471,7 +471,7 @@
                         local username = page:GetValue("register_account")
 
                         if not username or #username == 0 then
-                            page:SetUIValue('register_account_field_error_msg', L"*Account number cannot be empty")
+                            page:SetUIValue('register_account_field_error_msg', "*Account number cannot be empty")
                             page:FindControl('register_account_field_error').visible = true
                             return false
                         end
@@ -479,7 +479,7 @@
                         KeepworkServiceSession:CheckUsernameExist(username, function(bIsExist)
                             if bIsExist then
                                 MainLogin.accountExist = true
-                                page:SetUIValue('register_account_field_error_msg', L"*Account already exists, please use another account")
+                                page:SetUIValue('register_account_field_error_msg', "*Account already exists, please use another account")
                                 page:FindControl('register_account_field_error').visible = true
                                 return false
                             else
@@ -496,7 +496,7 @@
                         local username = page:GetValue("phone_register_account")
 
                         if not username or #username == 0 then
-                            page:SetUIValue('phone_register_account_field_error_msg', L"*Account number cannot be empty")
+                            page:SetUIValue('phone_register_account_field_error_msg', "*Account number cannot be empty")
                             page:FindControl('phone_register_account_field_error').visible = true
                             return false
                         end
@@ -504,7 +504,7 @@
                         KeepworkServiceSession:CheckUsernameExist(username, function(bIsExist)
                             if bIsExist then
                                 MainLogin.phoneAccountExist = true
-                                page:SetUIValue('phone_register_account_field_error_msg', L"*Account already exists, please use another account")
+                                page:SetUIValue('phone_register_account_field_error_msg', "*Account already exists, please use another account")
                                 page:FindControl('phone_register_account_field_error').visible = true
                                 return false
                             else
@@ -527,7 +527,7 @@
 
                     function set_register_agree()
                         if not page:GetValue('agree') then
-                            page:SetUIValue('agree_field_error_msg', L"*You did not agree to the user agreement")
+                            page:SetUIValue('agree_field_error_msg', "*You did not agree to the user agreement")
                             page:FindControl('agree_field_error').visible = true
                         else
                             page:FindControl('agree_field_error').visible = false
@@ -536,7 +536,7 @@
 
                     function set_phone_agree()
                         if not page:GetValue('phone_agree') then
-                            page:SetUIValue('phone_agree_field_error_msg', L"*You did not agree to the user agreement")
+                            page:SetUIValue('phone_agree_field_error_msg', "*You did not agree to the user agreement")
                             page:FindControl('phone_agree_field_error').visible = true
                         else
                             page:FindControl('phone_agree_field_error').visible = false
@@ -555,7 +555,7 @@
                         page:SetValue('register_account_password', password)
 
                         if #password < 6 then
-                            page:SetUIValue('register_account_password_field_error_msg', L"*The password must be at least 6 digits")
+                            page:SetUIValue('register_account_password_field_error_msg', "*The password must be at least 6 digits")
                             page:FindControl('register_account_password_field_error').visible = true
                         else
                             page:FindControl('register_account_password_field_error').visible = false
@@ -566,7 +566,7 @@
                         local captcha = page:GetValue('captcha')
 
                         if not captcha or #captcha == 0 then
-                            page:SetUIValue('captcha_field_error_msg', L"*Verification code cannot be empty")
+                            page:SetUIValue('captcha_field_error_msg', "*Verification code cannot be empty")
                             page:FindControl('captcha_field_error').visible = true
                         else
                             page:FindControl('captcha_field_error').visible = false
@@ -581,13 +581,13 @@
                         local phonenumber = page:GetValue("phonenumber")
 
                         if phonenumber and #phonenumber == 0 then
-                            page:SetUIValue('phonenumber_field_error_msg', L"*Mobile phone number cannot be empty")
+                            page:SetUIValue('phonenumber_field_error_msg', "*Mobile phone number cannot be empty")
                             page:FindControl('phonenumber_field_error').visible = true
                             return                           
                         end
 
                         if not Validated:Phone(phonenumber) then
-                            page:SetUIValue('phonenumber_field_error_msg', L"*Wrong format of mobile phone number")
+                            page:SetUIValue('phonenumber_field_error_msg', "*Wrong format of mobile phone number")
                             page:FindControl('phonenumber_field_error').visible = true
                             return false
                         end
@@ -595,7 +595,7 @@
                         KeepworkServiceSession:CheckPhonenumberExist(phonenumber, function(bIsExist)
                             if bIsExist then
                                 phonenumberExist = true
-                                page:SetUIValue('phonenumber_field_error_msg', L"*Mobile number already exists")
+                                page:SetUIValue('phonenumber_field_error_msg', "*Mobile number already exists")
                                 page:FindControl('phonenumber_field_error').visible = true
                             else
                                 phonenumberExist = false
