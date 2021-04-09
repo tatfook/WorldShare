@@ -14,6 +14,8 @@ WorldExitDialog.ShowPage()
 local ShareWorldPage = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.Areas.ShareWorldPage")
 local WorldRevision = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision")
 local NplBrowserPlugin = commonlib.gettable("NplBrowser.NplBrowserPlugin")
+local Desktop = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop")
+local ParaWorldLoginAdapter = commonlib.gettable("MyCompany.Aries.Game.Tasks.ParaWorld.ParaWorldLoginAdapter")
 
 -- service
 local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
@@ -39,6 +41,11 @@ function WorldExitDialog.ShowPage(callback)
 
     if not currentEnterWorld then
         return false
+    end
+
+    if currentEnterWorld.communityWorld then
+        ParaWorldLoginAdapter.ShowExitWorld(true)
+        return
     end
 
     Mod.WorldShare.MsgBox:Show(L"请稍候...")
@@ -171,6 +178,21 @@ function WorldExitDialog.OnDialogResult(res)
 
     if res == _guihelper.DialogResult.No or res == _guihelper.DialogResult.Yes then
         local currentEnterWorld = Mod.WorldShare.Store:Get("world/currentEnterWorld")
+
+        -- back to origin world
+        if currentEnterWorld.kpProjectId ~= Mod.WorldShare.Utils:GetConfig('homeWorldId') and
+           currentEnterWorld.kpProjectId ~= Mod.WorldShare.Utils:GetConfig('schoolWorldId') then
+
+            Desktop.is_exiting = false
+
+            if KeepworkServiceSession:GetUserWhere() == 'HOME' then
+                GameLogic.RunCommand(format('/loadworld -s -force %s', Mod.WorldShare.Utils:GetConfig('homeWorldId')))
+            elseif KeepworkServiceSession:GetUserWhere() == 'SCHOOL' then
+                GameLogic.RunCommand(format('/loadworld -s -force %s', Mod.WorldShare.Utils:GetConfig('schoolWorldId')))
+            end
+
+            return
+        end
 
         -- unlock share world logic
         if Mod.WorldShare.Utils:IsSharedWorld(currentEnterWorld) then

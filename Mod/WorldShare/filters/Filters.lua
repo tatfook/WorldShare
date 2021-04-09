@@ -547,4 +547,23 @@ function Filters:Init()
             return false
         end
     )
+
+    -- filter escape key
+    GameLogic.GetFilters():add_filter(
+        "HandleEscapeKey",
+        function()
+            local ParaWorldLoginAdapter = commonlib.gettable("MyCompany.Aries.Game.Tasks.ParaWorld.ParaWorldLoginAdapter")
+
+            if Mod.WorldShare.Store:Get('world/isEnterWorld') then
+                local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
+
+                if currentEnterWorld.communityWorld then
+                    ParaWorldLoginAdapter.ShowExitWorld(true)
+                    return true
+                else
+                    return false
+                end
+            end
+        end
+    )
 end
