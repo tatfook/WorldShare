@@ -289,9 +289,9 @@
                             <div style="float:right;padding-left:28px;">
                                 <div style="margin-top:-5px;margin-bottom: 20px;">
                                     <span style="color: #000000"><%= L"项目ID：" %></span>
-                                    <input type="button" style="float:left;height: 25px;" class="theme1_baby_bule_button" value="<%= get_project_id() %>" onclick="open_keepwork_project()" tooltip='<%= L"点击访问作品项目页面" %>' />&nbsp;
+                                    <input type="button" style="float:left;height: 25px;min-width: 10px;" class="theme1_baby_bule_button" value="<%= get_project_id() %>" onclick="open_keepwork_project()" tooltip='<%= L"点击访问作品项目页面" %>' />&nbsp;
                                     <pe:if condition="<%= not GameLogic.IsReadOnly() and (not has_project_id() or is_user_world()) %>">
-                                        <input type="button" class="theme1_black_button" style="font-size: 12px;width: 40px;height: 25px;" value="<%= L'上传' %>" onclick="on_click_share_world()"/>
+                                        <input type="button" class="theme1_black_button" style="font-size: 12px;width: 50px;height: 25px;" value="<%= L'上传' %>" onclick="on_click_share_world()"/>
                                     </pe:if>
                                 </div>
                                 <div>
@@ -303,11 +303,11 @@
                                     <pe:if condition="<%= get_platform() ~= 'android' and get_platform() ~= 'ios' %>">
                                         <div style="float:right;">
                                             <div style="margin-bottom: 6px;">
-                                                <input type="button" class="button1 theme1_baby_bule_button" tooltip='<%= L"点击打开所在目录" %>' value="<%= L'本地目录' %>" onclick="on_open_world_dir()" />
+                                                <input type="button" style="width: 120px;" class="button1 theme1_baby_bule_button" tooltip='<%= L"点击打开所在目录" %>' value="<%= L'本地目录' %>" onclick="on_open_world_dir()" />
                                             </div>
                                             <pe:if condition="<%= not GameLogic.IsReadOnly() %>">
                                                 <div style="margin-bottom: 6px;">
-                                                    <input type="button" class="button1 theme1_lime_button" tooltip='<%=L"点击查看历史版本目录, 解压可恢复到最近几天的版本"%>' value="<%= L'历史版本' %>" onclick="on_click_revision()" />
+                                                    <input type="button" style="width: 120px;" class="button1 theme1_lime_button" tooltip='<%=L"点击查看历史版本目录, 解压可恢复到最近几天的版本"%>' value="<%= L'历史版本' %>" onclick="on_click_revision()" />
                                                 </div>
                                             </pe:if>
                                         </div>
