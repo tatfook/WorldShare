@@ -35,11 +35,9 @@ local self = WorldExitDialog
 -- @param callback: function(res) end.
 -- @return void or boolean
 function WorldExitDialog.ShowPage(callback)
-    UserConsole:ClosePage()
+    local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
-    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
-
-    if not currentWorld then
+    if not currentEnterWorld then
         return false
     end
 
@@ -86,8 +84,8 @@ function WorldExitDialog.ShowPage(callback)
 
     if GameLogic.IsReadOnly() then
         if KeepworkService:IsSignedIn() then
-            if currentWorld.kpProjectId and currentWorld.kpProjectId ~= 0 then
-                Grade:IsRated(currentWorld.kpProjectId, function(isRated)
+            if currentEnterWorld.kpProjectId and currentEnterWorld.kpProjectId ~= 0 then
+                Grade:IsRated(currentEnterWorld.kpProjectId, function(isRated)
                     self.isRated = isRated
                     Handle()
                 end)
@@ -101,18 +99,18 @@ function WorldExitDialog.ShowPage(callback)
         end
     else
         if KeepworkService:IsSignedIn() then
-            Compare:Init(currentWorld.worldpath, function(result)
+            Compare:Init(currentEnterWorld.worldpath, function(result)
                 if not result then
                     return false
                 end
 
-                if currentWorld and currentWorld.kpProjectId and currentWorld.kpProjectId ~= 0 then
-                    KeepworkServiceProject:GetProject(currentWorld.kpProjectId, function(data)
+                if currentEnterWorld and currentEnterWorld.kpProjectId and currentEnterWorld.kpProjectId ~= 0 then
+                    KeepworkServiceProject:GetProject(currentEnterWorld.kpProjectId, function(data)
                         if data and data.world and data.world.worldName then
                             self.currentWorldKeepworkInfo = data
                         end
 
-                        Grade:IsRated(currentWorld.kpProjectId, function(isRated)
+                        Grade:IsRated(currentEnterWorld.kpProjectId, function(isRated)
                             self.isRated = isRated
                             Handle()
                         end)
@@ -131,10 +129,10 @@ function WorldExitDialog.ShowPage(callback)
 end
 
 function WorldExitDialog:IsUserWorld()
-    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+    local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
     local userId = Mod.WorldShare.Store:Get('user/userId')
 
-    if currentWorld and currentWorld.kpProjectId and currentWorld.kpProjectId ~= 0 and userId then
+    if currentEnterWorld and currentEnterWorld.kpProjectId and currentEnterWorld.kpProjectId ~= 0 and userId then
         if self.currentWorldKeepworkInfo and self.currentWorldKeepworkInfo.userId and self.currentWorldKeepworkInfo.userId == userId then
             return true
         else
@@ -167,13 +165,14 @@ end
 function WorldExitDialog.OnDialogResult(res)
     local WorldExitDialogPage = Mod.WorldShare.Store:Get('page/WorldExitDialog')
 
-    if (WorldExitDialogPage) then
+    if WorldExitDialogPage then
         WorldExitDialogPage:CloseWindow()
     end
 
     if res == _guihelper.DialogResult.No or res == _guihelper.DialogResult.Yes then
         local currentEnterWorld = Mod.WorldShare.Store:Get("world/currentEnterWorld")
 
+        -- unlock share world logic
         if Mod.WorldShare.Utils:IsSharedWorld(currentEnterWorld) then
             Mod.WorldShare.MsgBox:Show(L"请稍候...")
             KeepworkServiceWorld:UnlockWorld(function()
@@ -218,15 +217,15 @@ end
 function WorldExitDialog:CanSetStart()
     if not KeepworkService:IsSignedIn() then
         LoginModal:Init(function()
-            local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+            local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
-            if currentWorld and currentWorld.kpProjectId and currentWorld.kpProjectId ~= 0 then
-                KeepworkServiceProject:GetProject(tonumber(currentWorld.kpProjectId), function(data)
+            if currentEnterWorld and currentEnterWorld.kpProjectId and currentEnterWorld.kpProjectId ~= 0 then
+                KeepworkServiceProject:GetProject(tonumber(currentEnterWorld.kpProjectId), function(data)
                     if data and data.world and data.world.worldName then
                         self.currentWorldKeepworkInfo = data
                     end
 
-                    Grade:IsRated(currentWorld.kpProjectId, function(isRated)
+                    Grade:IsRated(currentEnterWorld.kpProjectId, function(isRated)
                         self.isRated = isRated
                         self:Refresh()
                     end)
