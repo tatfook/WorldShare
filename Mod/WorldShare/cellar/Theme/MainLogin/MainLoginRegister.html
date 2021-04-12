@@ -519,17 +519,28 @@
                     function update_register_phone_button_status()
                         local username = page:GetValue('phone_register_account')
 
-                        if not Validated:Account(username) then
-                            -- page:SetUIValue('phone_account_field_error_msg', L'*账号需大于3位且非数字开头的字母、数字组合形式')
-                            -- page:FindControl('phone_account_field_error').visible = true
+                        if #username < 4 then
+                            page:SetUIValue('phone_account_field_error_msg', L'请输入4位以上的英文字母、数字')
+                            _guihelper.SetFontColor(page:FindControl('phone_account_field_error_msg'), '#00FF00')
+                            page:FindControl('phone_account_field_error').visible = true
                             page:SetUIBackground('phone_register_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 197 258 44')
                             return
+                        else
+                            if not Validated:Account(username) then
+                                page:SetUIValue('phone_account_field_error_msg', L'*账号需大于3位且非数字开头的字母、数字组合形式')
+                                _guihelper.SetFontColor(page:FindControl('phone_account_field_error_msg'), '#FF0000')
+                                page:FindControl('phone_account_field_error').visible = true
+                                page:SetUIBackground('phone_register_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 197 258 44')
+                                return
+                            end
                         end
 
+                        
                         KeepworkServiceSession:CheckUsernameExist(username, function(b_is_exist)
                             if b_is_exist then
                                 MainLogin.accountExist = true
                                 page:SetUIValue('phone_account_field_error_msg', L'*账号已存在，请使用其他账号')
+                                _guihelper.SetFontColor(page:FindControl('phone_account_field_error_msg'), '#FF0000')
                                 page:FindControl('phone_account_field_error').visible = true
                                 page:SetUIBackground('phone_register_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 197 258 44')
                             else
