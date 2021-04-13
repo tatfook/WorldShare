@@ -130,6 +130,8 @@ EventTrackingService.map = {
             code_war = 'click.dock.code_war', -- 玩学课堂
             web_keepwork_home = 'click.dock.web_keepwork_home', -- 用户社区
             user_tip = 'click.dock.user_tip', -- 成长日记
+            homework = 'click.dock.homework', -- 作业
+            invitefriend = 'click.dock.invitefriend', -- 结伴学习
         },
         task = { -- 实战提升
             program = 'click.task.program', -- 编程
@@ -268,6 +270,9 @@ EventTrackingService.map = {
         },
         beginner = {
             catation = 'click.beginner.catation' -- 领取奖状
+        },
+        knowledge = { -- 知识
+            click_item = 'click.knowledge.select_course' -- 选择课程
         }
     }
 }

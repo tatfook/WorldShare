@@ -78,10 +78,6 @@ KeepworkServicePermission.AllAuth = {
         key = 'daily_note',
         desc = L'随意观看每日成长视频'
     },
-    FlyOnParaWorld = {
-        key = 'fly_on_paraworld',
-        desc = L'马上飞行!'
-    },
     VipGoods = {
         key = 'vip_goods',
         desc = L'拥有会员创造道具'
@@ -92,12 +88,39 @@ KeepworkServicePermission.AllAuth = {
     }
 }
 
+KeepworkServicePermission.AllLocalAuth = {
+    FlyOnParaWorld = {
+        key = 'fly_on_paraworld',
+        desc = L'马上飞行!'
+    },
+    PlyText = {
+        key = 'play_text',
+        desc = L'AI朗读'
+    }
+}
+
+function KeepworkServicePermission:GetAllLocalAuth(authName)
+    if self.AllLocalAuth[authName] then
+        return self.AllLocalAuth[authName].key
+    end
+
+    return
+end
+
 function KeepworkServicePermission:GetAuth(authName)
     if self.AllAuth[authName] then
         return self.AllAuth[authName].key
     end
 
     return
+end
+
+function KeepworkServicePermission:GetAllLocalDesc(authName)
+    if self.AllLocalAuth[authName] then
+        return self.AllLocalAuth[authName].desc
+    end
+
+    return L'马上开通会员激活功能'
 end
 
 function KeepworkServicePermission:GetAuthDesc(authName)
@@ -109,6 +132,21 @@ function KeepworkServicePermission:GetAuthDesc(authName)
 end
 
 function KeepworkServicePermission:Authentication(authName, callback)
+    -- check permission locally for VIP permission
+    if self:GetAllLocalAuth(authName) then
+        if Mod.WorldShare.Store:Get('user/isVip') then
+            if callback and type(callback) == 'function' then
+                callback(true, self:GetAllLocalAuth(authName), self:GetAllLocalDesc(authName))
+            end
+        else
+            if callback and type(callback) == 'function' then
+                callback(false, self:GetAllLocalAuth(authName), self:GetAllLocalDesc(authName))
+            end
+        end
+
+        return
+    end
+
     if not self:GetAuth(authName) then
         if authName == '' or authName == 'Vip' then -- Vip
             if Mod.WorldShare.Store:Get('user/isVip') then
@@ -140,21 +178,6 @@ function KeepworkServicePermission:Authentication(authName, callback)
 
         if callback and type(callback) == 'function' then
             callback(false, authName, L'马上激活功能')
-        end
-
-        return
-    end
-
-    -- check permission locally
-    if authName == 'FlyOnParaWorld' then
-        if Mod.WorldShare.Store:Get('user/isVip') then
-            if callback and type(callback) == 'function' then
-                callback(true, self:GetAuth(authName), self:GetAuthDesc(authName))
-            end
-        else
-            if callback and type(callback) == 'function' then
-                callback(false, self:GetAuth(authName), self:GetAuthDesc(authName))
-            end
         end
 
         return
