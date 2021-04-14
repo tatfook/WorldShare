@@ -487,7 +487,7 @@
                         local username = page:GetValue('phone_register_account')
 
                         if #username < 4 then
-                            page:SetUIValue('phone_account_field_error_msg', L'请输入4位以上的英文字母、数字')
+                            page:SetUIValue('phone_account_field_error_msg', L"请输入4位以上的英文字母、数字")
                             _guihelper.SetFontColor(page:FindControl('phone_account_field_error_msg'), '#00FF00')
                             page:FindControl('phone_account_field_error').visible = true
                             page:SetUIBackground('phone_register_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 197 258 44')

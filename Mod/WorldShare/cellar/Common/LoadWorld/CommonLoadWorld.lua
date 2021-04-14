@@ -17,11 +17,12 @@ local InternetLoadWorld = commonlib.gettable('MyCompany.Aries.Creator.Game.Login
 -- service
 local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
 local GitService = NPL.load('(gl)Mod/WorldShare/service/GitService.lua')
-local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
 local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
 
 -- bottles
 local LoginModal = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua')
+local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
 
 -- databse
 local CacheProjectId = NPL.load('(gl)Mod/WorldShare/database/CacheProjectId.lua')
@@ -30,6 +31,30 @@ local CacheProjectId = NPL.load('(gl)Mod/WorldShare/database/CacheProjectId.lua'
 local KeepworkBaseApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/BaseApi.lua")
 
 local CommonLoadWorld = NPL.export()
+
+function CommonLoadWorld:EnterCommunityWorld()
+    if not KeepworkServiceSession:IsSignedIn() then
+        return
+    end
+
+    if KeepworkServiceSession:GetUserWhere() == 'HOME' then
+        GameLogic.RunCommand(format('/loadworld -s -force %s', Mod.WorldShare.Utils:GetConfig('homeWorldId')))
+    elseif KeepworkServiceSession:GetUserWhere() == 'SCHOOL' then
+        GameLogic.RunCommand(format('/loadworld -s -force %s', Mod.WorldShare.Utils:GetConfig('schoolWorldId')))
+    else
+        CommonLoadWorld:SelectPlaceAndEnterCommunityWorld()
+    end
+end
+
+function CommonLoadWorld:SelectPlaceAndEnterCommunityWorld()
+    MainLogin:ShowWhere(function(result)
+        if result == 'HOME' then
+            GameLogic.RunCommand(format('/loadworld -s -force %s', Mod.WorldShare.Utils:GetConfig('homeWorldId')))
+        elseif result == 'SCHOOL' then
+            GameLogic.RunCommand(format('/loadworld -s -force %s', Mod.WorldShare.Utils:GetConfig('schoolWorldId')))
+        end
+    end)
+end
 
 function CommonLoadWorld:EnterCourseWorld(aiCourseId, preRelease, releaseId)
     if not aiCourseId or type(preRelease) ~= 'boolean' or not releaseId then
@@ -393,7 +418,7 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
             end
 
             if data and data.visibility == 1 then
-                if not KeepworkService:IsSignedIn() then
+                if not KeepworkServiceSession:IsSignedIn() then
                     LoginModal:CheckSignedIn(L"该项目需要登录后访问", function(bIsSuccessed)
                         if bIsSuccessed then
                             self:EnterWorldById(pid, refreshMode)
@@ -431,7 +456,7 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                    data.extra and
                    ((data.extra.vipEnabled and data.extra.vipEnabled == 1) or
                    (data.extra.isVipWorld and data.extra.isVipWorld == 1)) then
-                    if not KeepworkService:IsSignedIn() then
+                    if not KeepworkServiceSession:IsSignedIn() then
                         LoginModal:CheckSignedIn(L"该项目需要登录后访问", function(bIsSuccessed)
                             if bIsSuccessed then
                                 self:EnterWorldById(pid, refreshMode)
@@ -461,7 +486,7 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                    data.extra.instituteVipEnabled and
                    data.extra.instituteVipEnabled == 1 and
                    not self.instituteVerified then
-                    if not KeepworkService:IsSignedIn() then
+                    if not KeepworkServiceSession:IsSignedIn() then
                         LoginModal:CheckSignedIn(L"该项目需要登录后访问", function(bIsSuccessed)
                             if bIsSuccessed then
                                 self:EnterWorldById(pid, refreshMode)

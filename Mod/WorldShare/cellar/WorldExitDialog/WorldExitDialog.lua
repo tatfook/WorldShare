@@ -27,7 +27,7 @@ local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 
 -- UI
 local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
-local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
+local CommonLoadWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/CommonLoadWorld.lua')
 local Grade = NPL.load("./Grade.lua")
 
 local WorldExitDialog = NPL.export()
@@ -179,35 +179,39 @@ function WorldExitDialog.OnDialogResult(res)
     if res == _guihelper.DialogResult.No or res == _guihelper.DialogResult.Yes then
         local currentEnterWorld = Mod.WorldShare.Store:Get("world/currentEnterWorld")
 
-        -- back to origin world
-        if currentEnterWorld.kpProjectId ~= Mod.WorldShare.Utils:GetConfig('homeWorldId') and
-           currentEnterWorld.kpProjectId ~= Mod.WorldShare.Utils:GetConfig('schoolWorldId') then
+        local function Handle()
+             -- back to origin world
+            if currentEnterWorld.kpProjectId ~= Mod.WorldShare.Utils:GetConfig('homeWorldId') and
+                currentEnterWorld.kpProjectId ~= Mod.WorldShare.Utils:GetConfig('schoolWorldId') and
+                KeepworkServiceSession:IsSignedIn() then
 
-            Desktop.is_exiting = false
+                Desktop.is_exiting = false
 
-            if KeepworkServiceSession:GetUserWhere() == 'HOME' then
-                GameLogic.RunCommand(format('/loadworld -s -force %s', Mod.WorldShare.Utils:GetConfig('homeWorldId')))
-            elseif KeepworkServiceSession:GetUserWhere() == 'SCHOOL' then
-                GameLogic.RunCommand(format('/loadworld -s -force %s', Mod.WorldShare.Utils:GetConfig('schoolWorldId')))
+                if KeepworkServiceSession:GetUserWhere() == 'HOME' then
+                    GameLogic.RunCommand(format('/loadworld -s -force %s', Mod.WorldShare.Utils:GetConfig('homeWorldId')))
+                elseif KeepworkServiceSession:GetUserWhere() == 'SCHOOL' then
+                    GameLogic.RunCommand(format('/loadworld -s -force %s', Mod.WorldShare.Utils:GetConfig('schoolWorldId')))
+                else
+                    CommonLoadWorld:SelectPlaceAndEnterCommunityWorld()
+                end
+
+                return
             end
 
-            return
+            if WorldExitDialogPage.callback then
+                NplBrowserPlugin.CloseAllBrowsers()
+                WorldExitDialogPage.callback(res)
+            end
         end
 
         -- unlock share world logic
         if Mod.WorldShare.Utils:IsSharedWorld(currentEnterWorld) then
             Mod.WorldShare.MsgBox:Show(L"请稍候...")
             KeepworkServiceWorld:UnlockWorld(function()
-                if WorldExitDialogPage.callback then
-                    NplBrowserPlugin.CloseAllBrowsers()
-                    WorldExitDialogPage.callback(res)
-                end
+                Handle()
             end)
         else
-            if WorldExitDialogPage.callback then
-                NplBrowserPlugin.CloseAllBrowsers()
-                WorldExitDialogPage.callback(res)
-            end
+            Handle()
         end
 
     else
