@@ -393,7 +393,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
             end
 
             for LKey, LItem in ipairs(localWorlds) do
-                if DItem.worldName == LItem.foldername and not LItem.is_zip and remoteShared == LItem.shared then
+                if DItem.worldName == LItem.foldername and not LItem.is_zip then
                     local function Handle()
                         if tonumber(LItem.revision or 0) == tonumber(DItem.revision or 0) then
                             status = 3 -- both
@@ -422,15 +422,23 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                         end
                     end
 
-                    if LItem.shared then
-                        -- avoid upload same name share world
-                        local sharedUsername = Mod.WorldShare:GetWorldData("username", LItem.worldpath)
-
-                        if sharedUsername == DItem.user.username then
+                    if LItem.shared then -- share folder
+                        if remoteShared == LItem.shared then
+                            -- avoid upload same name share world
+                            local sharedUsername = Mod.WorldShare:GetWorldData("username", LItem.worldpath)
+    
+                            if sharedUsername == DItem.user.username then
+                                Handle()
+                            end
+                        end
+                    else -- personal folder
+                        if remoteShared then
+                            if remoteWorldUserId == tonumber(userId) then
+                                Handle()
+                            end
+                        else
                             Handle()
                         end
-                    else
-                        Handle()
                     end
                 end
             end
@@ -441,7 +449,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                 revision = DItem.revision
                 name = DItem.extra and DItem.extra.worldTagName or ''
 
-                if remoteShared then
+                if remoteShared and remoteWorldUserId ~= tonumber(userId) then
                     -- shared world path
                     worldpath = format(
                         "%s/_shared/%s/%s/",
@@ -460,7 +468,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
             end
 
             -- shared world text
-            if remoteWorldUserId ~= tonumber(userId) and remoteShared then
+            if remoteShared and remoteWorldUserId ~= tonumber(userId) then
                 if DItem.extra and DItem.extra.worldTagName then
                     text = (DItem.user and DItem.user.username or '') .. '/' .. (DItem.extra and DItem.extra.worldTagName or '') .. '(' .. text .. ')'
                 else
