@@ -45,7 +45,16 @@ end
 
 function LocalServiceSession:OnWillLeaveWorld()
     -- record last enter world
-    Mod.WorldShare.Store:Set('world/lastWorld', Mod.WorldShare.Store:Get('world/currentEnterWorld'))
+    local lastWorld = Mod.WorldShare.Store:Get('world/lastWorld')
+    local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
+
+    if (not lastWorld or lastWorld.foldername ~= currentEnterWorld.foldername) and not Mod.WorldShare.Store:Get('world/reloadStatus') then
+        Mod.WorldShare.Store:Set('world/lastWorld', Mod.WorldShare.Store:Get('world/currentEnterWorld'))
+    end
+
+    if Mod.WorldShare.Store:Get('world/reloadStatus') then
+        Mod.WorldShare.Store:Remove('world/reloadStatus')
+    end
 
     -- set actor last position
     if GameLogic.options:IsCommunityWorld() then

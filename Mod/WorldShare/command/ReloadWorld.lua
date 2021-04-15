@@ -32,15 +32,15 @@ function ReloadWorldCommand:Init()
 
             if currentEnterWorld.is_zip then
                 local remoteWorld = RemoteWorld.LoadFromHref(currentEnterWorld.remotefile, "self")
+                Mod.WorldShare.Store:Set('world/reloadStatus', true)
                 InternetLoadWorld.LoadWorld(
                     remoteWorld,
                     nil,
                     'auto',
                     function(bSucceed, localWorldPath) end
                 )
-                -- local remoteWorld = RemoteWorld.LoadFromHref(currentEnterWorld.remotefile, "self")
-                -- WorldCommon.OpenWorld(remoteWorld.localpath)
             else
+                Mod.WorldShare.Store:Set('world/reloadStatus', true)
                 WorldCommon.OpenWorld(currentEnterWorld.worldpath)
             end
         end,
