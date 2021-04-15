@@ -522,13 +522,25 @@ function Create:WorldRename(currentItemIndex, tempModifyWorldname, callback)
         if currentWorld.status ~= 2 then
             -- update sync world
             -- local world exist
-            Mod.WorldShare.Store:Set('world/currentRevision', currentWorld.revision)
-            Mod.WorldShare.Store:Set('world/currentWorld', currentWorld)
 
-            SyncMain:SyncToDataSource(function(result, msg)
-                if type(callback) == 'function' then
-                    callback()
+            -- get members for shared world
+            KeepworkServiceProject:GetMembers(currentWorld.kpProjectId, function(data)
+                local members = {}
+
+                for key, item in ipairs(data) do
+                    members[#members + 1] = item.username
                 end
+                
+                currentWorld.members = members
+
+                Mod.WorldShare.Store:Set('world/currentRevision', currentWorld.revision)
+                Mod.WorldShare.Store:Set('world/currentWorld', currentWorld)
+    
+                SyncMain:SyncToDataSource(function(result, msg)
+                    if type(callback) == 'function' then
+                        callback()
+                    end
+                end)
             end)
         elseif currentWorld.status == 2 then
             -- just remote world exist

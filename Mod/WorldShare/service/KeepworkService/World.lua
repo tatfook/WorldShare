@@ -393,7 +393,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
             end
 
             for LKey, LItem in ipairs(localWorlds) do
-                if DItem.worldName == LItem.foldername and not LItem.is_zip then
+                if DItem.worldName == LItem.foldername and not LItem.is_zip and remoteShared == LItem.shared then
                     local function Handle()
                         if tonumber(LItem.revision or 0) == tonumber(DItem.revision or 0) then
                             status = 3 -- both
@@ -422,17 +422,15 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                         end
                     end
 
-                    if remoteWorldUserId == tonumber(userId) then
-                        Handle() -- myself world
-                    else
-                        if remoteShared == LItem.shared then
-                            -- avoid upload same name share world
-                            local sharedUsername = Mod.WorldShare:GetWorldData("username", LItem.worldpath)
+                    if LItem.shared then
+                        -- avoid upload same name share world
+                        local sharedUsername = Mod.WorldShare:GetWorldData("username", LItem.worldpath)
 
-                            if sharedUsername == DItem.user.username then
-                                Handle()
-                            end
+                        if sharedUsername == DItem.user.username then
+                            Handle()
                         end
+                    else
+                        Handle()
                     end
                 end
             end
@@ -443,7 +441,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                 revision = DItem.revision
                 name = DItem.extra and DItem.extra.worldTagName or ''
 
-                if remoteWorldUserId ~= 0 and remoteWorldUserId ~= tonumber(userId) then
+                if remoteShared then
                     -- shared world path
                     worldpath = format(
                         "%s/_shared/%s/%s/",

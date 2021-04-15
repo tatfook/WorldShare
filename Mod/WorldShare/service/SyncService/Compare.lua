@@ -98,9 +98,11 @@ function Compare:CompareRevision()
     local worldTag = LocalService:GetTag(self.worldPath)
 
     -- Entered world project Id may be changed
-    local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
-    if currentEnterWorld.worldpath == self.worldPath then
-        worldTag.kpProjectId = currentEnterWorld.kpProjectId
+    if Mod.WorldShare.Store:Get('world/isEnterWorld') then
+        local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
+        if currentEnterWorld and currentEnterWorld.worldpath == self.worldPath then
+            worldTag.kpProjectId = currentEnterWorld.kpProjectId
+        end
     end
 
     local localRevision = WorldRevision:new():init(self.worldPath):Checkout()

@@ -6,6 +6,11 @@
                     local MySchool = NPL.load("(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua")
 
                     function get_result()
+                        -- set first item selected default
+                        if MySchool.result and #MySchool.result > 0 then
+                            MySchool.result[1].selected = true
+                        end
+
                         return MySchool.result
                     end
                 ]]>

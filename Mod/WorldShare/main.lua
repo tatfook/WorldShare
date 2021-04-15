@@ -45,6 +45,9 @@ NPL.load('(gl)script/ide/System/Core/ToolBase.lua')
 -- include ide system os
 NPL.load('(gl)script/ide/System/os/os.lua')
 
+-- include ide math
+NPL.load("(gl)script/ide/math/StringUtil.lua")
+
 -- include aries creator
 NPL.load('(gl)script/apps/Aries/Creator/WorldCommon.lua')
 

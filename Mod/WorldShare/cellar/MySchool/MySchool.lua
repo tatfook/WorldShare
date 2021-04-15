@@ -9,6 +9,9 @@ local MySchool = NPL.load("(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua")
 ------------------------------------------------------------
 ]]
 
+-- libs
+local StringUtil = commonlib.gettable("mathlib.StringUtil")
+
 -- service
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 local KeepworkServiceSchoolAndOrg = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/SchoolAndOrg.lua")
@@ -474,6 +477,9 @@ function MySchool:GetSearchSchoolResultByName(name, callback)
         return false
     end
 
+    -- trim white space
+    name = StringUtil.trim(name)
+
     if type(tonumber(name)) == 'number' then
         KeepworkServiceSchoolAndOrg:SearchSchoolBySchoolId(tonumber(name), function(data)
             self:SetResult(data)
@@ -490,7 +496,7 @@ function MySchool:GetSearchSchoolResultByName(name, callback)
 
         return
     end
-
+    
     KeepworkServiceSchoolAndOrg:SearchSchoolByName(name, self.curId, self.kind, function(data)
         self:SetResult(data)
 
