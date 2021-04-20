@@ -53,6 +53,7 @@ local MainLoginFilter = NPL.load('(gl)Mod/WorldShare/filters/cellar/MainLogin/Ma
 
 local KeepworkServiceSessionFilter = NPL.load('(gl)Mod/WorldShare/filters/service/KeepworkService/KeepworkServiceSessionFilter.lua')
 local LocalServiceWorldFilter = NPL.load('(gl)Mod/WorldShare/filters/service/LocalService/LocalServiceWorldFilter.lua')
+local LocalServiceFilter = NPL.load('(gl)Mod/WorldShare/filters/service/LocalService/LocalServiceFilter.lua')
 
 local OnWorldInitialRegionsLoadedFilter = NPL.load('(gl)Mod/WorldShare/filters/libs/OnWorldInitialRegionsLoadedFilter.lua')
 local WorldInfoFilter = NPL.load('(gl)Mod/WorldShare/filters/libs/WorldInfoFilter.lua')
@@ -99,6 +100,9 @@ function Filters:Init()
     -- init common load world filter
     CommonLoadWorldFilter:Init()
 
+    -- init local service filter
+    LocalServiceFilter:Init()
+
     GameLogic.GetFilters():add_filter(
         'ShowClientUpdaterNotice',
         function()
@@ -144,8 +148,20 @@ function Filters:Init()
     -- replace share world page
     GameLogic.GetFilters():add_filter(
         'SaveWorldPage.ShowSharePage',
-        function(bEnable, callback)
-            ShareWorld:Init(bEnable, callback)
+        function(callback)
+            NPL.load("(gl)script/apps/Aries/Creator/WorldCommon.lua")
+            NPL.load("(gl)script/apps/Aries/Creator/Game/World/generators/ParaWorldMiniChunkGenerator.lua")
+
+            local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
+            local generatorName = WorldCommon.GetWorldTag("world_generator")
+            local ParaWorldMiniChunkGenerator = commonlib.gettable("MyCompany.Aries.Game.World.Generators.ParaWorldMiniChunkGenerator")
+
+            if generatorName == "paraworldMini" then
+                ParaWorldMiniChunkGenerator:OnSaveWorld()
+            else
+                ShareWorld:Init(callback)
+            end
+
             return false
         end
     )
@@ -331,23 +347,6 @@ function Filters:Init()
             if callback and type(callback) == 'function' then
                 callback()
             end
-
-            -- local currentEnterWorld = Mod.WorldShare.Store:Get("world/currentEnterWorld")
-
-            -- if (currentEnterWorld and currentEnterWorld.project and currentEnterWorld.project.memberCount or 0) > 1 then
-            --     Mod.WorldShare.MsgBox:Show(L"请稍后...")
-            --     local KeepworkServiceWorld = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/World.lua")
-
-            --     KeepworkServiceWorld:UnlockWorld(function()
-            --         if callback and type(callback) == 'function' then
-            --             callback()
-            --         end
-            --     end)
-            -- else
-            --     if callback and type(callback) == 'function' then
-            --         callback()
-            --     end
-            -- end
         end
     )
 

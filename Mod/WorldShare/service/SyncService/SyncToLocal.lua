@@ -8,16 +8,19 @@ use the lib:
 local SyncToLocal = NPL.load("(gl)Mod/WorldShare/service/SyncService/SyncToLocal.lua")
 ------------------------------------------------------------
 ]]
+
+-- libs
 local Encoding = commonlib.gettable("commonlib.Encoding")
 local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
 
+-- service
 local KeepworkService = NPL.load("../KeepworkService.lua")
 local KeepworkServiceProject = NPL.load('../KeepworkService/Project.lua')
-local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
-local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
+local LocalServiceWorld = NPL.load('(gl)Mod/WorldShare/service/LocalService/LocalServiceWorld.lua')
 local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
-local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
+
+-- bottles
 local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
 
 local SyncToLocal = NPL.export()
@@ -398,12 +401,12 @@ function SyncToLocal:DownloadZIP()
         GameLogic.RunCommand(format("/menu %s", "file.worldrevision"))
     end
 
-    GitService:DownloadZIP(
+    LocalServiceWorld:DownLoadZipWorld(
         self.currentWorld.foldername,
         self.currentWorld.user and self.currentWorld.user.username or nil,
         self.currentWorld.lastCommitId,
-        function(bSuccess, downloadPath)
-            LocalService:MoveZipToFolder(self.currentWorld.worldpath, downloadPath)
+        self.currentWorld.worldpath,
+        function()
             KeepworkService:SetCurrentCommitId()
 
             -- update worldinfo because world from internet

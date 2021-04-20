@@ -32,7 +32,7 @@ local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkServ
 
 local ShareWorld = NPL.export()
 
-function ShareWorld:Init(bEnabled, callback)
+function ShareWorld:Init(callback)
 	ShareWorld.callback = callback
     local currentEnterWorld = Mod.WorldShare.Store:Get("world/currentEnterWorld")
 

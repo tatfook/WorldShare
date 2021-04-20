@@ -187,6 +187,10 @@ function WorldExitDialog.OnDialogResult(res)
 
                 Desktop.is_exiting = false
 
+                if res == _guihelper.DialogResult.Yes then
+                    GameLogic.QuickSave()
+                end
+
                 if KeepworkServiceSession:GetUserWhere() == 'HOME' then
                     GameLogic.RunCommand(format('/loadworld -s -force %s', Mod.WorldShare.Utils:GetConfig('homeWorldId')))
                 elseif KeepworkServiceSession:GetUserWhere() == 'SCHOOL' then

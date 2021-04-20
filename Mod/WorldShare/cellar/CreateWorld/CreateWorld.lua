@@ -31,14 +31,9 @@ function CreateWorld:CreateNewWorld(foldername)
 end
 
 function CreateWorld.OnClickCreateWorld()
-    -- if not CreateWorld:CheckSpecialCharacter(CreateNewWorld.page:GetValue('new_world_name') or '') then
-    --      -- that return true to OnClickCreateWorld filter if have special charactor
-    --     return true
-    -- end
-
     Mod.WorldShare.Store:Remove("world/currentWorld")
 
-    local currentWorldList = Mod.WorldShare.Store:Get('world/compareWorldList')
+    local currentWorldList = Mod.WorldShare.Store:Get('world/compareWorldList') or {}
 
     local beExisted = false
     local foldername = CreateNewWorld.page:GetValue('new_world_name')

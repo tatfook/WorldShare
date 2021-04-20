@@ -89,6 +89,7 @@ NPL.load("(gl)script/apps/Aries/Creator/Game/Entity/EntityManager.lua");
 -- include worldshare service
 NPL.load('(gl)Mod/WorldShare/service/SocketService.lua')
 NPL.load('(gl)Mod/WorldShare/service/Cef3Manager.lua')
+NPL.load('(gl)Mod/WorldShare/service/FileDownloader/FileDownloader.lua')
 
 
 -- get table lib

@@ -16,6 +16,7 @@ local CommonLoadWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/Com
 local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
 local GitService = NPL.load('(gl)Mod/WorldShare/service/GitService.lua')
 local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
+local LocalServiceWorld = NPL.load('(gl)Mod/WorldShare/service/LocalService/LocalServiceWorld.lua')
 
 -- libs
 local CommandManager = commonlib.gettable('MyCompany.Aries.Game.CommandManager')
@@ -300,13 +301,12 @@ function LoadWorldCommand:Fork(cmdText, options)
             return
         end
 
-        GitService:DownloadZIP(
+        LocalServiceWorld:DownLoadZipWorld(
             data.name,
             data.username,
             data.world.commitId,
-            function(bSuccess, downloadPath)
-                LocalService:MoveZipToFolder(worldPath, downloadPath)
-
+            worldPath .. '/',
+            function()
                 local tag = LocalService:GetTag(worldPath)
                 
                 if not tag and type(tag) ~= 'table' then

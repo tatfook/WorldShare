@@ -5,12 +5,30 @@ Date:  2016.12.11
 Desc: 
 use the lib:
 ------------------------------------------------------------
-local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
+local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
 ------------------------------------------------------------
 ]]
-NPL.load("./FileDownloader/FileDownloader.lua")
-local Files = commonlib.gettable("commonlib.Files")
 
+--------- thread part ---------
+NPL.load("(gl)script/ide/commonlib.lua")
+NPL.load("(gl)script/ide/System/Concurrent/rpc.lua")
+
+local rpc = commonlib.gettable('System.Concurrent.Async.rpc')
+
+rpc:new():init(
+    'Mod.WorldShare.service.LocalServiceThread',
+    function(self, msg)
+        local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
+        LocalService:MoveZipToFolderThread(msg.rootFolder, msg.zipPath)
+
+        return true 
+    end,
+    'Mod/WorldShare/service/LocalService.lua'
+)
+--------- thread part ---------
+
+-- libs
+local Files = commonlib.gettable("commonlib.Files")
 local SystemEncoding = commonlib.gettable("System.Encoding")
 local CommonlibEncoding = commonlib.gettable("commonlib.Encoding")
 local FileDownloader = commonlib.gettable("Mod.WorldShare.service.FileDownloader.FileDownloader")
@@ -23,32 +41,36 @@ LocalService.filter = "*"
 LocalService.nMaxFileLevels = 0
 LocalService.nMaxFilesNum = 10000
 LocalService.output = {}
+LocalService.isGetContent = true
+LocalService.isGetFolder = false
 
-function LocalService:Find(path)
-    return Files.Find({}, path, self.nMaxFileLevels, self.nMaxFilesNum, self.filter)
-end
-
-function LocalService:LoadFiles(worldDir)
-    if not worldDir or #worldDir == 0 then
+function LocalService:LoadFiles(path, NotGetContent, isGetFolder)
+    if not path or type(path) ~= 'string' or #path == 0 then
         return {}
     end
 
-    if string.sub(worldDir, #worldDir, #worldDir) == "/" then
-        worldDir = string.sub(worldDir, 0, #worldDir - 1)
+    if string.sub(path, #path, #path) == "/" then
+        path = string.sub(path, 0, #path - 1)
     end
 
     self.output = {}
-    self.worldDir = worldDir
+    self.isGetContent = not NotGetContent
+    self.isGetFolder = isGetFolder
 
-    local result = self:Find(self.worldDir)
+    local result = self:Find(path)
 
-    self:FilesFind(result, self.worldDir)
+    self:FilesFind(result, path)
 
+    -- cover default string to utf-8 string
     for _, item in ipairs(self.output) do
         item.filename = CommonlibEncoding.DefaultToUtf8(item.filename)
     end
 
     return self.output
+end
+
+function LocalService:Find(path)
+    return Files.Find({}, path, self.nMaxFileLevels, self.nMaxFilesNum, self.filter)
 end
 
 function LocalService:FilesFind(result, path, subPath)
@@ -62,6 +84,7 @@ function LocalService:FilesFind(result, path, subPath)
 
         for key, item in ipairs(curResult) do
             if (item.filesize ~= 0) then
+                -- file
                 item.file_path = curPath .. "/" .. item.filename
 
                 if (curSubPath) then
@@ -73,28 +96,33 @@ function LocalService:FilesFind(result, path, subPath)
                 if (sExt == ".bak") then
                     item = false
                 else
-                    local bConvert = false
-
-                    if (convertLineEnding[sExt] and zipFile[sExt]) then
-                        bConvert = not self:IsZip(item.file_path)
-                    elseif (convertLineEnding[sExt]) then
-                        bConvert = true
+                    if self.isGetContent then
+                        local bConvert = false
+    
+                        if (convertLineEnding[sExt] and zipFile[sExt]) then
+                            bConvert = not self:IsZip(item.file_path)
+                        elseif (convertLineEnding[sExt]) then
+                            bConvert = true
+                        end
+    
+                        if (bConvert) then
+                            item.file_content_t = self:GetFileContent(item.file_path):gsub("\r\n", "\n") or ""
+                            item.filesize = #item.file_content_t or 0
+                            item.sha1 = SystemEncoding.sha1("blob " .. item.filesize .. "\0" .. item.file_content_t, "hex")
+                        else
+                            item.file_content_t = self:GetFileContent(item.file_path) or ""
+                            item.sha1 = SystemEncoding.sha1("blob " .. item.filesize .. "\0" .. item.file_content_t, "hex")
+                        end
                     end
-
-                    if (bConvert) then
-                        item.file_content_t = self:GetFileContent(item.file_path):gsub("\r\n", "\n") or ""
-                        item.filesize = #item.file_content_t or 0
-                        item.sha1 = SystemEncoding.sha1("blob " .. item.filesize .. "\0" .. item.file_content_t, "hex")
-                    else
-                        item.file_content_t = self:GetFileContent(item.file_path) or ""
-                        item.sha1 = SystemEncoding.sha1("blob " .. item.filesize .. "\0" .. item.file_content_t, "hex")
-                    end
-
-                    item.needChange = true
 
                     self.output[#self.output + 1] = item
                 end
             else
+                -- folder
+                if self.isGetFolder then
+                    self.output[#self.output + 1] = item
+                end
+
                 local newPath = curPath .. "/" .. item.filename
                 local newResult = self:Find(newPath)
                 local newSubPath = nil
@@ -190,92 +218,106 @@ function LocalService:IsZip(path)
     end
 end
 
-function LocalService:MoveZipToFolder(worldpath, zipPath)
-    if not worldpath or not ParaAsset.OpenArchive(zipPath, true) then
+function LocalService:MoveZipToFolder(rootFolder, zipPath, callback)
+    Mod.WorldShare.service.LocalServiceThread(
+        "(worker_move_zip_to_folder)",
+        {
+            rootFolder = rootFolder,
+            zipPath = zipPath,
+        },
+        function(err, msg)
+            if callback and type(callback) == 'function' then
+                callback()
+            end
+        end
+    )
+end
+
+function LocalService:MoveZipToFolderThread(rootFolder, zipPath)
+    if not rootFolder or not ParaAsset.OpenArchive(zipPath, true) then
         return false
     end
 
-    local parentDir = zipPath:gsub("[^/\\]+$", "")
+    ParaIO.CreateDirectory(rootFolder)
 
+    local zipParentDir = zipPath:gsub("[^/\\]+$", "")
     local fileList = {}
-    local rootFolder
+
     -- ":.", any regular expression after : is supported. `.` match to all strings.
-    commonlib.Files.Find(fileList, "", 0, 10000, ":.", zipPath)
+    commonlib.Files.Find(fileList, '', 0, 10000, ":.", zipPath)
 
     for key, item in ipairs(fileList) do
-        if string.match(item.filename, ".+/$") then
-            rootFolder = item.filename
-            break
-        end
-    end
-
-    for _, item in ipairs(fileList) do
         if item.filesize > 0 then
-            local file = ParaIO.open(format("%s%s", parentDir, item.filename), "r")
+            local segmentationArray = {}
 
-            if file:IsValid() then
-                local folderArray = {}
-                local content = file:GetText(0, -1)
-                local filename = item.filename
+            for segmentation in string.gmatch(item.filename, "[^/]+") do
+                segmentationArray[#segmentationArray + 1] = segmentation
+            end
 
-                -- tricky: we do not know which encoding the filename in the zip archive is,
-				-- so we will assume it is utf8, we will convert it to default and then back to utf8.
-				-- if the file does not change, it might be utf8. 
-				local trueFilename = ''
-                local defaultEncodingFilename = CommonlibEncoding.Utf8ToDefault(filename)
+            if #segmentationArray > 1 then
+                -- create folder and copy file
+                local folderPath = rootFolder
 
-				if defaultEncodingFilename == filename then
-					trueFilename = filename
-				else
-					if CommonlibEncoding.DefaultToUtf8(defaultEncodingFilename) == filename then
-						trueFilename = defaultEncodingFilename
-					else
-						trueFilename = filename
-					end
-                end
+                for Skey, SItem in ipairs(segmentationArray) do
+                    if Skey == #segmentationArray then
+                        -- file
+                        local filename = SItem
 
-                if string.match(trueFilename, "revision.xml") then
-                    Mod.WorldShare.Store:Set('remoteRevision', content)
-                end
+                        -- tricky: we do not know which encoding the filename in the zip archive is,
+                        -- so we will assume it is utf8, we will convert it to default and then back to utf8.
+                        -- if the file does not change, it might be utf8. 
+                        local trueFilename = ''
+                        local defaultEncodingFilename = CommonlibEncoding.Utf8ToDefault(filename)
 
-                local buildFolderStr = ""
+                        if defaultEncodingFilename == filename then
+                            trueFilename = filename
+                        else
+                            if CommonlibEncoding.DefaultToUtf8(defaultEncodingFilename) == filename then
+                                trueFilename = defaultEncodingFilename
+                            else
+                                trueFilename = filename
+                            end
+                        end
 
-                for segmentation in string.gmatch(trueFilename, "[^/]+") do
-                    if not string.match(rootFolder, segmentation) then
-                        buildFolderStr = buildFolderStr .. segmentation .. "/"
-                        folderArray[#folderArray + 1] = buildFolderStr
+                        filename = trueFilename
+
+                        local readFile = ParaIO.open(zipParentDir .. item.filename, "r")
+
+                        if readFile:IsValid() then
+                            local content = readFile:GetText(0, -1)
+                            local filePath = folderPath .. filename
+                            local writeFile = ParaIO.open(filePath, "w")
+
+                            if writeFile:IsValid() then
+                                writeFile:write(content, #content)
+                                writeFile:close()
+                            end
+
+                            readFile:close()
+                        end
+                    else
+                        -- folder
+                        folderPath = folderPath .. SItem .. '/'
+
+                        ParaIO.CreateDirectory(folderPath)
                     end
                 end
+            else
+                -- just copy file
+                local readFile = ParaIO.open(zipParentDir .. item.filename, "r")
 
-                -- remove file path
-                folderArray[#folderArray] = nil
+                if readFile:IsValid() then
+                    local content = readFile:GetText(0, -1)
+                    local filePath = rootFolder .. segmentationArray[1]
+                    local writeFile = ParaIO.open(filePath, "w")
 
-                if #folderArray >= 1 then
-                    -- create folder
-                    for _, folderItem in pairs(folderArray) do
-                        ParaIO.CreateDirectory(format('%s/%s/', worldpath, folderItem))
+                    if writeFile:IsValid() then
+                        writeFile:write(content, #content)
+                        writeFile:close()
                     end
+
+                    readFile:close()
                 end
-
-                -- create file
-                local writeFilename
-
-                if rootFolder then
-                    writeFilename = trueFilename:gsub(rootFolder, "")
-                else
-                    writeFilename = trueFilename
-                end
-
-                local writeFile = ParaIO.open(format("%s/%s", worldpath, writeFilename), "w")
-
-                if writeFile:IsValid() then
-                    writeFile:write(content, #content)
-                    writeFile:close()
-                else
-                    LOG.std(nil, "info", "LocalService", "failed to write to %s", format("%s/%s", worldpath, trueFilename));
-                end
-
-                file:close()
             end
         end
     end

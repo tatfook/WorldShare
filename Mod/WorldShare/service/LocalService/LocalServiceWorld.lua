@@ -13,6 +13,7 @@ local LocalServiceWorld = NPL.load("(gl)Mod/WorldShare/service/LocalService/Loca
 local LocalService = NPL.load('../LocalService.lua')
 local KeepworkService = NPL.load('../KeepworkService.lua')
 local KeepworkServiceSession = NPL.load('../KeepworkService/Session.lua')
+local GitService = NPL.load('(gl)Mod/WorldShare/service/GitService.lua')
 
 -- libs
 local LocalLoadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalLoadWorld")
@@ -381,4 +382,55 @@ function LocalServiceWorld:GenerateWorldInstance(params)
         shared = params.shared or false,
         name = params.name or '',
     }
+end
+
+function LocalServiceWorld:DownLoadZipWorld(foldername, username, lastCommitId, worldpath, callback)
+    GitService:DownloadZIP(
+        foldername,
+        username or nil,
+        lastCommitId,
+        function(bSuccess, downloadPath)
+            if not bSuccess then
+                return
+            end
+
+            LocalService:MoveZipToFolder('temp/world_temp_download/', downloadPath, function()
+                local fileList = LocalService:LoadFiles('temp/world_temp_download/', true, true)
+    
+                if not fileList or type(fileList) ~= 'table' or #fileList == 0 then
+                    return
+                end
+    
+                local zipRootPath = ''
+    
+                if fileList[1] and fileList[1].filesize == 0 then
+                    zipRootPath = fileList[1].filename
+                end
+    
+                ParaIO.CreateDirectory(worldpath)
+    
+                for key, item in ipairs(fileList) do
+                    if key ~= 1 then
+                        local relativePath = commonlib.Encoding.Utf8ToDefault(item.filename:gsub(zipRootPath .. '/', ''))
+    
+                        if item.filesize == 0 then
+                            local folderPath = worldpath .. relativePath .. '/'
+    
+                            ParaIO.CreateDirectory(folderPath)
+                        else
+                            local filePath = worldpath .. relativePath
+    
+                            ParaIO.MoveFile(item.file_path, filePath)
+                        end
+                    end
+                end
+    
+                ParaIO.DeleteFile('temp/world_temp_download/')
+    
+                if callback and type(callback) then
+                    callback()
+                end
+            end)
+        end
+    )
 end
