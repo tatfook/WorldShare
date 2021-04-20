@@ -50,6 +50,7 @@ local VipNoticeFilter = NPL.load('(gl)Mod/WorldShare/filters/cellar/VipNotice/Vi
 local ClientUpdateDialogFilter = NPL.load('(gl)Mod/WorldShare/filters/cellar/ClientUpdateDialog/ClientUpdateDialogFilter.lua')
 local MsgBoxFilter = NPL.load('(gl)Mod/WorldShare/filters/cellar/Common/MsgBox/MsgBoxFilter.lua')
 local MainLoginFilter = NPL.load('(gl)Mod/WorldShare/filters/cellar/MainLogin/MainLoginFilter.lua')
+local ShareWorldFilter = NPL.load('(gl)Mod/WorldShare/filters/cellar/ShareWorld/ShareWorldFilter.lua')
 
 local KeepworkServiceSessionFilter = NPL.load('(gl)Mod/WorldShare/filters/service/KeepworkService/KeepworkServiceSessionFilter.lua')
 local LocalServiceWorldFilter = NPL.load('(gl)Mod/WorldShare/filters/service/LocalService/LocalServiceWorldFilter.lua')
@@ -102,6 +103,9 @@ function Filters:Init()
 
     -- init local service filter
     LocalServiceFilter:Init()
+
+    -- init share world filter
+    ShareWorldFilter:Init()
 
     GameLogic.GetFilters():add_filter(
         'ShowClientUpdaterNotice',

@@ -16,12 +16,23 @@ NPL.load("(gl)script/ide/System/Concurrent/rpc.lua")
 local rpc = commonlib.gettable('System.Concurrent.Async.rpc')
 
 rpc:new():init(
-    'Mod.WorldShare.service.LocalServiceThread',
+    'Mod.WorldShare.service.LocalService.MoveZipToFolderThread',
     function(self, msg)
         local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
         LocalService:MoveZipToFolderThread(msg.rootFolder, msg.zipPath)
 
         return true 
+    end,
+    'Mod/WorldShare/service/LocalService.lua'
+)
+
+rpc:new():init(
+    'Mod.WorldShare.service.LocalService.MoveFolderToZipThread',
+    function(self, msg)
+        local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
+        LocalService:MoveFolderToZipThread(msg.rootFolder, msg.zipPath)
+
+        return true
     end,
     'Mod/WorldShare/service/LocalService.lua'
 )
@@ -61,7 +72,7 @@ function LocalService:LoadFiles(path, NotGetContent, isGetFolder)
 
     self:FilesFind(result, path)
 
-    -- cover default string to utf-8 string
+    -- convert default string to utf-8 string
     for _, item in ipairs(self.output) do
         item.filename = CommonlibEncoding.DefaultToUtf8(item.filename)
     end
@@ -218,9 +229,40 @@ function LocalService:IsZip(path)
     end
 end
 
+function LocalService:MoveFolderToZip(rootFolder, zipPath, callback)
+    Mod.WorldShare.service.LocalService.MoveFolderToZipThread(
+        '(worker_move_folder_to_zip)',
+        {
+            rootFolder = rootFolder,
+            zipPath = zipPath
+        },
+        function(err, msg)
+            if callback and type(callback) == 'function' then
+                callback()
+            end
+        end
+    )
+end
+
+function LocalService:MoveFolderToZipThread(rootFolder, zipPath)
+    local fileList = LocalService:LoadFiles(rootFolder, true, false)
+    
+    if not fileList or type(fileList) ~= 'table' or #fileList == 0 then
+        return
+    end
+
+    local writer = ParaIO.CreateZip(zipPath, '')
+
+    for key, item in ipairs(fileList) do
+        writer:ZipAdd(CommonlibEncoding.Utf8ToDefault(item.filename), item.file_path)
+    end
+
+    writer:close();
+end
+
 function LocalService:MoveZipToFolder(rootFolder, zipPath, callback)
-    Mod.WorldShare.service.LocalServiceThread(
-        "(worker_move_zip_to_folder)",
+    Mod.WorldShare.service.LocalService.MoveZipToFolderThread(
+        '(worker_move_zip_to_folder)',
         {
             rootFolder = rootFolder,
             zipPath = zipPath,
@@ -296,8 +338,28 @@ function LocalService:MoveZipToFolderThread(rootFolder, zipPath)
                             readFile:close()
                         end
                     else
+                        local foldername = SItem
+
+                        -- tricky: we do not know which encoding the filename in the zip archive is,
+                        -- so we will assume it is utf8, we will convert it to default and then back to utf8.
+                        -- if the file does not change, it might be utf8. 
+                        local trueFolderName = ''
+                        local defaultEncodingFolderName = CommonlibEncoding.Utf8ToDefault(foldername)
+
+                        if defaultEncodingFolderName == foldername then
+                            trueFolderName = foldername
+                        else
+                            if CommonlibEncoding.DefaultToUtf8(defaultEncodingFolderName) == foldername then
+                                trueFolderName = defaultEncodingFolderName
+                            else
+                                trueFolderName = foldername
+                            end
+                        end
+
+                        foldername = trueFolderName
+
                         -- folder
-                        folderPath = folderPath .. SItem .. '/'
+                        folderPath = folderPath .. foldername .. '/'
 
                         ParaIO.CreateDirectory(folderPath)
                     end

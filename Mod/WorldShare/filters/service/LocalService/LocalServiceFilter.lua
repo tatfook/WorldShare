@@ -23,4 +23,12 @@ function LocalServiceFilter:Init()
             LocalService:MoveZipToFolder(...)
         end
     )
+
+    -- filter move folder to zip
+    GameLogic.GetFilters():add_filter(
+        'service.local_service.move_folder_to_zip',
+        function(...)
+            LocalService:MoveFolderToZip(...)
+        end
+    )
 end
