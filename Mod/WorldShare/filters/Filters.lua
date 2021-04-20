@@ -553,7 +553,7 @@ function Filters:Init()
 
     -- filter escape key
     GameLogic.GetFilters():add_filter(
-        "HandleEscapeKey",
+        "EscFramePage.ShowPage",
         function()
             local ParaWorldLoginAdapter = commonlib.gettable("MyCompany.Aries.Game.Tasks.ParaWorld.ParaWorldLoginAdapter")
 
