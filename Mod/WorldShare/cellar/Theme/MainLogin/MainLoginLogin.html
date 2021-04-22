@@ -106,7 +106,7 @@
 
                         is_login = true
 
-                        if not MainLogin:LoginActionNew(function(b_succeed)
+                        if not MainLogin:LoginAction(function(b_succeed)
                             is_login = false
 
                             if not b_succeed then
@@ -115,13 +115,15 @@
 
                             close()
 
-                            if not Mod.WorldShare.Store:Get('user/hasJoinedSchool') then
-                                MySchool:ShowJoinSchoolAfterRegister(function()
+                            MainLogin:ShowWhere(function(where)
+                                if not Mod.WorldShare.Store:Get('user/hasJoinedSchool') then
+                                    MySchool:ShowJoinSchoolAfterRegister(function()
+                                        MainLogin:EnterUserConsole()
+                                    end)
+                                else
                                     MainLogin:EnterUserConsole()
-                                end)
-                            else
-                                MainLogin:EnterUserConsole()
-                            end
+                                end
+                            end)
                         end) then
                             is_login = false
                         end
