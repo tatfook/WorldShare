@@ -77,22 +77,23 @@
 
                     -- @param name: 'local', 'internet'
                     function use_offline()
+                        close()
                         KeepworkServiceSession:Logout()
                         MainLogin:EnterUserConsole(true)
                         EventTrackingService:Send(1, 'click.main_login.offline_enter', { machineId = ParaEngine.GetAttributeObject():GetField('MachineID','') }, true)
                     end
 
                     function close()
-                        local MainLoginLoginPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Login')
+                        local MainLoginLoginNewPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.LoginNew')
 
-                        if MainLoginLoginPage then
-                            MainLoginLoginPage:CloseWindow()
+                        if MainLoginLoginNewPage then
+                            MainLoginLoginNewPage:CloseWindow()
                         end
                     end
 
                     function back()
                         close()
-                        MainLogin:ShowSelect()
+                        MainLogin:SelectMode()
                     end
 
                     function forget_password()
@@ -106,7 +107,7 @@
 
                         is_login = true
 
-                        if not MainLogin:LoginActionNew(function(b_succeed)
+                        if not MainLogin:LoginAction(function(b_succeed)
                             is_login = false
 
                             if not b_succeed then
@@ -115,13 +116,15 @@
 
                             close()
 
-                            if not Mod.WorldShare.Store:Get('user/hasJoinedSchool') then
-                                MySchool:ShowJoinSchoolAfterRegister(function()
+                            MainLogin:ShowWhere(function(where)
+                                if not Mod.WorldShare.Store:Get('user/hasJoinedSchool') then
+                                    MySchool:ShowJoinSchoolAfterRegister(function()
+                                        MainLogin:EnterUserConsole()
+                                    end)
+                                else
                                     MainLogin:EnterUserConsole()
-                                end)
-                            else
-                                MainLogin:EnterUserConsole()
-                            end
+                                end
+                            end)
                         end) then
                             is_login = false
                         end

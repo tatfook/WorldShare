@@ -16,6 +16,12 @@
                     local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
                     local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua")
 
+                    -- service
+                    local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+
+                    -- database
+                    local SessionsData = NPL.load('(gl)Mod/WorldShare/database/SessionsData.lua')
+
                     local page = document:GetPageCtrl()
                     Mod.WorldShare.Store:Remove("world/searchText")
 
@@ -215,10 +221,18 @@
                     end
 
                     function close()
-                        Create:Close()
+                        local function handle()
+                            Create:Close()
 
-                        if not Mod.WorldShare.Store:Get("world/isEnterWorld") then
-                            MainLogin:Init()
+                            if not Mod.WorldShare.Store:Get("world/isEnterWorld") then
+                                MainLogin:Init()
+                            end
+                        end
+
+                        if KeepworkServiceSession:IsSignedIn() then
+                            KeepworkServiceSession:Logout(nil, handle)
+                        else
+                            handle()
                         end
                     end
 
@@ -646,6 +660,18 @@
                             page:FindControl('search_button_offline'):SetDefault(true)
                         end
                     end
+
+                    function open_AI_course()
+                        NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/Quest/QuestLocalAICourse.lua").Show()
+                    end
+
+                    function is_show_local_ai_course()
+                        if KeepworkServiceSession:GetUserWhere() == 'LOCAL' then
+                            return true
+                        else
+                            return false
+                        end
+                    end
                 ]]>
             </script>
             <style type="text/mcss" src="Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss">
@@ -835,7 +861,19 @@
             </style>
             <kp:window width="920" height="530" icon="Texture/Aries/Creator/keepwork/Window/title/biaoti_chuangzao_32bits.png" onclose="close()">
                 <div style="<%= header() %>" width="100%">
-                    <div class="list_search_bar theme1_white1_textfield" style="<%= 'float: left;margin-left: 520px;' %>">
+                    <div style="float:left;margin-left: 420px;width: 90px;">
+                        <pe:if condition='<%= is_show_local_ai_course() %>'>
+                            <input type='button'
+                                   name='open_AI_course'
+                                   class='theme1_orange_button'
+                                   style='width: 90px;
+                                          height: 34px;
+                                          margin-top: 1px;'
+                                   value='<%= L"本地AI课" %>'
+                                   onclick='open_AI_course()'/>
+                        </pe:if>
+                    </div>
+                    <div class="list_search_bar theme1_white1_textfield" style="<%= 'float: left;margin-left: 10px;' %>">
                         <input type="text"
                                name="content"
                                onfocusin='set_default'

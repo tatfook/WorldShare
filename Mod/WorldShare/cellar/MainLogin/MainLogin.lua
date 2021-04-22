@@ -43,6 +43,16 @@ function MainLogin:Init()
 end
 
 function MainLogin:Show()
+    local localVersion = ParaEngine.GetAppCommandLineByParam("localVersion", nil)
+
+    if localVersion == 'SCHOOL' then
+        self:Show2()
+    else
+        self:Show1()
+    end
+end
+
+function MainLogin:Show1()
     Mod.WorldShare.Utils.ShowWindow({
         url = 'Mod/WorldShare/cellar/Theme/MainLogin/MainLogin.html', 
         name = 'MainLogin', 
@@ -68,6 +78,34 @@ function MainLogin:Show()
 
     self:ShowExtra()
     self:ShowSelect()
+end
+
+function MainLogin:Show2()
+    Mod.WorldShare.Utils.ShowWindow({
+        url = 'Mod/WorldShare/cellar/Theme/MainLogin/MainLogin.html', 
+        name = 'MainLogin', 
+        isShowTitleBar = false,
+        DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
+        style = CommonCtrl.WindowFrame.ContainerStyle,
+        zorder = -1,
+        allowDrag = false,
+        directPosition = true,
+        align = '_fi',
+        x = 0,
+        y = 0,
+        width = 0,
+        height = 0,
+        cancelShowAnimation = true,
+    })
+
+    local MainLoginPage = Mod.WorldShare.Store:Get('page/MainLogin')
+
+    if not MainLoginPage then
+        return false
+    end
+
+    self:ShowExtra()
+    self:SelectMode()
 end
 
 function MainLogin:ShowSelect()
@@ -109,6 +147,78 @@ function MainLogin:ShowLogin()
         MainLoginLoginPage:SetUIValue('account', PWDInfo.account or '')
         self.account = PWDInfo.account
     end
+end
+
+function MainLogin:ShowLoginNew()
+    Mod.WorldShare.Utils.ShowWindow(
+        0,
+        0,
+        'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginLoginNew.html',
+        'Mod.WorldShare.cellar.MainLogin.LoginNew',
+        0,
+        0,
+        '_fi',
+        false,
+        -1
+    )
+
+    local MainLoginLoginNewPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.LoginNew')
+
+    if not MainLoginLoginNewPage then
+        return
+    end
+
+    local PWDInfo = KeepworkServiceSession:LoadSigninInfo()
+
+    if PWDInfo then
+        MainLoginLoginNewPage:SetUIValue('account', PWDInfo.account or '')
+        self.account = PWDInfo.account
+    end
+end
+
+function MainLogin:ShowLoginAtSchool(mode)
+    local params = Mod.WorldShare.Utils.ShowWindow(
+        0,
+        0,
+        'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginLoginAtSchool.html',
+        'Mod.WorldShare.cellar.MainLogin.LoginAtSchool',
+        0,
+        0,
+        '_fi',
+        false,
+        -1
+    )
+
+    if params then
+        params._page.mode = mode
+    end
+
+    local MainLoginLoginAtSchoolPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.LoginAtSchool')
+
+    if not MainLoginLoginAtSchoolPage then
+        return
+    end
+
+    local PWDInfo = KeepworkServiceSession:LoadSigninInfo()
+
+    if PWDInfo then
+        MainLoginLoginAtSchoolPage:SetUIValue('account', PWDInfo.account or '')
+        self.account = PWDInfo.account
+    end
+end
+
+function MainLogin:ShowRegisterNew(mode)
+    Mod.WorldShare.Utils.ShowWindow(
+        0,
+        0,
+        'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginRegisterNew.html',
+        'Mod.WorldShare.cellar.MainLogin.RegisterNew',
+        0,
+        0,
+        '_fi',
+        false,
+        -1
+    )
 end
 
 function MainLogin:ShowRegister()
@@ -155,6 +265,30 @@ function MainLogin:ShowWhere(callback)
     params._page.callback = function(where)
         if callback and type(callback) == 'function' then
             callback(where)
+        end
+    end
+end
+
+function MainLogin:SelectMode()
+    local params = Mod.WorldShare.Utils.ShowWindow(
+        0,
+        0,
+        'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginSelectMode.html',
+        'Mod.WorldShare.cellar.MainLogin.SelectMode',
+        0,
+        0,
+        '_fi',
+        false,
+        -1
+    )
+
+    params._page.callback = function(mode)
+        if mode == 'HOME' then
+            self:ShowLoginNew()
+        elseif mode == 'SCHOOL' then
+            self:ShowLoginAtSchool('SCHOOL')
+        elseif mode == 'LOCAL' then
+            self:ShowLoginAtSchool('LOCAL')
         end
     end
 end
@@ -306,6 +440,176 @@ function MainLogin:LoginAction(callback)
                 else
                     MainLoginPage:SetUIValue('account_field_error_msg', format(L'*系统维护中(%d)', err))
                     MainLoginPage:FindControl('account_field_error').visible = true
+                end
+
+                if callback and type(callback) == 'function' then
+                    callback(false)
+                end
+
+                return false
+            end
+
+            response.autoLogin = autoLogin
+            response.rememberMe = rememberMe
+            response.password = password
+
+            KeepworkServiceSession:LoginResponse(response, err, HandleLogined)
+        end
+    )
+end
+
+function MainLogin:LoginActionNew(callback)
+    local MainLoginNewPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.LoginNew')
+
+    if not MainLoginNewPage then
+        return false
+    end
+
+    MainLoginNewPage:FindControl('account_field_error').visible = false
+    MainLoginNewPage:FindControl('password_field_error').visible = false
+
+    local account = MainLoginNewPage:GetValue('account')
+    local password = MainLoginNewPage:GetValue('password')
+
+    local validated = true
+
+    if not Validated:AccountCompatible(account) then
+        MainLoginNewPage:SetUIValue('account_field_error_msg', L'*账号不合法')
+        MainLoginNewPage:FindControl('account_field_error').visible = true
+        validated = false
+    end
+
+    if not Validated:Password(password) then
+        MainLoginNewPage:SetUIValue('password_field_error_msg', L'*密码不合法')
+        MainLoginNewPage:FindControl('password_field_error').visible = true
+        validated = false
+    end
+
+    if not validated then
+        return false
+    end
+
+    Mod.WorldShare.MsgBox:Show(L'正在登录，请稍候...', 24000, L'链接超时', 300, 120)
+
+    local function HandleLogined(bSucceed, message)
+        Mod.WorldShare.MsgBox:Close()
+
+        if callback and type(callback) == 'function' then
+            callback(bSucceed)
+        end
+
+        if not bSucceed then
+            MainLoginNewPage:SetUIValue('account_field_error_msg', format(L'*%s', message))
+            MainLoginNewPage:FindControl('account_field_error').visible = true
+            return
+        end
+
+        local AfterLogined = Mod.WorldShare.Store:Get('user/AfterLogined')
+
+        if type(AfterLogined) == 'function' then
+            AfterLogined(true)
+            Mod.WorldShare.Store:Remove('user/AfterLogined')
+        end
+    end
+
+    KeepworkServiceSession:Login(
+        account,
+        password,
+        function(response, err)
+            if err ~= 200 or not response then
+                Mod.WorldShare.MsgBox:Close()
+
+                if response and response.code and response.message then
+                    MainLoginNewPage:SetUIValue('account_field_error_msg', format(L'*%s(%d)', response.message, response.code))
+                    MainLoginNewPage:FindControl('account_field_error').visible = true
+                else
+                    MainLoginNewPage:SetUIValue('account_field_error_msg', format(L'*系统维护中(%d)', err))
+                    MainLoginNewPage:FindControl('account_field_error').visible = true
+                end
+
+                if callback and type(callback) == 'function' then
+                    callback(false)
+                end
+
+                return false
+            end
+
+            response.autoLogin = autoLogin
+            response.rememberMe = rememberMe
+            response.password = password
+
+            KeepworkServiceSession:LoginResponse(response, err, HandleLogined)
+        end
+    )
+end
+
+function MainLogin:LoginAtSchoolAction(callback)
+    local MainLoginAtSchoolPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.LoginAtSchool')
+
+    if not MainLoginAtSchoolPage then
+        return false
+    end
+
+    MainLoginAtSchoolPage:FindControl('account_field_error').visible = false
+    MainLoginAtSchoolPage:FindControl('password_field_error').visible = false
+
+    local account = MainLoginAtSchoolPage:GetValue('account')
+    local password = MainLoginAtSchoolPage:GetValue('password')
+
+    local validated = true
+
+    if not Validated:AccountCompatible(account) then
+        MainLoginAtSchoolPage:SetUIValue('account_field_error_msg', L'*账号不合法')
+        MainLoginAtSchoolPage:FindControl('account_field_error').visible = true
+        validated = false
+    end
+
+    if not Validated:Password(password) then
+        MainLoginAtSchoolPage:SetUIValue('password_field_error_msg', L'*密码不合法')
+        MainLoginAtSchoolPage:FindControl('password_field_error').visible = true
+        validated = false
+    end
+
+    if not validated then
+        return false
+    end
+
+    Mod.WorldShare.MsgBox:Show(L'正在登录，请稍候...', 24000, L'链接超时', 300, 120)
+
+    local function HandleLogined(bSucceed, message)
+        Mod.WorldShare.MsgBox:Close()
+
+        if callback and type(callback) == 'function' then
+            callback(bSucceed)
+        end
+
+        if not bSucceed then
+            MainLoginAtSchoolPage:SetUIValue('account_field_error_msg', format(L'*%s', message))
+            MainLoginAtSchoolPage:FindControl('account_field_error').visible = true
+            return
+        end
+
+        local AfterLogined = Mod.WorldShare.Store:Get('user/AfterLogined')
+
+        if type(AfterLogined) == 'function' then
+            AfterLogined(true)
+            Mod.WorldShare.Store:Remove('user/AfterLogined')
+        end
+    end
+
+    KeepworkServiceSession:Login(
+        account,
+        password,
+        function(response, err)
+            if err ~= 200 or not response then
+                Mod.WorldShare.MsgBox:Close()
+
+                if response and response.code and response.message then
+                    MainLoginAtSchoolPage:SetUIValue('account_field_error_msg', format(L'*%s(%d)', response.message, response.code))
+                    MainLoginAtSchoolPage:FindControl('account_field_error').visible = true
+                else
+                    MainLoginAtSchoolPage:SetUIValue('account_field_error_msg', format(L'*系统维护中(%d)', err))
+                    MainLoginAtSchoolPage:FindControl('account_field_error').visible = true
                 end
 
                 if callback and type(callback) == 'function' then

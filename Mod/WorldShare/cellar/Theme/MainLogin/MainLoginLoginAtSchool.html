@@ -7,8 +7,8 @@
                     local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
                     local ForgetPassword = NPL.load('(gl)Mod/WorldShare/cellar/ForgetPassword/ForgetPassword.lua')
                     local ThirdPartyLogin = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/ThirdPartyLogin.lua')
-                    local UserConsole = NPL.load('(gl)Mod/WorldShare/cellar/UserConsole/Main.lua')
                     local MySchool = NPL.load('(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua')
+                    local Create = NPL.load('(gl)Mod/WorldShare/cellar/Create/Create.lua')
 
                     -- service
                     local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepWorkService/Session.lua')
@@ -16,6 +16,9 @@
 
                     -- helper
                     local Validated = NPL.load('(gl)Mod/WorldShare/helper/Validated.lua')
+
+                    -- database
+                    local SessionsData = NPL.load('(gl)Mod/WorldShare/database/SessionsData.lua')
 
                     local page = document:GetPageCtrl()
 
@@ -35,68 +38,26 @@
                         end
                     end
 
-                    function login_with_wx()
-                        ThirdPartyLogin:Init('WECHAT', function()
-                            UserConsole.notFirstTimeShown = nil
-
-                            close()
-
-                            MainLogin:ShowWhere(function(where)
-                                -- TODO: record where
-
-                                if not Mod.WorldShare.Store:Get('user/hasJoinedSchool') then
-                                    MySchool:ShowJoinSchoolAfterRegister(function()
-                                        MainLogin:EnterUserConsole()
-                                    end)
-                                else
-                                    MainLogin:EnterUserConsole()
-                                end
-                            end)
-                        end)
-                    end
-
-                    function login_with_qq()
-                        ThirdPartyLogin:Init('QQ', function()
-                            UserConsole.notFirstTimeShown = nil
-
-                            close()
-
-                            MainLogin:ShowWhere(function(where)
-                                -- TODO: record where
-
-                                if not Mod.WorldShare.Store:Get('user/hasJoinedSchool') then
-                                    MySchool:ShowJoinSchoolAfterRegister(function()
-                                        MainLogin:EnterUserConsole()
-                                    end)
-                                else
-                                    MainLogin:EnterUserConsole()
-                                end
-                            end)
-                        end)
-                    end
-
-                    -- @param name: 'local', 'internet'
-                    function use_offline()
-                        KeepworkServiceSession:Logout()
-                        MainLogin:EnterUserConsole(true)
-                        EventTrackingService:Send(1, 'click.main_login.offline_enter', { machineId = ParaEngine.GetAttributeObject():GetField('MachineID','') }, true)
-                    end
-
                     function close()
-                        local MainLoginLoginPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Login')
+                        local MainLoginLoginAtSchoolPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.LoginAtSchool')
 
-                        if MainLoginLoginPage then
-                            MainLoginLoginPage:CloseWindow()
+                        if MainLoginLoginAtSchoolPage then
+                            MainLoginLoginAtSchoolPage:CloseWindow()
                         end
                     end
 
                     function back()
                         close()
-                        MainLogin:ShowSelect()
+                        MainLogin:SelectMode()
                     end
 
                     function forget_password()
                         ForgetPassword:ShowPage()
+                    end
+
+                    function register()
+                        close()
+                        MainLogin:ShowRegisterNew(page.mode)
                     end
 
                     function login()
@@ -106,21 +67,31 @@
 
                         is_login = true
 
-                        if not MainLogin:LoginActionNew(function(b_succeed)
+                        if not MainLogin:LoginAtSchoolAction(function(b_succeed)
                             is_login = false
 
                             if not b_succeed then
                                 return
                             end
 
+                            SessionsData:SetUserLocation(page.mode, Mod.WorldShare.Store:Get('user/username'))
+
                             close()
 
                             if not Mod.WorldShare.Store:Get('user/hasJoinedSchool') then
                                 MySchool:ShowJoinSchoolAfterRegister(function()
-                                    MainLogin:EnterUserConsole()
+                                    if page.mode == 'SCHOOL' then
+                                        MainLogin:EnterUserConsole()
+                                    elseif page.mode == 'LOCAL' then
+                                        Create:Show()
+                                    end
                                 end)
                             else
-                                MainLogin:EnterUserConsole()
+                                if page.mode == 'SCHOOL' then
+                                    MainLogin:EnterUserConsole()
+                                elseif page.mode == 'LOCAL' then
+                                    Create:Show()
+                                end
                             end
                         end) then
                             is_login = false
@@ -278,9 +249,8 @@
                     </div>
                     <div style="margin-top: 5px;">
                         <div style='float:left;base-font-size: 13px;font-size: 13px;' onclick='forget_password()'><%= L"找回密码" %></div>
-                        <div style='float:left;base-font-size: 13px;font-size: 13px;color: #9A9DA2;margin-left: 120px;' onclick='use_offline()'><%= L"本地模式" %></div>
                     </div>
-                    <div style='margin-top:5px;margin-bottom:10px;'>
+                    <div style='margin-top:5px;margin-bottom:10px;margin-top: 10px;'>
                         <input type='button'
                                name='login_button'
                                DefaultButton='true'
@@ -288,17 +258,13 @@
                                onclick='login()'
                                value='<%= L"登录"%>' />
                     </div>
-                    <pe:if condition='<%= is_support_third_party_login() %>'>
-                        <div>
-                            <div style='width: 240px;text-align: center;base-font-size: 12px;font-size: 12px;color: #9A9DA2;'>
-                                <%= L'第三方账号登录' %>
-                            </div>
-                            <div style='margin-top: 10px;'>
-                                <div onclick='login_with_wx()' style='width: 44px;height: 44px;background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#245 135 44 44);float: left;margin-left: 63px;'></div>
-                                <div onclick='login_with_qq()' style='width: 44px;height: 44px;background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#301 135 44 44);float: left;margin-left: 30x;'></div>
-                            </div>
-                        </div>
-                    </pe:if>
+                    <div style='margin-top:5px;margin-bottom:10px;'>
+                        <input type='button'
+                               name='login_button'
+                               class='main_login_cyan_button'
+                               onclick='register()'
+                               value='<%= L"注册"%>' />
+                    </div>
                 </div>
             </pe:container>
         </pe:mcml>

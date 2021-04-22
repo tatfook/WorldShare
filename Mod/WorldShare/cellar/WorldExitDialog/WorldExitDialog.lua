@@ -212,6 +212,7 @@ function WorldExitDialog.OnDialogResult(res)
         if Mod.WorldShare.Utils:IsSharedWorld(currentEnterWorld) then
             Mod.WorldShare.MsgBox:Show(L"请稍候...")
             KeepworkServiceWorld:UnlockWorld(function()
+                Mod.WorldShare.MsgBox:Close()
                 Handle()
             end)
         else

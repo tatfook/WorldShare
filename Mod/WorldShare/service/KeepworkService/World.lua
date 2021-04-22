@@ -321,9 +321,32 @@ function KeepworkServiceWorld:UnlockWorld(callback)
     self.lockHeartbeat = false
     local currentEnterWorld = Mod.WorldShare.Store:Get("world/currentEnterWorld")
 
+    if not currentEnterWorld.members then
+        return
+    end
+
     if currentEnterWorld then
         if Mod.WorldShare.Utils:IsSharedWorld(currentEnterWorld, true) then
             self.isUnlockFetching = true
+
+            local username = Mod.WorldShare.Store:Get('user/username')
+            local isExist = false
+
+            for key, item in ipairs(currentEnterWorld.members) do
+                if item == username then
+                    isExist = true
+                end
+            end
+
+            if not isExist then
+                self.isUnlockFetching = false
+                
+                if callback and type(callback) == 'function' then
+                    callback()
+                end
+
+                return
+            end
 
             local function unlock()
                 if self.isLockFetching then
