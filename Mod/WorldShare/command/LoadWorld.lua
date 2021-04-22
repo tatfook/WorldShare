@@ -316,6 +316,10 @@ function LoadWorldCommand:Fork(cmdText, options)
                 tag.fromProjects = tag.kpProjectId
                 tag.kpProjectId = nil
 
+                if options.replacename then
+                    tag.name = worldName
+                end
+
                 LocalService:SetTag(worldPath, tag)
 
                 Mod.WorldShare.MsgBox:Close()
