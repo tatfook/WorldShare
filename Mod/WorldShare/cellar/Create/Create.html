@@ -229,7 +229,7 @@
                             end
                         end
 
-                        if KeepworkServiceSession:IsSignedIn() then
+                        if KeepworkServiceSession:GetUserWhere() == 'LOCAL' and KeepworkServiceSession:IsSignedIn() then
                             KeepworkServiceSession:Logout(nil, handle)
                         else
                             handle()
