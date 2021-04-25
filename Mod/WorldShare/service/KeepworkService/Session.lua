@@ -1065,7 +1065,9 @@ end
 
 function KeepworkServiceSession:GetUserWhere()
     if not self:IsSignedIn() then
-        return false
+        local whereAnonymousUser = Mod.WorldShare.Store:Get('user/whereAnonymousUser')
+
+        return whereAnonymousUser or false
     end
 
     local session = SessionsData:GetSessionByUsername(Mod.WorldShare.Store:Get('user/username'))

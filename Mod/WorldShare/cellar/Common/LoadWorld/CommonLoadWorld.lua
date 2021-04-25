@@ -13,6 +13,7 @@ local CommonLoadWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/Com
 local DownloadWorld = commonlib.gettable('MyCompany.Aries.Game.MainLogin.DownloadWorld')
 local RemoteWorld = commonlib.gettable('MyCompany.Aries.Creator.Game.Login.RemoteWorld')
 local InternetLoadWorld = commonlib.gettable('MyCompany.Aries.Creator.Game.Login.InternetLoadWorld')
+local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 
 -- service
 local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
@@ -161,6 +162,28 @@ function CommonLoadWorld:EnterHomeworkWorld(aiHomeworkId, preRelease, releaseId)
         LoadWorld(world, 'never')
     else
         LoadWorld(world, 'force')
+    end
+end
+
+function CommonLoadWorld:EnterCacheWorldById(pid)
+    pid = tonumber(pid)
+
+    local cacheWorldInfo = CacheProjectId:GetProjectIdInfo(pid)
+
+    if not cacheWorldInfo or not cacheWorldInfo.worldInfo or not cacheWorldInfo.worldInfo.archiveUrl then
+        return false
+    end
+
+    local worldInfo = cacheWorldInfo.worldInfo
+    local url = cacheWorldInfo.worldInfo.archiveUrl
+    local world = RemoteWorld.LoadFromHref(url, "self")
+    world:SetProjectId(pid)
+    local fileUrl = world:GetLocalFileName()
+
+    if fileUrl then
+        WorldCommon.OpenWorld(fileUrl, true)
+    else
+        _guihelper.MessageBox(L"无效的世界文件")
     end
 end
 

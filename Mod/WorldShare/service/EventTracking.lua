@@ -272,7 +272,7 @@ EventTrackingService.map = {
             catation = 'click.beginner.catation' -- 领取奖状
         },
         knowledge = { -- 知识
-            click_item = 'click.knowledge.select_course' -- 选择课程
+            select_course = 'click.knowledge.select_course' -- 选择课程
         },
         go_home = 'click.go_home', -- 回家任务
     }

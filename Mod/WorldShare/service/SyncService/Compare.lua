@@ -222,6 +222,11 @@ function Compare:GetCurrentWorldInfo(callback)
 
         if worldTag.kpProjectId and worldTag.kpProjectId ~= 0 then
             KeepworkServiceProject:GetProject(worldTag.kpProjectId, function(data, err)
+                if err == 0 then
+                    Mod.WorldShare.MsgBox:Close()
+                    return
+                end
+
                 local shared = false
                 if data and data.memberCount and data.memberCount > 1 then
                     shared = true

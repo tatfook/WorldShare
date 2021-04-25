@@ -560,9 +560,26 @@ function Filters:Init()
             if Mod.WorldShare.Store:Get('world/isEnterWorld') then
                 local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
-                if currentEnterWorld.communityWorld then
-                    ParaWorldLoginAdapter.ShowExitWorld(true)
-                    return true
+                if currentEnterWorld and currentEnterWorld.communityWorld then
+                    local isMyWorld = false
+
+                    if currentEnterWorld.members and type(currentEnterWorld.members) == 'table' then
+                        local username = Mod.WorldShare.Store:Get('user/username')
+
+                        for key, item in ipairs(currentEnterWorld.members) do
+                            if username == item then
+                                isMyWorld = true
+                                break
+                            end
+                        end
+                    end
+
+                    if not isMyWorld then
+                        ParaWorldLoginAdapter.ShowExitWorld(true)
+                        return true
+                    else
+                        return
+                    end
                 else
                     return false
                 end

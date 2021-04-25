@@ -33,6 +33,10 @@ local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkServ
 local ShareWorld = NPL.export()
 
 function ShareWorld:Init(callback)
+    if KeepworkServiceSession:GetUserWhere() == 'LOCAL' and not KeepworkServiceSession:IsSignedIn() then
+        return
+    end
+
 	ShareWorld.callback = callback
     local currentEnterWorld = Mod.WorldShare.Store:Get("world/currentEnterWorld")
 

@@ -71,6 +71,21 @@
                             is_login = false
 
                             if not b_succeed then
+                                if page.mode == 'LOCAL' then
+                                    _guihelper.MessageBox(
+                                        L'网络不稳定，是否进入游客模式（离线模式）？',
+                                        function(res)
+                                            if res and res == _guihelper.DialogResult.Yes then
+                                                Mod.WorldShare.Store:Set('user/whereAnonymousUser', page.mode)
+                                                MainLogin:Close()
+                                                close()
+                                                Create:Show()
+                                            end
+                                        end,
+                                        _guihelper.MessageBoxButtons.YesNo
+                                    )
+                                end
+
                                 return
                             end
 

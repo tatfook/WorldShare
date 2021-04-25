@@ -43,11 +43,6 @@ function WorldExitDialog.ShowPage(callback)
         return false
     end
 
-    if currentEnterWorld.communityWorld then
-        ParaWorldLoginAdapter.ShowExitWorld(true)
-        return
-    end
-
     Mod.WorldShare.MsgBox:Show(L"请稍候...")
 
     local function Handle()

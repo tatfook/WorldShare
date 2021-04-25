@@ -25,6 +25,9 @@ local WorldCommon = commonlib.gettable('MyCompany.Aries.Creator.WorldCommon')
 -- command
 local WorldShareCommand = NPL.load('(gl)Mod/WorldShare/command/Command.lua')
 
+-- databse
+local CacheProjectId = NPL.load('(gl)Mod/WorldShare/database/CacheProjectId.lua')
+
 local LoadWorldCommand = NPL.export()
 
 function LoadWorldCommand:Init()
@@ -124,6 +127,36 @@ function LoadWorldCommand:Init()
 
                 local pid = string.match(cmd_text, '(%d+)')
                 if pid then
+                    local cacheWorldInfo = CacheProjectId:GetProjectIdInfo(tonumber(pid))
+
+                    if options.e and cacheWorldInfo then
+                        local optionsStr = ''
+    
+                        for key, item in pairs(options) do
+                            if key ~= 's' then
+                                optionsStr = optionsStr .. '-' .. key .. ' '
+                            end
+                        end
+
+                        local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
+
+                        if currentEnterWorld then
+                            _guihelper.MessageBox(
+                                format(L'即将离开【%s】进入【%s】', currentEnterWorld.text, cacheWorldInfo.worldName),
+                                function(res)
+                                    if res and res == _guihelper.DialogResult.Yes then
+                                        CommandManager:RunCommand('/loadworld -s ' .. optionsStr .. cmd_text)
+                                    end
+                                end,
+                                _guihelper.MessageBoxButtons.YesNo
+                            )
+                        else
+                            CommandManager:RunCommand('/loadworld -s ' .. optionsStr .. cmd_text)
+                        end
+
+                        return
+                    end
+
                     Mod.WorldShare.MsgBox:Show(L"请稍候...")
                     KeepworkServiceProject:GetProject(pid, function(data, err)
                         Mod.WorldShare.MsgBox:Close()
@@ -201,6 +234,13 @@ function LoadWorldCommand:Init()
 
             if not pid then
                 return false
+            end
+
+            local cacheWorldInfo = CacheProjectId:GetProjectIdInfo(tonumber(pid))
+
+            if options and options.e and cacheWorldInfo then
+                CommonLoadWorld:EnterCacheWorldById(pid)
+                return
             end
 
             if options and options.inplace then
