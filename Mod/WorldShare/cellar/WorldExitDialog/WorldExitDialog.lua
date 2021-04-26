@@ -182,6 +182,7 @@ function WorldExitDialog.OnDialogResult(res)
 
                 Desktop.is_exiting = false
 
+                -- TODO: // check world folder because zip file
                 if res == _guihelper.DialogResult.Yes then
                     GameLogic.QuickSave()
                 end
@@ -190,6 +191,8 @@ function WorldExitDialog.OnDialogResult(res)
                     GameLogic.RunCommand(format('/loadworld -s -force %s', Mod.WorldShare.Utils:GetConfig('homeWorldId')))
                 elseif KeepworkServiceSession:GetUserWhere() == 'SCHOOL' then
                     GameLogic.RunCommand(format('/loadworld -s -force %s', Mod.WorldShare.Utils:GetConfig('schoolWorldId')))
+                elseif KeepworkServiceSession:GetUserWhere() == 'LOCAL' then
+                    Desktop.ForceExit(true)
                 else
                     CommonLoadWorld:SelectPlaceAndEnterCommunityWorld()
                 end

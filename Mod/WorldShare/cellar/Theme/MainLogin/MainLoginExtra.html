@@ -3,7 +3,11 @@
         <pe:mcml>
             <script type="text/npl">
                 <![CDATA[
+                    -- bottles
                     local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
+
+                    -- libs
+                    local Desktop = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop")
 
                     function GetModCountAsString()
                         NPL.load('(gl)script/apps/Aries/Creator/Game/Mod/ModManager.lua')
@@ -37,6 +41,10 @@
                     function OnClickCustomerService()
                         ParaGlobal.ShellExecute('open', L'https://keepwork.com/official/docs/FAQ/questions', '', '', 1)
                     end
+
+                    function on_click_exit()
+                        Desktop.ForceExit()
+                    end
                 ]]>
             </script>
             <style type="text/mcss" src='Mod/WorldShare/cellar/Theme/Mcss/MainLoginMcss.mcss'>
@@ -58,13 +66,9 @@
                 <input type="button"
                        style="margin-left: 20px;width: 80px;height: 44px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#284 471 80 44)"
                        onclick="OnClickCustomerService" />
-                <!-- <input type="button" value='<%=L"致谢"%>' align="right" style="position:relative;margin-right:10px;margin-top:45px;padding:5px;padding-left:10px;padding-right:10px;font-size:14px;font-weight:bold;color:#ffffffcc;background:url(Texture/whitedot.png);background-color:#00000080" onclick="OnClickCredits" /> -->
-                <!--<pe:if condition='<%=Rebranding:GetValue("donation")~="false"%>'>
-                    <input type="button" value='<%=L"捐赠" %>' align="right" spacing="20" class="mc_light_grey_button_with_fillet" style="font-size:14px;height:36px;margin-right:20px" onclick="OnClickDonate" />
-                </pe:if>-->
-                <!--<div style="position:relative;margin-left:0px;margin-top:5px;padding:5px;padding-left:10px;padding-right:10px;font-size:14px;font-weight:bold;color:#ffffffcc;background:url(Texture/whitedot.png);background-color:#00000080">
-                    <%=L"点击任意位置继续"%>
-                </div>-->
+                <input type='button'
+                       style='margin-left: 20px;width: 80px;height: 44px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#281 885 81 44)'
+                       onclick='on_click_exit' />
             </div>
         </pe:mcml>
     </body>

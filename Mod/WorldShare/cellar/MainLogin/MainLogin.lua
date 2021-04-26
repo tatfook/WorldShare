@@ -43,6 +43,11 @@ function MainLogin:Init()
 end
 
 function MainLogin:Show()
+    if System.os.GetPlatform() == 'android' then
+        self:ShowAndroid()
+        return
+    end
+
     local localVersion = ParaEngine.GetAppCommandLineByParam("localVersion", nil)
 
     if localVersion == 'SCHOOL' then
@@ -50,6 +55,25 @@ function MainLogin:Show()
     else
         self:Show1()
     end
+end
+
+function MainLogin:ShowAndroid()
+    Mod.WorldShare.Utils.ShowWindow({
+        url = 'Mod/WorldShare/cellar/Theme/MainLogin/MainLogin.html', 
+        name = 'MainLogin', 
+        isShowTitleBar = false,
+        DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
+        style = CommonCtrl.WindowFrame.ContainerStyle,
+        zorder = -1,
+        allowDrag = false,
+        directPosition = true,
+        align = '_fi',
+        x = 0,
+        y = 0,
+        width = 0,
+        height = 0,
+        cancelShowAnimation = true,
+    })
 end
 
 function MainLogin:Show1()
@@ -305,9 +329,9 @@ function MainLogin:ShowExtra()
         left = 1000
         top = 160
     else
-        width = 300
+        width = 400
         height = 130
-        left = 700
+        left = 800
         top = 160
     end
 
@@ -438,8 +462,13 @@ function MainLogin:LoginAction(callback)
                     MainLoginPage:SetUIValue('account_field_error_msg', format(L'*%s(%d)', response.message, response.code))
                     MainLoginPage:FindControl('account_field_error').visible = true
                 else
-                    MainLoginPage:SetUIValue('account_field_error_msg', format(L'*系统维护中(%d)', err))
-                    MainLoginPage:FindControl('account_field_error').visible = true
+                    if err == 0 then
+                        MainLoginPage:SetUIValue('account_field_error_msg', format(L'*网络异常或超时，请检查网络(%d)', err))
+                        MainLoginPage:FindControl('account_field_error').visible = true
+                    else
+                        MainLoginPage:SetUIValue('account_field_error_msg', format(L'*系统维护中(%d)', err))
+                        MainLoginPage:FindControl('account_field_error').visible = true
+                    end
                 end
 
                 if callback and type(callback) == 'function' then
@@ -523,8 +552,13 @@ function MainLogin:LoginActionNew(callback)
                     MainLoginNewPage:SetUIValue('account_field_error_msg', format(L'*%s(%d)', response.message, response.code))
                     MainLoginNewPage:FindControl('account_field_error').visible = true
                 else
-                    MainLoginNewPage:SetUIValue('account_field_error_msg', format(L'*系统维护中(%d)', err))
-                    MainLoginNewPage:FindControl('account_field_error').visible = true
+                    if err == 0 then
+                        MainLoginNewPage:SetUIValue('account_field_error_msg', format(L'*网络异常或超时，请检查网络(%d)', err))
+                        MainLoginNewPage:FindControl('account_field_error').visible = true
+                    else
+                        MainLoginNewPage:SetUIValue('account_field_error_msg', format(L'*系统维护中(%d)', err))
+                        MainLoginNewPage:FindControl('account_field_error').visible = true
+                    end
                 end
 
                 if callback and type(callback) == 'function' then
@@ -608,8 +642,13 @@ function MainLogin:LoginAtSchoolAction(callback)
                     MainLoginAtSchoolPage:SetUIValue('account_field_error_msg', format(L'*%s(%d)', response.message, response.code))
                     MainLoginAtSchoolPage:FindControl('account_field_error').visible = true
                 else
-                    MainLoginAtSchoolPage:SetUIValue('account_field_error_msg', format(L'*系统维护中(%d)', err))
-                    MainLoginAtSchoolPage:FindControl('account_field_error').visible = true
+                    if err == 0 then
+                        MainLoginAtSchoolPage:SetUIValue('account_field_error_msg', format(L'*网络异常或超时，请检查网络(%d)', err))
+                        MainLoginAtSchoolPage:FindControl('account_field_error').visible = true
+                    else
+                        MainLoginAtSchoolPage:SetUIValue('account_field_error_msg', format(L'*系统维护中(%d)', err))
+                        MainLoginAtSchoolPage:FindControl('account_field_error').visible = true
+                    end
                 end
 
                 if callback and type(callback) == 'function' then
