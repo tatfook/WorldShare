@@ -21,6 +21,7 @@ local LoadWorldCommand = NPL.load("(gl)Mod/WorldShare/command/LoadWorld.lua")
 local LoadPersonalWorldCommand = NPL.load("(gl)Mod/WorldShare/command/LoadPersonalWorld.lua")
 local LoadReadOnlyWorldCommand = NPL.load("(gl)Mod/WorldShare/command/LoadReadOnlyWorld.lua")
 local ReloadWorldCommand = NPL.load("(gl)Mod/WorldShare/command/ReloadWorld.lua")
+local CreateWorldCommand = NPL.load('(gl)Mod/WorldShare/command/CreateWorldCommand.lua')
 
 local WorldShareCommand = NPL.export()
 
@@ -39,12 +40,14 @@ function WorldShareCommand:Init()
     local loadpersonalworld = LoadPersonalWorldCommand:Init()
     local loadreadonlyworld = LoadReadOnlyWorldCommand:Init()
     local reload = ReloadWorldCommand:Init()
+    local createworld = CreateWorldCommand:Init()
 
     GameLogic.GetFilters():add_filter("register_command", function(_, SlashCommand)
         SlashCommand:RegisterSlashCommand(pipe)
         SlashCommand:RegisterSlashCommand(loadpersonalworld)
         SlashCommand:RegisterSlashCommand(loadreadonlyworld)
         SlashCommand:RegisterSlashCommand(reload)
+        SlashCommand:RegisterSlashCommand(createworld)
     end)
 
     CommandManager:Init()

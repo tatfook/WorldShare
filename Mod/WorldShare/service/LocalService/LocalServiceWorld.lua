@@ -70,6 +70,7 @@ function LocalServiceWorld:GetWorldList()
         local is_zip
         local revision = 0
         local kpProjectId = 0
+        local parentProjectId = 0
         local size = 0
         local name = ''
         local isVipWorld = false
@@ -90,6 +91,7 @@ function LocalServiceWorld:GetWorldList()
             name = tag.name
             isVipWorld = tag.isVipWorld
             instituteVipEnabled = tag.instituteVipEnabled
+            parentProjectId = tag.parentProjectId
         else
             foldername = value.Title
             Title = value.Title
@@ -102,6 +104,7 @@ function LocalServiceWorld:GetWorldList()
             IsFolder = value.IsFolder,
             is_zip = is_zip,
             kpProjectId = kpProjectId,
+            parentProjectId = parentProjectId,
             text = text,
             size = size,
             foldername = foldername,
@@ -266,6 +269,14 @@ function LocalServiceWorld:SetWorldInstanceByFoldername(foldername)
         text = name .. '(' .. commonlib.Encoding.DefaultToUtf8(foldername) .. ')'
     end
 
+    if worldTag.fromProjects then
+        local fromProjectsTable = {}
+
+        for item in string.gmatch(worldTag.fromProjects, '[^,]+') do
+            fromProjectsTable[#fromProjectsTable + 1] = item  
+        end
+    end
+
     currentWorld = self:GenerateWorldInstance({
         IsFolder = true,
         is_zip = false,
@@ -273,7 +284,8 @@ function LocalServiceWorld:SetWorldInstanceByFoldername(foldername)
         foldername = foldername,
         worldpath = worldpath,
         kpProjectId = worldTag.kpProjectId,
-        fromProjectId = worldTag.fromProjects,
+        parentProjectId = worldTag.parentProjectId,
+        fromProjectId = fromProjectsTable[#fromProjectsTable],
         name = worldTag.name,
         modifyTime = 0,
         revision = revision,
@@ -322,6 +334,8 @@ function LocalServiceWorld:SaveWorldInfo(ctx, node)
     node.attr.communityWorld = ctx.communityWorld or false
     node.attr.instituteVipEnabled = ctx.instituteVipEnabled or false
     node.attr.kpProjectId = ctx.kpProjectId and tonumber(ctx.kpProjectId) or 0
+    node.attr.parentProjectId = ctx.parentProjectId and tonumber(ctx.parentProjectId) or 0
+    node.attr.redirectLoadWorld = ctx.redirectLoadWorld or ''
 end
 
 function LocalServiceWorld:LoadWorldInfo(ctx, node)
@@ -334,6 +348,8 @@ function LocalServiceWorld:LoadWorldInfo(ctx, node)
     ctx.communityWorld = ctx.communityWorld == 'true' or ctx.communityWorld == true
     ctx.instituteVipEnabled = ctx.instituteVipEnabled == 'true' or ctx.instituteVipEnabled == true
     ctx.kpProjectId = tonumber(ctx.kpProjectId) or 0
+    ctx.parentProjectId = tonumber(ctx.parentProjectId) or 0
+    ctx.redirectLoadWorld = ctx.redirectLoadWorld or ''
 end
 
 function LocalServiceWorld:CheckWorldIsCorrect(world)
@@ -381,6 +397,7 @@ function LocalServiceWorld:GenerateWorldInstance(params)
         instituteVipEnabled = params.instituteVipEnabled or false,
         shared = params.shared or false,
         name = params.name or '',
+        parentProjectId = params.parentProjectId or 0,
     }
 end
 

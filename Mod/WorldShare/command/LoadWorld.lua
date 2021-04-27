@@ -353,7 +353,12 @@ function LoadWorldCommand:Fork(cmdText, options)
                     return
                 end
 
-                tag.fromProjects = tag.kpProjectId
+                if not tag.fromProjects then
+                    tag.fromProjects = tostring(tag.kpProjectId)
+                else
+                    tag.fromProjects = tag.fromProjects .. ',' .. tostring(tag.kpProjectId)
+                end
+
                 tag.kpProjectId = nil
 
                 if options.replacename then

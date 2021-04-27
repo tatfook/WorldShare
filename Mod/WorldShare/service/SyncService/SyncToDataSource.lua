@@ -625,6 +625,7 @@ function SyncToDataSource:UpdateRecord(callback)
                                 KeepworkServiceProject:UpdateProject(
                                     self.currentWorld.kpProjectId,
                                     {
+                                        parentId = self.currentWorld.parentProjectId,
                                         extra = extra
                                     }
                                 )
@@ -649,6 +650,7 @@ function SyncToDataSource:UpdateRecord(callback)
                                         },
                                         kpProjectId = self.currentWorld.kpProjectId,
                                         fromProjectId = self.currentWorld.fromProjectId,
+                                        parentProjectId = self.currentWorld.parentProjectId,
                                         name = self.currentWorld.name,
                                         IsFolder = true,
                                         is_zip = false,

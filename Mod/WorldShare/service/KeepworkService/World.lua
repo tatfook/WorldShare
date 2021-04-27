@@ -119,6 +119,7 @@ function KeepworkServiceWorld:SetWorldInstanceByPid(pid, callback)
             local currentWorld = self:GenerateWorldInstance({
                 kpProjectId = pid,
                 fromProjectId = data.fromProjectId,
+                parentProjectId = data.parentProjectId,
                 IsFolder = true,
                 is_zip = false,
                 text = foldername,
@@ -129,7 +130,7 @@ function KeepworkServiceWorld:SetWorldInstanceByPid(pid, callback)
                 revision = data.revision,
                 size = data.fileSize,
                 modifyTime = Mod.WorldShare.Utils:UnifiedTimestampFormat(data.updatedAt),
-                lastCommitId = data.commitId, 
+                lastCommitId = data.commitId,
                 project = data.project,
                 user = {
                     id = data.userId,
@@ -531,6 +532,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                 },
                 kpProjectId = DItem.projectId,
                 fromProjectId = DItem.fromProjectId,
+                parentProjectId = DItem.project and DItem.project.parentProjectId or 0,
                 IsFolder = true,
                 is_zip = false,
                 shared = remoteShared,
@@ -612,5 +614,6 @@ function KeepworkServiceWorld:GenerateWorldInstance(params)
         instituteVipEnabled = params.instituteVipEnabled or false,
         memberCount = params.memberCount or 0,
         members = params.members or {},
+        parentProjectId = params.parentProjectId or 0
     }
 end

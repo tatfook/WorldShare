@@ -652,7 +652,7 @@ function MainLogin:LoginAtSchoolAction(callback)
                 end
 
                 if callback and type(callback) == 'function' then
-                    callback(false)
+                    callback(false, response.code)
                 end
 
                 return false

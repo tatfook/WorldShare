@@ -247,6 +247,14 @@ function Compare:GetCurrentWorldInfo(callback)
                         end
                     end
 
+                    if worldTag.fromProjects then
+                        local fromProjectsTable = {}
+
+                        for item in string.gmatch(worldTag.fromProjects, '[^,]+') do
+                            fromProjectsTable[#fromProjectsTable + 1] = item  
+                        end
+                    end
+
                     currentWorld = KeepworkServiceWorld:GenerateWorldInstance({
                         text = worldTag.name,
                         foldername = Mod.WorldShare.Utils.GetFolderName(),
@@ -263,7 +271,8 @@ function Compare:GetCurrentWorldInfo(callback)
                             username = data.username,
                         }, -- { id = xxxx, username = xxxx }
                         kpProjectId = worldTag.kpProjectId,
-                        fromProjectId = worldTag.fromProjects,
+                        fromProjectId = fromProjectsTable[#fromProjectsTable],
+                        parentProjectId = data.parentId,
                         IsFolder = false,
                         is_zip = true,
                         shared = shared,
@@ -287,6 +296,7 @@ function Compare:GetCurrentWorldInfo(callback)
                 is_zip = true,
                 kpProjectId = worldTag.kpProjectId,
                 fromProjectId = worldTag.fromProjectId,
+                parentProjectId = worldTag.parentProjectId,
                 text = worldTag.name,
                 size = 0,
                 foldername = Mod.WorldShare.Utils.GetFolderName(),
@@ -313,6 +323,7 @@ function Compare:GetCurrentWorldInfo(callback)
         if KeepworkServiceSession:IsSignedIn() and worldTag.kpProjectId and worldTag.kpProjectId ~= 0 then
             local kpProjectId = worldTag.kpProjectId
             local fromProjectId = worldTag.fromProjectId
+            local parentProjectId = worldTag.parentProjectId
 
             KeepworkServiceProject:GetProject(kpProjectId, function(data, err)
                 data = data or {}
@@ -336,6 +347,7 @@ function Compare:GetCurrentWorldInfo(callback)
                             worldpath = worldpath,
                             kpProjectId = 0,
                             fromProjectId = fromProjectId,
+                            parentProjectId = parentProjectId,
                             name = worldTag.name,
                             revision = WorldRevision:new():init(worldpath):GetDiskRevision(),
                             communityWorld = worldTag.communityWorld,
@@ -387,6 +399,7 @@ function Compare:GetCurrentWorldInfo(callback)
                             worldpath = worldpath,
                             kpProjectId = kpProjectId,
                             fromProjectId = fromProjectId,
+                            parentProjectId = data.parentId,
                             name = worldTag.name,
                             status = status,
                             revision = data.revision,
@@ -437,8 +450,9 @@ function Compare:GetCurrentWorldInfo(callback)
                 text = worldTag.name,
                 foldername = Mod.WorldShare.Utils.GetFolderName(),
                 worldpath = worldpath,
-                kpProjectId = kpProjectId,
-                fromProjectId = fromProjectId,
+                kpProjectId = worldTag.kpProjectId,
+                fromProjectId = worldTag.fromProjectId,
+                parentProjectId = worldTag.parentProjectId,
                 name = worldTag.name,
                 revision = WorldRevision:new():init(worldpath):GetDiskRevision(),
                 communityWorld = worldTag.communityWorld,

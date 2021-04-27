@@ -67,11 +67,11 @@
 
                         is_login = true
 
-                        if not MainLogin:LoginAtSchoolAction(function(b_succeed)
+                        if not MainLogin:LoginAtSchoolAction(function(b_succeed, code)
                             is_login = false
 
                             if not b_succeed then
-                                if page.mode == 'LOCAL' then
+                                if page.mode == 'LOCAL' and (code == 0 or code == 500) then
                                     _guihelper.MessageBox(
                                         L'网络不稳定，是否进入游客模式（离线模式）？',
                                         function(res)
