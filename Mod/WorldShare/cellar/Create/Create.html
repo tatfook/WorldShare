@@ -229,7 +229,9 @@
                             end
                         end
 
-                        if KeepworkServiceSession:GetUserWhere() == 'LOCAL' and KeepworkServiceSession:IsSignedIn() then
+                        if KeepworkServiceSession:GetUserWhere() == 'LOCAL' and
+                           KeepworkServiceSession:IsSignedIn() and
+                           not Mod.WorldShare.Store:Get("world/isEnterWorld") then
                             KeepworkServiceSession:Logout(nil, handle)
                         else
                             handle()

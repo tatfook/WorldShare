@@ -10,6 +10,9 @@ MainLoginFilter:Init()
 ------------------------------------------------------------
 ]]
 
+-- libs
+local RestartTable = commonlib.gettable('RestartTable')
+
 -- UI
 local MainLogin = NPL.load("(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua")
 
@@ -20,6 +23,12 @@ function MainLoginFilter:Init()
     GameLogic.GetFilters():add_filter(
         'cellar.main_login.show_login_mode_page',
         function()
+            -- inject
+            -- sync system.User info to Store user
+            Mod.WorldShare.Store:Set('user/token', System.User.keepworktoken)
+            Mod.WorldShare.Store:Set('user/username', RestartTable.username)
+            Mod.WorldShare.Store:Set('user/whereAnonymousUser', RestartTable.whereAnonymousUser)
+
             MainLogin:Show()
             return false
         end

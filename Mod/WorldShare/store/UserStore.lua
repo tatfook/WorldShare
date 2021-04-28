@@ -10,6 +10,9 @@ local UserStore = commonlib.gettable('Mod.WorldShare.store.User')
 ------------------------------------------------------------
 ]]
 
+--libs
+local RestartTable = commonlib.gettable('RestartTable')
+
 local UserStore = commonlib.inherit(commonlib.gettable("System.Core.ToolBase"), commonlib.gettable('Mod.WorldShare.store.User'))
 
 UserStore:Signal("onLogin", function() end)
@@ -43,6 +46,8 @@ function UserStore:Action()
             commonlib.setfield("System.User.isVip", self.isVip)
             commonlib.setfield("System.User.isVipSchool", self.isVipSchool)
 
+            RestartTable.username = self.username
+
             self:onLogin()
         end,
         Logout = function()
@@ -59,6 +64,7 @@ function UserStore:Action()
             commonlib.setfield("System.User.NickName", nil)
             commonlib.setfield("System.User.userType", nil)
             commonlib.setfield("System.User.isVip", nil)
+            
 
             self:onLogout()
         end,
@@ -70,6 +76,10 @@ function UserStore:Action()
             self.authCode = authCode
 
             self:onSetThirdPartyLoginAuthinfo()
+        end,
+        SetWhereAnonymousUser = function(where)
+            self.whereAnonymousUser = where
+            RestartTable.whereAnonymousUser = where
         end
     }
 end

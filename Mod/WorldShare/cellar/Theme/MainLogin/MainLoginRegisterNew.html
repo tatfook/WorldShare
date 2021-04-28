@@ -6,12 +6,16 @@
                     -- bottles
                     local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
                     local MySchool = NPL.load('(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua')
+                    local Create = NPL.load('(gl)Mod/WorldShare/cellar/Create/Create.lua')
 
                     -- service
                     local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepWorkService/Session.lua')
 
                     -- helper
                     local Validated = NPL.load('(gl)Mod/WorldShare/helper/Validated.lua')
+
+                    -- database
+                    local SessionsData = NPL.load('(gl)Mod/WorldShare/database/SessionsData.lua')
 
                     local page = document:GetPageCtrl()
 
@@ -257,9 +261,15 @@
 
                     function finish()
                         close()
-                        MainLogin:ShowWhere(function()
+                        MainLogin:SelectMode(function(mode)
+                            SessionsData:SetUserLocation(mode, Mod.WorldShare.Store:Get('user/username'))
+
                             MySchool:ShowJoinSchoolAfterRegister(function()
-                                MainLogin:EnterUserConsole()
+                                if mode == 'LOCAL' then
+                                    Create:Show()
+                                else
+                                    MainLogin:EnterUserConsole()
+                                end
                             end)
                         end)
                     end

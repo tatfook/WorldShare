@@ -224,7 +224,7 @@ function Filters:Init()
     -- filter old user behavior
     GameLogic:GetFilters():add_filter(
         'user_event_stat',
-        function(category, action, value, label)            
+        function(category, action, value, label)
             local sArray = {}
 
             for item in string.gmatch(action, "[^%:]+") do
@@ -392,15 +392,6 @@ function Filters:Init()
         function()
             Create:Show()
 		    return Mod.WorldShare.Store:Get('page/Mod.WorldShare.Create')
-        end
-    )
-
-    -- filter show console page
-    GameLogic.GetFilters():add_filter(
-        'show_console_page',
-        function()
-            UserConsole:ShowPage()
-		    return Mod.WorldShare.Store:Get('page/Mod.WorldShare.UserConsole')
         end
     )
 

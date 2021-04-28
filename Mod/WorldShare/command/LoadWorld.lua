@@ -140,9 +140,9 @@ function LoadWorldCommand:Init()
 
                         local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
-                        if currentEnterWorld then
+                        if currentEnterWorld and cacheWorldInfo and cacheWorldInfo.worldName then
                             _guihelper.MessageBox(
-                                format(L'即将离开【%s】进入【%s】', currentEnterWorld.text, cacheWorldInfo.worldName),
+                                format(L'即将离开【%s】进入【%s】', currentEnterWorld.text or '', cacheWorldInfo.worldName or ''),
                                 function(res)
                                     if res and res == _guihelper.DialogResult.Yes then
                                         CommandManager:RunCommand('/loadworld -s ' .. optionsStr .. cmd_text)

@@ -76,7 +76,9 @@
                                         L'网络不稳定，是否进入游客模式（离线模式）？',
                                         function(res)
                                             if res and res == _guihelper.DialogResult.Yes then
-                                                Mod.WorldShare.Store:Set('user/whereAnonymousUser', page.mode)
+                                                local SetWhereAnonymousUser = Mod.WorldShare.Store:Action('user/SetWhereAnonymousUser')
+                                                SetWhereAnonymousUser(page.mode)
+
                                                 MainLogin:Close()
                                                 close()
                                                 Create:Show()

@@ -21,6 +21,7 @@ local SessionsData = NPL.load('(gl)Mod/WorldShare/database/SessionsData.lua')
 
 -- bottles
 local RegisterModal = NPL.load('(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua')
+local Create = NPL.load('(gl)Mod/WorldShare/cellar/Create/Create.lua')
 
 -- helper
 local Validated = NPL.load('(gl)Mod/WorldShare/helper/Validated.lua')
@@ -51,6 +52,28 @@ function MainLogin:Show()
     local localVersion = ParaEngine.GetAppCommandLineByParam("localVersion", nil)
 
     if localVersion == 'SCHOOL' then
+        if KeepworkServiceSession:GetUserWhere() == 'LOCAL' then
+            local token = Mod.WorldShare.Store:Get('user/token')
+
+            if token then
+                KeepworkServiceSession:LoginWithToken(token, function(data, err)
+                    data.token = token
+
+                    KeepworkServiceSession:LoginResponse(data, err, function(bSucceed)
+                        if bSucceed then
+                            SessionsData:SetUserLocation('LOCAL', Mod.WorldShare.Store:Get('user/username'))
+                            Create:Show()
+                        end
+                    end)
+
+                end)
+            else
+                Create:Show()
+            end
+
+            return
+        end
+
         self:Show2()
     else
         self:Show1()
@@ -293,7 +316,7 @@ function MainLogin:ShowWhere(callback)
     end
 end
 
-function MainLogin:SelectMode()
+function MainLogin:SelectMode(callback)
     local params = Mod.WorldShare.Utils.ShowWindow(
         0,
         0,
@@ -307,6 +330,11 @@ function MainLogin:SelectMode()
     )
 
     params._page.callback = function(mode)
+        if callback and type(callback) == 'function' then
+            callback(mode)
+            return
+        end
+
         if mode == 'HOME' then
             self:ShowLoginNew()
         elseif mode == 'SCHOOL' then
@@ -652,7 +680,7 @@ function MainLogin:LoginAtSchoolAction(callback)
                 end
 
                 if callback and type(callback) == 'function' then
-                    callback(false, response.code)
+                    callback(false, err)
                 end
 
                 return false

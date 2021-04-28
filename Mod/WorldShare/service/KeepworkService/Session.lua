@@ -314,7 +314,7 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
         local Login = Mod.WorldShare.Store:Action("user/Login")
         Login(token, userId, username, nickname, realname, isVipSchool)
 
-        GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", true);
+        GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", true)
 
         -- update enter world info
         if Mod.WorldShare.Store:Get('world/isEnterWorld') then
@@ -1064,7 +1064,9 @@ function KeepworkServiceSession:CaptchaVerify(captcha, callback)
 end
 
 function KeepworkServiceSession:GetUserWhere()
-    if not self:IsSignedIn() then
+    local token = Mod.WorldShare.Store:Get('user/token')
+
+    if not token then
         local whereAnonymousUser = Mod.WorldShare.Store:Get('user/whereAnonymousUser')
 
         return whereAnonymousUser or false

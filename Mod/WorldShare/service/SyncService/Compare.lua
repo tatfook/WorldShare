@@ -255,6 +255,12 @@ function Compare:GetCurrentWorldInfo(callback)
                         end
                     end
 
+                    local fromProjectId = 0
+
+                    if fromProjectsTable and #fromProjectsTable > 0 then
+                        fromProjectsTable = fromProjectsTable[#fromProjectsTable]
+                    end
+
                     currentWorld = KeepworkServiceWorld:GenerateWorldInstance({
                         text = worldTag.name,
                         foldername = Mod.WorldShare.Utils.GetFolderName(),
@@ -271,7 +277,7 @@ function Compare:GetCurrentWorldInfo(callback)
                             username = data.username,
                         }, -- { id = xxxx, username = xxxx }
                         kpProjectId = worldTag.kpProjectId,
-                        fromProjectId = fromProjectsTable[#fromProjectsTable],
+                        fromProjectId = fromProjectId,
                         parentProjectId = data.parentId,
                         IsFolder = false,
                         is_zip = true,
