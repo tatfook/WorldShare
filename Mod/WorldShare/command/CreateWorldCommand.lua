@@ -50,8 +50,8 @@ function CreateWorldCommand:Init()
             option, cmd_text = CmdParser.ParseOption(cmd_text)
 
             if option == 'name' then
-                name, cmd_text = CmdParser.ParseFormated(cmd_text, "\".+\"")
-                name = string.match(name, '^"(.+)"$')
+                name, cmd_text = CmdParser.ParseFormated(cmd_text, "\".+\"[ ]+")
+                name = string.match(name, '^"(.+)"')
             else
                 return
             end
@@ -87,8 +87,9 @@ function CreateWorldCommand:Init()
             option, cmd_text = CmdParser.ParseOption(cmd_text)
 
             if option == 'redirectLoadWorld' then
-                isRedirentLoadWorld = true
+                isRedirectLoadWorld = true
                 redirectLoadWorld = cmd_text
+                redirectLoadWorld = string.match(redirectLoadWorld, '^"(.+)"')
             end
 
             local worldPath = 'worlds/DesignHouse/' .. commonlib.Encoding.Utf8ToDefault(name) .. '/'
