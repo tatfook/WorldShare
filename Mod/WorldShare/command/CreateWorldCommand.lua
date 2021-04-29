@@ -142,7 +142,7 @@ e.g.
                         worldPath,
                         function()
                             SetParentProjectIdAndRedirectLoadWorld()
-                            GameLogic.RunCommand('/sendevent createworld_callback { success = true }')
+                            GameLogic.RunCommand('/sendevent createworld_callback '..worldPath)
                         end
                     )
 
@@ -151,7 +151,7 @@ e.g.
 
                 if isLocalWorldExisted and not isRemoteWorldExisted then
                     SetParentProjectIdAndRedirectLoadWorld()
-                    GameLogic.RunCommand('/sendevent createworld_callback { success = true }')
+                    GameLogic.RunCommand('/sendevent createworld_callback '..worldPath)
 
                     return
                 end
@@ -160,13 +160,13 @@ e.g.
                     if isUpdate then
                         SyncMain:CheckAndUpdatedByFoldername(name, function()
                             SetParentProjectIdAndRedirectLoadWorld()
-                            GameLogic.RunCommand('/sendevent createworld_callback { success = true }')
+                            GameLogic.RunCommand('/sendevent createworld_callback '..worldPath)
                         end)
                         return
                     end
 
                     SetParentProjectIdAndRedirectLoadWorld()
-                    GameLogic.RunCommand('/sendevent createworld_callback { success = true }')
+                    GameLogic.RunCommand('/sendevent createworld_callback '..worldPath)
 
                     return
                 end
@@ -207,7 +207,7 @@ e.g.
                                     LocalService:SetTag(worldPath, tag)
 
                                     SetParentProjectIdAndRedirectLoadWorld()
-                                    GameLogic.RunCommand('/sendevent createworld_callback { success = true }')
+                                    GameLogic.RunCommand('/sendevent createworld_callback '..worldPath)
                                 end
                             )
                         end)
@@ -226,7 +226,7 @@ e.g.
 
                         if worldPath then
                             SetParentProjectIdAndRedirectLoadWorld()
-                            GameLogic.RunCommand('/sendevent createworld_callback { success = true, world_path = worldPath }')
+                            GameLogic.RunCommand('/sendevent createworld_callback '..worldPath)
                         end
                     end
 
