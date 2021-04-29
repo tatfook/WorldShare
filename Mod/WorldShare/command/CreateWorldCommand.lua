@@ -29,8 +29,18 @@ local CreateWorldCommand = NPL.export()
 function CreateWorldCommand:Init()
     local createworld = {
         name="createworld", 
-        quick_ref='/createworld -name "ABC" -parentProjectId 888 -update -fork 222 -redirectLoadWorld "/loadworld XXX | /sendevent loadlevel {id=1}"', 
-        desc=[[]],
+        quick_ref='/createworld [name [parentProjectId [update [fork [redirectLoadWorld]]]]]',
+        desc=[[create a new world by world name or from a exist world
+@param -name: new world name
+@param -parentProjectId: parent world Id
+@param -update: update world if remote world exist
+@param -fork: create a new world from a exist world
+@param -redirectLoadWorld: set a redirect command in world tag
+e.g.
+/createworld -name "my_new_world"
+/createworld -name "my_new_world" -parentProjectId 888
+/createworld -name "my_new_world" -parentProjectId 888 -update -fork 888 -redirectLoadWorld "/loadworld -s 888"
+        ]],
         mode_deny = "",
         handler = function(cmd_name, cmd_text, cmd_params)
             if not KeepworkServiceSession:IsSignedIn() then
