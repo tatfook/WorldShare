@@ -32,12 +32,14 @@ function CreateWorldCommand:Init()
         quick_ref='/createworld [name [parentProjectId [update [fork [redirectLoadWorld]]]]]',
         desc=[[create a new world by world name or from a exist world
 @param -name: new world name
+@param -worldGenerator: world type
 @param -parentProjectId: parent world Id
 @param -update: update world if remote world exist
 @param -fork: create a new world from a exist world
 @param -redirectLoadWorld: set a redirect command in world tag
 e.g.
 /createworld -name "my_new_world"
+/createworld -name "my_new_world" -worldGenerator paraworldMini
 /createworld -name "my_new_world" -parentProjectId 888
 /createworld -name "my_new_world" -parentProjectId 888 -update -fork 888 -redirectLoadWorld "/loadworld -s 888"
         ]],
@@ -49,6 +51,7 @@ e.g.
 
             local option = ''
             local name = ''
+            local worldGenerator = ''
             local parentProjectId = 0
             local isUpdate = false
             local fromProjectId = 0
@@ -64,6 +67,15 @@ e.g.
                 name = string.match(name, '^"(.+)"')
             else
                 return
+            end
+
+            beforeCmdText = cmd_text
+            option, cmd_text = CmdParser.ParseOption(cmd_text)
+
+            if option == 'worldGenerator' then
+                worldGenerator, cmd_text = CmdParser.ParseString(cmd_text)
+            else
+                cmd_text = beforeCmdText
             end
 
             beforeCmdText = cmd_text
@@ -129,6 +141,10 @@ e.g.
 
                     if isRedirectLoadWorld then
                         tag.redirectLoadWorld = redirectLoadWorld
+                    end
+
+                    if worldGenerator and worldGenerator ~= '' then
+                        tag.world_generator = worldGenerator
                     end
 
                     LocalService:SetTag(worldPath, tag)
