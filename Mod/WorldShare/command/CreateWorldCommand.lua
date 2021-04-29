@@ -216,7 +216,7 @@ e.g.
                             worldname = commonlib.Encoding.Utf8ToDefault(name),
                             title = name,
                             creationfolder = CreateNewWorld.GetWorldFolder(),
-                            world_generator = 'flat',
+                            world_generator = 'paraworldMini',
                             seed = name,
                             inherit_scene = true,
                             inherit_char = true,
@@ -226,7 +226,7 @@ e.g.
 
                         if worldPath then
                             SetParentProjectIdAndRedirectLoadWorld()
-                            GameLogic.RunCommand('/sendevent createworld_callback { success = true }')
+                            GameLogic.RunCommand('/sendevent createworld_callback { success = true, world_path = worldPath }')
                         end
                     end
 
