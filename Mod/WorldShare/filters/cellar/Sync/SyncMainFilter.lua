@@ -16,7 +16,7 @@ local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
 local SyncMainFilter = NPL.export()
 
 function SyncMainFilter:Init()
-    -- close vip notice page
+    -- sync to data source by world name
     GameLogic.GetFilters():add_filter(
         'cellar.sync.sync_main.sync_to_data_source_by_world_name',
         function(...)

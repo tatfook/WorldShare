@@ -114,8 +114,6 @@ function KeepworkServiceWorld:SetWorldInstanceByPid(pid, callback)
         end
 
         Compare:Init(worldPath, function(result, code)
-            local worldTag = LocalService:GetTag(worldPath)
-
             local currentWorld = self:GenerateWorldInstance({
                 kpProjectId = pid,
                 fromProjectId = data.fromProjectId,
@@ -123,7 +121,7 @@ function KeepworkServiceWorld:SetWorldInstanceByPid(pid, callback)
                 IsFolder = true,
                 is_zip = false,
                 text = foldername,
-                name = worldTag.name or '',
+                name = foldername,
                 foldername = foldername,
                 worldpath = worldPath,
                 status = code,
@@ -137,9 +135,9 @@ function KeepworkServiceWorld:SetWorldInstanceByPid(pid, callback)
                     username = data.username,
                 },
                 shared = shared,
-                communityWorld = worldTag.communityWorld,
-                isVipWorld = worldTag.isVipWorld,
-                instituteVipEnabled =  worldTag.instituteVipEnabled,
+                communityWorld = data.extra.communityWorld,
+                isVipWorld = data.extra.isVipWorld,
+                instituteVipEnabled =  data.extra.instituteVipEnabled,
                 memberCount = data.memberCount,
                 members = {}
             })

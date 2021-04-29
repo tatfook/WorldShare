@@ -235,11 +235,28 @@ function SyncMain:SyncToDataSourceByWorldName(worldName, callback)
     KeepworkServiceWorld:GetMyWorldByWorldName(worldName, function(data)        
         if data then
             KeepworkServiceWorld:SetWorldInstanceByPid(data.projectId, function()
-                SyncMain:SyncToDataSource(callback)
+                local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+                local worldTag = LocalService:GetTag(currentWorld.worldpath)
+                
+                if worldTag then
+                    currentWorld.parentProjectId = worldTag.parentProjectId
+                end
+
+                Mod.WorldShare.Store:Set('world/currentWorld', currentWorld)
+
+                SyncMain:SyncToDataSource(function(result)
+                    if callback and type(callback) == 'function' then
+                        callback(result, currentWorld.kpProjectId)
+                    end
+                end)
             end)
         else
             LocalServiceWorld:SetWorldInstanceByFoldername(worldName)
-            SyncMain:SyncToDataSource(callback)
+            SyncMain:SyncToDataSource(function(result)
+                if callback and type(callback) == 'function' then
+                    callback(result, currentWorld.kpProjectId)
+                end
+            end)
         end
     end)
 end
