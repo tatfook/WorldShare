@@ -269,11 +269,17 @@ function LocalServiceWorld:SetWorldInstanceByFoldername(foldername)
         text = name .. '(' .. commonlib.Encoding.DefaultToUtf8(foldername) .. ')'
     end
 
+    local fromProjectId = 0
+
     if worldTag.fromProjects then
         local fromProjectsTable = {}
 
         for item in string.gmatch(worldTag.fromProjects, '[^,]+') do
             fromProjectsTable[#fromProjectsTable + 1] = item  
+        end
+
+        if fromProjectsTable and #fromProjectsTable > 0 then
+            fromProjectId = fromProjectsTable[#fromProjectsTable]
         end
     end
 
@@ -285,7 +291,7 @@ function LocalServiceWorld:SetWorldInstanceByFoldername(foldername)
         worldpath = worldpath,
         kpProjectId = worldTag.kpProjectId,
         parentProjectId = worldTag.parentProjectId,
-        fromProjectId = fromProjectsTable[#fromProjectsTable],
+        fromProjectId = fromProjectId,
         name = worldTag.name,
         modifyTime = 0,
         revision = revision,

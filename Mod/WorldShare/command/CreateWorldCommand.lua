@@ -123,9 +123,7 @@ e.g.
                 isLocalWorldExisted = true
             end
 
-            local userId = Mod.WorldShare.Store:Get('user/userId')
-            
-            KeepworkServiceWorld:GetWorld(name, false, userId, function(data)
+            KeepworkServiceWorld:GetMyWorldByWorldName(name, function(data)
                 local isRemoteWorldExisted = false
 
                 if data then
@@ -232,7 +230,7 @@ e.g.
                             worldname = commonlib.Encoding.Utf8ToDefault(name),
                             title = name,
                             creationfolder = CreateNewWorld.GetWorldFolder(),
-                            world_generator = 'paraworldMini',
+                            world_generator = worldGenerator,
                             seed = name,
                             inherit_scene = true,
                             inherit_char = true,

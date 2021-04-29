@@ -51,6 +51,7 @@ local ClientUpdateDialogFilter = NPL.load('(gl)Mod/WorldShare/filters/cellar/Cli
 local MsgBoxFilter = NPL.load('(gl)Mod/WorldShare/filters/cellar/Common/MsgBox/MsgBoxFilter.lua')
 local MainLoginFilter = NPL.load('(gl)Mod/WorldShare/filters/cellar/MainLogin/MainLoginFilter.lua')
 local ShareWorldFilter = NPL.load('(gl)Mod/WorldShare/filters/cellar/ShareWorld/ShareWorldFilter.lua')
+local SyncMainFilter = NPL.load('(gl)Mod/WorldShare/filters/cellar/Sync/SyncMainFilter.lua')
 
 local KeepworkServiceSessionFilter = NPL.load('(gl)Mod/WorldShare/filters/service/KeepworkService/KeepworkServiceSessionFilter.lua')
 local LocalServiceWorldFilter = NPL.load('(gl)Mod/WorldShare/filters/service/LocalService/LocalServiceWorldFilter.lua')
@@ -106,6 +107,9 @@ function Filters:Init()
 
     -- init share world filter
     ShareWorldFilter:Init()
+
+    -- init sync main filter
+    SyncMainFilter:Init()
 
     GameLogic.GetFilters():add_filter(
         'ShowClientUpdaterNotice',

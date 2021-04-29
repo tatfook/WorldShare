@@ -5,7 +5,7 @@ Date:  2017.4.17
 Desc: 
 use the lib:
 ------------------------------------------------------------
-local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
+local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
 ------------------------------------------------------------
 ]]
 
@@ -23,7 +23,7 @@ local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local LocalServiceWorld = NPL.load("(gl)Mod/WorldShare/service/LocalService/LocalServiceWorld.lua")
 local KeepworkServiceWorld = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/World.lua')
-local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
+local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
 local SyncToLocal = NPL.load("(gl)Mod/WorldShare/service/SyncService/SyncToLocal.lua")
 local SyncToDataSource = NPL.load("(gl)Mod/WorldShare/service/SyncService/SyncToDataSource.lua")
 local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
@@ -225,6 +225,25 @@ function SyncMain:SyncToLocalSingle(callback)
     Progress:Init(syncInstance)
 end
 
+function SyncMain:SyncToDataSourceByWorldName(worldName, callback)
+    if not KeepworkServiceSession:IsSignedIn() then
+        return
+    end
+
+    local userId = Mod.WorldShare.Store:Get('user/userId')
+
+    KeepworkServiceWorld:GetMyWorldByWorldName(worldName, function(data)        
+        if data then
+            KeepworkServiceWorld:SetWorldInstanceByPid(data.projectId, function()
+                SyncMain:SyncToDataSource(callback)
+            end)
+        else
+            LocalServiceWorld:SetWorldInstanceByFoldername(worldName)
+            SyncMain:SyncToDataSource(callback)
+        end
+    end)
+end
+
 function SyncMain:SyncToDataSource(callback)
     local function Handle()
         -- close the notice
@@ -391,7 +410,7 @@ function SyncMain:GetWorldDateTable()
 end
 
 function SyncMain:CheckAndUpdatedBeforeEnterMyHome(callback)
-    if not KeepworkService:IsSignedIn() then
+    if not KeepworkServiceSession:IsSignedIn() then
         return false
     end
 

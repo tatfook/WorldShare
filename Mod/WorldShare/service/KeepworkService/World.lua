@@ -162,7 +162,36 @@ function KeepworkServiceWorld:GetWorldsList(callback)
     KeepworkWorldsApi:GetWorldList(10000, 1, callback)
 end
 
--- get world by worldname
+-- get my create world by world name
+function KeepworkServiceWorld:GetMyWorldByWorldName(foldername, callback)
+    local userId = Mod.WorldShare.Store:Get('user/userId')
+
+    KeepworkWorldsApi:GetWorldByName(foldername, function(data, err)
+        if type(data) ~= 'table' then
+            if callback and type(callback) == 'function' then
+                callback(false)    
+            end
+            return
+        end
+
+        for key, item in ipairs(data) do
+            if userId == item.user.id then
+                -- exist
+                if callback and type(callback) == 'function' then
+                    callback(item)    
+                end
+                return
+            end
+        end
+
+        if callback and type(callback) == 'function' then
+            callback(false)    
+        end
+    end)
+end
+
+-- only for create world page sync and rename feature
+-- this is a filter for world list
 function KeepworkServiceWorld:GetWorld(foldername, shared, worldUserId, callback)
     if not foldername or
        shared == nil or
