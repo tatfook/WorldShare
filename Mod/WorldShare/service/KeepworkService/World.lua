@@ -341,9 +341,9 @@ function KeepworkServiceWorld:UnlockWorld(callback)
 
             if not isExist then
                 self.isUnlockFetching = false
-                
+
                 if callback and type(callback) == 'function' then
-                    callback()
+                    callback(false)
                 end
 
                 return
@@ -363,14 +363,14 @@ function KeepworkServiceWorld:UnlockWorld(callback)
                         self.isUnlockFetching = false
 
                         if type(callback) == 'function' then
-                            callback()
+                            callback(true)
                         end
                     end,
                     function()
                         self.isUnlockFetching = false
 
                         if type(callback) == 'function' then
-                            callback()
+                            callback(false)
                         end
                     end
                 )
