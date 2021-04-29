@@ -262,7 +262,8 @@ EventTrackingService.map = {
             parents_help = 'click.vip.parents_help', -- "找家长续费" 点击次数
             payment_completed = 'click.vip.payment_completed', -- “已完成支付” 点击次数
             funnel = {
-                open = 'click.vip.funnel.open' -- 弹出会员弹窗次数
+                open = 'click.vip.funnel.open', -- 弹出会员弹窗次数
+                open1 = 'click.vip.funnel.open1', -- 弹出会员弹窗次数
             }
         },
         macro = { -- 宏
