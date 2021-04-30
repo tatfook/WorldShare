@@ -130,6 +130,12 @@ function MainLogin:Show1()
 end
 
 function MainLogin:Show2()
+    local MainLoginPage = Mod.WorldShare.Store:Get('page/MainLogin')
+
+    if MainLoginPage then
+        return
+    end
+
     Mod.WorldShare.Utils.ShowWindow({
         url = 'Mod/WorldShare/cellar/Theme/MainLogin/MainLogin.html', 
         name = 'MainLogin', 
@@ -338,11 +344,11 @@ function MainLogin:SelectMode(callback)
         end
 
         if mode == 'HOME' then
+            GameMainLogin:UpdateCoreClient()
             self:ShowLoginNew()
-            GameMainLogin:UpdateCoreClient()
         elseif mode == 'SCHOOL' then
-            self:ShowLoginAtSchool('SCHOOL')
             GameMainLogin:UpdateCoreClient()
+            self:ShowLoginAtSchool('SCHOOL')
         elseif mode == 'LOCAL' then
             self:ShowLoginAtSchool('LOCAL')
         end
