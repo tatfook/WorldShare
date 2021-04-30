@@ -44,10 +44,10 @@ function MainLogin:Init()
 end
 
 function MainLogin:Show()
-    if System.os.GetPlatform() == 'android' then
-        self:ShowAndroid()
-        return
-    end
+    -- if System.os.GetPlatform() == 'android' then
+        -- self:ShowAndroid()
+        -- return
+    -- end
 
     local localVersion = ParaEngine.GetAppCommandLineByParam("localVersion", nil)
 
