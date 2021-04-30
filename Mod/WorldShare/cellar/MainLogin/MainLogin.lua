@@ -97,6 +97,8 @@ function MainLogin:ShowAndroid()
         height = 0,
         cancelShowAnimation = true,
     })
+
+    self:ShowAndroidLogin()
 end
 
 function MainLogin:Show1()
@@ -337,8 +339,10 @@ function MainLogin:SelectMode(callback)
 
         if mode == 'HOME' then
             self:ShowLoginNew()
+            GameMainLogin:UpdateCoreClient()
         elseif mode == 'SCHOOL' then
             self:ShowLoginAtSchool('SCHOOL')
+            GameMainLogin:UpdateCoreClient()
         elseif mode == 'LOCAL' then
             self:ShowLoginAtSchool('LOCAL')
         end

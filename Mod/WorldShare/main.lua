@@ -95,6 +95,7 @@ NPL.load('(gl)Mod/WorldShare/service/FileDownloader/FileDownloader.lua')
 -- get table lib
 local SocketService = commonlib.gettable('Mod.WorldShare.service.SocketService')
 local Cef3Manager = commonlib.gettable('Mod.WorldShare.service.Cef3Manager')
+local MainLogin = commonlib.gettable('MyCompany.Aries.Game.MainLogin')
 
 -- bottles
 local UserConsole = NPL.load('(gl)Mod/WorldShare/cellar/UserConsole/Main.lua')
@@ -177,6 +178,13 @@ function WorldShare:init()
     end)
 
     WorldShareCommand:Init()
+
+    -- prevent autoupdate if local school version
+    local localVersion = ParaEngine.GetAppCommandLineByParam('localVersion', nil)
+
+    if localVersion then
+        MainLogin.state.IsUpdaterStarted = true
+    end
 end
 
 function WorldShare:OnInitDesktop()
