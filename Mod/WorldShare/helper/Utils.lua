@@ -151,7 +151,6 @@ function Utils.SetTimeOut(callback, times)
 end
 
 function Utils.FixCenter(width, height)
-    NPL.load("(gl)script/ide/System/Windows/Screen.lua")
     local Screen = commonlib.gettable("System.Windows.Screen")
 
     local marginLeft = math.floor((Screen:GetWidth() / 2))

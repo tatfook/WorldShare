@@ -5,7 +5,7 @@ Date: 2020.9.1
 Desc: 
 use the lib:
 ------------------------------------------------------------
-local Create = NPL.load('(gl)Mod/WorldShare/cellar/UserConsole/Create/Create.lua')
+local Create = NPL.load('(gl)Mod/WorldShare/cellar/Create/Create.lua')
 ------------------------------------------------------------
 ]]
 

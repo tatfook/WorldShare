@@ -11,7 +11,6 @@ local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkServ
 
 -- service
 local KeepworkService = NPL.load("../KeepworkService.lua")
-local GitGatewayService = NPL.load("../GitGatewayService.lua")
 local KpChatChannel = NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/ChatSystem/KpChatChannel.lua")
 local KeepworkServiceSchoolAndOrg = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/SchoolAndOrg.lua")
 local SyncServiceCompare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
@@ -20,7 +19,6 @@ local SyncServiceCompare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Comp
 local KeepworkUsersApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Users.lua")
 local KeepworkKeepworksApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/KeepworkKeepworksApi.lua")
 local KeepworkOauthUsersApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/OauthUsers.lua")
-local AccountingOrgApi = NPL.load("(gl)Mod/WorldShare/api/Accounting/Org.lua")
 local KeepworkSocketApi = NPL.load("(gl)Mod/WorldShare/api/Socket/Socket.lua")
 local AccountingVipCodeApi = NPL.load("(gl)Mod/WorldShare/api/Accounting/ParacraftVipCode.lua")
 
@@ -335,7 +333,16 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
 end
 
 function KeepworkServiceSession:Logout(mode, callback)
-    if KeepworkService:IsSignedIn() then
+    if self:IsSignedIn() then
+        local username = Mod.WorldShare.Store:Get('user/username')
+
+        self:SaveSigninInfo(
+            {
+                account = username,
+                loginServer = KeepworkService:GetEnv()
+            }
+        )
+
         if not mode or mode ~= "KICKOUT" then
             KeepworkUsersApi:Logout(function()
                 KeepworkSocketApi:SendMsg("app/logout", {})
@@ -343,7 +350,7 @@ function KeepworkServiceSession:Logout(mode, callback)
                 Logout()
                 self:ResetIndulge()
                 Mod.WorldShare.Store:Remove('user/bLoginSuccessed')
-                
+
                 if callback and type(callback) == "function" then
                     callback()
                 end
@@ -371,6 +378,70 @@ function KeepworkServiceSession:RegisterWithAccount(username, password, callback
         username = username,
         password = password,
         channel = 3
+    }
+
+    KeepworkUsersApi:Register(
+        params,
+        function(registerData, err)
+            if registerData.id then
+                self:Login(
+                    username,
+                    password,
+                    function(loginData, err)
+                        if err ~= 200 then
+                            registerData.message = L'注册成功，登录失败'
+                            registerData.code = 9
+
+                            if type(callback) == 'function' then
+                                callback(registerData)
+                            end
+
+                            return false
+                        end
+
+                        loginData.autoLogin = autoLogin
+                        loginData.rememberMe = rememberMe
+                        loginData.password = password
+
+                        self:LoginResponse(loginData, err, function()
+                            if type(callback) == 'function' then
+                                callback(registerData)
+                            end
+                        end)
+                    end
+                )
+                return true
+            end
+
+            if type(callback) == 'function' then
+                callback(registerData)
+            end
+        end,
+        function(data, err)
+            if type(callback) == 'function' then
+                if type(data) == 'table' and data.code then
+                    callback(data)
+                else
+                    callback({ message = L"未知错误", code = err})
+                end
+            end
+        end,
+        { 400 }
+    )
+end
+
+function KeepworkServiceSession:RegisterWithPhoneAndLogin(username, cellphone, cellphoneCaptcha, password, autoLogin, rememberMe, callback)
+    if not cellphone or not cellphoneCaptcha or not password then
+        return
+    end
+
+    local params = {
+        username = username,
+        cellphone = cellphone,
+        captcha = cellphoneCaptcha,
+        password = password,
+        channel = 3,
+        isBind = true
     }
 
     KeepworkUsersApi:Register(
@@ -456,8 +527,6 @@ function KeepworkServiceSession:RegisterWithPhone(username, cellphone, cellphone
                             return false
                         end
 
-                        loginData.autoLogin = autoLogin
-                        loginData.rememberMe = rememberMe
                         loginData.password = password
 
                         self:LoginResponse(loginData, err, function()
@@ -770,7 +839,7 @@ function KeepworkServiceSession:GetUserTokenFromUrlProtocol()
 end
 
 function KeepworkServiceSession:CheckTokenExpire(callback)
-    if not KeepworkService:IsSignedIn() then
+    if not self:IsSignedIn() then
         return false
     end
 
@@ -1079,4 +1148,36 @@ function KeepworkServiceSession:GetUserWhere()
     else
         return ''
     end
+end
+
+function KeepworkServiceSession:LoginWithPhoneNumber(cellphone, cellphoneCaptcha, callback)
+    if not cellphone or type(cellphone) ~= 'string' then
+        return
+    end
+
+    if not cellphoneCaptcha or type(cellphoneCaptcha) ~= 'string' then
+        return
+    end
+
+    local machineCode = SessionsData:GetDeviceUUID()
+    local platform
+
+    if System.os.GetPlatform() == 'mac' or
+       System.os.GetPlatform() == 'win32' then
+        platform = "PC"
+    elseif System.os.GetPlatform() == 'android' or
+           System.os.GetPlatform() == 'ios' then
+        platform = "MOBILE"
+    else
+        return
+    end
+
+    local params = {
+        cellphone = cellphone,
+        cellphoneCaptcha = cellphoneCaptcha,
+        platform = platform,
+        machineCode = machineCode,
+    }
+
+    KeepworkUsersApi:Login(params, callback, callback)
 end

@@ -1,0 +1,538 @@
+<html>
+    <body> 
+        <pe:mcml>
+            <script type='text/npl'>
+                <![CDATA[
+                    -- bottles
+                    local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
+                    local RegisterModal = NPL.load('(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua')
+
+                    -- service
+                    local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+                    local EventTrackingService = NPL.load('(gl)Mod/WorldShare/service/EventTracking.lua')
+
+                    -- helper
+                    local Validated = NPL.load('(gl)Mod/WorldShare/helper/Validated.lua')
+
+                    -- database
+                    local SessionsData = NPL.load('(gl)Mod/WorldShare/database/SessionsData.lua')
+
+                    local page = document:GetPageCtrl()
+
+                    Mod.WorldShare.Utils.SetTimeOut(function()
+                        local current_selected_user = KeepworkServiceSession:LoadSigninInfo()
+                        local signed_in_node = page:FindControl('signed_in')
+                        local login_node = page:FindControl('login')
+                        local switch_account_node = page:FindControl('switch_account')
+
+                        if current_selected_user and
+                           current_selected_user.autoLogin and
+                           current_selected_user.rememberMe and
+                           current_selected_user.token then
+                            if KeepworkServiceSession:IsSignedIn() then
+                                signed_in_node.visible = true
+                                login_node.visible = false
+                                switch_account_node.visible = true
+                            else
+                                MainLogin:LoginWithToken(current_selected_user.token, function(b_succeed, reason, message)
+                                    if b_succeed then
+                                        page:Refresh(0.01)
+                                    else
+                                        signed_in_node.visible = false
+                                        login_node.visible = true
+                                        switch_account_node.visible = false
+                                    end
+                                end)
+                            end
+                        else
+                            signed_in_node.visible = false
+                            login_node.visible = true
+                            switch_account_node.visible = false
+                        end
+                    end, 0)
+
+                    function close()
+                        page:CloseWindow()
+                    end
+
+                    function set_account_mode()
+                        set_mode('account')
+                    end
+
+                    function set_phone_mode()
+                        set_mode('phone')
+                    end
+
+                    function set_mode(mode)
+                        local login_with_phone_number = page:FindControl('login_with_phone_number')
+                        local login_with_account = page:FindControl('login_with_account')
+
+                        if mode == 'account' then
+                            login_with_phone_number.visible = false
+                            login_with_account.visible = true
+                        elseif mode == 'phone' then
+                            login_with_phone_number.visible = true
+                            login_with_account.visible = false
+                        end
+                    end
+
+                    function get_phone_captcha()
+                        local phone_number = page:GetValue('phone_number')
+
+                        if not Validated:Phone(phone_number) then
+                            _guihelper.MessageBox(L'*手机号格式错误')
+                            return
+                        end
+
+                        if is_clicked_get_phone_captcha then
+                           return false
+                        end
+
+                        is_clicked_get_phone_captcha = true
+
+                        local times = 60
+
+                        local timer = commonlib.Timer:new({
+                            callbackFunc = function(timer)
+                                page:SetValue('get_phone_captcha', format('%s(%ds)', L'重新发送', times))
+
+                                if times == 0 then
+                                    is_clicked_get_phone_captcha = false
+                                    page:SetValue('get_phone_captcha', L'获取验证码')
+                                    timer:Change(nil, nil)
+                                end
+
+                                times = times - 1
+                            end
+                        })
+
+                        KeepworkServiceSession:GetPhoneCaptcha(phone_number, function(data, err)
+                            if err == 400 and data and data.code and data.message then
+                                is_clicked_get_phone_captcha = false
+                                page:SetValue('get_phone_captcha', L'获取验证码')
+                                GameLogic.AddBBS(nil, format('%s%s(%d)', L'获取验证码失败，错误信息：', data.message, data.code), 3000, '255 0 0')
+                                timer:Change(nil, nil)
+                            end
+                        end)
+
+                        timer:Change(1000, 1000)
+                    end
+
+                    function user_agreement()
+                        RegisterModal:ShowUserAgreementPage()
+                    end
+
+                    function login_action()
+                        local phone_number = page:GetValue('phone_number')
+                        local phone_captcha = page:GetValue('phone_captcha')
+
+                        if not phone_number or not Validated:Phone(phone_number) then
+                            _guihelper.MessageBox(L'*手机号格式错误')
+                            return
+                        end
+
+                        if not phone_captcha or phone_captcha == '' then
+                            _guihelper.MessageBox(L'*手机验证码不能为空')
+                            return
+                        end
+
+                        KeepworkServiceSession:CellphoneCaptchaVerify(
+                            phone_number,
+                            phone_captcha,
+                            function(result)
+                                if not result or type(result) ~= 'table' then
+                                    return
+                                end
+
+                                if result.verify ~= true then
+                                    _guihelper.MessageBox(format(L'%s(%d)', result.message, result.code))
+                                    return
+                                end
+
+                                KeepworkServiceSession:CheckPhonenumberExist(phone_number, function(be_exist)
+                                    if be_exist then
+                                        MainLogin:AndroidLoginWithPhoneNumber(phone_number, phone_captcha, function(be_succeed, reason, message)
+                                            if not be_succeed then
+                                                _guihelper.MessageBox(message)
+                                                return
+                                            end
+
+                                            page:Refresh(0.01)
+                                        end)
+                                    else
+                                        MainLogin.cellphone = phone_number
+                                        MainLogin.cellphoneCaptcha = phone_captcha
+
+                                        close()
+                                        MainLogin:ShowAndroidSetUser()
+                                    end
+                                end)
+                            end
+                        )
+                    end
+
+                    function login_with_password_action()
+                        local account = page:GetValue('account')
+                        local password = page:GetValue('password')
+
+                        MainLogin:AndroidLoginAction(
+                            account,
+                            password,
+                            function(be_succeed, reason, message)
+                                if not be_succeed then
+                                    _guihelper.MessageBox(message)
+                                    return
+                                end
+
+                                page:Refresh(0.01)
+                            end
+                        )
+                    end
+
+                    function local_mode()
+                        close()
+                        KeepworkServiceSession:Logout()
+                        MainLogin:EnterUserConsole(true)
+                    end
+
+                    local isPasswordVisible = false
+
+                    function update_password()
+                        local password_show_value = page:GetValue('password_show')
+                        local password_hide_value = page:GetValue('password_hide')
+
+                        if isPasswordVisible then
+                            page:SetValue('password', password_show_value)
+                        else
+                            page:SetValue('password', password_hide_value)
+                        end
+                    end
+
+                    function set_password_show_or_hide()
+                        local password_show_node = page:FindControl('password_show')
+                        local password_hide_node = page:FindControl('password_hide')
+                        local password_show_value = page:GetValue('password_show')
+                        local password_hide_value = page:GetValue('password_hide')
+
+                        if isPasswordVisible then
+                            password_show_node.visible = false
+                            password_hide_node.visible = true
+
+                            page:SetValue('password_show', '')
+                            page:SetValue('password_hide', password_show_value)
+                            page:SetValue('password', password_show_value)
+
+                            isPasswordVisible = false
+                        else
+                            password_show_node.visible = true
+                            password_hide_node.visible = false
+
+                            page:SetValue('password_show', password_hide_value)
+                            page:SetValue('password_hide', '')
+                            page:SetValue('password', password_hide_value)
+
+                            isPasswordVisible = true
+                        end
+                    end
+
+                    function get_username()
+                        return Mod.WorldShare.Store:Get('user/username') or ''
+                    end
+
+                    function enter()
+                        MainLogin:Next()
+                    end
+
+                    function switch_account()
+                        KeepworkServiceSession:Logout(nil, function()
+                            local signed_in_node = page:FindControl('signed_in')
+                            local login_node = page:FindControl('login')
+                            local switch_account_node = page:FindControl('switch_account')
+
+                            signed_in_node.visible = false
+                            login_node.visible = true
+                            switch_account_node.visible = false
+                        end)
+                    end
+                ]]>
+            </script>
+            <style type='text/mcss' src='Mod/WorldShare/cellar/Theme/Mcss/MainLoginMcss.mcss'>
+                {
+                    container_size = {
+                        width = 652.2395,
+                        height = 416.66,
+                        padding = 10,
+                        ['margin-left'] = -326.1197,
+                        ['margin-top'] = -115,
+                    },
+                }
+            </style>
+            <pe:container alignment='_rt' name='switch_account' visible='true' style='position: relative;background:;'>
+                <input type='button'
+                       onclick='switch_account'
+                       style='width: 192px;
+                              height: 74px;
+                              margin-right: 100px;
+                              margin-top: 60px;
+                              background: url(Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#26 797 192 74)' />
+            </pe:container>
+            <pe:container alignment='_ct' name='signed_in' visible='false' class='main_login_mobile_container_bg container_size'>
+                <div style='height: 40px;'>
+                    <img style='width: 97.85px;
+                                height: 30px;
+                                margin-top: 8px;
+                                margin-left: 25px;'
+                         src='Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#844 580 137 42' />
+                </div>
+                <div style='width: 632px;
+                            text-align: center;
+                            font-size: 50px;
+                            base-font-size: 50px;
+                            margin-top: 110px;
+                            color: #FFFFFF;
+                            margin-left: -3px;'>
+                    <%= get_username() %>
+                </div>
+                <div>
+                    <input type='button'
+                           textscale=1.8
+                           class='main_login_mobile_blue_button'
+                           onclick='enter'
+                           style='width: 230px;
+                                  height: 71.37px;
+                                  font-size: 15px;
+                                  base-font-size: 15px;
+                                  margin-left: 200px;
+                                  margin-top: 90px;
+                                  color: #FFFFFF;'
+                           value='<%= L"开始" %>' />
+                </div>
+            </pe:container>
+            <pe:container alignment='_ct' name='login' visible='true' class='main_login_mobile_container_bg container_size'>
+                <div style='height: 40px;'>
+                    <img style='width: 69px;
+                                height: 30px;
+                                margin-top: 8px;
+                                margin-left: 45px;'
+                         src='Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#907 94 92 40' />
+                </div>
+                <pe:container name='login_with_phone_number' visible='true' style='background:;position: relative;'>
+                    <div style='margin-top: 20px;'>
+                        <div style='margin-left: 75px;'>
+                            <input type='text'
+                                   spacing='10'
+                                   MoveViewWhenAttachWithIME='true'
+                                   class='main_login_mobile_textfield'
+                                   name='phone_number'
+                                   EmptyText='<%= L"请输入手机号" %>'
+                                   style='textcolor: #FFFFFF;
+                                          text-valign: center;
+                                          line-height: 30px;
+                                          font-size: 22px;
+                                          base-font-size: 22px;
+                                          width: 480px;
+                                          height: 55px;'/>
+                        </div>
+                        <div style='margin-top: 10px;
+                                    margin-left: 85px;
+                                    font-size: 17px;
+                                    base-font-size: 17px;
+                                    color: #A0A5BA;'>
+                            <%= L"如果该手机号未注册，我们将为您注册" %>
+                        </div>
+                        <div style='margin-top: 10px;margin-left: 75px;'>
+                            <input type='button'
+                                   zorder=1
+                                   name='get_phone_captcha'
+                                   onclick='get_phone_captcha'
+                                   value='<%= L"获取验证码" %>'
+                                   style='position: relative;
+                                          min-width: 135px;
+                                          height: 45px;
+                                          margin-left: 342px;
+                                          margin-top: 6px;
+                                          color: #34B0FF;
+                                          font-size: 19px;
+                                          base-font-size: 19px;
+                                          text-offset-y: -1;
+                                          background: url(Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#28 577 169 62)' />
+                            <input type='text'
+                                   spacing='10'
+                                   name='phone_captcha'
+                                   MoveViewWhenAttachWithIME='true'
+                                   class='main_login_mobile_textfield'
+                                   EmptyText='<%= L"请输入验证码" %>'
+                                   style='textcolor: #FFFFFF;
+                                          text-valign: center;
+                                          line-height: 30px;
+                                          font-size: 22px;
+                                          base-font-size: 22px;
+                                          width: 480px;
+                                          height: 55px;'/>
+                        </div>
+                        <div style='margin-top: 10px;margin-left: 75px;'>
+                            <div style='float: left;'>
+                                <input type="checkbox"
+                                       iconsize="18"
+                                       CheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#275 79 12 12"
+                                       UncheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#295 79 12 12"
+                                       style="float:left;margin-top:4px;min-width:90px;"
+                                       name="phone_agree"
+                                       onclick="set_phone_agree"
+                                       checked="checked"/>
+                                <div style="float:left; color: white;base-font-size: 17px;font-size: 17px;margin-left: 4px;">
+                                    <div style="float:left;width: 2px;"></div>
+                                    <%= L"我同意" %>
+                                    <div style="float:left;color: #EDB853" onclick="user_agreement()"><%= L"《Paracraft用户协议》" %></div>
+                                    <%= L"中的内容" %>
+                                </div>
+                            </div>
+                            <div style='float: left;margin-left: 45px;'>
+                                <div style='position: relative;
+                                            height: 1px;
+                                            width: 108%;
+                                            margin-top: 27px;
+                                            background-color: #FFFFFF;'></div>
+                                <div style='background:;
+                                            font-size: 17px;
+                                            base-font-size: 17px;
+                                            color: #FFFFFF;'
+                                     onclick='set_account_mode()'><%= L'使用密码登录' %></div>
+                            </div>
+                        </div>
+                        <div style='margin-top: 45px;margin-left: 75px;'>
+                            <div style='float: left;'>
+                                <input type='button'
+                                       class='main_login_mobile_blue_button'
+                                       textscale=1.8
+                                       style='width: 230px;
+                                              color: #FFFFFF;
+                                              height: 71.37px;
+                                              font-size: 15px;
+                                              base-font-size: 15px;'
+                                       onclick='login_action'
+                                       value='<%= L"登录" %>' />
+                            </div>
+                            <div style='float: left;margin-left: 10px;'>
+                                <input type='button'
+                                       class='main_login_mobile_baby_blue_button'
+                                       textscale=1.8
+                                       style='width: 230px;
+                                              color: #FFFFFF;
+                                              height: 71.37px;
+                                              font-size: 15px;
+                                              base-font-size: 15px;'
+                                       onclick='local_mode'
+                                       value='<%= L"本地模式" %>' />
+                            </div>
+                        </div>
+                    </div>
+                </pe:container>
+                <pe:container name='login_with_account' visible='false' style='background:;position: relative;'>
+                    <div style='margin-top: 40px;'>
+                        <div style='margin-left: 75px;'>
+                            <input type='text'
+                                   spacing='10'
+                                   name='account'
+                                   MoveViewWhenAttachWithIME='true'
+                                   class='main_login_mobile_textfield'
+                                   EmptyText='<%= L"请输入手机号" %>'
+                                   style='textcolor: #FFFFFF;
+                                          text-valign: center;
+                                          line-height: 30px;
+                                          font-size: 22px;
+                                          base-font-size: 22px;
+                                          width: 480px;
+                                          height: 55px;'/>
+                        </div>
+                        <div style='margin-left: 75px;margin-top: 20px;'>
+                            <input type='text'
+                                   spacing='10'
+                                   onchange='update_password'
+                                   SkipAutoBadWordFilter='true'
+                                   MoveViewWhenAttachWithIME='true'
+                                   EmptyText='<%= L"请输入密码" %>'
+                                   style='textcolor: #FFFFFF;
+                                          text-valign: center;
+                                          line-height: 30px;
+                                          font-size: 22px;
+                                          base-font-size: 22px;
+                                          width: 480px;
+                                          height: 55px;'
+                                   name='password_show'
+                                   class='main_login_mobile_textfield'
+                                   visible='false' />
+                            <input type='text'
+                                   spacing='10'
+                                   onchange='update_password'
+                                   PasswordChar='*'
+                                   SkipAutoBadWordFilter='true'
+                                   MoveViewWhenAttachWithIME='true'
+                                   EmptyText='<%= L"请输入密码" %>'
+                                   style='textcolor: #FFFFFF;
+                                          text-valign: center;
+                                          line-height: 30px;
+                                          font-size: 22px;
+                                          base-font-size: 22px;
+                                          width: 480px;
+                                          height: 55px;
+                                          margin-left: -480px;'
+                                   class='main_login_mobile_textfield'
+                                   name='password_hide'
+                                   visible='true' />
+                            <input type='hidden' name='password' value='' />
+                            <input name='show_or_hide_password_button'
+                                   type='checkbox'
+                                   checked='false'
+                                   iconsize='35'
+                                   style='margin-left: -50px;
+                                          margin-top: 10px;'
+                                   CheckedBG='Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#909 151 35 35'
+                                   UncheckedBG='Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#969 147 35 35'
+                                   onclick='set_password_show_or_hide' />
+                        </div>
+                        <div style='margin-left: 430px;margin-top: 10px;'>
+                            <div>
+                                <div style='position: relative;
+                                            height: 1px;
+                                            width: 124%;
+                                            margin-top: 27px;
+                                            background-color: #FFFFFF;'></div>
+                                <div style='background:;
+                                            font-size: 17px;
+                                            base-font-size: 17px;
+                                            color: #FFFFFF;'
+                                     onclick='set_phone_mode()'><%= L'使用验证码登录' %></div>
+                            </div>
+                        </div>
+                        <div style='margin-top: 35px;margin-left: 75px;'>
+                            <div style='float: left;'>
+                                <input type='button'
+                                       class='main_login_mobile_blue_button'
+                                       onclick='login_with_password_action'
+                                       textscale=1.8
+                                       style='width: 230px;
+                                              color: #FFFFFF;
+                                              height: 71.37px;
+                                              font-size: 15px;
+                                              base-font-size: 15px;'
+                                       value='<%= L"登录" %>' />
+                            </div>
+                            <div style='float: left;margin-left: 10px;'>
+                                <input type='button'
+                                       class='main_login_mobile_baby_blue_button'
+                                       textscale=1.8
+                                       style='width: 230px;
+                                              color: #FFFFFF;
+                                              height: 71.37px;
+                                              font-size: 15px;
+                                              base-font-size: 15px;'
+                                       value='<%= L"本地模式" %>' />
+                            </div>
+                        </div>
+                    </div>
+                </pe:container>
+            </pe:container>
+        </pe:mcml>
+    </body>
+</html>

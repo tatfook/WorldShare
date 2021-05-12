@@ -22,11 +22,13 @@ local KeepworkUsersApi = NPL.export()
     password string necessary password
     platform string not necessary platform
     machineCode string not necessary machine code
-    oauthToken string not necessary third party token 
+    oauthToken string not necessary third party token
+    cellphone string not necessary login with phone number
+    cellphoneCaptcha string not necessary A captcha for cellphone
 ]]
 -- return: object
 function KeepworkUsersApi:Login(params, success, error)
-    if not params or type(params.username) ~= "string" or type(params.password) ~= "string" then
+    if not params or type(params) ~= 'table' then
         return false
     end
 

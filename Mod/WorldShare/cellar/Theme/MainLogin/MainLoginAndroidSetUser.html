@@ -1,0 +1,464 @@
+<html>
+    <body>
+        <pe:mcml>
+            <script type="text/npl">
+                <![CDATA[
+                    -- bottles
+                    local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
+
+                    -- helper
+                    local Validated = NPL.load('(gl)Mod/WorldShare/helper/Validated.lua')
+
+                    -- service
+                    local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+                    local KeepworkServiceSchoolAndOrg = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/SchoolAndOrg.lua')
+
+                    local page = document:GetPageCtrl()
+                    local result
+                    local curValue
+
+                    function close()
+                        page:CloseWindow()
+                    end
+
+                    function next()
+                        local username = page:GetValue('username')
+                        local password = page:GetValue('password')
+
+                        if not Validated:Account(username) then
+                            _guihelper.MessageBox(L'*用户名不合法')
+                            return
+                        end
+
+                        if not Validated:Password(password) then
+                            _guihelper.MessageBox(L'*密码不合法')
+                            return
+                        end
+
+                        KeepworkServiceSession:CheckUsernameExist(username, function(be_exist)
+                            if be_exist then
+                                _guihelper.MessageBox(L'*此用户名已存在，换一个试试吧')
+                                return
+                            end
+
+                            local cellphone = MainLogin.cellphone
+                            local cellphoneCaptcha = MainLogin.cellphoneCaptcha
+
+                            -- register and login
+                            MainLogin:AndroidRegisterWithPhoneNumber(
+                                username,
+                                cellphone,
+                                cellphoneCaptcha,
+                                password,
+                                true,
+                                true,
+                                function()
+                                    -- hide set username container and show select school container
+                                    page:FindControl('set_username').visible = false
+                                    page:FindControl('set_school').visible = true
+                                end
+                            )
+                        end)
+                    end
+
+                    function update_school_list(_, mcmlNode)
+                        local school_list_node = page:FindControl('school_list')
+                        local school_list_row1_node = page:FindControl('school_list_row1')
+                        local school_list_row2_node = page:FindControl('school_list_row2')
+                        local school_list_row3_node = page:FindControl('school_list_row3')
+                        local text = mcmlNode:GetUIValue()
+
+                        school_list_node.visible = true
+
+                        KeepworkServiceSchoolAndOrg:SearchSchoolByName(text, 0, nil, function(data)
+                            if not data or type(data) ~= 'table' then
+                                return
+                            end
+
+                            result = data
+                            local count = #result
+
+                            for key, item in ipairs(result) do
+                                item.text = item.name or ""
+                                item.value = item.id
+
+                                if key > 3 then
+                                    break
+                                end
+                            end
+
+                            for key, item in ipairs(result) do
+                                for dKey, dItem in ipairs(result) do
+                                    if item.name == dItem.name then
+                                        local remark = item.region.city.name ..
+                                                       item.region.county.name
+                                        item.text = item.name .. '(' .. remark .. ')'
+                                        break
+                                    end
+                                end
+                            end
+
+                            if count == 0 then
+                                school_list_row1_node.visible = false
+                                school_list_row2_node.visible = false
+                                school_list_row3_node.visible = false
+                            elseif count == 1 then
+                                school_list_row1_node.visible = true
+                                school_list_row2_node.visible = false
+                                school_list_row3_node.visible = false
+
+                                page:SetValue('school_list_number_row1', result[1].id)
+                                page:SetValue('school_list_name_row1', result[1].text)
+                            elseif count == 2 then
+                                school_list_row1_node.visible = true
+                                school_list_row2_node.visible = true
+                                school_list_row3_node.visible = false
+
+                                page:SetValue('school_list_number_row1', result[1].id)
+                                page:SetValue('school_list_name_row1', result[1].text)
+                                page:SetValue('school_list_number_row2', result[2].id)
+                                page:SetValue('school_list_name_row2', result[2].text)
+                            elseif count >= 3 then
+                                school_list_row1_node.visible = true
+                                school_list_row2_node.visible = true
+                                school_list_row3_node.visible = true
+
+                                page:SetValue('school_list_number_row1', result[1].id)
+                                page:SetValue('school_list_name_row1', result[1].text)
+                                page:SetValue('school_list_number_row2', result[2].id)
+                                page:SetValue('school_list_name_row2', result[2].text)
+                                page:SetValue('school_list_number_row3', result[3].id)
+                                page:SetValue('school_list_name_row3', result[3].text)
+                            else
+                                school_list_row1_node.visible = false
+                                school_list_row2_node.visible = false
+                                school_list_row3_node.visible = false
+                            end
+                        end)
+                    end
+
+                    function next1()
+                        KeepworkServiceSchoolAndOrg:ChangeSchool(curValue, function(bSuccessed)
+                            close()
+                            MainLogin:ShowAndroidLogin()
+                        end)
+                    end
+
+                    function skip()
+                        close()
+                        MainLogin:ShowAndroidLogin()
+                    end
+
+                    local isPasswordVisible = false
+
+                    function update_password()
+                        local password_show_value = page:GetValue('password_show')
+                        local password_hide_value = page:GetValue('password_hide')
+
+                        if isPasswordVisible then
+                            page:SetValue('password', password_show_value)
+                        else
+                            page:SetValue('password', password_hide_value)
+                        end
+                    end
+
+                    function set_password_show_or_hide()
+                        local password_show_node = page:FindControl('password_show')
+                        local password_hide_node = page:FindControl('password_hide')
+                        local password_show_value = page:GetValue('password_show')
+                        local password_hide_value = page:GetValue('password_hide')
+
+                        if isPasswordVisible then
+                            password_show_node.visible = false
+                            password_hide_node.visible = true
+
+                            page:SetValue('password_show', '')
+                            page:SetValue('password_hide', password_show_value)
+                            page:SetValue('password', password_show_value)
+
+                            isPasswordVisible = false
+                        else
+                            password_show_node.visible = true
+                            password_hide_node.visible = false
+
+                            page:SetValue('password_show', password_hide_value)
+                            page:SetValue('password_hide', '')
+                            page:SetValue('password', password_hide_value)
+
+                            isPasswordVisible = true
+                        end
+                    end
+
+                    function select_school_1()
+                        select_school(1)
+                    end
+
+                    function select_school_2()
+                        select_school(2)
+                    end
+
+                    function select_school_3()
+                        select_school(3)
+                    end
+
+                    function select_school(index)
+                        page:SetUIBackground('school_list_click_row1', '')
+                        page:SetUIBackground('school_list_click_row2', '')
+                        page:SetUIBackground('school_list_click_row3', '')
+
+                        local selectedBg = 'Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#907 333 50 50:13 13 13 13'
+
+                        if index == 1 then
+                            page:SetUIBackground('school_list_click_row1', selectedBg)
+
+                            curValue = result[1].value
+                        elseif index == 2 then
+                            page:SetUIBackground('school_list_click_row2', selectedBg)
+
+                            curValue = result[2].value
+                        elseif index == 3 then
+                            page:SetUIBackground('school_list_click_row3', selectedBg)
+
+                            curValue = result[3].value
+                        end
+
+                        page:SetUIBackground('next1', 'Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#212 580 290 90')
+                    end
+                ]]>
+            </script>
+            <style type="text/mcss" src='Mod/WorldShare/cellar/Theme/Mcss/MainLoginMcss.mcss'>
+                {
+                    container_size = {
+                        width = 700,
+                        height = 400,
+                        background = '',
+                        ['margin-left'] = -150,
+                        ['margin-top'] = -150,
+                    },
+                    col1 = {
+                        width = 150,
+                        ['padding-left'] = 10,
+                        ['font-size'] = 24,
+                        ['base-font-size'] = 24,
+                        color = '#FFFFFF',
+                        ['padding-top'] = 6,
+                    },
+                    col2 = {
+                        ['padding-left'] = 10,
+                        ['font-size'] = 24,
+                        ['base-font-size'] = 24,
+                        color = '#FFFFFF',
+                        ['padding-top'] = 6,
+                    }
+                }
+            </style>
+            <pe:container
+                alignment='_fi'
+                width='100%'
+                height='100%'
+                style='position: relative;background: url(Texture/Aries/Creator/paracraft/paracraft_mobile_login_bg_32bits.png#0 0 1920 1080)'
+            />
+            <pe:container alignment='_ct' class="container_size">
+                <pe:container name='set_username' visible='true' style='position: relative;background:;'>
+                    <div>
+                        <img style='width: 449px;height: 47px;'
+                             src='Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#521 756 449 47' />
+                    </div>
+                    <div style='margin-top: 30px;'>
+                        <input type='text'
+                               name='username'
+                               MoveViewWhenAttachWithIME='true'
+                               style='width: 600px;
+                                      height: 47px;
+                                      text-valign: center;
+                                      font-size: 22px;
+                                      base-font-size: 22px;
+                                      background: url(Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#907 202 50 50:13 13 13 13)'
+                               EmptyText='<%= L"请输入您的账号名字，请使用字母加数字" %>'
+                        />
+                    </div>
+                    <div style='margin-top: 30px;'>
+                        <input type='text'
+                               spacing='10'
+                               onchange='update_password'
+                               SkipAutoBadWordFilter='true'
+                               MoveViewWhenAttachWithIME='true'
+                               EmptyText='<%= L"请输入4位以上密码" %>'
+                               style='width: 600px;
+                                      height: 47px;
+                                      text-valign: center;
+                                      font-size: 22px;
+                                      base-font-size: 22px;
+                                      background: url(Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#907 202 50 50:13 13 13 13)'
+                               name='password_show'
+                               class='main_login_mobile_textfield'
+                               visible='false' />
+                        <input type='text'
+                               spacing='10'
+                               onchange='update_password'
+                               PasswordChar='*'
+                               SkipAutoBadWordFilter='true'
+                               MoveViewWhenAttachWithIME='true'
+                               EmptyText='<%= L"请输入4位以上密码" %>'
+                               style='width: 600px;
+                                      height: 47px;
+                                      text-valign: center;
+                                      font-size: 22px;
+                                      base-font-size: 22px;
+                                      margin-left: -600px;
+                                      background: url(Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#907 202 50 50:13 13 13 13)'
+                               class='main_login_mobile_textfield'
+                               name='password_hide'
+                               visible='true' />
+                        <input type='hidden' name='password' value='' />
+                        <input name="show_password"
+                               type="checkbox"
+                               checked="false"
+                               iconsize="35"
+                               style="margin-left: -50px;
+                                      margin-top: 8px;"
+                               CheckedBG="Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#913 275 35 35"
+                               UncheckedBG="Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#970 269 35 35"
+                               onclick='set_password_show_or_hide' />
+                    </div>
+                    <div style='margin-top: 30px;'>
+                        <input type='button'
+                               onclick='next()'
+                               textscale=1.8
+                               style='width: 230px;
+                                      height: 70.89px;
+                                      color: #FFFFFF;
+                                      font-size: 15px;
+                                      base-font-size: 15px;'
+                               class='main_login_mobile_blue_button'
+                               value='<%= L"下一步" %>' />
+                    </div>
+                </pe:container>
+                <pe:container name='set_school' visible='false' style='position: relative;background:;margin-top: -30px;'>
+                    <div>
+                        <img style='width: 220px;height: 48px;'
+                             src='Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#524 689 220 48' />
+                    </div>
+                    <div style='margin-top: 30px;'>
+                        <input type='text'
+                               onchange='update_school_list'
+                               MoveViewWhenAttachWithIME='true'
+                               style='width: 600px;
+                                      height: 47px;
+                                      font-size: 22px;
+                                      base-font-size: 22px;
+                                      background: url(Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#907 202 50 50:13 13 13 13)'
+                               EmptyText='<%= L" 请输入学校名称" %>'
+                        />
+                    </div>
+                    <div>
+                        <pe:container
+                            name='school_list'
+                            visible='false'
+                            style='width: 600px;
+                                   height: 141px;
+                                   font-size: 22px;
+                                   base-font-size: 22px;
+                                   text-valign: center;
+                                   background: url(Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#959 12 50 52:13 13 13 13);'>
+                            <pe:container name='school_list_row1' visible='false' style='background:;'>
+                                <div style='width: 600px;height: 47px'>
+                                    <div style='position: relative;'>
+                                        <input type='button'
+                                               name='school_list_click_row1'
+                                               onclick='select_school_1'
+                                               style='width: 600px;height: 47px;background:;' />
+                                    </div>
+                                    <div class='col1' style='float: left;'>
+                                        <label name='school_list_number_row1'
+                                               style='height: 47px;'
+                                               value='' />
+                                    </div>
+                                    <div class='col2' style='float: left;'>
+                                        <label name='school_list_name_row1'
+                                               style='height: 47px;
+                                                      padding-top: 10px;'
+                                               value='' />
+                                    </div>
+                                </div>
+                            </pe:container>
+                            <pe:container name='school_list_row2' visible='false' style='background:;'>
+                                <div style='width: 600px;height: 47px;'>
+                                    <div style='position: relative;'>
+                                        <input type='button'
+                                               name='school_list_click_row2'
+                                               onclick='select_school_2'
+                                               style='width: 600px;height: 47px;background:;' />
+                                    </div>
+                                    <div class='col1' style='float: left;'>
+                                        <label name='school_list_number_row2'
+                                               style='height: 47px;'
+                                               value='' />
+                                    </div>
+                                    <div class='col2' style='float: left'>
+                                        <label name='school_list_name_row2'
+                                               style='height: 47px;
+                                                      padding-top: 10px;'
+                                               value='' />
+                                    </div>
+                                </div>
+                            </pe:container>
+                            <pe:container name='school_list_row3' visible='false' style='background:;'>
+                                <div style='width: 600px;height: 47px;color: #FFFFFF;'>
+                                    <div style='position: relative;'>
+                                        <input type='button'
+                                               name='school_list_click_row3'
+                                               onclick='select_school_3'
+                                               style='width: 600px;height: 47px;background:;' />
+                                    </div>
+                                    <div class='col1' style='float: left;'>
+                                        <label name='school_list_number_row3'
+                                               style='height: 47px;'
+                                               value='' />
+                                    </div>
+                                    <div class='col2' style='float: left'>
+                                        <label name='school_list_name_row3'
+                                               style='height: 47px;
+                                                      padding-top: 10px;'
+                                               value='' />
+                                    </div>
+                                </div>
+                            </pe:container>
+                        </pe:container>
+                    </div>
+                    <div style='font-size: 18px;
+                                base-font-size: 18px;
+                                margin-top: 10px;
+                                color: #7D490D;'>
+                        <%= L'*如果您的学校未出现在列表中，请联系客服。我们会尽快添加。客服QQ：2850955888' %>
+                    </div>
+                    <div style='margin-top: 10px;'>
+                        <div style='float: left;'>
+                            <input type='button'
+                                   textscale=1.8
+                                   style='width: 230px;
+                                          height: 70.89px;
+                                          color: #FFFFFF;
+                                          font-size: 15px;
+                                          base-font-size: 15px;'
+                                   name='next1'
+                                   class='main_login_mobile_gray_button'
+                                   onclick='next1'
+                                   value='<%= L"下一步" %>' />
+                        </div>
+                        <div style='float: left;margin-left: 280px;padding-top: 10px;'>
+                            <div style='position: relative;
+                                        width: 60px;
+                                        height: 2px;
+                                        margin-top: 40px;
+                                        background-color: #2864DD'></div>
+                            <div onclick='skip()' style='color: #2864DD;font-size: 26px;base-font-size: 26px;'>
+                                <%= L'跳过' %>
+                            </div>
+                        </div>
+                    </div>
+                </pe:container>
+            </pe:container>
+        </pe:mcml>
+    </body>
+</html>

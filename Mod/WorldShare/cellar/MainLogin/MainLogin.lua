@@ -10,17 +10,14 @@ local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
 ------------------------------------------------------------
 ]]
 -- libs
-local ParaWorldLessons = commonlib.gettable('MyCompany.Aries.Game.MainLogin.ParaWorldLessons')
 local GameMainLogin = commonlib.gettable('MyCompany.Aries.Game.MainLogin')
 local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua")
 
 -- service
-local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepWorkService/Session.lua')
-local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
 local SessionsData = NPL.load('(gl)Mod/WorldShare/database/SessionsData.lua')
 
 -- bottles
-local RegisterModal = NPL.load('(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua')
 local Create = NPL.load('(gl)Mod/WorldShare/cellar/Create/Create.lua')
 
 -- helper
@@ -44,10 +41,10 @@ function MainLogin:Init()
 end
 
 function MainLogin:Show()
-    -- if System.os.GetPlatform() == 'android' then
-        -- self:ShowAndroid()
-        -- return
-    -- end
+    if System.os.GetPlatform() == 'android' then
+        self:ShowAndroid()
+        return
+    end
 
     local localVersion = ParaEngine.GetAppCommandLineByParam("localVersion", nil)
 
@@ -82,7 +79,7 @@ end
 
 function MainLogin:ShowAndroid()
     Mod.WorldShare.Utils.ShowWindow({
-        url = 'Mod/WorldShare/cellar/Theme/MainLogin/MainLogin.html', 
+        url = 'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginAndroid.html',
         name = 'MainLogin', 
         isShowTitleBar = false,
         DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
@@ -130,12 +127,6 @@ function MainLogin:Show1()
 end
 
 function MainLogin:Show2()
-    local MainLoginPage = Mod.WorldShare.Store:Get('page/MainLogin')
-
-    if MainLoginPage then
-        return
-    end
-
     Mod.WorldShare.Utils.ShowWindow({
         url = 'Mod/WorldShare/cellar/Theme/MainLogin/MainLogin.html', 
         name = 'MainLogin', 
@@ -202,6 +193,34 @@ function MainLogin:ShowLogin()
         MainLoginLoginPage:SetUIValue('account', PWDInfo.account or '')
         self.account = PWDInfo.account
     end
+end
+
+function MainLogin:ShowAndroidLogin()
+    Mod.WorldShare.Utils.ShowWindow(
+        0,
+        0,
+        'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginAndroidLogin.html',
+        'Mod.WorldShare.cellar.MainLogin.MainAndroidLogin',
+        0,
+        0,
+        '_fi',
+        false,
+        -1
+    )
+end
+
+function MainLogin:ShowAndroidSetUser()
+    Mod.WorldShare.Utils.ShowWindow(
+        0,
+        0,
+        'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginAndroidSetUser.html',
+        'Mod.WorldShare.cellar.MainLogin.MainAndroidSetUser',
+        0,
+        0,
+        '_fi',
+        false,
+        -1
+    )
 end
 
 function MainLogin:ShowLoginNew()
@@ -344,10 +363,8 @@ function MainLogin:SelectMode(callback)
         end
 
         if mode == 'HOME' then
-            GameMainLogin:UpdateCoreClient()
             self:ShowLoginNew()
         elseif mode == 'SCHOOL' then
-            GameMainLogin:UpdateCoreClient()
             self:ShowLoginAtSchool('SCHOOL')
         elseif mode == 'LOCAL' then
             self:ShowLoginAtSchool('LOCAL')
@@ -433,6 +450,165 @@ function MainLogin:Close()
     end
 end
 
+function MainLogin:LoginWithToken(token, callback)
+    Mod.WorldShare.MsgBox:Show(L'正在登录，请稍候(TOKEN登录)...', 24000, L'链接超时', 450, 120)
+
+    KeepworkServiceSession:LoginWithToken(token, function(response, err)
+        if err ~= 200 or not response then
+            Mod.WorldShare.MsgBox:Close()
+
+            if response and response.code and response.message then
+                if callback and type(callback) == 'function' then
+                    callback(false, 'RESPONSE', format(L'*%s(%d)', response.message, response.code))
+                end
+            else
+                if err == 0 then
+                    if callback and type(callback) == 'function' then
+                        callback(false, 'RESPONSE', format(L'*网络异常或超时，请检查网络(%d)', err))
+                    end
+                else
+                    if callback and type(callback) == 'function' then
+                        callback(false, 'RESPONSE',  format(L'*系统维护中(%d)', err))
+                    end
+                end
+            end
+
+            return
+        end
+
+        response.token = token
+        response.autoLogin = true
+        response.rememberMe = true
+
+        KeepworkServiceSession:LoginResponse(response, err, function(bSucceed, message)
+            Mod.WorldShare.MsgBox:Close()
+            if not bSucceed then
+                if callback and type(callback) == 'function' then
+                    callback(false, 'RESPONSE', format(L'*%s', message))
+                end
+                return
+            end
+
+            if callback and type(callback) == 'function' then
+                callback(true)
+            end
+        end)
+    end)
+end
+
+function MainLogin:AndroidRegisterWithPhoneNumber(...)
+    KeepworkServiceSession:RegisterWithPhoneAndLogin(...)
+end
+
+function MainLogin:AndroidLoginWithPhoneNumber(phoneNumber, captcha, callback)
+    if not Validated:Phone(phoneNumber) then
+        if callback and type(callback) == 'function' then
+            callback(false, 'ACCOUNT', L'*手机号码格式错误')
+        end
+        return
+    end
+
+    if not captcha then
+        if callback and type(callback) == 'function' then
+            callback(false, 'CAPTCHA', L'*验证码不能为空')
+        end
+        return
+    end
+
+    Mod.WorldShare.MsgBox:Show(L'正在登录，请稍候(验证码登录)...', 24000, L'链接超时', 450, 120)
+
+    KeepworkServiceSession:LoginWithPhoneNumber(phoneNumber, captcha, function(response, err)
+        response.autoLogin = true
+        response.rememberMe = true
+
+        KeepworkServiceSession:LoginResponse(response, err, function(bSucceed, message)
+            Mod.WorldShare.MsgBox:Close()
+
+            if not bSucceed then
+                if callback and type(callback) == 'function' then
+                    callback(false, 'RESPONSE', format(L'*%s', message))
+                end
+                return
+            end
+
+            if callback and type(callback) == 'function' then
+                callback(bSucceed)
+            end
+        end)
+    end)
+end
+
+function MainLogin:AndroidLoginAction(account, password, callback)
+    if not Validated:AccountCompatible(account) then
+        if callback and type(callback) == 'function' then
+            callback(false, 'ACCOUNT', L'*用户名不合法')
+        end
+        return
+    end
+
+    if not Validated:Password(password) then
+        if callback and type(callback) == 'function' then
+            callback(false, 'PASSWORD', L'*密码不合法')
+        end
+        return
+    end
+
+    Mod.WorldShare.MsgBox:Show(L'正在登录，请稍候...', 24000, L'链接超时', 300, 120)
+
+    KeepworkServiceSession:Login(
+        account,
+        password,
+        function(response, err)
+            if err ~= 200 or not response then
+                Mod.WorldShare.MsgBox:Close()
+
+                if response and response.code and response.message then
+                    if callback and type(callback) == 'function' then
+                        callback(false, 'RESPONSE', format(L'*%s(%d)', response.message, response.code))
+                    end
+                else
+                    if err == 0 then
+                        if callback and type(callback) == 'function' then
+                            callback(false, 'RESPONSE', format(L'*网络异常或超时，请检查网络(%d)', err))
+                        end
+                    else
+                        if callback and type(callback) == 'function' then
+                            callback(false, 'RESPONSE',  format(L'*系统维护中(%d)', err))
+                        end
+                    end
+                end
+
+                return
+            end
+
+            response.autoLogin = true
+            response.rememberMe = true
+
+            KeepworkServiceSession:LoginResponse(response, err, function(bSucceed, message)
+                Mod.WorldShare.MsgBox:Close()
+
+                if not bSucceed then
+                    if callback and type(callback) == 'function' then
+                        callback(false, 'RESPONSE',   format(L'*%s', message))
+                    end
+                    return
+                end
+
+                if callback and type(callback) == 'function' then
+                    callback(true)
+                end
+
+                local AfterLogined = Mod.WorldShare.Store:Get('user/AfterLogined')
+
+                if AfterLogined and type(AfterLogined) == 'function' then
+                    AfterLogined(true)
+                    Mod.WorldShare.Store:Remove('user/AfterLogined')
+                end
+            end)
+        end
+    )
+end
+
 function MainLogin:LoginAction(callback)
     local MainLoginPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Login')
 
@@ -445,8 +621,6 @@ function MainLogin:LoginAction(callback)
 
     local account = MainLoginPage:GetValue('account')
     local password = MainLoginPage:GetValue('password')
-    -- local autoLogin = MainLoginPage:GetValue('autoLogin')
-    -- local rememberMe = MainLoginPage:GetValue('rememberMe')
 
     local validated = true
 
@@ -801,6 +975,10 @@ function MainLogin:RegisterWithPhone(callback)
 
         GameLogic.AddBBS(nil, format("%s%s(%d)", L"注册失败，错误信息：", state.message or "", state.code or 0), 5000, "255 0 0")
     end)
+end
+
+function MainLogin:Next()
+    self:EnterUserConsole()
 end
 
 function MainLogin:EnterUserConsole(isOffline)

@@ -57,7 +57,12 @@
                 }
             </style>
             <pe:container alignment="_ct" ClickThrough="true" style="position:relative;background:;margin-left:-260px;margin-top:-300px;width:520px;height:500px;">
-                <div style='<%="position:relative;margin-left:130px;margin-top: 20px;width: 270px;height: 225px;background:url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#643 421 270 225);"%>'></div>
+                <div style='position: relative;
+                            margin-left: 130px;
+                            margin-top: 0px;
+                            width: 270px;
+                            height: 225px;
+                            background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#643 421 270 225);'></div>
                 <pe:if condition='<%=Rebranding:GetValue("companylogo") ~= nil %>'>
                     <div style='<%=format("position:relative;margin-top:15px;margin-left:-220px;width:256px;height:64px;background:url(%s)", Rebranding:GetValue("companylogo"))%>'></div>
                 </pe:if>
