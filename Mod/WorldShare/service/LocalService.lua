@@ -85,9 +85,9 @@ function LocalService:Find(path)
 end
 
 function LocalService:FilesFind(result, path, subPath)
-    local curResult = commonlib.copy(result)
-    local curPath = commonlib.copy(path)
-    local curSubPath = commonlib.copy(subPath)
+    local curResult = result
+    local curPath = path
+    local curSubPath = subPath
 
     if (type(curResult) == "table") then
         local convertLineEnding = {[".xml"] = true, [".bmax"] = true, [".txt"] = true, [".md"] = true, [".lua"] = true}
@@ -129,11 +129,6 @@ function LocalService:FilesFind(result, path, subPath)
                     self.output[#self.output + 1] = item
                 end
             else
-                -- folder
-                if self.isGetFolder then
-                    self.output[#self.output + 1] = item
-                end
-
                 local newPath = curPath .. "/" .. item.filename
                 local newResult = self:Find(newPath)
                 local newSubPath = nil
@@ -142,6 +137,13 @@ function LocalService:FilesFind(result, path, subPath)
                     newSubPath = curSubPath .. "/" .. item.filename
                 else
                     newSubPath = item.filename
+                end
+
+                -- folder
+                if self.isGetFolder then
+                    local curItem = item
+                    curItem.filename = newSubPath
+                    self.output[#self.output + 1] = curItem
                 end
 
                 self:FilesFind(newResult, newPath, newSubPath)

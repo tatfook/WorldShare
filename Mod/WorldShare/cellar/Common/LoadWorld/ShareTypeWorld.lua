@@ -54,12 +54,19 @@ function ShareTypeWorld:Lock(world, callback)
                     {
                         Title = L"世界被占用",
                         Yes = L"知道了",
-                        No = L"只读模式打开"
+                        No = L"强制打开"
                     },
                     function(res)
                         if res and res == _guihelper.DialogResult.No then
-                            Mod.WorldShare.Store:Set("world/readonly", true)
-                            callback(false)
+                            _guihelper.MessageBox(
+                                L'强制打开后，您可能会覆盖其他成员正在编辑的内容，是否继续？',
+                                function(res)
+                                    if res and res == _guihelper.DialogResult.Yes then
+                                        callback(true)
+                                    end
+                                end,
+                                _guihelper.MessageBoxButtons.YesNo
+                            )
                         end
                     end,
                     _guihelper.MessageBoxButtons.YesNo

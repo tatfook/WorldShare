@@ -265,8 +265,8 @@ function LocalServiceWorld:SetWorldInstanceByFoldername(foldername)
     local revision = WorldRevision:new():init(worldpath):GetDiskRevision()
     local shared = string.match(worldpath, "shared") == "shared" and true or false
     
-    if name ~= commonlib.Encoding.DefaultToUtf8(foldername) then
-        text = name .. '(' .. commonlib.Encoding.DefaultToUtf8(foldername) .. ')'
+    if worldTag.name ~= commonlib.Encoding.DefaultToUtf8(foldername) then
+        text = worldTag.name .. '(' .. commonlib.Encoding.DefaultToUtf8(foldername) .. ')'
     end
 
     local fromProjectId = 0
@@ -419,7 +419,7 @@ function LocalServiceWorld:DownLoadZipWorld(foldername, username, lastCommitId, 
 
             LocalService:MoveZipToFolder('temp/world_temp_download/', downloadPath, function()
                 local fileList = LocalService:LoadFiles('temp/world_temp_download/', true, true)
-    
+
                 if not fileList or type(fileList) ~= 'table' or #fileList == 0 then
                     return
                 end
@@ -429,7 +429,7 @@ function LocalServiceWorld:DownLoadZipWorld(foldername, username, lastCommitId, 
                 if fileList[1] and fileList[1].filesize == 0 then
                     zipRootPath = fileList[1].filename
                 end
-    
+
                 ParaIO.CreateDirectory(worldpath)
     
                 for key, item in ipairs(fileList) do
