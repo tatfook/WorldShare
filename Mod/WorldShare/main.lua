@@ -95,9 +95,9 @@ NPL.load('(gl)Mod/WorldShare/service/FileDownloader/FileDownloader.lua')
 -- get table lib
 local SocketService = commonlib.gettable('Mod.WorldShare.service.SocketService')
 local Cef3Manager = commonlib.gettable('Mod.WorldShare.service.Cef3Manager')
+local MainLogin = commonlib.gettable('MyCompany.Aries.Game.MainLogin')
 
 -- bottles
-local UserConsole = NPL.load('(gl)Mod/WorldShare/cellar/UserConsole/Main.lua')
 local KickOut = NPL.load('(gl)Mod/WorldShare/cellar/Common/KickOut/KickOut.lua')
 local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
 local HistoryManager = NPL.load('(gl)Mod/WorldShare/cellar/HistoryManager/HistoryManager.lua')
@@ -197,8 +197,6 @@ function WorldShare:OnWorldLoad()
         -- open from MainLogin:EnterUserConsole
         Mod.WorldShare.MsgBox:Close()
     end
-
-    UserConsole:ClosePage()
 
     -- local curLesson = Store:Getter('lesson/GetCurLesson')
     -- if enter with lesson method, we will not check revision
