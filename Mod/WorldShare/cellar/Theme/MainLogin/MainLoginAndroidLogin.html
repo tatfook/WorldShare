@@ -240,6 +240,7 @@
                     end
 
                     function enter()
+                        SessionsData:SetUserLocation('HOME', Mod.WorldShare.Store:Get('user/username'))
                         MainLogin:Next()
                     end
 
@@ -436,7 +437,7 @@
                                    name='account'
                                    MoveViewWhenAttachWithIME='true'
                                    class='main_login_mobile_textfield'
-                                   EmptyText='<%= L"请输入手机号" %>'
+                                   EmptyText='<%= L"请输入手机号/账号" %>'
                                    style='textcolor: #FFFFFF;
                                           text-valign: center;
                                           line-height: 30px;
