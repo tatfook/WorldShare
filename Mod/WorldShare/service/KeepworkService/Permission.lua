@@ -96,6 +96,10 @@ KeepworkServicePermission.AllLocalAuth = {
     PlyText = {
         key = 'play_text',
         desc = L'AI朗读'
+    },
+    MakeApk = {
+        key = 'make_apk',
+        desc = L'生成APK'
     }
 }
 
