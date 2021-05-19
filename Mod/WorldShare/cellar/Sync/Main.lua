@@ -42,7 +42,10 @@ local SyncMain = NPL.export()
 function SyncMain:OnWorldLoad()
     Compare:GetCurrentWorldInfo(function()
         local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
-        Compare:CheckRevision(currentEnterWorld.worldpath)
+
+        if not currentEnterWorld.is_zip then
+            Compare:CheckRevision(currentEnterWorld.worldpath)
+        end
     end)
 end
 
