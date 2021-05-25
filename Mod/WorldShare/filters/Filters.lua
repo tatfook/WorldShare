@@ -163,8 +163,9 @@ function Filters:Init()
             local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
             local generatorName = WorldCommon.GetWorldTag("world_generator")
             local ParaWorldMiniChunkGenerator = commonlib.gettable("MyCompany.Aries.Game.World.Generators.ParaWorldMiniChunkGenerator")
+            local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
-            if generatorName == "paraworldMini" then
+            if string.match(currentEnterWorld.foldername, '.+_main') and generatorName == "paraworldMini" then
                 ParaWorldMiniChunkGenerator:OnSaveWorld()
             else
                 ShareWorld:Init(callback)
