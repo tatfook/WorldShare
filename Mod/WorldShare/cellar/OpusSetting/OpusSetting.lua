@@ -34,7 +34,6 @@ function OpusSetting:Show()
                 -- public
                 params._page:GetNode("public"):SetAttribute("checked", "checked")
                 params._page:SetValue("private", false)
-
                 if data.extra and
                    ((data.extra.vipEnabled and
                    data.extra.vipEnabled == 1) or
@@ -53,6 +52,14 @@ function OpusSetting:Show()
                 else
                     params._page:SetValue("institute_vip_checkbox", false)
                     self.instituteVipEnabled = false
+                end
+
+                if data.extra and data.extra.encode_world and data.extra.encode_world == 1 then
+                    params._page:SetValue("encode_world", true)
+                    self.encode_world = true
+                else
+                    params._page:SetValue("encode_world", false)
+                    self.encode_world = false
                 end
 
             elseif data.visibility == 1 then
@@ -139,6 +146,33 @@ function OpusSetting:SetInstituteVip(value)
         if err == 200 then
             GameLogic.AddBBS(nil, L"设置成功", 3000, "0 255 0")
             self.instituteVipEnabled = value
+        else
+            GameLogic.AddBBS(nil, L"设置失败", 3000, "255 0 0")
+        end
+    end)
+end
+
+function OpusSetting:SetEncodeWorld(value)
+    local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
+
+    if not currentWorld or not currentWorld.kpProjectId or currentWorld.kpProjectId == 0 then
+        return false
+    end
+
+    local params = {
+        extra = {}
+    }
+
+    if value then
+        params.extra.encode_world = 1
+    else
+        params.extra.encode_world = 0
+    end
+
+    KeepworkServiceProject:UpdateProject(currentWorld.kpProjectId, params, function(data, err)
+        if err == 200 then
+            GameLogic.AddBBS(nil, L"设置成功", 3000, "0 255 0")
+            self.encode_world = true
         else
             GameLogic.AddBBS(nil, L"设置失败", 3000, "255 0 0")
         end

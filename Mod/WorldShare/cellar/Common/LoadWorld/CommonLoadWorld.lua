@@ -531,23 +531,48 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
 
                 self.instituteVerified = false
 
-                if data.world and data.world.archiveUrl and #data.world.archiveUrl > 0 then
-                    Mod.WorldShare.Store:Set('world/openKpProjectId', pid)
-                    HandleLoadWorld(data.world.archiveUrl, data.world)
-                    CacheProjectId:SetProjectIdInfo(pid, data.world)
-                else
-                    GameLogic.AddBBS(nil, L"未找到对应内容", 3000, "255 0 0")
-                    
-                    if failed then
-                        _guihelper.MessageBox(
-                            L'未能成功进入该地图，将帮您传送到【创意空间】。 ',
-                            function()
-                                local mainWorldProjectId = LocalServiceWorld:GetMainWorldProjectId()
-                                self:EnterWorldById(mainWorldProjectId, true)
-                            end,
-                            _guihelper.MessageBoxButtons.OK_CustomLabel
-                        )
+
+                local enter_cb = function()
+                    if data.world and data.world.archiveUrl and #data.world.archiveUrl > 0 then
+                        Mod.WorldShare.Store:Set('world/openKpProjectId', pid)
+                        HandleLoadWorld(data.world.archiveUrl, data.world)
+                        CacheProjectId:SetProjectIdInfo(pid, data.world)
+                    else
+                        GameLogic.AddBBS(nil, L"未找到对应内容", 3000, "255 0 0")
+                        
+                        if failed then
+                            _guihelper.MessageBox(
+                                L'未能成功进入该地图，将帮您传送到【创意空间】。 ',
+                                function()
+                                    local mainWorldProjectId = LocalServiceWorld:GetMainWorldProjectId()
+                                    self:EnterWorldById(mainWorldProjectId, true)
+                                end,
+                                _guihelper.MessageBoxButtons.OK_CustomLabel
+                            )
+                        end
                     end
+                end
+
+                if data and data.extra and data.extra.encode_world == 1 then
+                    if not KeepworkServiceSession:IsSignedIn() then
+                        LoginModal:CheckSignedIn(L"该项目需要登录后访问", function(bIsSuccessed)
+                            if bIsSuccessed then
+                                self:EnterWorldById(pid, refreshMode)
+                            end
+                        end)
+                        return false
+                    else
+                        local username = Mod.WorldShare.Store:Get("user/username")
+
+                        if data.username and data.username == username then
+                            enter_cb()
+                        else
+                            NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/WorldKey/WorldKeyDecodePage.lua").Show(data, enter_cb);
+                        end
+                    end
+
+                else
+                    enter_cb()
                 end
             end
         end

@@ -58,6 +58,10 @@
                         end
                     end
 
+                    function open_encode()
+                        NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/WorldKey/WorldKeyEncodePage.lua").Show()
+                    end
+
                     function set_institute_vip(val)
                         if not GameLogic.IsReadOnly() then
                             GameLogic.IsVip(
@@ -75,6 +79,10 @@
                                 'Teacher'
                             )
                         end
+                    end
+
+                    function set_encode_world(val)
+                        OpusSetting:SetEncodeWorld(val)
                     end
                 ]]>
             </script>
@@ -109,6 +117,14 @@
                                            name="institute_vip_checkbox"
                                            onclick="set_institute_vip" />
                                     <%= L"需要是合作机构VIP会员（访问与编辑均需登录Paracraft账号）" %>
+                                </div>
+
+                                <div>
+                                    <input type="checkbox"
+                                           name="encode_world"
+                                           onclick="set_encode_world" />
+                                    <%= L"需要密钥访问" %>
+                                    <input type="button" value='配置' onclick="open_encode" class="mc_light_grey_button_with_fillet" style="color: #FFFFFF; margin-left: 10px;" />
                                 </div>
                             </div>
                         </div>
