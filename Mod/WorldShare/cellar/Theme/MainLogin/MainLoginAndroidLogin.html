@@ -34,15 +34,17 @@
                                 login_node.visible = false
                                 switch_account_node.visible = true
                             else
-                                MainLogin:LoginWithToken(current_selected_user.token, function(b_succeed, reason, message)
-                                    if b_succeed then
-                                        page:Refresh(0.01)
-                                    else
-                                        signed_in_node.visible = false
-                                        login_node.visible = true
-                                        switch_account_node.visible = false
-                                    end
-                                end)
+                                Mod.WorldShare.Utils.SetTimeOut(function()
+                                    MainLogin:LoginWithToken(current_selected_user.token, function(b_succeed, reason, message)
+                                        if b_succeed then
+                                            page:Refresh(0.01)
+                                        else
+                                            signed_in_node.visible = false
+                                            login_node.visible = true
+                                            switch_account_node.visible = false
+                                        end
+                                    end)
+                                end, 0)
                             end
                         else
                             signed_in_node.visible = false
@@ -262,8 +264,9 @@
                     container_size = {
                         width = 652.2395,
                         height = 416.66,
-                        padding = 10,
                         ['margin-left'] = -326.1197,
+                        ['padding-top'] = 12,
+                        ['padding-left'] = 12,
                         ['margin-top'] = -115,
                     },
                 }
@@ -277,44 +280,57 @@
                               margin-top: 60px;
                               background: url(Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#26 797 192 74)' />
             </pe:container>
-            <pe:container alignment='_ct' name='signed_in' visible='false' class='main_login_mobile_container_bg container_size'>
-                <div style='height: 40px;'>
-                    <img style='width: 97.85px;
+            <pe:container alignment='_ct' name='signed_in' visible='false' class='container_size' style='background:;'>
+                <div width='100%'
+                     class='main_login_mobile_container_bg'
+                     style='max-height: 416.66px;
+                            padding-top: 12px;
+                            padding-left: 12px;'>
+                    <div style='width: 240px;
+                            height: 50px;
+                            padding-left: 35px;
+                            padding-right: 100px'
+                         class='main_login_mobile_container_title_bg'>
+                        <img style='width: 97.85px;
                                 height: 30px;
-                                margin-top: 8px;
-                                margin-left: 25px;'
-                         src='Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#844 580 137 42' />
-                </div>
-                <div style='width: 632px;
-                            text-align: center;
-                            font-size: 50px;
-                            base-font-size: 50px;
-                            margin-top: 110px;
-                            color: #FFFFFF;
-                            margin-left: -3px;'>
-                    <%= get_username() %>
-                </div>
-                <div>
-                    <input type='button'
-                           textscale=1.8
-                           class='main_login_mobile_blue_button'
-                           onclick='enter'
-                           style='width: 230px;
-                                  height: 71.37px;
-                                  font-size: 15px;
-                                  base-font-size: 15px;
-                                  margin-left: 200px;
-                                  margin-top: 90px;
-                                  color: #FFFFFF;'
-                           value='<%= L"开始" %>' />
+                                margin-top: 10px;'
+                             src='Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#844 580 137 42' />
+                    </div>
+                    <div style='width: 632px;
+                                text-align: center;
+                                font-size: 50px;
+                                base-font-size: 50px;
+                                margin-top: 20px;
+                                color: #FFFFFF;
+                                margin-left: -3px;'>
+                        <%= get_username() %>
+                    </div>
+                    <div>
+                        <input type='button'
+                               textscale=1.8
+                               class='main_login_mobile_blue_button'
+                               onclick='enter'
+                               style='width: 230px;
+                                      height: 71.37px;
+                                      font-size: 15px;
+                                      base-font-size: 15px;
+                                      margin-left: 200px;
+                                      margin-top: 20px;
+                                      margin-bottom: 20px;
+                                      color: #FFFFFF;'
+                               value='<%= L"开始" %>' />
+                    </div>
                 </div>
             </pe:container>
             <pe:container alignment='_ct' name='login' visible='true' class='main_login_mobile_container_bg container_size'>
-                <div style='height: 40px;'>
+                <div style='width: 210px;
+                            height: 50px;
+                            padding-left: 35px;
+                            padding-right: 100px'
+                            class='main_login_mobile_container_title_bg'>
                     <img style='width: 69px;
                                 height: 30px;
-                                margin-top: 8px;
-                                margin-left: 45px;'
+                                margin-top: 10px;'
                          src='Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#907 94 92 40' />
                 </div>
                 <pe:container name='login_with_phone_number' visible='true' style='background:;position: relative;'>
