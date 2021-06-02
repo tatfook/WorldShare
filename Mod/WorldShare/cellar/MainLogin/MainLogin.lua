@@ -977,18 +977,26 @@ function MainLogin:RegisterWithPhone(callback)
     end)
 end
 
-function MainLogin:Next()
-    self:EnterUserConsole()
-end
-
-function MainLogin:EnterUserConsole(isOffline)
-    System.options.loginmode = 'local'
-
-    if isOffline then
-        System.options.loginmode = 'offline'
+function MainLogin:Next(isOffline)
+    if KeepworkServiceSession:IsSignedIn() then
+        System.options.loginmode = 'online'
+    else
+        if isOffline then
+            System.options.loginmode = 'offline'
+        else
+            System.options.loginmode = 'local'
+        end
     end
 
     self:Close()
+
+    if System.options.cmdline_world and System.options.cmdline_world ~= '' then
+        Mod.WorldShare.MsgBox:Show(L'请稍候...', 12000)
+        Mod.WorldShare.Utils.SetTimeOut(function()
+            GameMainLogin:CheckLoadWorldFromCmdLine()
+        end, 500)
+        return
+    end
 
     if System.options.loginmode ~= 'offline' then
         -- close at on world load
@@ -1002,6 +1010,11 @@ function MainLogin:EnterUserConsole(isOffline)
     else
         GameMainLogin:next_step({IsLoginModeSelected = true})
     end
+end
+
+-- Depreciated
+function MainLogin:EnterUserConsole(isOffline)
+    self:Next(isOffline)
 end
 
 function MainLogin:SetAutoLogin()

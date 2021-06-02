@@ -133,11 +133,7 @@ function Filters:Init()
     GameLogic.GetFilters():add_filter(
         'InternetLoadWorld.ShowPage',
         function(bEnable, bShow)
-            if mouse_button == 'right' then
-                UserConsole:ShowPage()
-            else
-                Create:Show()
-            end
+            Create:Show()
             return false
         end
     )
