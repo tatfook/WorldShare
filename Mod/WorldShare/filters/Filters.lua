@@ -52,16 +52,20 @@ local MsgBoxFilter = NPL.load('(gl)Mod/WorldShare/filters/cellar/Common/MsgBox/M
 local MainLoginFilter = NPL.load('(gl)Mod/WorldShare/filters/cellar/MainLogin/MainLoginFilter.lua')
 local ShareWorldFilter = NPL.load('(gl)Mod/WorldShare/filters/cellar/ShareWorld/ShareWorldFilter.lua')
 local SyncMainFilter = NPL.load('(gl)Mod/WorldShare/filters/cellar/Sync/SyncMainFilter.lua')
+local CommonLoadWorldFilter = NPL.load('(gl)Mod/WorldShare/filters/cellar/Common/LoadWorld/CommonLoadWorldFilter.lua')
 
 local KeepworkServiceSessionFilter = NPL.load('(gl)Mod/WorldShare/filters/service/KeepworkService/KeepworkServiceSessionFilter.lua')
 local LocalServiceWorldFilter = NPL.load('(gl)Mod/WorldShare/filters/service/LocalService/LocalServiceWorldFilter.lua')
 local LocalServiceFilter = NPL.load('(gl)Mod/WorldShare/filters/service/LocalService/LocalServiceFilter.lua')
+local GitServiceFilter = NPL.load('(gl)Mod/WorldShare/filters/service/GitServiceFilter.lua')
+
+local KeepworkProjectsApiFilter = NPL.load('(gl)Mod/WorldShare/filters/api/Keepwork/KeepworkProjectsApiFilter.lua')
+local KeepworkDragonBoatApiFilter = NPL.load('(gl)Mod/WorldShare/filters/api/Keepwork/KeepworkDragonBoatApiFilter.lua')
+
+local SessionsDataFilter = NPL.load('(gl)Mod/WorldShare/filters/database/SessionsDataFilter.lua')
 
 local OnWorldInitialRegionsLoadedFilter = NPL.load('(gl)Mod/WorldShare/filters/libs/OnWorldInitialRegionsLoadedFilter.lua')
 local WorldInfoFilter = NPL.load('(gl)Mod/WorldShare/filters/libs/WorldInfoFilter.lua')
-local GitServiceFilter = NPL.load('(gl)Mod/WorldShare/filters/service/GitServiceFilter.lua')
-local KeepworkProjectsApiFilter = NPL.load('(gl)Mod/WorldShare/filters/api/Keepwork/KeepworkProjectsApiFilter.lua')
-local CommonLoadWorldFilter = NPL.load('(gl)Mod/WorldShare/filters/cellar/Common/LoadWorld/CommonLoadWorldFilter.lua')
 
 local Filters = NPL.export()
 
@@ -99,6 +103,9 @@ function Filters:Init()
     -- init keepwork projects api filter
     KeepworkProjectsApiFilter:Init()
 
+    -- init keepwork dragon boat api filter
+    KeepworkDragonBoatApiFilter:Init()
+
     -- init common load world filter
     CommonLoadWorldFilter:Init()
 
@@ -110,6 +117,9 @@ function Filters:Init()
 
     -- init sync main filter
     SyncMainFilter:Init()
+
+    -- init sessions data filter
+    SessionsDataFilter:Init()
 
     GameLogic.GetFilters():add_filter(
         'ShowClientUpdaterNotice',

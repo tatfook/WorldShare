@@ -198,17 +198,12 @@ function WorldShare:OnWorldLoad()
         Mod.WorldShare.MsgBox:Close()
     end
 
-    -- local curLesson = Store:Getter('lesson/GetCurLesson')
-    -- if enter with lesson method, we will not check revision
-    -- if not curLesson then
-    -- end
-    
     SyncMain:OnWorldLoad()
     HistoryManager:OnWorldLoad()
     WorldShareCommand:OnWorldLoad()
-    -- Beginner:OnWorldLoad()
     LocalServiceSession:OnWorldLoad()
     KeepworkServiceProject:OnWorldLoad()
+    KeepworkServiceSession:OnWorldLoad()
 
     EventTrackingService:Send(2, 'duration.world.stay', { started = true })
 
@@ -218,6 +213,7 @@ end
 
 function WorldShare:OnWillLeaveWorld()
     LocalServiceSession:OnWillLeaveWorld()
+    KeepworkServiceSession:OnWillLeaveWorld()
 end
 
 function WorldShare:OnLeaveWorld()

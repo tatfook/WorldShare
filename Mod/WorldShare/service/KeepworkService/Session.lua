@@ -21,6 +21,7 @@ local KeepworkKeepworksApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/KeepworkK
 local KeepworkOauthUsersApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/OauthUsers.lua")
 local KeepworkSocketApi = NPL.load("(gl)Mod/WorldShare/api/Socket/Socket.lua")
 local AccountingVipCodeApi = NPL.load("(gl)Mod/WorldShare/api/Accounting/ParacraftVipCode.lua")
+local KeepworkDragonBoatApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/DragonBoatApi.lua")
 
 -- database
 local SessionsData = NPL.load("(gl)Mod/WorldShare/database/SessionsData.lua")
@@ -86,7 +87,6 @@ function KeepworkServiceSession:OnMsg(msg)
     end
 end
 
-
 function KeepworkServiceSession:LoginSocket()
     if not self:IsSignedIn() then
         return false
@@ -102,6 +102,23 @@ function KeepworkServiceSession:LoginSocket()
 
     local machineCode = SessionsData:GetDeviceUUID()
     KeepworkSocketApi:SendMsg("app/login", { platform = platform, machineCode = machineCode })
+end
+
+function KeepworkServiceSession:OnWorldLoad()
+    if not self.riceMode then
+        return
+    end
+
+    if self.riceMode == 'create' or
+       self.riceMode == 'explorer' or
+       self.riceMode == 'work' or
+       self.riceMode == 'study' then
+        KeepworkServiceSession:StartRiceTimer()
+    end
+end
+
+function KeepworkServiceSession:OnWillLeaveWorld()
+    self:StopRiceTimer()
 end
 
 function KeepworkServiceSession:IsSignedIn()
@@ -311,6 +328,9 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
 
         local Login = Mod.WorldShare.Store:Action("user/Login")
         Login(token, userId, username, nickname, realname, isVipSchool)
+
+        -- add rice
+        self:AddRice('login')
 
         GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", true)
 
@@ -1180,4 +1200,100 @@ function KeepworkServiceSession:LoginWithPhoneNumber(cellphone, cellphoneCaptcha
     }
 
     KeepworkUsersApi:Login(params, callback, callback)
+end
+
+function KeepworkServiceSession:AddRice(name)
+    local riceObject = SessionsData:GetUserRice()
+    local amount = 0
+
+    if riceObject.amount then
+        amount = riceObject.amount
+    end
+
+    if name == 'login' then
+        if riceObject.lastLoginDate and riceObject.lastLoginDate == os.date("%Y-%m-%d", os.time()) then
+            return
+        end
+
+        amount = amount + 3
+
+        riceObject.amount = amount
+        riceObject.lastLoginDate = os.date("%Y-%m-%d", os.time())
+
+        SessionsData:SetUserRice(riceObject)
+        self:SyncRiceToServer(3)
+    elseif name == 'thumbsup' then
+        if riceObject.lastThumbsUpDate and riceObject.lastThumbsUpDate == os.date("%Y-%m-%d", os.time()) then
+            return
+        end
+
+        amount = amount + 2
+        riceObject.lastThumbsUpDate = os.date("%Y-%m-%d", os.time())
+
+        SessionsData:SetUserRice(riceObject)
+        self:SyncRiceToServer(2)
+    elseif name == 'growup' then
+        if riceObject.lastGrowupDate and riceObject.lastGrowupDate == os.date("%Y-%m-%d", os.time()) then
+            return
+        end
+
+        amount = amount + 5
+        riceObject.lastGrowupDate = os.date("%Y-%m-%d", os.time())
+
+        SessionsData:SetUserRice(riceObject)
+        self:SyncRiceToServer(5)
+    elseif name == 'create' then
+        KeepworkServiceSession.riceMode = name
+        return
+    elseif name == 'explorer' then
+        KeepworkServiceSession.riceMode = name
+        return
+    elseif name == 'work' then
+        KeepworkServiceSession.riceMode = name
+        return
+    elseif name == 'study' then
+        KeepworkServiceSession.riceMode = name
+        return
+    end
+end
+
+function KeepworkServiceSession:SyncRiceToServer(riceCount)
+    KeepworkDragonBoatApi:Rice(riceCount)
+end
+
+function KeepworkServiceSession:StartRiceTimer()
+    self.riceTimer = commonlib.Timer:new(
+        {
+            callbackFunc = function()
+                local riceObject = SessionsData:GetUserRice()
+                local amount = 0
+
+                if riceObject.amount then
+                    amount = riceObject.amount
+                end
+
+                riceObject.amount = amount + 5
+
+                SessionsData:SetUserRice(riceObject)
+                self:SyncRiceToServer(5)
+            end
+        }
+    )
+
+    local interval = 10 * 60 * 1000
+
+    self.riceTimer:Change(interval, interval)
+end
+
+function KeepworkServiceSession:StopRiceTimer()
+    if self.riceTimer then
+        self.riceMode = nil
+        self.riceTimer:Change(nil, nil)
+    end
+end
+
+function KeepworkServiceSession:GetRice()
+    local riceObject = SessionsData:GetUserRice()
+
+    return riceObject.amount or 0
 end

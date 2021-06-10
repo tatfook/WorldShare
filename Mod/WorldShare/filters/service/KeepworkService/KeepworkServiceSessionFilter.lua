@@ -31,4 +31,28 @@ function KeepworkServiceSessionFilter:Init()
             return KeepworkServiceSession:GetUserWhere()
         end
     )
+
+    -- filter get user where
+    GameLogic.GetFilters():add_filter(
+        'service.session.add_rice',
+        function(...)
+            return KeepworkServiceSession:AddRice(...)
+        end
+    )
+
+    -- filter get user where
+    GameLogic.GetFilters():add_filter(
+        'service.session.reduce_rice',
+        function(...)
+            return KeepworkServiceSession:ReduceRice(...)
+        end
+    )
+
+    -- filter get user where
+    GameLogic.GetFilters():add_filter(
+        'service.session.get_rice',
+        function(...)
+            return KeepworkServiceSession:GetRice(...)
+        end
+    )
 end

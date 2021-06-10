@@ -36,6 +36,12 @@ local SessionsData = NPL.export()
                     lastPosition = { x = 19200, y = 6, x = 19200 },
                     orientation = { CameraLiftupAngle = 0.11111, CameraRotY = 0.22222 }
                 }
+            },
+            act = {
+                rice = {
+                    amount = 11,
+                    lastLoginDate = 2021-06-09,
+                }
             }
         },
         {
@@ -101,11 +107,13 @@ function SessionsData:SaveSession(session)
         return false
     end
 
-    if not session.allPositions then
-        local oldSession = self:GetSessionByUsername(session.account)
+    local oldSession = self:GetSessionByUsername(session.account)
 
-        if oldSession and oldSession.allPositions then
-            session.allPositions = oldSession.allPositions
+    if oldSession then
+        for key, item in pairs(oldSession) do
+            if not session[key] then
+                session[key] = item
+            end
         end
     end
 
@@ -261,6 +269,44 @@ function SessionsData:SetUserLastPosition(x, y, z, cameraLiftupAngle, cameraRotY
         end
 
         session.allPositions[#session.allPositions + 1] = curItem
+    end
+
+    self:SaveSession(session)
+end
+
+function SessionsData:GetUserRice()
+    local username = Mod.WorldShare.Store:Get('user/username')
+    local session = self:GetSessionByUsername(username)
+
+    if not session or type(session) ~= 'table' then
+        return
+    end
+
+    if session.act and session.act.rice then
+        return session.act.rice
+    else
+        return {}
+    end
+end
+
+function SessionsData:SetUserRice(rice)
+    if not rice or type(rice) ~= "table" then
+        return
+    end
+
+    local username = Mod.WorldShare.Store:Get('user/username')
+    local session = self:GetSessionByUsername(username)
+
+    if not session or type(session) ~= 'table' then
+        return
+    end
+
+    if session.act then
+        session.act.rice = rice
+    else
+        session.act = {
+            rice = rice
+        }
     end
 
     self:SaveSession(session)
