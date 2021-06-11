@@ -1203,6 +1203,10 @@ function KeepworkServiceSession:LoginWithPhoneNumber(cellphone, cellphoneCaptcha
 end
 
 function KeepworkServiceSession:AddRice(name)
+    if not self:IsSignedIn() then
+        return
+    end
+
     local riceObject = SessionsData:GetUserRice()
     local amount = 0
 
