@@ -41,7 +41,9 @@ function MainLogin:Init()
 end
 
 function MainLogin:Show()
-    if System.os.GetPlatform() == 'android' then
+    local platform = System.os.GetPlatform()
+
+    if platform == 'android' or platform == 'ios' then
         self:ShowAndroid()
         return
     end
