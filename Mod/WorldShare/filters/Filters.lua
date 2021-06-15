@@ -425,8 +425,8 @@ function Filters:Init()
     -- filter show offical worlds 
     GameLogic.GetFilters():add_filter(
         'show_offical_worlds_page',
-        function()
-            UserConsole.OnClickOfficialWorlds();
+        function(...)
+            GameLogic.GetFilters():apply_filters('cellar.explorer.show', ...)
         end
     )
 
