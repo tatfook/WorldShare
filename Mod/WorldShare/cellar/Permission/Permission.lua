@@ -64,9 +64,9 @@ function Permission:CheckPermission(authName, bOpenUIIfNot, callback, uiType)
                                     local platform = System.os.GetPlatform()
                                     if platform == 'ios' or platform == 'mac' then
                                         _guihelper.MessageBox(L'会员相关功能只能在windows平台使用')
-                                        return
+                                    else
+                                        self:ShowFailDialog(key, desc)
                                     end
-                                    self:ShowFailDialog(key, desc)
                                 end
         
                                 if uiType == 'Teacher' then
