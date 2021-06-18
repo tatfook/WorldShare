@@ -61,6 +61,11 @@ function Permission:CheckPermission(authName, bOpenUIIfNot, callback, uiType)
                         KeepworkServicePermission:Authentication(authName, function(result, key, desc)
                             if result == false then
                                 if not uiType or uiType == 'Vip' then
+                                    local platform = System.os.GetPlatform()
+                                    if platform == 'ios' or platform == 'mac' then
+                                        _guihelper.MessageBox(L'会员相关功能只能在windows平台使用')
+                                        return
+                                    end
                                     self:ShowFailDialog(key, desc)
                                 end
         
