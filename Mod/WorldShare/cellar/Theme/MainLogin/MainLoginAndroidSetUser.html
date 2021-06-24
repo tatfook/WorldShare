@@ -21,6 +21,11 @@
                         page:CloseWindow()
                     end
 
+                    function back()
+                        close()
+                        MainLogin:Show()
+                    end
+
                     function next()
                         local username = page:GetValue('username')
                         local password = page:GetValue('password')
@@ -36,28 +41,59 @@
                         end
 
                         KeepworkServiceSession:CheckUsernameExist(username, function(be_exist)
-                            if be_exist then
-                                _guihelper.MessageBox(L'*此用户名已存在，换一个试试吧')
-                                return
-                            end
-
                             local cellphone = MainLogin.cellphone
                             local cellphoneCaptcha = MainLogin.cellphoneCaptcha
 
-                            -- register and login
-                            MainLogin:AndroidRegisterWithPhoneNumber(
-                                username,
-                                cellphone,
-                                cellphoneCaptcha,
-                                password,
-                                true,
-                                true,
-                                function()
-                                    -- hide set username container and show select school container
-                                    page:FindControl('set_username').visible = false
-                                    page:FindControl('set_school').visible = true
-                                end
-                            )
+                            if be_exist then
+                                MainLogin:AndroidLoginAction(username, password, function(be_succeed, reason, message)
+                                    if not be_succeed then
+                                        _guihelper.MessageBox(message)
+                                        return
+                                    end
+
+                                    local is_bind = Mod.WorldShare.Store:Get('user/isBind')
+                                    local is_verified = Mod.WorldShare.Store:Get('user/isVerified')
+
+                                    if is_bind then
+                                        _guihelper.MessageBox(
+                                            L"该账号已绑定手机",
+                                            function(res)
+                                                back()
+                                            end,
+                                            _guihelper.MessageBoxButtons.OK
+                                        )
+                                        return
+                                    end
+
+                                    KeepworkServiceSession:BindPhone(
+                                        cellphone,
+                                        cellphoneCaptcha,
+                                        function(data, err)
+                                            if err ~= 200 then
+                                                return
+                                            end
+
+                                            page:FindControl('set_username').visible = false
+                                            page:FindControl('set_school').visible = true
+                                        end
+                                    )
+                                end)
+                            else
+                                -- register and login
+                                MainLogin:AndroidRegisterWithPhoneNumber(
+                                    username,
+                                    cellphone,
+                                    cellphoneCaptcha,
+                                    password,
+                                    true,
+                                    true,
+                                    function()
+                                        -- hide set username container and show select school container
+                                        page:FindControl('set_username').visible = false
+                                        page:FindControl('set_school').visible = true
+                                    end
+                                )
+                            end
                         end)
                     end
 
@@ -261,8 +297,12 @@
             <pe:container alignment='_ct' class="container_size">
                 <pe:container name='set_username' visible='true' style='position: relative;background:;'>
                     <div>
-                        <img style='width: 449px;height: 47px;'
-                             src='Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#521 756 449 47' />
+                        <div style='font-size: 40px;base-font-size: 40px;'>
+                            <%= L"注册新账号/绑定已有账号" %>
+                        </div>
+                        <div style='font-size: 30px;base-font-size: 30px;'>
+                            <%= L"如果您已拥有Paracraft账号，可直接输入使用。" %>
+                        </div>
                     </div>
                     <div style='margin-top: 30px;'>
                         <input type='text'
@@ -321,15 +361,26 @@
                                UncheckedBG="Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#970 269 35 35"
                                onclick='set_password_show_or_hide' />
                     </div>
-                    <div style='margin-top: 30px;'>
+                    <div style='margin-top: 30px;width: 600px;'>
                         <input type='button'
-                               onclick='next()'
+                               onclick='back()'
                                textscale=1.8
                                style='width: 230px;
                                       height: 70.89px;
                                       color: #FFFFFF;
                                       font-size: 15px;
                                       base-font-size: 15px;'
+                               class='main_login_mobile_gray_button'
+                               value='<%= L"返回" %>' />
+                        <input type='button'
+                               align='right'
+                               onclick='next()'
+                               textscale=1.8
+                               style='width: 230px;
+                                      height: 70.89px;
+                                      color: #FFFFFF;
+                                     font-size: 15px;
+                                     base-font-size: 15px;'
                                class='main_login_mobile_blue_button'
                                value='<%= L"下一步" %>' />
                     </div>
