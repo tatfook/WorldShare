@@ -24,6 +24,7 @@ local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkServ
 -- bottles
 local LoginModal = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua')
 local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
+local Create = NPL.load('(gl)Mod/WorldShare/cellar/Create/Create.lua')
 
 -- databse
 local CacheProjectId = NPL.load('(gl)Mod/WorldShare/database/CacheProjectId.lua')
@@ -318,87 +319,19 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
         end
 	end
 
-    -- show view over 5 seconds
+    -- show view over 10 seconds
     Mod.WorldShare.Utils.SetTimeOut(function()
         if fetchSuccess then
             return false
         end
 
-        Mod.WorldShare.Store:Set('world/openKpProjectId', pid)
-
-        local cacheWorldInfo = CacheProjectId:GetProjectIdInfo(pid)
-
-        if not cacheWorldInfo or not cacheWorldInfo.worldInfo or not cacheWorldInfo.worldInfo.archiveUrl then
-            return false
-        end
-
-        local worldInfo = cacheWorldInfo.worldInfo
-        local url = cacheWorldInfo.worldInfo.archiveUrl
-        local world = RemoteWorld.LoadFromHref(url, "self")
-        world:SetProjectId(pid)
-        local fileUrl = world:GetLocalFileName()   
-        local localRevision = tonumber(LocalService:GetZipRevision(fileUrl)) or 0
-
-        local worldName = ''
-
-        if worldInfo and worldInfo.extra and worldInfo.extra.worldTagName then
-            worldName = worldInfo.extra.worldTagName
-        else
-            worldName = worldInfo.worldName
-        end
-
-        local function LoadWorld(world, refreshMode)
-            if world then
-                local url = world:GetLocalFileName()
-                DownloadWorld.ShowPage(url)
-
-                local mytimer = commonlib.Timer:new(
-                    {
-                        callbackFunc = function(timer)
-                            InternetLoadWorld.LoadWorld(
-                                world,
-                                nil,
-                                refreshMode or "auto",
-                                function(bSucceed, localWorldPath)
-                                    DownloadWorld.Close()
-                                    return true
-                                end
-                            )
-                        end
-                    }
-                );
-
-                -- prevent recursive calls.
-                mytimer:Change(1,nil);
-            else
-                _guihelper.MessageBox(L"无效的世界文件")
-            end
-        end
-
-        local params = Mod.WorldShare.Utils.ShowWindow(
-            0,
-            0,
-            "Mod/WorldShare/cellar/Common/LoadWorld/ProjectIdEnter.html?project_id=" 
-                .. pid
-                .. "&remote_revision=" .. 0
-                .. "&local_revision=" .. localRevision
-                .. "&world_name=" .. worldName,
-            "ProjectIdEnter",
-            0,
-            0,
-            "_fi",
-            false
-        )
-
-        params._page.callback = function(data)
-            if data == 'local' then
-                overtimeEnter = true
-                LoadWorld(world, "never")
-            end
-        end
-    end, 5000)
+        MainLogin:Close()
+        Create:Show()
+        Mod.WorldShare.MsgBox:Close()
+    end, 10000)
 
     Mod.WorldShare.MsgBox:Show(L"请稍候...", 20000)
+
     KeepworkServiceProject:GetProject(
         pid,
         function(data, err)
