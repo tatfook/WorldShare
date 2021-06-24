@@ -12,17 +12,44 @@
                     function get_type_name()
                         return "("..VipNotice:GetTypeName()..")"
                     end
+
+                    function getBackStyle()
+                        if GetIsTouchMode() then
+                            return "width: 784px; height: 536px; background: url(Texture/Aries/Creator/keepwork/vip/bj_mobile_784x536_32bits.png#0 0 784 536);"
+                        else
+                            return "width: 784px; height: 536px; background: url(Texture/Aries/Creator/keepwork/vip/bj_784x536_32bits.png#0 0 784 536);"
+                        end
+                    end
+
+                    function GetIsTouchMode()
+                        return System.os.IsTouchMode()
+                    end
+
+                    function OnClickBuy()
+                        VipNotice.OnClickBuy()
+                    end
+
+                    function OnClickInput()
+                        VipNotice.OnClickInput()
+                    end
                 ]]>
             </script>
-            <div style="width: 784px; height: 536px; background: url(Texture/Aries/Creator/keepwork/vip/bj_784x536_32bits.png#0 0 784 536);">
+            <div style="<%=getBackStyle()%>">
                 <!--title-->
                 <div style="width: 784px; height: 60px;">
                     <input type="button" style="margin-left: 740px; margin-top: 20x; width:22px;height:22px;background: url(Texture/Aries/Creator/keepwork/vip/guanbi_32bits.png#0 0 22 22);" onclick="close()"/>                    
                 </div>
                 <!-- type_name -->
                 <div style="margin-top: 408px;">
-                    <div style="text-align: center; font-size: 24px;base-font-size: 24px;color: #9B2010; font-weight: bold;"><%= L"开通会员" %></div>
-                    <div style="margin-top: -2px; text-align: center; font-size: 12px;base-font-size: 12px;color: #9B2010; font-weight: bold;"><%= get_type_name() %></div>
+                    <pe:if condition='<%=GetIsTouchMode()%>'>
+                        <input type="button" onclick="OnClickBuy" style=" margin-top: -20px; margin-left: 178px; width: 180px; height: 64px; background: url(Texture/Aries/Creator/keepwork/vip/btn_buy_blue_180X64_32bits.png#0 0 180 64);" />
+                        <input type="button" onclick="OnClickInput" style=" margin-top: -20px; margin-left: 70px; width: 180px; height: 64px; background: url(Texture/Aries/Creator/keepwork/vip/btn_input_180X64_32bits.png#0 0 180 64);" />
+                    </pe:if>
+
+                    <pe:if condition='<%=not GetIsTouchMode()%>'>
+                        <div style="text-align: center; font-size: 24px;base-font-size: 24px;color: #9B2010; font-weight: bold;"><%= L"开通会员" %></div>
+                        <div style="margin-top: -2px; text-align: center; font-size: 12px;base-font-size: 12px;color: #9B2010; font-weight: bold;"><%= get_type_name() %></div>
+                    </pe:if>                    
                 </div>   
             </div>
         </pe:mcml>

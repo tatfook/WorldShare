@@ -11,9 +11,10 @@ local VipNotice = NPL.load('(gl)Mod/WorldShare/cellar/VipNotice/VipNotice.lua')
 ]]
 -- service
 local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
 --lib
 local QREncode = NPL.load("(gl)script/apps/Aries/Creator/Game/Movie/QREncode.lua");
-
+local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua")
 local VipNotice = NPL.export()
 local page
 
@@ -38,16 +39,20 @@ function VipNotice:Close()
 end
 
 function VipNotice:GetQRCodeUrl()
-    local qrcode_url = string.format(
-        '%s/p/qr/purchase?userId=%s&from=%s',
-        KeepworkService:GetKeepworkUrl(),
-        Mod.WorldShare.Store:Get('user/userId'),
-        self.key
-    )
+	local userid = Mod.WorldShare.Store:Get('user/userId')
+    local qrcode_url;
+	if(userid) then
+		qrcode_url = string.format("%s/p/qr/purchase?userId=%s&from=%s",KeepworkService:GetKeepworkUrl(), userid, self.key);
+	else
+		qrcode_url = string.format("%s/p/qr/buyFor?from=%s",KeepworkService:GetKeepworkUrl(), self.key);
+	end
     return qrcode_url
 end
 
 function VipNotice:InitQRCode()
+    if (System.os.IsTouchMode()) then
+        return 
+    end
     local parent  = page:GetParentUIObject()
     local ret,qrcode = QREncode.qrcode(VipNotice:GetQRCodeUrl())
     if ret then        
@@ -74,4 +79,20 @@ end
 
 function VipNotice:GetTypeName()
     return self.desc
+end
+
+function VipNotice.OnClickBuy()
+   local url = VipNotice:GetQRCodeUrl()
+   if System.os.IsTouchMode() then
+        cmd(format("/open -e %s",url))
+   else
+        --print("url=============",url)
+        ParaGlobal.ShellExecute("open",url, "","", 1);
+   end
+end
+
+function VipNotice.OnClickInput()
+    VipNotice:Close()
+    local VipCodeExchange = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/VipToolTip/VipCodeExchange.lua") 
+    VipCodeExchange.ShowView()
 end
