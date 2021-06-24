@@ -84,7 +84,7 @@ end
 function VipNotice.OnClickBuy()
    local url = VipNotice:GetQRCodeUrl()
    if System.os.IsTouchMode() then
-        cmd(format("/open -e %s",url))
+        GameLogic.RunCommand(string.format("/open -e %s",url))
    else
         --print("url=============",url)
         ParaGlobal.ShellExecute("open",url, "","", 1);
