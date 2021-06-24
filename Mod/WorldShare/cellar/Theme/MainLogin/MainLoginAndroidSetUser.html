@@ -73,8 +73,15 @@
                                                 return
                                             end
 
-                                            page:FindControl('set_username').visible = false
-                                            page:FindControl('set_school').visible = true
+                                            local has_join_school = Mod.WorldShare.Store:Get('user/hasJoinedSchool')
+
+                                            if has_join_school then
+                                                close()
+                                                MainLogin:ShowAndroidLogin()
+                                            else
+                                                page:FindControl('set_username').visible = false
+                                                page:FindControl('set_school').visible = true
+                                            end
                                         end
                                     )
                                 end)
