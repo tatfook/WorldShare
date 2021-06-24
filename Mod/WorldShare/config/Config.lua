@@ -36,6 +36,13 @@ Config.schoolWorldId = {
   LOCAL = 0
 }
 
+Config.campWorldId = {
+  ONLINE = 70351,
+  RELEASE = 20669,
+  STAGE = 0,
+  LOCAL = 0
+}
+
 Config.keepworkList = {
   ONLINE = "https://keepwork.com",
   STAGE = "http://dev.kp-para.cn",

@@ -480,6 +480,15 @@ function Utils:IsSharedWorld(world)
     return false
 end
 
+function Utils.IsSummerUser()
+    local isVip = Mod.WorldShare.Store:Get('user/isVip')
+    local isVipSchool = System.User.isVipSchool
+    if System.options.isDevMode then
+        return isVipSchool or isVip
+    end
+    return false
+end
+
 function Utils:RecentDatetimeFormat(timestamp)
     timestamp = tonumber(timestamp) or 0
     local now = os.time()

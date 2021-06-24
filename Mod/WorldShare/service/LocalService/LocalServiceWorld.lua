@@ -307,6 +307,10 @@ function LocalServiceWorld:SetWorldInstanceByFoldername(foldername)
 end
 
 function LocalServiceWorld:GetMainWorldProjectId()
+    local IsSummerUser = Mod.WorldShare.Utils.IsSummerUser()    
+    if IsSummerUser then
+        return Mod.WorldShare.Utils:GetConfig('campWorldId')
+    end
     if not ParaWorldLoginAdapter or not ParaWorldLoginAdapter.ids then
         return false
     end

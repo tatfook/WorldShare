@@ -38,10 +38,18 @@ function CommonLoadWorld:EnterCommunityWorld()
     if not KeepworkServiceSession:IsSignedIn() then
         return
     end
-
+    local IsSummerUser = Mod.WorldShare.Utils.IsSummerUser()
     if KeepworkServiceSession:GetUserWhere() == 'HOME' then
+        if IsSummerUser then
+            GameLogic.RunCommand(format('/loadworld -s -force %s', Mod.WorldShare.Utils:GetConfig('campWorldId')))
+            return 
+        end
         GameLogic.RunCommand(format('/loadworld -s -force %s', Mod.WorldShare.Utils:GetConfig('homeWorldId')))
     elseif KeepworkServiceSession:GetUserWhere() == 'SCHOOL' then
+        if IsSummerUser then
+            GameLogic.RunCommand(format('/loadworld -s -force %s', Mod.WorldShare.Utils:GetConfig('campWorldId')))
+            return 
+        end
         GameLogic.RunCommand(format('/loadworld -s -force %s', Mod.WorldShare.Utils:GetConfig('schoolWorldId')))
     else
         CommonLoadWorld:SelectPlaceAndEnterCommunityWorld()
@@ -49,10 +57,19 @@ function CommonLoadWorld:EnterCommunityWorld()
 end
 
 function CommonLoadWorld:SelectPlaceAndEnterCommunityWorld()
+    local IsSummerUser = Mod.WorldShare.Utils.IsSummerUser()
     MainLogin:ShowWhere(function(result)
         if result == 'HOME' then
+            if IsSummerUser then
+                GameLogic.RunCommand(format('/loadworld -s -force %s', Mod.WorldShare.Utils:GetConfig('campWorldId')))
+                return 
+            end
             GameLogic.RunCommand(format('/loadworld -s -force %s', Mod.WorldShare.Utils:GetConfig('homeWorldId')))
         elseif result == 'SCHOOL' then
+            if IsSummerUser then
+                GameLogic.RunCommand(format('/loadworld -s -force %s', Mod.WorldShare.Utils:GetConfig('campWorldId')))
+                return 
+            end
             GameLogic.RunCommand(format('/loadworld -s -force %s', Mod.WorldShare.Utils:GetConfig('schoolWorldId')))
         end
     end)
