@@ -85,7 +85,11 @@ KeepworkServicePermission.AllAuth = {
     IsOrgan = {
         key = 'is_organ',
         desc = L'需要机构会员权限'
-    }
+    },
+    LongMarch ={
+        key = 'long_march',
+        desc = L'玩转征途编程课'
+    },
 }
 
 KeepworkServicePermission.AllLocalAuth = {
