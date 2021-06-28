@@ -32,6 +32,10 @@
                     function OnClickInput()
                         VipNotice.OnClickInput()
                     end
+
+                    function OnClickHelp()
+                        GameLogic.AddBBS(nil,"敬请期待")
+                    end
                 ]]>
             </script>
             <div style="<%=getBackStyle()%>">
@@ -42,8 +46,9 @@
                 <!-- type_name -->
                 <div style="margin-top: 408px;">
                     <pe:if condition='<%=GetIsTouchMode()%>'>
-                        <input type="button" onclick="OnClickBuy" style=" margin-top: -20px; margin-left: 178px; width: 180px; height: 64px; background: url(Texture/Aries/Creator/keepwork/vip/btn_buy_blue_180X64_32bits.png#0 0 180 64);" />
-                        <input type="button" onclick="OnClickInput" style=" margin-top: -20px; margin-left: 70px; width: 180px; height: 64px; background: url(Texture/Aries/Creator/keepwork/vip/btn_input_180X64_32bits.png#0 0 180 64);" />
+                        <input type="button" value="点击加入会员" onclick="OnClickBuy" style="color: #111616;font-size: 16px; base-font-size: 16px; margin-top: -220px; margin-left: 56px; width: 142px; height: 48px; background: url(Texture/Aries/Creator/keepwork/macro/btn_1_32X32_32bits.png#0 0 32 32:14 14 14 14);" />
+                        <input type="button" onclick="OnClickInput" style=" margin-top: -116px; margin-left: -120px; width: 96px; height: 29px; background: url(Texture/Aries/Creator/keepwork/vip/btn_96x29_32bits.png#0 0 96 29);" />
+                        <input type="button" value="如何获得激活码？" onclick="OnClickHelp" style="color: #0050BD;font-size: 14px; base-font-size: 14px;  margin-top: -84px; margin-left: -90px; width: 96px; height: 29px; background: url();" />
                     </pe:if>
 
                     <pe:if condition='<%=not GetIsTouchMode()%>'>

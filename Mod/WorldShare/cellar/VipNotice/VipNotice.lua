@@ -50,9 +50,9 @@ function VipNotice:GetQRCodeUrl()
 end
 
 function VipNotice:InitQRCode()
-    if (System.os.IsTouchMode()) then
-        return 
-    end
+    -- if (System.os.IsTouchMode()) then
+    --     return 
+    -- end
     local parent  = page:GetParentUIObject()
     local ret,qrcode = QREncode.qrcode(VipNotice:GetQRCodeUrl())
     if ret then        
@@ -84,7 +84,8 @@ end
 function VipNotice.OnClickBuy()
    local url = VipNotice:GetQRCodeUrl()
    if System.os.IsTouchMode() then
-        GameLogic.RunCommand(string.format("/open -e %s",url))
+        local weixinUrl = "weixin://dl/business/?t=ZbXsre0lSAf"
+        cmd(format("/open -e %s",weixinUrl))
    else
         --print("url=============",url)
         ParaGlobal.ShellExecute("open",url, "","", 1);
