@@ -243,6 +243,11 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                                 nil,
                                 refreshMode or "auto",
                                 function(bSucceed, localWorldPath)
+                                    if not bSucceed then
+                                        MainLogin:Close()
+                                        Create:Show()
+                                    end
+
                                     DownloadWorld.Close()
                                 end
                             )

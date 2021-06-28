@@ -225,7 +225,12 @@
                             Create:Close()
 
                             if not Mod.WorldShare.Store:Get("world/isEnterWorld") then
-                                MainLogin:Init()
+                                if KeepworkServiceSession:IsSignedIn() then
+                                    KeepworkServiceSession:Logout(nil)
+                                    MainLogin:Init()
+                                else
+                                    MainLogin:Init()
+                                end
                             end
                         end
 
