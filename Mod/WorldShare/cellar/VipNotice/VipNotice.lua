@@ -84,8 +84,9 @@ end
 function VipNotice.OnClickBuy()
    local url = VipNotice:GetQRCodeUrl()
    if System.os.IsTouchMode() then
+        VipNotice:Close()
         local weixinUrl = "weixin://dl/business/?t=ZbXsre0lSAf"
-        GameLogic.RunCommand(format("/open -e %s",weixinUrl))
+        GameLogic.RunCommand(string.format("/open -e %s",weixinUrl))
    else
         --print("url=============",url)
         ParaGlobal.ShellExecute("open",url, "","", 1);
