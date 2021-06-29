@@ -88,7 +88,7 @@ KeepworkServicePermission.AllAuth = {
     },
     LongMarch ={
         key = 'long_march',
-        desc = L'玩转征途编程课'
+        desc = L'畅学征程编程课'
     },
 }
 
