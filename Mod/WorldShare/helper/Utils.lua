@@ -483,10 +483,11 @@ end
 function Utils.IsSummerUser()
     local isVip = Mod.WorldShare.Store:Get('user/isVip')
     local isVipSchool = System.User.isVipSchool
-    if System.options.isDevMode then
-        return isVipSchool or isVip
-    end
-    return false
+    return isVipSchool or isVip
+    -- if System.options.isDevMode then
+    --     return isVipSchool or isVip
+    -- end
+    -- return false
 end
 
 function Utils:RecentDatetimeFormat(timestamp)
