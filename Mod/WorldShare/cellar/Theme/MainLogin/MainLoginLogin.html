@@ -17,6 +17,9 @@
                     -- helper
                     local Validated = NPL.load('(gl)Mod/WorldShare/helper/Validated.lua')
 
+                    -- database
+                    local SessionsData = NPL.load("(gl)Mod/WorldShare/database/SessionsData.lua")
+
                     local page = document:GetPageCtrl()
 
                     function get_history_users()
@@ -115,15 +118,15 @@
 
                             close()
 
-                            MainLogin:ShowWhere(function(where)
-                                if not Mod.WorldShare.Store:Get('user/hasJoinedSchool') then
-                                    MySchool:ShowJoinSchoolAfterRegister(function()
-                                        MainLogin:EnterUserConsole()
-                                    end)
-                                else
+                            SessionsData:SetUserLocation('HOME', Mod.WorldShare.Store:Get('user/username'))
+
+                            if not Mod.WorldShare.Store:Get('user/hasJoinedSchool') then
+                                MySchool:ShowJoinSchoolAfterRegister(function()
                                     MainLogin:EnterUserConsole()
-                                end
-                            end)
+                                end)
+                            else
+                                MainLogin:EnterUserConsole()
+                            end
                         end) then
                             is_login = false
                         end
