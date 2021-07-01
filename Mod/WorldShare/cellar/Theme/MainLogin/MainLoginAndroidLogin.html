@@ -315,12 +315,12 @@
                                 text-align: center;
                                 font-size: 50px;
                                 base-font-size: 50px;
-                                margin-top: 20px;
+                                margin-top: 0px;
                                 color: #FFFFFF;
                                 margin-left: -3px;'>
                         <%= get_username() %>
                     </div>
-                    <div>
+                    <div style="padding-bottom: 20px;">
                         <input type='button'
                                textscale=1.8
                                class='main_login_mobile_blue_button'
@@ -349,7 +349,19 @@
                          src='Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#907 94 92 40' />
                 </div>
                 <pe:container name='login_with_phone_number' visible='true' style='background:;position: relative;'>
-                    <div style='margin-top: 20px;'>
+                    <div style='margin-top: 0px;'>
+                        <div style="margin-left: 440px;margin-bottom: 10px;">
+                            <div style='position: relative;
+                                        height: 1px;
+                                        width: 108%;
+                                        margin-top: 27px;
+                                        background-color: #FFFFFF;'></div>
+                            <div style='background:;
+                                        font-size: 17px;
+                                        base-font-size: 17px;
+                                        color: #FFFFFF;'
+                                 onclick='set_account_mode()'><%= L'使用密码登录' %></div>
+                        </div>
                         <div style='margin-left: 75px;'>
                             <input type='text'
                                    CaretColor='#FFFFFFFF'
@@ -423,18 +435,6 @@
                                     <%= L"中的内容" %>
                                 </div>
                             </div>
-                            <div>
-                                <div style='position: relative;
-                                            height: 1px;
-                                            width: 108%;
-                                            margin-top: 27px;
-                                            background-color: #FFFFFF;'></div>
-                                <div style='background:;
-                                            font-size: 17px;
-                                            base-font-size: 17px;
-                                            color: #FFFFFF;'
-                                     onclick='set_account_mode()'><%= L'使用密码登录' %></div>
-                            </div>
                         </div>
                         <div style='margin-top: 15px;margin-left: 75px;'>
                             <div style='float: left;'>
@@ -449,7 +449,7 @@
                                        onclick='login_action'
                                        value='<%= L"登录" %>' />
                             </div>
-                            <div style='float: left;margin-left: 10px;'>
+                            <div style='float: left;margin-left: 20px;'>
                                 <input type='button'
                                        class='main_login_mobile_baby_blue_button'
                                        textscale=1.8
