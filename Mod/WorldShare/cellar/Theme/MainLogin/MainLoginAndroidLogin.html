@@ -19,6 +19,8 @@
 
                     local page = document:GetPageCtrl()
 
+                    agree = false
+
                     Mod.WorldShare.Utils.SetTimeOut(function()
                         local current_selected_user = KeepworkServiceSession:LoadSigninInfo()
                         local signed_in_node = page:FindControl('signed_in')
@@ -124,9 +126,22 @@
                         RegisterModal:ShowUserAgreementPage()
                     end
 
+                    function user_privacy()
+                        RegisterModal:ShowUserPrivacyPage()
+                    end
+
+                    function set_phone_agree()
+                        agree = not agree
+                    end
+
                     function login_action()
                         local phone_number = page:GetValue('phone_number')
                         local phone_captcha = page:GetValue('phone_captcha')
+
+                        if not agree then
+                            _guihelper.MessageBox(L'*您未同意《Paracraft用户协议》')
+                            return
+                        end
 
                         if not phone_number or not Validated:Phone(phone_number) then
                             _guihelper.MessageBox(L'*手机号格式错误')
@@ -390,7 +405,7 @@
                                           height: 55px;'/>
                         </div>
                         <div style='margin-top: 10px;margin-left: 75px;'>
-                            <div style='float: left;'>
+                            <div>
                                 <input type="checkbox"
                                        iconsize="18"
                                        CheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#275 79 12 12"
@@ -398,15 +413,17 @@
                                        style="float:left;margin-top:4px;min-width:90px;"
                                        name="phone_agree"
                                        onclick="set_phone_agree"
-                                       checked="checked"/>
+                                       checked="false"/>
                                 <div style="float:left; color: white;base-font-size: 17px;font-size: 17px;margin-left: 4px;">
                                     <div style="float:left;width: 2px;"></div>
                                     <%= L"我同意" %>
-                                    <div style="float:left;color: #EDB853" onclick="user_agreement()"><%= L"《Paracraft用户协议》" %></div>
+                                    <div style="float:left;color: #EDB853" onclick="user_agreement()"><%= L"《用户许可协议》" %></div>
+                                    <%= L'与' %>
+                                    <div style="float:left;color: #EDB853" onclick="user_privacy()"><%= L"《用户隐私协议》" %></div>
                                     <%= L"中的内容" %>
                                 </div>
                             </div>
-                            <div style='float: left;margin-left: 45px;'>
+                            <div>
                                 <div style='position: relative;
                                             height: 1px;
                                             width: 108%;
@@ -419,7 +436,7 @@
                                      onclick='set_account_mode()'><%= L'使用密码登录' %></div>
                             </div>
                         </div>
-                        <div style='margin-top: 45px;margin-left: 75px;'>
+                        <div style='margin-top: 15px;margin-left: 75px;'>
                             <div style='float: left;'>
                                 <input type='button'
                                        class='main_login_mobile_blue_button'
