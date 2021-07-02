@@ -19,28 +19,29 @@ local EntityManager = commonlib.gettable("MyCompany.Aries.Game.EntityManager")
 local LocalServiceSession = NPL.export()
 
 function LocalServiceSession:OnWorldLoad()
-    if GameLogic.options:IsCommunityWorld() then
-        if not KeepworkServiceSession:IsSignedIn() then
-            return
-        end
+    -- for strange issue
+    -- if GameLogic.options:IsCommunityWorld() then
+    --     if not KeepworkServiceSession:IsSignedIn() then
+    --         return
+    --     end
 
-        -- go to user last position
-        local userLastPosition = SessionsData:GetUserLastPosition()
+    --     -- go to user last position
+    --     local userLastPosition = SessionsData:GetUserLastPosition()
 
-        if userLastPosition and type(userLastPosition) == 'table' then
-            GameLogic.RunCommand(
-                format(
-                    '/goto %d, %d, %d',
-                    userLastPosition.position.x,
-                    userLastPosition.position.y,
-                    userLastPosition.position.z
-                )
-            )
+    --     if userLastPosition and type(userLastPosition) == 'table' then
+    --         GameLogic.RunCommand(
+    --             format(
+    --                 '/goto %d, %d, %d',
+    --                 userLastPosition.position.x,
+    --                 userLastPosition.position.y,
+    --                 userLastPosition.position.z
+    --             )
+    --         )
 
-            GameLogic.RunCommand(format('/camerapitch %s', userLastPosition.orientation.cameraLiftupAngle))
-            GameLogic.RunCommand(format('/camerayaw %s', userLastPosition.orientation.cameraRotY))
-        end
-    end
+    --         GameLogic.RunCommand(format('/camerapitch %s', userLastPosition.orientation.cameraLiftupAngle))
+    --         GameLogic.RunCommand(format('/camerayaw %s', userLastPosition.orientation.cameraRotY))
+    --     end
+    -- end
 end
 
 function LocalServiceSession:OnWillLeaveWorld()
@@ -57,25 +58,26 @@ function LocalServiceSession:OnWillLeaveWorld()
     end
 
     -- set actor last position
-    if GameLogic.options:IsCommunityWorld() then
-        if not KeepworkServiceSession:IsSignedIn() or not Mod.WorldShare.Store:Get('world/isEnterWorld') then
-            return
-        end
+    -- for strange issue
+    -- if GameLogic.options:IsCommunityWorld() then
+    --     if not KeepworkServiceSession:IsSignedIn() or not Mod.WorldShare.Store:Get('world/isEnterWorld') then
+    --         return
+    --     end
     
-        -- get user position info
-        local cameraAttribute = ParaCamera.GetAttributeObject()
-        local cameraLiftupAngle = cameraAttribute:GetField('CameraLiftupAngle')
-        local cameraRotY = cameraAttribute:GetField('CameraRotY')
+    --     -- get user position info
+    --     local cameraAttribute = ParaCamera.GetAttributeObject()
+    --     local cameraLiftupAngle = cameraAttribute:GetField('CameraLiftupAngle')
+    --     local cameraRotY = cameraAttribute:GetField('CameraRotY')
     
-        local focusEntity = EntityManager.GetFocus()
+    --     local focusEntity = EntityManager.GetFocus()
     
-        if not focusEntity then
-            return
-        end
+    --     if not focusEntity then
+    --         return
+    --     end
     
-        local x, y, z = focusEntity:GetBlockPos()
+    --     local x, y, z = focusEntity:GetBlockPos()
     
-        SessionsData:SetUserLastPosition(x, y, z, cameraLiftupAngle, cameraRotY)
-    end
+    --     SessionsData:SetUserLastPosition(x, y, z, cameraLiftupAngle, cameraRotY)
+    -- end
 end
 
