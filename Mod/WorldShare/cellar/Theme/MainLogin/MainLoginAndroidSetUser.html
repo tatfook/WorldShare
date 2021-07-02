@@ -111,9 +111,14 @@
                         local school_list_row3_node = page:FindControl('school_list_row3')
                         local text = mcmlNode:GetUIValue()
 
-                        school_list_node.visible = true
+                        if text and #text > 0 then
+                            school_list_node.visible = true
+                        else
+                            school_list_node.visible = false
+                            return
+                        end
 
-                        KeepworkServiceSchoolAndOrg:SearchSchoolByName(text, 0, nil, function(data)
+                        local function handle(data, err)
                             if not data or type(data) ~= 'table' then
                                 return
                             end
@@ -134,7 +139,7 @@
                                 for dKey, dItem in ipairs(result) do
                                     if item.name == dItem.name then
                                         local remark = item.region.city.name ..
-                                                       item.region.county.name
+                                                    item.region.county.name
                                         item.text = item.name .. '(' .. remark .. ')'
                                         break
                                     end
@@ -177,7 +182,13 @@
                                 school_list_row2_node.visible = false
                                 school_list_row3_node.visible = false
                             end
-                        end)
+                        end
+
+                        if type(tonumber(text)) == 'number' then
+                            KeepworkServiceSchoolAndOrg:SearchSchoolBySchoolId(tonumber(text), handle)
+                        else
+                            KeepworkServiceSchoolAndOrg:SearchSchoolByName(text, 0, nil, handle)
+                        end                        
                     end
 
                     function next1()
