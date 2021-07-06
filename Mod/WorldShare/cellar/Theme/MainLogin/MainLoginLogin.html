@@ -39,6 +39,8 @@
                     end
 
                     function login_with_wx()
+                        EventTrackingService:Send(1, 'click.main_login.login_with_wechat', nil, true)
+
                         ThirdPartyLogin:Init('WECHAT', function()
                             UserConsole.notFirstTimeShown = nil
 
@@ -59,6 +61,8 @@
                     end
 
                     function login_with_qq()
+                        EventTrackingService:Send(1, 'click.main_login.login_with_qq', nil, true)
+
                         ThirdPartyLogin:Init('QQ', function()
                             UserConsole.notFirstTimeShown = nil
 
@@ -99,6 +103,7 @@
                     end
 
                     function forget_password()
+                        EventTrackingService:Send(1, 'click.main_login.find_password', nil, true)
                         ForgetPassword:ShowPage()
                     end
 

@@ -6,6 +6,9 @@
                     -- bottles
                     local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
 
+                    -- service
+                    local EventTrackingService = NPL.load('(gl)Mod/WorldShare/service/EventTracking.lua')
+
                     function close()
                         local MainLoginSelectPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Select')
 
@@ -15,16 +18,19 @@
                     end
 
                     function login()
+                        EventTrackingService:Send(1, 'click.main_login.select_login', nil, true)
                         close()
                         MainLogin:ShowLogin()
                     end
 
                     function register()
+                        EventTrackingService:Send(1, 'click.main_login.select_register', nil, true)
                         close()
                         MainLogin:ShowRegister()
                     end
 
                     function parent()
+                        EventTrackingService:Send(1, 'click.main_login.select_parents', nil, true)
                         close()
                         MainLogin:ShowParent()
                     end
