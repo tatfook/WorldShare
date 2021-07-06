@@ -125,7 +125,7 @@ function LoadWorldCommand:Init()
                     return false
                 end
 
-                local pid = string.match(cmd_text, '(%d+)')
+                local pid = string.match(cmd_text, '^%s-(%d+)%s-$')
                 if pid then
                     local cacheWorldInfo = CacheProjectId:GetProjectIdInfo(tonumber(pid))
 
@@ -154,7 +154,7 @@ function LoadWorldCommand:Init()
                             CommandManager:RunCommand('/loadworld -s ' .. optionsStr .. cmd_text)
                         end
 
-                        return
+                        return false
                     end
 
                     Mod.WorldShare.MsgBox:Show(L"请稍候...")
@@ -189,16 +189,20 @@ function LoadWorldCommand:Init()
                             CommandManager:RunCommand('/loadworld -s ' .. optionsStr .. cmd_text)
                         end
                     end)
-                end
 
-                return false
+                    return false
+                end
             end
 
             if cmd_text == 'home' then
                 return cmd_text
             end
 
-            if cmd_text:match("^https?://") then
+            if cmd_text:match('^https?://') then
+                return cmd_text
+            end
+
+            if cmd_text:match('^worlds/DesignHouse/') then
                 return cmd_text
             end
 
@@ -222,7 +226,7 @@ function LoadWorldCommand:Init()
                     WorldCommon.OpenWorld(lastWorld.worldpath)
                 end
 
-                return
+                return false
             end
 
             if options and options.personal then
@@ -230,7 +234,7 @@ function LoadWorldCommand:Init()
                 return false
             end
 
-            local pid = string.match(cmd_text, '(%d+)')
+            local pid = string.match(cmd_text, '^%s-(%d+)%s-$')
 
             if not pid then
                 return false
