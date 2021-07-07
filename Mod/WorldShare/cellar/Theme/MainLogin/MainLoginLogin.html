@@ -430,16 +430,32 @@
                     </div>
                     <div style="margin-top: 5px;">
                         <div style='float:left;base-font-size: 13px;font-size: 13px;'>
-                            <input type="checkbox"
+                            <pe:if condition='<%= System.os.GetPlatform() == "win32" %>'>
+                                <input type="checkbox"
+                                   iconsize="12"
+                                   CheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#275 79 12 12"
+                                   UncheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#295 79 12 12"
+                                   style="float:left;margin-top:3px;min-width:90px;"
+                                   name='remember_password_name'
+                                   checked="false"/>
+                            </pe:if>
+                            <pe:if condition='<%= System.os.GetPlatform() ~= "win32" %>'>
+                                <input type="checkbox"
                                    iconsize="12"
                                    CheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#275 79 12 12"
                                    UncheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#295 79 12 12"
                                    style="float:left;margin-top:5px;min-width:90px;"
                                    name='remember_password_name'
                                    checked="false"/>
+                            </pe:if>
                             <%= L"记住密码" %>
                         </div>
-                        <div style='float:left;base-font-size: 13px;font-size: 13px;color: #9A9DA2;margin-left: 120px;' onclick='forget_password()'><%= L"找回密码" %></div>
+                        <pe:if condition='<%= System.os.GetPlatform() == "win32" %>'>
+                            <div style='float:left;base-font-size: 13px;font-size: 13px;color: #9A9DA2;margin-left: 100px;' onclick='forget_password()'><%= L"找回密码" %></div>
+                        </pe:if>
+                        <pe:if condition='<%= System.os.GetPlatform() ~= "win32" %>'>
+                            <div style='float:left;base-font-size: 13px;font-size: 13px;color: #9A9DA2;margin-left: 120px;' onclick='forget_password()'><%= L"找回密码" %></div>
+                        </pe:if>
                     </div>
                     <div style='margin-top:5px;margin-bottom:10px;'>
                         <input type='button'
@@ -467,7 +483,7 @@
                                             height: 38px;
                                             margin-left: 20.5px;
                                             margin-top: 10.5px;'></div>
-                                <div style='width: 79px;text-align: center;font-size: 12px;'><%= L'本地模式' %></div>
+                                <div style='width: 79px;text-align: center;font-size: 13px;'><%= L'本地模式' %></div>
                             </div>
                         </div>
                     </pe:if>
