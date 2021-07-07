@@ -820,10 +820,6 @@ function KeepworkServiceSession:SaveSigninInfo(info)
         return false
     end
 
-    if not info.rememberMe then
-        info.password = nil
-    end
-
     SessionsData:SaveSession(info)
 end
 

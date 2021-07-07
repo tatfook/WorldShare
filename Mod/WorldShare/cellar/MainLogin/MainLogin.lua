@@ -193,7 +193,13 @@ function MainLogin:ShowLogin()
 
     if PWDInfo then
         MainLoginLoginPage:SetUIValue('account', PWDInfo.account or '')
-        self.account = PWDInfo.account
+
+        if PWDInfo.rememberMe then
+            MainLoginLoginPage:SetUIValue('password_show', PWDInfo.password or '')
+            MainLoginLoginPage:SetUIValue('password_hide', PWDInfo.password or '')
+            MainLoginLoginPage:SetUIValue('password', PWDInfo.account or '')
+            MainLoginLoginPage:SetUIValue('remember_password_name', true)
+        end
     end
 end
 
@@ -623,6 +629,7 @@ function MainLogin:LoginAction(callback)
 
     local account = MainLoginPage:GetValue('account')
     local password = MainLoginPage:GetValue('password')
+    local rememberMe = MainLoginPage:GetNode('remember_password_name').checked
 
     local validated = true
 
@@ -1027,124 +1034,6 @@ function MainLogin:EnterUserConsole(isOffline)
     self:Next(isOffline)
 end
 
-function MainLogin:SetAutoLogin()
-    local MainLoginPage = Mod.WorldShare.Store:Get('page/MainLogin')
-
-    if not MainLoginPage then
-        return false
-    end
-
-    local autoLogin = MainLoginPage:GetValue('autoLogin')
-    local rememberMe = MainLoginPage:GetValue('rememberMe')
-    local account = MainLoginPage:GetValue('showaccount')
-    local password = MainLoginPage:GetValue('password')
-
-    if autoLogin then
-        MainLoginPage:SetValue('rememberMe', true)
-    else
-        MainLoginPage:SetValue('rememberMe', rememberMe)
-    end
-
-    MainLoginPage:SetValue('autoLogin', autoLogin)
-    MainLoginPage:SetValue('password', password)
-    MainLoginPage:SetValue('account', account)
-    MainLoginPage:SetValue('showaccount', account)
-    self.account = string.lower(account)
-
-    self:Refresh()
-end
-
-function MainLogin:SetRememberMe()
-    local MainLoginPage = Mod.WorldShare.Store:Get('page/MainLogin')
-
-    if not MainLoginPage then
-        return false
-    end
-
-    local autoLogin = MainLoginPage:GetValue('autoLogin')
-    local password = MainLoginPage:GetValue('password')
-    local rememberMe = MainLoginPage:GetValue('rememberMe')
-    local account = MainLoginPage:GetValue('showaccount')
-
-    if rememberMe then
-        MainLoginPage:SetValue('autoLogin', autoLogin)
-    else
-        MainLoginPage:SetValue('autoLogin', false)
-    end
-
-    MainLoginPage:SetValue('rememberMe', rememberMe)
-    MainLoginPage:SetValue('password', password)
-    MainLoginPage:SetValue('account', account)
-    MainLoginPage:SetValue('showaccount', account)
-    self.account = string.lower(account)
-
-    self:Refresh()
-end
-
 function MainLogin:GetHistoryUsers()
-    if self.account and #self.account > 0 then
-        local allUsers = commonlib.Array:new(SessionsData:GetSessions().allUsers)
-        local beExist = false
-
-        for key, item in ipairs(allUsers) do
-            item.selected = nil
-
-            if item.value == self.account then
-                item.selected = true
-                beExist = true
-            end
-        end
-
-        if not beExist then
-            allUsers:push_front({ text = self.account, value = self.account, selected = true })
-        end
-
-        return allUsers
-    else
-        return SessionsData:GetSessions().allUsers
-    end
-end
-
-function MainLogin:SelectAccount(username)
-    local MainLoginPage = Mod.WorldShare.Store:Get('page/MainLogin')
-
-    if not MainLoginPage then
-        return false
-    end
-
-    local session = SessionsData:GetSessionByUsername(username)
-
-    if not session then
-        return false
-    end
-
-    self.account = session and session.account or ''
-
-    MainLoginPage:SetValue('autoLogin', session.autoLogin)
-    MainLoginPage:SetValue('rememberMe', session.rememberMe)
-    MainLoginPage:SetValue('password', session.password)
-    MainLoginPage:SetValue('showaccount', session.account or '')
-
-    self:Refresh()
-end
-
-function MainLogin:RemoveAccount(username)
-    local MainLoginPage = Mod.WorldShare.Store:Get('page/MainLogin')
-
-    if not MainLoginPage then
-        return false
-    end
-
-    SessionsData:RemoveSession(username)
-
-    if self.account == username then
-        self.account = nil
-
-        MainLoginPage:SetValue('autoLogin', false)
-        MainLoginPage:SetValue('rememberMe', false)
-        MainLoginPage:SetValue('password', '')
-        MainLoginPage:SetValue('showaccount', '')
-    end
-
-    self:Refresh()
+    return SessionsData:GetSessions().allUsers
 end

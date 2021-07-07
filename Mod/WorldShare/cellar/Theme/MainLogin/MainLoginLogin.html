@@ -21,13 +21,41 @@
                     local SessionsData = NPL.load("(gl)Mod/WorldShare/database/SessionsData.lua")
 
                     local page = document:GetPageCtrl()
+                    local account_list_data = MainLogin:GetHistoryUsers()
+
+                    if type(account_list_data) == 'table' and #account_list_data > 0 then
+                        local tmp = {}
+
+                        for i = 1, #account_list_data - 1 do
+                            for j = 1, #account_list_data - i do
+                                local curItemModifyTime = 0
+                                local nextItemModifyTime = 0
+
+                                if account_list_data[j] and
+                                    account_list_data[j].session and
+                                    account_list_data[j].session.loginTime then
+                                    curItemModifyTime = account_list_data[j].session.loginTime
+                                end
+
+                                if account_list_data[j + 1] and
+                                    account_list_data[j + 1].session and
+                                    account_list_data[j + 1].session.loginTime then
+                                    nextItemModifyTime = account_list_data[j + 1].session.loginTime
+                                end
+
+                                if curItemModifyTime < nextItemModifyTime then
+                                    tmp = account_list_data[j]
+                                    account_list_data[j] = account_list_data[j + 1]
+                                    account_list_data[j + 1] = tmp
+                                end
+                            end
+                        end
+                    else
+                        account_list_data = {}
+                    end
 
                     function get_history_users()
                         return MainLogin:GetHistoryUsers()
-                    end
-
-                    function remove_account(username)
-                        MainLogin:RemoveAccount(username)
                     end
 
                     function is_support_third_party_login()
@@ -144,8 +172,6 @@
                         local beSuccess = true
 
                         if not Validated:AccountCompatible(account) then
-                           -- page:SetUIValue('account_field_error_msg', L'*账号不合法')
-                           -- page:FindControl('account_field_error').visible = true
                            beSuccess = false
                         else
                             page:FindControl('account_field_error').visible = false
@@ -178,7 +204,7 @@
 
                     function set_show_password()
                         if be_show_password then
-                        be_show_password = false
+                            be_show_password = false
 
                             local val = page:GetValue('password_show')
                             page:SetValue('password_hide', val)
@@ -196,6 +222,57 @@
                             page:FindControl('password_show').visible = true
                             page:FindControl('password_hide').visible = false
                         end
+                    end
+
+                    function get_account_list()
+                        return account_list_data
+                    end
+
+                    function get_account_list_style()
+                        local count = #account_list_data
+
+                        if count > 4 then
+                            count = 4
+                        end
+
+                        return 'width: 205px;height: ' .. (count * 40) .. 'px;background-color: #25282e;'
+                    end
+
+                    local is_show_account_list = false
+
+                    function show_account_list()
+                        if is_show_account_list then
+                            is_show_account_list = false
+                            page:FindControl('account_list').visible = false
+                        else
+                            is_show_account_list = true
+                            page:FindControl('account_list').visible = true
+                        end
+                    end
+
+                    function hide_account_list()
+                        is_show_account_list = false
+                        page:FindControl('account_list').visible = false
+                    end
+
+                    function select_account(index)
+                        local value = account_list_data[index].value
+                        page:SetValue('account', value);
+                        hide_account_list()
+                    end
+
+                    function remove_account(index)
+                        local value = account_list_data[index].value
+                        SessionsData:RemoveSession(value)
+
+                        local username = page:GetValue('account')
+
+                        if value == username then
+                            page:SetValue('account', '')
+                        end
+
+                        hide_account_list()
+                        page:Rebuild()
                     end
 
                     -- don't remove
@@ -249,12 +326,72 @@
                             <label style='font-size: 12px;base-font-size: 12px;color: #EB2222;' name='password_field_error_msg' />
                         </div>
                     </pe:container>
-                    <div style='width: 240px; height: 88.1px;padding-left: 35px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#9 0 256 94)'>
+                    <div style='width: 240px;
+                                height: 88.1px;
+                                padding-left: 35px;
+                                background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#9 0 256 94)'>
+                        <pe:container name='account_list'
+                                      visible='false'
+                                      zorder='1'
+                                      style='display: none;
+                                             background:;
+                                             position: relative;
+                                             margin-top: 45px;'>
+                            <div style='<%= get_account_list_style() %>'>
+                                <pe:gridview name='account_list_view'
+                                             DataSource='<%= get_account_list() %>'
+                                             DefaultNodeHeight='40'
+                                             pagesize='100'
+                                             ItemsPerLine='1'
+                                             AllowPaging='false'>
+                                    <Columns>
+                                        <div style='width: 205px;
+                                                    height: 39px;
+                                                    padding-left: 4px;
+                                                    background-color: #25282e'>
+                                            <input type='button'
+                                                   value='<%= text %>'
+                                                   name='<%= Eval("index") %>'
+                                                   onclick='select_account'
+                                                   style='width: 160px;
+                                                          height: 39px;
+                                                          text-align: left;
+                                                          color: #FFFFFF;
+                                                          background:;' />
+                                            <input type='button'
+                                                   name='<%= Eval("index") %>'
+                                                   style='background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#639 407 10 12);
+                                                          width: 10px;
+                                                          height: 12px;
+                                                          margin-top: 16px;
+                                                          margin-left: 10px;'
+                                                   onclick='remove_account'/>
+                                        </div>
+                                        <div style='width: 205px;height: 1px;background-color: #3d4047'></div>
+                                    </Columns>
+                                </pe:gridview>
+                            </div>
+                        </pe:container>
                         <div>
+                            <div style='position: relative;
+                                        background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#608 406 7 14);
+                                        width: 7px;
+                                        height: 14px;
+                                        margin-left: 183px;
+                                        margin-top: 18px;'
+                                 onclick='show_account_list'
+                                 zorder='1'>
+                            </div>
                             <input type='text'
                                    name='account'
                                    onchange='update_login_button_status'
-                                   style='background:;textcolor: #FFFFFF;height: 30px;width: 190px;margin-top: 10px;font-size: 16px;'
+                                   onfocusin='hide_account_list'
+                                   style='background:;
+                                          textcolor: #FFFFFF;
+                                          height: 30px;
+                                          width: 190px;
+                                          margin-top: 10px;
+                                          font-size: 16px;'
                                    EmptyText='<%= L"请输入您的账号/手机号" %>'
                                    MoveViewWhenAttachWithIME='true' />
                         </div>
@@ -262,7 +399,12 @@
                             <div style="float: left;width: 190px;">
                                 <input type='text'
                                         name='password_show'
-                                        style='background:;textcolor: #FFFFFF;height: 30px;width: 190px;margin-top: 10px;font-size: 16px;'
+                                        style='background:;
+                                               textcolor: #FFFFFF;
+                                               height: 30px;
+                                               width: 190px;
+                                               margin-top: 10px;
+                                               font-size: 16px;'
                                         onchange='update_login_button_status'
                                         SkipAutoBadWordFilter="true"
                                         EmptyText='<%= L"请输入密码" %>'
@@ -287,8 +429,17 @@
                         </div>
                     </div>
                     <div style="margin-top: 5px;">
-                        <div style='float:left;base-font-size: 13px;font-size: 13px;' onclick='forget_password()'><%= L"找回密码" %></div>
-                        <div style='float:left;base-font-size: 13px;font-size: 13px;color: #9A9DA2;margin-left: 120px;' onclick='use_offline()'><%= L"本地模式" %></div>
+                        <div style='float:left;base-font-size: 13px;font-size: 13px;'>
+                            <input type="checkbox"
+                                   iconsize="12"
+                                   CheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#275 79 12 12"
+                                   UncheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#295 79 12 12"
+                                   style="float:left;margin-top:5px;min-width:90px;"
+                                   name='remember_password_name'
+                                   checked="false"/>
+                            <%= L"记住密码" %>
+                        </div>
+                        <div style='float:left;base-font-size: 13px;font-size: 13px;color: #9A9DA2;margin-left: 120px;' onclick='forget_password()'><%= L"找回密码" %></div>
                     </div>
                     <div style='margin-top:5px;margin-bottom:10px;'>
                         <input type='button'
@@ -299,13 +450,24 @@
                                value='<%= L"登录"%>' />
                     </div>
                     <pe:if condition='<%= is_support_third_party_login() %>'>
-                        <div>
-                            <div style='width: 240px;text-align: center;base-font-size: 12px;font-size: 12px;color: #9A9DA2;'>
+                        <div style='float: left;width: 160px;'>
+                            <div style='text-align: center;base-font-size: 12px;font-size: 12px;color: #9A9DA2;'>
                                 <%= L'第三方账号登录' %>
                             </div>
                             <div style='margin-top: 10px;'>
-                                <div onclick='login_with_wx()' style='width: 44px;height: 44px;background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#245 135 44 44);float: left;margin-left: 63px;'></div>
-                                <div onclick='login_with_qq()' style='width: 44px;height: 44px;background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#301 135 44 44);float: left;margin-left: 30x;'></div>
+                                <div onclick='login_with_wx()' style='width: 44px;height: 44px;background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#245 135 44 44);float: left;margin-left: 30px;'></div>
+                                <div onclick='login_with_qq()' style='width: 44px;height: 44px;background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#301 135 44 44);float: left;margin-left: 15px;'></div>
+                            </div>
+                        </div>
+                        <div style='float: left;width: 80px;'>
+                            <div style='float: left;width: 1px;height: 73px;background-color: #5d6066;'></div>
+                            <div onclick='use_offline' style='float: left;width: 79px;height: 73px;'>
+                                <div style='background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#967 748 38 38);
+                                            width: 38px;
+                                            height: 38px;
+                                            margin-left: 20.5px;
+                                            margin-top: 10.5px;'></div>
+                                <div style='width: 79px;text-align: center;font-size: 12px;'><%= L'本地模式' %></div>
                             </div>
                         </div>
                     </pe:if>

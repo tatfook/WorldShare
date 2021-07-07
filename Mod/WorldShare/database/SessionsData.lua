@@ -29,6 +29,7 @@ local SessionsData = NPL.export()
                 rememberMe = true,
                 token = "jwttoken",
                 tokenExpire = 12345678
+                loginTime = 111111111
             },
             allPositions = {
                 {
@@ -111,13 +112,18 @@ function SessionsData:SaveSession(session)
 
     if oldSession then
         for key, item in pairs(oldSession) do
-            if not session[key] then
+            if session[key] == nil then
                 session[key] = item
             end
         end
     end
 
+    if session.rememberMe == false then
+        session.password = nil
+    end
+
     session.account = string.lower(session.account)
+    session.loginTime = os.time()
 
     local sessionsData = self:GetSessions()
     sessionsData.selectedUser = session.account
