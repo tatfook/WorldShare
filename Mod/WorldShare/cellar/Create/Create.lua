@@ -46,6 +46,20 @@ function Create:Show()
     self:GetWorldList(self.statusFilter)
 end
 
+function Create:ShowCreateEmbed(width, height, x, y)
+    local CreateEmbedPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Create')
+
+    if CreateEmbedPage then
+        CreateEmbedPage:CloseWindow()
+    end
+
+    Create.currentMenuSelectIndex = 1
+
+    Mod.WorldShare.Utils.ShowWindow(1024, 580, '(ws)Create/CreateEmbed.html', 'Mod.WorldShare.Create', 768, 440, nil, false)
+
+    self:GetWorldList(self.statusFilter)
+end
+
 function Create:Close()
     self.statusFilter = nil
 

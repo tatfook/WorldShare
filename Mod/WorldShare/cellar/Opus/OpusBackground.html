@@ -1,0 +1,223 @@
+<html>
+    <body>
+        <pe:mcml>
+            <script type="text/npl" refresh="false">
+                <![CDATA[
+                    -- bottles
+                    local Opus = NPL.load('./Opus.lua')
+                    local CommonLoadWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/CommonLoadWorld.lua')
+
+                    -- libs
+                    local InternetLoadWorld = commonlib.gettable('MyCompany.Aries.Creator.Game.Login.InternetLoadWorld')
+
+                    local page = document:GetPageCtrl()
+                    local cur_sel = '1'
+
+                    function sel(index)
+                        local my_opus_sel = page:FindControl('my_opus_sel')
+                        local my_opus_unsel = page:FindControl('my_opus_unsel')
+                        local my_honour_sel = page:FindControl('my_honour_sel')
+                        local my_honour_unsel = page:FindControl('my_honour_unsel')
+
+                        if index == '1' then
+                            my_opus_sel.visible = true
+                            my_opus_unsel.visible = false
+                            my_honour_sel.visible = false
+                            my_honour_unsel.visible = true
+
+                            if index ~= cur_sel then
+                                cur_sel = index
+
+                                Opus:ShowOpus()
+                                Opus:CloseHonour()
+                            end
+                        elseif index == '2' then
+                            my_opus_sel.visible = false
+                            my_opus_unsel.visible = true
+                            my_honour_sel.visible = true
+                            my_honour_unsel.visible = false
+
+                            if index ~= cur_sel then
+                                cur_sel = index
+
+                                Opus:ShowHonour()
+                                Opus:CloseOpus()
+                            end
+                        end
+                    end
+
+                    function open()
+                        local content = page:GetValue('content', '')
+
+                        local pid = get_project_id(content)
+
+                        if pid then
+                            CommonLoadWorld:EnterWorldById(pid)
+                        else
+                            InternetLoadWorld.GotoUrl(url)
+                        end
+                    end
+
+                    function get_project_id(content)
+                        if (tonumber(content or '') or 99999) < 99999 then
+                            return content
+                        end
+
+                        local pid = string.match(content or '', "^p(%d+)$")
+
+                        if not pid then
+                            pid = string.match(content or '', "/pbl/project/(%d+)")
+                        end
+
+                        return pid or false
+                    end
+                ]]>
+            </script>
+            <style type="type/mcss" src='Mod/WorldShare/cellar/Opus/OpusMcss.mcss'>
+            </style>
+            <pe:container
+                alignment='_fi'
+                zorder='-1'
+                width='100%'
+                height='100%'
+                style='position:relative;
+                       background:url(Texture/Aries/Creator/Paracraft/paracraft_opus_background_32bits.png#0 0 1280 720)'>
+            </pe:container>
+            <div>
+                <div>
+                    <div align='right'
+                            style='width: 67px;
+                                height: 70px;
+                                position: relative;
+                                margin-right: 20px;
+                                margin-top: 8px;'>
+                        <div style='background: url(Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#304 111 67 70);
+                                    width: 67px;
+                                    height: 70px;'></div>
+                    </div>
+                    <div style='background: url(Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#0 0 417 55);
+                                width: 417px;
+                                height: 55px;
+                                float: left;'>
+                        <div style='background: url(Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#5 67 38 33);
+                                    width: 38px;
+                                    height: 33px;
+                                    margin-top: 12px;
+                                    margin-left: 33px;
+                                    float: left;'></div>
+                        <div style='background: url(Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#48 74 141 20);
+                                    width: 141px;
+                                    height: 20px;
+                                    margin-top: 19px;
+                                    margin-left: 138px;
+                                    float: left;'></div>
+                    </div>
+                    <div style='float: left;'>
+                        <!-- seach bar -->
+                        <div style='background: url(Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#176 173 32 42: 7 7 7 7);
+                                    width: 490px;
+                                    height: 42px;
+                                    margin-left: 10px;
+                                    margin-top: 10px;'>
+                            <input type='text'
+                                   name='content'
+                                   spacing='10'
+                                   EmptyText='<%= L"输入项目ID或课程ID或服务器地址" %>'
+                                   style='width: 404px;
+                                          height: 42px;
+                                          font-size: 18px;
+                                          base-font-size: 18px;
+                                          text-valign: center;
+                                          background:;'/>
+                            <input type='button'
+                                   class='opus_bar_button'
+                                   DefaultButton='true'
+                                   style='width: 86px;
+                                          height: 46px;
+                                          text-offset-y: -3px;
+                                          font-size: 16px;
+                                          base-font-size: 16px;
+                                          margin-top: -2px;'
+                                   name='open_button'
+                                   onclick='open'
+                                   value='<%= L"打开" %>' />
+                        </div>
+                    </div>
+                </div>
+                <pe:container alignment='_ct' width='1280' height='720' style='margin-left:-640px;margin-top:-360px;background-color:#FFFFFF55;'>
+                    <div width='100%' style='padding-top: 20px;'>
+                        <!-- bottom content -->
+                        <div width='20%' style='float: left;'>
+                            <div align='center'
+                                 style='height: 64px;
+                                        width: 160px;
+                                        margin-bottom: 20px;'>
+                                <pe:container name='my_opus_sel' visible='true' style='position: relative;background:;'>
+                                    <div style='width: 160px;'>
+                                        <input type='button'
+                                               onclick='sel'
+                                               name='1'
+                                               class='opus_menu_button'
+                                               style='width: 160px;
+                                                      font-size: 16px;
+                                                      base-font-size: 16px;'
+                                               value='<%= "我的作品" %>' />
+                                    </div>
+                                </pe:container>
+                                <pe:container name='my_opus_unsel' visible='false' style='position: relative;background:;'>
+                                    <div style='width: 160px;'>
+                                        <input type='button'
+                                               onclick='sel'
+                                               name='1'
+                                               class='opus_menu_button_unsel'
+                                               style='width: 160px;
+                                                      font-size: 16px;
+                                                      base-font-size: 16px;
+                                                      margin-bottom: 20px;
+                                                      color: #FFFFFF;'
+                                               value='<%= "我的作品" %>' />
+                                    </div>
+                                </pe:container>
+                            </div>
+                            <div align='center'
+                                 style='height: 64px;
+                                        width: 160px;
+                                        margin-bottom: 20px;'>
+                                <pe:container name='my_honour_sel' visible='false' style='position: relative;background:;'>
+                                    <div style='width: 160px;'>
+                                        <input type='button'
+                                               onclick='sel'
+                                               name='2'
+                                               class='opus_menu_button'
+                                               style='width: 160px;
+                                                       font-size: 16px;
+                                                       base-font-size: 16px;
+                                                       margin-bottom: 20px;'
+                                               value='<%= "我的荣誉" %>' />
+                                    </div>
+                                </pe:container>
+                                <pe:container name='my_honour_unsel' visible='true' style='position: relative;background:;'>
+                                    <div style='width: 160px;'>
+                                        <input type='button'
+                                               onclick='sel' 
+                                               name='2'
+                                               class='opus_menu_button_unsel'
+                                               style='width: 160px;
+                                                       font-size: 16px;
+                                                       base-font-size: 16px;
+                                                       margin-bottom: 20px;
+                                                       color: #FFFFFF;'
+                                               value='<%= "我的荣誉" %>' />
+                                    </div>
+                                </pe:container>
+                            </div>
+                        </div>
+                        <div width='80%' style='float: left;'>
+                            <!-- holder -->
+                        </div>
+                    </div>
+                </pe:container>
+            </div>
+        </pe:mcml>
+    </body>
+</html>

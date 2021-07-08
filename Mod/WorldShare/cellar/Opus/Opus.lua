@@ -14,36 +14,73 @@ Opus:Show()
 -- libs
 local Screen = commonlib.gettable("System.Windows.Screen")
 
+-- bottles
+local Create = NPL.load('(gl)Mod/WorldShare/cellar/Create/Create.lua')
+
 local Opus = NPL.export()
 
 function Opus:Show()
-    local params = Mod.WorldShare.Utils.ShowWindow(0, 0, 'Mod/WorldShare/cellar/Opus/Opus.html', 'Mod.WorldShare.Opus', 0, 0, "_fi", false)
+    local params = self:ShowOpusBackground()
+    self:ShowOpus()
 
-    echo('connect!!!!', true)
     Screen:Connect("sizeChanged", Opus, Opus.OnScreenSizeChange, "UniqueConnection")
-    -- Opus.OnScreenSizeChange()
 
-    params._page.OnClose = function()
-        echo('disconnect!!!!!', true)
-        Screen:Disconnect("sizeChanged", Opus, Opus.OnScreenSizeChange)
+    -- params._page.OnClose = function()
+    --     Screen:Disconnect("sizeChanged", Opus, Opus.OnScreenSizeChange)
+    -- end
+end
+
+function Opus:CloseAll()
+    local OpusBackgroundPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.OpusBackground')
+
+    if OpusBackgroundPage then
+        OpusBackgroundPage:CloseWindow()
     end
+
+    self:CloseOpus()
+    self:CloseHonour()
+end
+
+function Opus:CloseOpus()
+    local OpusPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Opus')
+    local CreatePage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Create')
+
+    if OpusPage then
+        OpusPage:CloseWindow()
+    end
+
+    if CreatePage then
+        CreatePage:CloseWindow()
+    end
+end
+
+function Opus:CloseHonour()
+    local HonourPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Honour')
+
+    if HonourPage then
+        HonourPage:CloseWindow()
+    end
+end
+
+function Opus:ShowOpusBackground()
+    return Mod.WorldShare.Utils.ShowWindow(0, 0, 'Mod/WorldShare/cellar/Opus/OpusBackground.html', 'Mod.WorldShare.OpusBackground', 0, 0, "_fi", false)
 end
 
 function Opus:ShowOpus()
-    local params = Mod.WorldShare.Utils.ShowWindow(0, 0, 'Mod/WorldShare/cellar/Opus/Opus.html', 'Mod.WorldShare.Opus', 0, 0, "_fi", false)
+    Mod.WorldShare.Utils.ShowWindow(1024, 720, 'Mod/WorldShare/cellar/Opus/Opus.html', 'Mod.WorldShare.Opus', 768, 575, "_ct", false)
+    Create:ShowCreateEmbed()
 end
 
 function Opus:ShowHonour()
-    local params = Mod.WorldShare.Utils.ShowWindow(0, 0, 'Mod/WorldShare/cellar/Opus/Honour.html', 'Mod.WorldShare.Opus', 0, 0, "_fi", false)
+    Mod.WorldShare.Utils.ShowWindow(1024, 720, 'Mod/WorldShare/cellar/Opus/Honour.html', 'Mod.WorldShare.Honour', 768, 575, "_ct", false)
 end
 
 function Opus.OnScreenSizeChange()
-    echo('hello world!!!!11111111', true)
-    local OpusPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Opus')
+    local OpusBackgroundPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.OpusBackground')
 
-    if not OpusPage then
+    if not OpusBackgroundPage then
         return
     end
 
-    OpusPage:Rebuild()
+    OpusBackgroundPage:Rebuild()
 end

@@ -14,6 +14,10 @@ local OpusMcss = NPL.load("(gl)Mod/WorldShare/cellar/Opus/OpusMcss.lua")
         background = 'Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#15 113 66 64:20 0 20 0',
         height = 64,
     },
+    opus_menu_button_unsel = {
+        background = 'Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#15 185 66 64:20 0 20 0',
+        height = 64,
+    },
     opus_bar_button = {
         background = 'Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#205 112 86 46',
     },
