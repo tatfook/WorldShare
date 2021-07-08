@@ -67,6 +67,15 @@ local MainLoginMcss = NPL.load("(gl)Mod/WorldShare/cellar/Theme/Mcss/MainLoginMc
         background = 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 197 258 44',
         ['text-offset-y'] = -1,
     },
+    main_login_white_button = {
+        width = 240,
+        height = 44,
+        color = '#000000',
+        ['font-size'] = 16,
+        ['base-font-size'] = 16,
+        background = 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#749 878 256 42',
+        ['text-offset-y'] = -1,
+    },
     main_login_title_bg = {
         background = 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#272 0 172 49',
     },
@@ -79,5 +88,13 @@ local MainLoginMcss = NPL.load("(gl)Mod/WorldShare/cellar/Theme/Mcss/MainLoginMc
         width = 40,
         height = 40,
         background = 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#540 145 40 40',
+    },
+    main_login_blue_buttom_small = {
+        width = 123,
+        height = 44,
+        ['font-size'] = 16,
+        ['base-font-size'] = 16,
+        color = '#FFFFFF',
+        background = 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#819 748 123 44',
     }
 }

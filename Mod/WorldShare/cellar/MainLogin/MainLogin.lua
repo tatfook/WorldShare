@@ -1,7 +1,8 @@
 --[[
 Title: Main Login
 Author: big  
-Date: 2019.12.25
+CreateDate: 2019.12.25
+ModifyDate: 2021.7.8
 place: Foshan
 Desc: 
 use the lib:
@@ -125,7 +126,7 @@ function MainLogin:Show1()
     end
 
     self:ShowExtra()
-    self:ShowSelect()
+    self:ShowLogin()
 end
 
 function MainLogin:Show2()
@@ -156,20 +157,6 @@ function MainLogin:Show2()
     self:SelectMode()
 end
 
-function MainLogin:ShowSelect()
-    Mod.WorldShare.Utils.ShowWindow(
-        0,
-        0,
-        'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginSelect.html',
-        'Mod.WorldShare.cellar.MainLogin.Select',
-        0,
-        0,
-        '_fi',
-        false,
-        -1
-    )
-end
-
 function MainLogin:ShowLogin()
     Mod.WorldShare.Utils.ShowWindow(
         0,
@@ -194,11 +181,21 @@ function MainLogin:ShowLogin()
     if PWDInfo then
         MainLoginLoginPage:SetUIValue('account', PWDInfo.account or '')
 
-        if PWDInfo.rememberMe then
+        if PWDInfo.rememberMe and PWDInfo.password then
             MainLoginLoginPage:SetUIValue('password_show', PWDInfo.password or '')
             MainLoginLoginPage:SetUIValue('password_hide', PWDInfo.password or '')
             MainLoginLoginPage:SetUIValue('password', PWDInfo.account or '')
+            MainLoginLoginPage:SetUIValue('remember_username', PWDInfo.account or '')
             MainLoginLoginPage:SetUIValue('remember_password_name', true)
+            MainLoginLoginPage:FindControl('remember_mode').visible = true
+            MainLoginLoginPage:FindControl('phone_mode').visible = false
+            MainLoginLoginPage:FindControl('account_mode').visible = false
+            MainLoginLoginPage:FindControl('title_login').visible = false
+            MainLoginLoginPage:FindControl('title_username').visible = true
+            MainLoginLoginPage:FindControl('remember_login_button'):SetDefault(true)
+            MainLoginLoginPage:SetUIBackground('login_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 98 258 44')
+        else
+            MainLoginLoginPage:FindControl('login_button'):SetDefault(true)
         end
     end
 end
@@ -443,12 +440,6 @@ function MainLogin:Close()
 
     if MainLoginParentPage then
         MainLoginParentPage:CloseWindow()
-    end
-
-    local MainLoginSelectPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Select')
-
-    if MainLoginSelectPage then
-        MainLoginSelectPage:CloseWindow()
     end
 
     local MainLoginExtraPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Extra')
