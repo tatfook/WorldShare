@@ -1,0 +1,287 @@
+<html>
+    <body>
+        <pe:mcml>
+            <script type="text/npl" refresh="false">
+                <![CDATA[
+                    function get_opus_list()
+                        return {1,2,3,4,5,6,7}
+                    end
+                ]]>
+            </script>
+            <style type="type/mcss" src='Mod/WorldShare/cellar/Opus/OpusMcss.mcss'>
+            </style>
+            <pe:container
+                alignment='_fi'
+                zorder='-1'
+                width='100%'
+                height='100%'
+                style='position:relative;
+                       background:url(Texture/Aries/Creator/Paracraft/paracraft_opus_background_32bits.png#0 0 1280 720)'>
+            </pe:container>
+            <div>
+                <div>
+                    <div align='right'
+                            style='width: 67px;
+                                height: 70px;
+                                position: relative;
+                                margin-right: 20px;
+                                margin-top: 8px;'>
+                        <div style='background: url(Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#304 111 67 70);
+                                    width: 67px;
+                                    height: 70px;'></div>
+                    </div>
+                    <div style='background: url(Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#0 0 417 55);
+                                width: 417px;
+                                height: 55px;
+                                float: left;'>
+                        <div style='background: url(Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#5 67 38 33);
+                                    width: 38px;
+                                    height: 33px;
+                                    margin-top: 12px;
+                                    margin-left: 33px;
+                                    float: left;'></div>
+                        <div style='background: url(Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#48 74 141 20);
+                                    width: 141px;
+                                    height: 20px;
+                                    margin-top: 19px;
+                                    margin-left: 138px;
+                                    float: left;'></div>
+                    </div>
+                    <div style='float: left;'>
+                        <!-- seach bar -->
+                        <div style='background: url(Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#176 173 32 42: 7 7 7 7);
+                                    width: 490px;
+                                    height: 42px;
+                                    margin-left: 10px;
+                                    margin-top: 10px;'>
+                            <input type="text"
+                                   spacing='10'
+                                   EmptyText='<%= L"输入项目ID或课程ID或服务器地址" %>'
+                                   style='width: 404px;
+                                          height: 42px;
+                                          font-size: 18px;
+                                          base-font-size: 18px;
+                                          text-valign: center;
+                                          background:;'
+                                   name='open_val' />
+                            <input type='button'
+                                   class='opus_bar_button'
+                                   style='width: 86px;
+                                          height: 46px;
+                                          text-offset-y: -3px;
+                                          font-size: 16px;
+                                          base-font-size: 16px;
+                                          margin-top: -2px;'
+                                   name='open_button'
+                                   value='<%= L"打开" %>' />
+                        </div>
+                    </div>
+                </div>
+                <pe:container alignment="_ct" width="1280" height="720" style="margin-left:-640px;margin-top:-360px;background-color:#FFFFFF55;">
+                    <div width='100%' style='padding-top: 20px;'>
+                        <!-- bottom content -->
+                        <div width='20%' style='float: left;'>
+                            <div align='center' style='width: 160px;'>
+                                <input type='button'
+                                        class='opus_menu_button'
+                                        style='width: 160px;
+                                                font-size: 16px;
+                                                base-font-size: 16px;
+                                                margin-bottom: 20px;'
+                                        value='<%= "我的作品" %>' />
+                            </div>
+                            <div align='center' style='width: 160px;'>
+                                <input type='button'
+                                        class='opus_menu_button'
+                                        style='width: 160px;
+                                                font-size: 16px;
+                                                base-font-size: 16px;
+                                                margin-bottom: 20px;'
+                                        value='<%= "我的荣誉" %>' />
+                            </div>
+                        </div>
+                        <div width='80%' style='float: left;'>
+                            <div>
+                                <div style='float: left;
+                                            width: 340px;
+                                            height: 64px;'>
+                                    <div zorder='-1'
+                                         style='position: relative;
+                                                width: 335px;
+                                                height: 52px;
+                                                margin-left: 4px;
+                                                margin-top: 2px;
+                                                background: url(Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#92 173 32 42:9 9 9 9);'></div>
+                                    <div style='width: 113px;height: 64px;float: left;'>
+                                        <!-- 全部 -->
+                                        <input type='button'
+                                               zorder='1'
+                                               style='position: relative;
+                                                      width: 113px;
+                                                      height: 64px;
+                                                      background:;' />
+                                        <pe:if condition='true'>
+                                            <div style='position: relative;
+                                                        width: 113px;
+                                                        height: 64px;
+                                                        background: url(Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#87 110 111 52:20 0 20 0);'></div>
+                                        </pe:if>
+                                        <div align='center' style='width: 41px;height: 20px;'>
+                                            <img src='Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#196 74 41 20'
+                                                 style='width: 41px;
+                                                        height: 20px;
+                                                        margin-top: 18px;' />
+                                        </div>
+                                    </div>
+                                    <div style='width: 113px;height: 64px;float: left;'>
+                                        <!-- 在线 -->
+                                        <input type='button'
+                                               zorder='1'
+                                               style='position: relative;
+                                                      width: 113px;
+                                                      height: 64px;
+                                                      background:;' />
+                                        <pe:if condition='false'>
+                                            <div style='position: relative;
+                                                        width: 113px;
+                                                        height: 64px;
+                                                        background: url(Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#87 110 111 52:20 0 20 0);'></div>
+                                        </pe:if>
+                                        <div align='center' style='width: 41px;height: 20px;'>
+                                            <img src='Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#241 74 41 20'
+                                                 style='width: 41px;
+                                                        height: 20px;
+                                                        margin-top: 18px;' />
+                                        </div>
+                                    </div>
+                                    <div style='width: 113px;height: 64px;float: left;'>
+                                        <!-- 全部 -->
+                                        <input type='button'
+                                               zorder='1'
+                                               style='position: relative;
+                                                      width: 113px;
+                                                      height: 64px;
+                                                      background:;' />
+                                        <pe:if condition='false'>
+                                            <div style='position: relative;
+                                                        width: 113px;
+                                                        height: 64px;
+                                                        background: url(Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#87 110 111 52:20 0 20 0);'></div>
+                                        </pe:if>
+                                        <div align='center' style='width: 41px;height: 20px;'>
+                                            <img src='Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#286 74 41 20'
+                                                 style='width: 41px;
+                                                        height: 20px;
+                                                        margin-top: 18px;' />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style='float: left;
+                                            width: 340px;
+                                            height: 64px;'>
+                                    <div>
+                                        <div zorder='-1'
+                                             style='position: relative;
+                                                    width: 335px;
+                                                    height: 52px;
+                                                    margin-left: 4px;
+                                                    margin-top: 2px;
+                                                    background: url(Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#135 173 32 43:9 9 9 9);'></div>
+                                        <div style='float:left;
+                                                    background: url(Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#334 76 16 18);
+                                                    width: 16px;
+                                                    height: 18px;
+                                                    margin-left: 10px;
+                                                    margin-top: 20px;'></div>
+                                        <div style='float: left'>
+                                            <input type='text'
+                                                   EmptyText='<%= L"搜索列表项目" %>'
+                                                   style='width: 219px;
+                                                          height: 40px;
+                                                          margin-left: 10px;
+                                                          margin-top: 8px;
+                                                          textcolor: #FFFFFF;
+                                                          text-valign: center;
+                                                          font-size: 18px;
+                                                          base-font-size: 18px;
+                                                          background:;'/>
+                                        </div>
+                                        <div style='float: left'>
+                                            <input type='button'
+                                                   class='opus_bar_button'
+                                                   style='width: 86px;
+                                                          height: 55px;
+                                                          text-offset-y: -3px;
+                                                          font-size: 16px;
+                                                          base-font-size: 16px;
+                                                          margin-top: 1px;'
+                                                   value='<%= L"搜索" %>' />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style='float: left;'>
+                                    <input type='button'
+                                           style='background: url(Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#9 254 297 52);
+                                                  width: 297px;
+                                                  height: 52px;
+                                                  margin-top: 2px;
+                                                  margin-left: 5px;' />
+                                </div>
+                            </div>
+                            <div>
+                                <pe:gridview DataSource='get_opus_list()'>
+                                    <Columns>
+                                        <div class="work_item">
+                                            <input type="button" class="click" name='<%=Eval("index")%>' onclick="select_project" />
+                                            <div class="radius"></div>
+                                            <div style="<%=get_image(Eval('cover'))%>"></div>
+                                            <div class="work_item_info">
+                                                <div class="work_item_info_left">
+                                                    <div class="work_item_info_workname"><%=get_world_text(Eval("name"))%></div>
+                                                    <div class="work_item_info_author"><%=Eval("username")%></div>
+                                                </div>
+                                                <div class="work_item_info_right">
+                                                    <div class="project_id" name='<%=Eval("id")%>' tooltip="<%=get_project_url_text(Eval('id'))%>" onclick="go_project_web"><%= format('%s%d', L'项目ID:', Eval('id'))%></div>
+                                                    <div class="item_button">
+                                                        <pe:if condition="<%= Eval('downloaded') %>">
+                                                            <div class="download">
+                                                                <input type="button" class="download_icon_click" tooltip="<%=L'已下载'%>" name='<%=Eval("index")%>' />
+                                                                <div class="download_icon"></div>
+                                                            </div>
+                                                        </pe:if>
+                                                        <pe:if condition="<%= not Eval('downloaded') %>">
+                                                            <div class="download">
+                                                                <input type="button" class="download_icon_click" name='<%=Eval("index")%>' onclick="download" />
+                                                                <div class="not_download_icon"></div>
+                                                            </div>
+                                                        </pe:if>
+                                                        <pe:if condition="<%= Eval('favorite') %>">
+                                                            <div class="favorite">
+                                                                <input type="button" class="favorite_icon_click" name='<%=Eval("index")%>' onclick="myfavorite" />
+                                                                <div class="favorite_icon"></div>
+                                                            </div>
+                                                        </pe:if>
+                                                        <pe:if condition="<%= not Eval('favorite') %>">
+                                                            <div class="favorite">
+                                                                <input type="button" class="favorite_icon_click" name='<%=Eval("index")%>' onclick="myfavorite" />
+                                                                <div class="not_favorite_icon"></div>
+                                                            </div>
+                                                        </pe:if>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <pe:if condition="<%= is_load_more_items(Eval('index')) %>">
+                                                <pe:custom oncreate="<%=lazy_load%>"></pe:custom>
+                                            </pe:if>
+                                        </div>
+                                    </Columns>
+                                </pe:gridview>
+                                <!-- content bottom -->
+                            </div>
+                        </div>
+                    </div>
+                </pe:container>
+            </div>
+        </pe:mcml>
+    </body>
+</html>
