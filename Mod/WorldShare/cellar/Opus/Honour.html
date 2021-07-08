@@ -3,17 +3,110 @@
         <pe:mcml>
             <script type="text/npl" refresh="false">
                 <![CDATA[
-                    function get_opus_list()
-                        return {1,2,3,4,5,6,7}
+                    -- libs
+                    local KeepWorkItemManager = NPL.load('(gl)script/apps/Aries/Creator/HttpAPI/KeepWorkItemManager.lua')
+
+                    local gs_list = {
+                        {
+                            id = 70001,
+                            name = 'honour_anti_epidemic',
+                        },
+                        {
+                            id = 70002,
+                            name = 'honour_graduate',
+                        },
+                        {
+                            id = 70003,
+                            name = 'honour_parent_child',
+                        },
+                        {
+                            id = 70007,
+                            name = 'honour_talent',
+                        },
+                        {
+                            id = 70008,
+                            name = 'honour_friends_call',
+                        },
+                        {
+                            id = 70009,
+                            name = 'honour_red_star',
+                        },
+                        {
+                            id = 70010,
+                            name = 'honour_origin_aspiration',
+                        },
+                        {
+                            id = 70011,
+                            name = 'honour_vanguard',
+                        },
+                        {
+                            id = 70012,
+                            name = 'bonour_times_successor',
+                        },
+                    }
+
+                    function get_honour_list()
+                        local handle_list = {}    
+
+                        for key, item in ipairs(gs_list) do
+                            local handle_item = {
+                                name = item.name,
+                            }
+ 
+                            local has_item, guid, bag, copies = KeepWorkItemManager.HasGSItem(item.id)
+                            local gs_item = KeepWorkItemManager.GetItemTemplate(item.id);
+
+                            if has_item then
+                                handle_item.has_item = true
+                            else
+                                handle_item.has_item = false
+                            end
+
+                            handle_item.desc = gs_item.name
+
+                            handle_list[#handle_list + 1] = handle_item
+                        end
+
+                        return handle_list
+                    end
+
+                    function get_active_style(has_item)
+                        if has_item then
+                            return 'honour_active_item'
+                        else
+                            return 'honour_inactive_item'
+                        end
                     end
                 ]]>
             </script>
             <style type="type/mcss" src='Mod/WorldShare/cellar/Opus/OpusMcss.mcss'>
             </style>
             <div width='1024' height='720' style=''>
-                <div>
-                    111111
-                </div>
+                <pe:gridview DataSource='<%= get_honour_list() %>'
+                             RememberScrollPos='true'
+                             AllowPaging='false'
+                             VerticalScrollBarStep='80'
+                             DefaultNodeHeight='150'
+                             CellPadding='0'
+                             ItemsPerLine='6'>
+                    <Columns width='16.66%'>
+                        <div class='<%= get_active_style(Eval("has_item")) %>'>
+                            <div style='width: 146px;height: 105px;'>
+                                <div align='center'
+                                     class='<%= Eval("name") %>'
+                                     style='margin-top: 30px;'></div>
+                            </div>
+                            <div style='width: 146px;
+                                        height: 35px;
+                                        text-align: center;
+                                        font-size: 13px;
+                                        base-font-size: 13px;
+                                        line-height: 20px;'>
+                                <%= Eval("desc") %>
+                            </div>
+                        </div>
+                    </Columns>
+                </pe:gridview>
             </div>
         </pe:mcml>
     </body>

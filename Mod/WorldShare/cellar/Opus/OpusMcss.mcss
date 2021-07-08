@@ -21,4 +21,69 @@ local OpusMcss = NPL.load("(gl)Mod/WorldShare/cellar/Opus/OpusMcss.lua")
     opus_bar_button = {
         background = 'Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#205 112 86 46',
     },
+    honour_active_item = {
+        background = 'Texture/Aries/Creator/paracraft/paracraft_certificate_32bits.png#274 159 146 140',
+        width = 146,
+        height = 140,
+    },
+    honour_inactive_item = {
+        background = 'Texture/Aries/Creator/paracraft/paracraft_certificate_32bits.png#274 4 146 140',
+        width = 146,
+        height = 140,
+    },
+    honour_anti_epidemic = {
+        background = 'Texture/Aries/Creator/paracraft/paracraft_certificate_32bits.png#0 0 75 56',
+        width = 75,
+        height = 56,
+    },
+    honour_graduate = {
+        background = 'Texture/Aries/Creator/paracraft/paracraft_certificate_32bits.png#89 2 72 48',
+        width = 72,
+        height = 48,
+    },
+    honour_graduate = {
+        background = 'Texture/Aries/Creator/paracraft/paracraft_certificate_32bits.png#89 2 72 48',
+        width = 72,
+        height = 48,
+    },
+    honour_parent_child = {
+        background = 'Texture/Aries/Creator/paracraft/paracraft_certificate_32bits.png#181 59 75 61',
+        width = 75,
+        height = 61,
+    },
+    honour_parent_child = {
+        background = 'Texture/Aries/Creator/paracraft/paracraft_certificate_32bits.png#181 59 75 61',
+        width = 75,
+        height = 61,
+    },
+    honour_talent = {
+        background = 'Texture/Aries/Creator/paracraft/paracraft_certificate_32bits.png#89 111 75 61',
+        width = 73,
+        height = 48,
+    },
+    honour_friends_call = {
+        background = 'Texture/Aries/Creator/paracraft/paracraft_certificate_32bits.png#179 2 73 48',
+        width = 73,
+        height = 48,
+    },
+    honour_red_star = {
+        background = 'Texture/Aries/Creator/paracraft/paracraft_certificate_32bits.png#2 56 73 50',
+        width = 73,
+        height = 50,
+    },
+    honour_origin_aspiration = {
+        background = 'Texture/Aries/Creator/paracraft/paracraft_certificate_32bits.png#4 165 71 48',
+        width = 71,
+        height = 48,
+    },
+    honour_vanguard = {
+        background = 'Texture/Aries/Creator/paracraft/paracraft_certificate_32bits.png#3 111 72 49',
+        width = 72,
+        height = 49,
+    },
+    bonour_times_successor = {
+        background = 'Texture/Aries/Creator/paracraft/paracraft_certificate_32bits.png#3 111 72 49',
+        width = 72,
+        height = 49,
+    }
 }
