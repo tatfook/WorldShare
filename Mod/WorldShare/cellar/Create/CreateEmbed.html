@@ -713,14 +713,12 @@
                         background = "Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;263 346 36 36:15 15 15 15",
                     },
                     share_selected_item = {
-                        width = 280,
                         height = 260,
                         background = "Texture/Aries/Creator/keepwork/worldshare_32bits.png;471 212 30 30:11 11 11 11",
                     },
                     share_unselect_item = {
                         ["margin-bottom"] = 8,
                         ["padding-top"] = 4,
-                        width = 280,
                         height = 260,
                         background = "Texture/Aries/Creator/keepwork/worldshare_32bits.png;435 212 30 30:11 11 11 11",
                     },
@@ -862,9 +860,9 @@
                     },
                 }
             </style>
-            <div width="1024" height="580" style=''>
+            <div width="1024" height="530" style=''>
                 <div class="world_area">
-                    <div style="height:580px;">
+                    <div style="height:530px;">
                         <pe:if condition="<%= is_list_refreshing() %>">
                             <div style="margin-left: 330px;margin-top: 140px;">
                                 <div style="margin-left: 58px;margin-bottom: 20px;width: 104px;height: 109px;background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#500 15 104 109);background-animation:url(script/UIAnimation/CommonProgress.lua.table#WaitingSpin)"></div>
@@ -876,14 +874,18 @@
                                 RememberScrollPos="true"
                                 AllowPaging="false"
                                 VerticalScrollBarStep="80"
-                                DefaultNodeHeight="270"
+                                DefaultNodeHeight="290"
                                 CellPadding="0"
                                 ItemsPerLine="3"
                                 name="gw_world_ds">
                                 <Columns width='34.7%'>
                                     <!--selected-->
                                     <pe:if condition='<%= be_selected()%>'>
-                                        <div name='<%=Eval("index")%>' align='left' class="share_selected_item" style="padding-top: 6px;padding-left: 4px;">
+                                        <div name='<%=Eval("index")%>'
+                                             align='left'
+                                             width='90.5%'
+                                             class="share_selected_item"
+                                             style="padding-top: 6px;padding-left: 4px;">
                                             <pe:if condition="<%= has_rated() %>">
                                                 <div style="position: relative;width: 70px;height: 36px;margin-top: -4px;margin-left: -4px;padding-top: 4px;padding-left: 6px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#356 136 70 36)">
                                                     <%= get_art_number()%>
@@ -892,10 +894,22 @@
                                             <pe:if condition='<%= Eval("project") and tonumber(Eval("project")["visibility"]) == 1 %>'>
                                                 <div style="position: relative;margin-left: 220px;width: 28px;height: 31px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#310 53 28 31)"></div>
                                             </pe:if>
-                                            <div style="width: 268px;height: 248px;padding: 4px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#72 20 16 16:2 2 2 2)">
-                                                <div style="width: 260px;height: 130px;background-color: #afafaf;">
-                                                    <div style="position: relative;width: 260px;height: 130px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#394 211 32 32:9 9 9 9)"></div>
-                                                    <div style="<%= 'width: 260px;height: 130px;background: url(' .. get_world_preview() .. ')' %>"></div>
+                                            <div width='97%'
+                                                 style="height: 248px;
+                                                        padding: 4px;
+                                                        background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#72 20 16 16:2 2 2 2)">
+                                                <div width='100%'
+                                                     style="height: 130px;
+                                                            background-color: #afafaf;">
+                                                    <div width='101%'
+                                                         style="position: relative;
+                                                                height: 132px;
+                                                                margin-left: -1px;
+                                                                margin-right: -1px;
+                                                                margin-top: -1px;
+                                                                background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#394 211 32 32:9 9 9 9)"></div>
+                                                    <div width='100%'
+                                                         style="<%= 'height: 130px;background: url(' .. get_world_preview() .. ')' %>"></div>
                                                 </div>
                                                 <div style="position: relative; width: 32px;height: 32px;">
                                                     <pe:if condition='<%= get_world_status(1)%>'>
@@ -1037,8 +1051,18 @@
                                     </pe:if>
                                     <!--not selected-->
                                     <pe:if condition='<%= not be_selected() %>'>
-                                        <div name='<%=Eval("index")%>' align='left' class="share_unselect_item" style="padding-left:8px;padding-top:8px;">
-                                            <input type="button" style="position: relative;width:260px;height:260px;background:" name='<%=Eval("index")%>' onclick="switch_world" />
+                                        <div name='<%=Eval("index")%>'
+                                             align='left'
+                                             width='90.5%'
+                                             class="share_unselect_item"
+                                             style="padding-left:8px;padding-top:8px;">
+                                            <input width='100%'
+                                                   type="button"
+                                                   style="position: relative;
+                                                          height:260px;
+                                                          background:"
+                                                   name='<%=Eval("index")%>'
+                                                   onclick="switch_world" />
                                             <pe:if condition="<%= has_rated() %>">
                                                 <div style="position: relative;width: 70px;height: 36px;margin-top: -6.8px;margin-left: -8px;padding-top: 4px;padding-left: 6px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#356 136 70 36)">
                                                     <%= get_art_number()%>
@@ -1047,11 +1071,27 @@
                                             <pe:if condition='<%= Eval("project") and tonumber(Eval("project")["visibility"]) == 1 %>'>
                                                 <div style="position: relative;margin-left: 220px;width: 28px;height: 31px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#310 53 28 31)"></div>
                                             </pe:if>
-                                            <div style="width: 260px;height: 130px;background-color: #afafaf;">
-                                                <div style="position: relative;width: 260px;height: 130px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#394 211 32 32:9 9 9 9)"></div>
-                                                <div style="<%= 'width: 260px;height: 130px;background: url(' .. get_world_preview() .. ')' %>">
+                                            <div width='97%'
+                                                 style="height: 130px;
+                                                        background-color: #afafaf;">
+                                                <div width='100%'
+                                                     style="position: relative;
+                                                            height: 132px;
+                                                            margin-left: -1px;
+                                                            margin-right: -1px;
+                                                            margin-top: -1px;
+                                                            background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#394 211 32 32:9 9 9 9)"></div>
+                                                <div width='100%'
+                                                     style="<%= 'height: 130px;background: url(' .. get_world_preview() .. ')' %>">
                                                     <pe:if condition="<%= has_username() %>">
-                                                        <div style="width: 260px;height: 30px;margin-top: 100px;font-size: 12px;padding-top: 5px;padding-left: 4px;color: #ffffff;background-color: #000000a3">
+                                                        <div width='100%'
+                                                             style="height: 30px;
+                                                                    margin-top: 100px;
+                                                                    font-size: 12px;
+                                                                    padding-top: 5px;
+                                                                    padding-left: 4px;
+                                                                    color: #ffffff;
+                                                                    background-color: #000000a3">
                                                             <%= get_user_icon() %>
                                                             <%= get_username() %>
                                                         </div>

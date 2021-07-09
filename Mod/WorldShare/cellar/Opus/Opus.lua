@@ -21,13 +21,16 @@ local Opus = NPL.export()
 
 function Opus:Show()
     local params = self:ShowOpusBackground()
-    self:ShowOpus()
 
     Screen:Connect("sizeChanged", Opus, Opus.OnScreenSizeChange, "UniqueConnection")
 
     params._page.OnClose = function()
         Screen:Disconnect("sizeChanged", Opus, Opus.OnScreenSizeChange)
     end
+
+    Opus.cur_sel = '1'
+
+    self:ShowOpus()
 end
 
 function Opus:CloseAll()
@@ -104,7 +107,7 @@ function Opus:ShowOpus()
             height = 720,
             cancelShowAnimation = true,
             bToggleShowHide = true,
-            DesignResolutionWidth = 1024,
+            DesignResolutionWidth = 1280,
             DesignResolutionHeight = 720,
         }
     )
@@ -130,7 +133,7 @@ function Opus:ShowHonour()
             height = 720,
             cancelShowAnimation = true,
             bToggleShowHide = true,
-            DesignResolutionWidth = 1024,
+            DesignResolutionWidth = 1280,
             DesignResolutionHeight = 720,
         }
     )
@@ -144,4 +147,5 @@ function Opus.OnScreenSizeChange()
     end
 
     OpusBackgroundPage:Rebuild()
+    OpusBackgroundPage.sel(Opus.cur_sel)
 end

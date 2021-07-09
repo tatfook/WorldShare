@@ -11,7 +11,6 @@
                     local InternetLoadWorld = commonlib.gettable('MyCompany.Aries.Creator.Game.Login.InternetLoadWorld')
 
                     local page = document:GetPageCtrl()
-                    local cur_sel = '1'
 
                     function sel(index)
                         local my_opus_sel = page:FindControl('my_opus_sel')
@@ -25,8 +24,8 @@
                             my_honour_sel.visible = false
                             my_honour_unsel.visible = true
 
-                            if index ~= cur_sel then
-                                cur_sel = index
+                            if index ~= Opus.cur_sel then
+                                Opus.cur_sel = index
 
                                 Opus:CloseHonour()
                                 Opus:ShowOpus()
@@ -37,14 +36,16 @@
                             my_honour_sel.visible = true
                             my_honour_unsel.visible = false
 
-                            if index ~= cur_sel then
-                                cur_sel = index
+                            if index ~= Opus.cur_sel then
+                                Opus.cur_sel = index
 
                                 Opus:CloseOpus()
                                 Opus:ShowHonour()
                             end
                         end
                     end
+
+                    page.sel = sel
 
                     function open()
                         local content = page:GetValue('content', '')
@@ -80,8 +81,7 @@
                 zorder='-1'
                 width='100%'
                 height='100%'
-                style='position:relative;
-                       background:url(Texture/Aries/Creator/Paracraft/paracraft_opus_background_32bits.png#0 0 1280 720)'>
+                style='position:relative;background-color:#dcdcdc'>
             </pe:container>
             <div>
                 <pe:containe zorder='1' style='background:;'>
@@ -95,21 +95,27 @@
                                     width: 67px;
                                     height: 70px;'></div>
                     </div>
-                    <div style='background: url(Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#0 0 417 55);
-                                width: 417px;
-                                height: 55px;
+                    <div style='background: url(Texture/Aries/Creator/keepwork/RedSummerCamp/courses/courses_32bits.png#7 249 169 56);
+                                width: 169px;
+                                height: 56px;
                                 float: left;'>
-                        <div style='background: url(Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#5 67 38 33);
+                        <div align='center'
+                             style='background: url(Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#5 67 38 33);
                                     width: 38px;
                                     height: 33px;
                                     margin-top: 12px;
-                                    margin-left: 33px;
-                                    float: left;'></div>
-                        <div style='background: url(Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#48 74 141 20);
+                                    margin-left: -20px;'></div>
+                    </div>
+                    <div style='float: left;
+                                width: 283px;
+                                height: 56px;
+                                margin-left: -73px;
+                                background: url(Texture/Aries/Creator/keepwork/RedSummerCamp/shentongbei/shentongbei_32bits.png#17 794 283 56)'>
+                        <div align='center'
+                             style='background: url(Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#48 74 141 20);
                                     width: 141px;
                                     height: 20px;
                                     margin-top: 19px;
-                                    margin-left: 138px;
                                     float: left;'></div>
                     </div>
                     <div style='float: left;'>
@@ -119,28 +125,30 @@
                                     height: 42px;
                                     margin-left: 10px;
                                     margin-top: 10px;'>
-                            <input type='text'
-                                   name='content'
-                                   spacing='10'
-                                   EmptyText='<%= L"输入项目ID或课程ID或服务器地址" %>'
-                                   style='width: 404px;
-                                          height: 42px;
-                                          font-size: 18px;
-                                          base-font-size: 18px;
-                                          text-valign: center;
-                                          background:;'/>
-                            <input type='button'
-                                   class='opus_bar_button'
-                                   DefaultButton='true'
-                                   style='width: 86px;
-                                          height: 46px;
-                                          text-offset-y: -3px;
-                                          font-size: 16px;
-                                          base-font-size: 16px;
-                                          margin-top: -2px;'
-                                   name='open_button'
-                                   onclick='open'
-                                   value='<%= L"打开" %>' />
+                            <div style='width: 495px;'>
+                                <input type='text'
+                                       name='content'
+                                       spacing='10'
+                                       EmptyText='<%= L"输入项目ID或课程ID或服务器地址" %>'
+                                       style='width: 406px;
+                                              height: 42px;
+                                              font-size: 18px;
+                                              base-font-size: 18px;
+                                              text-valign: center;
+                                              background:;'/>
+                                <input type='button'
+                                       class='opus_bar_button'
+                                       DefaultButton='true'
+                                       style='width: 86px;
+                                              height: 46px;
+                                              text-offset-y: -3px;
+                                              font-size: 16px;
+                                              base-font-size: 16px;
+                                              margin-top: -2px;'
+                                       name='open_button'
+                                       onclick='open'
+                                       value='<%= L"打开" %>' />
+                            </div>
                         </div>
                     </div>
                 </pe:containe>
@@ -150,8 +158,18 @@
                               height='720'
                               style='margin-left:-640px;
                                      margin-top:-320px;
-                                     background-color:#FFFFFF55;'>
+                                     background:;'>
                     <div width='100%' style='padding-top: 20px;'>
+                        <pe:container alignment="_ct" style="margin-left:-640px;margin-top:-360px;width:1280px;height:720px;background:url();">
+                            <!--背景水印-->
+                            <div>
+                                <div style="position:relative;margin-left:86px;margin-top:123px;width:270px;height:150px;background:url(Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#95 329 270 150);" />
+                                <div style="position:relative;margin-left:621px;margin-top:25px;width:270px;height:150px;background:url(Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#95 329 270 150);" />
+                                <div style="position:relative;margin-left:174px;margin-top:301px;width:270px;height:150px;background:url(Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#95 329 270 150);" />
+                                <div style="position:relative;margin-left:508px;margin-top:477px;width:270px;height:150px;background:url(Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#95 329 270 150);" />
+                                <div style="position:relative;margin-left:949px;margin-top:330px;width:270px;height:150px;background:url(Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#95 329 270 150);" />
+                            </div>
+                        </pe:container>
                         <!-- bottom content -->
                         <div width='18%' style='float: left;'>
                             <div align='center'
@@ -221,7 +239,8 @@
                         <div style='float:left;
                                     height: 620px;
                                     width: 2px;
-                                    background-color: #999999;'></div>
+                                    margin-left: -6px;
+                                    background-color: #99999999;'></div>
                         <div width='80%' style='float: left;'>
                             <!-- holder -->
                         </div>
