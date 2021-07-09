@@ -6,6 +6,7 @@
                     -- bottles
                     local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
                     local RegisterModal = NPL.load('(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua')
+                    local RedSummerCampMainPage = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/RedSummerCamp/RedSummerCampMainPage.lua")
 
                     -- service
                     local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
@@ -54,6 +55,10 @@
                             switch_account_node.visible = false
                         end
                     end, 0)
+
+                    function show_summer_camp()
+                        RedSummerCampMainPage.Show()
+                    end
 
                     function close()
                         page:CloseWindow()
@@ -262,8 +267,12 @@
                     end
 
                     function enter()
-                        SessionsData:SetUserLocation('HOME', Mod.WorldShare.Store:Get('user/username'))
-                        MainLogin:Next()
+                        if true then
+                            show_summer_camp()
+                            return
+                        end
+                        -- SessionsData:SetUserLocation('HOME', Mod.WorldShare.Store:Get('user/username'))
+                        -- MainLogin:Next()
                     end
 
                     function switch_account()

@@ -76,6 +76,11 @@
                     function close()
                         Opus:CloseAll()
                     end
+
+                    function open_vip()
+                        local VipToolNew = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/VipToolTip/VipToolNew.lua")
+                        VipToolNew.Show("red_summer_camp_main")
+                    end
                 ]]>
             </script>
             <style type="type/mcss" src='Mod/WorldShare/cellar/Opus/OpusMcss.mcss'>
@@ -102,7 +107,8 @@
                                 position: relative;
                                 margin-right: 20px;
                                 margin-top: 8px;'>
-                        <div style='background: url(Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#304 111 67 70);
+                        <div onclick='open_vip'
+                             style='background: url(Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#304 111 67 70);
                                     width: 67px;
                                     height: 70px;'></div>
                     </div>

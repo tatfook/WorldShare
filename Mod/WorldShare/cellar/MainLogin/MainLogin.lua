@@ -404,7 +404,7 @@ function MainLogin:ShowExtra()
         top,
         '_rb',
         false,
-        1
+        -1
     )
     
 end

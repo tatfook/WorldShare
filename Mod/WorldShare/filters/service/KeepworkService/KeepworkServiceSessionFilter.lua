@@ -16,6 +16,14 @@ local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkServ
 local KeepworkServiceSessionFilter = NPL.export()
 
 function KeepworkServiceSessionFilter:Init()
+    -- filter logout
+    GameLogic.GetFilters():add_filter(
+        'service.session.logout',
+        function(...)
+            return KeepworkServiceSession:Logout(...)
+        end
+    )
+
     -- filter is real name
     GameLogic.GetFilters():add_filter(
         'service.session.is_real_name',

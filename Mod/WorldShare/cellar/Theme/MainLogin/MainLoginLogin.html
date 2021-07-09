@@ -9,6 +9,7 @@
                     local ThirdPartyLogin = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/ThirdPartyLogin.lua')
                     local UserConsole = NPL.load('(gl)Mod/WorldShare/cellar/UserConsole/Main.lua')
                     local MySchool = NPL.load('(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua')
+                    local RedSummerCampMainPage = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/RedSummerCamp/RedSummerCampMainPage.lua")
 
                     -- service
                     local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepWorkService/Session.lua')
@@ -52,6 +53,10 @@
                         end
                     else
                         account_list_data = {}
+                    end
+
+                    function show_summer_camp()
+                        RedSummerCampMainPage.Show()
                     end
 
                     function get_history_users()
@@ -110,7 +115,12 @@
                                 return
                             end
 
-                            close()
+                            -- close()
+
+                            if true then
+                                show_summer_camp()
+                                return
+                            end
 
                             SessionsData:SetUserLocation('HOME', Mod.WorldShare.Store:Get('user/username'))
 
@@ -305,7 +315,12 @@
                                                 return
                                             end
 
-                                            close()
+                                            -- close()
+
+                                            if true then
+                                                show_summer_camp()
+                                                return
+                                            end
 
                                             SessionsData:SetUserLocation('HOME', Mod.WorldShare.Store:Get('user/username'))
 
