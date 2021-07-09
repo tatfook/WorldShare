@@ -55,7 +55,28 @@ function Create:ShowCreateEmbed(width, height, x, y)
 
     Create.currentMenuSelectIndex = 1
 
-    Mod.WorldShare.Utils.ShowWindow(1024, 580, '(ws)Create/CreateEmbed.html', 'Mod.WorldShare.Create', 768, 440, nil, false)
+    Mod.WorldShare.Utils.ShowWindow(
+        {
+            url = '(ws)Create/CreateEmbed.html',
+            name = 'Mod.WorldShare.Create',
+            isShowTitleBar = false,
+            DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
+            style = CommonCtrl.WindowFrame.ContainerStyle,
+            zorder = 0,
+            allowDrag = false,
+            bShow = nil,
+            directPosition = true,
+            align = "_ct",
+            x = -768 / 2,
+            y = -360 / 2,
+            width = 1024,
+            height = 580,
+            cancelShowAnimation = true,
+            bToggleShowHide = true,
+            DesignResolutionWidth = 1024,
+            DesignResolutionHeight = 580,
+        }
+    )
 
     self:GetWorldList(self.statusFilter)
 end

@@ -28,8 +28,8 @@
                             if index ~= cur_sel then
                                 cur_sel = index
 
-                                Opus:ShowOpus()
                                 Opus:CloseHonour()
+                                Opus:ShowOpus()
                             end
                         elseif index == '2' then
                             my_opus_sel.visible = false
@@ -40,8 +40,8 @@
                             if index ~= cur_sel then
                                 cur_sel = index
 
-                                Opus:ShowHonour()
                                 Opus:CloseOpus()
+                                Opus:ShowHonour()
                             end
                         end
                     end
@@ -84,9 +84,9 @@
                        background:url(Texture/Aries/Creator/Paracraft/paracraft_opus_background_32bits.png#0 0 1280 720)'>
             </pe:container>
             <div>
-                <div>
+                <pe:containe zorder='1' style='background:;'>
                     <div align='right'
-                            style='width: 67px;
+                         style='width: 67px;
                                 height: 70px;
                                 position: relative;
                                 margin-right: 20px;
@@ -143,8 +143,14 @@
                                    value='<%= L"打开" %>' />
                         </div>
                     </div>
-                </div>
-                <pe:container alignment='_ct' width='1280' height='720' style='margin-left:-640px;margin-top:-360px;background-color:#FFFFFF55;'>
+                </pe:containe>
+                <pe:container alignment='_ct'
+                              zorder='-1'
+                              width='1280'
+                              height='720'
+                              style='margin-left:-640px;
+                                     margin-top:-320px;
+                                     background-color:#FFFFFF55;'>
                     <div width='100%' style='padding-top: 20px;'>
                         <!-- bottom content -->
                         <div width='18%' style='float: left;'>

@@ -107,10 +107,10 @@ function Utils.ShowWindow(option, height, url, name, x, y, align, allowDrag, zor
         return params
     end
 
-    Mod.WorldShare.Store:Set('page/' .. tostring(name), params._page)
+    Mod.WorldShare.Store:Set('page/' .. tostring(params.name), params._page)
 
     params._page.OnClose = function()
-        Mod.WorldShare.Store:Remove('page/' .. tostring(name))
+        Mod.WorldShare.Store:Remove('page/' .. tostring(params.name))
     end
 
     return params
