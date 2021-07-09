@@ -139,7 +139,7 @@
                         local phone_captcha = page:GetValue('phone_captcha')
 
                         if not agree then
-                            _guihelper.MessageBox(L'*您未同意《Paracraft用户协议》')
+                            _guihelper.MessageBox(L'*您未同意《Paracraft用户协议和隐私协议》')
                             return
                         end
 
@@ -189,6 +189,11 @@
                     end
 
                     function login_with_password_action()
+                        if not page:GetNode('account_agree').checked then
+                            _guihelper.MessageBox(L'*您未同意《Paracraft用户协议和隐私协议》')
+                            return
+                        end
+
                         local account = page:GetValue('account')
                         local password = page:GetValue('password')
 
@@ -272,6 +277,11 @@
                             switch_account_node.visible = false
                         end)
                     end
+
+                    function parent()
+                        EventTrackingService:Send(1, 'click.main_login.select_parents', nil, true)
+                        MainLogin:ShowParent()
+                    end
                 ]]>
             </script>
             <style type='text/mcss' src='Mod/WorldShare/cellar/Theme/Mcss/MainLoginMcss.mcss'>
@@ -286,6 +296,24 @@
                     },
                 }
             </style>
+            <pe:container
+                alignment='_fi'
+                zorder='-1'
+                width='100%'
+                height='100%'
+                style='background:;'>
+                <div align='right'
+                     style='width: 55px;
+                            margin-right: 20px;'>
+                    <input type='button'
+                           style='margin-top: 20px;
+                                  width: 55px;
+                                  height: 59px;
+                                  background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#533 8 55 59)'
+                            onclick="parent"/>
+                </div>
+            </pe:container>
+            
             <pe:container alignment='_rt' name='switch_account' visible='true' style='position: relative;background:;'>
                 <input type='button'
                        onclick='switch_account'
@@ -436,25 +464,31 @@
                                 </div>
                             </div>
                         </div>
-                        <div style='margin-top: 15px;margin-left: 75px;'>
-                            <div style='float: left;'>
+                        <div style='width: 480px;
+                                    margin-top: 15px;
+                                    margin-left: 75px;'>
+                            <div width='50%'
+                                 style='float: left;
+                                        padding-right: 8px;'>
                                 <input type='button'
                                        class='main_login_mobile_blue_button'
                                        textscale=1.8
-                                       style='width: 230px;
-                                              color: #FFFFFF;
+                                       width='100%'
+                                       style='color: #FFFFFF;
                                               height: 71.37px;
                                               font-size: 15px;
                                               base-font-size: 15px;'
                                        onclick='login_action'
                                        value='<%= L"登录" %>' />
                             </div>
-                            <div style='float: left;margin-left: 20px;'>
+                            <div width='50%'
+                                 style='float: left;
+                                        padding-left: 8px;'>
                                 <input type='button'
                                        class='main_login_mobile_baby_blue_button'
                                        textscale=1.8
-                                       style='width: 230px;
-                                              color: #FFFFFF;
+                                       width='100%'
+                                       style='color: #FFFFFF;
                                               height: 71.37px;
                                               font-size: 15px;
                                               base-font-size: 15px;'
@@ -465,7 +499,21 @@
                     </div>
                 </pe:container>
                 <pe:container name='login_with_account' visible='false' style='background:;position: relative;'>
-                    <div style='margin-top: 40px;'>
+                    <div style='margin-top: 0px;'>
+                        <div style='margin-left: 430px;margin-bottom: 10px;'>
+                            <div>
+                                <div style='position: relative;
+                                            height: 1px;
+                                            width: 124%;
+                                            margin-top: 27px;
+                                            background-color: #FFFFFF;'></div>
+                                <div style='background:;
+                                            font-size: 17px;
+                                            base-font-size: 17px;
+                                            color: #FFFFFF;'
+                                     onclick='set_phone_mode()'><%= L'使用验证码登录' %></div>
+                            </div>
+                        </div>
                         <div style='margin-left: 75px;'>
                             <input type='text'
                                    CaretColor='#FFFFFFFF'
@@ -530,40 +578,51 @@
                                    UncheckedBG='Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#969 147 35 35'
                                    onclick='set_password_show_or_hide' />
                         </div>
-                        <div style='margin-left: 430px;margin-top: 10px;'>
+                        <div style='margin-top: 37px;margin-left: 75px;'>
                             <div>
-                                <div style='position: relative;
-                                            height: 1px;
-                                            width: 124%;
-                                            margin-top: 27px;
-                                            background-color: #FFFFFF;'></div>
-                                <div style='background:;
-                                            font-size: 17px;
-                                            base-font-size: 17px;
-                                            color: #FFFFFF;'
-                                     onclick='set_phone_mode()'><%= L'使用验证码登录' %></div>
+                                <input type="checkbox"
+                                       iconsize="18"
+                                       CheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#275 79 12 12"
+                                       UncheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#295 79 12 12"
+                                       style="float:left;margin-top:4px;min-width:90px;"
+                                       name="account_agree"
+                                       checked="false"/>
+                                <div style="float:left; color: white;base-font-size: 17px;font-size: 17px;margin-left: 4px;">
+                                    <div style="float:left;width: 2px;"></div>
+                                    <%= L"我同意" %>
+                                    <div style="float:left;color: #EDB853" onclick="user_agreement()"><%= L"《用户许可协议》" %></div>
+                                    <%= L'与' %>
+                                    <div style="float:left;color: #EDB853" onclick="user_privacy()"><%= L"《用户隐私协议》" %></div>
+                                    <%= L"中的内容" %>
+                                </div>
                             </div>
                         </div>
-                        <div style='margin-top: 35px;margin-left: 75px;'>
-                            <div style='float: left;'>
+                        <div style='width: 480px;
+                                    margin-top: 15px;
+                                    margin-left: 75px;'>
+                            <div width='50%'
+                                 style='float: left;
+                                        padding-right: 8px;'>
                                 <input type='button'
                                        class='main_login_mobile_blue_button'
                                        onclick='login_with_password_action'
                                        textscale=1.8
-                                       style='width: 230px;
-                                              color: #FFFFFF;
+                                       width='100%'
+                                       style='color: #FFFFFF;
                                               height: 71.37px;
                                               font-size: 15px;
                                               base-font-size: 15px;'
                                        value='<%= L"登录" %>' />
                             </div>
-                            <div style='float: left;margin-left: 10px;'>
+                            <div width='50%'
+                                 style='float: left;
+                                        padding-left: 8px;'>
                                 <input type='button'
                                        class='main_login_mobile_baby_blue_button'
                                        onclick='local_mode'
                                        textscale=1.8
-                                       style='width: 230px;
-                                              color: #FFFFFF;
+                                       width='100%'
+                                       style='color: #FFFFFF;
                                               height: 71.37px;
                                               font-size: 15px;
                                               base-font-size: 15px;'
