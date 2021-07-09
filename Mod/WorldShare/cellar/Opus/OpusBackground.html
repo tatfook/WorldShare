@@ -72,6 +72,10 @@
 
                         return pid or false
                     end
+
+                    function close()
+                        Opus:CloseAll()
+                    end
                 ]]>
             </script>
             <style type="type/mcss" src='Mod/WorldShare/cellar/Opus/OpusMcss.mcss'>
@@ -82,6 +86,13 @@
                 width='100%'
                 height='100%'
                 style='position:relative;background-color:#dcdcdc'>
+            </pe:container>
+            <pe:container
+                alignment='_fi'
+                zorder='-1'
+                width='100%'
+                height='100%'
+                class='red_summer_camp_bg'>
             </pe:container>
             <div>
                 <pe:containe zorder='1' style='background:;'>
@@ -100,6 +111,7 @@
                                 height: 56px;
                                 float: left;'>
                         <div align='center'
+                             onclick='close'
                              style='background: url(Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#5 67 38 33);
                                     width: 38px;
                                     height: 33px;
@@ -130,6 +142,7 @@
                                        name='content'
                                        spacing='10'
                                        EmptyText='<%= L"输入项目ID或课程ID或服务器地址" %>'
+                                       EmptyTextColor='#FF25282E'
                                        style='width: 406px;
                                               height: 42px;
                                               font-size: 18px;
@@ -142,8 +155,9 @@
                                        style='width: 86px;
                                               height: 46px;
                                               text-offset-y: -3px;
-                                              font-size: 16px;
-                                              base-font-size: 16px;
+                                              font-weight: bold;
+                                              font-size: 20px;
+                                              base-font-size: 20px;
                                               margin-top: -2px;'
                                        name='open_button'
                                        onclick='open'
@@ -157,17 +171,17 @@
                               width='1280'
                               height='720'
                               style='margin-left:-640px;
-                                     margin-top:-320px;
+                                     margin-top:-340px;
                                      background:;'>
                     <div width='100%' style='padding-top: 20px;'>
                         <pe:container alignment="_ct" style="margin-left:-640px;margin-top:-360px;width:1280px;height:720px;background:url();">
                             <!--背景水印-->
                             <div>
-                                <div style="position:relative;margin-left:86px;margin-top:123px;width:270px;height:150px;background:url(Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#95 329 270 150);" />
-                                <div style="position:relative;margin-left:621px;margin-top:25px;width:270px;height:150px;background:url(Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#95 329 270 150);" />
-                                <div style="position:relative;margin-left:174px;margin-top:301px;width:270px;height:150px;background:url(Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#95 329 270 150);" />
-                                <div style="position:relative;margin-left:508px;margin-top:477px;width:270px;height:150px;background:url(Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#95 329 270 150);" />
-                                <div style="position:relative;margin-left:949px;margin-top:330px;width:270px;height:150px;background:url(Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#95 329 270 150);" />
+                                <div style="position:relative;margin-left:24px;margin-top:104px;width:512px;height:256px;background:url(Texture/Aries/Creator/keepwork/RedSummerCamp/courses/watermark_bg_32bits.png);" />
+                                <div style="position:relative;margin-left:557px;margin-top:26px;width:512px;height:256px;background:url(Texture/Aries/Creator/keepwork/RedSummerCamp/courses/watermark_bg_32bits.png);" />
+                                <div style="position:relative;margin-left:103px;margin-top:282px;width:512px;height:256px;background:url(Texture/Aries/Creator/keepwork/RedSummerCamp/courses/watermark_bg_32bits.png);" />
+                                <div style="position:relative;margin-left:879px;margin-top:311px;width:512px;height:256px;background:url(Texture/Aries/Creator/keepwork/RedSummerCamp/courses/watermark_bg_32bits.png);" />
+                                <div style="position:relative;margin-left:438px;margin-top:477px;width:512px;height:256px;background:url(Texture/Aries/Creator/keepwork/RedSummerCamp/courses/watermark_bg_32bits.png);" />
                             </div>
                         </pe:container>
                         <!-- bottom content -->
@@ -182,9 +196,11 @@
                                                onclick='sel'
                                                name='1'
                                                class='opus_menu_button'
+                                               textscale=1.2
                                                style='width: 160px;
-                                                      font-size: 16px;
-                                                      base-font-size: 16px;'
+                                                      font-weight: bold;
+                                                      font-size: 20px;
+                                                      base-font-size: 40px;'
                                                value='<%= "我的作品" %>' />
                                     </div>
                                 </pe:container>
@@ -194,10 +210,12 @@
                                                onclick='sel'
                                                name='1'
                                                class='opus_menu_button_unsel'
+                                               textscale=1.2
                                                style='width: 160px;
-                                                      font-size: 16px;
-                                                      base-font-size: 16px;
-                                                      margin-bottom: 20px;
+                                                      font-weight: bold;
+                                                      font-size: 20px;
+                                                      base-font-size: 30px;
+                                                      margin-bottom: 40px;
                                                       color: #FFFFFF;'
                                                value='<%= "我的作品" %>' />
                                     </div>
@@ -213,10 +231,12 @@
                                                onclick='sel'
                                                name='2'
                                                class='opus_menu_button'
+                                               textscale=1.2
                                                style='width: 160px;
-                                                       font-size: 16px;
-                                                       base-font-size: 16px;
-                                                       margin-bottom: 20px;'
+                                                      font-weight: bold;
+                                                      font-size: 20px;
+                                                      base-font-size: 20px;
+                                                       margin-bottom: 40px;'
                                                value='<%= "我的荣誉" %>' />
                                     </div>
                                 </pe:container>
@@ -226,10 +246,12 @@
                                                onclick='sel' 
                                                name='2'
                                                class='opus_menu_button_unsel'
+                                               textscale=1.2
                                                style='width: 160px;
-                                                       font-size: 16px;
-                                                       base-font-size: 16px;
-                                                       margin-bottom: 20px;
+                                                      font-weight: bold;
+                                                      font-size: 20px;
+                                                      base-font-size: 20px;
+                                                       margin-bottom: 40px;
                                                        color: #FFFFFF;'
                                                value='<%= "我的荣誉" %>' />
                                     </div>

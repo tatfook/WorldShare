@@ -68,7 +68,7 @@ function Create:ShowCreateEmbed(width, height, x, y)
             directPosition = true,
             align = "_ct",
             x = -768 / 2,
-            y = -360 / 2,
+            y = -400 / 2,
             width = 1024,
             height = 580,
             cancelShowAnimation = true,
