@@ -46,7 +46,7 @@ function LoadWorldCommand:Init()
 
                     if currentEnterWorld then
                         _guihelper.MessageBox(
-                            format(L"即将离开【%s】", currentEnterWorld.text),
+                            format(L"即将离开【%s】", currentEnterWorld.name or ''),
                             function(res)
                                 if res and res == _guihelper.DialogResult.Yes then
                                     local optionsStr = ''
@@ -82,7 +82,7 @@ function LoadWorldCommand:Init()
 
                     if currentEnterWorld then
                         _guihelper.MessageBox(
-                            format(L"即将离开【%s】进入【%s】", currentEnterWorld.text, L'家园'),
+                            format(L"即将离开【%s】进入【%s】", currentEnterWorld.name or '', L'家园'),
                             function(res)
                                 if res and res == _guihelper.DialogResult.Yes then
                                     local optionsStr = ''
@@ -141,8 +141,16 @@ function LoadWorldCommand:Init()
                         local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
                         if currentEnterWorld and cacheWorldInfo and cacheWorldInfo.worldName then
+                            local remoteWorldName = ''
+
+                            if cacheWorldInfo and cacheWorldInfo.extra and cacheWorldInfo.extra.worldTagName then
+                                remoteWorldName = cacheWorldInfo.extra.worldTagName
+                            else
+                                remoteWorldName = cacheWorldInfo.name
+                            end
+
                             _guihelper.MessageBox(
-                                format(L'即将离开【%s】进入【%s】', currentEnterWorld.text or '', cacheWorldInfo.worldName or ''),
+                                format(L'即将离开【%s】进入【%s】', currentEnterWorld.name or '', remoteWorldName or ''),
                                 function(res)
                                     if res and res == _guihelper.DialogResult.Yes then
                                         CommandManager:RunCommand('/loadworld -s ' .. optionsStr .. cmd_text)
@@ -176,8 +184,16 @@ function LoadWorldCommand:Init()
                         local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
                         if currentEnterWorld then
+                            local remoteWorldName = ''
+
+                            if data and data.extra and data.extra.worldTagName then
+                                remoteWorldName = data.extra.worldTagName
+                            else
+                                remoteWorldName = data.name
+                            end
+
                             _guihelper.MessageBox(
-                                format(L"即将离开【%s】进入【%s】", currentEnterWorld.text, data.name),
+                                format(L"即将离开【%s】进入【%s】", currentEnterWorld.name or '', remoteWorldName or ''),
                                 function(res)
                                     if res and res == _guihelper.DialogResult.Yes then
                                         CommandManager:RunCommand('/loadworld -s ' .. optionsStr .. cmd_text)
