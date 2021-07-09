@@ -603,13 +603,13 @@
                                        iconsize="12"
                                        CheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#275 79 12 12"
                                        UncheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#295 79 12 12"
-                                       style="float:left;margin-top:3px;min-width:90px;"
+                                       style="float:left;margin-top:3px;min-width:90px;margin-right: 2px;"
                                        name='remember_password_name'
                                        checked="false"/>
                                 <%= L"记住密码" %>
                             </div>
                             <pe:if condition='<%= System.os.GetPlatform() == "win32" %>'>
-                                <div style='float:left;base-font-size: 13px;font-size: 13px;color: #9A9DA2;margin-left: 100px;' onclick='forget_password()'><%= L"找回密码" %></div>
+                                <div style='float:left;base-font-size: 13px;font-size: 13px;color: #9A9DA2;margin-left: 106px;' onclick='forget_password()'><%= L"找回密码" %></div>
                             </pe:if>
                             <pe:if condition='<%= System.os.GetPlatform() ~= "win32" %>'>
                                 <div style='float:left;base-font-size: 13px;font-size: 13px;color: #9A9DA2;margin-left: 120px;' onclick='forget_password()'><%= L"找回密码" %></div>
