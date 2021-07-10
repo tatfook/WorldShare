@@ -274,12 +274,9 @@
                     end
 
                     function enter()
-                        if true then
-                            show_summer_camp()
-                            return
-                        end
                         -- SessionsData:SetUserLocation('HOME', Mod.WorldShare.Store:Get('user/username'))
-                        -- MainLogin:Next()
+                        close()
+                        MainLogin:Next()
                     end
 
                     function switch_account()

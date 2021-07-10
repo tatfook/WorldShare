@@ -22,40 +22,22 @@ Certificate.certificateCallback = nil
 Certificate.inited = false
 
 function Certificate:OnWorldLoad()
-    local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
-
-    if currentEnterWorld.kpProjectId and currentEnterWorld.kpProjectId == 29477 then
-        return
-    end
-
     if not KeepworkServiceSession:IsSignedIn() then
         return
     end
 
-    if not KeepworkServiceSession:IsRealName() then
-        if not self.inited then
-            self.inited = true
-            TeacherAgent:AddTaskButton('award', "Texture/Aries/Creator/keepwork/paracraft_guide_32bits.png#484 458 90 91", function()
-                self:Init(function(result)
-                    if result then
-                        TeacherAgent:RemoveTaskButton('award')
-                        TeacherAgent:SetEnabled(false)
-                        GameLogic.AddBBS(nil, L'领取成功', 3000, '0 255 0')
-                    end
-                end)
-            end)
-            TeacherAgent:SetEnabled(true)
-            TeacherIcon.SetBouncing(true)
-        else
-            TeacherAgent:ShowIcon(true)
-        end
+    local isVerified = Mod.WorldShare.Store:Get('user/isVerified')
+    local hasJoinedSchool = Mod.WorldShare.Store:Get('user/hasJoinedSchool')
+
+    if not isVerified or not hasJoinedSchool then
+        self:ShowCertificateNoticePage()
     end
 end
 
 function Certificate:ShowCertificateNoticePage()
     local params = Mod.WorldShare.Utils.ShowWindow(
-        800,
-        400,
+        860,
+        480,
         '(ws)Certificate/CertificateNotice.html',
         'Mod.WorldShare.CertificateNotice'
     )
@@ -130,17 +112,16 @@ function Certificate:ShowSchoolPage()
     end
 end
 
-function Certificate:ShowMyHomePage()
+function Certificate:ShowMyHomePage(callback)
     local params = Mod.WorldShare.Utils.ShowWindow(
         800,
-        670,
+        480,
         '(ws)Certificate/MyHome.html',
         'Mod.WorldShare.Certificate.MyHome'
     )
 
     if params and type(params) == 'table' and params._page then
-        params._page.Success = function() self:ShowSuccessPage() end
-        params._page.certificateCallback = self.certificateCallback
+        params._page.certificateCallback = callback
     end
 end
 

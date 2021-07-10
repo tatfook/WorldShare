@@ -16,10 +16,10 @@
 
                 function close()
                     if page.certificateCallback and type(page.certificateCallback) == 'function' then
-                        page.certificateCallback(false)
+                        page.certificateCallback()
                     end
+
                     page:CloseWindow()
-                    page.closed = true
                 end
 
                 function bind()
@@ -44,7 +44,7 @@
                         -- if page and page.Success then
                         --    page.Success()
                         -- end
-                        -- page:CloseWindow()
+                        close()
                     end)
                 end
 
@@ -143,7 +143,7 @@
         <style type="text/mscc" src="Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss">
         </style>
         <div width="100%" height="100%">
-            <kp:window width="800" height="670" onclose="close()">
+            <kp:window width="800" height="470" onclose="close()">
                 <div class="theme1_header"></div>
                 <div style="padding: 30px;padding-top: 20px;">
                     <div style="margin-left: 136px;">
@@ -164,11 +164,8 @@
                     <div style="margin-left: 136px;margin-top: 10px;">
                         <img style="width: 465px;height: 39px;" src="Texture/Aries/Creator/keepwork/paracraft_guide_32bits.png#14 290 465 39" />
                     </div>
-                    <div style="margin-left: 180px;margin-top: 10px;">
-                        <img style="width: 397px;height: 176px;" src="Texture/Aries/Creator/keepwork/paracraft_guide_32bits.png#30 623 397 176" />
-                    </div>
-                    <div style="margin-left: 213px;margin-top: 5px;">
-                        <img style="width: 311px;height: 177px;" src="Texture/Aries/Creator/keepwork/paracraft_guide_32bits.png#10 814 314 185" />
+                    <div align='center' style="width: 205px;margin-top: 20px;">
+                        <img style="width: 205px;height: 138px;" src="Texture/Aries/Creator/paracraft/paracraft_certification_a_32bits.png#811 13 205 138" />
                     </div>
                 </div>
             </kp:window>

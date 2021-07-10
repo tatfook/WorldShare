@@ -9,7 +9,6 @@
                     local ThirdPartyLogin = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/ThirdPartyLogin.lua')
                     local UserConsole = NPL.load('(gl)Mod/WorldShare/cellar/UserConsole/Main.lua')
                     local MySchool = NPL.load('(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua')
-                    local RedSummerCampMainPage = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/RedSummerCamp/RedSummerCampMainPage.lua")
 
                     -- service
                     local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepWorkService/Session.lua')
@@ -53,10 +52,6 @@
                         end
                     else
                         account_list_data = {}
-                    end
-
-                    function show_summer_camp()
-                        RedSummerCampMainPage.Show()
                     end
 
                     function get_history_users()
@@ -111,6 +106,7 @@
                         local pwd = page:GetValue('password')
 
                         if not pwd or #pwd == 0 then
+                            -- maybe not come here
                             local auto_login = page:GetNode('auto_login_name').checked
 
                             if auto_login then
@@ -122,7 +118,7 @@
                                     if b_succeed then
                                         -- TODO: // chagne to start UI
                                     else
-                                        page:SetUIValue('account_field_error_msg', L'*账号不合法')
+                                        page:SetUIValue('account_field_error_msg', message)
                                         page:FindControl('account_field_error').visible = true
                                     end
                                 end)
@@ -303,18 +299,22 @@
                         local login_with_phone_number = page:FindControl('phone_mode')
                         local login_with_account = page:FindControl('account_mode')
                         local auto_login_mode = page:FindControl('auto_login_mode')
+                        local change_button = page:FindControl('chagne_button')
 
                         if mode == 'account' then
                             page:FindControl('login_button'):SetDefault(true)
                             login_with_phone_number.visible = false
                             login_with_account.visible = true
                             auto_login_mode.visible = false
+                            change_button.visible = false
                         elseif mode == 'phone' then
                             page:FindControl('phone_login_button'):SetDefault(true)
                             login_with_phone_number.visible = true
                             login_with_account.visible = false
                             auto_login_mode.visible = false
+                            change_button.visible = false
                         elseif mode == 'auto_login' then
+                            change_button.visible = true
                             auto_login_mode.visible = true
                             login_with_phone_number.visible = false
                             login_with_account.visible = false
@@ -480,7 +480,7 @@
                     end
 
                     function start()
-                        show_summer_camp()
+                        MainLogin:Next()
                     end
 
                     function parent()
@@ -489,7 +489,7 @@
                     end
 
                     function on_click_exit()
-                        Desktop.ForceExit()
+                        MainLogin:Exit()
                     end
 
                     -- don't remove
@@ -541,14 +541,28 @@
             <pe:container
                 alignment='_rt'
                 zorder='-1'
-                width='100px'
+                width='210px'
                 height='100px'
-                style='position: relative; background:;'>
-                <div style='width: 80px;
-                           margin-right: 18px;
-                           margin-top: 20px;'>
+                style='position: relative;
+                       background:;
+                       margin-top: 20px;
+                       margin-right: 11px;'>
+                <div style='width: 111px;float: left;'>
+                    <pe:container name='chagne_button' visible='false' style='background:;'>
+                        <input type='button'
+                            onclick='change'
+                            style='width: 111px;
+                                    height: 43px;
+                                    background: url(Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#26 797 192 74)' />
+                    </pe:container>
+                </div>
+                <div style='float: left;
+                            width: 80px;
+                            margin-left: 10px;'>
                     <input type='button'
-                           style='width: 80px;height: 44px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#281 885 81 44)'
+                           style='width: 80px;
+                                  height: 44px;
+                                  background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#281 885 81 44)'
                            onclick='on_click_exit' />
                 </div>
             </pe:container>
@@ -713,13 +727,15 @@
                                        style="float:left;margin-top:3px;min-width:90px;"
                                        name='auto_login_name'
                                        checked="false"/>
-                                <%= L"自动登陆" %>
+                                <div style='float: left;margin-left: 3px;' for='auto_login_name'>
+                                    <%= L"自动登陆" %>
+                                </div>
                             </div>
                             <pe:if condition='<%= System.os.GetPlatform() == "win32" %>'>
-                                <div style='float:left;base-font-size: 13px;font-size: 13px;color: #9A9DA2;margin-left: 100px;' onclick='forget_password()'><%= L"找回密码" %></div>
+                                <div style='float:left;base-font-size: 13px;font-size: 13px;color: #9A9DA2;margin-left: 97px;' onclick='forget_password()'><%= L"找回密码" %></div>
                             </pe:if>
                             <pe:if condition='<%= System.os.GetPlatform() ~= "win32" %>'>
-                                <div style='float:left;base-font-size: 13px;font-size: 13px;color: #9A9DA2;margin-left: 120px;' onclick='forget_password()'><%= L"找回密码" %></div>
+                                <div style='float:left;base-font-size: 13px;font-size: 13px;color: #9A9DA2;margin-left: 117px;' onclick='forget_password()'><%= L"找回密码" %></div>
                             </pe:if>
                         </div>
                         <div style='margin-top:5px;margin-bottom:10px;'>
@@ -873,13 +889,6 @@
                                    class='main_login_blue_button'
                                    onclick='start()'
                                    value='<%= L"开始"%>' />
-                        </div>
-                        <div style='margin-top:10px;margin-bottom:10px;'>
-                            <input type='button'
-                                   name='phone_login_button'
-                                   class='main_login_white_button'
-                                   onclick='change()'
-                                   value='<%= L"切换账号"%>' />
                         </div>
                     </pe:container>
                 </div>

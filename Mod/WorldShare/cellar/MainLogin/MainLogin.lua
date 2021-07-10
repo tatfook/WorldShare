@@ -13,6 +13,7 @@ local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
 -- libs
 local GameMainLogin = commonlib.gettable('MyCompany.Aries.Game.MainLogin')
 local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua")
+local Desktop = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop")
 
 -- service
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
@@ -251,6 +252,7 @@ function MainLogin:ShowLogin1()
         MainLoginLoginPage:FindControl('phone_mode').visible = false
         MainLoginLoginPage:FindControl('account_mode').visible = false
         MainLoginLoginPage:FindControl('auto_login_mode').visible = true
+        MainLoginLoginPage:FindControl('chagne_button').visible = true
         MainLoginLoginPage:SetUIValue('auto_username', Mod.WorldShare.Store:Get('user/username') or '')
 
         MainLoginLoginPage:FindControl('title_login').visible = false
@@ -270,6 +272,7 @@ function MainLogin:ShowLogin1()
                         MainLoginLoginPage:FindControl('phone_mode').visible = false
                         MainLoginLoginPage:FindControl('account_mode').visible = false
                         MainLoginLoginPage:FindControl('auto_login_mode').visible = true
+                        MainLoginLoginPage:FindControl('chagne_button').visible = true
                         MainLoginLoginPage:SetUIValue('auto_username', PWDInfo.account or '')
     
                         MainLoginLoginPage:FindControl('title_login').visible = false
@@ -488,7 +491,7 @@ function MainLogin:ShowExtra()
         top,
         '_rb',
         false,
-        1
+        0
     )
     
 end
@@ -1095,6 +1098,17 @@ function MainLogin:Next(isOffline)
         return
     end
 
+    if true then
+        if System.options.loginmode == 'offline' then
+            Create:Show()
+        else
+            local RedSummerCampMainPage = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/RedSummerCamp/RedSummerCampMainPage.lua")
+            RedSummerCampMainPage.Show()
+        end
+
+        return
+    end
+
     if System.options.loginmode ~= 'offline' then
         -- close at on world load
         Mod.WorldShare.MsgBox:Show(L'请稍候...', 12000)
@@ -1124,4 +1138,8 @@ end
 
 function MainLogin:GetHistoryUsers()
     return SessionsData:GetSessions().allUsers
+end
+
+function MainLogin:Exit()
+    Desktop.ForceExit()
 end

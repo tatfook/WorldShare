@@ -103,6 +103,7 @@ local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
 local HistoryManager = NPL.load('(gl)Mod/WorldShare/cellar/HistoryManager/HistoryManager.lua')
 local PreventIndulge = NPL.load('(gl)Mod/WorldShare/cellar/PreventIndulge/PreventIndulge.lua')
 local Beginner = NPL.load('(gl)Mod/WorldShare/cellar/Beginner/Beginner.lua')
+local Certificate = NPL.load("(gl)Mod/WorldShare/cellar/Certificate/Certificate.lua")
 
 -- service
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
@@ -204,6 +205,7 @@ function WorldShare:OnWorldLoad()
     LocalServiceSession:OnWorldLoad()
     KeepworkServiceProject:OnWorldLoad()
     KeepworkServiceSession:OnWorldLoad()
+    Certificate:OnWorldLoad()
 
     EventTrackingService:Send(2, 'duration.world.stay', { started = true })
 
