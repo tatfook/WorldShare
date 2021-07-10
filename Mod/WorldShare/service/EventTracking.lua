@@ -43,9 +43,9 @@ EventTrackingService.map = {
         main_login = {
             offline_enter = 'click.main_login.offline_enter', -- 本地模式
             find_password = 'click.main_login.find_password', -- 找回密码
-            login_with_qq = 'click.main_login.login_with_qq', -- 使用QQ登陆
-            login_with_wechat = 'click.main_login.login_with_wechat', -- 使用微信登陆
-            select_login = 'click.main_login.select_login', -- 选择登陆
+            login_with_qq = 'click.main_login.login_with_qq', -- 使用QQ登录
+            login_with_wechat = 'click.main_login.login_with_wechat', -- 使用微信登录
+            select_login = 'click.main_login.select_login', -- 选择登录
             select_register = 'click.main_login.select_register', -- 选择注册
             select_parents = 'click.main_login.select_parents', -- 选择家长
         },

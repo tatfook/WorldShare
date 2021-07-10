@@ -214,7 +214,7 @@ function WorldList:EnterWorld(index)
     -- vip world
     if currentWorld.isVipWorld or currentWorld.instituteVipEnabled then
         if not KeepworkService:IsSignedIn() then
-            LoginModal:CheckSignedIn(L"此操作需要登陆后继续", function(bIsSuccessed)
+            LoginModal:CheckSignedIn(L"此操作需要录后继续", function(bIsSuccessed)
                 if bIsSuccessed then
                     local index = self:GetWorldIndexByFoldername(currentWorld.foldername, currentWorld.shared, currentWorld.is_zip)
                     self:EnterWorld(index)

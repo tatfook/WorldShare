@@ -267,7 +267,7 @@ function Create:EnterWorld(index, skip)
     -- vip world step
     if VipTypeWorld:IsVipWorld(currentSelectedWorld) and not self.vipVerified then
         if not KeepworkServiceSession:IsSignedIn() then
-            LoginModal:CheckSignedIn(L'此世界为VIP世界，需要登陆后才能继续', function(bIsSuccessed)
+            LoginModal:CheckSignedIn(L'此世界为VIP世界，需要登录后才能继续', function(bIsSuccessed)
                 if bIsSuccessed then
                     self:GetWorldList(self.statusFilter, function()
                         local index = Compare:GetWorldIndexByFoldername(
@@ -294,7 +294,7 @@ function Create:EnterWorld(index, skip)
     -- institute vip step
     if VipTypeWorld:IsInstituteVipWorld(currentSelectedWorld) and not self.instituteVerified then
         if not KeepworkServiceSession:IsSignedIn() then
-            LoginModal:CheckSignedIn(L'此世界为机构VIP世界，需要登陆后才能继续', function(bIsSuccessed)
+            LoginModal:CheckSignedIn(L'此世界为机构VIP世界，需要登录后才能继续', function(bIsSuccessed)
                 if bIsSuccessed then
                     self:GetWorldList(self.statusFilter, function()
                         local index = Compare:GetWorldIndexByFoldername(
