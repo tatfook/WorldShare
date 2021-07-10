@@ -359,7 +359,9 @@ function KeepworkServiceSession:Logout(mode, callback)
         self:SaveSigninInfo(
             {
                 account = username,
-                loginServer = KeepworkService:GetEnv()
+                loginServer = KeepworkService:GetEnv(),
+                autoLogin = false,
+                rememberMe = false,
             }
         )
 
@@ -419,9 +421,9 @@ function KeepworkServiceSession:RegisterWithAccount(username, password, callback
                             return false
                         end
 
-                        loginData.autoLogin = autoLogin
-                        loginData.rememberMe = rememberMe
-                        loginData.password = password
+                        loginData.autoLogin = true
+                        loginData.rememberMe = nil
+                        loginData.password = nil
 
                         self:LoginResponse(loginData, err, function()
                             if type(callback) == 'function' then
@@ -547,7 +549,9 @@ function KeepworkServiceSession:RegisterWithPhone(username, cellphone, cellphone
                             return false
                         end
 
-                        loginData.password = password
+                        loginData.autoLogin = true
+                        loginData.rememberMe = nil
+                        loginData.password = nil
 
                         self:LoginResponse(loginData, err, function()
                             if type(callback) == 'function' then

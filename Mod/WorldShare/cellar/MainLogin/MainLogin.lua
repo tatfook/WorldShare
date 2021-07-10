@@ -76,8 +76,7 @@ function MainLogin:Show()
 
         self:Show2()
     else
-        self:ShowAndroid() -- use mobile UI
-        -- self:Show1()
+        self:Show3()
     end
 end
 
@@ -158,6 +157,34 @@ function MainLogin:Show2()
     self:SelectMode()
 end
 
+function MainLogin:Show3()
+    Mod.WorldShare.Utils.ShowWindow({
+        url = 'Mod/WorldShare/cellar/Theme/MainLogin/MainLogin.html', 
+        name = 'MainLogin', 
+        isShowTitleBar = false,
+        DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
+        style = CommonCtrl.WindowFrame.ContainerStyle,
+        zorder = -1,
+        allowDrag = false,
+        directPosition = true,
+        align = '_fi',
+        x = 0,
+        y = 0,
+        width = 0,
+        height = 0,
+        cancelShowAnimation = true,
+    })
+
+    local MainLoginPage = Mod.WorldShare.Store:Get('page/MainLogin')
+
+    if not MainLoginPage then
+        return false
+    end
+
+    self:ShowExtra()
+    self:ShowLogin1()
+end
+
 function MainLogin:ShowLogin()
     Mod.WorldShare.Utils.ShowWindow(
         0,
@@ -199,6 +226,62 @@ function MainLogin:ShowLogin()
             MainLoginLoginPage:FindControl('login_button'):SetDefault(true)
         end
     end
+end
+
+function MainLogin:ShowLogin1()
+    Mod.WorldShare.Utils.ShowWindow(
+        0,
+        0,
+        'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginLogin1.html',
+        'Mod.WorldShare.cellar.MainLogin.Login',
+        0,
+        0,
+        '_fi',
+        false,
+        -1
+    )
+
+    local MainLoginLoginPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Login')
+
+    if not MainLoginLoginPage then
+        return
+    end
+
+    if KeepworkServiceSession:IsSignedIn() then
+        MainLoginLoginPage:FindControl('phone_mode').visible = false
+        MainLoginLoginPage:FindControl('account_mode').visible = false
+        MainLoginLoginPage:FindControl('auto_login_mode').visible = true
+        MainLoginLoginPage:SetUIValue('auto_username', Mod.WorldShare.Store:Get('user/username') or '')
+
+        MainLoginLoginPage:FindControl('title_login').visible = false
+        MainLoginLoginPage:FindControl('title_username').visible = true
+    else
+        local PWDInfo = KeepworkServiceSession:LoadSigninInfo()
+    
+        if PWDInfo then
+            MainLoginLoginPage:SetUIValue('account', PWDInfo.account or '')
+    
+            if PWDInfo.autoLogin then
+                MainLogin:LoginWithToken(PWDInfo.token, function(bSsucceed, reason, message)
+                    if bSsucceed then
+                        MainLoginLoginPage:SetUIValue('auto_login_name', true)
+                        MainLoginLoginPage:SetUIBackground('login_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 98 258 44')
+    
+                        MainLoginLoginPage:FindControl('phone_mode').visible = false
+                        MainLoginLoginPage:FindControl('account_mode').visible = false
+                        MainLoginLoginPage:FindControl('auto_login_mode').visible = true
+                        MainLoginLoginPage:SetUIValue('auto_username', PWDInfo.account or '')
+    
+                        MainLoginLoginPage:FindControl('title_login').visible = false
+                        MainLoginLoginPage:FindControl('title_username').visible = true
+                    end
+                end)
+            else
+                MainLoginLoginPage:FindControl('login_button'):SetDefault(true)
+            end
+        end
+    end
+
 end
 
 function MainLogin:ShowAndroidLogin()
@@ -390,9 +473,9 @@ function MainLogin:ShowExtra()
         left = 1000
         top = 160
     else
-        width = 400
+        width = 300
         height = 130
-        left = 800
+        left = 600
         top = 160
     end
 
@@ -405,7 +488,7 @@ function MainLogin:ShowExtra()
         top,
         '_rb',
         false,
-        -1
+        1
     )
     
 end
@@ -621,7 +704,20 @@ function MainLogin:LoginAction(callback)
 
     local account = MainLoginPage:GetValue('account')
     local password = MainLoginPage:GetValue('password')
-    local rememberMe = MainLoginPage:GetNode('remember_password_name').checked
+
+    local pwdNode = MainLoginPage:GetNode('remember_password_name')
+    local rememberMe = false
+
+    if pwdNode then
+        local rememberMe = pwdNode.checked
+    end
+
+    local autoLoginNode = MainLoginPage:GetNode('auto_login_name')
+    local autoLogin = false
+
+    if autoLoginNode then
+        autoLogin = autoLoginNode.checked
+    end
 
     local validated = true
 

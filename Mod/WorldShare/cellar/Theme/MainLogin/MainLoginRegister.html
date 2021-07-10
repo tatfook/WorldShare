@@ -9,6 +9,7 @@
 
                     -- service
                     local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepWorkService/Session.lua')
+                    local EventTrackingService = NPL.load('(gl)Mod/WorldShare/service/EventTracking.lua')
 
                     -- helper
                     local Validated = NPL.load('(gl)Mod/WorldShare/helper/Validated.lua')
@@ -33,7 +34,7 @@
 
                     function back()
                         close()
-                        MainLogin:ShowLogin()
+                        MainLogin:ShowLogin1()
                     end
 
                     function get_register_mode()
@@ -257,6 +258,12 @@
 
                     function finish()
                         close()
+
+                        if true then
+                            MainLogin:ShowLogin1()
+                            return
+                        end
+
                         MainLogin:ShowWhere(function()
                             MySchool:ShowJoinSchoolAfterRegister(function()
                                 MainLogin:EnterUserConsole()
@@ -535,7 +542,6 @@
                             end
                         end
 
-                        
                         KeepworkServiceSession:CheckUsernameExist(username, function(b_is_exist)
                             if b_is_exist then
                                 MainLogin.accountExist = true
@@ -549,6 +555,15 @@
                                 page:SetUIBackground('phone_register_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 98 258 44')
                             end
                         end)
+                    end
+
+                    function parent()
+                        EventTrackingService:Send(1, 'click.main_login.select_parents', nil, true)
+                        MainLogin:ShowParent()
+                    end
+
+                    function on_click_exit()
+                        Desktop.ForceExit()
                     end
                 ]]>
             </script>
@@ -571,6 +586,37 @@
                     },
                 }
             </style>
+            <pe:container
+                alignment='_lt'
+                zorder='-1'
+                width='100px'
+                height='100px'
+                style='position: relative; background:;'>
+                <div align='left'
+                    style='width: 55px;
+                        margin-left: 20px;
+                        margin-top: 20px;'>
+                    <input type='button'
+                        style='width: 55px;
+                            height: 59px;
+                            background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#533 8 55 59)'
+                            onclick="parent"/>
+                </div>
+            </pe:container>
+            <pe:container
+                alignment='_rt'
+                zorder='-1'
+                width='100px'
+                height='100px'
+                style='position: relative; background:;'>
+                <div style='width: 80px;
+                        margin-right: 18px;
+                        margin-top: 20px;'>
+                    <input type='button'
+                        style='width: 80px;height: 44px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#281 885 81 44)'
+                        onclick='on_click_exit' />
+                </div>
+            </pe:container>
             <pe:container alignment='_ct' ClickThrough='true' class='main_login_container_bg container_size'>
                 <div style='padding-top: 12px;padding-left: 18px;'>
                     <div class='main_login_title_bg' style='float: left;width: 172px;height: 49px;'>
