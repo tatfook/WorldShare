@@ -178,16 +178,15 @@ function RegisterModal:RegisterWithPhone(callback)
 end
 
 function RegisterModal:Classification(phonenumber, captcha, callback)
-    KeepworkServiceSession:ClassificationPhone(phonenumber, captcha, function(data, err)
-        if data.data then
+    KeepworkServiceSession:ClassificationPhone(phonenumber, captcha, function(data, err, bSuccess)
+        if bSuccess then
             GameLogic.AddBBS(nil, L"实名认证成功", 5000, "0 255 0")
 
-            Mod.WorldShare.Store:Set("user/isVerified", true)
-
-            if type(callback) == "function" then
+            if callback and type(callback) == "function" then
                 callback()
             end
-            return true
+
+            return
         end
 
         GameLogic.AddBBS(nil, format("%s%s(%d)", L"认证失败，错误信息：", data.message, data.code), 5000, "255 0 0")

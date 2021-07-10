@@ -19,12 +19,12 @@
 
                     if status == 3 then
                         Certificate:ShowMyHomePage(function()
-                            MySchool:ShowJoinSchool()
+                            MySchool:ShowJoinSchool(page.callback)
                         end)
                     elseif status == 2 then
-                        MySchool:ShowJoinSchool()
+                        MySchool:ShowJoinSchool(page.callback)
                     elseif status == 1 then
-                        Certificate:ShowMyHomePage()
+                        Certificate:ShowMyHomePage(page.callback)
                     end
                 end
 

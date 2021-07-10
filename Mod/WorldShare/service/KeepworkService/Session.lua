@@ -752,7 +752,22 @@ function KeepworkServiceSession:GetPhoneCaptcha(phone, callback)
 end
 
 function KeepworkServiceSession:ClassificationPhone(cellphone, captcha, callback)
-    KeepworkUsersApi:RealName(cellphone, captcha, callback, callback, { 400 })
+    KeepworkUsersApi:RealName(
+        cellphone,
+        captcha,
+        function(data, err)
+            if callback and type(callback) == 'function' then
+                Mod.WorldShare.Store:Set('user/isVerified', true)
+                callback(data, err, true)    
+            end
+        end,
+        function(data, err)
+            if callback and type(callback) == 'function' then
+                callback(data, err, true)    
+            end
+        end,
+        { 400 }
+    )
 end
 
 function KeepworkServiceSession:BindPhone(cellphone, captcha, callback)

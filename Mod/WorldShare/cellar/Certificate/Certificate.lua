@@ -34,13 +34,15 @@ function Certificate:OnWorldLoad()
     end
 end
 
-function Certificate:ShowCertificateNoticePage()
+function Certificate:ShowCertificateNoticePage(callback)
     local params = Mod.WorldShare.Utils.ShowWindow(
         860,
         480,
         '(ws)Certificate/CertificateNotice.html',
         'Mod.WorldShare.CertificateNotice'
     )
+
+    params._page.callback = callback
 end
 
 function Certificate:Init(callback)

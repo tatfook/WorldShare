@@ -169,11 +169,14 @@ function KeepworkServiceSchoolAndOrg:SearchSchoolBySchoolId(id, callback)
     end)
 end
 
--- return true or false
+-- join school service
 function KeepworkServiceSchoolAndOrg:ChangeSchool(schoolId, callback)
-    KeepworkUsersApi:ChangeSchool(schoolId, function(data, err)
-        if err == 200 then
-            if type(callback) == "function" then
+    KeepworkUsersApi:ChangeSchool(
+        schoolId,
+        function(data, err)
+            Mod.WorldShare.Store:Set('user/hasJoinedSchool', true)
+
+            if callback and type(callback) == "function" then
                 -- update field 
                 KeepworkServiceSession:Profile(function(response, err)
                     local isVipSchool = false
@@ -190,11 +193,14 @@ function KeepworkServiceSchoolAndOrg:ChangeSchool(schoolId, callback)
 
                     callback(true)
                 end)
-            else
+            end
+        end,
+        function()
+            if callback and type(callback) == 'function' then
                 callback(false)
             end
         end
-    end)
+    )
 end
 
 -- return true or false
