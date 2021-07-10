@@ -110,5 +110,7 @@ function Permission:CheckPermission(authName, bOpenUIIfNot, callback, uiType)
 end
 
 function Permission:ShowFailDialog(key, desc)
-    VipNotice:ShowPage(key, desc)
+    --VipNotice:ShowPage(key, desc)
+    local VipPage = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/User/VipPage.lua");
+    VipPage.ShowPage(key, desc);
 end
