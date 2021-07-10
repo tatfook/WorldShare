@@ -1,0 +1,44 @@
+<body>
+    <pe:mcml>
+        <script type="text/npl">
+            <![CDATA[
+                local page = document:GetPageCtrl()
+
+                function close()
+                    page:CloseWindow()
+                end
+
+                function certificate_now()
+                    GameLogic.GetFilters():apply_filters("user_behavior", 1, "click.world.certificate.certificate_now")
+                end
+            ]]>
+        </script>
+        <style type="text/mscc" src="Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss">
+
+        </style>
+        <div width="100%" height="100%">
+            <kp:window width="800" height="400" onclose="close()">
+                <div class="theme1_header"></div>
+                <div style="padding: 30px;">
+                    <div>
+                        photo
+                    </div>
+                    <div>
+                        亲爱的同学&家长，您还没有完成【检查变量】。
+                        请在参加赛事前完善您的个人资料！以便顺利
+                        参赛和享受各项学习服务！
+                    </div>
+                    <div>
+                        <input type='button' value='<%= L"完善个人资料" %>'/>
+                    </div>
+                    <div>
+                        <input type='checkbox' checked='false' />
+                        不再提醒
+                    </div>
+                </div>
+            </kp:window>
+        </div>
+    </pe:mcml>
+</body>
+</html>
+

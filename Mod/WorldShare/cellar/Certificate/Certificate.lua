@@ -52,6 +52,15 @@ function Certificate:OnWorldLoad()
     end
 end
 
+function Certificate:ShowCertificateNoticePage()
+    local params = Mod.WorldShare.Utils.ShowWindow(
+        800,
+        400,
+        '(ws)Certificate/CertificateNotice.html',
+        'Mod.WorldShare.CertificateNotice'
+    )
+end
+
 function Certificate:Init(callback)
     if not KeepworkServiceSession:IsSignedIn() then
         GameLogic.AddBBS(nil, L"请先登录", 3000, "255 0 0")

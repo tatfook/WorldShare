@@ -76,7 +76,8 @@ function MainLogin:Show()
 
         self:Show2()
     else
-        self:Show1()
+        self:ShowAndroid() -- use mobile UI
+        -- self:Show1()
     end
 end
 

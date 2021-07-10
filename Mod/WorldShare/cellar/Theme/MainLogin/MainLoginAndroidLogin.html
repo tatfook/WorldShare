@@ -23,6 +23,13 @@
                     agree = false
 
                     Mod.WorldShare.Utils.SetTimeOut(function()
+                        local val = page:GetValue('password_show')
+                        page:SetValue('password_hide', val)
+                        page:SetValue('password', val)
+
+                        page:FindControl('password_show').visible = false
+                        page:FindControl('password_hide').visible = true
+                    
                         local current_selected_user = KeepworkServiceSession:LoadSigninInfo()
                         local signed_in_node = page:FindControl('signed_in')
                         local login_node = page:FindControl('login')
@@ -508,135 +515,131 @@
                     </div>
                 </pe:container>
                 <pe:container name='login_with_account' visible='false' style='background:;position: relative;'>
-                    <div style='margin-top: 0px;'>
-                        <div style='margin-left: 430px;margin-bottom: 10px;'>
-                            <div>
-                                <div style='position: relative;
-                                            height: 1px;
-                                            width: 124%;
-                                            margin-top: 27px;
-                                            background-color: #FFFFFF;'></div>
-                                <div style='background:;
-                                            font-size: 17px;
-                                            base-font-size: 17px;
-                                            color: #FFFFFF;'
-                                     onclick='set_phone_mode()'><%= L'使用验证码登录' %></div>
+                    <div style='margin-left: 430px;margin-bottom: 10px;'>
+                        <div>
+                            <div style='position: relative;
+                                        height: 1px;
+                                        width: 124%;
+                                        margin-top: 27px;
+                                        background-color: #FFFFFF;'></div>
+                            <div style='background:;
+                                        font-size: 17px;
+                                        base-font-size: 17px;
+                                        color: #FFFFFF;'
+                                 onclick='set_phone_mode()'><%= L'使用验证码登录' %></div>
+                        </div>
+                    </div>
+                    <div style='margin-left: 75px;'>
+                        <input type='text'
+                               CaretColor='#FFFFFFFF'
+                               spacing='10'
+                               name='account'
+                               MoveViewWhenAttachWithIME='true'
+                               class='main_login_mobile_textfield'
+                               EmptyText='<%= L"请输入手机号/账号" %>'
+                               style='textcolor: #FFFFFF;
+                                      text-valign: center;
+                                      line-height: 30px;
+                                      font-size: 22px;
+                                      base-font-size: 22px;
+                                      width: 480px;
+                                      height: 55px;'/>
+                    </div>
+                    <div style='margin-left: 75px;margin-top: 20px;'>
+                        <input type='text'
+                               CaretColor='#FFFFFFFF'
+                               spacing='10'
+                               onchange='update_password'
+                               SkipAutoBadWordFilter='true'
+                               MoveViewWhenAttachWithIME='true'
+                               EmptyText='<%= L"请输入密码" %>'
+                               style='textcolor: #FFFFFF;
+                                      text-valign: center;
+                                      line-height: 30px;
+                                      font-size: 22px;
+                                      base-font-size: 22px;
+                                      width: 480px;
+                                      height: 55px;'
+                               name='password_show'
+                               class='main_login_mobile_textfield' />
+                        <input type='text'
+                               CaretColor='#FFFFFFFF'
+                               spacing='10'
+                               onchange='update_password'
+                               PasswordChar='*'
+                               SkipAutoBadWordFilter='true'
+                               MoveViewWhenAttachWithIME='true'
+                               EmptyText='<%= L"请输入密码" %>'
+                               style='textcolor: #FFFFFF;
+                                      text-valign: center;
+                                      line-height: 30px;
+                                      font-size: 22px;
+                                      base-font-size: 22px;
+                                      width: 480px;
+                                      height: 55px;
+                                      margin-left: -480px;'
+                               name='password_hide'
+                               class='main_login_mobile_textfield' />
+                        <input type='hidden' name='password' value='' />
+                        <input name='show_or_hide_password_button'
+                               type='checkbox'
+                               checked='false'
+                               iconsize='35'
+                               style='margin-left: -50px;
+                                      margin-top: 10px;'
+                               CheckedBG='Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#909 151 35 35'
+                               UncheckedBG='Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#969 147 35 35'
+                               onclick='set_password_show_or_hide' />
+                    </div>
+                    <div style='margin-top: 37px;margin-left: 75px;'>
+                        <div>
+                            <input type="checkbox"
+                                   iconsize="18"
+                                   CheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#275 79 12 12"
+                                   UncheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#295 79 12 12"
+                                   style="float:left;margin-top:4px;min-width:90px;"
+                                   name="account_agree"
+                                   checked="false"/>
+                            <div style="float:left; color: white;base-font-size: 17px;font-size: 17px;margin-left: 4px;">
+                                <div style="float:left;width: 2px;"></div>
+                                <%= L"我同意" %>
+                                <div style="float:left;color: #EDB853" onclick="user_agreement()"><%= L"《用户许可协议》" %></div>
+                                <%= L'与' %>
+                                <div style="float:left;color: #EDB853" onclick="user_privacy()"><%= L"《用户隐私协议》" %></div>
+                                <%= L"中的内容" %>
                             </div>
                         </div>
-                        <div style='margin-left: 75px;'>
-                            <input type='text'
-                                   CaretColor='#FFFFFFFF'
-                                   spacing='10'
-                                   name='account'
-                                   MoveViewWhenAttachWithIME='true'
-                                   class='main_login_mobile_textfield'
-                                   EmptyText='<%= L"请输入手机号/账号" %>'
-                                   style='textcolor: #FFFFFF;
-                                          text-valign: center;
-                                          line-height: 30px;
-                                          font-size: 22px;
-                                          base-font-size: 22px;
-                                          width: 480px;
-                                          height: 55px;'/>
+                    </div>
+                    <div style='width: 480px;
+                                margin-top: 15px;
+                                margin-left: 75px;'>
+                        <div width='50%'
+                             style='float: left;
+                                    padding-right: 8px;'>
+                            <input type='button'
+                                   class='main_login_mobile_blue_button'
+                                   onclick='login_with_password_action'
+                                   textscale=1.8
+                                   width='100%'
+                                   style='color: #FFFFFF;
+                                          height: 71.37px;
+                                          font-size: 15px;
+                                          base-font-size: 15px;'
+                                   value='<%= L"登录" %>' />
                         </div>
-                        <div style='margin-left: 75px;margin-top: 20px;'>
-                            <input type='text'
-                                   CaretColor='#FFFFFFFF'
-                                   spacing='10'
-                                   onchange='update_password'
-                                   SkipAutoBadWordFilter='true'
-                                   MoveViewWhenAttachWithIME='true'
-                                   EmptyText='<%= L"请输入密码" %>'
-                                   style='textcolor: #FFFFFF;
-                                          text-valign: center;
-                                          line-height: 30px;
-                                          font-size: 22px;
-                                          base-font-size: 22px;
-                                          width: 480px;
-                                          height: 55px;'
-                                   name='password_show'
-                                   class='main_login_mobile_textfield'
-                                   visible='false' />
-                            <input type='text'
-                                   CaretColor='#FFFFFFFF'
-                                   spacing='10'
-                                   onchange='update_password'
-                                   PasswordChar='*'
-                                   SkipAutoBadWordFilter='true'
-                                   MoveViewWhenAttachWithIME='true'
-                                   EmptyText='<%= L"请输入密码" %>'
-                                   style='textcolor: #FFFFFF;
-                                          text-valign: center;
-                                          line-height: 30px;
-                                          font-size: 22px;
-                                          base-font-size: 22px;
-                                          width: 480px;
-                                          height: 55px;
-                                          margin-left: -480px;'
-                                   class='main_login_mobile_textfield'
-                                   name='password_hide'
-                                   visible='true' />
-                            <input type='hidden' name='password' value='' />
-                            <input name='show_or_hide_password_button'
-                                   type='checkbox'
-                                   checked='false'
-                                   iconsize='35'
-                                   style='margin-left: -50px;
-                                          margin-top: 10px;'
-                                   CheckedBG='Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#909 151 35 35'
-                                   UncheckedBG='Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#969 147 35 35'
-                                   onclick='set_password_show_or_hide' />
-                        </div>
-                        <div style='margin-top: 37px;margin-left: 75px;'>
-                            <div>
-                                <input type="checkbox"
-                                       iconsize="18"
-                                       CheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#275 79 12 12"
-                                       UncheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#295 79 12 12"
-                                       style="float:left;margin-top:4px;min-width:90px;"
-                                       name="account_agree"
-                                       checked="false"/>
-                                <div style="float:left; color: white;base-font-size: 17px;font-size: 17px;margin-left: 4px;">
-                                    <div style="float:left;width: 2px;"></div>
-                                    <%= L"我同意" %>
-                                    <div style="float:left;color: #EDB853" onclick="user_agreement()"><%= L"《用户许可协议》" %></div>
-                                    <%= L'与' %>
-                                    <div style="float:left;color: #EDB853" onclick="user_privacy()"><%= L"《用户隐私协议》" %></div>
-                                    <%= L"中的内容" %>
-                                </div>
-                            </div>
-                        </div>
-                        <div style='width: 480px;
-                                    margin-top: 15px;
-                                    margin-left: 75px;'>
-                            <div width='50%'
-                                 style='float: left;
-                                        padding-right: 8px;'>
-                                <input type='button'
-                                       class='main_login_mobile_blue_button'
-                                       onclick='login_with_password_action'
-                                       textscale=1.8
-                                       width='100%'
-                                       style='color: #FFFFFF;
-                                              height: 71.37px;
-                                              font-size: 15px;
-                                              base-font-size: 15px;'
-                                       value='<%= L"登录" %>' />
-                            </div>
-                            <div width='50%'
-                                 style='float: left;
-                                        padding-left: 8px;'>
-                                <input type='button'
-                                       class='main_login_mobile_baby_blue_button'
-                                       onclick='local_mode'
-                                       textscale=1.8
-                                       width='100%'
-                                       style='color: #FFFFFF;
-                                              height: 71.37px;
-                                              font-size: 15px;
-                                              base-font-size: 15px;'
-                                       value='<%= L"本地模式" %>' />
-                            </div>
+                        <div width='50%'
+                             style='float: left;
+                                    padding-left: 8px;'>
+                            <input type='button'
+                                   class='main_login_mobile_baby_blue_button'
+                                   onclick='local_mode'
+                                   textscale=1.8
+                                   width='100%'
+                                   style='color: #FFFFFF;
+                                          height: 71.37px;
+                                          font-size: 15px;
+                                          base-font-size: 15px;'
+                                   value='<%= L"本地模式" %>' />
                         </div>
                     </div>
                 </pe:container>
