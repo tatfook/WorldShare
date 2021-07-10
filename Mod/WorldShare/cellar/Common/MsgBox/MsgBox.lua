@@ -52,8 +52,8 @@ function MsgBox:Show(msg, sec, overtimeMsg, width, height, index, align, isTopLe
                     if overtimeMsg then
                         GameLogic.AddBBS(nil, overtimeMsg, 3000, "255 0 0")
                     end
-
                     self:Close(msgId)
+                    break;
                 end
             end
         end,
@@ -74,6 +74,8 @@ function MsgBox:Close(msgId)
         if value == msgId then
             MessageInfoPage = Mod.WorldShare.Store:Get("page/MsgBox" .. msgId)
             self.allMsgBox:remove(key)
+            self.allMsg[msgId] = nil;
+            break;
         end
     end
 
