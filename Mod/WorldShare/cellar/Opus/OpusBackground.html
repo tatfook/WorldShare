@@ -48,26 +48,26 @@
                     page.sel = sel
 
                     function open()
-                        local content = page:GetValue('content', '')
+                        local opus_content = page:GetValue('opus_content', '')
 
-                        local pid = get_project_id(content)
+                        local pid = get_project_id(opus_content)
 
                         if pid then
                             CommonLoadWorld:EnterWorldById(pid)
                         else
-                            InternetLoadWorld.GotoUrl(url)
+                            InternetLoadWorld.GotoUrl(opus_content)
                         end
                     end
 
-                    function get_project_id(content)
-                        if (tonumber(content or '') or 99999) < 99999 then
-                            return content
+                    function get_project_id(opus_content)
+                        if (tonumber(opus_content or '') or 99999) < 99999 then
+                            return opus_content
                         end
 
-                        local pid = string.match(content or '', "^p(%d+)$")
+                        local pid = string.match(opus_content or '', "^p(%d+)$")
 
                         if not pid then
-                            pid = string.match(content or '', "/pbl/project/(%d+)")
+                            pid = string.match(opus_content or '', "/pbl/project/(%d+)")
                         end
 
                         return pid or false
@@ -145,7 +145,7 @@
                                     margin-top: 10px;'>
                             <div style='width: 495px;'>
                                 <input type='text'
-                                       name='content'
+                                       name='opus_content'
                                        spacing='10'
                                        EmptyText='<%= L"输入项目ID或课程ID或服务器地址" %>'
                                        EmptyTextColor='#FF25282E'

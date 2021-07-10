@@ -13,6 +13,7 @@ Opus:Show()
 
 -- libs
 local Screen = commonlib.gettable("System.Windows.Screen")
+local Page = NPL.load("Mod/GeneralGameServerMod/UI/Page.lua");
 
 -- bottles
 local Create = NPL.load('(gl)Mod/WorldShare/cellar/Create/Create.lua')
@@ -27,6 +28,8 @@ function Opus:Show()
     params._page.OnClose = function()
         Screen:Disconnect("sizeChanged", Opus, Opus.OnScreenSizeChange)
     end
+    
+    params._page:SetValue('opus_content', '')
 
     Opus.cur_sel = '1'
 
@@ -137,6 +140,23 @@ function Opus:ShowHonour()
             DesignResolutionHeight = 720,
         }
     )
+end
+
+function Opus:ShowCertificate(texture, date)
+    local username = Mod.WorldShare.Store:Get('user/username')
+    local nickname = Mod.WorldShare.Store:Get('user/nickname')
+
+    if nickname and type(nickname) == 'string' then
+        username = string.format("%s(%s)", nickname, username)
+    end
+
+    Page.Show({
+        username = username,
+        datetime = os.date("%Y-%m-%d", commonlib.timehelp.GetTimeStampByDateTime(date)),
+        certurl = texture,
+    }, {
+        url = "%vue%/Page/User/Certificate.html",
+    });
 end
 
 function Opus.OnScreenSizeChange()

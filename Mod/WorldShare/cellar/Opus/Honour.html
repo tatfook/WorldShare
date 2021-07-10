@@ -3,6 +3,9 @@
         <pe:mcml>
             <script type="text/npl" refresh="false">
                 <![CDATA[
+                    -- bottles
+                    local Opus = NPL.load('./Opus.lua')
+
                     -- libs
                     local KeepWorkItemManager = NPL.load('(gl)script/apps/Aries/Creator/HttpAPI/KeepWorkItemManager.lua')
 
@@ -63,6 +66,8 @@
                             end
 
                             handle_item.desc = gs_item.name
+                            handle_item.texture = gs_item.extra.picture
+                            handle_item.createdAt = gs_item.createdAt
 
                             handle_list[#handle_list + 1] = handle_item
                         end
@@ -75,6 +80,14 @@
                             return 'honour_active_item'
                         else
                             return 'honour_inactive_item'
+                        end
+                    end
+
+                    function show_certificate(index)
+                        local cur = get_honour_list()[index]
+
+                        if cur.has_item then
+                            Opus:ShowCertificate(cur.texture, cur.createdAt)
                         end
                     end
                 ]]>
@@ -91,6 +104,14 @@
                              ItemsPerLine='6'>
                     <Columns width='16.66%'>
                         <div class='<%= get_active_style(Eval("has_item")) %>'>
+                            <div width='100%' height='100%' style='position: relative;'>
+                                <input width='100%'
+                                       height='100%'
+                                       type='button'
+                                       style='background:;'
+                                       name='<%= Eval("index") %>'
+                                       onclick='show_certificate' />
+                            </div>
                             <div style='width: 146px;height: 105px;'>
                                 <div align='center'
                                      class='<%= Eval("name") %>'
