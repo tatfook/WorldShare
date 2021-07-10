@@ -187,7 +187,8 @@ function WorldExitDialog.OnDialogResult(res)
                     GameLogic.QuickSave()
                 end
 
-                Desktop.ForceExit(true)
+                local RedSummerCampMainPage = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/RedSummerCamp/RedSummerCampMainPage.lua")
+                RedSummerCampMainPage.Show()
 
                 -- local IsSummerUser = Mod.WorldShare.Utils.IsSummerUser()                
                 -- if KeepworkServiceSession:GetUserWhere() == 'HOME' then
