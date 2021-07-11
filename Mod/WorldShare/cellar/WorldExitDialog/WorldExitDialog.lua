@@ -175,40 +175,19 @@ function WorldExitDialog.OnDialogResult(res)
         local currentEnterWorld = Mod.WorldShare.Store:Get("world/currentEnterWorld")
 
         local function Handle()
-             -- back to origin world
-            if currentEnterWorld.kpProjectId ~= Mod.WorldShare.Utils:GetConfig('homeWorldId') and
-                currentEnterWorld.kpProjectId ~= Mod.WorldShare.Utils:GetConfig('schoolWorldId') and
-                KeepworkServiceSession:IsSignedIn() then
+            -- TODO: // check world folder because zip file
+            if res == _guihelper.DialogResult.Yes then
+                GameLogic.QuickSave()
+            end
 
-                Desktop.is_exiting = false
-
-                -- TODO: // check world folder because zip file
-                if res == _guihelper.DialogResult.Yes then
-                    GameLogic.QuickSave()
-                end
-
+            if KeepworkServiceSession:IsSignedIn() then
                 local RedSummerCampMainPage = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/RedSummerCamp/RedSummerCampMainPage.lua")
                 RedSummerCampMainPage.Show()
+                return
+            end
 
-                -- local IsSummerUser = Mod.WorldShare.Utils.IsSummerUser()                
-                -- if KeepworkServiceSession:GetUserWhere() == 'HOME' then
-                --     if IsSummerUser then
-                --         GameLogic.RunCommand(format('/loadworld -s -force %s', Mod.WorldShare.Utils:GetConfig('campWorldId')))
-                --         return 
-                --     end
-                --     GameLogic.RunCommand(format('/loadworld -s -force %s', Mod.WorldShare.Utils:GetConfig('homeWorldId')))
-                -- elseif KeepworkServiceSession:GetUserWhere() == 'SCHOOL' then
-                --     if IsSummerUser then
-                --         GameLogic.RunCommand(format('/loadworld -s -force %s', Mod.WorldShare.Utils:GetConfig('campWorldId')))
-                --         return 
-                --     end
-                --     GameLogic.RunCommand(format('/loadworld -s -force %s', Mod.WorldShare.Utils:GetConfig('schoolWorldId')))
-                -- elseif KeepworkServiceSession:GetUserWhere() == 'LOCAL' then
-                --     Desktop.ForceExit(true)
-                -- else
-                --     CommonLoadWorld:SelectPlaceAndEnterCommunityWorld()
-                -- end
-
+            if System.options.loginmode == 'offline' then
+                Desktop.ForceExit(false)
                 return
             end
 

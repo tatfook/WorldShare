@@ -297,10 +297,10 @@
                     if not GameLogic.IsReadOnly() and Mod.WorldShare.Utils:IsSharedWorld(currentEnterWorld) then
                         Mod.WorldShare.MsgBox:Show(L"请稍候...")
                         KeepworkServiceWorld:UnlockWorld(function()
-                            Desktop.ForceExit(true)
+                            Desktop.ForceExit(false)
                         end)
                     else
-                        Desktop.ForceExit(true)
+                        Desktop.ForceExit(false)
                     end
                 end
 
@@ -462,7 +462,7 @@
                             </div>
                             <div style="margin-top: 10px;">
                                 <input type="button" onclick="go_back()" value='<%=L"返回" %>' class="theme1_orange_button" style="margin-left:50px;min-width:130px;height:50px;" />
-                                <input type="button" onclick="force_exit()" value='<%=L"返回到登录" %>' class="theme1_gray_button" style="margin-left:60px;min-width:130px;height:50px;" />
+                                <input type="button" onclick="force_exit()" value='<%=L"直接退出" %>' class="theme1_gray_button" style="margin-left:60px;min-width:130px;height:50px;" />
                                 <input type="button" onclick="on_click_cancel()" value='<%=L"取消" %>' class="theme1_gray_button" style="margin-left:60px;min-width:130px;height:50px;" />
                             </div>
                         </pe:if>

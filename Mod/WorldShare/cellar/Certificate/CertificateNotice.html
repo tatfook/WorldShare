@@ -6,9 +6,34 @@
                 Certificate = NPL.load('./Certificate.lua')
                 local MySchool = NPL.load("(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua")
 
+                -- database
+                local SessionsData = NPL.load("(gl)Mod/WorldShare/database/SessionsData.lua")
+
                 local page = document:GetPageCtrl()
 
                 function close()
+                    local do_not_notice = page:GetNode('do_not_notice').checked
+
+                    echo(do_not_notice, true)
+
+                    if do_not_notice == true then
+                        local username = Mod.WorldShare.Store:Get('user/username')
+                        local session = SessionsData:GetSessionByUsername(username)
+
+                        if session and type(session) == 'table' then
+                            session.doNotNoticeVerify = true
+                            SessionsData:SaveSession(session)
+                        end
+                    elseif do_not_notice == false then
+                        local username = Mod.WorldShare.Store:Get('user/username')
+                        local session = SessionsData:GetSessionByUsername(username)
+
+                        if session and type(session) == 'table' then
+                            session.doNotNoticeVerify = false
+                            SessionsData:SaveSession(session)
+                        end
+                    end
+
                     page:CloseWindow()
                 end
 
@@ -54,13 +79,22 @@
 
                     return ''
                 end
+
+                Mod.WorldShare.Utils.SetTimeOut(function()
+                    local username = Mod.WorldShare.Store:Get('user/username')
+                    local session = SessionsData:GetSessionByUsername(username)
+
+                    if session.doNotNoticeVerify then
+                        page:SetUIValue('do_not_notice', true)
+                    end
+                end, 0)
             ]]>
         </script>
         <style type="text/mscc" src="Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss">
 
         </style>
         <div width="100%" height="100%">
-            <kp:window width="860" height="480" onclose="close()">
+            <kp:window width="860" height="510" onclose="close()">
                 <div class="theme1_header"></div>
                 <div style="padding: 30px;">
                     <div>
@@ -74,10 +108,10 @@
                                 base-font-size: 15px;
                                 padding-top: 10px;
                                 padding-bottom: 10px;'>
-                        亲爱的同学&家长，您还没有完成<br />
+                        <%= L'亲爱的同学&家长，您还没有完成' %><br />
                         【<%= get_status_desc() %>】。<br/>
-                        请在参加赛事前完善您的个人资料！以便顺利<br/>
-                        参赛和享受各项学习服务！<br/>
+                        <%= L'请在参加赛事前完善您的个人资料！以便顺利' %><br/>
+                        <%= L'参赛和享受各项学习服务！' %><br/>
                     </div>
                     <div>
                         <input align='center'
@@ -93,8 +127,8 @@
                                value='<%= L"完善个人资料" %>'/>
                     </div>
                     <div>
-                        <input type='checkbox' checked='false' />
-                        不再提醒
+                        <input type='checkbox' name='do_not_notice' checked='false' />
+                        <div for='do_not_notice' style='float: left;margin-left: 3px;'><%= L'不再提醒' %></div>
                     </div>
                 </div>
             </kp:window>

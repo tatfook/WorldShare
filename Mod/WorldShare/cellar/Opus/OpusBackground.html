@@ -78,8 +78,10 @@
                     end
 
                     function open_vip()
-                        local VipToolNew = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/VipToolTip/VipToolNew.lua")
-                        VipToolNew.Show("red_summer_camp_main")
+                        GameLogic.IsVip("RedSummerCampWorks", true, function(result)
+                            if result then
+                            end
+                        end)
                     end
                 ]]>
             </script>

@@ -22,45 +22,30 @@ Certificate.certificateCallback = nil
 Certificate.inited = false
 
 function Certificate:OnWorldLoad()
+end
+
+function Certificate:ShowCertificateNoticePage(callback)
     if not KeepworkServiceSession:IsSignedIn() then
         return
     end
 
-    local isVerified = Mod.WorldShare.Store:Get('user/isVerified')
-    local hasJoinedSchool = Mod.WorldShare.Store:Get('user/hasJoinedSchool')
-
-    if not isVerified or not hasJoinedSchool then
-        self:ShowCertificateNoticePage()
-    end
-end
-
-function Certificate:ShowCertificateNoticePage(callback)
     local params = Mod.WorldShare.Utils.ShowWindow(
         860,
-        480,
+        510,
         '(ws)Certificate/CertificateNotice.html',
-        'Mod.WorldShare.CertificateNotice'
+        'Mod.WorldShare.CertificateNotice',
+        nil,
+        nil,
+        nil,
+        nil,
+        1
     )
 
     params._page.callback = callback
 end
 
 function Certificate:Init(callback)
-    if not KeepworkServiceSession:IsSignedIn() then
-        GameLogic.AddBBS(nil, L"请先登录", 3000, "255 0 0")
-        return
-    end
-
-    if KeepworkServiceSession:IsRealName() then
-        if callback and type(callback) == 'function' then
-            callback(true)
-        end
-        return
-    end
-
-    self.certificateCallback = callback
-
-    self:ShowCertificatePage()
+    self:ShowCertificateNoticePage(callback)
 end
 
 function Certificate:ShowCertificatePage()

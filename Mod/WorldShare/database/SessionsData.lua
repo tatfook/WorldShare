@@ -8,8 +8,7 @@ use the lib:
 ------------------------------------------------------------
 local SessionsData = NPL.load("(gl)Mod/WorldShare/database/SessionsData.lua")
 ------------------------------------------------------------
-]] local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
-local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
+]]
 
 local SessionsData = NPL.export()
 
@@ -28,8 +27,9 @@ local SessionsData = NPL.export()
                 autoLogin = true,
                 rememberMe = true,
                 token = "jwttoken",
-                tokenExpire = 12345678
-                loginTime = 111111111
+                tokenExpire = 12345678,
+                loginTime = 111111111,
+                doNotNoticeVerify = false,
             },
             allPositions = {
                 {

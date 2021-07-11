@@ -17,6 +17,20 @@ local SessionsDataFilter = NPL.export()
 
 function SessionsDataFilter:Init()
     GameLogic.GetFilters():add_filter(
+        'database.sessions_data.get_session_by_username',
+        function(...)
+            return SessionsData:GetSessionByUsername(...)
+        end
+    )
+
+    GameLogic.GetFilters():add_filter(
+        'database.sessions_data.save_session',
+        function(...)
+            return SessionsData:SaveSession(...)
+        end
+    )
+
+    GameLogic.GetFilters():add_filter(
         'database.sessions_data.get_user_rice',
         function(...)
             return SessionsData:GetUserRice(...)
