@@ -135,11 +135,26 @@
                                 end
                             end
 
+                            -- judge same school name
                             for key, item in ipairs(result) do
                                 for dKey, dItem in ipairs(result) do
                                     if item.name == dItem.name then
-                                        local remark = item.region.city.name ..
-                                                    item.region.county.name
+                                        local city_name = ''
+                                        local county_name = ''
+
+                                        if item.region and type(item.region) == 'table' and
+                                           item.region.city and type(item.region.city) == 'table' and
+                                           item.region.city.name and type(item.region.city.name) == 'string' then
+                                            city_name = item.region.city.name
+                                        end
+
+                                        if item.region and type(item.region) == 'table' and
+                                           item.region.county and type(item.region.county) == 'table' and
+                                           item.region.county.name and type(item.region.county.name) == 'string' then
+                                            county_name = item.region.county.name
+                                        end
+
+                                        local remark = city_name .. county_name
                                         item.text = item.name .. '(' .. remark .. ')'
                                         break
                                     end
@@ -191,8 +206,19 @@
                         end                        
                     end
 
+                    local is_click_next = false
+
                     function next1()
+                        if is_click_next then
+                            return
+                        end
+
+                        is_click_next = true
+
+                        Mod.WorldShare.MsgBox:Wait()
                         KeepworkServiceSchoolAndOrg:ChangeSchool(curValue, function(bSuccessed)
+                            is_click_next = false
+                            Mod.WorldShare.MsgBox:Close()
                             close()
                             MainLogin:ShowAndroidLogin()
                         end)
