@@ -209,7 +209,7 @@
                     local is_click_next = false
 
                     function next1()
-                        if is_click_next then
+                        if not curValue or is_click_next then
                             return
                         end
 
