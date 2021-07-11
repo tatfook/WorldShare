@@ -68,6 +68,7 @@
                             handle_item.desc = gs_item.name
                             handle_item.texture = gs_item.extra.picture
                             handle_item.createdAt = gs_item.createdAt
+                            handle_item.tooltip = gs_item.desc or ''
 
                             handle_list[#handle_list + 1] = handle_item
                         end
@@ -110,21 +111,34 @@
                                        type='button'
                                        style='background:;'
                                        name='<%= Eval("index") %>'
-                                       onclick='show_certificate' />
+                                       onclick='show_certificate'
+                                       tooltip='<%= Eval("tooltip") %>' />
                             </div>
                             <div style='width: 146px;height: 105px;'>
                                 <div align='center'
                                      class='<%= Eval("name") %>'
                                      style='margin-top: 30px;'></div>
                             </div>
-                            <div style='width: 146px;
-                                        height: 35px;
-                                        text-align: center;
-                                        font-size: 13px;
-                                        base-font-size: 13px;
-                                        line-height: 20px;'>
-                                <%= Eval("desc") %>
-                            </div>
+                            <pe:if condition='<%= System.os.GetPlatform() == "win32" %>'>
+                                <div style='width: 146px;
+                                            height: 35px;
+                                            text-align: center;
+                                            font-size: 12px;
+                                            base-font-size: 12px;
+                                            line-height: 20px;'>
+                                    <%= Eval("desc") %>
+                                </div>
+                            </pe:if>
+                            <pe:if condition='<%= System.os.GetPlatform() ~= "win32" %>'>
+                                <div style='width: 146px;
+                                            height: 35px;
+                                            text-align: center;
+                                            font-size: 13px;
+                                            base-font-size: 13px;
+                                            line-height: 20px;'>
+                                    <%= Eval("desc") %>
+                                </div>
+                            </pe:if>
                         </div>
                     </Columns>
                 </pe:gridview>
