@@ -558,38 +558,38 @@ function Filters:Init()
     )
 
     -- filter escape key
-    GameLogic.GetFilters():add_filter(
-        "EscFramePage.ShowPage",
-        function()
-            local ParaWorldLoginAdapter = commonlib.gettable("MyCompany.Aries.Game.Tasks.ParaWorld.ParaWorldLoginAdapter")
+    -- GameLogic.GetFilters():add_filter(
+    --     "EscFramePage.ShowPage",
+    --     function()
+    --         local ParaWorldLoginAdapter = commonlib.gettable("MyCompany.Aries.Game.Tasks.ParaWorld.ParaWorldLoginAdapter")
 
-            if Mod.WorldShare.Store:Get('world/isEnterWorld') then
-                local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
+    --         if Mod.WorldShare.Store:Get('world/isEnterWorld') then
+    --             local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
-                if currentEnterWorld and currentEnterWorld.communityWorld then
-                    local isMyWorld = false
+    --             if currentEnterWorld and currentEnterWorld.communityWorld then
+    --                 local isMyWorld = false
 
-                    if currentEnterWorld.members and type(currentEnterWorld.members) == 'table' then
-                        local username = Mod.WorldShare.Store:Get('user/username')
+    --                 if currentEnterWorld.members and type(currentEnterWorld.members) == 'table' then
+    --                     local username = Mod.WorldShare.Store:Get('user/username')
 
-                        for key, item in ipairs(currentEnterWorld.members) do
-                            if username == item then
-                                isMyWorld = true
-                                break
-                            end
-                        end
-                    end
+    --                     for key, item in ipairs(currentEnterWorld.members) do
+    --                         if username == item then
+    --                             isMyWorld = true
+    --                             break
+    --                         end
+    --                     end
+    --                 end
 
-                    if not isMyWorld then
-                        ParaWorldLoginAdapter.ShowExitWorld(true)
-                        return true
-                    else
-                        return
-                    end
-                else
-                    return false
-                end
-            end
-        end
-    )
+    --                 if not isMyWorld then
+    --                     ParaWorldLoginAdapter.ShowExitWorld(true)
+    --                     return true
+    --                 else
+    --                     return
+    --                 end
+    --             else
+    --                 return false
+    --             end
+    --         end
+    --     end
+    -- )
 end

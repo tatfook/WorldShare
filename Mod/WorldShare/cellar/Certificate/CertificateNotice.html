@@ -14,8 +14,6 @@
                 function close()
                     local do_not_notice = page:GetNode('do_not_notice').checked
 
-                    echo(do_not_notice, true)
-
                     if do_not_notice == true then
                         local username = Mod.WorldShare.Store:Get('user/username')
                         local session = SessionsData:GetSessionByUsername(username)
@@ -34,11 +32,15 @@
                         end
                     end
 
+                    if page.callback and type(page.callback) == 'function' then
+                        page.callback()
+                    end
+
                     page:CloseWindow()
                 end
 
                 function show_certificate()
-                    close()
+                    page:CloseWindow()
 
                     local status = get_status()
 
@@ -128,7 +130,7 @@
                     </div>
                     <div>
                         <input type='checkbox' name='do_not_notice' checked='false' />
-                        <div for='do_not_notice' style='float: left;margin-left: 3px;'><%= L'不再提醒' %></div>
+                        <div for='do_not_notice' style='margin-top: -2px;float: left;margin-left: 3px;'><%= L'不再提醒' %></div>
                     </div>
                 </div>
             </kp:window>
