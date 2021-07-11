@@ -72,6 +72,7 @@ function WorldExitDialog.ShowPage(callback)
 
         params._page.OnClose = function()
             Desktop.is_exiting = false
+            Mod.WorldShare.Store:Remove('page/WorldExitDialog')
         end
 
         local WorldExitDialogPage = Mod.WorldShare.Store:Get('page/WorldExitDialog')
