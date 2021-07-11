@@ -165,6 +165,8 @@ end
 
 -- @param res: _guihelper.DialogResult
 function WorldExitDialog.OnDialogResult(res)
+    Desktop.is_exiting = false
+
     local WorldExitDialogPage = Mod.WorldShare.Store:Get('page/WorldExitDialog')
 
     if WorldExitDialogPage then
