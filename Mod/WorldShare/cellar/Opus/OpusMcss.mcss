@@ -51,13 +51,8 @@ local OpusMcss = NPL.load("(gl)Mod/WorldShare/cellar/Opus/OpusMcss.lua")
         width = 75,
         height = 61,
     },
-    honour_parent_child = {
-        background = 'Texture/Aries/Creator/paracraft/paracraft_certificate_32bits.png#181 59 75 61',
-        width = 75,
-        height = 61,
-    },
     honour_talent = {
-        background = 'Texture/Aries/Creator/paracraft/paracraft_certificate_32bits.png#89 111 75 61',
+        background = 'Texture/Aries/Creator/paracraft/paracraft_certificate_32bits.png#89 111 73 48',
         width = 73,
         height = 48,
     },
