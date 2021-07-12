@@ -199,15 +199,16 @@ function WorldShare:OnWorldLoad()
         Mod.WorldShare.MsgBox:Close()
     end
 
-    SyncMain:OnWorldLoad()
+    SyncMain:OnWorldLoad(function()
+        -- ensure current enter world exist
+        EventTrackingService:Send(2, 'duration.world.stay', { started = true })
+    end)
     HistoryManager:OnWorldLoad()
     WorldShareCommand:OnWorldLoad()
     LocalServiceSession:OnWorldLoad()
     KeepworkServiceProject:OnWorldLoad()
     KeepworkServiceSession:OnWorldLoad()
     Certificate:OnWorldLoad()
-
-    EventTrackingService:Send(2, 'duration.world.stay', { started = true })
 
     Mod.WorldShare.Store:Set('world/isEnterWorld', true)
     Mod.WorldShare.Store:Set('world/loadWorldFinish', true)

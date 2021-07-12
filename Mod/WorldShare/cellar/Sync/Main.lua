@@ -39,12 +39,16 @@ local SaveWorldHandler = commonlib.gettable("MyCompany.Aries.Game.SaveWorldHandl
 
 local SyncMain = NPL.export()
 
-function SyncMain:OnWorldLoad()
+function SyncMain:OnWorldLoad(callback)
     Compare:GetCurrentWorldInfo(function()
         local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
         if not currentEnterWorld.is_zip then
             Compare:CheckRevision(currentEnterWorld.worldpath)
+        end
+
+        if callback and type(callback) == 'function' then
+            callback()
         end
     end)
 end
