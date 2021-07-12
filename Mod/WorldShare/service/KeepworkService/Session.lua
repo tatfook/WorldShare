@@ -1222,9 +1222,8 @@ end
 
 function KeepworkServiceSession:CheckVerify()
     local isVerified = Mod.WorldShare.Store:Get('user/isVerified')
-    local hasJoinedSchool = Mod.WorldShare.Store:Get('user/hasJoinedSchool')
 
-    if isVerified and hasJoinedSchool then
+    if isVerified then
         -- get newer certificate
         if not KeepWorkItemManager.HasGSItem(70014) then
             KeepWorkItemManager.DoExtendedCost(40006)
