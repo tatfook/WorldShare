@@ -41,6 +41,7 @@
                     -- only classification
                     Mod.WorldShare.MsgBox:Show(L'请稍候...')
                     RegisterModal:Classification(phonenumber, phonecaptcha, function()
+                        KeepworkServiceSession:CheckVerify()
                         Mod.WorldShare.MsgBox:Close()
                         close()
                     end)

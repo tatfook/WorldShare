@@ -44,7 +44,7 @@ function KeepworkServiceSessionFilter:Init()
     GameLogic.GetFilters():add_filter(
         'service.session.add_rice',
         function(...)
-            return KeepworkServiceSession:AddRice(...)
+             --return KeepworkServiceSession:AddRice(...)
         end
     )
 
@@ -52,7 +52,7 @@ function KeepworkServiceSessionFilter:Init()
     GameLogic.GetFilters():add_filter(
         'service.session.reduce_rice',
         function(...)
-            return KeepworkServiceSession:ReduceRice(...)
+            -- return KeepworkServiceSession:ReduceRice(...)
         end
     )
 
@@ -60,7 +60,7 @@ function KeepworkServiceSessionFilter:Init()
     GameLogic.GetFilters():add_filter(
         'service.session.get_rice',
         function(...)
-            return KeepworkServiceSession:GetRice(...)
+            -- return KeepworkServiceSession:GetRice(...)
         end
     )
 end

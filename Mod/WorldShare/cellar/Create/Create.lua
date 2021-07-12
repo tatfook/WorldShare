@@ -421,7 +421,7 @@ function Create:EnterWorld(index, skip)
     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
     -- add rice
-    KeepworkServiceSession:AddRice('create')
+    -- KeepworkServiceSession:AddRice('create')
 
     if currentWorld.status == 2 then
         Mod.WorldShare.MsgBox:Show(L"请稍候...")
