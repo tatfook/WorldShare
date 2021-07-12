@@ -103,30 +103,6 @@
 
                         is_login = true
 
-                        local pwd = page:GetValue('password')
-
-                        if not pwd or #pwd == 0 then
-                            -- maybe not come here
-                            local auto_login = page:GetNode('auto_login_name').checked
-
-                            if auto_login then
-                                local account = page:GetValue('account')
-                                local session = SessionsData:GetSessionByUsername(account) or {}
-
-                                MainLogin:LoginWithToken(session.token, function(b_succeed, reason, message)
-                                    is_login = false
-                                    if b_succeed then
-                                        -- TODO: // chagne to start UI
-                                    else
-                                        page:SetUIValue('account_field_error_msg', message)
-                                        page:FindControl('account_field_error').visible = true
-                                    end
-                                end)
-
-                                return
-                            end
-                        end
-
                         if not MainLogin:LoginAction(function(b_succeed)
                             is_login = false
 
