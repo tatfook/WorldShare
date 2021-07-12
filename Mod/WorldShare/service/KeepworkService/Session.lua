@@ -1221,16 +1221,15 @@ function KeepworkServiceSession:LoginWithPhoneNumber(cellphone, cellphoneCaptcha
 end
 
 function KeepworkServiceSession:CheckVerify()
-    -- local isVerified = Mod.WorldShare.Store:Get('user/isVerified')
-    -- local hasJoinedSchool = Mod.WorldShare.Store:Get('user/hasJoinedSchool')
+    local isVerified = Mod.WorldShare.Store:Get('user/isVerified')
+    local hasJoinedSchool = Mod.WorldShare.Store:Get('user/hasJoinedSchool')
 
-    -- if isVerified and hasJoinedSchool then
-    --     -- get newer certificate
-    --     if not KeepWorkItemManager.HasGSItem(70014) then
-    --         KeepWorkItemManager.DoExtendedCost(40006)
-    --         KeepWorkItemManager.DoExtendedCost(40002)
-    --     end
-    -- end
+    if isVerified and hasJoinedSchool then
+        -- get newer certificate
+        if not KeepWorkItemManager.HasGSItem(70014) then
+            KeepWorkItemManager.DoExtendedCost(40006)
+        end
+    end
 end
 
 

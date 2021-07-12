@@ -133,7 +133,6 @@
                         MySchool:ChangeSchool(curItem.value, function(bSuccessed)
                             Mod.WorldShare.MsgBox:Close()
                             if bSuccessed then
-                                KeepworkServiceSession:CheckVerify()
                                 close()
                                 GameLogic.AddBBS(nil, L"加入学校成功", 3000, "0 255 0")
                             else

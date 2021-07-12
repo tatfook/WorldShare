@@ -3,7 +3,11 @@
         <pe:mcml>
             <script type="text/npl">
                 <![CDATA[
+                    -- bottles
                     local MySchool = NPL.load("(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua")
+
+                    -- libs
+                    local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
                     local page = document:GetPageCtrl()
 
                     function close()
@@ -195,6 +199,7 @@
                             Mod.WorldShare.MsgBox:Close()
                             if bSuccessed then
                                 page:CloseWindow()
+                                KeepworkServiceSession:CheckVerify()
                                 GameLogic.AddBBS(nil, L"加入学校成功", 3000, "0 255 0")
                             else
                                 GameLogic.AddBBS(nil, L"加入学校失败", 3000, "255 0 0")
