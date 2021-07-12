@@ -85,5 +85,10 @@ local OpusMcss = NPL.load("(gl)Mod/WorldShare/cellar/Opus/OpusMcss.lua")
         background = 'Texture/Aries/Creator/paracraft/paracraft_certificate_32bits.png#87 56 77 50',
         width = 77,
         height = 50,
+    },
+    good_beginner = {
+        background = 'Texture/Aries/Creator/paracraft/paracraft_certificate_32bits.png#89 166 73 48',
+        width = 73,
+        height = 48,
     }
 }

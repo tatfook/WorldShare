@@ -87,6 +87,7 @@ function Opus:ShowOpusBackground()
             height = 0,
             cancelShowAnimation = true,
             bToggleShowHide = true,
+            zorder=10,
         }
     )
 end
@@ -112,6 +113,7 @@ function Opus:ShowOpus()
             bToggleShowHide = true,
             DesignResolutionWidth = 1280,
             DesignResolutionHeight = 720,
+            zorder=10,
         }
     )
     Create:ShowCreateEmbed()
@@ -138,6 +140,7 @@ function Opus:ShowHonour()
             bToggleShowHide = true,
             DesignResolutionWidth = 1280,
             DesignResolutionHeight = 720,
+            zorder=10,
         }
     )
 end

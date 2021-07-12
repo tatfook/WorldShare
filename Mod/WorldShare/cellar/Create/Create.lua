@@ -73,6 +73,7 @@ function Create:ShowCreateEmbed(width, height, x, y)
             height = 580,
             cancelShowAnimation = true,
             bToggleShowHide = true,
+            zorder=10,
         }
     )
 
