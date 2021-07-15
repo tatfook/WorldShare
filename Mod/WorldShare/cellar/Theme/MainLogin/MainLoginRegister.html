@@ -264,6 +264,11 @@
                         RegisterModal:ShowUserAgreementPage()
                     end
 
+                    function user_privacy()
+                        local RegisterModal = NPL.load('(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua')
+                        RegisterModal:ShowUserPrivacyPage()
+                    end
+
                     function finish()
                         close()
 

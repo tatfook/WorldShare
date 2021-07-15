@@ -200,8 +200,11 @@ function WorldShare:OnWorldLoad()
     end
 
     SyncMain:OnWorldLoad(function()
+        Mod.WorldShare.Store:Set('world/loadWorldFinish', true)
+
         -- ensure current enter world exist
         EventTrackingService:Send(2, 'duration.world.stay', { started = true })
+        GameLogic.GetFilters():apply_filters('set_mode', GameLogic.GameMode:GetMode())
     end)
     HistoryManager:OnWorldLoad()
     WorldShareCommand:OnWorldLoad()
@@ -211,7 +214,6 @@ function WorldShare:OnWorldLoad()
     Certificate:OnWorldLoad()
 
     Mod.WorldShare.Store:Set('world/isEnterWorld', true)
-    Mod.WorldShare.Store:Set('world/loadWorldFinish', true)
 end
 
 function WorldShare:OnWillLeaveWorld()
