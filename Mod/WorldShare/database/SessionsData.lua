@@ -280,40 +280,40 @@ function SessionsData:SetUserLastPosition(x, y, z, cameraLiftupAngle, cameraRotY
     self:SaveSession(session)
 end
 
-function SessionsData:GetUserRice()
-    local username = Mod.WorldShare.Store:Get('user/username')
-    local session = self:GetSessionByUsername(username)
+-- function SessionsData:GetUserRice()
+--     local username = Mod.WorldShare.Store:Get('user/username')
+--     local session = self:GetSessionByUsername(username)
 
-    if not session or type(session) ~= 'table' then
-        return
-    end
+--     if not session or type(session) ~= 'table' then
+--         return
+--     end
 
-    if session.act and session.act.rice then
-        return session.act.rice
-    else
-        return {}
-    end
-end
+--     if session.act and session.act.rice then
+--         return session.act.rice
+--     else
+--         return {}
+--     end
+-- end
 
-function SessionsData:SetUserRice(rice)
-    if not rice or type(rice) ~= "table" then
-        return
-    end
+-- function SessionsData:SetUserRice(rice)
+--     if not rice or type(rice) ~= "table" then
+--         return
+--     end
 
-    local username = Mod.WorldShare.Store:Get('user/username')
-    local session = self:GetSessionByUsername(username)
+--     local username = Mod.WorldShare.Store:Get('user/username')
+--     local session = self:GetSessionByUsername(username)
 
-    if not session or type(session) ~= 'table' then
-        return
-    end
+--     if not session or type(session) ~= 'table' then
+--         return
+--     end
 
-    if session.act then
-        session.act.rice = rice
-    else
-        session.act = {
-            rice = rice
-        }
-    end
+--     if session.act then
+--         session.act.rice = rice
+--     else
+--         session.act = {
+--             rice = rice
+--         }
+--     end
 
-    self:SaveSession(session)
-end
+--     self:SaveSession(session)
+-- end

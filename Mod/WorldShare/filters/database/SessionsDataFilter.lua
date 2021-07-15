@@ -33,14 +33,14 @@ function SessionsDataFilter:Init()
     GameLogic.GetFilters():add_filter(
         'database.sessions_data.get_user_rice',
         function(...)
-            return SessionsData:GetUserRice(...)
+            -- return SessionsData:GetUserRice(...)
         end
     )
 
     GameLogic.GetFilters():add_filter(
         'database.sessions_data.set_user_rice',
         function(...)
-            return SessionsData:SetUserRice(...)
+            -- return SessionsData:SetUserRice(...)
         end
     )
 end

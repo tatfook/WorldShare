@@ -93,31 +93,6 @@ function MySchool:Show(callback)
 
         params._page:Refresh(0.01)
     end)
-
-    -- KeepworkServiceSchoolAndOrg:GetMyAllOrgsAndSchools(function(schoolData, orgData)
-    --     Mod.WorldShare.MsgBox:Close()
-
-    --     local hasJoinedSchool = false
-    --     local hasJoinedOrg = false
-
-    --     if type(schoolData) == "table" and schoolData.regionId then
-    --         hasJoinedSchool = true
-    --         self.schoolData= schoolData
-    --     end
-
-    --     if type(orgData) == "table" and #orgData > 0 then
-    --         hasJoinedOrg = true
-    --         self.orgData = orgData
-    --     end
-
-    --     if hasJoinedSchool or hasJoinedOrg then
-    --         self.hasJoined = true
-    --     else
-    --         self.hasJoined = false
-    --     end
-
-    --     params._page:Refresh(0.01)
-    -- end)
 end
 
 function MySchool:ShowJoinSchool(callback)
@@ -190,8 +165,51 @@ function MySchool:ShowJoinSchool(callback)
         end
 
         self.provinces = data
+        local region = Mod.WorldShare.Store:Get('user/region')
 
-        self:RefreshJoinSchool()
+        if region and type(region) == 'table' and region.info then
+            -- set privince field
+            if self.provinces and type(self.provinces) == 'table' then
+                for key, item in ipairs(self.provinces) do
+                    item.selected = nil
+
+                    if item.id == region.info.state.id then
+                        item.selected = true
+                    end
+                end
+            end
+
+            -- set city field
+            self:GetCities(region.info.state.id, function(data)
+                self.cities = data
+
+                if self.cities and
+                    type(self.cities) == 'table' and
+                    region.info.city and
+                    region.info.city.id then
+                    for key, item in ipairs(self.cities) do
+                        item.selected = nil
+                        
+                        if item.id == region.info.city.id then
+                            item.selected = true
+                        end
+                    end
+                end
+
+                self:GetAreas(region.info.city.id, function(data)
+                    self.areas = data
+
+                    self.curId = region.info.city.id
+                    self.lastCityId = region.info.city.id
+
+                    self:GetSearchSchoolResult(region.info.city.id, nil, function(data)
+                        self:RefreshJoinSchool()
+                    end)
+                end)
+            end)
+        else
+            self:RefreshJoinSchool()
+        end
     end)
 
     params1._page.OnClose = function()

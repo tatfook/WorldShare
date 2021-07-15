@@ -270,6 +270,10 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
         isVipSchool = true
     end
 
+    if response and response.region and type(response.region) == 'table' then
+        Mod.WorldShare.Store:Set('user/region', response.region)
+    end
+
     Mod.WorldShare.Store:Set('user/bLoginSuccessed', true)
 
     local tokenExpire

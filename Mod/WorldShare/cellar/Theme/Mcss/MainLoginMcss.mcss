@@ -11,13 +11,16 @@ local MainLoginMcss = NPL.load("(gl)Mod/WorldShare/cellar/Theme/Mcss/MainLoginMc
 
 {
     main_login_mobile_gray_button = {
-        background = 'Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#29 693 292 90'
+        background = 'Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#32 693 288 88:105 0 105 0'
     },
     main_login_mobile_baby_blue_button = {
-        background = 'Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#523 580 290 90'
+        background = 'Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#523 580 290 90:105 0 105 0'
+    },
+    main_login_mobile_green_button = {
+        background = 'Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#33 467 633 90:150 0 150 0'
     },
     main_login_mobile_blue_button = {
-        background = 'Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#212 580 290 90'
+        background = 'Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#212 580 290 90:105 0 105 0'
     },
     main_login_mobile_textfield = {
         background = 'Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#959 12 50 52:12 12 12 12'

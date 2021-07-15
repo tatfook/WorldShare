@@ -213,15 +213,23 @@
                             return
                         end
 
-                        KeepworkServiceSession:CellphoneCaptchaVerify(phonenumber, phonecaptcha, function(data, err)
-                            if err == 400 then
-                                page:SetUIValue('phone_field_error_msg', L"*手机验证码错误")
+                        KeepworkServiceSession:CheckPhonenumberExist(phonenumber, function(b_is_exist)
+                            if b_is_exist then
+                                page:SetUIValue('phone_field_error_msg', L'*手机号码已存在')
                                 page:FindControl('phone_field_error').visible = true
                                 return
                             end
 
-                            page:FindControl('phone_register_mode_step_1').visible = false
-                            page:FindControl('phone_register_mode_step_2').visible = true
+                            KeepworkServiceSession:CellphoneCaptchaVerify(phonenumber, phonecaptcha, function(data, err)
+                                if err == 400 then
+                                    page:SetUIValue('phone_field_error_msg', L"*手机验证码错误")
+                                    page:FindControl('phone_field_error').visible = true
+                                    return
+                                end
+
+                                page:FindControl('phone_register_mode_step_1').visible = false
+                                page:FindControl('phone_register_mode_step_2').visible = true
+                            end)
                         end)
                     end
 
@@ -707,11 +715,12 @@
                                        UncheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#295 79 12 12"
                                        style="float:left;margin-top:3px;min-width:90px;"
                                        onclick="set_register_agree" />
-                                <div style="float:left; color: white;base-font-size: 11px;font-size: 11px;margin-left: 4px;">
+                                <div style="float:left; color: white;base-font-size: 10px;font-size: 10px;margin-left: 4px;">
                                     <div style="float:left;width: 2px;"></div>
                                     <%= L"我同意" %>
-                                    <div style="float:left;color: #EDB853" onclick="user_agreement()"><%= L"《Paracraft用户协议》" %></div>
-                                    <%= L"中的内容" %>
+                                    <div style="float:left;color: #EDB853" onclick="user_agreement()"><%= L"《用户许可协议》" %></div>
+                                    <%= L'与' %>
+                                    <div style="float:left;color: #EDB853" onclick="user_privacy()"><%= L"《用户隐私协议》" %></div>
                                 </div>
                             </div>
                             <div>
@@ -810,11 +819,12 @@
                                             name="phone_agree"
                                             onclick="set_phone_agree"
                                             checked="checked"/>
-                                        <div style="float:left; color: white;base-font-size: 11px;font-size: 11px;margin-left: 4px;">
+                                        <div style="float:left; color: white;base-font-size: 10px;font-size: 10px;margin-left: 4px;">
                                             <div style="float:left;width: 2px;"></div>
                                             <%= L"我同意" %>
-                                            <div style="float:left;color: #EDB853" onclick="user_agreement()"><%= L"《Paracraft用户协议》" %></div>
-                                            <%= L"中的内容" %>
+                                            <div style="float:left;color: #EDB853" onclick="user_agreement()"><%= L"《用户许可协议》" %></div>
+                                            <%= L'与' %>
+                                            <div style="float:left;color: #EDB853" onclick="user_privacy()"><%= L"《用户隐私协议》" %></div>
                                         </div>
                                     </div>
                                     <div>

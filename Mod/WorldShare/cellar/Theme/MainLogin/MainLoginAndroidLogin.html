@@ -1,12 +1,12 @@
 <html>
-    <body> 
+    <body>
         <pe:mcml>
             <script type='text/npl'>
                 <![CDATA[
                     -- bottles
                     local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
                     local RegisterModal = NPL.load('(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua')
-                    local RedSummerCampMainPage = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/RedSummerCamp/RedSummerCampMainPage.lua")
+                    local RedSummerCampMainPage = NPL.load('(gl)script/apps/Aries/Creator/Game/Tasks/RedSummerCamp/RedSummerCampMainPage.lua')
 
                     -- service
                     local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
@@ -19,8 +19,6 @@
                     local SessionsData = NPL.load('(gl)Mod/WorldShare/database/SessionsData.lua')
 
                     local page = document:GetPageCtrl()
-
-                    agree = false
 
                     Mod.WorldShare.Utils.SetTimeOut(function()
                         local val = page:GetValue('password_show')
@@ -35,31 +33,40 @@
                         local login_node = page:FindControl('login')
                         local switch_account_node = page:FindControl('switch_account')
 
-                        if current_selected_user and
-                           current_selected_user.autoLogin and
-                           current_selected_user.rememberMe and
-                           current_selected_user.token then
-                            if KeepworkServiceSession:IsSignedIn() then
-                                signed_in_node.visible = true
-                                login_node.visible = false
-                                switch_account_node.visible = true
-                            else
+                        if KeepworkServiceSession:IsSignedIn() then
+                            signed_in_node.visible = true
+                            login_node.visible = false
+                            switch_account_node.visible = true
+                        else
+                            if current_selected_user and
+                            current_selected_user.autoLogin and
+                            current_selected_user.rememberMe and
+                            current_selected_user.token then
                                 Mod.WorldShare.Utils.SetTimeOut(function()
                                     MainLogin:LoginWithToken(current_selected_user.token, function(b_succeed, reason, message)
                                         if b_succeed then
                                             page:Refresh(0.01)
                                         else
+                                            local session = SessionsData:GetSessionByUsername(current_selected_user.account)
+
+                                            if session and type(session) == 'table' then
+                                                session.autoLogin = false
+                                                session.token = ''
+
+                                                SessionsData:SaveSession(session)
+                                            end
+
                                             signed_in_node.visible = false
                                             login_node.visible = true
                                             switch_account_node.visible = false
                                         end
                                     end)
                                 end, 0)
+                            else
+                                signed_in_node.visible = false
+                                login_node.visible = true
+                                switch_account_node.visible = false
                             end
-                        else
-                            signed_in_node.visible = false
-                            login_node.visible = true
-                            switch_account_node.visible = false
                         end
                     end, 0)
 
@@ -142,16 +149,13 @@
                         RegisterModal:ShowUserPrivacyPage()
                     end
 
-                    function set_phone_agree()
-                        agree = not agree
-                    end
-
                     function login_action()
                         local phone_number = page:GetValue('phone_number')
                         local phone_captcha = page:GetValue('phone_captcha')
+                        local agree = page:GetNode('phone_agree').checked
 
                         if not agree then
-                            _guihelper.MessageBox(L'*您未同意《Paracraft用户协议和隐私协议》')
+                            _guihelper.MessageBox(L'*您未同意《Paracraft用户协议》和《隐私协议》')
                             return
                         end
 
@@ -192,8 +196,16 @@
                                         MainLogin.cellphone = phone_number
                                         MainLogin.cellphoneCaptcha = phone_captcha
 
-                                        close()
-                                        MainLogin:ShowAndroidSetUser()
+                                        register()
+
+                                        local page = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.MainAndroidRegister')
+
+                                        page:SetValue('phone_number', phone_number)
+                                        page:SetValue('phone_captcha', phone_captcha)
+
+                                        Mod.WorldShare.Utils.SetTimeOut(function()
+                                            page.set_mode('phone')
+                                        end, 100)
                                     end
                                 end)
                             end
@@ -202,7 +214,7 @@
 
                     function login_with_password_action()
                         if not page:GetNode('account_agree').checked then
-                            _guihelper.MessageBox(L'*您未同意《Paracraft用户协议和隐私协议》')
+                            _guihelper.MessageBox(L'*您未同意《Paracraft用户协议》和《隐私协议》')
                             return
                         end
 
@@ -279,6 +291,11 @@
                         MainLogin:Next()
                     end
 
+                    function register()
+                        close()
+                        MainLogin:ShowAndroidRegister()
+                    end
+
                     function switch_account()
                         KeepworkServiceSession:Logout(nil, function()
                             local signed_in_node = page:FindControl('signed_in')
@@ -295,13 +312,67 @@
                         EventTrackingService:Send(1, 'click.main_login.select_parents', nil, true)
                         MainLogin:ShowParent()
                     end
+
+                    function update_phone_login_button_status()
+                        local phone_number = page:GetValue('phone_number')
+                        local phone_captcha = page:GetValue('phone_captcha')
+                        local agree = page:GetNode('phone_agree').checked
+
+                        local be_success = true
+
+                        if not Validated:Phone(phone_number) then
+                            be_success = false
+                        end
+
+                        if not phone_captcha or #phone_captcha == 0 then
+                            be_success = false
+                        end
+
+                        if not agree then
+                            be_success = false
+                        end
+
+                        if be_success then
+                            page:SetUIBackground('phone_login_button', 'Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#212 580 290 90:105 0 105 0')
+                        else
+                            page:SetUIBackground('phone_login_button', 'Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#32 693 288 88:105 0 105 0')
+                        end
+                    end
+
+                    function update_login_button_status()
+                        update_password()
+
+                        local account = page:GetValue('account')
+                        local password = page:GetValue('password')
+                        local account_agree = page:GetNode('account_agree').checked
+
+                        local be_success = true
+
+                        if not Validated:AccountCompatible(account) then
+                            be_success = false
+                        end
+
+                        if not Validated:Password(password) then
+                            be_success = false
+                        end
+
+                        if not account_agree then
+                            be_success = false
+                        end
+
+                        if be_success then
+                            page:SetUIBackground('login_button', 'Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#212 580 290 90:105 0 105 0')
+                        else
+                            page:SetUIBackground('login_button', 'Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#32 693 288 88:105 0 105 0')
+                        end
+                    end
                 ]]>
             </script>
             <style type='text/mcss' src='Mod/WorldShare/cellar/Theme/Mcss/MainLoginMcss.mcss'>
                 {
                     container_size = {
                         width = 652.2395,
-                        height = 416.66,
+                        height = 425,
                         ['margin-left'] = -326.1197,
                         ['padding-top'] = 12,
                         ['padding-left'] = 12,
@@ -335,7 +406,11 @@
                               margin-top: 60px;
                               background: url(Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#26 797 192 74)' />
             </pe:container>
-            <pe:container alignment='_ct' name='signed_in' visible='false' class='container_size' style='background:;'>
+            <pe:container alignment='_ct'
+                          name='signed_in'
+                          visible='false'
+                          class='container_size'
+                          style='background:;'>
                 <div width='100%'
                      class='main_login_mobile_container_bg'
                      style='max-height: 416.66px;
@@ -347,8 +422,8 @@
                             padding-right: 100px'
                          class='main_login_mobile_container_title_bg'>
                         <img style='width: 97.85px;
-                                height: 30px;
-                                margin-top: 10px;'
+                                    height: 30px;
+                                    margin-top: 10px;'
                              src='Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#844 580 137 42' />
                     </div>
                     <div style='width: 632px;
@@ -378,17 +453,21 @@
                 </div>
             </pe:container>
             <pe:container alignment='_ct' name='login' visible='true' class='main_login_mobile_container_bg container_size'>
-                <div style='width: 260px;
-                            height: 50px;
-                            padding-left: 20px;'
+                <div style='width: 230px;
+                            height: 60px;'
                             class='main_login_mobile_container_title_bg'>
-                    <img style='width: 159px;
-                                height: 27px;
-                                margin-top: 10px;'
-                         src='Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#843 654 159 27' />
+                    <img style='width: 92px;
+                                height: 40px;
+                                margin-top: 10px;
+                                margin-left: 30px;'
+                         src='Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#907 94 92 40' />
                 </div>
-                <pe:container name='login_with_phone_number' visible='true' style='background:;position: relative;'>
-                    <div style='margin-top: 0px;'>
+                <pe:container name='login_with_phone_number'
+                              visible='true'
+                              style='background:;
+                                     position: relative;
+                                     margin-top: -20px;'>
+                    <div>
                         <div style="margin-left: 440px;margin-bottom: 10px;">
                             <div style='position: relative;
                                         height: 1px;
@@ -408,6 +487,7 @@
                                    MoveViewWhenAttachWithIME='true'
                                    class='main_login_mobile_textfield'
                                    name='phone_number'
+                                   onchange='update_phone_login_button_status'
                                    EmptyText='<%= L"请输入手机号" %>'
                                    style='textcolor: #FFFFFF;
                                           text-valign: center;
@@ -416,13 +496,6 @@
                                           base-font-size: 22px;
                                           width: 480px;
                                           height: 55px;'/>
-                        </div>
-                        <div style='margin-top: 10px;
-                                    margin-left: 85px;
-                                    font-size: 17px;
-                                    base-font-size: 17px;
-                                    color: #A0A5BA;'>
-                            <%= L"如果该手机号未注册，我们将为您注册" %>
                         </div>
                         <div style='margin-top: 10px;margin-left: 75px;'>
                             <input type='button'
@@ -444,6 +517,7 @@
                                    CaretColor='#FFFFFFFF'
                                    spacing='10'
                                    name='phone_captcha'
+                                   onchange='update_phone_login_button_status'
                                    MoveViewWhenAttachWithIME='true'
                                    class='main_login_mobile_textfield'
                                    EmptyText='<%= L"请输入验证码" %>'
@@ -463,53 +537,88 @@
                                        UncheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#295 79 12 12"
                                        style="float:left;margin-top:4px;min-width:90px;"
                                        name="phone_agree"
-                                       onclick="set_phone_agree"
+                                       onclick='update_phone_login_button_status'
                                        checked="false"/>
-                                <div style="float:left; color: white;base-font-size: 17px;font-size: 17px;margin-left: 4px;">
-                                    <div style="float:left;width: 2px;"></div>
-                                    <%= L"我同意" %>
-                                    <div style="float:left;color: #EDB853" onclick="user_agreement()"><%= L"《用户许可协议》" %></div>
-                                    <%= L'与' %>
-                                    <div style="float:left;color: #EDB853" onclick="user_privacy()"><%= L"《用户隐私协议》" %></div>
-                                    <%= L"中的内容" %>
+                                <div style="float:left;
+                                            color: white;
+                                            base-font-size: 17px;
+                                            font-size: 17px;
+                                            margin-left: 4px;">
+                                    <div for='phone_agree'
+                                         style="float:left;">
+                                        <%= L"我同意" %>
+                                    </div>
+                                    <div style="float:left;
+                                                color: #EDB853"
+                                         onclick="user_agreement()"><%= L"《用户许可协议》" %></div>
+                                    <div for='phone_agree'
+                                         style="float:left;">
+                                        <%= L'与' %>
+                                    </div>
+                                    <div style="float:left;
+                                                color: #EDB853"
+                                         onclick="user_privacy()"><%= L"《用户隐私协议》" %></div>
+                                    <div for='phone_agree'
+                                         style="float:left;">
+                                        <%= L"中的内容" %>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         <div style='width: 480px;
                                     margin-top: 15px;
                                     margin-left: 75px;'>
-                            <div width='50%'
-                                 style='float: left;
-                                        padding-right: 8px;'>
+                            <div width='100%'>
                                 <input type='button'
-                                       class='main_login_mobile_blue_button'
+                                       class='main_login_mobile_gray_button'
                                        textscale=1.8
                                        width='100%'
                                        style='color: #FFFFFF;
-                                              height: 71.37px;
+                                              height: 60px;
                                               font-size: 15px;
                                               base-font-size: 15px;'
                                        onclick='login_action'
+                                       name='phone_login_button'
                                        value='<%= L"登录" %>' />
                             </div>
-                            <div width='50%'
-                                 style='float: left;
-                                        padding-left: 8px;'>
-                                <input type='button'
-                                       class='main_login_mobile_baby_blue_button'
-                                       textscale=1.8
-                                       width='100%'
-                                       style='color: #FFFFFF;
-                                              height: 71.37px;
-                                              font-size: 15px;
-                                              base-font-size: 15px;'
-                                       onclick='local_mode'
-                                       value='<%= L"本地模式" %>' />
+                            <div style='margin-top: 10px;'>
+                                <div width='50%'
+                                     style='float: left;
+                                            padding-right: 8px;'>
+                                    <input type='button'
+                                           class='main_login_mobile_baby_blue_button'
+                                           textscale=1.8
+                                           width='100%'
+                                           style='color: #FFFFFF;
+                                                  height: 60px;
+                                                  font-size: 15px;
+                                                  base-font-size: 15px;'
+                                           onclick='register'
+                                           value='<%= L"注册" %>' />
+                                </div>
+                                <div width='50%'
+                                     style='float: left;
+                                            padding-left: 8px;'>
+                                    <input type='button'
+                                           class='main_login_mobile_baby_blue_button'
+                                           textscale=1.8
+                                           width='100%'
+                                           style='color: #FFFFFF;
+                                                  height: 60px;
+                                                  font-size: 15px;
+                                                  base-font-size: 15px;'
+                                           onclick='local_mode'
+                                           value='<%= L"本地模式" %>' />
+                                </div>
                             </div>
                         </div>
                     </div>
                 </pe:container>
-                <pe:container name='login_with_account' visible='false' style='background:;position: relative;'>
+                <pe:container name='login_with_account'
+                              visible='false'
+                              style='background:;
+                                     position: relative;
+                                     margin-top: -20px;'>
                     <div style='margin-left: 430px;margin-bottom: 10px;'>
                         <div>
                             <div style='position: relative;
@@ -529,6 +638,7 @@
                                CaretColor='#FFFFFFFF'
                                spacing='10'
                                name='account'
+                               onchange='update_login_button_status'
                                MoveViewWhenAttachWithIME='true'
                                class='main_login_mobile_textfield'
                                EmptyText='<%= L"请输入手机号/账号" %>'
@@ -540,11 +650,11 @@
                                       width: 480px;
                                       height: 55px;'/>
                     </div>
-                    <div style='margin-left: 75px;margin-top: 20px;'>
+                    <div style='margin-left: 75px;margin-top: 10px;'>
                         <input type='text'
                                CaretColor='#FFFFFFFF'
                                spacing='10'
-                               onchange='update_password'
+                               onchange='update_login_button_status'
                                SkipAutoBadWordFilter='true'
                                MoveViewWhenAttachWithIME='true'
                                EmptyText='<%= L"请输入密码" %>'
@@ -560,7 +670,7 @@
                         <input type='text'
                                CaretColor='#FFFFFFFF'
                                spacing='10'
-                               onchange='update_password'
+                               onchange='update_login_button_status'
                                PasswordChar='*'
                                SkipAutoBadWordFilter='true'
                                MoveViewWhenAttachWithIME='true'
@@ -586,55 +696,85 @@
                                UncheckedBG='Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#969 147 35 35'
                                onclick='set_password_show_or_hide' />
                     </div>
-                    <div style='margin-top: 37px;margin-left: 75px;'>
+                    <div style='margin-top: 10px;margin-left: 75px;'>
                         <div>
                             <input type="checkbox"
                                    iconsize="18"
                                    CheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#275 79 12 12"
                                    UncheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#295 79 12 12"
-                                   style="float:left;margin-top:4px;min-width:90px;"
-                                   name="account_agree"
+                                   style='float: left;
+                                          margin-top: 4px;
+                                          min-width: 90px;'
+                                   name='account_agree'
+                                   onclick='update_login_button_status'
                                    checked="false"/>
-                            <div style="float:left; color: white;base-font-size: 17px;font-size: 17px;margin-left: 4px;">
-                                <div style="float:left;width: 2px;"></div>
-                                <%= L"我同意" %>
+                            <div style="float:left;
+                                        color: white;
+                                        base-font-size: 17px;
+                                        font-size: 17px;
+                                        margin-left: 4px;">
+                                <div for='account_agree'
+                                     style="float:left;">
+                                    <%= L"我同意" %>
+                                </div>
                                 <div style="float:left;color: #EDB853" onclick="user_agreement()"><%= L"《用户许可协议》" %></div>
-                                <%= L'与' %>
+                                <div for='account_agree'
+                                     style="float:left;">
+                                    <%= L'与' %>
+                                </div>
                                 <div style="float:left;color: #EDB853" onclick="user_privacy()"><%= L"《用户隐私协议》" %></div>
-                                <%= L"中的内容" %>
+                                <div for='account_agree'
+                                     style="float:left;">
+                                    <%= L"中的内容" %>
+                                </div>
                             </div>
                         </div>
                     </div>
                     <div style='width: 480px;
                                 margin-top: 15px;
                                 margin-left: 75px;'>
-                        <div width='50%'
-                             style='float: left;
-                                    padding-right: 8px;'>
+                        <div width='100%'>
                             <input type='button'
-                                   class='main_login_mobile_blue_button'
-                                   onclick='login_with_password_action'
+                                   class='main_login_mobile_gray_button'
                                    textscale=1.8
                                    width='100%'
                                    style='color: #FFFFFF;
-                                          height: 71.37px;
+                                          height: 60px;
                                           font-size: 15px;
                                           base-font-size: 15px;'
+                                   name='login_button'
+                                   onclick='login_with_password_action'
                                    value='<%= L"登录" %>' />
                         </div>
-                        <div width='50%'
-                             style='float: left;
-                                    padding-left: 8px;'>
-                            <input type='button'
-                                   class='main_login_mobile_baby_blue_button'
-                                   onclick='local_mode'
-                                   textscale=1.8
-                                   width='100%'
-                                   style='color: #FFFFFF;
-                                          height: 71.37px;
-                                          font-size: 15px;
-                                          base-font-size: 15px;'
-                                   value='<%= L"本地模式" %>' />
+                        <div style='margin-top: 10px;'>
+                            <div width='50%'
+                                    style='float: left;
+                                        padding-right: 8px;'>
+                                <input type='button'
+                                        class='main_login_mobile_baby_blue_button'
+                                        textscale=1.8
+                                        width='100%'
+                                        style='color: #FFFFFF;
+                                                height: 60px;
+                                                font-size: 15px;
+                                                base-font-size: 15px;'
+                                        onclick='register'
+                                        value='<%= L"注册" %>' />
+                            </div>
+                            <div width='50%'
+                                    style='float: left;
+                                        padding-left: 8px;'>
+                                <input type='button'
+                                        class='main_login_mobile_baby_blue_button'
+                                        textscale=1.8
+                                        width='100%'
+                                        style='color: #FFFFFF;
+                                                height: 60px;
+                                                font-size: 15px;
+                                                base-font-size: 15px;'
+                                        onclick='local_mode'
+                                        value='<%= L"本地模式" %>' />
+                            </div>
                         </div>
                     </div>
                 </pe:container>

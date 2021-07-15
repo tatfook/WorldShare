@@ -1,0 +1,977 @@
+<html>
+    <body> 
+        <pe:mcml>
+            <script type='text/npl'>
+                <![CDATA[
+                    -- bottles
+                    local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
+                    local RegisterModal = NPL.load('(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua')
+                    local RedSummerCampMainPage = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/RedSummerCamp/RedSummerCampMainPage.lua")
+
+                    -- service
+                    local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+                    local EventTrackingService = NPL.load('(gl)Mod/WorldShare/service/EventTracking.lua')
+
+                    -- helper
+                    local Validated = NPL.load('(gl)Mod/WorldShare/helper/Validated.lua')
+
+                    -- database
+                    local SessionsData = NPL.load('(gl)Mod/WorldShare/database/SessionsData.lua')
+
+                    local page = document:GetPageCtrl()
+
+                    function show_summer_camp()
+                        RedSummerCampMainPage.Show()
+                    end
+
+                    function close()
+                        page:CloseWindow()
+                    end
+
+                    function set_account_mode()
+                        set_mode('account')
+                    end
+
+                    function set_phone_mode()
+                        set_mode('phone')
+                    end
+
+                    -- don't remove, beacause set account mode button realtime
+                    Mod.WorldShare.Utils.SetTimeOut(function()
+                        set_account_mode()
+                    end, 0)
+
+                    function set_mode(mode)
+                        local register_with_phone_number = page:FindControl('register_with_phone_number')
+                        local register_with_account = page:FindControl('register_with_account')
+                        local ui_register = ParaUI.GetUIObject('mod.world_share.main_login.register')
+
+                        if mode == 'account' then
+                            register_with_phone_number.visible = false
+                            register_with_account.visible = true
+
+                            ui_register.height = 425
+
+                            page:SetUIBackground('phone_button', '')
+                            page:SetUIBackground('account_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#5 378 128 26:15 0 15 0')
+
+                            _guihelper.SetFontColor(page:FindControl('phone_button'), '#FFFFFF')
+                            _guihelper.SetFontColor(page:FindControl('account_button'), '#25282E')
+                        elseif mode == 'phone' then
+                            register_with_phone_number.visible = true
+                            register_with_account.visible = false
+
+                            ui_register.height = 450
+
+                            page:SetUIBackground('account_button', '')
+                            page:SetUIBackground('phone_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#5 378 128 26:15 0 15 0')
+
+                            _guihelper.SetFontColor(page:FindControl('account_button'), '#FFFFFF')
+                            _guihelper.SetFontColor(page:FindControl('phone_button'), '#25282E')
+                        elseif mode == 'finish' then
+                            register_with_phone_number.visible = false
+                            register_with_account.visible = false
+                            page:FindControl('register_finish').visible = true
+                            page:FindControl('swtich').visible = false
+
+                            ui_register.height = 425
+                        end
+                    end
+
+                    page.set_mode = set_mode
+
+                    function get_phone_captcha()
+                        local phone_number = page:GetValue('phone_number')
+
+                        if not Validated:Phone(phone_number) then
+                            _guihelper.MessageBox(L'*手机号格式错误')
+                            return
+                        end
+
+                        if is_clicked_get_phone_captcha then
+                           return false
+                        end
+
+                        is_clicked_get_phone_captcha = true
+
+                        local times = 60
+
+                        local timer = commonlib.Timer:new({
+                            callbackFunc = function(timer)
+                                page:SetValue('get_phone_captcha', format('%s(%ds)', L'重新发送', times))
+
+                                if times == 0 then
+                                    is_clicked_get_phone_captcha = false
+                                    page:SetValue('get_phone_captcha', L'获取验证码')
+                                    timer:Change(nil, nil)
+                                end
+
+                                times = times - 1
+                            end
+                        })
+
+                        KeepworkServiceSession:GetPhoneCaptcha(phone_number, function(data, err)
+                            if err == 400 and data and data.code and data.message then
+                                is_clicked_get_phone_captcha = false
+                                page:SetValue('get_phone_captcha', L'获取验证码')
+                                GameLogic.AddBBS(nil, format('%s%s(%d)', L'获取验证码失败，错误信息：', data.message, data.code), 3000, '255 0 0')
+                                timer:Change(nil, nil)
+                            end
+                        end)
+
+                        timer:Change(1000, 1000)
+                    end
+
+                    function user_agreement()
+                        RegisterModal:ShowUserAgreementPage()
+                    end
+
+                    function user_privacy()
+                        RegisterModal:ShowUserPrivacyPage()
+                    end
+
+                    function account_register()
+                        local account = page:GetValue('account')
+                        local password = page:GetValue('password') or ''
+                        local account_agree = page:GetNode('account_agree').checked
+
+                        if not Validated:Account(account) then
+                            _guihelper.MessageBox(L'*账号需4位以上且非数字开头的字母、数字组合形式')
+                            return
+                        end
+
+                        if not account_agree then
+                            _guihelper.MessageBox(L'*您未同意《Paracraft用户协议》和《隐私协议》')
+                            return
+                        end
+
+                        if not Validated:Password(password) then
+                            _guihelper.MessageBox(L'*密码不合法')
+                            return
+                        end
+
+                        MainLogin.account = account
+                        MainLogin.password = password
+                        MainLogin.agree = agree
+
+                        MainLogin.callback = function()
+                            page:SetValue('account_result', account)
+                            page:SetValue('password_result', password)
+                            set_finish()
+                        end
+
+                        MainLogin:RegisterWithAccount()
+                    end
+
+                    function phone_register()
+                        local phone_number = page:GetValue('phone_number')
+                        local phone_password = page:GetValue('phone_password')
+                        local phone_captcha = page:GetValue('phone_captcha')
+                        local username = page:GetValue('phone_register_account')
+
+                        if not username or not Validated:Account(username) then
+                            _guihelper.MessageBox(L'*账号需4位以上且非数字开头的字母、数字组合形式')
+                            return
+                        end
+
+                        if not phone_number or not Validated:Phone(phone_number) then
+                            _guihelper.MessageBox(L'*手机号格式错误')
+                            return
+                        end
+
+                        if not Validated:Password(phone_password) then
+                            _guihelper.MessageBox(L'*密码不合法')
+                            return
+                        end
+
+                        if not phone_captcha or phone_captcha == '' then
+                            _guihelper.MessageBox(L'*手机验证码不能为空')
+                            return
+                        end
+
+                        KeepworkServiceSession:CheckUsernameExist(username, function(b_is_exist)
+                            if b_is_exist then
+                                _guihelper.MessageBox(L'*账号已存在，请使用其他账号')
+                                return
+                            end
+
+                            MainLogin.phonenumber = phone_number
+                            MainLogin.password = phone_password
+                            MainLogin.phonecaptcha = phone_captcha
+                            MainLogin.account = username
+
+                            MainLogin.callback = function()
+                                page:SetValue('account_result', username)
+                                page:SetValue('password_result', phone_password)
+                                set_finish()
+                            end
+
+                            MainLogin:RegisterWithPhone()
+                        end)
+                    end
+
+                    local is_password_visible = false
+
+                    function update_password()
+                        local password_show_value = page:GetValue('password_show')
+                        local password_hide_value = page:GetValue('password_hide')
+
+                        if is_password_visible then
+                            page:SetValue('password', password_show_value)
+                        else
+                            page:SetValue('password', password_hide_value)
+                        end
+                    end
+
+                    function set_password_show_or_hide()
+                        local password_show_node = page:FindControl('password_show')
+                        local password_hide_node = page:FindControl('password_hide')
+                        local password_show_value = page:GetValue('password_show')
+                        local password_hide_value = page:GetValue('password_hide')
+
+                        if is_password_visible then
+                            password_show_node.visible = false
+                            password_hide_node.visible = true
+
+                            page:SetValue('password_show', '')
+                            page:SetValue('password_hide', password_show_value)
+                            page:SetValue('password', password_show_value)
+
+                            is_password_visible = false
+                        else
+                            password_show_node.visible = true
+                            password_hide_node.visible = false
+
+                            page:SetValue('password_show', password_hide_value)
+                            page:SetValue('password_hide', '')
+                            page:SetValue('password', password_hide_value)
+
+                            is_password_visible = true
+                        end
+                    end
+
+                    -- don't remove
+                    Mod.WorldShare.Utils.SetTimeOut(function()
+                        local val = page:GetValue('password_show')
+                        page:SetValue('password_hide', val)
+                        page:SetValue('password', val)
+
+                        page:FindControl('password_show').visible = false
+                        page:FindControl('password_hide').visible = true
+                    end, 0)
+
+                    local is_phone_password_visible = false
+
+                    function update_phone_password()
+                        local password_show_value = page:GetValue('phone_password_show')
+                        local password_hide_value = page:GetValue('phone_password_hide')
+
+                        if is_phone_password_visible then
+                            page:SetValue('phone_password', password_show_value)
+                        else
+                            page:SetValue('phone_password', password_hide_value)
+                        end
+                    end
+
+                    function set_phone_password_show_or_hide()
+                        local password_show_node = page:FindControl('phone_password_show')
+                        local password_hide_node = page:FindControl('phone_password_hide')
+                        local password_show_value = page:GetValue('phone_password_show')
+                        local password_hide_value = page:GetValue('phone_password_hide')
+
+                        if is_phone_password_visible then
+                            password_show_node.visible = false
+                            password_hide_node.visible = true
+
+                            page:SetValue('phone_password_show', '')
+                            page:SetValue('phone_password_hide', password_show_value)
+                            page:SetValue('phone_password', password_show_value)
+
+                            is_phone_password_visible = false
+                        else
+                            password_show_node.visible = true
+                            password_hide_node.visible = false
+
+                            page:SetValue('phone_password_show', password_hide_value)
+                            page:SetValue('phone_password_hide', '')
+                            page:SetValue('phone_password', password_hide_value)
+
+                            is_phone_password_visible = true
+                        end
+                    end
+
+                    -- don't remove
+                    Mod.WorldShare.Utils.SetTimeOut(function()
+                        local val = page:GetValue('phone_password_show')
+                        page:SetValue('phone_password_hide', val)
+                        page:SetValue('phone_password', val)
+
+                        page:FindControl('phone_password_show').visible = false
+                        page:FindControl('phone_password_hide').visible = true
+                    end, 0)
+
+                    function parent()
+                        EventTrackingService:Send(1, 'click.main_login.select_parents', nil, true)
+                        MainLogin:ShowParent()
+                    end
+
+                    function back()
+                        close()
+                        MainLogin:ShowAndroidLogin()
+                    end
+
+                    function next()
+                        local phone_number = page:GetValue('phone_number')
+                        local phone_password = page:GetValue('phone_password')
+                        local phone_captcha = page:GetValue('phone_captcha')
+                        local phone_agree = page:GetNode('phone_agree').checked
+
+                        if not Validated:Phone(phone_number) then
+                            _guihelper.MessageBox(L'*手机号格式错误')
+                            return
+                        end
+
+                        if not phone_captcha or phone_captcha == '' then
+                            _guihelper.MessageBox(L'*手机验证码不能为空')
+                            return
+                        end
+
+                        if not Validated:Password(phone_password) then
+                            _guihelper.MessageBox(L'*密码不合法')
+                            return
+                        end
+
+                        if not phone_agree then
+                            _guihelper.MessageBox(L'*您未同意《Paracraft用户协议》和《隐私协议》')
+                            return
+                        end
+
+                        KeepworkServiceSession:CheckPhonenumberExist(phone_number, function(b_is_exist)
+                            if b_is_exist then
+                                _guihelper.MessageBox(L'*手机号码已存在')
+                                return
+                            end
+
+                            KeepworkServiceSession:CellphoneCaptchaVerify(
+                                phone_number,
+                                phone_captcha,
+                                function(result)
+                                    if not result or type(result) ~= 'table' then
+                                        return
+                                    end
+
+                                    if result.verify ~= true then
+                                        _guihelper.MessageBox(format(L'%s(%d)', result.message, result.code))
+                                        return
+                                    end
+
+                                    local register_with_phone_number_step_1 = page:FindControl('register_with_phone_number_step_1')
+                                    local register_with_phone_number_step_2 = page:FindControl('register_with_phone_number_step_2')
+
+                                    register_with_phone_number_step_1.visible = false
+                                    register_with_phone_number_step_2.visible = true
+                                end
+                            )
+                        end)
+                    end
+
+                    function check_account(callback)
+                        if not callback or type(callback) ~='function' then
+                            return false
+                        end
+
+                        local username = page:GetValue('account')
+
+                        if not Validated:Account(username) then
+                            callback(false, L'*账号需大于3位且非数字开头的字母、数字组合形式')
+                            return
+                        end
+
+                        KeepworkServiceSession:CheckUsernameExist(username, function(bIsExist)
+                            if bIsExist then
+                                callback(false, L'*账号已存在，请使用其他账号')
+                            else
+                                callback(true)
+                            end
+                        end)
+                    end
+
+                    function update_register_account_button_status()
+                        update_password()
+
+                        local password = page:GetValue('password')
+                        local account_agree = page:GetNode('account_agree').checked
+
+                        local b_right = true    
+
+                        if not Validated:Password(password) then
+                            b_right = false
+                        end
+
+                        if not account_agree then
+                            b_right = false
+                        end
+
+                        check_account(function(result, msg)
+                            if not result then
+                                b_right = false
+                            end
+
+                            if b_right then
+                                page:SetUIBackground('account_register_button', 'Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#212 580 290 90:105 0 105 0')
+                            else
+                                page:SetUIBackground('account_register_button', 'Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#32 693 288 88:105 0 105 0')
+                            end
+                        end)
+                    end
+
+                    function update_register_phone_button_status_step_1()
+                        update_phone_password()
+
+                        local phone_number = page:GetValue('phone_number')
+                        local phone_password = page:GetValue('phone_password')
+                        local phone_captcha = page:GetValue('phone_captcha')
+                        local phone_agree = page:GetNode('phone_agree').checked
+
+                        local b_right = true    
+
+                        if not Validated:Phone(phone_number) then
+                            b_right = false
+                        end
+
+                        if not Validated:Password(phone_password) then
+                            b_right = false
+                        end
+
+                        if not phone_captcha or phone_captcha == '' then
+                            b_right = false
+                        end
+
+                        if not phone_agree then
+                            b_right = false
+                        end
+
+                        if not b_right then
+                            page:SetUIBackground('phone_register_button', 'Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#32 693 288 88:105 0 105 0')
+                            return
+                        end
+
+                        KeepworkServiceSession:CheckPhonenumberExist(phone_number, function(b_is_exist)
+                            if b_is_exist then
+                                b_right = false
+                            end
+
+                            if b_right then
+                                page:SetUIBackground('phone_register_button', 'Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#212 580 290 90:105 0 105 0')
+                            else
+                                page:SetUIBackground('phone_register_button', 'Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#32 693 288 88:105 0 105 0')
+                            end
+                        end)
+                    end
+
+                    function update_register_phone_button_status_step_2()
+                        local username = page:GetValue('phone_register_account')
+
+                        if not username or not Validated:Account(username) then
+                            page:SetUIBackground('phone_register_finish_button', 'Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#32 693 288 88:105 0 105 0')
+                            return
+                        end
+
+                        KeepworkServiceSession:CheckUsernameExist(username, function(bIsExist)
+                            if bIsExist then
+                                page:SetUIBackground('phone_register_finish_button', 'Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#32 693 288 88:105 0 105 0')
+                                return
+                            end
+
+                            page:SetUIBackground('phone_register_finish_button', 'Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#212 580 290 90:105 0 105 0')
+                        end)
+                    end
+
+                    function set_finish()
+                        set_mode('finish')
+                    end
+
+                    function finish()
+                        close()
+
+                        MainLogin:ShowAndroidLogin()
+                    end
+                ]]>
+            </script>
+            <style type='text/mcss' src='Mod/WorldShare/cellar/Theme/Mcss/MainLoginMcss.mcss'>
+                {
+                    container_size = {
+                        width = 652.2395,
+                        height = 425,
+                        ['margin-left'] = -326.1197,
+                        ['padding-top'] = 12,
+                        ['padding-left'] = 12,
+                        ['margin-top'] = -115,
+                    },
+                    switch_button = {
+                        ['text-offset-y'] = -1
+                    }
+                }
+            </style>
+            <pe:container
+                alignment='_fi'
+                zorder='-1'
+                width='100%'
+                height='100%'
+                style='background:;'>
+                <div align='left'
+                     style='width: 55px;
+                            margin-left: 20px;'>
+                    <input type='button'
+                           style='margin-top: 20px;
+                                  width: 55px;
+                                  height: 59px;
+                                  background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#533 8 55 59)'
+                            onclick="parent"/>
+                </div>
+            </pe:container>
+            <pe:container alignment='_ct'
+                          name='register'
+                          uiname='mod.world_share.main_login.register'
+                          visible='true'
+                          class='main_login_mobile_container_bg container_size'>
+                <div width='100%' style='position: relative;'>
+                    <div align='right'
+                         style='margin-top: 20px;
+                                margin-right: 30px;
+                                width: 33px;'>
+                        <input type='button' class='main_login_back_button' onclick="back"/>
+                    </div>
+                </div>
+                <div style='width: 230px;
+                            height: 60px;'
+                            class='main_login_mobile_container_title_bg'>
+                    <img style='margin-top: 10px;
+                                margin-left: 30px;
+                                width: 92px;
+                                height: 40px;'
+                         src='Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#892 528 92 40' />
+                </div>
+                <!-- switch -->
+                <pe:container name='swtich'
+                              visible='true'
+                              style='background:;'>
+                    <div align='center'
+                        style='margin-top: 15px;
+                                margin-bottom: 10px;
+                                width: 480px;
+                                height: 28px;
+                                background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#5 345 256 26:15 0 15 0)'>
+                        <input type='button'
+                            name='account_button'
+                            width='50%'
+                            height='100%'
+                            class='switch_button'
+                            style="height: 28px;
+                                color: #ffffff;
+                                font-size: 18px;
+                                base-font-size: 18px;
+                                background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#5 378 128 26:15 0 15 0);"
+                            value='<%= "账号注册" %>'
+                            onclick='set_account_mode'/>
+                        <input type='button'
+                            name='phone_button'
+                            width='50%'
+                            class='switch_button'
+                            style="height: 28px;
+                                color: #ffffff;
+                                font-size: 18px;
+                                base-font-size: 18px;
+                                background:;"
+                            value='<%= "手机注册" %>'
+                            onclick='set_phone_mode'/>
+                    </div>
+                </pe:container>
+                <pe:container name='register_with_account'
+                              visible='true'
+                              style='background:;
+                                     position: relative;
+                                     margin-top: 20px;'>
+                    <div style='width: 480px;
+                                margin-left: 80px;'>
+                        <div width='100%'>
+                            <input type='text'
+                                   CaretColor='#FFFFFFFF'
+                                   spacing='10'
+                                   name='account'
+                                   onchange='update_register_account_button_status'
+                                   MoveViewWhenAttachWithIME='true'
+                                   class='main_login_mobile_textfield'
+                                   EmptyText='<%= L"请输入账号" %>'
+                                   style='textcolor: #FFFFFF;
+                                          text-valign: center;
+                                          line-height: 30px;
+                                          font-size: 22px;
+                                          base-font-size: 22px;
+                                          width: 480px;
+                                          height: 55px;'/>
+                        </div>
+                        <div width='100%'
+                             style='margin-top: 10px;'>
+                            <input type='text'
+                                   CaretColor='#FFFFFFFF'
+                                   spacing='10'
+                                   onchange='update_register_account_button_status'
+                                   SkipAutoBadWordFilter='true'
+                                   MoveViewWhenAttachWithIME='true'
+                                   EmptyText='<%= L"请输入密码" %>'
+                                   style='textcolor: #FFFFFF;
+                                          text-valign: center;
+                                          line-height: 30px;
+                                          font-size: 22px;
+                                          base-font-size: 22px;
+                                          width: 480px;
+                                          height: 55px;'
+                                   name='password_show'
+                                   class='main_login_mobile_textfield' />
+                            <input type='text'
+                                   CaretColor='#FFFFFFFF'
+                                   spacing='10'
+                                   onchange='update_register_account_button_status'
+                                   PasswordChar='*'
+                                   SkipAutoBadWordFilter='true'
+                                   MoveViewWhenAttachWithIME='true'
+                                   EmptyText='<%= L"请输入密码" %>'
+                                   style='textcolor: #FFFFFF;
+                                          text-valign: center;
+                                          line-height: 30px;
+                                          font-size: 22px;
+                                          base-font-size: 22px;
+                                          width: 480px;
+                                          height: 55px;
+                                          margin-left: -480px;'
+                                   name='password_hide'
+                                   class='main_login_mobile_textfield' />
+                            <input type='hidden' name='password' value='' />
+                            <input name='show_or_hide_password_button'
+                                   type='checkbox'
+                                   checked='false'
+                                   iconsize='35'
+                                   style='margin-left: -50px;
+                                          margin-top: 10px;'
+                                   CheckedBG='Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#909 151 35 35'
+                                   UncheckedBG='Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#969 147 35 35'
+                                   onclick='set_password_show_or_hide' />
+                        </div>
+                    </div>
+                    <div align='center'
+                         style='width: 480px;margin-top: 10px;'>
+                        <div>
+                            <input type="checkbox"
+                                   iconsize="18"
+                                   CheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#275 79 12 12"
+                                   UncheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#295 79 12 12"
+                                   style='float:left;margin-top:4px;min-width:90px;'
+                                   name='account_agree'
+                                   onclick='update_register_account_button_status'
+                                   checked="false"/>
+                            <div style="float:left;
+                                        color: white;
+                                        base-font-size: 17px;
+                                        font-size: 17px;
+                                        margin-left: 4px;">
+                                <div for='account_agree'
+                                     style="float:left;">
+                                    <%= L"我同意" %>
+                                </div>
+                                <div style="float:left;
+                                            color: #EDB853"
+                                     onclick="user_agreement()"><%= L"《用户许可协议》" %></div>
+                                <div for='account_agree'
+                                     style="float:left;">
+                                    <%= L'与' %>
+                                </div>
+                                <div style="float:left;
+                                            color: #EDB853"
+                                     onclick="user_privacy()"><%= L"《用户隐私协议》" %></div>
+                                <div for='account_agree'
+                                        style="float:left;">
+                                    <%= L"中的内容" %>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div align='center'
+                         style='width: 480px;
+                                margin-top: 15px;'>
+                        <div width='100%'>
+                            <input type='button'
+                                   class='main_login_mobile_gray_button'
+                                   textscale=1.8
+                                   width='100%'
+                                   style='color: #FFFFFF;
+                                          height: 65px;
+                                          font-size: 15px;
+                                          base-font-size: 15px;'
+                                   onclick='account_register'
+                                   name='account_register_button'
+                                   value='<%= L"注册" %>' />
+                        </div>
+                    </div>
+                </pe:container>
+                <pe:container width='100%'
+                              name='register_with_phone_number'
+                              visible='false'
+                              style='background:;
+                                     position: relative;
+                                     height: 300px;'>
+                    <pe:container name='register_with_phone_number_step_1' visible='true' style='background:;position: relative;'>
+                        <div style='background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#968 800 36 66:13 13 13 13);
+                                    width: 480px;
+                                    padding-left: 12px;
+                                    padding-right: 12px;
+                                    margin-left: 80px;'>
+                            <div width='100%'
+                                 style='margin-top: 2px;'>
+                                <input type='text'
+                                       CaretColor='#FFFFFFFF'
+                                       spacing='10'
+                                       MoveViewWhenAttachWithIME='true'
+                                       name='phone_number'
+                                       onchange='update_register_phone_button_status_step_1'
+                                       EmptyText='<%= L"请输入手机号" %>'
+                                       style='textcolor: #FFFFFF;
+                                              text-valign: center;
+                                              line-height: 30px;
+                                              font-size: 22px;
+                                              base-font-size: 22px;
+                                              height: 55px;
+                                              background:;'/>
+                            </div>
+                            <div width='100%' style='height: 1px;
+                                                     background-color: #2F3237;
+                                                     margin-top: 2px;
+                                                     margin-bottom: 4px;'></div>
+                            <div width='100%'>
+                                <input align='right'
+                                       type='button'
+                                       zorder=1
+                                       name='get_phone_captcha'
+                                       onclick='get_phone_captcha'
+                                       value='<%= L"获取验证码" %>'
+                                       style='position: relative;
+                                              min-width: 135px;
+                                              height: 45px;
+                                              margin-top: 6px;
+                                              color: #34B0FF;
+                                              font-size: 19px;
+                                              base-font-size: 19px;
+                                              text-offset-y: -1;
+                                              background: url(Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#28 577 169 62)' />
+                                <input type='text'
+                                       CaretColor='#FFFFFFFF'
+                                       spacing='10'
+                                       name='phone_captcha'
+                                       change='update_register_phone_button_status_step_1'
+                                       MoveViewWhenAttachWithIME='true'
+                                       EmptyText='<%= L"请输入验证码" %>'
+                                       style='textcolor: #FFFFFF;
+                                              text-valign: center;
+                                              line-height: 30px;
+                                              font-size: 22px;
+                                              base-font-size: 22px;
+                                              height: 55px;
+                                              background:;'/>
+                            </div>
+                            <div width='100%' style='height: 1px;
+                                                     background-color: #2F3237;
+                                                     margin-top: 4px;
+                                                     margin-bottom: 0px;'></div>
+                            <div width='100%'>
+                                <input type='text'
+                                       CaretColor='#FFFFFFFF'
+                                       spacing='10'
+                                       MoveViewWhenAttachWithIME='true'
+                                       name='phone_password_show'
+                                       onchange='update_register_phone_button_status_step_1'
+                                       EmptyText='<%= L"请输入4位以上的密码" %>'
+                                       style='textcolor: #FFFFFF;
+                                              text-valign: center;
+                                              line-height: 30px;
+                                              font-size: 22px;
+                                              base-font-size: 22px;
+                                              height: 55px;
+                                              background:;'/>
+                                <input type='text'
+                                       CaretColor='#FFFFFFFF'
+                                       spacing='10'
+                                       MoveViewWhenAttachWithIME='true'
+                                       name='phone_password_hide'
+                                       onchange='update_register_phone_button_status_step_1'
+                                       PasswordChar='*'
+                                       EmptyText='<%= L"请输入4位以上的密码" %>'
+                                       style='textcolor: #FFFFFF;
+                                              text-valign: center;
+                                              line-height: 30px;
+                                              font-size: 22px;
+                                              base-font-size: 22px;
+                                              height: 55px;
+                                              margin-left: -456px;
+                                              background:;'/>
+                                <input type='hidden' name='phone_password' value='' />
+                                <input name='show_or_hide_phone_password_button'
+                                       type='checkbox'
+                                       checked='false'
+                                       iconsize='35'
+                                       style='margin-left: -50px;
+                                              margin-top: 10px;'
+                                       CheckedBG='Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#909 151 35 35'
+                                       UncheckedBG='Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#969 147 35 35'
+                                       onclick='set_phone_password_show_or_hide' />
+                            </div>
+                        </div>
+                        <div align='center'
+                             style='margin-top: 10px;
+                                    width: 480px;'>
+                            <div>
+                                <input type="checkbox"
+                                       iconsize="18"
+                                       CheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#275 79 12 12"
+                                       UncheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#295 79 12 12"
+                                       style="float:left;margin-top:4px;min-width:90px;"
+                                       name="phone_agree"
+                                       onclick="update_register_phone_button_status_step_1"
+                                       checked="false"/>
+                                <div style="float:left; color: white;base-font-size: 17px;font-size: 17px;margin-left: 4px;">
+                                    <div for='phone_agree'
+                                         style="float:left;">
+                                        <%= L"我同意" %>
+                                    </div>
+                                    <div style="float:left;
+                                                color: #EDB853"
+                                         onclick="user_agreement()"><%= L"《用户许可协议》" %></div>
+                                    <div for='phone_agree'
+                                         style="float:left;">
+                                        <%= L'与' %>
+                                    </div>
+                                    <div style="float:left;
+                                                color: #EDB853"
+                                         onclick="user_privacy()"><%= L"《用户隐私协议》" %></div>
+                                    <div for='phone_agree'
+                                         style="float:left;">
+                                        <%= L"中的内容" %>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div align='center'
+                             style='width: 480px;
+                                    margin-top: 10px;'>
+                            <div width='100%'>
+                                <input type='button'
+                                       class='main_login_mobile_gray_button'
+                                       textscale=1.8
+                                       width='100%'
+                                       style='color: #FFFFFF;
+                                              height: 65px;
+                                              font-size: 15px;
+                                              base-font-size: 15px;'
+                                       onclick='next'
+                                       name='phone_register_button'
+                                       value='<%= L"下一步" %>' />
+                            </div>
+                        </div>
+                    </pe:container>
+                    <pe:container name='register_with_phone_number_step_2'
+                                  visible='false'
+                                  style="position: relative;
+                                         background:;">
+                        <div class='main_login_mobile_textfield'
+                             style="width: 480px;
+                                    height: 55px;
+                                    margin-left: 80px;">
+                            <input type='text'
+                                   name='phone_register_account'
+                                   spacing='10'
+                                   onchange='update_register_phone_button_status_step_2'
+                                   EmptyText='<%= L"为自己取一个个性账号名吧" %>'
+                                   style='height: 55px;
+                                       textcolor: #FFFFFF;
+                                       text-valign: center;
+                                       font-size: 22px;
+                                       base-font-size: 22px;
+                                       background:; ' />
+                        </div>
+                        <div align='center'
+                             style='margin-top: 130px;
+                                    width: 480px;'>
+                            <input type='button'
+                                   class='main_login_mobile_gray_button'
+                                   textscale=1.8
+                                   width='100%'
+                                   style='color: #FFFFFF;
+                                          height: 65px;
+                                          font-size: 15px;
+                                          base-font-size: 15px;'
+                                   onclick='phone_register'
+                                   name='phone_register_finish_button'
+                                   value='<%= L"注册" %>' />
+                        </div>
+                    </pe:container>
+                </pe:container>
+                <pe:container name='register_finish'
+                              visible='false'
+                              style='position: relative;
+                                     background:;
+                                     margin-top: -45px;'>
+                    <div align='center'
+                         style='width: 480px;'>
+                        <div style="margin-top: 10px;
+                                    width: 480px;
+                                    height: 68px;
+                                    background: url(Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#19 137 642 91)"></div>
+                        <div style="margin-top: 25px;
+                                    width: 480px;
+                                    height: 123.6px;
+                                    background: url(Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#18 256 668 172)">
+                            <div style="margin-left: 105px;margin-top: 12px;">
+                                <input type='text'
+                                       name='account_result'
+                                       style='width: 350px;
+                                              height: 45px;
+                                              text-valign: center;
+                                              font-weight: bolder;
+                                              base-font-size: 22px;
+                                              font-size: 22px;
+                                              text-singleline: true;
+                                              background:;'
+                                       value='' />
+                            </div>
+                            <div style="margin-left: 75px;margin-top: 8px;">
+                                <input type='text'
+                                       name='password_result'
+                                       style='width: 380px;
+                                              height: 45px;
+                                              text-valign: center;
+                                              font-weight: bolder;
+                                              base-font-size: 22px;
+                                              font-size: 22px;
+                                              text-singleline: true;
+                                              background:;'
+                                       value='' />
+                            </div>
+                        </div>
+                        <div style='margin-top: 17px;'>
+                            <input type='button'
+                                   class='main_login_mobile_green_button'
+                                   textscale=1.8
+                                   style='margin-top: 10px;
+                                          width: 480px;
+                                          height: 60px;
+                                          color: #FFFFFF;
+                                          font-size: 15px;
+                                          base-font-size: 16px;'
+                                   onclick='finish()'
+                                   value='<%= L"已完成" %>' />
+                        </div>
+                    </div>
+                </pe:container>
+            </pe:container>
+        </pe:mcml>
+    </body>
+</html>

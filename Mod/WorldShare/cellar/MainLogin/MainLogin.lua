@@ -257,6 +257,19 @@ function MainLogin:ShowLogin1()
 
         MainLoginLoginPage:FindControl('title_login').visible = false
         MainLoginLoginPage:FindControl('title_username').visible = true
+
+        -- for default button
+        for i = 1, 10000 do
+            Mod.WorldShare.Utils.SetTimeOut(function()
+                if MainLoginLoginPage then
+                    local node = MainLoginLoginPage:FindControl('start_button_focus')
+
+                    if node then
+                        node:Focus()
+                    end
+                end
+            end, 0 + i)
+        end
     else
         local PWDInfo = KeepworkServiceSession:LoadSigninInfo()
     
@@ -277,6 +290,19 @@ function MainLogin:ShowLogin1()
     
                         MainLoginLoginPage:FindControl('title_login').visible = false
                         MainLoginLoginPage:FindControl('title_username').visible = true
+
+                        -- for default button
+                        for i = 1, 10000 do
+                            Mod.WorldShare.Utils.SetTimeOut(function()
+                                if MainLoginLoginPage then
+                                    local node = MainLoginLoginPage:FindControl('start_button_focus')
+                
+                                    if node then
+                                        node:Focus()
+                                    end
+                                end
+                            end, 0 + i)
+                        end
                     end
                 end)
             else
@@ -293,6 +319,20 @@ function MainLogin:ShowAndroidLogin()
         0,
         'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginAndroidLogin.html',
         'Mod.WorldShare.cellar.MainLogin.MainAndroidLogin',
+        0,
+        0,
+        '_fi',
+        false,
+        -1
+    )
+end
+
+function MainLogin:ShowAndroidRegister()
+    Mod.WorldShare.Utils.ShowWindow(
+        0,
+        0,
+        'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginAndroidRegister.html',
+        'Mod.WorldShare.cellar.MainLogin.MainAndroidRegister',
         0,
         0,
         '_fi',
