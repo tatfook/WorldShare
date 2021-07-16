@@ -678,58 +678,64 @@ function SyncToDataSource:UpdateRecord(callback)
 
             end
 
-            StorageFilesApi:Token('preview.jpg', function(data, err)
-                if not data.token or not data.key then
-                    AfterHandlePreview()
-                    return false
-                end
+            StorageFilesApi:Token(
+                'preview.jpg',
+                function(data, err)
+                    if not data.token or not data.key then
+                        AfterHandlePreview()
+                        return false
+                    end
 
-                local targetDir = format("%s/%s/preview.jpg", Mod.WorldShare.Utils.GetWorldFolderFullPath(), commonlib.Encoding.Utf8ToDefault(self.currentWorld.foldername))
-                local content = LocalService:GetFileContent(targetDir)
+                    local targetDir = format("%s/%s/preview.jpg", Mod.WorldShare.Utils.GetWorldFolderFullPath(), commonlib.Encoding.Utf8ToDefault(self.currentWorld.foldername))
+                    local content = LocalService:GetFileContent(targetDir)
 
-                if not content then
-                    AfterHandlePreview()
-                    return false
-                end
+                    if not content then
+                        AfterHandlePreview()
+                        return false
+                    end
 
-                if not self.currentWorld or
-                   not self.currentWorld.kpProjectId or
-                   self.currentWorld.kpProjectId == 0 or
-                   not lastCommitSha then
-                    return false
-                end
+                    if not self.currentWorld or
+                    not self.currentWorld.kpProjectId or
+                    self.currentWorld.kpProjectId == 0 or
+                    not lastCommitSha then
+                        return false
+                    end
 
-                QiniuRootApi:Upload(
-                    data.token,
-                    data.key,
-                    self.currentWorld.kpProjectId .. '-preview-' .. lastCommitSha .. '.jpg',
-                    content,
-                    function( _, err)
-                        if err ~= 200 then
-                            AfterHandlePreview()
-                            return false
-                        end
-
-                        StorageFilesApi:List(data.key, function(listData, err)
-                            if listData and type(listData.data) ~= 'table' then
+                    QiniuRootApi:Upload(
+                        data.token,
+                        data.key,
+                        self.currentWorld.kpProjectId .. '-preview-' .. lastCommitSha .. '.jpg',
+                        content,
+                        function( _, err)
+                            if err ~= 200 then
                                 AfterHandlePreview()
                                 return false
                             end
 
-                            for key, item in ipairs(listData.data) do
-                                if item.key == data.key then
-                                    if item.downloadUrl then
-                                        AfterHandlePreview(item.downloadUrl)
-                                        return true
+                            StorageFilesApi:List(data.key, function(listData, err)
+                                if listData and type(listData.data) ~= 'table' then
+                                    AfterHandlePreview()
+                                    return false
+                                end
+
+                                for key, item in ipairs(listData.data) do
+                                    if item.key == data.key then
+                                        if item.downloadUrl then
+                                            AfterHandlePreview(item.downloadUrl)
+                                            return true
+                                        end
                                     end
                                 end
-                            end
- 
-                            AfterHandlePreview()
-                        end)
-                    end
-                )
-            end)
+    
+                                AfterHandlePreview()
+                            end)
+                        end
+                    )
+                end,
+                function()
+                    AfterHandlePreview()
+                end
+            )
         end
 
         local worldUserId = 0
