@@ -622,10 +622,20 @@ function SyncToDataSource:UpdateRecord(callback)
         
                                 extra.worldTagName = self.currentWorld.name
 
+                                -- 家园的话parentId传为-1
+                                local parent_id = self.currentWorld.parentProjectId
+                                if worldInfo and worldInfo.type == 1 then
+                                    local folder_name = self.currentWorld.foldername or ""
+                                    local _, end_index = string.find(folder_name, "_main")
+                                    if end_index and end_index == #folder_name then
+                                        parent_id = -1
+                                    end
+                                end
+
                                 KeepworkServiceProject:UpdateProject(
                                     self.currentWorld.kpProjectId,
                                     {
-                                        parentId = self.currentWorld.parentProjectId,
+                                        parentId = parent_id,
                                         extra = extra
                                     }
                                 )
