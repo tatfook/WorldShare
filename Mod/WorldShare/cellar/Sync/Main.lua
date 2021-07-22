@@ -247,13 +247,31 @@ function SyncMain:SyncToDataSourceByWorldName(worldName, callback)
                     currentWorld.parentProjectId = worldTag.parentProjectId
                 end
 
-                Mod.WorldShare.Store:Set('world/currentWorld', currentWorld)
+                local members = currentWorld.members or {}
+                if currentWorld.memberCount and currentWorld.memberCount > 0 and #members == 0 then
+                    KeepworkServiceProject:GetMembers(currentWorld.kpProjectId, function(membersData, err)
+                        local members = {}
+                        for key, item in ipairs(membersData) do
+                            members[#members + 1] = item.username
+                        end
+                        currentWorld.members = members
+                        Mod.WorldShare.Store:Set('world/currentWorld', currentWorld)
 
-                SyncMain:SyncToDataSource(function(result)
-                    if callback and type(callback) == 'function' then
-                        callback(result, currentWorld.kpProjectId)
-                    end
-                end)
+                        SyncMain:SyncToDataSource(function(result)
+                            if callback and type(callback) == 'function' then
+                                callback(result, currentWorld.kpProjectId)
+                            end
+                        end)
+                    end)
+                else
+                    Mod.WorldShare.Store:Set('world/currentWorld', currentWorld)
+
+                    SyncMain:SyncToDataSource(function(result)
+                        if callback and type(callback) == 'function' then
+                            callback(result, currentWorld.kpProjectId)
+                        end
+                    end)
+                end
             end)
         else
             LocalServiceWorld:SetWorldInstanceByFoldername(worldName)
