@@ -38,7 +38,7 @@
         curGame = Page:GetRequestParam("curGame")
     ]]>
 </script>
-<aries:window mode="thin" width="420" title='<%=format(L"关于%s", curGame)%>' onclose="OnClose">
+<aries:window mode="thin" width="420" title='<%=format(L"关于%s", curGame)%>'>
     <div class="default" style="margin:20px">
         <div style="">
             <%=L"最新版本为:"%><%=Eval("latestVersion")%>

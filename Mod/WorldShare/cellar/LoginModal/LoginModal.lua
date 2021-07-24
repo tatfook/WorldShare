@@ -32,6 +32,10 @@ local LoginModal = NPL.export()
 
 -- @param callback: called after successfully signed in. 
 function LoginModal:Init(callback)
+    if System.options.isForceOffline then
+        return
+    end
+
     Mod.WorldShare.Store:Remove('user/AfterLogined')
 
     if callback and type(callback) == "function" then
@@ -46,6 +50,10 @@ end
 -- @param desc: login desc
 -- @param callback: after login function
 function LoginModal:CheckSignedIn(desc, callback)
+    if System.options.isForceOffline then
+        return
+    end
+
     if KeepworkServiceSession:IsSignedIn() then
         if type(callback) == "function" then
             callback(true)
@@ -61,6 +69,10 @@ function LoginModal:CheckSignedIn(desc, callback)
 end
 
 function LoginModal:ShowPage()
+    if System.options.isForceOffline then
+        return
+    end
+
     local RegisterModalPage = Mod.WorldShare.Store:Get("page/Mod.WorldShare.RegisterModal")
 
     if RegisterModalPage then

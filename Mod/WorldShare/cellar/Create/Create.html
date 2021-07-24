@@ -221,6 +221,10 @@
                     end
 
                     function close()
+                        if System.options.isForceOffline then
+                            return
+                        end
+
                         local function handle()
                             Create:Close()
 
