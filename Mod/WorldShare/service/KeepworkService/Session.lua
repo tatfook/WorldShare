@@ -5,7 +5,7 @@ Date:  2019.09.22
 Place: Foshan
 use the lib:
 ------------------------------------------------------------
-local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
 ------------------------------------------------------------
 ]]
 

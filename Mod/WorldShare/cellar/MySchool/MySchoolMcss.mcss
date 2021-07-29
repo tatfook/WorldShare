@@ -1,0 +1,41 @@
+--[[
+Title: My School Mcss
+Author(s):  big
+Date:  2021.7.22
+Desc: 
+use the lib:
+------------------------------------------------------------
+<style type="type/mcss" src='Mod/WorldShare/cellar/MySchool/MySchoolMcss.mcss'>
+------------------------------------------------------------
+]]
+
+{
+    header_bar = {
+        background = 'Texture/Aries/Creator/paracraft/my_school_32bits.png#3 243 30 82',
+    },
+    join_school_icon = {
+        background = 'Texture/Aries/Creator/paracraft/my_school_32bits.png#0 0 211 60',
+        width = 211,
+        height = 60
+    },
+    close = {
+        background = 'Texture/Aries/Creator/paracraft/my_school_32bits.png#75 180 32 32',
+        width = 32,
+        height = 32
+    },
+    list_background = {
+        background = 'Texture/Aries/Creator/paracraft/my_school_32bits.png#139 164 32 32:15 15 15 15',
+    },
+    text_field_background = {
+        background = 'Texture/Aries/Creator/paracraft/my_school_32bits.png#6 107 154 42:16 16 16 16',
+    },
+    down_button = {
+        background = 'Texture/Aries/Creator/paracraft/my_school_32bits.png#172 106 50 46',
+        width = 50,
+        height = 46
+    },
+    item_button = {
+        background = 'Texture/Aries/Creator/paracraft/my_school_32bits.png#3 161 48 70:16 16 16 16',
+        color = '#666666'
+    }
+}

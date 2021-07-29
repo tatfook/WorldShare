@@ -1,16 +1,21 @@
 --[[
 Title: my school page
 Author(s):  big
-Date: 2019.09.11
-Desc: 
+CreateDate: 2019.09.11
+ModifyDate: 2021.07.28
+Place: Foshan
+Desc: set user school.
 use the lib:
 ------------------------------------------------------------
-local MySchool = NPL.load("(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua")
+local MySchool = NPL.load('(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua')
+MySchool:Show()
+MySchool:ShowJoinSchool()
 ------------------------------------------------------------
 ]]
 
 -- libs
-local StringUtil = commonlib.gettable("mathlib.StringUtil")
+local StringUtil = commonlib.gettable('mathlib.StringUtil')
+local Screen = commonlib.gettable('System.Windows.Screen')
 
 -- service
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
@@ -144,20 +149,39 @@ function MySchool:ShowJoinSchool(callback)
         }
     }
 
-    self:SetResult({
-        {
-            text = L"在这里显示筛选的结果",
-            value = 0,
-            selected = true,
-        },
-    })
+    self:SetResult({})
 
     self.curId = 0
     self.kind = nil
     self.joinSchoolCallback = callback
 
-    local params1 = Mod.WorldShare.Utils.ShowWindow(600, 420, "(ws)Theme/MySchool/JoinSchool.html", "Mod.WorldShare.JoinSchool", nil, nil, nil, false, 1)
-    local params2 = Mod.WorldShare.Utils.ShowWindow(442, 100, "(ws)Theme/MySchool/JoinSchoolResult.html", "Mod.WorldShare.JoinSchoolResult", nil, 20, nil, false, 2)
+    local params = Mod.WorldShare.Utils.ShowWindow(
+        {
+            url = '(ws)MySchool/JoinSchool.html',
+            name = 'Mod.WorldShare.JoinSchool',
+            isShowTitleBar = false,
+            DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
+            style = CommonCtrl.WindowFrame.ContainerStyle,
+            zorder = 1,
+            allowDrag = false,
+            bShow = nil,
+            directPosition = true,
+            align = "_fi",
+            x = 0,
+            y = 0,
+            width = 0,
+            height = 0,
+            cancelShowAnimation = true,
+            bToggleShowHide = true,
+            DesignResolutionWidth = 1280,
+            DesignResolutionHeight = 720,
+        }
+    )
+
+    local resultPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.JoinSchool.Result')
+
+    params._page:CallMethod('province_list_datasource', 'SetDataSource', self.provinces)
+    params._page:CallMethod('province_list_datasource', 'DataBind')
 
     self:GetProvinces(function(data)
         if type(data) ~= "table" then
@@ -165,6 +189,10 @@ function MySchool:ShowJoinSchool(callback)
         end
 
         self.provinces = data
+
+        params._page:CallMethod('province_list_datasource', 'SetDataSource', self.provinces)
+        params._page:CallMethod('province_list_datasource', 'DataBind')
+
         local region = Mod.WorldShare.Store:Get('user/region')
 
         if region and type(region) == 'table' and region.info then
@@ -175,6 +203,7 @@ function MySchool:ShowJoinSchool(callback)
 
                     if item.id == region.info.state.id then
                         item.selected = true
+                        params._page:SetUIValue('province', item.text)
                     end
                 end
             end
@@ -182,6 +211,9 @@ function MySchool:ShowJoinSchool(callback)
             -- set city field
             self:GetCities(region.info.state.id, function(data)
                 self.cities = data
+
+                params._page:CallMethod('city_list_datasource', 'SetDataSource', self.cities)
+                params._page:CallMethod('city_list_datasource', 'DataBind')
 
                 if self.cities and
                     type(self.cities) == 'table' and
@@ -192,6 +224,7 @@ function MySchool:ShowJoinSchool(callback)
                         
                         if item.id == region.info.city.id then
                             item.selected = true
+                            params._page:SetUIValue('city', item.text)
                         end
                     end
                 end
@@ -199,24 +232,39 @@ function MySchool:ShowJoinSchool(callback)
                 self:GetAreas(region.info.city.id, function(data)
                     self.areas = data
 
+                    params._page:CallMethod('area_list_datasource', 'SetDataSource', self.areas)
+                    params._page:CallMethod('area_list_datasource', 'DataBind')
+
                     self.curId = region.info.city.id
                     self.lastCityId = region.info.city.id
 
                     self:GetSearchSchoolResult(region.info.city.id, nil, function(data)
-                        self:RefreshJoinSchool()
+                        resultPage:GetNode('school_list'):SetUIAttribute('DataSource', self.result)
                     end)
                 end)
             end)
-        else
-            self:RefreshJoinSchool()
         end
     end)
 
-    params1._page.OnClose = function()
-        if params2._page then
-            params2._page:CloseWindow()
-        end
+    if resultPage then
+        resultPage:GetNode('school_list'):SetUIAttribute('DataSource', {})
     end
+
+    Screen:Connect("sizeChanged", MySchool, MySchool.OnScreenSizeChange, "UniqueConnection")
+
+    params._page.OnClose = function()
+        Screen:Disconnect("sizeChanged", MySchool, MySchool.OnScreenSizeChange)
+    end
+end
+
+function MySchool.OnScreenSizeChange()
+    local joinSchoolPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.JoinSchool')
+
+    if joinSchoolPage then
+        joinSchoolPage:CloseWindow()
+    end
+
+    MySchool:ShowJoinSchool()
 end
 
 function MySchool:ShowJoinSchoolAfterRegister(callback)
@@ -268,13 +316,7 @@ function MySchool:ShowJoinSchoolAfterRegister(callback)
         }
     }
 
-    self:SetResult({
-        {
-            text = L"在这里显示筛选的结果",
-            value = 0,
-            selected = true,
-        },
-    })
+    self:SetResult({})
 
     self.curId = 0
     self.kind = nil
@@ -407,7 +449,7 @@ function MySchool:GetProvinces(callback)
             end
 
             data[#data + 1] = {
-                text = L"省",
+                text = L'省',
                 value = 0,
                 selected = true,
             }
@@ -430,7 +472,7 @@ function MySchool:GetCities(id, callback)
             end
 
             data[#data + 1] = {
-                text = L"市",
+                text = L'市',
                 value = 0,
                 selected = true,
             }
@@ -453,7 +495,7 @@ function MySchool:GetAreas(id, callback)
             end
 
             data[#data + 1] = {
-                text = L"区（县、镇、街道）",
+                text = L'区（县、镇、街道）',
                 value = 0,
                 selected = true,
             }
@@ -481,13 +523,7 @@ end
 function MySchool:GetSearchSchoolResultByName(name, callback)
     if not name or type(name) ~= "string" or #name == 0 then
         if callback and type(callback) == "function" then
-            self:SetResult({
-                {
-                    text = L"在这里显示筛选的结果",
-                    value = 0,
-                    selected = true,
-                },
-            })
+            self:SetResult({})
 
             callback()
         end
@@ -543,7 +579,7 @@ end
 
 function MySchool:SetResult(data)
     self.result = data
-    
+
     if self.result and type(self.result) == 'table' then
         -- find out same school name
         for aKey, aItem in ipairs(self.result) do

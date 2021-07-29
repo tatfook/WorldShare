@@ -1,0 +1,825 @@
+<html>
+    <body>
+        <pe:mcml>
+            <script type="text/npl" refresh="false">
+                <![CDATA[
+                    -- bottles
+                    local MySchool = NPL.load('./MySchool.lua')
+                    local CommonLoadWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/CommonLoadWorld.lua')
+
+                    -- service
+                    local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+
+                    -- libs
+                    local InternetLoadWorld = commonlib.gettable('MyCompany.Aries.Creator.Game.Login.InternetLoadWorld')
+
+                    local page = document:GetPageCtrl()
+                    local result_page
+
+                    local cur_kind = ''
+
+                    function close()
+                        page:CloseWindow()
+                    end
+
+                    function sel_kind(name)
+                        local primary_school_node = page:FindControl('primary_school')
+                        local middle_school_node = page:FindControl('middle_school')
+                        local college_node = page:FindControl('college')
+                        local multiple_node = page:FindControl('multiple')
+
+                        local bg = 'Texture/Aries/Creator/paracraft/my_school_32bits.png;3 161 48 70:16 16 16 16'
+
+                        local function set_default(node)
+                            node:SetCurrentState('normal');
+                            node:GetTexture(nil).texture = bg;
+                            node.color="230 230 230";
+                        end
+
+                        set_default(primary_school_node)
+                        set_default(middle_school_node)
+                        set_default(college_node)
+                        set_default(multiple_node)
+
+                        local cur_node
+                        local kind_value
+
+                        if name == 'primary_school' then
+                            cur_node = primary_school_node
+                            kind_value = L"小学"
+                        elseif name == 'middle_school' then
+                            cur_node = middle_school_node
+                            kind_value = L"中学"
+                        elseif name == 'college' then
+                            cur_node = college_node
+                            kind_value = L"大学"
+                        elseif name == 'multiple' then
+                            cur_node = multiple_node
+                            kind_value = L"综合"
+                        end
+
+                        if cur_node then
+                            cur_node:SetCurrentState('normal');
+                            cur_node:GetTexture(nil).texture = bg;
+                            cur_node.color="255 255 255";
+
+                            if cur_kind == name then
+                                cur_node.color="230 230 230";
+
+                                cur_kind = ''
+
+                                MySchool.kind = nil
+                            else
+                                cur_kind = name
+
+                                MySchool.kind = kind_value
+                            end
+
+                            -- show loading msg
+                            result_page.fetching()
+
+                            if MySchool.searchText and MySchool.searchText ~= "" then
+                                MySchool:GetSearchSchoolResultByName(MySchool.searchText, function()
+                                    result_page.set_cur_index(1)
+                                    result_page:GetNode('school_list'):SetUIAttribute('DataSource', MySchool.result)
+                                end)
+
+                                return
+                            end
+
+                            if not MySchool.curId or MySchool.curId == 0 then
+                                return
+                            end
+
+                            MySchool:GetSearchSchoolResult(MySchool.curId, MySchool.kind, function(data)
+                                result_page.set_cur_index(1)
+                                result_page:GetNode('school_list'):SetUIAttribute('DataSource', MySchool.result)
+                            end)
+                        end
+                    end
+
+                    local cur_toggle_type
+                    local is_province_list_show = false
+
+                    function toggle_province_list()
+                        local click_mask_node = page:FindControl('click_mask')
+                        local province_list_node = page:FindControl('province_list')
+                        local province_down_button_node = page:FindControl('province_down_button')
+
+                        local province_down_x, province_down_y = province_down_button_node:GetAbsPosition()
+
+                        province_list_node.x = province_down_x - 110
+                        province_list_node.y = province_down_y + 46
+
+                        if is_province_list_show then
+                            province_list_node.visible = false
+                            province_down_button_node.rotation = 0
+                            click_mask_node.visible = false
+                            
+                            is_province_list_show = false
+                            cur_toggle_type = nil
+                        else
+                            province_list_node.visible = true
+                            province_down_button_node.rotation = 3.14
+                            click_mask_node.visible = true
+
+                            is_province_list_show = true
+                            cur_toggle_type = 1
+
+                            page:CallMethod('province_list_datasource', 'ScrollToRow', 1)
+                        end
+                    end
+
+                    function sel_province_item(index, _, toggle)
+                        if not index or type(index) ~= 'string' then
+                            if not toggle then
+                                toggle_province_list()
+                            end
+                            return
+                        end
+
+                        local _index = string.match(index, 'province_index_(%d+)')
+
+                        if not _index or type(_index) ~= 'string' or not tonumber(_index) then
+                            if not toggle then
+                                toggle_province_list()
+                            end
+                            return
+                        end
+
+                        local cur_province = MySchool.provinces[tonumber(_index)]
+
+                        if cur_province and type(cur_province) == 'table' then
+                            page:SetUIValue('province', cur_province.text)
+                            page:SetUIValue('city', L'市')
+                            page:SetUIValue('areas', L'区（县、镇、街道）')
+
+                            MySchool.curId = cur_province.id
+                            MySchool.lastProvinceId = MySchool.curId
+
+                            -- show loading msg
+                            result_page.fetching()
+
+                            MySchool:GetCities(cur_province.id, function(data)
+                                MySchool.cities = data
+
+                                page:CallMethod('city_list_datasource', 'SetDataSource', MySchool.cities)
+                                page:CallMethod('city_list_datasource', 'DataBind')
+
+                                MySchool.areas = {
+                                    {
+                                        text = L'区（县、镇、街道）',
+                                        value = 0,
+                                        selected = true,
+                                    }
+                                }
+
+                                page:CallMethod('area_list_datasource', 'SetDataSource', MySchool.areas)
+                                page:CallMethod('area_list_datasource', 'DataBind')
+
+                                if MySchool.searchText and MySchool.searchText ~= "" then
+                                    MySchool:GetSearchSchoolResultByName(MySchool.searchText, function()
+                                        result_page.set_cur_index(1)
+                                        result_page:GetNode('school_list'):SetUIAttribute('DataSource', MySchool.result)
+                                    end)
+
+                                    return
+                                end
+
+                                MySchool:GetSearchSchoolResult(cur_province.id, MySchool.kind, function()
+                                    result_page.set_cur_index(1)
+                                    result_page:GetNode('school_list'):SetUIAttribute('DataSource', MySchool.result)
+                                end)
+                            end)
+                        end
+
+                        if not toggle then
+                            toggle_province_list()
+                        end
+                    end
+
+                    local is_city_list_show = false
+
+                    function toggle_city_list()
+                        local click_mask_node = page:FindControl('click_mask')
+                        local city_list_node = page:FindControl('city_list')
+                        local city_down_button_node = page:FindControl('city_down_button')
+
+                        local city_down_x, city_down_y = city_down_button_node:GetAbsPosition()
+
+                        city_list_node.x = city_down_x - 110
+                        city_list_node.y = city_down_y + 46
+
+                        if is_city_list_show then
+                            city_list_node.visible = false
+                            city_down_button_node.rotation = 0
+                            click_mask_node.visible = false
+
+                            is_city_list_show = false
+                            cur_toggle_type = nil
+                        else
+                            city_list_node.visible = true
+                            city_down_button_node.rotation = 3.14
+                            click_mask_node.visible = true
+
+                            is_city_list_show = true
+                            cur_toggle_type = 2
+
+                            page:CallMethod('city_list_datasource', 'ScrollToRow', 1)
+                        end
+                    end
+
+                    function sel_city_item(index, _, toggle)
+                        if not index or type(index) ~= 'string' then
+                            if not toggle then
+                                toggle_city_list()
+                            end
+                            return
+                        end
+
+                        local _index = string.match(index, 'city_index_(%d+)')
+
+                        if not _index or type(_index) ~= 'string' or not tonumber(_index) then
+                            if not toggle then
+                                toggle_city_list()
+                            end
+                            return
+                        end
+
+                        local cur_city = MySchool.cities[tonumber(_index)]
+
+                        if cur_city and type(cur_city) == 'table' then
+                            page:SetUIValue('city', cur_city.text)
+                            page:SetUIValue('areas', L'区（县、镇、街道）')
+
+                            if cur_city.value == 0 then
+                                for key, item in ipairs(MySchool.provinces or {}) do
+                                    if item.id == MySchool.lastProvinceId then
+                                        sel_province_item('province_index_' .. (key or 0), nil, true)
+                                        break
+                                    end
+                                end
+
+                                if not toggle then
+                                    toggle_city_list()
+                                end
+                                return
+                            end
+
+                            MySchool.curId = cur_city.id
+                            MySchool.lastCityId = MySchool.curId
+
+                            -- show loading msg
+                            result_page.fetching()
+
+                            MySchool:GetAreas(cur_city.id, function(data)
+                                MySchool.areas = data
+
+                                page:CallMethod('area_list_datasource', 'SetDataSource', MySchool.areas)
+                                page:CallMethod('area_list_datasource', 'DataBind')
+
+                                if MySchool.searchText and MySchool.searchText ~= "" then
+                                    MySchool:GetSearchSchoolResultByName(MySchool.searchText, function()
+                                        result_page.set_cur_index(1)
+                                        result_page:GetNode('school_list'):SetUIAttribute('DataSource', MySchool.result)
+                                    end)
+
+                                    return
+                                end
+
+                                MySchool:GetSearchSchoolResult(cur_city.id, MySchool.kind, function()
+                                    result_page.set_cur_index(1)
+                                    result_page:GetNode('school_list'):SetUIAttribute('DataSource', MySchool.result)
+                                end)
+                            end)
+                        end
+
+                        if not toggle then
+                            toggle_city_list()
+                        end
+                    end
+
+                    local is_area_list_show = false
+
+                    function toggle_area_list()
+                        local click_mask_node = page:FindControl('click_mask')
+                        local area_list_node = page:FindControl('area_list')
+                        local area_down_button_node = page:FindControl('area_down_button')
+
+                        local area_down_x, area_down_y = area_down_button_node:GetAbsPosition()
+
+                        area_list_node.x = area_down_x - 290
+                        area_list_node.y = area_down_y + 46
+
+                        if is_area_list_show then
+                            area_list_node.visible = false
+                            area_down_button_node.rotation = 0
+                            click_mask_node.visible = false
+
+                            is_area_list_show = false
+                            cur_toggle_type = nil
+                        else
+                            area_list_node.visible = true
+                            area_down_button_node.rotation = 3.14
+                            click_mask_node.visible = true
+
+                            is_area_list_show = true
+                            cur_toggle_type = 3
+
+                            page:CallMethod('area_list_datasource', 'ScrollToRow', 1)
+                        end
+                    end
+
+                    function sel_area_item(index)
+                        if not index or type(index) ~= 'string' then
+                            toggle_area_list()
+                            return
+                        end
+
+                        local _index = string.match(index, 'area_index_(%d+)')
+
+                        if not _index or type(_index) ~= 'string' or not tonumber(_index) then
+                            toggle_area_list()
+                            return
+                        end
+
+                        local cur_area = MySchool.areas[tonumber(_index)]
+
+                        if cur_area and type(cur_area) == 'table' then
+                            page:SetUIValue('areas', cur_area.text)
+
+                            if cur_area.value == 0 then
+                                for key, item in ipairs(MySchool.cities or {}) do
+                                    if item.id == MySchool.lastCityId then
+                                        sel_city_item('city_index_' .. (key or 0), nil, true)
+                                        break
+                                    end
+                                end
+
+                                toggle_area_list()
+                                return
+                            end
+
+                            MySchool.curId = cur_area.id
+
+                            -- show loading msg
+                            result_page.fetching()
+
+                            if MySchool.searchText and MySchool.searchText ~= "" then
+                                MySchool:GetSearchSchoolResultByName(MySchool.searchText, function()
+                                    result_page.set_cur_index(1)
+                                    result_page:GetNode('school_list'):SetUIAttribute('DataSource', MySchool.result)
+                                end)
+
+                                return
+                            end
+
+                            MySchool:GetSearchSchoolResult(cur_area.id, MySchool.kind, function()
+                                result_page.set_cur_index(1)
+                                result_page:GetNode('school_list'):SetUIAttribute('DataSource', MySchool.result)
+                            end)
+                        end
+
+                        toggle_area_list()
+                    end
+
+                    function remove_mask()
+                        if cur_toggle_type == 1 then
+                            toggle_province_list()
+                        elseif cur_toggle_type == 2 then
+                            toggle_city_list()
+                        elseif cur_toggle_type == 3 then
+                            toggle_area_list()
+                        end
+                    end
+
+                    function on_enter_text(name, mcmlNode)
+                        local text = mcmlNode:GetUIValue()
+
+                        MySchool.searchText = text
+
+                        if text and text == "" and MySchool.curId ~= 0 then
+                            MySchool:GetSearchSchoolResult(MySchool.curId, MySchool.kind, function()
+                                result_page:GetNode('school_list'):SetUIAttribute('DataSource', MySchool.result)
+                            end)
+
+                            return
+                        end
+
+                        MySchool:GetSearchSchoolResultByName(text, function()
+                            result_page:GetNode('school_list'):SetUIAttribute('DataSource', MySchool.result)
+                        end)
+                    end
+
+                    function join_school()
+                        if not MySchool.result or type(MySchool.result) ~= 'table' then
+                            return
+                        end
+
+                        local cur_sel_school = MySchool.result[result_page.get_cur_index()]
+
+                        if not cur_sel_school then
+                            _guihelper.MessageBox(L'请选择一所学校')
+                            return
+                        end
+
+                        Mod.WorldShare.MsgBox:Wait()
+
+                        MySchool:ChangeSchool(cur_sel_school.value, function(bSuccessed)
+                            Mod.WorldShare.MsgBox:Close()
+
+                            if bSuccessed then
+                                page:CloseWindow()
+                                KeepworkServiceSession:CheckVerify()
+                                GameLogic.AddBBS(nil, L"加入学校成功", 3000, "0 255 0")
+                            else
+                                GameLogic.AddBBS(nil, L"加入学校失败", 3000, "255 0 0")
+                            end
+
+                            if MySchool.callback and type(MySchool.callback) == 'function' then
+                                MySchool.callback()
+                            end
+
+                            if MySchool.joinSchoolCallback and type(MySchool.joinSchoolCallback) == 'function' then
+                                MySchool.joinSchoolCallback()
+                            end
+                        end)
+                    end
+
+                    Mod.WorldShare.Utils.SetTimeOut(function()
+                        result_page = Mod.WorldShare.Store:Get('page/Mod.WorldShare.JoinSchool.Result')
+                    end, 0)
+                ]]>
+            </script>
+            <style type="type/mcss" src='Mod/WorldShare/cellar/MySchool/MySchoolMcss.mcss'></style>
+            <style type="type/mcss" src='Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss'></style>
+            <pe:container
+                alignment='_fi'
+                zorder='-1'
+                width='100%'
+                height='100%'
+                style='position:relative;background-color:#dcdcdc'>
+            </pe:container>
+            <pe:container
+                alignment='_fi'
+                zorder='-1'
+                width='100%'
+                height='100%'
+                class='red_summer_camp_bg'>
+            </pe:container>
+            <!-- click mask -->
+            <pe:container visible='false'
+                          name='click_mask'
+                          onclick='remove_mask()'
+                          alignment='_fi'
+                          zorder=1
+                          width='10000px'
+                          height='10000px;'
+                          style='position: absolute;
+                                 left: -5000;
+                                 top: -5000;
+                                 background:;' />
+            <!-- province list -->
+            <pe:container name='province_list'
+                          width='160px'
+                          zorder=2
+                          visible='false'
+                          class='text_field_background'
+                          style='position: absolute;
+                                 height: 200px;
+                                 padding-top: 10px;
+                                 padding-bottom: 10px;'>
+                <pe:gridview name='province_list_datasource'
+                             DataSource='<%= {} %>'
+                             AllowPaging='false'
+                             VerticalScrollBarStep='20'
+                             DefaultNodeHeight='30'
+                             CellPadding='0'
+                             ItemsPerLine='1'>
+                    <Columns>
+                        <div width='100%'>
+                            <input type='button'
+                                   width='100%'
+                                   style='height: 30px;
+                                          background:;
+                                          background2: url(Texture/whitedot.png);
+                                          background2-color: #c5c5c5;'
+                                   value='<%= Eval("text") %>'
+                                   name='<%= "province_index_" .. Eval("index") %>'
+                                   onclick='sel_province_item'/>
+                        </div>
+                    </Columns>
+                </pe:gridview>
+            </pe:container>
+            <!-- city list -->
+            <pe:container name='city_list'
+                          width='160px'
+                          zorder=2
+                          visible='false'
+                          class='text_field_background'
+                          style='position: absolute;
+                                 height: 200px;
+                                 padding-top: 10px;
+                                 padding-bottom: 10px;'>
+                <pe:gridview name='city_list_datasource'
+                             DataSource='<%= {} %>'
+                             AllowPaging='false'
+                             VerticalScrollBarStep='20'
+                             DefaultNodeHeight='30'
+                             CellPadding='0'
+                             ItemsPerLine='1'>
+                    <Columns>
+                        <div width='100%'>
+                            <input type='button'
+                                   width='100%'
+                                   style='height: 30px;
+                                          background:;
+                                          background2: url(Texture/whitedot.png);
+                                          background2-color: #c5c5c5;'
+                                   value='<%= Eval("text") %>'
+                                   name='<%= "city_index_" .. Eval("index") %>'
+                                   onclick='sel_city_item'/>
+                        </div>
+                    </Columns>
+                </pe:gridview>
+            </pe:container>
+            <!-- area list -->
+            <pe:container name='area_list'
+                          width='340px'
+                          zorder=2
+                          visible='false'
+                          class='text_field_background'
+                          style='position: absolute;
+                                 height: 200px;
+                                 padding-top: 10px;
+                                 padding-bottom: 10px;'>
+                <pe:gridview name='area_list_datasource'
+                             DataSource='<%= {} %>'
+                             AllowPaging='false'
+                             VerticalScrollBarStep='20'
+                             DefaultNodeHeight='30'
+                             CellPadding='0'
+                             ItemsPerLine='1'>
+                    <Columns>
+                        <div width='100%'>
+                            <input type='button'
+                                   width='100%'
+                                   style='height: 30px;
+                                          background:;
+                                          background2: url(Texture/whitedot.png);
+                                          background2-color: #c5c5c5;'
+                                   value='<%= Eval("text") %>'
+                                   name='<%= "area_index_" .. Eval("index") %>'
+                                   onclick='sel_area_item'/>
+                        </div>
+                    </Columns>
+                </pe:gridview>
+            </pe:container>
+            <div>
+                <pe:container zorder='1'
+                              width='100%'
+                              class='header_bar'>
+                    <div align='right'
+                         onclick='close'
+                         class='close'
+                         style='position: relative;
+                                margin-right: 25px;
+                                margin-top: 25px;'></div>
+                    <div class='join_school_icon'
+                         style='float: left;
+                                margin-top: 10px;
+                                margin-bottom: 10px;
+                                margin-left: 30px;'></div>
+                </pe:container>
+                <pe:container alignment='_ct'
+                              zorder='-1'
+                              width='1280'
+                              height='720'
+                              style='margin-left:-640px;
+                                     margin-top:-340px;
+                                     background:;'>
+                    <div width='100%' style='padding-top: 8px;'>
+                        <pe:container alignment="_ct"
+                                      style="margin-left:-640px;margin-top:-360px;width:1280px;height:720px;background:url();">
+                            <!--背景水印-->
+                            <div>
+                                <div style="position:relative;margin-left:24px;margin-top:104px;width:512px;height:256px;background:url(Texture/Aries/Creator/keepwork/RedSummerCamp/courses/watermark_bg_32bits.png);" />
+                                <div style="position:relative;margin-left:557px;margin-top:26px;width:512px;height:256px;background:url(Texture/Aries/Creator/keepwork/RedSummerCamp/courses/watermark_bg_32bits.png);" />
+                                <div style="position:relative;margin-left:103px;margin-top:282px;width:512px;height:256px;background:url(Texture/Aries/Creator/keepwork/RedSummerCamp/courses/watermark_bg_32bits.png);" />
+                                <div style="position:relative;margin-left:879px;margin-top:311px;width:512px;height:256px;background:url(Texture/Aries/Creator/keepwork/RedSummerCamp/courses/watermark_bg_32bits.png);" />
+                                <div style="position:relative;margin-left:438px;margin-top:477px;width:512px;height:256px;background:url(Texture/Aries/Creator/keepwork/RedSummerCamp/courses/watermark_bg_32bits.png);" />
+                            </div>
+                        </pe:container>
+                        <pe:container zorder=1
+                                      width='100%'
+                                      style='background:;'>
+                            <!-- bottom content -->
+                            <div width='30%'
+                                style='float: left;'>
+                                <div align='center'
+                                    style='width: 340px;
+                                           margin-bottom: 20px;'>
+                                    <div style='font-size: 22px;
+                                                base-font-size: 22px;
+                                                margin-bottom: 15px;'>
+                                        <%= L'请输入学校名称或编号搜索：' %>
+                                    </div>
+                                    <div style='margin-bottom: 10px;'>
+                                        <input type='text'
+                                               EmptyText='<%= L"请输入学校名称或编号搜索" %>'
+                                               EmptyTextColor='#FF666666'
+                                               spacing=10
+                                               onchange='on_enter_text'
+                                               class='text_field_background'
+                                               style='width: 338px;
+                                                      height: 52px;
+                                                      font-size: 22px;
+                                                      base-font-size: 22px;
+                                                      text-valign: center;' />
+                                    </div>
+                                    <div style='font-size: 22px;
+                                                base-font-size: 22px;
+                                                margin-bottom: 10px;'>
+                                        <%= L'请选择地区及学校类型：' %>
+                                    </div>
+                                    <div style='margin-bottom: 10px;'>
+                                        <div width='50%'
+                                             style='float: left;
+                                                    padding-right: 10px;'>
+                                            <div style='position: relative;'>
+                                                <input type='button'
+                                                       class='down_button'
+                                                       align='right'
+                                                       style='margin-right: -1px;'
+                                                       zorder=2
+                                                       name='province_down_button'
+                                                       onclick='toggle_province_list'
+                                                       value='' />
+                                            </div>
+                                            <div class='text_field_background'
+                                                 style='height: 45px;'>
+                                                <pe:label name='province'
+                                                          value='<%= L"省" %>'
+                                                          style='background:;
+                                                                 color: #666666;
+                                                                 height: 25px;
+                                                                 font-size: 21px;
+                                                                 base-font-size: 21px;
+                                                                 margin-top: 5px;
+                                                                 margin-left: 14px;' />
+                                            </div>
+                                        </div>
+                                        <div width='50%'
+                                             style='float: left;
+                                                    padding-left: 10px;'>
+                                            <div style='position: relative;'>
+                                                <input type='button'
+                                                       class='down_button'
+                                                       name='city_down_button'
+                                                       align='right'
+                                                       style='margin-right: -1px;'
+                                                       zorder=3
+                                                       value=''
+                                                       onclick='toggle_city_list' />
+                                            </div>
+                                            <div class='text_field_background'
+                                                 style='height: 45px;'>
+                                                <pe:label name='city'
+                                                          value='<%= L"市" %>'
+                                                          style='background:;
+                                                                 color: #666666;
+                                                                 height: 25px;
+                                                                 font-size: 21px;
+                                                                 base-font-size: 21px;
+                                                                 margin-top: 5px;
+                                                                 margin-left: 14px;' />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style='margin-bottom: 10px;'>
+                                        <div width='100%'
+                                             class='text_field_background'
+                                             style='height: 45px;'>
+                                            <div style='position: relative;'>
+                                                <input type='button'
+                                                       class='down_button'
+                                                       name='area_down_button'
+                                                       align='right'
+                                                       style='margin-right: -1px;'
+                                                       zorder=2
+                                                       value=''
+                                                       onclick='toggle_area_list' />
+                                            </div>
+                                            <div>
+                                                <pe:label name='areas'
+                                                          value='<%= L"区（县、镇、街道）" %>'
+                                                          style='background:;
+                                                                 color: #666666;
+                                                                 height: 25px;
+                                                                 font-size: 21px;
+                                                                 base-font-size: 21px;
+                                                                 margin-top: 5px;
+                                                                 margin-left: 14px;' />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div>
+                                            <div width='33.33%'
+                                                 style='float: left;
+                                                        padding-right: 5px;'>
+                                                <input class='item_button'
+                                                       type='button'
+                                                       onclick='sel_kind'
+                                                       name='primary_school'
+                                                       width='100%'
+                                                       style='height: 45px;
+                                                              font-size: 20px;
+                                                              base-font-size: 20px;'
+                                                       value='<%= L"小学" %>' />
+                                            </div>
+                                            <div width='33.33%'
+                                                 style='float: left;
+                                                        padding-left: 5px;
+                                                        padding-right: 5px;'>
+                                                <input class='item_button'
+                                                       type='button'
+                                                       onclick='sel_kind'
+                                                       name='middle_school'
+                                                       width='100%'
+                                                       style='height: 45px;
+                                                              font-size: 20px;
+                                                              base-font-size: 20px;'
+                                                       value='<%= L"中学" %>' />
+                                            </div>
+                                            <div width='33.33%'
+                                                 style='float: left;
+                                                        padding-left: 5px;'>
+                                                <input class='item_button'
+                                                       type='button'
+                                                       onclick='sel_kind'
+                                                       name='college'
+                                                       width='100%'
+                                                       style='height: 45px;
+                                                              font-size: 20px;
+                                                              base-font-size: 20px;'
+                                                       value='<%= L"大学" %>' />
+                                            </div>
+                                        </div>
+                                        <div width='33.33%'
+                                             style='margin-top: 10px;
+                                                    padding-right: 5px;'>
+                                            <input class='item_button'
+                                                   type='button'
+                                                   onclick='sel_kind'
+                                                   name='multiple'
+                                                   width='100%'
+                                                   style='height: 45px;
+                                                          font-size: 20px;
+                                                          base-font-size: 20px;'
+                                                   value='<%= L"综合" %>' />
+                                        </div>
+                                    </div>
+                                    <div align='center'
+                                         style='width: 180px;
+                                                margin-top: 40px;'>
+                                        <input type='button'
+                                               class='theme1_orange_button'
+                                               onclick='join_school'
+                                               style='width: 180px;
+                                                      height: 65px;
+                                                      font-size: 25px;
+                                                      base-font-size: 25px;'
+                                               value='<%= L"加入学校" %>' />
+                                    </div>
+                                    <div style='margin-top: 20px;
+                                                font-size: 23px;
+                                                base-font-size: 23px;'>
+                                        <%= L'*如果您的学校未出现再列表中，请联系客服。我们会尽快添加。客服QQ：2850955888。' %>
+                                    </div>
+                                </div>
+                            </div>
+                            <div width='70%'
+                                 style='float: left;
+                                       padding-right: 20px;'>
+                                <div style='margin-bottom: 15px;'>
+                                    <img style='width: 125px;
+                                                height: 30px;'
+                                         src='Texture/Aries/Creator/paracraft/my_school_32bits.png#225 23 125 30' />
+                                </div>
+                                <div width='100%'
+                                     class='list_background'
+                                     style='padding: 15px;'>
+                                    <iframe width='100%'
+                                            style='height: 510px;'
+                                            name='school_list_iframe'
+                                            src='Mod/WorldShare/cellar/MySchool/JoinSchoolResult.html'></iframe>
+                                </div>
+                            </div>
+                        </pe:container>
+                    </div>
+                </pe:container>
+            </div>
+        </pe:mcml>
+    </body>
+</html>

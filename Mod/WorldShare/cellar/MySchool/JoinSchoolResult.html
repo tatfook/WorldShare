@@ -1,0 +1,113 @@
+<html>
+    <body>
+        <pe:mcml>
+            <script type="text/npl" refresh="false">
+                <![CDATA[
+                    -- bottles
+                    local MySchool = NPL.load('./MySchool.lua')
+                    local CommonLoadWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/CommonLoadWorld.lua')
+
+                    -- libs
+                    local InternetLoadWorld = commonlib.gettable('MyCompany.Aries.Creator.Game.Login.InternetLoadWorld')
+
+                    local page = document:GetPageCtrl()
+
+                    cur_index = 1
+
+                    Mod.WorldShare.Store:Set('page/Mod.WorldShare.JoinSchool.Result', page)
+
+                    function close()
+                        page:CloseWindow()
+                        Mod.WorldShare.Store:Remove('page/Mod.WorldShare.JoinSchool.Result')
+                    end
+
+                    function fetching()
+                        page:CallMethod('school_list', 'SetDataSource', function() end)
+                        page:CallMethod('school_list', 'DataBind')
+                    end
+
+                    page.fetching = fetching
+
+                    function sel_item(index)
+                        cur_index = index
+                        page:CallMethod('school_list', 'DataBind')
+                    end
+
+                    function get_cur_index()
+                        return cur_index
+                    end
+
+                    function set_cur_index(_index)
+                        cur_index = _index
+                    end
+
+                    page.get_cur_index = get_cur_index
+                    page.set_cur_index = set_cur_index
+                ]]>
+            </script>
+            <style type="type/mcss" src='Mod/WorldShare/cellar/MySchool/MySchoolMcss.mcss'></style>
+            <div>
+                <pe:gridview RememberScrollPos='true'
+                             AllowPaging='false'
+                             VerticalScrollBarStep='60'
+                             DefaultNodeHeight='85'
+                             CellPadding='0'
+                             ItemsPerLine='2'
+                             name='school_list'>
+                    <Columns width='50%'>
+                        <div width='97%'
+                             align='center'>
+                            <pe:if condition='<%= cur_index == Eval("index") %>'>
+                                <input type='button'
+                                       width='100%'
+                                       name='<%= Eval("index") %>'
+                                       onclick='sel_item'
+                                       class='item_button'
+                                       Normal_BG='Texture/Aries/Creator/paracraft/my_school_32bits.png#3 161 48 70:16 16 16 16'
+                                       MouseOver_BG='Texture/Aries/Creator/paracraft/my_school_32bits.png#3 161 48 70:16 16 16 16'
+                                       Pressed_BG='Texture/Aries/Creator/paracraft/my_school_32bits.png#3 161 48 70:16 16 16 16'
+                                       style='height: 70px;
+                                              text-align: left;
+                                              font-size: 24px;
+                                              base-font-size: 24px;
+                                              font-weight: bold;'
+                                       tooltip='<%= Eval("text") %>'
+                                       value='<%= "   " .. Mod.WorldShare.Utils.WordsLimit(Eval("text"), 200) %>' />
+                            </pe:if>
+                            <pe:if condition='<%= cur_index ~= Eval("index") %>'>
+                                <input type='button'
+                                       width='100%'
+                                       name='<%= Eval("index") %>'
+                                       onclick='sel_item'
+                                       class='item_button'
+                                       style='height: 70px;
+                                              text-align: left;
+                                              font-size: 24px;
+                                              base-font-size: 24px;
+                                              font-weight: bold;'
+                                       tooltip='<%= Eval("text") %>'
+                                       value='<%= "   " .. Mod.WorldShare.Utils.WordsLimit(Eval("text"), 200) %>' />
+                            </pe:if>
+                        </div>
+                    </Columns>
+                    <EmptyDataTemplate>
+                        <div width='115px'
+                             align='center'
+                             style='margin-top: 200px;'>
+                            <img style='width: 115px;
+                                        height: 107px;'
+                                 src='Texture/Aries/Creator/paracraft/my_school_32bits.png#230 105 115 107' />
+                        </div>
+                    </EmptyDataTemplate>
+                    <FetchingDataTemplate>
+                        <div style='font-weight: bold;
+                                    font-size: 22px;
+                                    base-font-size: 22px;'>
+                            <%= L'正在加载中，请稍后...' %>
+                        </div>
+                    </FetchingDataTemplate>
+                </pe:gridview>
+            </div>
+        </pe:mcml>
+    </body>
+</html>
