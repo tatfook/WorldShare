@@ -183,7 +183,11 @@ function MainLogin:Show3()
     end
 
     self:ShowExtra()
-    self:ShowLogin1()
+
+    -- tricky: Delay show login because in this step some UI library may be not loaded.
+    Mod.WorldShare.Utils.SetTimeOut(function()
+        self:ShowLogin1()
+    end, 0)
 end
 
 function MainLogin:ShowLogin()
