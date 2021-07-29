@@ -31,9 +31,9 @@
                         local bg = 'Texture/Aries/Creator/paracraft/my_school_32bits.png;3 161 48 70:16 16 16 16'
 
                         local function set_default(node)
+                            node.background = bg;
                             node:SetCurrentState('normal');
-                            node:GetTexture(nil).texture = bg;
-                            node.color="230 230 230";
+                            node.color="255 255 255";
                         end
 
                         set_default(primary_school_node)
@@ -59,12 +59,17 @@
                         end
 
                         if cur_node then
-                            cur_node:SetCurrentState('normal');
-                            cur_node:GetTexture(nil).texture = bg;
-                            cur_node.color="255 255 255";
+                            local sel_bg = 'Texture/Aries/Creator/paracraft/my_school_32bits.png#53 241 48 70:16 16 16 16'
+                            cur_node.background = sel_bg
+
+                            cur_node:SetCurrentState('normal')
+                            cur_node.color="255 255 255"
 
                             if cur_kind == name then
-                                cur_node.color="230 230 230";
+                                cur_node.background = bg
+
+                                cur_node:SetCurrentState('normal')
+                                cur_node.color="255 255 255"
 
                                 cur_kind = ''
 
@@ -622,9 +627,11 @@
                                     <div style='font-size: 22px;
                                                 base-font-size: 22px;
                                                 margin-bottom: 15px;'>
-                                        <%= L'请输入学校名称或编号搜索：' %>
+                                        <img style='width: 272px;
+                                                    height: 22px;'
+                                             src='Texture/Aries/Creator/paracraft/my_school_32bits.png#6 69 272 22' />
                                     </div>
-                                    <div style='margin-bottom: 10px;'>
+                                    <div style='margin-bottom: 20px;'>
                                         <input type='text'
                                                EmptyText='<%= L"请输入学校名称或编号搜索" %>'
                                                EmptyTextColor='#FF666666'
@@ -640,9 +647,11 @@
                                     <div style='font-size: 22px;
                                                 base-font-size: 22px;
                                                 margin-bottom: 10px;'>
-                                        <%= L'请选择地区及学校类型：' %>
+                                        <img style='width: 228px;
+                                                    height: 22px;'
+                                             src='Texture/Aries/Creator/paracraft/my_school_32bits.png#0 335 228 22' />
                                     </div>
-                                    <div style='margin-bottom: 10px;'>
+                                    <div style='margin-bottom: 20px;'>
                                         <div width='50%'
                                              style='float: left;
                                                     padding-right: 10px;'>
@@ -696,7 +705,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div style='margin-bottom: 10px;'>
+                                    <div style='margin-bottom: 20px;'>
                                         <div width='100%'
                                              class='text_field_background'
                                              style='height: 45px;'>
@@ -784,13 +793,22 @@
                                          style='width: 180px;
                                                 margin-top: 40px;'>
                                         <input type='button'
-                                               class='theme1_orange_button'
                                                onclick='join_school'
+                                               zorder='1'
                                                style='width: 180px;
                                                       height: 65px;
-                                                      font-size: 25px;
-                                                      base-font-size: 25px;'
-                                               value='<%= L"加入学校" %>' />
+                                                      background:;
+                                                      position: relative;' />
+                                        <div type='button'
+                                             class='theme1_orange_button'
+                                             style='width: 180px;
+                                                    height: 65px;'>
+                                            <img style='width: 129px;
+                                                        height: 29px;
+                                                        margin-left: 24.5px;
+                                                        margin-top: 18px;'
+                                                 src='Texture/Aries/Creator/paracraft/my_school_32bits.png#366 24 129 29' />
+                                        </div>
                                     </div>
                                     <div style='margin-top: 20px;
                                                 font-size: 23px;

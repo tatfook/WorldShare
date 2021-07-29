@@ -36,6 +36,15 @@ use the lib:
     },
     item_button = {
         background = 'Texture/Aries/Creator/paracraft/my_school_32bits.png#3 161 48 70:16 16 16 16',
+        Normal_BG = 'Texture/Aries/Creator/paracraft/my_school_32bits.png#3 161 48 70:16 16 16 16',
+        MouseOver_BG = 'Texture/Aries/Creator/paracraft/my_school_32bits.png#3 161 48 70:16 16 16 16',
+        Pressed_BG = 'Texture/Aries/Creator/paracraft/my_school_32bits.png#3 161 48 70:16 16 16 16',
         color = '#666666'
+    }
+    item_button_selected = {
+        background = 'Texture/Aries/Creator/paracraft/my_school_32bits.png#53 241 48 70:16 16 16 16',
+        Normal_BG = 'Texture/Aries/Creator/paracraft/my_school_32bits.png#53 241 48 70:16 16 16 16',
+        MouseOver_BG = 'Texture/Aries/Creator/paracraft/my_school_32bits.png#53 241 48 70:16 16 16 16',
+        Pressed_BG = 'Texture/Aries/Creator/paracraft/my_school_32bits.png#53 241 48 70:16 16 16 16',
     }
 }
