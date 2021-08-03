@@ -275,25 +275,60 @@
                         local login_with_phone_number = page:FindControl('phone_mode')
                         local login_with_account = page:FindControl('account_mode')
                         local auto_login_mode = page:FindControl('auto_login_mode')
-                        local change_button = page:FindControl('chagne_button')
+                        local change_button = page:FindControl('change_button')
 
                         if mode == 'account' then
                             page:FindControl('login_button'):SetDefault(true)
-                            login_with_phone_number.visible = false
-                            login_with_account.visible = true
-                            auto_login_mode.visible = false
-                            change_button.visible = false
+
+                            if login_with_phone_number then
+                                login_with_phone_number.visible = false
+                            end
+
+                            if login_with_account then
+                                login_with_account.visible = true
+                            end
+
+                            if auto_login_mode then
+                                auto_login_mode.visible = false
+                            end
+
+                            if auto_login_mode then
+                                change_button.visible = false
+                            end
                         elseif mode == 'phone' then
                             page:FindControl('phone_login_button'):SetDefault(true)
-                            login_with_phone_number.visible = true
-                            login_with_account.visible = false
-                            auto_login_mode.visible = false
-                            change_button.visible = false
+
+                            if login_with_phone_number then
+                                login_with_phone_number.visible = true
+                            end
+
+                            if login_with_account then
+                                login_with_account.visible = false
+                            end
+
+                            if auto_login_mode then
+                                auto_login_mode.visible = false
+                            end
+
+                            if auto_login_mode then
+                                change_button.visible = false
+                            end
                         elseif mode == 'auto_login' then
-                            change_button.visible = true
-                            auto_login_mode.visible = true
-                            login_with_phone_number.visible = false
-                            login_with_account.visible = false
+                            if login_with_phone_number then
+                                login_with_phone_number.visible = false
+                            end
+
+                            if login_with_account then
+                                login_with_account.visible = false
+                            end
+
+                            if auto_login_mode then
+                                auto_login_mode.visible = true
+                            end
+
+                            if auto_login_mode then
+                                change_button.visible = true
+                            end
 
                             page:FindControl('start_button'):SetDefault(true)
                             page:FindControl('title_login').visible = false
@@ -537,7 +572,7 @@
                        margin-top: 20px;
                        margin-right: 11px;'>
                 <div style='width: 111px;float: left;'>
-                    <pe:container name='chagne_button' visible='false' style='background:;'>
+                    <pe:container name='change_button' visible='false' style='background:;'>
                         <input type='button'
                             onclick='change'
                             style='width: 111px;

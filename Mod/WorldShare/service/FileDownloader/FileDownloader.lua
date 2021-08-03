@@ -1,12 +1,13 @@
 --[[
 Title: FileDownloader
-Author(s): LiXizhi
-Date: 2014/1/22
+Author(s): Big, LiXizhi
+CreateDate: 2014.01.22
+UpdateDate: 2021.08.03
 Desc: 
 Use Lib:
 -------------------------------------------------------
-NPL.load("(gl)Mod/WorldShare/service/FileDownloader/FileDownloader.lua")
-local FileDownloader = commonlib.inherit(nil, commonlib.gettable("Mod.WorldShare.service.FileDownloader.FileDownloader"))
+NPL.load('(gl)Mod/WorldShare/service/FileDownloader/FileDownloader.lua')
+local FileDownloader = commonlib.gettable('Mod.WorldShare.service.FileDownloader.FileDownloader')
 -------------------------------------------------------
 ]]
 NPL.load("./localserver.lua")

@@ -288,6 +288,7 @@ function Compare:GetCurrentWorldInfo(callback)
                         memberCount = data.memberCount,
                         members = members,
                         remotefile = data.world.archiveUrl,
+                        level = data.level,
                     })
 
                     Mod.WorldShare.Store:Set("world/currentRevision", GameLogic.options:GetRevision())
@@ -422,6 +423,7 @@ function Compare:GetCurrentWorldInfo(callback)
                             memberCount = data.memberCount,
                             members = members,
                             size = 0,
+                            level = data.level,
                         })
 
                         local username = Mod.WorldShare.Store:Get('user/username')

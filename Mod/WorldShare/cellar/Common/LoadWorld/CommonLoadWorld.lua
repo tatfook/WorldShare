@@ -10,6 +10,7 @@ local CommonLoadWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/Com
 ]]
 
 -- libs
+local Game = commonlib.gettable("MyCompany.Aries.Game")
 local DownloadWorld = commonlib.gettable('MyCompany.Aries.Game.MainLogin.DownloadWorld')
 local RemoteWorld = commonlib.gettable('MyCompany.Aries.Creator.Game.Login.RemoteWorld')
 local InternetLoadWorld = commonlib.gettable('MyCompany.Aries.Creator.Game.Login.InternetLoadWorld')
@@ -20,11 +21,13 @@ local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
 local GitService = NPL.load('(gl)Mod/WorldShare/service/GitService.lua')
 local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+local LocalServiceWorld = NPL.load('(gl)Mod/WorldShare/service/LocalService/LocalServiceWorld.lua')
 
 -- bottles
 local LoginModal = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua')
 local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
 local Create = NPL.load('(gl)Mod/WorldShare/cellar/Create/Create.lua')
+local WorldKeyDecodePage = NPL.load('(gl)script/apps/Aries/Creator/Game/Tasks/WorldKey/WorldKeyDecodePage.lua')
 
 -- databse
 local CacheProjectId = NPL.load('(gl)Mod/WorldShare/database/CacheProjectId.lua')
@@ -227,25 +230,78 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
 
         local function LoadWorld(world, refreshMode)
             if world then
+                -- encrypt mode load world
+                if self.encryptWorldMode then
+                    local localWorldFile = world:GetLocalFileName() or ''
+                    local encryptWorldFile = string.match(localWorldFile, '(.+)%.zip$') .. '.pkg'
+
+                    local encryptWorldFileExist = false
+
+                    if ParaIO.DoesFileExist(encryptWorldFile) then
+                        encryptWorldFileExist = true     
+                    end
+
+                    -- TODO: never and auto
+                    echo(encryptWorldFile, true)
+                    Game.Start(encryptWorldFile)
+
+                    if not encryptWorldFileExist or
+                       refreshMode == 'force' then
+                        if ParaIO.DoesFileExist(encryptWorldFile) then
+                            ParaIO.DeleteFile(encryptWorldFile)    
+                        end
+
+                        if ParaIO.DoesFileExist(localWorldFile) then
+                            ParaIO.DeleteFile(localWorldFile)
+                        end
+
+                        DownloadWorld.ShowPage(url)
+
+                        world:DownloadRemoteFile(function(bSucceed, msg)
+                            DownloadWorld.Close()
+
+                            if bSucceed then
+                                if type(localWorldFile) ~= 'string' or
+                                   localWorldFile == '' or
+                                   not ParaIO.DoesFileExist(localWorldFile) then
+                                    return
+                                end
+    
+                                LocalServiceWorld:EncryptWorld(localWorldFile, encryptWorldFile)
+                                ParaIO.DeleteFile(localWorldFile)
+                                Game.Start(encryptWorldFile)
+                            end
+                        end)
+                    end
+
+                    return
+                end
+
+                -- zip mode load world
                 if refreshMode == 'never' then
                     if not LocalService:IsFileExistInZip(world:GetLocalFileName(), ":worldconfig.txt") then
                         refreshMode = 'force'
                     end
                 end
 
-                local url = world:GetLocalFileName()
                 DownloadWorld.ShowPage(url)
+
                 local mytimer = commonlib.Timer:new(
                     {
                         callbackFunc = function(timer)
                             InternetLoadWorld.LoadWorld(
                                 world,
                                 nil,
-                                refreshMode or "auto",
+                                refreshMode or 'auto',
                                 function(bSucceed, localWorldPath)
                                     if not bSucceed then
                                         MainLogin:Close()
-                                        Create:Show()
+
+                                        local CreatePage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Create')
+
+                                        if not CreatePage then
+                                            Create:Show()
+                                        end
                                     end
 
                                     DownloadWorld.Close()
@@ -253,21 +309,24 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                             )
                         end
                     }
-                );
+                )
 
                 -- prevent recursive calls.
-                mytimer:Change(1,nil);
+                mytimer:Change(1, nil)
             else
-                _guihelper.MessageBox(L"无效的世界文件");
+                _guihelper.MessageBox(
+                    format(L'无效的世界信息（项目ID：%d）', pid)
+                )
             end
         end
 
-        if url:match("^https?://") then
-            world = RemoteWorld.LoadFromHref(url, "self")
+        if url:match('^https?://') then
+            world = RemoteWorld.LoadFromHref(url, 'self')
             world:SetProjectId(pid)
-            local token = Mod.WorldShare.Store:Get("user/token")
+
+            local token = Mod.WorldShare.Store:Get('user/token')
             if token then
-                world:SetHttpHeaders({Authorization = format("Bearer %s", token)})
+                world:SetHttpHeaders({Authorization = format('Bearer %s', token)})
             end
 
             local fileUrl = world:GetLocalFileName()
@@ -276,11 +335,11 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
 
             if ParaIO.DoesFileExist(fileUrl) then
                 if offlineMode then
-                    LoadWorld(world, "never")
-                    return false
+                    LoadWorld(world, 'never')
+                    return
                 end
 
-                Mod.WorldShare.MsgBox:Show(L"请稍候...")
+                Mod.WorldShare.MsgBox:Wait()
                 GitService:GetWorldRevision(pid, false, function(data, err)
                     local localRevision = tonumber(LocalService:GetZipRevision(fileUrl)) or 0
                     local remoteRevision = tonumber(data) or 0
@@ -288,20 +347,20 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                     Mod.WorldShare.MsgBox:Close()
 
                     if localRevision == 0 then
-                        LoadWorld(world, "auto")
+                        LoadWorld(world, 'auto')
 
-                        return false
+                        return
                     end
 
                     if localRevision == remoteRevision then
-                        LoadWorld(world, "never")
+                        LoadWorld(world, 'never')
 
-                        return false
+                        return
                     end
 
-					if refreshMode == "force" then
-						LoadWorld(world, refreshMode);
-						return false;
+					if refreshMode == 'force' then
+						LoadWorld(world, refreshMode)
+						return
 					end
 
                     local worldName = ''
@@ -315,28 +374,28 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                     local params = Mod.WorldShare.Utils.ShowWindow(
                         0,
                         0,
-                        "Mod/WorldShare/cellar/Common/LoadWorld/ProjectIdEnter.html?project_id=" 
+                        'Mod/WorldShare/cellar/Common/LoadWorld/ProjectIdEnter.html?project_id=' 
                             .. pid
-                            .. "&remote_revision=" .. remoteRevision
-                            .. "&local_revision=" .. localRevision
-                            .. "&world_name=" .. worldName,
-                        "ProjectIdEnter",
+                            .. '&remote_revision=' .. remoteRevision
+                            .. '&local_revision=' .. localRevision
+                            .. '&world_name=' .. worldName,
+                        'ProjectIdEnter',
                         0,
                         0,
-                        "_fi",
+                        '_fi',
                         false
                     )
 
                     params._page.callback = function(data)
                         if data == 'local' then
-                            LoadWorld(world, "never")
+                            LoadWorld(world, 'never')
                         elseif data == 'remote' then
-                            LoadWorld(world, "force")
+                            LoadWorld(world, 'force')
                         end
                     end
                 end)
             else
-                LoadWorld(world, "auto")
+                LoadWorld(world, 'auto')
             end
         end
 	end
@@ -348,11 +407,17 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
         end
 
         MainLogin:Close()
-        Create:Show()
+
+        local CreatePage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Create')
+
+        if not CreatePage then
+            Create:Show()
+        end
+
         Mod.WorldShare.MsgBox:Close()
     end, 10000)
 
-    Mod.WorldShare.MsgBox:Show(L"请稍候...", 20000)
+    Mod.WorldShare.MsgBox:Wait(20000)
 
     KeepworkServiceProject:GetProject(
         pid,
@@ -364,70 +429,103 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                 local cacheWorldInfo = CacheProjectId:GetProjectIdInfo(pid)
 
                 if not cacheWorldInfo or not cacheWorldInfo.worldInfo then
-                    GameLogic.AddBBS(nil, L"网络环境差，或离线中，请联网后再试", 3000, "255 0 0")
-                    return false
+                    GameLogic.AddBBS(nil, format(L'网络环境差，或离线中，请联网后再试（%d）', err), 3000, '255 0 0')
+                    return
                 end
 
                 Mod.WorldShare.Store:Set('world/openKpProjectId', pid)
                 HandleLoadWorld(cacheWorldInfo.worldInfo.archiveUrl, cacheWorldInfo.worldInfo, true)
 
-                return false
-            end
-
-            if err == 404 then
-                GameLogic.AddBBS(nil, L"未找到对应内容", 3000, "255 0 0")
-
-                if failed then
-                    _guihelper.MessageBox(
-                        L'未能成功进入该地图，将帮您传送到【创意空间】。 ',
-                        function()
-                            local mainWorldProjectId = LocalServiceWorld:GetMainWorldProjectId()
-                            self:EnterWorldById(mainWorldProjectId, true)
-                        end,
-                        _guihelper.MessageBoxButtons.OK_CustomLabel
-                    )
-                end
-                return false
-            end
-
-            if err ~= 200 then
-                GameLogic.AddBBS(nil, L"服务器维护中...", 3000, "255 0 0")
                 return
             end
 
-            if data and data.visibility == 1 then
-                if not KeepworkServiceSession:IsSignedIn() then
-                    LoginModal:CheckSignedIn(L"该项目需要登录后访问", function(bIsSuccessed)
-                        if bIsSuccessed then
-                            self:EnterWorldById(pid, refreshMode)
-                        end
-                    end)
-                    return false
-                else
-                    KeepworkServiceProject:GetMembers(pid, function(members, err)
-                        if type(members) ~= 'table' then
-                            return false
-                        end
+            if err == 404 or
+               not data or
+               not data.world or
+               not data.world.archiveUrl or
+               #data.world.archiveUrl == 0 then
+                local archiveUrlLength = 0
 
-                        local username = Mod.WorldShare.Store:Get("user/username")
-                        
-                        for key, item in ipairs(members) do
-                            if item and item.username and item.username == username then
-                                if not data.world or not data.world.archiveUrl then
-                                    return false
-                                end
-
-                                Mod.WorldShare.Store:Set('world/openKpProjectId', pid)
-                                HandleLoadWorld(data.world.archiveUrl .. "&private=true", data.world)
-                                return true
-                            end
-                        end
-
-                        GameLogic.AddBBS(nil, L"您未获得该项目的访问权限", 3000, "255 0 0")
-                        return false
-                    end)
+                if data and data.world and data.world.archiveUrl then
+                    archiveUrlLength = #data.world.archiveUrl
                 end
-            else
+
+                GameLogic.AddBBS(
+                    nil,
+                    format(L'未找到对应项目信息（项目ID：%d）（URL长度：%d）（ERR：%d）', pid, archiveUrlLength, err),
+                    10000,
+                    '255 0 0'
+                )
+
+                local CreatePage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Create')
+
+                if not CreatePage then
+                    Create:Show() -- use local mode instead of enter world
+                end
+                return
+            end
+
+            if err ~= 200 then
+                GameLogic.AddBBS(nil, format(L'服务器维护中（%d）', err), 3000, '255 0 0')
+                return
+            end
+
+            data.level = 1
+
+            local function ResetVerified()
+                self.isVisiblityVerified = false
+                self.vipVerified = false
+                self.instituteVerified = false
+                self.encodeWorldVerified = false
+                self.encryptWorldVerified = false
+            end
+
+            local function HandleVerified()
+                if data.visibility == 1 and
+                   not self.isVisiblityVerified then
+                    if not KeepworkServiceSession:IsSignedIn() then
+                        LoginModal:CheckSignedIn(L'该项目需要登录后访问', function(bIsSuccessed)
+                            if bIsSuccessed then
+                                HandleVerified()
+                            end
+                        end)
+                    else
+                        KeepworkServiceProject:GetMembers(pid, function(members, err)
+                            if type(members) ~= 'table' then
+                                return
+                            end
+    
+                            local username = Mod.WorldShare.Store:Get('user/username')
+    
+                            for key, item in ipairs(members) do
+                                if item and item.username and item.username == username then    
+                                    Mod.WorldShare.Store:Set('world/openKpProjectId', pid)
+
+                                    data.world.archiveUrl = data.world.archiveUrl .. "&private=true"
+                                    self.isVisiblityVerified = true
+
+                                    HandleVerified()
+
+                                    return
+                                end
+                            end
+
+                            GameLogic.AddBBS(
+                                nil,
+                                format(L'您未获得该项目的访问权限（项目ID：%d）（用户名：%s）', pid or 0, username or ''),
+                                3000,
+                                '255 0 0'
+                            )
+
+                            ResetVerified()
+
+                            return
+                        end)
+                    end
+
+                    return
+                end
+    
                 -- vip enter
                 if not self.vipVerified and
                    data and
@@ -435,29 +533,35 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                    ((data.extra.vipEnabled and data.extra.vipEnabled == 1) or
                    (data.extra.isVipWorld and data.extra.isVipWorld == 1)) then
                     if not KeepworkServiceSession:IsSignedIn() then
-                        LoginModal:CheckSignedIn(L"该项目需要登录后访问", function(bIsSuccessed)
+                        LoginModal:CheckSignedIn(L'该项目需要登录后访问', function(bIsSuccessed)
                             if bIsSuccessed then
-                                self:EnterWorldById(pid, refreshMode)
+                                HandleVerified()
                             end
                         end)
                     else
-                        local username = Mod.WorldShare.Store:Get("user/username")
-    
+                        local username = Mod.WorldShare.Store:Get('user/username')
+
                         if data.username and data.username ~= username then
                             GameLogic.IsVip('Vip', true, function(result)
                                 if result then
                                     self.vipVerified = true
-                                    self:EnterWorldById(pid, refreshMode)
+                                    HandleVerified()
+                                else
+                                    local username = Mod.WorldShare.Store:Get('user/username')
+
+                                    _guihelper.MessageBox(
+                                        format(L'你没有权限进入此世界（VIP）(项目ID：%d)（用户名：%s）', pid or 0, username or '')
+                                    )
+
+                                    ResetVerified()
                                 end
                             end, 'Vip')
                         end
                     end
-
+    
                     return
                 end
-
-                self.vipVerified = false
-
+    
                 -- vip institute enter
                 if data and
                    data.extra and
@@ -465,9 +569,9 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                    data.extra.instituteVipEnabled == 1 and
                    not self.instituteVerified then
                     if not KeepworkServiceSession:IsSignedIn() then
-                        LoginModal:CheckSignedIn(L"该项目需要登录后访问", function(bIsSuccessed)
+                        LoginModal:CheckSignedIn(L'该项目需要登录后访问', function(bIsSuccessed)
                             if bIsSuccessed then
-                                self:EnterWorldById(pid, refreshMode)
+                                HandleVerified()
                             end
                         end)
                         return
@@ -475,61 +579,75 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                         GameLogic.IsVip('IsOrgan', true, function(result)
                             if result then
                                 self.instituteVerified = true
-                                self:EnterWorldById(pid, refreshMode)
+                                HandleVerified()
                             else
-                                _guihelper.MessageBox(L"你没有权限进入此世界（机构VIP）")
+                                local username = Mod.WorldShare.Store:Get('user/username')
+
+                                _guihelper.MessageBox(
+                                    format(L'你没有权限进入此世界（机构VIP）(项目ID：%d)（用户名：%s）', pid or 0, username or '')
+                                )
+
+                                ResetVerified()
                             end
                         end, 'Institute')
                     end
+
                     return
                 end
 
-                self.instituteVerified = false
-
-
-                local enter_cb = function()
-                    if data.world and data.world.archiveUrl and #data.world.archiveUrl > 0 then
-                        Mod.WorldShare.Store:Set('world/openKpProjectId', pid)
-                        HandleLoadWorld(data.world.archiveUrl, data.world)
-                        CacheProjectId:SetProjectIdInfo(pid, data.world)
-                    else
-                        GameLogic.AddBBS(nil, L"未找到对应内容", 3000, "255 0 0")
-                        
-                        if failed then
-                            _guihelper.MessageBox(
-                                L'未能成功进入该地图，将帮您传送到【创意空间】。 ',
-                                function()
-                                    local mainWorldProjectId = LocalServiceWorld:GetMainWorldProjectId()
-                                    self:EnterWorldById(mainWorldProjectId, true)
-                                end,
-                                _guihelper.MessageBoxButtons.OK_CustomLabel
-                            )
-                        end
-                    end
+                -- encrypt world
+                if data and
+                   data.level and
+                   data.level ~= 2 and
+                   not self.encryptWorldVerified then
+                    self.encryptWorldVerified = true
+                    self.encryptWorldMode = true
+                    HandleVerified()
+                    return
                 end
 
-                if data and data.extra and data.extra.encode_world == 1 then
+                -- encode world
+                if data and
+                   data.extra and
+                   data.extra.encode_world == 1 and
+                   not self.encodeWorldVerified then
                     if not KeepworkServiceSession:IsSignedIn() then
-                        LoginModal:CheckSignedIn(L"该项目需要登录后访问", function(bIsSuccessed)
+                        LoginModal:CheckSignedIn(L'该项目需要登录后访问', function(bIsSuccessed)
                             if bIsSuccessed then
-                                self:EnterWorldById(pid, refreshMode)
+                                HandleVerified()
                             end
                         end)
-                        return false
+    
+                        return
                     else
-                        local username = Mod.WorldShare.Store:Get("user/username")
-
+                        local username = Mod.WorldShare.Store:Get('user/username')
+    
                         if data.username and data.username == username then
-                            enter_cb()
+                            self.encodeWorldVerified = true
+                            HandleVerified()
                         else
-                            NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/WorldKey/WorldKeyDecodePage.lua").Show(data, enter_cb);
+                            WorldKeyDecodePage.Show(data, function()
+                                Mod.WorldShare.Store:Set('world/openKpProjectId', pid)
+                                HandleLoadWorld(data.world.archiveUrl, data.world)
+                                CacheProjectId:SetProjectIdInfo(pid, data.world)
+                            end)
+
+                            ResetVerified()
                         end
                     end
 
-                else
-                    enter_cb()
+                    return
                 end
+
+                ResetVerified()
+
+                -- enter world
+                Mod.WorldShare.Store:Set('world/openKpProjectId', pid)
+                HandleLoadWorld(data.world.archiveUrl, data.world)
+                CacheProjectId:SetProjectIdInfo(pid, data.world)
             end
+
+            HandleVerified()
         end
     )
 end

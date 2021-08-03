@@ -16,6 +16,8 @@ local KeepworkServiceSession = NPL.load('../KeepworkService/Session.lua')
 local GitService = NPL.load('(gl)Mod/WorldShare/service/GitService.lua')
 
 -- libs
+NPL.load('(gl)Mod/WorldShare/service/FileDownloader/FileDownloader.lua')
+local FileDownloader = commonlib.gettable('Mod.WorldShare.service.FileDownloader.FileDownloader')
 local LocalLoadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalLoadWorld")
 local WorldRevision = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision")
 local SaveWorldHandler = commonlib.gettable("MyCompany.Aries.Game.SaveWorldHandler")
@@ -460,4 +462,22 @@ function LocalServiceWorld:DownLoadZipWorld(foldername, username, lastCommitId, 
             end)
         end
     )
+end
+
+function LocalServiceWorld:EncryptWorld(originFile, encryptFile)
+    if not originFile or
+       type(originFile) ~= 'string' or
+       not ParaIO.DoesFileExist(originFile) or
+       not encryptFile or
+       type(encryptFile) ~= 'string' or
+       encryptFile == '' then
+        return
+    end
+
+    local base = ParaIO.GetWritablePath()
+
+    originFile = originFile:gsub(base, '')
+    encryptFile = encryptFile:gsub(base, '')
+
+    return ParaAsset.GeneratePkgFile(originFile, encryptFile)
 end

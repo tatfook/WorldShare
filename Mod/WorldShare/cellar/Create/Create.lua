@@ -18,6 +18,7 @@ local VipTypeWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/VipTyp
 local ShareTypeWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/ShareTypeWorld.lua')
 local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
 local DeleteWorld = NPL.load('(gl)Mod/WorldShare/cellar/DeleteWorld/DeleteWorld.lua')
+local CommonLoadWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/CommonLoadWorld.lua')
 
 -- service
 local Compare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
@@ -72,7 +73,7 @@ function Create:ShowCreateEmbed(width, height, x, y)
             width = 1024,
             height = 580,
             cancelShowAnimation = true,
-            bToggleShowHide = true,
+            bToggleShowHide = false,
         }
     )
 
@@ -312,7 +313,15 @@ function Create:EnterWorld(index, skip)
                     self.instituteVerified = true
                     self:EnterWorld(index)
                 else
-                    _guihelper.MessageBox(L'你没有权限进入此世界（机构VIP）')
+                    local username = Mod.WorldShare.Store:Get('user/username')
+
+                    _guihelper.MessageBox(
+                        format(
+                            L'你没有权限进入此世界（机构VIP）（项目ID：%d）（用户名：%s）',
+                            currentSelectedWorld.kpProjectId,
+                            username or ''
+                        )
+                    )
                 end
             end)
         end
@@ -363,15 +372,29 @@ function Create:EnterWorld(index, skip)
 
                 for key, item in ipairs(data) do
                     if item.userId == userId then
-                        -- check ouccupy
-                        ShareTypeWorld:Lock(currentSelectedWorld, function()
-                            self:EnterWorld(index, true)
-                        end)
+                        if currentSelectedWorld.level == 2 then
+                            -- check ouccupy
+                            ShareTypeWorld:Lock(currentSelectedWorld, function()
+                                self:EnterWorld(index, true)
+                            end)
+                        else
+                            -- download world and encrypted world
+                            CommonLoadWorld:EnterWorldById(currentSelectedWorld.kpProjectId)
+                        end
+
                         return
                     end
                 end
 
-                _guihelper.MessageBox(L'你没有权限进入此世界')
+                local username = Mod.WorldShare.Store:Get('user/username')
+
+                _guihelper.MessageBox(
+                    format(
+                        L'你没有权限进入此世界（共享世界）（项目ID：%d）（用户名：%s）',
+                        currentSelectedWorld.kpProjectId,
+                        username or ''
+                    )
+                )
             end)
             return
         end
@@ -419,9 +442,6 @@ function Create:EnterWorld(index, skip)
 
     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
-    -- add rice
-    -- KeepworkServiceSession:AddRice('create')
-
     if currentWorld.status == 2 then
         Mod.WorldShare.MsgBox:Show(L"请稍候...")
 
@@ -429,7 +449,7 @@ function Create:EnterWorld(index, skip)
             Mod.WorldShare.MsgBox:Close()
 
             if result ~= Compare.JUSTREMOTE then
-                return false
+                return
             end
 
             SyncToLocal:Init(function(result, option)
@@ -449,7 +469,7 @@ function Create:EnterWorld(index, skip)
                         if option.method == 'UPDATE-PROGRESS-FINISH' then
                             if not LocalServiceWorld:CheckWorldIsCorrect(currentWorld) then
                                 _guihelper.MessageBox(L'文件损坏，请再试一次。如果还是出现问题，请联系作者或者管理员。')
-                                return false
+                                return
                             end
 
                             InternetLoadWorld.EnterWorld()

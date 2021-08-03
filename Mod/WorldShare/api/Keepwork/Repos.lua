@@ -10,8 +10,8 @@ local KeepworkReposApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Repos.lua")
 ]]
 
 -- libs
-NPL.load("(gl)Mod/WorldShare/service/FileDownloader/FileDownloader.lua")
-local FileDownloader = commonlib.gettable("Mod.WorldShare.service.FileDownloader.FileDownloader")
+NPL.load('(gl)Mod/WorldShare/service/FileDownloader/FileDownloader.lua')
+local FileDownloader = commonlib.gettable('Mod.WorldShare.service.FileDownloader.FileDownloader')
 local Encoding = commonlib.gettable("System.Encoding")
 
 -- api
@@ -61,7 +61,7 @@ function KeepworkReposApi:Download(foldername, username, commitId, success, erro
         end,
         "access plus 5 mins",
         false
-    ) 
+    )
 end
 
 -- url: /repos/:repoPath/tree

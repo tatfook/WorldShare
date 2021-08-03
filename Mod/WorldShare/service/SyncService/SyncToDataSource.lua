@@ -670,6 +670,7 @@ function SyncToDataSource:UpdateRecord(callback)
                                         instituteVipEnabled = self.currentWorld.instituteVipEnabled,
                                         memberCount = data.memberCount,
                                         members = {}, -- updated at enter world
+                                        level = data.level,
                                     })
                                 end
 

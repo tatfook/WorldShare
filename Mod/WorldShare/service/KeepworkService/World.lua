@@ -139,7 +139,8 @@ function KeepworkServiceWorld:SetWorldInstanceByPid(pid, callback)
                 isVipWorld = data.extra.isVipWorld,
                 instituteVipEnabled =  data.extra.instituteVipEnabled,
                 memberCount = data.memberCount,
-                members = {}
+                members = {},
+                level = data.level,
             })
 
             Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
@@ -567,7 +568,8 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                 instituteVipEnabled = instituteVipEnabled or false,
                 memberCount = DItem.project.memberCount,
                 members = {},
-                name = name
+                name = name,
+                level = DItem.level and DItem.level or 0,
             })
 
             currentWorldList:push_back(currentWorld)
@@ -641,6 +643,7 @@ function KeepworkServiceWorld:GenerateWorldInstance(params)
         instituteVipEnabled = params.instituteVipEnabled or false,
         memberCount = params.memberCount or 0,
         members = params.members or {},
-        parentProjectId = params.parentProjectId or 0
+        parentProjectId = params.parentProjectId or 0,
+        level = params.level or 0, -- Is the world readable. 1. read only, 2. read and write
     }
 end
