@@ -470,8 +470,6 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                 return
             end
 
-            data.level = 1
-
             local function ResetVerified()
                 self.isVisiblityVerified = false
                 self.vipVerified = false
