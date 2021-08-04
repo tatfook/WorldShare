@@ -256,7 +256,7 @@ function MainLogin:ShowLogin1()
         MainLoginLoginPage:FindControl('phone_mode').visible = false
         MainLoginLoginPage:FindControl('account_mode').visible = false
         MainLoginLoginPage:FindControl('auto_login_mode').visible = true
-        MainLoginLoginPage:FindControl('chagne_button').visible = true
+        MainLoginLoginPage:FindControl('change_button').visible = true
         MainLoginLoginPage:SetUIValue('auto_username', Mod.WorldShare.Store:Get('user/username') or '')
 
         MainLoginLoginPage:FindControl('title_login').visible = false
@@ -289,7 +289,7 @@ function MainLogin:ShowLogin1()
                         MainLoginLoginPage:FindControl('phone_mode').visible = false
                         MainLoginLoginPage:FindControl('account_mode').visible = false
                         MainLoginLoginPage:FindControl('auto_login_mode').visible = true
-                        MainLoginLoginPage:FindControl('chagne_button').visible = true
+                        MainLoginLoginPage:FindControl('change_button').visible = true
                         MainLoginLoginPage:SetUIValue('auto_username', PWDInfo.account or '')
     
                         MainLoginLoginPage:FindControl('title_login').visible = false
