@@ -336,9 +336,6 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
         local Login = Mod.WorldShare.Store:Action("user/Login")
         Login(token, userId, username, nickname, realname, isVipSchool)
 
-        -- add rice
-        -- self:AddRice('login')
-
         GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", true)
 
         -- update enter world info

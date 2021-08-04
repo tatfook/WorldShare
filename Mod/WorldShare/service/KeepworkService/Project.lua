@@ -56,7 +56,7 @@ end
 
 -- get project members
 function KeepworkServiceProject:GetMembers(pid, callback)
-    KeepworkMembersApi:Members(pid, 5, callback, callback)
+    KeepworkMembersApi:Members(pid, 5, -1, callback, callback)
 end
 
 -- add members

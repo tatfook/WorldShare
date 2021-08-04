@@ -18,15 +18,29 @@ local KeepworkMembersApi = NPL.export()
 -- params:
 --[[
     objectId number necessary object id
-    objectType number necessary ENTITY_TYPE_USER: 0, // 用户类型 ENTITY_TYPE_SITE: 1, // 站点类型 ENTITY_TYPE_PAGE: 2, // 页面类型 ENTITY_TYPE_GROUP: 3, // 组 ENTITY_TYPE_ISSUE: 4, // 问题 ENTITY_TYPE_PROJECT: 5, // 项目
+    objectType number necessary ENTITY_TYPE_USER: 0, // 用户类型
+                                ENTITY_TYPE_SITE: 1, // 站点类型
+                                ENTITY_TYPE_PAGE: 2, // 页面类型
+                                ENTITY_TYPE_GROUP: 3, // 组
+                                ENTITY_TYPE_ISSUE: 4, // 问题
+                                ENTITY_TYPE_PROJECT: 5, // 项目
+    groupId number not necessary Default -1: ALL
+                                 > 0: specially appointed group
+                                 == 0: ungrouped member
 ]]
 -- return: object
-function KeepworkMembersApi:Members(objectId, objectType, success, error)
+function KeepworkMembersApi:Members(objectId, objectType, groupId, success, error)
     if not objectId or not objectType then
         return false
     end
 
-    KeepworkBaseApi:Get('/members?objectId=' .. objectId .. '&objectType=' .. objectType, nil, nil, success, error)
+    local params = {
+        objectId = objectId,
+        objectType = objectType,
+        groupId = groupId,
+    }
+
+    KeepworkBaseApi:Get('/members', params, nil, success, error)
 end
 
 -- url: /members/:id
