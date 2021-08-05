@@ -226,6 +226,8 @@ function Progress:UpdateDataBar(current, total, msg)
     if self:GetFinish() then
         self:ClosePage()
         self:ShowFinishPage()
+        
+        GameLogic.GetFilters():apply_filters("SyncWorldFinish");
     else
         ProgressPage:Rebuild()
     end
