@@ -5,7 +5,7 @@ Date:  2017.4.15
 Desc: 
 use the lib:
 ------------------------------------------------------------
-local GitlabService = NPL.load("(gl)Mod/WorldShare/service/GitlabService.lua")
+local GitlabService = NPL.load("(gl)Mod/WorldShare/service/GitService/GitlabService.lua")
 ------------------------------------------------------------
 ]]
 NPL.load("./FileDownloader/FileDownloader.lua")

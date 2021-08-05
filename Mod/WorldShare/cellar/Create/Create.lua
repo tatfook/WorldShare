@@ -11,6 +11,7 @@ local Create = NPL.load('(gl)Mod/WorldShare/cellar/Create/Create.lua')
 
 -- libs
 local InternetLoadWorld = commonlib.gettable('MyCompany.Aries.Creator.Game.Login.InternetLoadWorld')
+local DownloadWorld = commonlib.gettable('MyCompany.Aries.Game.MainLogin.DownloadWorld')
 
 -- bottles
 local LoginModal = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua')
@@ -438,7 +439,6 @@ function Create:EnterWorld(index, skip)
 
     -- set current world
     self:OnSwitchWorld(index)
-    self:Close()
 
     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
@@ -451,6 +451,8 @@ function Create:EnterWorld(index, skip)
             if result ~= Compare.JUSTREMOTE then
                 return
             end
+
+            DownloadWorld.ShowPage(format(L'%s（项目ID：%d）', currentWorld.foldername, currentWorld.kpProjectId))
 
             SyncToLocal:Init(function(result, option)
                 if not result then
@@ -467,6 +469,8 @@ function Create:EnterWorld(index, skip)
 
                     if type(option) == 'table' then
                         if option.method == 'UPDATE-PROGRESS-FINISH' then
+                            DownloadWorld.Close()
+
                             if not LocalServiceWorld:CheckWorldIsCorrect(currentWorld) then
                                 _guihelper.MessageBox(L'文件损坏，请再试一次。如果还是出现问题，请联系作者或者管理员。')
                                 return
@@ -481,6 +485,7 @@ function Create:EnterWorld(index, skip)
     else
         if currentWorld.status == 1 or not currentWorld.status then
             InternetLoadWorld.EnterWorld()
+            self:Close()
             return
         end
 
@@ -499,18 +504,21 @@ function Create:EnterWorld(index, skip)
                             Mod.WorldShare.MsgBox:Close()
 
                             if result == true then
-                                InternetLoadWorld.EnterWorld()	
+                                InternetLoadWorld.EnterWorld()
+                                self:Close()
                             end
                         end)
                     else
-                        InternetLoadWorld.EnterWorld()	
+                        InternetLoadWorld.EnterWorld()
+                        self:Close()
                     end
                 end)
             else
                 if result == Compare.REMOTEBIGGER then
                     SyncMain:ShowStartSyncPage(true)
                 else
-                    InternetLoadWorld.EnterWorld()	
+                    InternetLoadWorld.EnterWorld()
+                    self:Close()
                 end
             end
         end)

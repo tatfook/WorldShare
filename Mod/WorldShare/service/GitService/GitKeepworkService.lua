@@ -1,25 +1,43 @@
 --[[
 Title: GitlabService
 Author(s):  big
-Date:  2019.12.10
+CreateDate: 2019.12.10
+UpdateDate: 2021.08.05
 Desc: 
 use the lib:
 ------------------------------------------------------------
-local GitKeepworkService = NPL.load("(gl)Mod/WorldShare/service/GitKeepworkService.lua")
+local GitKeepworkService = NPL.load('(gl)Mod/WorldShare/service/GitService/GitKeepworkService.lua')
 ------------------------------------------------------------
 ]]
 
-local KeepworkReposApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Repos.lua")
-local KeepworkProjectsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Projects.lua")
+-- api
+local KeepworkReposApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/Repos.lua')
+local KeepworkProjectsApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/Projects.lua')
+
+-- service
+local GitService = NPL.load('(gl)Mod/WorldShare/service/GitService.lua')
+
+-- config
+local Config = NPL.load('(gl)Mod/WorldShare/config/Config.lua')
 
 local GitKeepworkService = NPL.export()
 
-function GitKeepworkService:Create(foldername, callback)
-    
+function GitKeepworkService:GetQiNiuArchiveUrl(foldername, username, commitId)
+    return format(
+            '%s/%s-%s.zip',
+            Config:GetValue('qiniuGitZip'),
+            GitService:GetRepoPath(foldername, username),
+            commitId
+           )
 end
 
-function GitKeepworkService:GetContent(foldername, path, commitId, callback)
-    
+function GitKeepworkService:GetCdnArchiveUrl(foldername, username, commitId)
+    return format(
+            '%s/repos/%s/download?ref=%s',
+            Config:GetValue('keepworkApiCdnList'),
+            GitService:GetRepoPath(foldername, username),
+            commitId
+           )
 end
 
 function GitKeepworkService:GetContentWithRaw(foldername, username, path, commitId, callback, cdnState)
@@ -196,10 +214,4 @@ function GitKeepworkService:GetWorldRevision(kpProjectId, isGetMine, callback)
     )
 end
 
-function GitKeepworkService:GetProjectIdByName(name, callback)
-    
-end
 
-function GitKeepworkService:DeleteResp(foldername, authToken, callback)
-    
-end

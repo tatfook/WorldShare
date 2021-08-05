@@ -1,7 +1,8 @@
 --[[
 Title: LocalService World
 Author(s):  big
-Date:  2020.2.12
+CreateDate: 2020.02.12
+UpdateDate: 2021.08.05
 Place: Foshan
 use the lib:
 ------------------------------------------------------------
@@ -14,9 +15,9 @@ local LocalService = NPL.load('../LocalService.lua')
 local KeepworkService = NPL.load('../KeepworkService.lua')
 local KeepworkServiceSession = NPL.load('../KeepworkService/Session.lua')
 local GitService = NPL.load('(gl)Mod/WorldShare/service/GitService.lua')
+local GitKeepworkService = NPL.load('(gl)Mod/WorldShare/service/GitService/GitKeepworkService.lua')
 
 -- libs
-NPL.load('(gl)Mod/WorldShare/service/FileDownloader/FileDownloader.lua')
 local FileDownloader = commonlib.gettable('Mod.WorldShare.service.FileDownloader.FileDownloader')
 local LocalLoadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalLoadWorld")
 local WorldRevision = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision")
@@ -414,54 +415,88 @@ function LocalServiceWorld:GenerateWorldInstance(params)
 end
 
 function LocalServiceWorld:DownLoadZipWorld(foldername, username, lastCommitId, worldpath, callback)
-    GitService:DownloadZIP(
-        foldername,
-        username or nil,
-        lastCommitId,
-        function(bSuccess, downloadPath)
-            if not bSuccess then
+    local qiniuZipArchiveUrl = GitKeepworkService:GetQiNiuArchiveUrl(foldername, username, lastCommitId)
+    local cdnArchiveUrl = GitKeepworkService:GetCdnArchiveUrl(foldername, username, lastCommitId)
+    local tryTimes = 0
+    
+    echo('from local service world!!!!', true)
+    echo(qiniuZipArchiveUrl, true)
+    echo(cdnArchiveUrl, true)
+
+    local function MoveZipToFolder()
+        LocalService:MoveZipToFolder('temp/world_temp_download/', 'temp/archive.zip', function()
+            local fileList = LocalService:LoadFiles('temp/world_temp_download/', true, true)
+
+            if not fileList or type(fileList) ~= 'table' or #fileList == 0 then
                 return
             end
 
-            LocalService:MoveZipToFolder('temp/world_temp_download/', downloadPath, function()
-                local fileList = LocalService:LoadFiles('temp/world_temp_download/', true, true)
+            local zipRootPath = ''
 
-                if not fileList or type(fileList) ~= 'table' or #fileList == 0 then
-                    return
-                end
-    
-                local zipRootPath = ''
-    
-                if fileList[1] and fileList[1].filesize == 0 then
-                    zipRootPath = fileList[1].filename
-                end
+            if fileList[1] and fileList[1].filesize == 0 then
+                zipRootPath = fileList[1].filename
+            end
 
-                ParaIO.CreateDirectory(worldpath)
-    
-                for key, item in ipairs(fileList) do
-                    if key ~= 1 then
-                        local relativePath = commonlib.Encoding.Utf8ToDefault(item.filename:gsub(zipRootPath .. '/', ''))
-    
-                        if item.filesize == 0 then
-                            local folderPath = worldpath .. relativePath .. '/'
-    
-                            ParaIO.CreateDirectory(folderPath)
-                        else
-                            local filePath = worldpath .. relativePath
-    
-                            ParaIO.MoveFile(item.file_path, filePath)
-                        end
+            ParaIO.CreateDirectory(worldpath)
+
+            for key, item in ipairs(fileList) do
+                if key ~= 1 then
+                    local relativePath = commonlib.Encoding.Utf8ToDefault(item.filename:gsub(zipRootPath .. '/', ''))
+
+                    if item.filesize == 0 then
+                        local folderPath = worldpath .. relativePath .. '/'
+
+                        ParaIO.CreateDirectory(folderPath)
+                    else
+                        local filePath = worldpath .. relativePath
+
+                        ParaIO.MoveFile(item.file_path, filePath)
                     end
                 end
-    
-                ParaIO.DeleteFile('temp/world_temp_download/')
-    
-                if callback and type(callback) then
-                    callback()
+            end
+
+            ParaIO.DeleteFile('temp/world_temp_download/')
+
+            if callback and type(callback) == 'function' then
+                callback(true)
+            end
+        end)
+    end
+
+    local function Download(url)
+        echo('download url', true)
+        echo(url, true)
+        local fileDownloader = FileDownloader:new()
+        fileDownloader.isSlient = true
+
+        fileDownloader:Init(
+            foldername,
+            url,
+            'temp/archive.zip',
+            function(bSuccess, downloadPath)
+                if bSuccess then
+                    MoveZipToFolder()
+                else
+                    if tryTimes > 0 then
+                        if callback and type(callback) == 'function' then
+                            callback(false)
+                        end
+
+                        return
+                    end
+
+                    Download(cdnArchiveUrl)
+
+                    tryTimes = tryTimes + 1
                 end
-            end)
-        end
-    )
+
+            end,
+            "access plus 5 mins",
+            false
+        )
+    end
+
+    Download(qiniuZipArchiveUrl)
 end
 
 function LocalServiceWorld:EncryptWorld(originFile, encryptFile)

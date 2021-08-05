@@ -683,6 +683,14 @@
                             return false
                         end
                     end
+
+                    function not_encrypt_world()
+                        if Eval('level') and Eval('level') == 1 then
+                            return false
+                        else
+                            return true
+                        end
+                    end
                 ]]>
             </script>
             <style type="text/mcss" src="Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss">
@@ -1117,6 +1125,10 @@
                                                     </div>
                                                 </div>
                                                 <div class="share_world_info_button" align="right" style="<%= 'width: ' .. get_share_world_info_button_style() .. ';margin-right: -10px;' %>">
+                                                    <pe:if condition='<%= not not_encrypt_world() %>'>
+                                                        <!-- holder -->
+                                                        <div style='width: 165px;height: 10px;float: left;'></div>
+                                                    </pe:if>
                                                     <pe:if condition="<%= Eval('hasPid') %>">
                                                         <input type="button"
                                                                class="share_button"
@@ -1125,34 +1137,36 @@
                                                                tooltip="<%= L'项目ID：' .. Eval('kpProjectId') .. L'， 点击打开项目页' %>"
                                                                name='<%= Eval("index") %>' />
                                                     </pe:if>
-                                                    <input type="button"
-                                                           class="share_button"
-                                                           style="<%= get_share_button('revision') %>"
-                                                           onclick="selected_version"
-                                                           tooltip="<%=L'切换版本' %>"
-                                                           name='<%= Eval("index") %>' />
-                                                    <!-- open current world folder -->
-                                                    <input type="button"
-                                                           class="share_button"
-                                                           style="<%= get_share_button('folder') %>"
-                                                           onclick="open_folder"
-                                                           tooltip="<%=L'打开世界文件夹' %>"
-                                                           name='<%= Eval("index") %>' />
-                                                    <!-- delete -->
-                                                    <input type="button"
-                                                           class="share_button"
-                                                           style="<%= get_share_button('delete') %>"
-                                                           onclick='delete_world'
-                                                           tooltip='<%=L"删除"%>'
-                                                           name='<%=Eval("index")%>' />
-                                                    <pe:if condition='<%= can_be_sync()%>'>
-                                                        <!-- sync -->
+                                                    <pe:if condition='<%= not_encrypt_world() %>'>
                                                         <input type="button"
                                                                class="share_button"
-                                                               style="<%= get_share_button('sync') %>"
-                                                               onclick="sync"
-                                                               tooltip='<%=L"同步"%>'
-                                                               name='<%=Eval("index")%>' />
+                                                               style="<%= get_share_button('revision') %>"
+                                                               onclick="selected_version"
+                                                               tooltip="<%=L'切换版本' %>"
+                                                               name='<%= Eval("index") %>' />
+                                                        <!-- open current world folder -->
+                                                        <input type="button"
+                                                                class="share_button"
+                                                                style="<%= get_share_button('folder') %>"
+                                                                onclick="open_folder"
+                                                                tooltip="<%=L'打开世界文件夹' %>"
+                                                                name='<%= Eval("index") %>' />
+                                                        <!-- delete -->
+                                                        <input type="button"
+                                                                class="share_button"
+                                                                style="<%= get_share_button('delete') %>"
+                                                                onclick='delete_world'
+                                                                tooltip='<%=L"删除"%>'
+                                                                name='<%=Eval("index")%>' />
+                                                        <pe:if condition='<%= can_be_sync()%>'>
+                                                            <!-- sync -->
+                                                            <input type="button"
+                                                                    class="share_button"
+                                                                    style="<%= get_share_button('sync') %>"
+                                                                    onclick="sync"
+                                                                    tooltip='<%=L"同步"%>'
+                                                                    name='<%=Eval("index")%>' />
+                                                        </pe:if>
                                                     </pe:if>
                                                     <!-- enter -->
                                                     <input type="button"

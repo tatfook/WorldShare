@@ -19,6 +19,7 @@ local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 -- service
 local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
 local GitService = NPL.load('(gl)Mod/WorldShare/service/GitService.lua')
+local GitKeepworkService = NPL.load('(gl)Mod/WorldShare/service/GitService/GitKeepworkService.lua')
 local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
 local LocalServiceWorld = NPL.load('(gl)Mod/WorldShare/service/LocalService/LocalServiceWorld.lua')
@@ -218,12 +219,13 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
     local world
     local overtimeEnter = false
     local fetchSuccess = false
+    local tryTimes = 0
 
     local function HandleLoadWorld(url, worldInfo, offlineMode)
         if not url then
             return false
         end
-        
+
         if overtimeEnter and Mod.WorldShare.Store:Get('world/isEnterWorld') then
             return false
         end
@@ -242,7 +244,6 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                     end
 
                     -- TODO: never and auto
-                    echo(encryptWorldFile, true)
                     Game.Start(encryptWorldFile)
 
                     if not encryptWorldFileExist or
@@ -261,15 +262,57 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                             DownloadWorld.Close()
 
                             if bSucceed then
-                                if type(localWorldFile) ~= 'string' or
-                                   localWorldFile == '' or
-                                   not ParaIO.DoesFileExist(localWorldFile) then
+                                if not ParaIO.DoesFileExist(localWorldFile) then
+                                    _guihelper.MessageBox(format(L'下载世界失败，请重新尝试几次（项目ID：%d）', pid))
+
+                                    LOG.std(nil, 'warn', 'CommandLoadWorld', 'Invalid downloaded file not exist: %s', localWorldFile)
+
                                     return
                                 end
+
+                                ParaAsset.OpenArchive(localWorldFile, true)
+                                
+                                local output = {}
+
+                                commonlib.Files.Find(output, "", 0, 500, ":worldconfig.txt", localWorldFile)
+
+                                if #output == 0 then
+                                    _guihelper.MessageBox(format(L'下载的世界已损坏，请重新尝试几次（项目ID：%d）', pid))
+
+                                    LOG.std(nil, 'warn', 'CommandLoadWorld', 'Invalid downloaded file will be deleted: %s', localWorldFile)
+
+                                    ParaIO.DeleteFile(localWorldFile)
+
+                                    ParaAsset.CloseArchive(localWorldFile)
+
+                                    return
+                                end
+
+                                ParaAsset.CloseArchive(localWorldFile)
     
                                 LocalServiceWorld:EncryptWorld(localWorldFile, encryptWorldFile)
                                 ParaIO.DeleteFile(localWorldFile)
                                 Game.Start(encryptWorldFile)
+                            else
+                                if tryTimes > 0 then
+                                    MainLogin:Close()
+
+                                    local CreatePage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Create')
+
+                                    if not CreatePage then
+                                        Create:Show()
+                                    end
+                                    return
+                                end
+
+                                local cdnArchiveUrl = GitKeepworkService:GetCdnArchiveUrl(
+                                                        worldInfo.worldName,
+                                                        worldInfo.username,
+                                                        worldInfo.commitId
+                                                      )
+
+                                HandleLoadWorld(cdnArchiveUrl, worldInfo)
+                                tryTimes = tryTimes + 1
                             end
                         end)
                     end
@@ -294,17 +337,61 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                                 nil,
                                 refreshMode or 'auto',
                                 function(bSucceed, localWorldPath)
+                                    DownloadWorld.Close()
+
                                     if not bSucceed then
-                                        MainLogin:Close()
-
-                                        local CreatePage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Create')
-
-                                        if not CreatePage then
-                                            Create:Show()
+                                        if tryTimes > 0 then
+                                            MainLogin:Close()
+        
+                                            local CreatePage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Create')
+        
+                                            if not CreatePage then
+                                                Create:Show()
+                                            end
+                                            return true -- always return true
                                         end
+
+                                        local cdnArchiveUrl = GitKeepworkService:GetCdnArchiveUrl(
+                                                                worldInfo.worldName,
+                                                                worldInfo.username,
+                                                                worldInfo.commitId
+                                                            )
+
+                                        HandleLoadWorld(cdnArchiveUrl, worldInfo)
+                                        tryTimes = tryTimes + 1
+                                    else
+                                        if not ParaIO.DoesFileExist(localWorldPath) then
+                                            _guihelper.MessageBox(format(L'下载世界失败，请重新尝试几次（项目ID：%d）', pid))
+
+                                            LOG.std(nil, 'warn', 'CommandLoadWorld', 'Invalid downloaded file not exist: %s', localWorldPath)
+
+                                            return true -- always return true
+                                        end
+
+                                        ParaAsset.OpenArchive(localWorldPath, true)
+                                        
+                                        local output = {}
+
+                                        commonlib.Files.Find(output, "", 0, 500, ":worldconfig.txt", localWorldPath)
+
+                                        if #output == 0 then
+                                            _guihelper.MessageBox(format(L'下载的世界已损坏，请重新尝试几次（项目ID：%d）', pid))
+
+                                            LOG.std(nil, 'warn', 'CommandLoadWorld', 'Invalid downloaded file will be deleted: %s', localWorldPath)
+
+                                            ParaIO.DeleteFile(localWorldPath)
+
+                                            ParaAsset.CloseArchive(localWorldPath)
+
+                                            return true
+                                        end
+
+                                        ParaAsset.CloseArchive(localWorldPath)
+
+                                        Game.Start(localWorldPath)
                                     end
 
-                                    DownloadWorld.Close()
+                                    return true -- use mod logic
                                 end
                             )
                         end
@@ -470,6 +557,15 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                 return
             end
 
+            -- update world info
+            data.world.username = data.username
+
+            local archiveUrl = GitKeepworkService:GetQiNiuArchiveUrl(
+                                data.world.worldName,
+                                data.world.username,
+                                data.world.commitId
+                               )
+
             local function ResetVerified()
                 self.isVisiblityVerified = false
                 self.vipVerified = false
@@ -626,7 +722,7 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                         else
                             WorldKeyDecodePage.Show(data, function()
                                 Mod.WorldShare.Store:Set('world/openKpProjectId', pid)
-                                HandleLoadWorld(data.world.archiveUrl, data.world)
+                                HandleLoadWorld(archiveUrl, data.world)
                                 CacheProjectId:SetProjectIdInfo(pid, data.world)
                             end)
 
@@ -641,7 +737,7 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
 
                 -- enter world
                 Mod.WorldShare.Store:Set('world/openKpProjectId', pid)
-                HandleLoadWorld(data.world.archiveUrl, data.world)
+                HandleLoadWorld(archiveUrl, data.world)
                 CacheProjectId:SetProjectIdInfo(pid, data.world)
             end
 

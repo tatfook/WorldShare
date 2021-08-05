@@ -97,17 +97,20 @@ function FileDownloader:Start(src, dest, callbackFunc, cachePolicy)
 
     local label_id = src or "userworlddownload"
     if self.text ~= "official_texture_package" then
-        BroadcastHelper.PushLabel(
-            {
-                id = label_id,
-                label = format(L"%s: 正在下载中,请耐心等待", self.text),
-                max_duration = 20000,
-                color = "255 188 67",
-                scaling = 1.1,
-                bold = true,
-                shadow = true
-            }
-        )
+
+        if not self.isSlient then
+            BroadcastHelper.PushLabel(
+                {
+                    id = label_id,
+                    label = format(L"%s: 正在下载中,请耐心等待", self.text),
+                    max_duration = 20000,
+                    color = "255 188 67",
+                    scaling = 1.1,
+                    bold = true,
+                    shadow = true
+                }
+            )
+        end
     end
 
     local res = ls:GetFile(
@@ -159,17 +162,19 @@ function FileDownloader:Start(src, dest, callbackFunc, cachePolicy)
                     self.text = ''
                 end
 
-                BroadcastHelper.PushLabel(
-                    {
-                        id = label_id,
-                        label = format(L"%s: %s", self.text, text),
-                        max_duration = 10000,
-                        color = "255 188 67",
-                        scaling = 1.1,
-                        bold = true,
-                        shadow = true
-                    }
-                )
+                if not self.isSlient then
+                    BroadcastHelper.PushLabel(
+                        {
+                            id = label_id,
+                            label = format(L"%s: %s", self.text, text),
+                            max_duration = 10000,
+                            color = "255 188 67",
+                            scaling = 1.1,
+                            bold = true,
+                            shadow = true
+                        }
+                    )
+                end
             end
         end
     )

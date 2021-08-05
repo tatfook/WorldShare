@@ -93,12 +93,12 @@ function SyncToLocal:Start()
         if type(data) ~= 'table' then
             self.callback(false, L"获取列表失败（下载）")
             self:SetFinish(true)
-            return false
+            return
         end
 
         if self.currentWorld.status == 2 and #data ~= 0 then
             self:DownloadZIP()
-            return false
+            return
         end
 
         if #data == 0 then

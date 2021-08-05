@@ -5,7 +5,7 @@ Date:  2017.4.17
 Desc: 
 use the lib:
 ------------------------------------------------------------
-NPL.load("(gl)Mod/WorldShare/service/GithubService.lua");
+NPL.load("(gl)Mod/WorldShare/service/GitService/GithubService.lua");
 local GithubService = commonlib.gettable("Mod.WorldShare.service.GithubService");
 ------------------------------------------------------------
 ]]

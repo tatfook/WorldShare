@@ -1,19 +1,24 @@
 --[[
 Title: GitService
-Author(s):  big
-Date:  2018.6.20
+Author(s): big
+CreateDate: 2018.06.20
+UpdateDate: 2021.08.05
 Place: Foshan
 use the lib:
 ------------------------------------------------------------
-local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
+local GitService = NPL.load('(gl)Mod/WorldShare/service/GitService.lua')
 ------------------------------------------------------------
 ]]
 
-local GitKeepworkService = NPL.load("./GitService/GitKeepworkService.lua")
+-- service
+local GitKeepworkService = NPL.load('./GitService/GitKeepworkService.lua')
+
+-- helper
+local GitEncoding = NPL.load('(gl)Mod/WorldShare/helper/GitEncoding.lua')
 
 local GitService = NPL.export()
 
-local KEEPWORK = "KEEPWORK"
+local KEEPWORK = 'KEEPWORK'
 
 function GitService:GetDataSourceInfo()
     return Mod.WorldShare.Store:Get("user/dataSourceInfo")
@@ -21,6 +26,16 @@ end
 
 function GitService:GetDataSourceType()
     return KEEPWORK
+end
+
+function GitService:GetRepoPath(foldername, username)
+    username = username or Mod.WorldShare.Store:Get('user/username')
+
+    if type(username) ~= 'string' or type(foldername) ~= 'string' then
+        return ''
+    else
+        return Mod.WorldShare.Utils.UrlEncode(username .. '/' .. GitEncoding.Base32(foldername))
+    end
 end
 
 function GitService:Create(...)

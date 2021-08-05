@@ -10,7 +10,6 @@ local KeepworkReposApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Repos.lua")
 ]]
 
 -- libs
-NPL.load('(gl)Mod/WorldShare/service/FileDownloader/FileDownloader.lua')
 local FileDownloader = commonlib.gettable('Mod.WorldShare.service.FileDownloader.FileDownloader')
 local Encoding = commonlib.gettable("System.Encoding")
 
