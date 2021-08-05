@@ -644,3 +644,17 @@ function Create:WorldRename(currentItemIndex, tempModifyWorldname, callback)
 
     return true
 end
+
+function Create:GetProjectId(url)
+    if (tonumber(url or '') or 99999) < 99999 then
+        return url
+    end
+
+    local pid = string.match(url or '', "^p(%d+)$")
+
+    if not pid then
+        pid = string.match(url or '', "/pbl/project/(%d+)")
+    end
+
+    return pid or false
+end

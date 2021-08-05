@@ -312,6 +312,7 @@ end
 function SyncToDataSource:HandleCompareList()
     if self.compareListTotal < self.compareListIndex then
         -- sync finish
+        GameLogic.GetFilters():apply_filters("SyncWorldFinish");
         self:SetFinish(true)
         self:UpdateRecord(
             function()

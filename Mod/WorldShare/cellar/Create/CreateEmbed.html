@@ -11,13 +11,15 @@
 
                     -- bottles
                     local Create = NPL.load('./Create.lua')
+                    local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
                     local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
-                    local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
                     local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
                     local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua")
+                    local CommonLoadWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/CommonLoadWorld.lua')
 
                     -- service
                     local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+                    local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
 
                     -- database
                     local SessionsData = NPL.load('(gl)Mod/WorldShare/database/SessionsData.lua')
@@ -162,10 +164,8 @@
                     function go_to_url()
                         local url = Page:GetValue("content","");
 
-                        local pid = UserConsole:GetProjectId(url)
-
                         if pid then
-                            UserConsole:HandleWorldId(pid)
+                            CommonLoadWorld:EnterWorldById(pid)
                         else
                             InternetLoadWorld.GotoUrl(url)
                         end
@@ -270,7 +270,7 @@
                     end
 
                     function create_new_world()
-                        UserConsole:CreateNewWorld()
+                        CreateWorld:CreateNewWorld()
                     end
 
                     function get_world_text()
