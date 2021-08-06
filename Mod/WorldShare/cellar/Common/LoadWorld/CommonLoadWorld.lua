@@ -291,7 +291,11 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                                 ParaAsset.CloseArchive(localWorldFile)
     
                                 LocalServiceWorld:EncryptWorld(localWorldFile, encryptWorldFile)
-                                ParaIO.DeleteFile(localWorldFile)
+
+                                if not ParaEngine.GetAppCommandLineByParam('save_origin_zip', nil) then
+                                    ParaIO.DeleteFile(localWorldFile)
+                                end
+
                                 Game.Start(encryptWorldFile)
                             else
                                 if tryTimes > 0 then

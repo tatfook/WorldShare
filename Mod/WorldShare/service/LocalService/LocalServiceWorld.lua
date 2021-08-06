@@ -418,10 +418,6 @@ function LocalServiceWorld:DownLoadZipWorld(foldername, username, lastCommitId, 
     local qiniuZipArchiveUrl = GitKeepworkService:GetQiNiuArchiveUrl(foldername, username, lastCommitId)
     local cdnArchiveUrl = GitKeepworkService:GetCdnArchiveUrl(foldername, username, lastCommitId)
     local tryTimes = 0
-    
-    echo('from local service world!!!!', true)
-    echo(qiniuZipArchiveUrl, true)
-    echo(cdnArchiveUrl, true)
 
     local function MoveZipToFolder()
         LocalService:MoveZipToFolder('temp/world_temp_download/', 'temp/archive.zip', function()
@@ -464,8 +460,6 @@ function LocalServiceWorld:DownLoadZipWorld(foldername, username, lastCommitId, 
     end
 
     local function Download(url)
-        echo('download url', true)
-        echo(url, true)
         local fileDownloader = FileDownloader:new()
         fileDownloader.isSlient = true
 
