@@ -17,7 +17,7 @@ WorldShare is a Mod for Paracraft. That can share paracraft world to datasources
 
 ## Controbution
 <a href="https://github.com/onedou">
-  <img width="50px" src="https://avatars.githubusercontent.com/u/3422640?v=4&size=5">
+  <img width="50px" src="https://avatars.githubusercontent.com/u/3422640?v=4&size=50">
 </a>
 <a href="https://github.com/LiXizhi">
   <img width="50px" src="https://avatars.githubusercontent.com/u/94537?v=4&size=50">
