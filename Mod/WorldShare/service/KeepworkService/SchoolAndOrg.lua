@@ -20,7 +20,10 @@ local AccountingOrgActivateCodeApi = NPL.load("(gl)Mod/WorldShare/api/Accounting
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
 
 -- libs
-local KeepWorkItemManager = NPL.load("(gl)script/apps/Aries/Creator/HttpAPI/KeepWorkItemManager.lua");
+local KeepWorkItemManager = NPL.load('(gl)script/apps/Aries/Creator/HttpAPI/KeepWorkItemManager.lua')
+
+-- databases
+local SessionsData = NPL.load('(gl)Mod/WorldShare/database/SessionsData.lua')
 
 local KeepworkServiceSchoolAndOrg = NPL.export()
 
@@ -175,6 +178,8 @@ function KeepworkServiceSchoolAndOrg:ChangeSchool(schoolId, callback)
         schoolId,
         function(data, err)
             Mod.WorldShare.Store:Set('user/hasJoinedSchool', true)
+
+            SessionsData:SetAnyonymousInfo('lastSchoolId', schoolId)
 
             if callback and type(callback) == "function" then
                 -- update field 

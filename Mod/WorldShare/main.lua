@@ -126,8 +126,8 @@ local Filters = NPL.load('(gl)Mod/WorldShare/filters/Filters.lua')
 local WorldShare = commonlib.inherit(commonlib.gettable('Mod.ModBase'), commonlib.gettable('Mod.WorldShare'))
 
 WorldShare:Property({'Name', 'WorldShare', 'GetName', 'SetName', { auto = true }})
-WorldShare:Property({'Desc', 'world share mod can share world to keepwork online', 'GetDesc', 'SetDesc', { auto = true }})
-WorldShare.version = '0.0.40'
+WorldShare:Property({'Desc', 'World share mod can share world to keepwork online', 'GetDesc', 'SetDesc', { auto = true }})
+WorldShare.version = '0.0.42'
 
 if Config.defaultEnv == 'RELEASE' or Config.defaultEnv == 'STAGE' then
     System.options.isAB_SDK = true
@@ -185,6 +185,14 @@ function WorldShare:init()
 
     if localVersion then
         MainLogin.state.IsUpdaterStarted = true
+    end
+
+    -- load diff world
+    NPL.load('(gl)Mod/DiffWorld/main.lua')
+    local DiffWorld = commonlib.gettable('Mod.DiffWorld')
+
+    if DiffWorld and type(DiffWorld) == 'table' and DiffWorld.init then
+        DiffWorld:init()
     end
 end
 

@@ -6,9 +6,12 @@ place: Foshan
 Desc: 
 use the lib:
 ------------------------------------------------------------
-local SessionsData = NPL.load("(gl)Mod/WorldShare/database/SessionsData.lua")
+local SessionsData = NPL.load('(gl)Mod/WorldShare/database/SessionsData.lua')
 ------------------------------------------------------------
 ]]
+
+-- config
+local Config = NPL.load('(gl)Mod/WorldShare/config/Config.lua')
 
 local SessionsData = NPL.export()
 
@@ -36,12 +39,6 @@ local SessionsData = NPL.export()
                     projectId = 1111,
                     lastPosition = { x = 19200, y = 6, x = 19200 },
                     orientation = { CameraLiftupAngle = 0.11111, CameraRotY = 0.22222 }
-                }
-            },
-            act = {
-                rice = {
-                    amount = 11,
-                    lastLoginDate = 2021-06-09,
                 }
             }
         },
@@ -146,6 +143,78 @@ function SessionsData:SaveSession(session)
     end
 
     GameLogic.GetPlayerController():SaveLocalData("sessions", sessionsData, true)
+end
+
+function SessionsData:GetAnonymousUser()
+    local default = {
+        value = 'ano',
+        text = 'ano',
+        session = {
+            account = 'ano',
+            loginServer = Config.defaultEnv,
+        }
+    }
+
+    local sessionsData = self:GetSessions()
+
+    if not sessionsData or not sessionsData.allUsers then
+        return default
+    end
+
+    for key, item in ipairs(sessionsData.allUsers) do
+        if item.value == 'ano' then
+            return item
+        end
+    end
+
+    return default
+end
+
+function SessionsData:GetAnonymousInfo()
+    local anonymousUser = self:GetAnonymousUser()
+
+    if anonymousUser and anonymousUser.anonymousInfo and type(anonymousUser.anonymousInfo) == 'table' then
+        return anonymousUser.anonymousInfo
+    else
+        return {}
+    end
+end
+
+function SessionsData:SetAnyonymousInfo(key, value)
+    if not key or type(key) ~= 'string' or not value then
+        return false
+    end
+
+    local anonymousInfo = self:GetAnonymousInfo()
+
+    anonymousInfo[key] = value
+
+    local sessionsData = self:GetSessions()
+
+    if not sessionsData or type(sessionsData) ~= 'table' then
+        return false
+    end
+
+    local beExist = false
+
+    for key, item in ipairs(sessionsData.allUsers) do
+        if item.value == 'ano' then
+            item.anonymousInfo = anonymousInfo
+            beExist = true
+        end
+    end
+
+    if not beExist then
+        local anoUser = self:GetAnonymousUser()
+
+        anoUser.anonymousInfo = anonymousInfo
+
+        sessionsData.allUsers[#sessionsData.allUsers + 1] = anoUser
+    end
+
+    GameLogic.GetPlayerController():SaveLocalData("sessions", sessionsData, true)
+
+    return true
 end
 
 function SessionsData:GetSessionByUsername(username)
@@ -279,41 +348,3 @@ function SessionsData:SetUserLastPosition(x, y, z, cameraLiftupAngle, cameraRotY
 
     self:SaveSession(session)
 end
-
--- function SessionsData:GetUserRice()
---     local username = Mod.WorldShare.Store:Get('user/username')
---     local session = self:GetSessionByUsername(username)
-
---     if not session or type(session) ~= 'table' then
---         return
---     end
-
---     if session.act and session.act.rice then
---         return session.act.rice
---     else
---         return {}
---     end
--- end
-
--- function SessionsData:SetUserRice(rice)
---     if not rice or type(rice) ~= "table" then
---         return
---     end
-
---     local username = Mod.WorldShare.Store:Get('user/username')
---     local session = self:GetSessionByUsername(username)
-
---     if not session or type(session) ~= 'table' then
---         return
---     end
-
---     if session.act then
---         session.act.rice = rice
---     else
---         session.act = {
---             rice = rice
---         }
---     end
-
---     self:SaveSession(session)
--- end

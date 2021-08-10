@@ -376,6 +376,8 @@
                                     result_page:GetNode('school_list'):SetUIAttribute('DataSource', MySchool.result)
                                 end)
 
+                                toggle_area_list()
+
                                 return
                             end
 
@@ -636,6 +638,7 @@
                                                EmptyText='<%= L"请输入学校名称或编号搜索" %>'
                                                EmptyTextColor='#FF666666'
                                                spacing=10
+                                               name='search_text'
                                                onchange='on_enter_text'
                                                class='text_field_background'
                                                style='width: 338px;

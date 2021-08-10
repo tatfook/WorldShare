@@ -22,6 +22,9 @@ local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua
 local KeepworkServiceSchoolAndOrg = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/SchoolAndOrg.lua")
 local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
 
+-- database
+local SessionsData = NPL.load("(gl)Mod/WorldShare/database/SessionsData.lua")
+
 local MySchool = NPL.export()
 
 function MySchool:Show(callback)
@@ -238,9 +241,21 @@ function MySchool:ShowJoinSchool(callback)
                     self.curId = region.info.city.id
                     self.lastCityId = region.info.city.id
 
-                    self:GetSearchSchoolResult(region.info.city.id, nil, function(data)
-                        resultPage:GetNode('school_list'):SetUIAttribute('DataSource', self.result)
-                    end)
+                    local lastSchoolId = SessionsData:GetAnonymousInfo().lastSchoolId or 0
+
+                    if lastSchoolId and type(lastSchoolId) == 'number' and lastSchoolId ~= 0 then
+                        params._page:SetValue('search_text', lastSchoolId)
+
+                        self.searchText = tostring(lastSchoolId)
+
+                        self:GetSearchSchoolResultByName(self.searchText, function()
+                            resultPage:GetNode('school_list'):SetUIAttribute('DataSource', self.result)
+                        end)
+                    else
+                        self:GetSearchSchoolResult(region.info.city.id, nil, function()
+                            resultPage:GetNode('school_list'):SetUIAttribute('DataSource', self.result)
+                        end)
+                    end
                 end)
             end)
         end
