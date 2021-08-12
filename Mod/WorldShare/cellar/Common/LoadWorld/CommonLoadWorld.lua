@@ -244,7 +244,9 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                     end
 
                     -- TODO: never and auto
-                    Game.Start(encryptWorldFile)
+                    if encryptWorldFileExist then
+                        Game.Start(encryptWorldFile)
+                    end
 
                     if not encryptWorldFileExist or
                        refreshMode == 'force' then
@@ -296,7 +298,9 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                                     ParaIO.DeleteFile(localWorldFile)
                                 end
 
-                                Game.Start(encryptWorldFile)
+                                if ParaIO.DoesFileExist(encryptWorldFile) then
+                                    Game.Start(encryptWorldFile)
+                                end
                             else
                                 if tryTimes > 0 then
                                     MainLogin:Close()
