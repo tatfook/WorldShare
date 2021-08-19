@@ -402,8 +402,9 @@ function Utils.OpenKeepworkUrlByToken(url)
     end)
 end
 
-function Utils.WordsLimit(text, size)
+function Utils.WordsLimit(text, size, charCount)
     size = size or 150
+    charCount = charCount or 25
 
     if _guihelper.GetTextWidth(text) > size then
         local function chsize(char)
@@ -429,7 +430,7 @@ function Utils.WordsLimit(text, size)
 
             currentIndex = currentIndex + charsizenum
 
-            if len >= 25 then
+            if len >= charCount then
                 break
             end
 

@@ -687,6 +687,12 @@
                             return true
                         end
                     end
+
+                    function get_columns_style()
+                        local embed_container = page:FindControl('embed_container')
+
+                        return 'width: ' .. (embed_container.width / 3 - 5) .. 'px;'
+                    end
                 ]]>
             </script>
             <style type="text/mcss" src="Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss">
@@ -712,7 +718,7 @@
                         float = "left",
                         width  = 1024,
                         height = 580,
-                        padding = 0
+                        padding = 0,
                     },
                     add_server_text_field = {
                         textcolor = "#ffffff",
@@ -868,52 +874,258 @@
                     },
                 }
             </style>
-            <div width="1024" height="567" style=''>
+            <pe:container
+                width='1024'
+                height='567'
+                name='embed_container'
+                style='background:;'>
                 <div class="world_area">
                     <div style="height:567px;">
                         <pe:if condition="<%= is_list_refreshing() %>">
-                            <div style="margin-left: 330px;margin-top: 140px;">
-                                <div style="margin-left: 58px;margin-bottom: 20px;width: 104px;height: 109px;background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#500 15 104 109);background-animation:url(script/UIAnimation/CommonProgress.lua.table#WaitingSpin)"></div>
+                            <div style='margin-left: 330px;
+                                        margin-top: 140px;'>
+                                <div style='margin-left: 58px;
+                                            margin-bottom: 20px;
+                                            width: 104px;
+                                            height: 109px;
+                                            background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#500 15 104 109);
+                                            background-animation:url(script/UIAnimation/CommonProgress.lua.table#WaitingSpin)'></div>
                                 <div style="width: 226px;height: 23px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#447 137 226 23)"></div>
                             </div>
                         </pe:if>
-                        <pe:if style="font-weight:bold;color:#ffffff" condition="<%= not is_list_refreshing() %>">
-                            <pe:gridview 
-                                RememberScrollPos="true"
-                                AllowPaging="false"
-                                VerticalScrollBarStep="80"
-                                DefaultNodeHeight="290"
-                                CellPadding="0"
-                                ItemsPerLine="3"
-                                name="gw_world_ds">
-                                <Columns width='34.7%'>
-                                    <!--selected-->
-                                    <pe:if condition='<%= be_selected()%>'>
-                                        <div name='<%=Eval("index")%>'
-                                             align='left'
-                                             width='90.5%'
-                                             class="share_selected_item"
-                                             style="padding-top: 6px;padding-left: 4px;">
-                                            <pe:if condition="<%= has_rated() %>">
-                                                <div style="position: relative;width: 70px;height: 36px;margin-top: -4px;margin-left: -4px;padding-top: 4px;padding-left: 6px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#356 136 70 36)">
-                                                    <%= get_art_number()%>
+                        <pe:if style='font-weight:bold;
+                                      color:#ffffff'
+                               condition='<%= not is_list_refreshing() %>'>
+                            <pe:gridview
+                                RememberScrollPos='true'
+                                AllowPaging='false'
+                                VerticalScrollBarStep='80'
+                                DefaultNodeHeight='290'
+                                CellPadding='0'
+                                ItemsPerLine='3'
+                                name='gw_world_ds'>
+                                <Columns>
+                                    <div style='<%= get_columns_style() %>'>
+                                        <!--selected-->
+                                        <pe:if condition='<%= be_selected()%>'>
+                                            <div name='<%=Eval("index")%>'
+                                                 align='left'
+                                                 width='90.5%'
+                                                 class='share_selected_item'
+                                                 style="padding: 0px;">
+                                                <pe:if condition="<%= has_rated() %>">
+                                                    <div style='position: relative;
+                                                                width: 70px;
+                                                                height: 36px;
+                                                                margin-top: -4px;
+                                                                margin-left: -4px;
+                                                                padding-top: 4px;
+                                                                padding-left: 6px;
+                                                                background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#356 136 70 36)'>
+                                                        <%= get_art_number()%>
+                                                    </div>
+                                                </pe:if>
+                                                <pe:if condition='<%= Eval("project") and tonumber(Eval("project")["visibility"]) == 1 %>'>
+                                                    <div style='position: relative;
+                                                                margin-left: 268px;
+                                                                width: 28px;
+                                                                height: 31px;
+                                                                background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#310 53 28 31)'></div>
+                                                </pe:if>
+                                                <div width='93%'
+                                                     align='center'
+                                                     style='height: 240px;
+                                                            padding: 0px;
+                                                            margin-left: -2px;
+                                                            margin-top: 10px;
+                                                            background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#72 20 16 16:2 2 2 2)'>
+                                                    <div width='100%'
+                                                         style='height: 130px;
+                                                                background-color: #afafaf;'>
+                                                        <div width='101%'
+                                                             style="position: relative;
+                                                                    height: 132px;
+                                                                    margin-left: -1px;
+                                                                    margin-right: -1px;
+                                                                    margin-top: -1px;
+                                                                    background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#394 211 32 32:9 9 9 9)"></div>
+                                                        <div width='100%'
+                                                             style="<%= 'height: 130px;background: url(' .. get_world_preview() .. ')' %>"></div>
+                                                    </div>
+                                                    <div style="position: relative; width: 32px;height: 32px;">
+                                                        <pe:if condition='<%= get_world_status(1)%>'>
+                                                            <div class="status" style="<%= get_world_status_icon(1) %>" tooltip='<%= get_world_status_tips()%>' />
+                                                        </pe:if>
+                                                        <pe:if condition='<%= get_world_status(2)%>'>
+                                                            <div class="status" style="<%= get_world_status_icon(2) %>" tooltip='<%= get_world_status_tips()%>' />
+                                                        </pe:if>
+                                                        <pe:if condition='<%= get_world_status(3)%>'>
+                                                            <div class="status" style="<%= get_world_status_icon(3) %>" tooltip='<%= get_world_status_tips()%>' />
+                                                        </pe:if>
+                                                        <pe:if condition='<%= get_world_status(4)%>'>
+                                                            <div class="status" style="<%= get_world_status_icon(4) %>" tooltip='<%= get_world_status_tips()%>' />
+                                                        </pe:if>
+                                                        <pe:if condition='<%= get_world_status(5)%>'>
+                                                            <div class="status" style="<%= get_world_status_icon(5) %>" tooltip='<%= get_world_status_tips()%>' />
+                                                        </pe:if>
+                                                        <pe:if condition='<%= not can_be_sync()%>'>
+                                                            <div style="float:left;width:9px;height:32px;background:#fff" />
+                                                        </pe:if>
+                                                    </div>
+                                                    <div style="margin-left: 20px;">
+                                                        <div class="share_world_name">
+                                                            <pe:if condition='<%= is_modifying() %>'>
+                                                                <div class="list_search_bar" style="float: left;margin-left: 0px;width: 180px;height: 25px;">
+                                                                    <input type="text"
+                                                                           onchange="update_temp_modify_worldname"
+                                                                           class="list_search_textfield theme1_white_textfield"
+                                                                           style="width: 145px;height: 25px;"
+                                                                           value="<%= get_tagname() %>"
+                                                                           spacing="4" />
+                                                                    <div class="list_search_button" style="height: 25px;width: 40px;font-size: 12px;base-font-size: 12px;margin-top: -26px;">
+                                                                        <input type="button"
+                                                                               class="list_search_button_click theme1_gray2_button"
+                                                                               style="height: 25px;"
+                                                                               DefaultButton="true"
+                                                                               value='<%=L"保存"%>'
+                                                                               onclick="covert_status" />
+                                                                    </div>
+                                                                </div>
+                                                            </pe:if>
+                                                            <pe:if condition='<%= not is_modifying() %>'>
+                                                                <%= get_world_text() %>
+                                                                <pe:if condition="<%= Eval('hasPid') %>">
+                                                                    <div style="float:left;margin-left: 2px;" tooltip='<%= L"项目ID：" .. Eval("kpProjectId") %>'>
+                                                                        <span style="color: #9e9e9e;">
+                                                                            #<%= Eval('kpProjectId') or '' %>
+                                                                        </span>
+                                                                    </div>
+                                                                </pe:if>
+                                                                <div onclick="covert_status"
+                                                                    tooltip="<%=Eval('text')%>"
+                                                                    style="float:left;margin-top:6px;margin-left:1px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#340 311 14 15);width: 10px;height: 12px;z-index: 10">
+                                                                </div>
+                                                            </pe:if>
+                                                        </div>
+                                                    </div>
+                                                    <div style="margin-left: 20px;">
+                                                        <div class="share_world_info">
+                                                            <div style="float:left;width:198px;">
+                                                                <%= get_world_date() %>
+                                                            </div>
+                                                            <div style="float: left;text-singleline: true;width: 20px;font-size: 12px;base-font-size: 12px;color: #9e9e9e;margin-top:6px;">
+                                                                <%= 'v' .. get_world_version() %>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div style="margin-left: 20px;font-size: 12px;base-font-size: 12px;color: #9e9e9e;margin-top: 6px;">
+                                                        <div style="float:left;" tooltip='<%= L"观看：" .. get_project_views() %>'>
+                                                            <img src="Texture/Aries/Creator/keepwork/worldshare_32bits.png#383 181 16 12"
+                                                                style="width: 16px;height: 12px;margin-top: 4px;" />
+                                                            <div style="float:left;margin-left: 2px;">
+                                                                <%= get_project_views() %>
+                                                            </div>
+                                                        </div>
+                                                        <div style="float:left;margin-left: 8px;" tooltip='<%= L"点赞：" .. get_project_thumbs() %>'>
+                                                            <img src="Texture/Aries/Creator/keepwork/worldshare_32bits.png#358 177 16 16"
+                                                                 style="width: 16px;height: 16px;" />
+                                                            <div style="float:left;margin-left: 2px;">
+                                                                <%= get_project_thumbs() %>
+                                                            </div>
+                                                        </div>
+                                                        <div style="float:left;margin-left: 8px;" tooltip='<%= L"评论：" .. get_project_comments() %>'>
+                                                            <img src="Texture/Aries/Creator/keepwork/worldshare_32bits.png#409 181 18 16"
+                                                                 style="width: 18px;height: 16px;margin-top: 3px;" />
+                                                            <div style="float:left;margin-left: 2px;">
+                                                                <%= get_project_comments() %>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="share_world_info_button" align="right" style="<%= 'width: ' .. get_share_world_info_button_style() .. ';margin-right: -10px;' %>">
+                                                        <pe:if condition='<%= not not_encrypt_world() %>'>
+                                                            <!-- holder -->
+                                                            <div style='width: 165px;height: 10px;float: left;'></div>
+                                                        </pe:if>
+                                                        <pe:if condition="<%= Eval('hasPid') %>">
+                                                            <input type="button"
+                                                                   class="share_button"
+                                                                   style="<%= get_share_button('web') %>"
+                                                                   onclick="open_project"
+                                                                   tooltip="<%= L'项目ID：' .. Eval('kpProjectId') .. L'， 点击打开项目页' %>"
+                                                                   name='<%= Eval("index") %>' />
+                                                        </pe:if>
+                                                        <pe:if condition='<%= not_encrypt_world() %>'>
+                                                            <input type="button"
+                                                                   class="share_button"
+                                                                   style="<%= get_share_button('revision') %>"
+                                                                   onclick="selected_version"
+                                                                   tooltip="<%=L'切换版本' %>"
+                                                                   name='<%= Eval("index") %>' />
+                                                            <!-- open current world folder -->
+                                                            <input type="button"
+                                                                    class="share_button"
+                                                                    style="<%= get_share_button('folder') %>"
+                                                                    onclick="open_folder"
+                                                                    tooltip="<%=L'打开世界文件夹' %>"
+                                                                    name='<%= Eval("index") %>' />
+                                                            <!-- delete -->
+                                                            <input type="button"
+                                                                    class="share_button"
+                                                                    style="<%= get_share_button('delete') %>"
+                                                                    onclick='delete_world'
+                                                                    tooltip='<%=L"删除"%>'
+                                                                    name='<%=Eval("index")%>' />
+                                                            <pe:if condition='<%= can_be_sync()%>'>
+                                                                <!-- sync -->
+                                                                <input type="button"
+                                                                        class="share_button"
+                                                                        style="<%= get_share_button('sync') %>"
+                                                                        onclick="sync"
+                                                                        tooltip='<%=L"同步"%>'
+                                                                        name='<%=Eval("index")%>' />
+                                                            </pe:if>
+                                                        </pe:if>
+                                                        <!-- enter -->
+                                                        <input type="button"
+                                                               class="share_button"
+                                                               style="<%= get_share_button('enter') %>"
+                                                               onclick="enter"
+                                                               tooltip='<%=L"进入"%>'
+                                                               name='<%=Eval("index")%>' />
+                                                    </div>
                                                 </div>
-                                            </pe:if>
-                                            <pe:if condition='<%= Eval("project") and tonumber(Eval("project")["visibility"]) == 1 %>'>
-                                                <div style="position: relative;
-                                                            margin-left: 268px;
-                                                            width: 28px;
-                                                            height: 31px;
-                                                            background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#310 53 28 31)"></div>
-                                            </pe:if>
-                                            <div width='97%'
-                                                 style="height: 248px;
-                                                        padding: 4px;
-                                                        background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#72 20 16 16:2 2 2 2)">
-                                                <div width='100%'
+                                            </div>
+                                        </pe:if>
+                                        <!--not selected-->
+                                        <pe:if condition='<%= not be_selected() %>'>
+                                            <div name='<%=Eval("index")%>'
+                                                 align='left'
+                                                 width='90.5%'
+                                                 class="share_unselect_item"
+                                                 style="padding-left:8px;padding-top:8px;">
+                                                <input width='100%'
+                                                       type="button"
+                                                       style="position: relative;
+                                                              height:260px;
+                                                              background:"
+                                                       name='<%=Eval("index")%>'
+                                                       onclick="switch_world" />
+                                                <pe:if condition="<%= has_rated() %>">
+                                                    <div style="position: relative;width: 70px;height: 36px;margin-top: -6.8px;margin-left: -8px;padding-top: 4px;padding-left: 6px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#356 136 70 36)">
+                                                        <%= get_art_number()%>
+                                                    </div>
+                                                </pe:if>
+                                                <pe:if condition='<%= Eval("project") and tonumber(Eval("project")["visibility"]) == 1 %>'>
+                                                    <div style="position: relative;
+                                                                margin-left: 268px;
+                                                                width: 28px;
+                                                                height: 31px;
+                                                                background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#310 53 28 31)"></div>
+                                                </pe:if>
+                                                <div width='97%'
                                                      style="height: 130px;
                                                             background-color: #afafaf;">
-                                                    <div width='101%'
+                                                    <div width='100%'
                                                          style="position: relative;
                                                                 height: 132px;
                                                                 margin-left: -1px;
@@ -921,22 +1133,36 @@
                                                                 margin-top: -1px;
                                                                 background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#394 211 32 32:9 9 9 9)"></div>
                                                     <div width='100%'
-                                                         style="<%= 'height: 130px;background: url(' .. get_world_preview() .. ')' %>"></div>
+                                                         style="<%= 'height: 130px;background: url(' .. get_world_preview() .. ')' %>">
+                                                        <pe:if condition="<%= has_username() %>">
+                                                            <div width='100%'
+                                                                 style="height: 30px;
+                                                                        margin-top: 100px;
+                                                                        font-size: 12px;
+                                                                        padding-top: 5px;
+                                                                        padding-left: 4px;
+                                                                        color: #ffffff;
+                                                                        background-color: #000000a3">
+                                                                <%= get_user_icon() %>
+                                                                <%= get_username() %>
+                                                            </div>
+                                                        </pe:if>
+                                                    </div>
                                                 </div>
-                                                <div style="position: relative; width: 32px;height: 32px;">
-                                                    <pe:if condition='<%= get_world_status(1)%>'>
+                                                <div style="position: relative;width: 32px;height: 32px;">
+                                                    <pe:if condition='<%= get_world_status(1) %>'>
                                                         <div class="status" style="<%= get_world_status_icon(1) %>" tooltip='<%= get_world_status_tips()%>' />
                                                     </pe:if>
-                                                    <pe:if condition='<%= get_world_status(2)%>'>
+                                                    <pe:if condition='<%= get_world_status(2) %>'>
                                                         <div class="status" style="<%= get_world_status_icon(2) %>" tooltip='<%= get_world_status_tips()%>' />
                                                     </pe:if>
-                                                    <pe:if condition='<%= get_world_status(3)%>'>
+                                                    <pe:if condition='<%= get_world_status(3) %>'>
                                                         <div class="status" style="<%= get_world_status_icon(3) %>" tooltip='<%= get_world_status_tips()%>' />
                                                     </pe:if>
-                                                    <pe:if condition='<%= get_world_status(4)%>'>
+                                                    <pe:if condition='<%= get_world_status(4) %>'>
                                                         <div class="status" style="<%= get_world_status_icon(4) %>" tooltip='<%= get_world_status_tips()%>' />
                                                     </pe:if>
-                                                    <pe:if condition='<%= get_world_status(5)%>'>
+                                                    <pe:if condition='<%= get_world_status(5) %>'>
                                                         <div class="status" style="<%= get_world_status_icon(5) %>" tooltip='<%= get_world_status_tips()%>' />
                                                     </pe:if>
                                                     <pe:if condition='<%= not can_be_sync()%>'>
@@ -945,36 +1171,12 @@
                                                 </div>
                                                 <div style="margin-left: 20px;">
                                                     <div class="share_world_name">
-                                                        <pe:if condition='<%= is_modifying() %>'>
-                                                            <div class="list_search_bar" style="float: left;margin-left: 0px;width: 180px;height: 25px;">
-                                                                <input type="text"
-                                                                       onchange="update_temp_modify_worldname"
-                                                                       class="list_search_textfield theme1_white_textfield"
-                                                                       style="width: 145px;height: 25px;"
-                                                                       value="<%= get_tagname() %>"
-                                                                       spacing="4" />
-                                                                <div class="list_search_button" style="height: 25px;width: 40px;font-size: 12px;base-font-size: 12px;margin-top: -26px;">
-                                                                    <input type="button"
-                                                                           class="list_search_button_click theme1_gray2_button"
-                                                                           style="height: 25px;"
-                                                                           DefaultButton="true"
-                                                                           value='<%=L"保存"%>'
-                                                                           onclick="covert_status" />
-                                                                </div>
-                                                            </div>
-                                                        </pe:if>
-                                                        <pe:if condition='<%= not is_modifying() %>'>
-                                                            <%= get_world_text() %>
-                                                            <pe:if condition="<%= Eval('hasPid') %>">
-                                                                <div style="float:left;margin-left: 2px;" tooltip='<%= L"项目ID：" .. Eval("kpProjectId") %>'>
-                                                                    <span style="color: #9e9e9e;">
-                                                                        #<%= Eval('kpProjectId') or '' %>
-                                                                    </span>
-                                                                </div>
-                                                            </pe:if>
-                                                            <div onclick="covert_status"
-                                                                tooltip="<%=Eval('text')%>"
-                                                                style="float:left;margin-top:6px;margin-left:1px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#340 311 14 15);width: 10px;height: 12px;z-index: 10">
+                                                        <%= get_world_text() %>
+                                                        <pe:if condition="<%= Eval('hasPid') %>">
+                                                            <div style="float:left;margin-left: 2px;" tooltip='<%= L"项目ID：" .. Eval("kpProjectId") %>'>
+                                                                <span style="color: #9e9e9e;">
+                                                                    #<%= Eval('kpProjectId') or '' %>
+                                                                </span>
                                                             </div>
                                                         </pe:if>
                                                     </div>
@@ -1012,196 +1214,24 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="share_world_info_button" align="right" style="<%= 'width: ' .. get_share_world_info_button_style() .. ';margin-right: -10px;' %>">
-                                                    <pe:if condition='<%= not not_encrypt_world() %>'>
-                                                        <!-- holder -->
-                                                        <div style='width: 165px;height: 10px;float: left;'></div>
+                                                <div style="margin-left: 20px;margin-top: 25px;height: 16px;float:left;font-size: 12px;">
+                                                    <pe:if condition="<%= get_school_name() ~= '' %>">
+                                                        <img style="width: 19px;height: 16px;margin-right: 5px;" src="Texture/Aries/Creator/keepwork/worldshare_32bits.png#311 311 19 16" />
+                                                        <%= get_school_name() %>
                                                     </pe:if>
-                                                    <pe:if condition="<%= Eval('hasPid') %>">
-                                                        <input type="button"
-                                                               class="share_button"
-                                                               style="<%= get_share_button('web') %>"
-                                                               onclick="open_project"
-                                                               tooltip="<%= L'项目ID：' .. Eval('kpProjectId') .. L'， 点击打开项目页' %>"
-                                                               name='<%= Eval("index") %>' />
-                                                    </pe:if>
-                                                    <pe:if condition='<%= not_encrypt_world() %>'>
-                                                        <input type="button"
-                                                               class="share_button"
-                                                               style="<%= get_share_button('revision') %>"
-                                                               onclick="selected_version"
-                                                               tooltip="<%=L'切换版本' %>"
-                                                               name='<%= Eval("index") %>' />
-                                                        <!-- open current world folder -->
-                                                        <input type="button"
-                                                                class="share_button"
-                                                                style="<%= get_share_button('folder') %>"
-                                                                onclick="open_folder"
-                                                                tooltip="<%=L'打开世界文件夹' %>"
-                                                                name='<%= Eval("index") %>' />
-                                                        <!-- delete -->
-                                                        <input type="button"
-                                                                class="share_button"
-                                                                style="<%= get_share_button('delete') %>"
-                                                                onclick='delete_world'
-                                                                tooltip='<%=L"删除"%>'
-                                                                name='<%=Eval("index")%>' />
-                                                        <pe:if condition='<%= can_be_sync()%>'>
-                                                            <!-- sync -->
-                                                            <input type="button"
-                                                                    class="share_button"
-                                                                    style="<%= get_share_button('sync') %>"
-                                                                    onclick="sync"
-                                                                    tooltip='<%=L"同步"%>'
-                                                                    name='<%=Eval("index")%>' />
-                                                        </pe:if>
-                                                    </pe:if>
-                                                    <!-- enter -->
+                                                </div>
+                                                <div align="right" class="share_world_info_button"  style="margin-right: 12px;width:30px;height:30px;margin-top: -34px;">
+                                                    <!-- ENTER -->
                                                     <input type="button"
-                                                           class="share_button"
-                                                           style="<%= get_share_button('enter') %>"
-                                                           onclick="enter"
-                                                           tooltip='<%=L"进入"%>'
-                                                           name='<%=Eval("index")%>' />
+                                                            class="share_button"
+                                                            style="<%= get_share_button('enter') %>"
+                                                            onclick="enter"
+                                                            tooltip='<%=L"进入"%>'
+                                                            name='<%=Eval("index")%>' />
                                                 </div>
                                             </div>
-                                        </div>
-                                    </pe:if>
-                                    <!--not selected-->
-                                    <pe:if condition='<%= not be_selected() %>'>
-                                        <div name='<%=Eval("index")%>'
-                                             align='left'
-                                             width='90.5%'
-                                             class="share_unselect_item"
-                                             style="padding-left:8px;padding-top:8px;">
-                                            <input width='100%'
-                                                   type="button"
-                                                   style="position: relative;
-                                                          height:260px;
-                                                          background:"
-                                                   name='<%=Eval("index")%>'
-                                                   onclick="switch_world" />
-                                            <pe:if condition="<%= has_rated() %>">
-                                                <div style="position: relative;width: 70px;height: 36px;margin-top: -6.8px;margin-left: -8px;padding-top: 4px;padding-left: 6px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#356 136 70 36)">
-                                                    <%= get_art_number()%>
-                                                </div>
-                                            </pe:if>
-                                            <pe:if condition='<%= Eval("project") and tonumber(Eval("project")["visibility"]) == 1 %>'>
-                                                <div style="position: relative;
-                                                            margin-left: 268px;
-                                                            width: 28px;
-                                                            height: 31px;
-                                                            background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#310 53 28 31)"></div>
-                                            </pe:if>
-                                            <div width='97%'
-                                                 style="height: 130px;
-                                                        background-color: #afafaf;">
-                                                <div width='100%'
-                                                     style="position: relative;
-                                                            height: 132px;
-                                                            margin-left: -1px;
-                                                            margin-right: -1px;
-                                                            margin-top: -1px;
-                                                            background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#394 211 32 32:9 9 9 9)"></div>
-                                                <div width='100%'
-                                                     style="<%= 'height: 130px;background: url(' .. get_world_preview() .. ')' %>">
-                                                    <pe:if condition="<%= has_username() %>">
-                                                        <div width='100%'
-                                                             style="height: 30px;
-                                                                    margin-top: 100px;
-                                                                    font-size: 12px;
-                                                                    padding-top: 5px;
-                                                                    padding-left: 4px;
-                                                                    color: #ffffff;
-                                                                    background-color: #000000a3">
-                                                            <%= get_user_icon() %>
-                                                            <%= get_username() %>
-                                                        </div>
-                                                    </pe:if>
-                                                </div>
-                                            </div>
-                                            <div style="position: relative;width: 32px;height: 32px;">
-                                                <pe:if condition='<%= get_world_status(1) %>'>
-                                                    <div class="status" style="<%= get_world_status_icon(1) %>" tooltip='<%= get_world_status_tips()%>' />
-                                                </pe:if>
-                                                <pe:if condition='<%= get_world_status(2) %>'>
-                                                    <div class="status" style="<%= get_world_status_icon(2) %>" tooltip='<%= get_world_status_tips()%>' />
-                                                </pe:if>
-                                                <pe:if condition='<%= get_world_status(3) %>'>
-                                                    <div class="status" style="<%= get_world_status_icon(3) %>" tooltip='<%= get_world_status_tips()%>' />
-                                                </pe:if>
-                                                <pe:if condition='<%= get_world_status(4) %>'>
-                                                    <div class="status" style="<%= get_world_status_icon(4) %>" tooltip='<%= get_world_status_tips()%>' />
-                                                </pe:if>
-                                                <pe:if condition='<%= get_world_status(5) %>'>
-                                                    <div class="status" style="<%= get_world_status_icon(5) %>" tooltip='<%= get_world_status_tips()%>' />
-                                                </pe:if>
-                                                <pe:if condition='<%= not can_be_sync()%>'>
-                                                    <div style="float:left;width:9px;height:32px;background:#fff" />
-                                                </pe:if>
-                                            </div>
-                                            <div style="margin-left: 20px;">
-                                                <div class="share_world_name">
-                                                    <%= get_world_text() %>
-                                                    <pe:if condition="<%= Eval('hasPid') %>">
-                                                        <div style="float:left;margin-left: 2px;" tooltip='<%= L"项目ID：" .. Eval("kpProjectId") %>'>
-                                                            <span style="color: #9e9e9e;">
-                                                                #<%= Eval('kpProjectId') or '' %>
-                                                            </span>
-                                                        </div>
-                                                    </pe:if>
-                                                </div>
-                                            </div>
-                                            <div style="margin-left: 20px;">
-                                                <div class="share_world_info">
-                                                    <div style="float:left;width:198px;">
-                                                        <%= get_world_date() %>
-                                                    </div>
-                                                    <div style="float: left;text-singleline: true;width: 20px;font-size: 12px;base-font-size: 12px;color: #9e9e9e;margin-top:6px;">
-                                                        <%= 'v' .. get_world_version() %>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div style="margin-left: 20px;font-size: 12px;base-font-size: 12px;color: #9e9e9e;margin-top: 6px;">
-                                                <div style="float:left;" tooltip='<%= L"观看：" .. get_project_views() %>'>
-                                                    <img src="Texture/Aries/Creator/keepwork/worldshare_32bits.png#383 181 16 12"
-                                                        style="width: 16px;height: 12px;margin-top: 4px;" />
-                                                    <div style="float:left;margin-left: 2px;">
-                                                        <%= get_project_views() %>
-                                                    </div>
-                                                </div>
-                                                <div style="float:left;margin-left: 8px;" tooltip='<%= L"点赞：" .. get_project_thumbs() %>'>
-                                                    <img src="Texture/Aries/Creator/keepwork/worldshare_32bits.png#358 177 16 16"
-                                                         style="width: 16px;height: 16px;" />
-                                                    <div style="float:left;margin-left: 2px;">
-                                                        <%= get_project_thumbs() %>
-                                                    </div>
-                                                </div>
-                                                <div style="float:left;margin-left: 8px;" tooltip='<%= L"评论：" .. get_project_comments() %>'>
-                                                    <img src="Texture/Aries/Creator/keepwork/worldshare_32bits.png#409 181 18 16"
-                                                         style="width: 18px;height: 16px;margin-top: 3px;" />
-                                                    <div style="float:left;margin-left: 2px;">
-                                                        <%= get_project_comments() %>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div style="margin-left: 20px;margin-top: 25px;height: 16px;float:left;font-size: 12px;">
-                                                <pe:if condition="<%= get_school_name() ~= '' %>">
-                                                    <img style="width: 19px;height: 16px;margin-right: 5px;" src="Texture/Aries/Creator/keepwork/worldshare_32bits.png#311 311 19 16" />
-                                                    <%= get_school_name() %>
-                                                </pe:if>
-                                            </div>
-                                            <div align="right" class="share_world_info_button"  style="margin-right: 12px;width:30px;height:30px;margin-top: -34px;">
-                                                <!-- ENTER -->
-                                                <input type="button"
-                                                        class="share_button"
-                                                        style="<%= get_share_button('enter') %>"
-                                                        onclick="enter"
-                                                        tooltip='<%=L"进入"%>'
-                                                        name='<%=Eval("index")%>' />
-                                            </div>
-                                        </div>
-                                    </pe:if>
+                                        </pe:if>
+                                    </div>
                                 </Columns>
                                 <EmptyDataTemplate>
                                     <div style="margin:10px;font-weight:bold;">
@@ -1225,7 +1255,7 @@
                         </pe:if>
                     </div>
                 </div>
-            </kp:window>
+            </pe:container>
         </pe:mcml>
     </body>
 </html>

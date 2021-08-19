@@ -33,23 +33,28 @@ local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkServ
 local ShareWorld = NPL.export()
 
 function ShareWorld:Init(callback)
-    if KeepworkServiceSession:GetUserWhere() == 'LOCAL' and not KeepworkServiceSession:IsSignedIn() then
+    if KeepworkServiceSession:GetUserWhere() == 'LOCAL' and
+       not KeepworkServiceSession:IsSignedIn() then
         return
     end
 
-	ShareWorld.callback = callback
-    local currentEnterWorld = Mod.WorldShare.Store:Get("world/currentEnterWorld")
+	self.callback = callback
 
+    local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
+
+    -- read only world
     if GameLogic.IsReadOnly() or not currentEnterWorld or currentEnterWorld.is_zip then
         self:ShowWorldCode(currentEnterWorld.kpProjectId)
-        return false
+        return
     end
 
-    local filepath = self:GetPreviewImagePath()
-    if not GameLogic.IsReadOnly() and not ParaIO.DoesFileExist(filepath, false) then
+    -- confirm preview jpg exist
+    if not GameLogic.IsReadOnly() and
+       not ParaIO.DoesFileExist(self:GetPreviewImagePath(), false) then
         PackageShareWorld.TakeSharePageImage()
     end
 
+    -- must login
     if not KeepworkService:IsSignedIn() then
         function Handle()
             KeepworkServiceProject:GetProjectIdByWorldName(
@@ -76,12 +81,14 @@ function ShareWorld:Init(callback)
             Mod.WorldShare.Store:Set('user/AfterLogined', Handle)
         end
 
-        return false
+        return
     end
 
-    Mod.WorldShare.MsgBox:Show(L"请稍候...")
+    Mod.WorldShare.MsgBox:Wait()
+
     Compare:Init(currentEnterWorld.worldpath, function(result)
         Mod.WorldShare.MsgBox:Close()
+
         if result then
             self:CheckRealName(function()
                 self:ShowPage()
@@ -103,45 +110,39 @@ function ShareWorld:CheckRealName(callback)
 end
 
 function ShareWorld:ShowPage()
-    local params = Mod.WorldShare.Utils.ShowWindow(640, 415, "Mod/WorldShare/cellar/Theme/ShareWorld/ShareWorld.html", "ShareWorld")
+    local params = Mod.WorldShare.Utils.ShowWindow(
+        640,
+        415,
+        'Mod/WorldShare/cellar/ShareWorld/Theme/ShareWorld.html',
+        'Mod.WorldShare.ShareWorld'
+    )
 
-    params._page.OnClose = function()
-        Mod.WorldShare.Store:Remove('page/ShareWorld')
-        Mod.WorldShare.Store:Remove("world/shareMode")
-    end
+    local filePath = self:GetPreviewImagePath()
 
-    local ShareWorldImp = Mod.WorldShare.Store:Get('page/ShareWorld')
-    local filepath = self:GetPreviewImagePath()
-
-    if ParaIO.DoesFileExist(filepath) and ShareWorldImp then
-        ShareWorldImp:SetNodeValue("ShareWorldImage", filepath)
+    if ParaIO.DoesFileExist(filePath) and params._page then
+        params._page:SetNodeValue("share_world_image", filePath)
     end
 
     self:Refresh()
 end
 
 function ShareWorld:GetPreviewImagePath()
-    local worldpath = ParaWorld.GetWorldDirectory() or ""
-    return format("%spreview.jpg", worldpath)
+    return format('%spreview.jpg', ParaWorld.GetWorldDirectory() or '')
 end
 
-function ShareWorld:SetPage()
-    Mod.WorldShare.Store:Set('page/ShareWorld', document:GetPageCtrl())
+function ShareWorld:GetPage()
+    return Mod.WorldShare.Store:Get('page/Mod.WorldShare.ShareWorld')
 end
 
 function ShareWorld:ClosePage()
-    local ShareWorldPage = Mod.WorldShare.Store:Get('page/ShareWorld')
-
-    if ShareWorldPage then
-        ShareWorldPage:CloseWindow()
+    if self:GetPage() then
+        self:GetPage():CloseWindow()
     end
 end
 
-function ShareWorld:Refresh(times)
-    local ShareWorldPage = Mod.WorldShare.Store:Get('page/ShareWorld')
-
-    if ShareWorldPage then
-        ShareWorldPage:Refresh(times or 0.01)
+function ShareWorld:Refresh()
+    if self:GetPage() then
+        self:GetPage():Refresh(0)
     end
 end
 
@@ -149,7 +150,7 @@ function ShareWorld:GetWorldSize()
     local worldpath = ParaWorld.GetWorldDirectory()
 
     if not worldpath then
-        return false
+        return 0
     end
 
     local filesTotal = LocalService:GetWorldSize(worldpath)
@@ -158,11 +159,11 @@ function ShareWorld:GetWorldSize()
 end
 
 function ShareWorld:GetRemoteRevision()
-    return tonumber(Mod.WorldShare.Store:Get("world/remoteRevision")) or 0
+    return tonumber(Mod.WorldShare.Store:Get('world/remoteRevision')) or 0
 end
 
 function ShareWorld:GetCurrentRevision()
-    return tonumber(Mod.WorldShare.Store:Get("world/currentRevision")) or 0
+    return tonumber(Mod.WorldShare.Store:Get('world/currentRevision')) or 0
 end
 
 function ShareWorld:OnClick()
@@ -171,12 +172,12 @@ function ShareWorld:OnClick()
 
     if WorldCommon:IsModified() then
         canBeShare = false
-        msg = L"当前世界未保存，是否继续上传世界？"
+        msg = L'当前世界未保存，是否继续上传世界？'
     end
 
     if canBeShare and self:GetRemoteRevision() > self:GetCurrentRevision() then
         canBeShare = false
-        msg = L"当前本地版本小于远程版本，是否继续上传？"
+        msg = L'当前本地版本小于远程版本，是否继续上传？'
     end
 
     local function Handle()
@@ -220,35 +221,38 @@ function ShareWorld:OnClick()
 end
 
 function ShareWorld:Snapshot()
-    local ShareWorldPage = Mod.WorldShare.Store:Get('page/ShareWorld')
+    -- take a new screenshot
     PackageShareWorld.TakeSharePageImage()
     self:UpdateImage(true)
 
-    if (self:GetRemoteRevision() == self:GetCurrentRevision()) then
+    -- incremental version number if version equal
+    if self:GetRemoteRevision() == self:GetCurrentRevision() then
         CommandManager:RunCommand("/save")
-        self:ClosePage()
-        self:Init()
+        
+        local currentRevision = tonumber(Mod.WorldShare.Store:Get('world/currentRevision')) or 0
+
+        currentRevision = currentRevision + 1
+
+        self:GetPage():SetUIValue('current_revision', currentRevision)
     end
 end
 
 function ShareWorld:UpdateImage(bRefreshAsset)
-    local ShareWorldPage = Mod.WorldShare.Store:Get('page/ShareWorld')
+    if self:GetPage() then
+        local filePath = self:GetPreviewImagePath()
 
-    if (ShareWorldPage) then
-        local filepath = self:GetPreviewImagePath()
-
-        ShareWorldPage:SetUIValue("ShareWorldImage", filepath)
-
-        if (bRefreshAsset) then
-            ParaAsset.LoadTexture("", filepath, 1):UnloadAsset()
-        end
-
+        self:GetPage():SetUIValue('share_world_image', filePath)
         self:Refresh()
+
+        -- release asset
+        if bRefreshAsset then
+            ParaAsset.LoadTexture('', filePath, 1):UnloadAsset()
+        end
     end
 end
 
 function ShareWorld:ShowWorldCode(projectId)
-    Mod.WorldShare.MsgBox:Show(L"请稍候...")
+    Mod.WorldShare.MsgBox:Wait()
 
     KeepworkServiceProject:GenerateMiniProgramCode(
         projectId,
@@ -256,11 +260,16 @@ function ShareWorld:ShowWorldCode(projectId)
             Mod.WorldShare.MsgBox:Close()
 
             if not bSucceed then
-                GameLogic.AddBBS(nil, L"生成二维码失败", 3000, "255 0 0")
-                return false
+                GameLogic.AddBBS(nil, L'生成二维码失败', 3000, '255 0 0')
+                return
             end
 
-            Mod.WorldShare.Utils.ShowWindow(520, 305, "Mod/WorldShare/cellar/ShareWorld/Code.html?wxacode=".. (wxacode or ""), "Mod.WorldShare.ShareWorld.Code")
+            Mod.WorldShare.Utils.ShowWindow(
+                520,
+                305,
+                'Mod/WorldShare/cellar/ShareWorld/Code.html?wxacode='.. (wxacode or ''),
+                'Mod.WorldShare.ShareWorld.Code'
+            )
         end
     )
 end
@@ -269,15 +278,17 @@ end
 function ShareWorld:GetShareUrl()
     local currentEnterWorld = Mod.WorldShare.Store:Get("world/currentEnterWorld")
 
-    if not currentEnterWorld or not currentEnterWorld.kpProjectId or currentEnterWorld.kpProjectId == 0 then
+    if not currentEnterWorld or
+       not currentEnterWorld.kpProjectId or
+       currentEnterWorld.kpProjectId == 0 then
         return ''
     end
 
-    return format("%s/pbl/project/%d/", KeepworkService:GetKeepworkUrl(), currentEnterWorld.kpProjectId)
+    return format('%s/pbl/project/%d/', KeepworkService:GetKeepworkUrl(), currentEnterWorld.kpProjectId)
 end
 
 function ShareWorld:GetWorldName()
     local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
-    return currentEnterWorld.text
+    return currentEnterWorld.text or ''
 end
