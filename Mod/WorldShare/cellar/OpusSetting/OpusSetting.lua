@@ -26,11 +26,13 @@ function OpusSetting:OnWorldLoad()
     local currentEnterWorldUserId = currentEnterWorld.user and currentEnterWorld.user.id or 0
     local userId = Mod.WorldShare.Store:Get('user/userId')
     local isStudent = Mod.WorldShare.Store:Get('user/userType').student
+    local isTeacher = Mod.WorldShare.Store:Get('user/userType').teacher
 
-    -- exclude myself and institute
+    -- exclude myself and institute user and teacher
     if instituteVipChangeOnly and
        currentEnterWorldUserId ~= userId and
-       not isStudent then
+       not isStudent and 
+       not isTeacher then
         GameLogic.options:SetLockedGameMode('game')
         SlashCommand.slash_command_maps['mode'].mode_deny = 'game'
     end
