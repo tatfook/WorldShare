@@ -101,6 +101,7 @@ local MainLogin = commonlib.gettable('MyCompany.Aries.Game.MainLogin')
 -- bottles
 local KickOut = NPL.load('(gl)Mod/WorldShare/cellar/Common/KickOut/KickOut.lua')
 local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
+local OpusSetting = NPL.load('(gl)Mod/WorldShare/cellar/OpusSetting/OpusSetting.lua')
 local HistoryManager = NPL.load('(gl)Mod/WorldShare/cellar/HistoryManager/HistoryManager.lua')
 local PreventIndulge = NPL.load('(gl)Mod/WorldShare/cellar/PreventIndulge/PreventIndulge.lua')
 local Beginner = NPL.load('(gl)Mod/WorldShare/cellar/Beginner/Beginner.lua')
@@ -210,6 +211,9 @@ function WorldShare:OnWorldLoad()
 
     SyncMain:OnWorldLoad(function()
         Mod.WorldShare.Store:Set('world/loadWorldFinish', true)
+
+        -- need to get current enter world info
+        OpusSetting:OnWorldLoad()
 
         -- ensure current enter world exist
         EventTrackingService:Send(2, 'duration.world.stay', { started = true })

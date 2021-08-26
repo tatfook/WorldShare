@@ -39,7 +39,6 @@ rpc:new():init(
 --------- thread part ---------
 
 -- libs
-local Files = commonlib.gettable("commonlib.Files")
 local SystemEncoding = commonlib.gettable("System.Encoding")
 local CommonlibEncoding = commonlib.gettable("commonlib.Encoding")
 local FileDownloader = commonlib.gettable("Mod.WorldShare.service.FileDownloader.FileDownloader")
@@ -81,7 +80,7 @@ function LocalService:LoadFiles(path, NotGetContent, isGetFolder)
 end
 
 function LocalService:Find(path)
-    return Files.Find({}, path, self.nMaxFileLevels, self.nMaxFilesNum, self.filter)
+    return commonlib.Files.Find({}, path, self.nMaxFileLevels, self.nMaxFilesNum, self.filter)
 end
 
 function LocalService:FilesFind(result, path, subPath)
@@ -422,7 +421,7 @@ function LocalService:GetZipRevision(path)
     local revision = 0
     local output = {}
 
-    Files.Find(output, "", 0, self.nMaxFilesNum, ":revision.xml", path)
+    commonlib.Files.Find(output, "", 0, self.nMaxFilesNum, ":revision.xml", path)
 
     if #output ~= 0 then
         local file = ParaIO.open(parentPath .. output[1].filename, "r")
@@ -443,7 +442,7 @@ function LocalService:IsFileExistInZip(path, filter)
 
     local output = {}
 
-    Files.Find(output, "", 0, self.nMaxFilesNum, filter or "", path)
+    commonlib.Files.Find(output, "", 0, self.nMaxFilesNum, filter or "", path)
 
     ParaAsset.CloseArchive(path)
 
@@ -493,7 +492,7 @@ end
 function LocalService:ClearUserWorlds()
     local userworldsPath = format("%s/%s", LocalLoadWorld.GetWorldFolderFullPath(), "userworlds")
 
-    local fileLists = Files.Find(nil, userworldsPath, self.nMaxFileLevels, self.nMaxFilesNum, self.filter)
+    local fileLists = commonlib.Files.Find(nil, userworldsPath, self.nMaxFileLevels, self.nMaxFilesNum, self.filter)
 
     for key, item in ipairs(fileLists) do
         if item.fileattr and item.fileattr == 16 then
@@ -501,7 +500,7 @@ function LocalService:ClearUserWorlds()
                 GameLogic.RemoveWorldFileWatcher()
             end
 
-            Files.DeleteFolder(format("%s/%s", userworldsPath, item.filename))
+            commonlib.Files.DeleteFolder(format("%s/%s", userworldsPath, item.filename))
         end
 
         if item.fileattr and item.fileattr == 0 then
@@ -511,5 +510,5 @@ function LocalService:ClearUserWorlds()
 end
 
 function LocalService:TouchFolder(...)
-    Files.TouchFolder(...)
+    commonlib.Files.TouchFolder(...)
 end

@@ -13,7 +13,7 @@ local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
 -- libs
 local GameMainLogin = commonlib.gettable('MyCompany.Aries.Game.MainLogin')
 local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua")
-local Desktop = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop")
+local Desktop = commonlib.gettable('MyCompany.Aries.Creator.Game.Desktop')
 
 -- service
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')

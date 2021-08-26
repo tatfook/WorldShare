@@ -1,30 +1,58 @@
 --[[
 Title: Project Setting
 Author: big  
-Date: 2020.8.15
-place: Foshan
+CreateDate: 2020.08.15
+ModifyDate: 2021.08.26
+Place: Foshan
 Desc: 
 use the lib:
 ------------------------------------------------------------
-local OpusSetting = NPL.load("(gl)Mod/WorldShare/cellar/OpusSetting/OpusSetting.lua")
+local OpusSetting = NPL.load('(gl)Mod/WorldShare/cellar/OpusSetting/OpusSetting.lua')
 ------------------------------------------------------------
 ]]
+
+-- libs
+local WorldCommon = commonlib.gettable('MyCompany.Aries.Creator.WorldCommon')
+local SlashCommand = commonlib.gettable("MyCompany.Aries.SlashCommand.SlashCommand")
 
 --- service
 local KeepworkServiceProject = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Project.lua")
 
 local OpusSetting = NPL.export()
 
+function OpusSetting:OnWorldLoad()
+    local instituteVipChangeOnly = WorldCommon.GetWorldTag('instituteVipChangeOnly')
+    local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
+    local currentEnterWorldUserId = currentEnterWorld.user and currentEnterWorld.user.id or 0
+    local userId = Mod.WorldShare.Store:Get('user/userId')
+    local isStudent = Mod.WorldShare.Store:Get('user/userType').freeStudent
+
+    -- exclude myself and institute
+    if instituteVipChangeOnly and
+       currentEnterWorldUserId ~= userId and
+       not isStudent then
+        GameLogic.options:SetLockedGameMode('game')
+        SlashCommand.slash_command_maps['mode'].mode_deny = 'game'
+    end
+end
+
 function OpusSetting:Show()
-    local params = Mod.WorldShare.Utils.ShowWindow(505 , 350, "(ws)OpusSetting", "Mod.WorldShare.OpusSetting")
+    local params = Mod.WorldShare.Utils.ShowWindow(
+        505,
+        385,
+        '(ws)OpusSetting',
+        'Mod.WorldShare.OpusSetting'
+    )
 
-    local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
+    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
-    if not currentWorld or not currentWorld.kpProjectId or currentWorld.kpProjectId == 0 then
-        return false
+    if not currentWorld or
+       not currentWorld.kpProjectId or
+       currentWorld.kpProjectId == 0 then
+        return
     end
 
-    Mod.WorldShare.MsgBox:Show(L"请稍候...")
+    Mod.WorldShare.MsgBox:Wait()
 
     KeepworkServiceProject:GetProject(currentWorld.kpProjectId, function(data, err)
         Mod.WorldShare.MsgBox:Close()
@@ -32,40 +60,40 @@ function OpusSetting:Show()
         if type(data) == 'table' then
             if data.visibility and data.visibility == 0 then
                 -- public
-                params._page:GetNode("public"):SetAttribute("checked", "checked")
-                params._page:SetValue("private", false)
+                params._page:GetNode('public'):SetAttribute('checked', 'checked')
+                params._page:SetValue('private', false)
                 if data.extra and
                    ((data.extra.vipEnabled and
                    data.extra.vipEnabled == 1) or
                    (data.extra.isVipWorld and
                    data.extra.isVipWorld == 1)) then
-                    params._page:SetValue("vip_checkbox", true)
+                    params._page:SetValue('vip_checkbox', true)
                     self.isVipWorld = true
                 else
-                    params._page:SetValue("vip_checkbox", false)
+                    params._page:SetValue('vip_checkbox', false)
                     self.isVipWorld = false
                 end
 
                 if data.extra and data.extra.instituteVipEnabled and data.extra.instituteVipEnabled == 1 then
-                    params._page:SetValue("institute_vip_checkbox", true)
+                    params._page:SetValue('institute_vip_checkbox', true)
                     self.instituteVipEnabled = true
                 else
-                    params._page:SetValue("institute_vip_checkbox", false)
+                    params._page:SetValue('institute_vip_checkbox', false)
                     self.instituteVipEnabled = false
                 end
 
                 if data.extra and data.extra.encode_world and data.extra.encode_world == 1 then
-                    params._page:SetValue("encode_world", true)
+                    params._page:SetValue('encode_world', true)
                     self.encode_world = true
                 else
-                    params._page:SetValue("encode_world", false)
+                    params._page:SetValue('encode_world', false)
                     self.encode_world = false
                 end
 
             elseif data.visibility == 1 then
                 -- private
-                params._page:SetValue("public", false)
-                params._page:GetNode("private"):SetAttribute("checked", "checked")
+                params._page:SetValue('public', false)
+                params._page:GetNode('private'):SetAttribute('checked', 'checked')
             end
         end
         params._page:Refresh(0.01)
@@ -81,17 +109,17 @@ function OpusSetting:SetPublic(value)
 
     local params = {}
 
-    if value == "public" then
+    if value == 'public' then
         params.visibility = 0
-    elseif value == "private" then
+    elseif value == 'private' then
         params.visibility = 1
     end
 
     KeepworkServiceProject:UpdateProject(currentWorld.kpProjectId, params, function(data, err)
         if err == 200 then
-            GameLogic.AddBBS(nil, L"设置成功", 3000, "0 255 0")
+            GameLogic.AddBBS(nil, L'设置成功', 3000, '0 255 0')
         else
-            GameLogic.AddBBS(nil, L"设置失败", 3000, "255 0 0")
+            GameLogic.AddBBS(nil, L'设置失败', 3000, "255 0 0")
         end
     end)
 end
@@ -99,8 +127,10 @@ end
 function OpusSetting:SetVip(value)
     local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
 
-    if not currentWorld or not currentWorld.kpProjectId or currentWorld.kpProjectId == 0 then
-        return false
+    if not currentWorld or
+       not currentWorld.kpProjectId or
+       currentWorld.kpProjectId == 0 then
+        return
     end
 
     local params = {
@@ -117,10 +147,10 @@ function OpusSetting:SetVip(value)
 
     KeepworkServiceProject:UpdateProject(currentWorld.kpProjectId, params, function(data, err)
         if err == 200 then
-            GameLogic.AddBBS(nil, L"设置成功", 3000, "0 255 0")
+            GameLogic.AddBBS(nil, L'设置成功', 3000, '0 255 0')
             self.isVipWorld = value
         else
-            GameLogic.AddBBS(nil, L"设置失败", 3000, "255 0 0")
+            GameLogic.AddBBS(nil, L'设置失败', 3000, '255 0 0')
         end
     end)
 end
@@ -144,10 +174,10 @@ function OpusSetting:SetInstituteVip(value)
 
     KeepworkServiceProject:UpdateProject(currentWorld.kpProjectId, params, function(data, err)
         if err == 200 then
-            GameLogic.AddBBS(nil, L"设置成功", 3000, "0 255 0")
+            GameLogic.AddBBS(nil, L'设置成功', 3000, '0 255 0')
             self.instituteVipEnabled = value
         else
-            GameLogic.AddBBS(nil, L"设置失败", 3000, "255 0 0")
+            GameLogic.AddBBS(nil, L'设置失败', 3000, '255 0 0')
         end
     end)
 end
@@ -155,8 +185,10 @@ end
 function OpusSetting:SetEncodeWorld(value)
     local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
 
-    if not currentWorld or not currentWorld.kpProjectId or currentWorld.kpProjectId == 0 then
-        return false
+    if not currentWorld or
+       not currentWorld.kpProjectId or
+       currentWorld.kpProjectId == 0 then
+        return
     end
 
     local params = {
@@ -171,10 +203,10 @@ function OpusSetting:SetEncodeWorld(value)
 
     KeepworkServiceProject:UpdateProject(currentWorld.kpProjectId, params, function(data, err)
         if err == 200 then
-            GameLogic.AddBBS(nil, L"设置成功", 3000, "0 255 0")
+            GameLogic.AddBBS(nil, L'设置成功', 3000, '0 255 0')
             self.encode_world = true
         else
-            GameLogic.AddBBS(nil, L"设置失败", 3000, "255 0 0")
+            GameLogic.AddBBS(nil, L'设置失败', 3000, '255 0 0')
         end
     end)
 end

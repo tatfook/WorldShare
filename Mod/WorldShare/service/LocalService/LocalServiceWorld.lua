@@ -349,6 +349,8 @@ function LocalServiceWorld:SaveWorldInfo(ctx, node)
     node.attr.kpProjectId = ctx.kpProjectId and tonumber(ctx.kpProjectId) or 0
     node.attr.parentProjectId = ctx.parentProjectId and tonumber(ctx.parentProjectId) or 0
     node.attr.redirectLoadWorld = ctx.redirectLoadWorld or ''
+    node.attr.instituteVipChangeOnly = ctx.instituteVipChangeOnly or false
+    node.attr.instituteVipSaveAsOnly = ctx.instituteVipSaveAsOnly or false
 end
 
 function LocalServiceWorld:LoadWorldInfo(ctx, node)
@@ -363,6 +365,8 @@ function LocalServiceWorld:LoadWorldInfo(ctx, node)
     ctx.kpProjectId = tonumber(ctx.kpProjectId) or 0
     ctx.parentProjectId = tonumber(ctx.parentProjectId) or 0
     ctx.redirectLoadWorld = ctx.redirectLoadWorld or ''
+    ctx.instituteVipChangeOnly = ctx.instituteVipChangeOnly == 'true' or ctx.instituteVipChangeOnly == true
+    ctx.instituteVipSaveAsOnly = ctx.instituteVipSaveAsOnly == 'true' or ctx.instituteVipSaveAsOnly == true
 end
 
 function LocalServiceWorld:CheckWorldIsCorrect(world)
