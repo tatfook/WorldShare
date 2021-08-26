@@ -25,7 +25,7 @@ function OpusSetting:OnWorldLoad()
     local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
     local currentEnterWorldUserId = currentEnterWorld.user and currentEnterWorld.user.id or 0
     local userId = Mod.WorldShare.Store:Get('user/userId')
-    local isStudent = Mod.WorldShare.Store:Get('user/userType').freeStudent
+    local isStudent = Mod.WorldShare.Store:Get('user/userType').student
 
     -- exclude myself and institute
     if instituteVipChangeOnly and
