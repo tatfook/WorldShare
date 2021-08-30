@@ -234,6 +234,9 @@ function WorldExitDialog.UpdateImage(bRefreshAsset)
         if bRefreshAsset then
             ParaAsset.LoadTexture("", filepath, 1):UnloadAsset()
         end
+
+        -- increase version number
+        GameLogic.QuickSave()
     end
 end
 

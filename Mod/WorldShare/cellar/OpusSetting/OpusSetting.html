@@ -94,6 +94,7 @@
 
                         WorldCommon.SetWorldTag('instituteVipChangeOnly', enabled)
                         WorldCommon.SaveWorldTag()
+                        GameLogic.QuickSave()
                     end
 
                     function is_ban_not_institute_vip_save_as()
@@ -105,6 +106,7 @@
 
                         WorldCommon.SetWorldTag('instituteVipSaveAsOnly', enabled)
                         WorldCommon.SaveWorldTag()
+                        GameLogic.QuickSave()
                     end
 
                     function can_modify_institute_vip()
@@ -138,24 +140,22 @@
                             <%= L'禁止另存' %>
                         </div>
                         <div><%= L'*为本世界设置保护，其他人无法另存该世界的内容。' %></div>
-                        <pe:if condition='<%= ParaEngine.GetAppCommandLineByParam("isDevMode", nil) %>'>
-                            <div style='margin-top: 10px;'>
-                                <input type='checkbox'
-                                       enabled='<%= can_modify_institute_vip() %>'
-                                       name='ban_not_institute_vip_change'
-                                       checked='<%= is_ban_not_institute_vip_change() %>'
-                                       onclick='ban_not_institute_vip_change' />
-                                <%= L'禁止非机构用户变更（一旦设定，仅原作者才可撤销）' %>
-                            </div>
-                            <div>
-                                <input type='checkbox'
-                                       enabled='<%= can_modify_institute_vip() %>'
-                                       name='ban_not_institute_vip_save_as'
-                                       checked='<%= is_ban_not_institute_vip_save_as() %>'
-                                       onclick='ban_not_institute_vip_save_as' />
-                                <%= L'禁止非机构用户另存（一旦设定，仅原作者才可撤销）' %>
-                            </div>
-                        </pe:if>
+                        <div style='margin-top: 10px;'>
+                            <input type='checkbox'
+                                   enabled='<%= can_modify_institute_vip() %>'
+                                   name='ban_not_institute_vip_change'
+                                   checked='<%= is_ban_not_institute_vip_change() %>'
+                                   onclick='ban_not_institute_vip_change' />
+                            <%= L'禁止非机构用户变更（一旦设定，仅原作者才可撤销）' %>
+                        </div>
+                        <div>
+                            <input type='checkbox'
+                                   enabled='<%= can_modify_institute_vip() %>'
+                                   name='ban_not_institute_vip_save_as'
+                                   checked='<%= is_ban_not_institute_vip_save_as() %>'
+                                   onclick='ban_not_institute_vip_save_as' />
+                            <%= L'禁止非机构用户另存（一旦设定，仅原作者才可撤销）' %>
+                        </div>
                     </div>
                     <div style='margin-top: 10px;'><%= L'社区世界：' %></div>
                     <div style='margin-left: 20px;'>
