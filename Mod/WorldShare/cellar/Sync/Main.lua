@@ -360,6 +360,9 @@ function SyncMain:CheckTagName(callback)
         Mod.WorldShare.MsgBox:Wait()
         KeepworkServiceProject:GetProject(currentWorld.kpProjectId, function(data)
             Mod.WorldShare.MsgBox:Close()
+
+            local name = currentWorld.name and currentWorld.name or ""
+
             if data.extra and
             data.extra.worldTagName and
             data.extra.worldTagName ~= currentWorld.name then
@@ -369,7 +372,7 @@ function SyncMain:CheckTagName(callback)
                     "Mod/WorldShare/cellar/Theme/Sync/CheckTagName.html?remote_tagname=" ..
                         data.extra.worldTagName ..
                         "&local_tagname=" ..
-                        currentWorld.name,
+                        name,
                     "Mod.WorldShare.Sync.CheckTagName"
                 )
 

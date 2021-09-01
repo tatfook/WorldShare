@@ -67,6 +67,7 @@ local SessionsDataFilter = NPL.load('(gl)Mod/WorldShare/filters/database/Session
 local OnWorldInitialRegionsLoadedFilter = NPL.load('(gl)Mod/WorldShare/filters/libs/OnWorldInitialRegionsLoadedFilter.lua')
 local WorldInfoFilter = NPL.load('(gl)Mod/WorldShare/filters/libs/WorldInfoFilter.lua')
 local CertificateFilter = NPL.load('(gl)Mod/WorldShare/filters/cellar/Certificate/CertificateFilter.lua')
+local KeepworkServiceProjectFilter = NPL.load('(gl)Mod/WorldShare/filters/service/KeepworkService/KeepworkServiceProjectFilter.lua')
 
 local Filters = NPL.export()
 
@@ -124,6 +125,9 @@ function Filters:Init()
 
     -- init CertificateFilter filter
     CertificateFilter:Init()
+
+    -- init keepwork service filters
+    KeepworkServiceProjectFilter:init()
 
     GameLogic.GetFilters():add_filter(
         'ShowClientUpdaterNotice',

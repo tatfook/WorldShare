@@ -1,18 +1,20 @@
 --[[
-Title: KeepworkService Project
+Title: Keepwork Service Project
 Author(s):  big
-Date:  2019.02.18
+CreateDate: 2019.02.18
+ModifyDate: 2021.09.01
 Place: Foshan
 use the lib:
 ------------------------------------------------------------
-local KeepworkServiceProject = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Project.lua")
+local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
 ------------------------------------------------------------
 ]]
-local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
-local Encoding = commonlib.gettable("commonlib.Encoding")
+
+local WorldCommon = commonlib.gettable('MyCompany.Aries.Creator.WorldCommon')
+local Encoding = commonlib.gettable('commonlib.Encoding')
 
 -- service
-local KeepworkService = NPL.load("../KeepworkService.lua")
+local KeepworkServiceSession = NPL.load('./Session.lua')
 
 -- api
 local KeepworkProjectsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Projects.lua")
@@ -33,7 +35,7 @@ end
 
 -- This api will create a keepwork paracraft project and associated with paracraft world.
 function KeepworkServiceProject:CreateProject(foldername, callback)
-    if not KeepworkService:IsSignedIn() or not foldername then
+    if not KeepworkServiceSession:IsSignedIn() or not foldername then
         return false
     end
 
@@ -42,7 +44,7 @@ end
 
 -- update projectinfo
 function KeepworkServiceProject:UpdateProject(kpProjectId, params, callback)
-    if not KeepworkService:IsSignedIn() then
+    if not KeepworkServiceSession:IsSignedIn() then
         return false
     end
 
@@ -106,7 +108,7 @@ function KeepworkServiceProject:GetProjectIdByWorldName(foldername, shared, call
         return false
     end
 
-    if not KeepworkService:IsSignedIn() then
+    if not KeepworkServiceSession:IsSignedIn() then
         return false
     end
 
@@ -196,7 +198,7 @@ function KeepworkServiceProject:RemoveProject(kpProjectId, callback)
         return false
     end
 
-    if not KeepworkService:IsSignedIn() then
+    if not KeepworkServiceSession:IsSignedIn() then
         return false
     end
 
@@ -227,4 +229,21 @@ end
 -- get favorited projects
 function KeepworkServiceProject:GetStaredProjects(projectIds, callback)
     KeepworkProjectStarApi:Search(projectIds, callback, callback)
+end
+
+-- judge project editable
+function KeepworkServiceProject:IsProjectReadOnly(pid, callback)
+    if not KeepworkServiceSession:IsSignedIn() or
+       not callback or
+       type(callback) ~= 'function' then
+        return
+    end
+
+    self:GetProject(pid, function(data, err)
+        if data.level ~= 2 then
+            callback(false)
+        else
+            callback(true)
+        end
+    end)
 end

@@ -13,7 +13,7 @@ local KeepworkBaseApi = NPL.load('./BaseApi.lua')
 
 local KeepworkMembersApi = NPL.export()
 
--- url: //members?objectId={objectId}&objectType={objectType}
+-- url: /members?objectId={objectId}&objectType={objectType}
 -- method: GET
 -- params:
 --[[
