@@ -485,7 +485,7 @@ function Compare:RefreshWorldList(callback, statusFilter)
     if not KeepworkService:IsSignedIn() then
         local currentWorldList = LocalServiceWorld:MergeInternetLocalWorldList(localWorlds)
 
-        local searchText = Mod.WorldShare.Store:Get("world/searchText")
+        local searchText = Mod.WorldShare.Store:Get('world/searchText')
 
         if type(searchText) == "string" and searchText ~= "" then
             local searchWorldList = {}
@@ -494,6 +494,21 @@ function Compare:RefreshWorldList(callback, statusFilter)
                 if item and item.text and string.match(string.lower(item.text), string.lower(searchText))then
                     searchWorldList[#searchWorldList + 1] = item
                 elseif item and item.kpProjectId and string.match(string.lower(item.kpProjectId), string.lower(searchText)) then
+                    searchWorldList[#searchWorldList + 1] = item
+                end
+            end
+
+            currentWorldList = searchWorldList
+            LocalServiceWorld:SetInternetLocalWorldList(currentWorldList)
+        end
+
+        local searchFolderName = Mod.WorldShare.Store:Get('world/searchFolderName')
+
+        if type(searchFolderName) == "string" and searchFolderName ~= "" then
+            local searchWorldList = {}
+
+            for key, item in ipairs(currentWorldList) do
+                if item and item.foldername and item.foldername == searchFolderName then
                     searchWorldList[#searchWorldList + 1] = item
                 end
             end
@@ -555,6 +570,21 @@ function Compare:RefreshWorldList(callback, statusFilter)
                         if item and item.text and string.match(string.lower(item.text), string.lower(searchText))then
                             searchWorldList[#searchWorldList + 1] = item
                         elseif item and item.kpProjectId and string.match(string.lower(item.kpProjectId), string.lower(searchText)) then
+                            searchWorldList[#searchWorldList + 1] = item
+                        end
+                    end
+
+                    currentWorldList = searchWorldList
+                    LocalServiceWorld:SetInternetLocalWorldList(currentWorldList)
+                end
+
+                local searchFolderName = Mod.WorldShare.Store:Get('world/searchFolderName')
+
+                if type(searchFolderName) == "string" and searchFolderName ~= "" then
+                    local searchWorldList = {}
+
+                    for key, item in ipairs(currentWorldList) do
+                        if item and item.foldername and item.foldername == searchFolderName then
                             searchWorldList[#searchWorldList + 1] = item
                         end
                     end

@@ -120,7 +120,7 @@ end
 function Opus:ShowMyHome()
     local username = Mod.WorldShare.Store:Get('user/username')
 
-    Mod.WorldShare.Store:Set('world/searchText', username .. '_main')
+    Mod.WorldShare.Store:Set('world/searchFolderName', username .. '_main')
     Create:ShowCreateEmbed(nil, nil, nil, -530)
 end
 
@@ -129,7 +129,7 @@ function Opus:CloseMyHome()
 
     if CreatePage then
         CreatePage:CloseWindow()
-        Mod.WorldShare.Store:Remove('world/searchText')
+        Mod.WorldShare.Store:Remove('world/searchFolderName')
     end
 end
 
