@@ -232,6 +232,7 @@ function KeepworkServiceProject:GetStaredProjects(projectIds, callback)
 end
 
 -- judge project editable
+-- true is editable, false is readonly
 function KeepworkServiceProject:IsProjectReadOnly(pid, callback)
     if not KeepworkServiceSession:IsSignedIn() or
        not callback or

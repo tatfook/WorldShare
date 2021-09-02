@@ -118,7 +118,9 @@ function Opus:ShowOpus()
 end
 
 function Opus:ShowMyHome()
-    Mod.WorldShare.Store:Set('world/searchText', 'testv8_main')
+    local username = Mod.WorldShare.Store:Get('user/username')
+
+    Mod.WorldShare.Store:Set('world/searchText', username .. '_main')
     Create:ShowCreateEmbed(nil, nil, nil, -530)
 end
 
