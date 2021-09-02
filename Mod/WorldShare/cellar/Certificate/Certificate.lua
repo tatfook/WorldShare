@@ -5,7 +5,7 @@ Date: 2020.11.30
 City: Foshan
 use the lib:
 ------------------------------------------------------------
-local Certificate = NPL.load("(gl)Mod/WorldShare/cellar/Certificate/Certificate.lua")
+local Certificate = NPL.load('(gl)Mod/WorldShare/cellar/Certificate/Certificate.lua')
 ------------------------------------------------------------
 ]]
 

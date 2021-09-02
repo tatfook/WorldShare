@@ -633,12 +633,21 @@ function SyncToDataSource:UpdateRecord(callback)
                                     end
                                 end
 
+                                local params = {
+                                    parentId = parent_id,
+                                    extra = extra,
+                                }
+
+                                local setPrivateDuringSync = Mod.WorldShare.Store:Get('world/setPrivateDuringSync')
+
+                                if setPrivateDuringSync then
+                                    params.visibility = 1
+                                    Mod.WorldShare.Store:Remove('world/setPrivateDuringSync')
+                                end
+
                                 KeepworkServiceProject:UpdateProject(
                                     self.currentWorld.kpProjectId,
-                                    {
-                                        parentId = parent_id,
-                                        extra = extra
-                                    }
+                                    params
                                 )
 
                                 Mod.WorldShare.Store:Remove('world/isPreviewUpdated')

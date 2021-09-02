@@ -24,19 +24,27 @@
                     end
 
                     function set_public(val)
-                        if val == 'public' then
-                            page:SetValue('private', false)
-                        end
+                        GameLogic.IsVip(
+                            'Vip',
+                            true,
+                            function(result)
+                                if result then
+                                    if val == 'public' then
+                                        page:SetValue('private', false)
+                                    end
 
-                        if val == 'private' then
-                            page:SetValue('public', false)
-                            page:SetValue('institute_vip_checkbox', false)
-                            page:SetValue('vip_checkbox', false)
-                        end
+                                    if val == 'private' then
+                                        page:SetValue('public', false)
+                                        page:SetValue('institute_vip_checkbox', false)
+                                        page:SetValue('vip_checkbox', false)
+                                    end
 
-                        page:Refresh(0.01)
+                                    page:Refresh(0.01)
 
-                        OpusSetting:SetPublic(val)
+                                    OpusSetting:SetPublic(val)
+                                end
+                            end
+                        )
                     end
 
                     function set_vip(val)

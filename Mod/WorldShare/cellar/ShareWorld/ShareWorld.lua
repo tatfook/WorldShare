@@ -1,34 +1,36 @@
 ﻿--[[
 Title: share world to datasource
 Author(s): big
-Date: 2017.5.12
+CreateDate: 2017.05.12
+ModifyDate: 2021.09.02
 Desc:  It can take snapshot for the current world. It can quick save or full save the world to datasource. 
 use the lib:
 ------------------------------------------------------------
-local ShareWorld = NPL.load("(gl)Mod/WorldShare/cellar/ShareWorld/ShareWorld.lua")
+local ShareWorld = NPL.load('(gl)Mod/WorldShare/cellar/ShareWorld/ShareWorld.lua')
 ShareWorld:Init()
 -------------------------------------------------------
 ]]
 
 -- libs
-local PackageShareWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.Areas.ShareWorldPage")
-local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
-local CommandManager = commonlib.gettable("MyCompany.Aries.Game.CommandManager")
+local PackageShareWorld = commonlib.gettable('MyCompany.Aries.Creator.Game.Desktop.Areas.ShareWorldPage')
+local WorldCommon = commonlib.gettable('MyCompany.Aries.Creator.WorldCommon')
+local CommandManager = commonlib.gettable('MyCompany.Aries.Game.CommandManager')
+local SessionsData = NPL.load('(gl)Mod/WorldShare/database/SessionsData.lua')
 
 -- UI
-local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
-local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
-local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua")
-local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
-local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
-local RegisterModal = NPL.load("(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua")
+local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
+local UserConsole = NPL.load('(gl)Mod/WorldShare/cellar/UserConsole/Main.lua')
+local UserInfo = NPL.load('(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua')
+local WorldList = NPL.load('(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua')
+local LoginModal = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua')
+local Certificate = NPL.load('(gl)Mod/WorldShare/cellar/Certificate/Certificate.lua')
 
 -- service
-local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
-local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
-local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
-local KeepworkServiceProject = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Project.lua")
-local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
+local Compare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
+local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
+local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
+local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
 
 local ShareWorld = NPL.export()
 
@@ -98,14 +100,25 @@ function ShareWorld:Init(callback)
 end
 
 function ShareWorld:CheckRealName(callback)
-    if not callback or type(callback) ~= "function" then
+    if not callback or type(callback) ~= 'function' then
         return false
     end
 
     if KeepworkServiceSession:IsRealName() then
         callback()
     else
-        RegisterModal:ShowClassificationPage(callback, true)
+        local username = Mod.WorldShare.Store:Get('user/username')
+        local session = SessionsData:GetSessionByUsername(username)
+
+        if not session.doNotNoticeVerify then
+            Certificate:Init(function(result)
+                if result then
+                    callback()
+                end
+            end)
+        else
+            callback()
+        end
     end
 end
 
@@ -120,7 +133,7 @@ function ShareWorld:ShowPage()
     local filePath = self:GetPreviewImagePath()
 
     if ParaIO.DoesFileExist(filePath) and params._page then
-        params._page:SetNodeValue("share_world_image", filePath)
+        params._page:SetNodeValue('share_world_image', filePath)
     end
 
     self:Refresh()
@@ -196,7 +209,7 @@ function ShareWorld:OnClick()
 
             -- act week
             if self:GetCurrentRevision() > self:GetRemoteRevision() then
-                local ActWeek = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/ActWeek/ActWeek.lua")
+                local ActWeek = NPL.load('(gl)script/apps/Aries/Creator/Game/Tasks/ActWeek/ActWeek.lua')
                 if ActWeek then
                     ActWeek.AchieveActTarget()
                 end
@@ -227,7 +240,7 @@ function ShareWorld:Snapshot()
 
     -- incremental version number if version equal
     if self:GetRemoteRevision() == self:GetCurrentRevision() then
-        CommandManager:RunCommand("/save")
+        CommandManager:RunCommand('/save')
         
         local currentRevision = tonumber(Mod.WorldShare.Store:Get('world/currentRevision')) or 0
 
@@ -276,7 +289,7 @@ end
 
 -- get keepwork project url
 function ShareWorld:GetShareUrl()
-    local currentEnterWorld = Mod.WorldShare.Store:Get("world/currentEnterWorld")
+    local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
     if not currentEnterWorld or
        not currentEnterWorld.kpProjectId or
