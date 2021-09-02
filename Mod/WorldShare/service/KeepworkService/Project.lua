@@ -242,9 +242,9 @@ function KeepworkServiceProject:IsProjectReadOnly(pid, callback)
 
     self:GetProject(pid, function(data, err)
         if data.level ~= 2 then
-            callback(false)
+            callback(false, data.level)
         else
-            callback(true)
+            callback(true, data.level)
         end
     end)
 end
