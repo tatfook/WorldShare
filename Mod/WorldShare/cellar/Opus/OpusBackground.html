@@ -3,44 +3,47 @@
         <pe:mcml>
             <script type="text/npl" refresh="false">
                 <![CDATA[
+                    NPL.load("(gl)Mod/ExplorerApp/main.lua")
+
                     -- bottles
                     local Opus = NPL.load('./Opus.lua')
                     local CommonLoadWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/CommonLoadWorld.lua')
 
                     -- libs
                     local InternetLoadWorld = commonlib.gettable('MyCompany.Aries.Creator.Game.Login.InternetLoadWorld')
+                    local ExplorerApp = commonlib.gettable("Mod.ExplorerApp")
 
                     local page = document:GetPageCtrl()
 
                     function sel(index)
                         local my_opus_sel = page:FindControl('my_opus_sel')
                         local my_opus_unsel = page:FindControl('my_opus_unsel')
-                        local my_honour_sel = page:FindControl('my_honour_sel')
-                        local my_honour_unsel = page:FindControl('my_honour_unsel')
+                        local my_home_sel = page:FindControl('my_home_sel')
+                        local my_home_unsel = page:FindControl('my_home_unsel')
 
                         if index == '1' then
                             my_opus_sel.visible = true
                             my_opus_unsel.visible = false
-                            my_honour_sel.visible = false
-                            my_honour_unsel.visible = true
+                            my_home_sel.visible = false
+                            my_home_unsel.visible = true
 
                             if index ~= Opus.cur_sel then
                                 Opus.cur_sel = index
 
-                                Opus:CloseHonour()
+                                Opus:CloseMyHome()
                                 Opus:ShowOpus()
                             end
                         elseif index == '2' then
                             my_opus_sel.visible = false
                             my_opus_unsel.visible = true
-                            my_honour_sel.visible = true
-                            my_honour_unsel.visible = false
+                            my_home_sel.visible = true
+                            my_home_unsel.visible = false
 
                             if index ~= Opus.cur_sel then
                                 Opus.cur_sel = index
 
                                 Opus:CloseOpus()
-                                Opus:ShowHonour()
+                                Opus:ShowMyHome()
                             end
                         end
                     end
@@ -83,10 +86,14 @@
                             end
                         end)
                     end
+
+                    function show_explorer()
+                        ExplorerApp:Init()
+                    end
                 ]]>
             </script>
-            <style type="type/mcss" src='Mod/WorldShare/cellar/Opus/OpusMcss.mcss'>
-            </style>
+            <style type="type/mcss" src='Mod/WorldShare/cellar/Opus/OpusMcss.mcss'></style>
+            <style type="type/mcss" src='Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss'></style>
             <pe:container
                 alignment='_fi'
                 zorder='-1'
@@ -193,7 +200,32 @@
                             </div>
                         </pe:container>
                         <!-- bottom content -->
-                        <div width='18%' style='float: left;'>
+                        <div width='18%'
+                             style='float: left;
+                                    height: 620px;'>
+                            <div align='center'
+                                 style='height: 64px;
+                                        width: 160px;
+                                        position: relative;
+                                        top: 540px;'>
+                                <pe:container style='position: relative;background:;'>
+                                    <div style='width: 160px;'>
+                                        <input type='button'
+                                                onclick='show_explorer' 
+                                                name='2'
+                                                class='theme1_green_button'
+                                                textscale=1.2
+                                                style='width: 160px;
+                                                       height: 64px;
+                                                       font-weight: bold;
+                                                       font-size: 20px;
+                                                       base-font-size: 20px;
+                                                       margin-bottom: 40px;
+                                                       color: #000000;'
+                                                value='<%= "推荐作品" %>' />
+                                    </div>
+                                </pe:container>
+                            </div>
                             <div align='center'
                                  style='height: 64px;
                                         width: 160px;
@@ -209,7 +241,7 @@
                                                       font-weight: bold;
                                                       font-size: 20px;
                                                       base-font-size: 40px;'
-                                               value='<%= "我的作品" %>' />
+                                               value='<%= "我的存档" %>' />
                                     </div>
                                 </pe:container>
                                 <pe:container name='my_opus_unsel' visible='false' style='position: relative;background:;'>
@@ -225,7 +257,7 @@
                                                       base-font-size: 30px;
                                                       margin-bottom: 40px;
                                                       color: #FFFFFF;'
-                                               value='<%= "我的作品" %>' />
+                                               value='<%= "我的存档" %>' />
                                     </div>
                                 </pe:container>
                             </div>
@@ -233,7 +265,7 @@
                                  style='height: 64px;
                                         width: 160px;
                                         margin-bottom: 20px;'>
-                                <pe:container name='my_honour_sel' visible='false' style='position: relative;background:;'>
+                                <pe:container name='my_home_sel' visible='false' style='position: relative;background:;'>
                                     <div style='width: 160px;'>
                                         <input type='button'
                                                onclick='sel'
@@ -245,13 +277,13 @@
                                                       font-size: 20px;
                                                       base-font-size: 20px;
                                                        margin-bottom: 40px;'
-                                               value='<%= "我的荣誉" %>' />
+                                               value='<%= "我的家园" %>' />
                                     </div>
                                 </pe:container>
-                                <pe:container name='my_honour_unsel' visible='true' style='position: relative;background:;'>
+                                <pe:container name='my_home_unsel' visible='true' style='position: relative;background:;'>
                                     <div style='width: 160px;'>
                                         <input type='button'
-                                               onclick='sel' 
+                                               onclick='sel'
                                                name='2'
                                                class='opus_menu_button_unsel'
                                                textscale=1.2
@@ -261,7 +293,7 @@
                                                       base-font-size: 20px;
                                                        margin-bottom: 40px;
                                                        color: #FFFFFF;'
-                                               value='<%= "我的荣誉" %>' />
+                                               value='<%= "我的家园" %>' />
                                     </div>
                                 </pe:container>
                             </div>

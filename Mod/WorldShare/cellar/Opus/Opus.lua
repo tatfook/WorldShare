@@ -117,6 +117,20 @@ function Opus:ShowOpus()
     Create:ShowCreateEmbed()
 end
 
+function Opus:ShowMyHome()
+    Mod.WorldShare.Store:Set('world/searchText', 'testv8_main')
+    Create:ShowCreateEmbed(nil, nil, nil, -530)
+end
+
+function Opus:CloseMyHome()
+    local CreatePage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Create')
+
+    if CreatePage then
+        CreatePage:CloseWindow()
+        Mod.WorldShare.Store:Remove('world/searchText')
+    end
+end
+
 function Opus:ShowHonour()
     Mod.WorldShare.Utils.ShowWindow(
         {

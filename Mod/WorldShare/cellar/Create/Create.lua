@@ -57,6 +57,8 @@ function Create:ShowCreateEmbed(width, height, x, y)
 
     Create.currentMenuSelectIndex = 1
 
+    y = y or -400
+
     Mod.WorldShare.Utils.ShowWindow(
         {
             url = '(ws)Create/CreateEmbed.html',
@@ -70,7 +72,7 @@ function Create:ShowCreateEmbed(width, height, x, y)
             directPosition = true,
             align = "_ct",
             x = -768 / 2,
-            y = -400 / 2,
+            y = y / 2,
             width = 1024,
             height = 580,
             cancelShowAnimation = true,
