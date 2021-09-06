@@ -111,10 +111,8 @@ function ShareWorld:CheckRealName(callback)
         local session = SessionsData:GetSessionByUsername(username)
 
         if not session.doNotNoticeVerify then
-            Certificate:Init(function(result)
-                if result then
-                    callback()
-                end
+            Certificate:Init(function()
+                callback()
             end)
         else
             callback()

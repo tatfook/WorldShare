@@ -51,6 +51,8 @@ function Opus:CloseOpus()
     local OpusPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Opus')
     local CreatePage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Create')
 
+    Mod.WorldShare.Store:Remove('world/searchText')
+
     if OpusPage then
         OpusPage:CloseWindow()
     end
