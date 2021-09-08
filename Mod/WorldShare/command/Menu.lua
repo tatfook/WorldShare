@@ -25,6 +25,7 @@ local MemberManager = NPL.load("(gl)Mod/WorldShare/cellar/MemberManager/MemberMa
 local MenuCommand = NPL.export()
 
 function MenuCommand:Init()
+    NPL.load("(gl)script/apps/Aries/Creator/Game/Commands/CommandMenu.lua");
     Commands["menu"].desc = Commands["menu"].desc .. [[
 /menu project.share
 /menu project.index
