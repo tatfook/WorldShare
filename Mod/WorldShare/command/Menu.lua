@@ -12,7 +12,6 @@ NPL.load("(gl)Mod/WorldShare/command/Menu.lua")
 -- load lib
 local CmdParser = commonlib.gettable("MyCompany.Aries.Game.CmdParser")
 local Commands = commonlib.gettable("MyCompany.Aries.Game.Commands")
-local CommandManager = commonlib.gettable("MyCompany.Aries.Game.CommandManager")
 
 -- service
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
@@ -26,8 +25,6 @@ local MemberManager = NPL.load("(gl)Mod/WorldShare/cellar/MemberManager/MemberMa
 local MenuCommand = NPL.export()
 
 function MenuCommand:Init()
-    CommandManager:Init()
-
     Commands["menu"].desc = Commands["menu"].desc .. [[
 /menu project.share
 /menu project.index

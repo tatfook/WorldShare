@@ -12,7 +12,6 @@ local WorldShareCommand = NPL.load("(gl)Mod/WorldShare/command/Command.lua")
 -- load lib
 local CmdParser = commonlib.gettable("MyCompany.Aries.Game.CmdParser")
 local Commands = commonlib.gettable("MyCompany.Aries.Game.Commands")
-local CommandManager = commonlib.gettable("MyCompany.Aries.Game.CommandManager")
 
 -- command
 local MenuCommand = NPL.load("(gl)Mod/WorldShare/command/Menu.lua")
@@ -49,8 +48,6 @@ function WorldShareCommand:Init()
         SlashCommand:RegisterSlashCommand(reload)
         SlashCommand:RegisterSlashCommand(createworld)
     end)
-
-    CommandManager:Init()
 end
 
 function WorldShareCommand:PushAfterLoadWorldCommand(command)
