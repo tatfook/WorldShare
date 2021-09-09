@@ -50,14 +50,25 @@ function LoadPersonalWorldCommand:Init()
             end
 
             LoginModal:CheckSignedIn('请先登录', function(bSucceed)
-                KeepworkServiceProject:GetProject(kpProjectId, function(data, err)
-                    if not data or type(data) ~= 'table' or not data.username then
-                        return false
+                KeepworkServiceProject:GetMembers(kpProjectId, function(members, err)
+                    if not members or
+                       type(members) ~= 'table' or
+                       #members == 0 then
+                        return
                     end
 
                     local username = Mod.WorldShare.Store:Get('user/username')
-                    
-                    if data.username ~= username then
+                    local beExist = false
+
+                    for key, item in ipairs(members) do
+                        if item and
+                           type(item) == 'table' and
+                           item.username == username then
+                            beExist = true
+                        end
+                    end
+
+                    if not beExist then
                         _guihelper.MessageBox(L'您正在试图加载的个人世界非您的个人世界，操作已被取消！')
                         return
                     end
