@@ -1,28 +1,29 @@
 --[[
 Title: Permission
 Author(s):  big
-Date: 2020.05.22
+CreateDate: 2020.05.22
+ModifyDate: 2021.09.09
 place: Foshan
 Desc: 
 use the lib:
 ------------------------------------------------------------
-local Permission = NPL.load("(gl)Mod/WorldShare/cellar/Permission/Permission.lua")
+local Permission = NPL.load('(gl)Mod/WorldShare/cellar/Permission/Permission.lua')
 ------------------------------------------------------------
 ]]
 
 -- service
-local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
-local KeepworkServicePermission = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Permission.lua")
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+local KeepworkServicePermission = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Permission.lua')
 
 -- bottles
-local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
-local VipNotice = NPL.load("(gl)Mod/WorldShare/cellar/VipNotice/VipNotice.lua")
+local LoginModal = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua')
+local VipPage = NPL.load('(gl)script/apps/Aries/Creator/Game/Tasks/User/VipPage.lua')
 
 local Permission = NPL.export()
 
 function Permission:CheckPermission(authName, bOpenUIIfNot, callback, uiType)
-    if not authName or type(authName) ~= "string" then
-        authName = ""
+    if not authName or type(authName) ~= 'string' then
+        authName = ''
     end
 
     if bOpenUIIfNot then
@@ -51,9 +52,9 @@ function Permission:CheckPermission(authName, bOpenUIIfNot, callback, uiType)
                     function(response)
                         -- update user vip info
                         if response.vip and response.vip == 1 then
-                            Mod.WorldShare.Store:Set("user/isVip", true)
+                            Mod.WorldShare.Store:Set('user/isVip', true)
                         else
-                            Mod.WorldShare.Store:Set("user/isVip", false)
+                            Mod.WorldShare.Store:Set('user/isVip', false)
                         end
 
                         KeepworkServiceSession:SetUserLevels(response)
@@ -78,7 +79,7 @@ function Permission:CheckPermission(authName, bOpenUIIfNot, callback, uiType)
                                 end
                             end
         
-                            if callback and type(callback) == "function" then
+                            if callback and type(callback) == 'function' then
                                 callback(result)
                             end
                         end)
@@ -102,7 +103,7 @@ function Permission:CheckPermission(authName, bOpenUIIfNot, callback, uiType)
         if KeepworkServiceSession:IsSignedIn() then
             KeepworkServicePermission:Authentication(authName, callback)
         else
-            if type(callback) == "function" then
+            if type(callback) == 'function' then
                 callback(false)
             end
         end
@@ -110,7 +111,5 @@ function Permission:CheckPermission(authName, bOpenUIIfNot, callback, uiType)
 end
 
 function Permission:ShowFailDialog(key, desc)
-    --VipNotice:ShowPage(key, desc)
-    local VipPage = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/User/VipPage.lua");
-    VipPage.ShowPage(key, desc);
+    VipPage.ShowPage(key, desc)
 end

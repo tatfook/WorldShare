@@ -104,6 +104,10 @@ KeepworkServicePermission.AllLocalAuth = {
     MakeApk = {
         key = 'make_apk',
         desc = L'生成APK'
+    },
+    RedSummerCampMain = {
+        key = 'red_summer_camp_main', -- red summer vip
+        desc = nil
     }
 }
 
