@@ -3,15 +3,12 @@
         <pe:mcml>
             <script type="text/npl" refresh="false">
                 <![CDATA[
-                    NPL.load("(gl)Mod/ExplorerApp/main.lua")
-
                     -- bottles
                     local Opus = NPL.load('./Opus.lua')
                     local CommonLoadWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/CommonLoadWorld.lua')
 
                     -- libs
                     local InternetLoadWorld = commonlib.gettable('MyCompany.Aries.Creator.Game.Login.InternetLoadWorld')
-                    local ExplorerApp = commonlib.gettable("Mod.ExplorerApp")
 
                     local page = document:GetPageCtrl()
 
@@ -90,7 +87,7 @@
                     function show_explorer()
                         close()
                         Mod.WorldShare.Store:Remove('world/searchFolderName')
-                        ExplorerApp:Init()
+                        GameLogic.GetFilters():apply_filters('cellar.explorer.show')
                     end
                 ]]>
             </script>
@@ -111,7 +108,7 @@
                 class='red_summer_camp_bg'>
             </pe:container>
             <div>
-                <pe:containe zorder='1' style='background:;'>
+                <div>
                     <div align='right'
                          style='width: 67px;
                                 height: 70px;
@@ -182,7 +179,7 @@
                             </div>
                         </div>
                     </div>
-                </pe:containe>
+                </div>
                 <pe:container alignment='_ct'
                               zorder='-1'
                               width='1280'
