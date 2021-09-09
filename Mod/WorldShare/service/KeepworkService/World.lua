@@ -257,6 +257,7 @@ function KeepworkServiceWorld:GetWorldByProjectId(kpProjectId, callback)
 
         -- for set instance by id
         data.world.memberCount = data.memberCount
+        data.world.username = data.username
 
         callback(data.world, err)
     end)
