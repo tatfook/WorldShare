@@ -1,7 +1,8 @@
 --[[
 Title: Main Login
-Author(s):  Big
-Date: 2021.2.25
+Author(s): Big
+CreateDate: 2021.2.25
+ModifyDate: 2021.9.10
 Desc: 
 use the lib:
 ------------------------------------------------------------
@@ -14,7 +15,7 @@ MainLoginFilter:Init()
 local RestartTable = commonlib.gettable('RestartTable')
 
 -- UI
-local MainLogin = NPL.load("(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua")
+local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
 
 local MainLoginFilter = NPL.export()
 

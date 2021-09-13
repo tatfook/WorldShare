@@ -74,7 +74,7 @@
                     -- @param name: 'local', 'internet'
                     function use_offline()
                         KeepworkServiceSession:Logout()
-                        MainLogin:EnterUserConsole(true)
+                        MainLogin:Next(true)
                         EventTrackingService:Send(1, 'click.main_login.offline_enter', { machineId = ParaEngine.GetAttributeObject():GetField('MachineID','') }, true)
                     end
 

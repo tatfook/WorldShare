@@ -1,7 +1,8 @@
 --[[
 Title: Create Page
 Author(s):  Big
-Date: 2020.9.1
+CreateDate: 2020.09.01
+ModifyDate: 2021.09.10
 Desc: 
 use the lib:
 ------------------------------------------------------------
@@ -20,6 +21,7 @@ local ShareTypeWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/Shar
 local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
 local DeleteWorld = NPL.load('(gl)Mod/WorldShare/cellar/DeleteWorld/DeleteWorld.lua')
 local CommonLoadWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/CommonLoadWorld.lua')
+local CreateWorld = NPL.load('(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua')
 
 -- service
 local Compare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
@@ -445,7 +447,7 @@ function Create:EnterWorld(index, skip)
     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
     if currentWorld.status == 2 then
-        Mod.WorldShare.MsgBox:Show(L"请稍候...")
+        Mod.WorldShare.MsgBox:Wait()
 
         Compare:Init(currentWorld.worldpath, function(result)
             Mod.WorldShare.MsgBox:Close()
@@ -457,12 +459,13 @@ function Create:EnterWorld(index, skip)
             DownloadWorld.ShowPage(format(L'%s（项目ID：%d）', currentWorld.foldername, currentWorld.kpProjectId))
 
             SyncToLocal:Init(function(result, option)
+                DownloadWorld.Close()
+
                 if not result then
                     if type(option) == 'string' then
                         if option == 'NEWWORLD' then
                             GameLogic.AddBBS(nil, L'服务器未找到您的世界数据，请新建', 3000, "255 255 0")
 
-                            self:Close()
                             CreateWorld:CreateNewWorld(currentWorld.foldername)
                         end
 
@@ -471,8 +474,6 @@ function Create:EnterWorld(index, skip)
 
                     if type(option) == 'table' then
                         if option.method == 'UPDATE-PROGRESS-FINISH' then
-                            DownloadWorld.Close()
-
                             if not LocalServiceWorld:CheckWorldIsCorrect(currentWorld) then
                                 _guihelper.MessageBox(L'文件损坏，请再试一次。如果还是出现问题，请联系作者或者管理员。')
                                 return

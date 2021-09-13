@@ -1,7 +1,8 @@
 --[[
 Title: SyncMain
-Author(s):  big
-Date:  2017.4.17
+Author(s): big
+CreateDate: 2017.04.17
+ModifyDate: 2021.09.10
 Desc: 
 use the lib:
 ------------------------------------------------------------
@@ -10,32 +11,29 @@ local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
 ]]
 
 -- bottles
-local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
-local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
-local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
-local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
-local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
-local Progress = NPL.load("./Progress/Progress.lua")
-local Permission = NPL.load("(gl)Mod/WorldShare/cellar/Permission/Permission.lua")
+local Compare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
+local CreateWorld = NPL.load('(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua')
+local LoginModal = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua')
+local Progress = NPL.load('./Progress/Progress.lua')
+local Permission = NPL.load('(gl)Mod/WorldShare/cellar/Permission/Permission.lua')
 
 -- service
-local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
-local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
-local LocalServiceWorld = NPL.load("(gl)Mod/WorldShare/service/LocalService/LocalServiceWorld.lua")
+local GitService = NPL.load('(gl)Mod/WorldShare/service/GitService.lua')
+local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
+local LocalServiceWorld = NPL.load('(gl)Mod/WorldShare/service/LocalService/LocalServiceWorld.lua')
 local KeepworkServiceWorld = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/World.lua')
-local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
-local SyncToLocal = NPL.load("(gl)Mod/WorldShare/service/SyncService/SyncToLocal.lua")
-local SyncToDataSource = NPL.load("(gl)Mod/WorldShare/service/SyncService/SyncToDataSource.lua")
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+local SyncToLocal = NPL.load('(gl)Mod/WorldShare/service/SyncService/SyncToLocal.lua')
+local SyncToDataSource = NPL.load('(gl)Mod/WorldShare/service/SyncService/SyncToDataSource.lua')
 local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
-local Compare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
 
 -- helper
-local GitEncoding = NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua")
+local GitEncoding = NPL.load('(gl)Mod/WorldShare/helper/GitEncoding.lua')
 
 -- libs
-local WorldShare = commonlib.gettable("Mod.WorldShare")
-local WorldRevision = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision")
-local SaveWorldHandler = commonlib.gettable("MyCompany.Aries.Game.SaveWorldHandler")
+local WorldShare = commonlib.gettable('Mod.WorldShare')
+local WorldRevision = commonlib.gettable('MyCompany.Aries.Creator.Game.WorldRevision')
+local SaveWorldHandler = commonlib.gettable('MyCompany.Aries.Game.SaveWorldHandler')
 
 local SyncMain = NPL.export()
 
@@ -54,7 +52,7 @@ function SyncMain:OnWorldLoad(callback)
 end
 
 function SyncMain:ShowNewVersionFoundPage(callback)
-    local params = SyncMain:ShowDialog("Mod/WorldShare/cellar/Theme/Sync/NewVersionFound.html", "Mod.WorldShare.NewVersionFound")
+    local params = SyncMain:ShowDialog('Mod/WorldShare/cellar/Theme/Sync/NewVersionFound.html', 'Mod.WorldShare.NewVersionFound')
 
     params._page.afterSyncCallback = callback
 end
@@ -77,7 +75,7 @@ function SyncMain:CloseStartSyncPage()
 end
 
 function SyncMain:ShowBeyondVolume(bEnabled)
-    SyncMain:ShowDialog("Mod/WorldShare/cellar/Sync/Templates/BeyondVolume.html?bEnabled=" .. (bEnabled and "true" or "false"), "Mod.WorldShare.BeyondVolume")
+    SyncMain:ShowDialog('Mod/WorldShare/cellar/Sync/Templates/BeyondVolume.html?bEnabled=' .. (bEnabled and 'true' or 'false'), 'Mod.WorldShare.BeyondVolume')
 end
 
 function SyncMain:CloseBeyondVolumePage()
@@ -89,7 +87,7 @@ function SyncMain:CloseBeyondVolumePage()
 end
 
 function SyncMain:ShowStartSyncUseLocalPage(callback)
-    local params = SyncMain:ShowDialog("Mod/WorldShare/cellar/Sync/Templates/UseLocal.html", "Mod.WorldShare.StartSyncUseLocal")
+    local params = SyncMain:ShowDialog('Mod/WorldShare/cellar/Sync/Templates/UseLocal.html', 'Mod.WorldShare.StartSyncUseLocal')
 
     params._page.afterSyncCallback = callback
 end
@@ -101,11 +99,11 @@ function SyncMain:ShowStartSyncUseDataSourcePage(callback)
 end
 
 function SyncMain:ShowDialog(url, name)
-    return Mod.WorldShare.Utils.ShowWindow(0, 0, url, name, 0, 0, "_fi", false)
+    return Mod.WorldShare.Utils.ShowWindow(0, 0, url, name, 0, 0, '_fi', false)
 end
 
 function SyncMain:BackupWorld()
-    local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
+    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
     local revision = WorldRevision:new():init(currentWorld and currentWorld.worldpath)
     revision:Checkout()
@@ -113,7 +111,7 @@ function SyncMain:BackupWorld()
 end
 
 function SyncMain:SyncToLocal(callback, _, noShownResult)
-    local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
+    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
     if not currentWorld.kpProjectId or currentWorld.kpProjectId == 0 then
         return false
@@ -127,7 +125,7 @@ function SyncMain:SyncToLocal(callback, _, noShownResult)
                 currentWorld.lastCommitId = data.world.commitId
             end
 
-            Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
+            Mod.WorldShare.Store:Set('world/currentWorld', currentWorld)
 
             local syncInstance = SyncToLocal:Init(function(result, option)
                 if result == false then
@@ -135,14 +133,13 @@ function SyncMain:SyncToLocal(callback, _, noShownResult)
                         Progress:ClosePage()
 
                         if option == 'NEWWORLD' then
-                            UserConsole:ClosePage()
-                            GameLogic.AddBBS(nil, L"服务器未找到世界数据，请新建", 3000, "255 255 0")
+                            GameLogic.AddBBS(nil, L'服务器未找到世界数据，请新建', 3000, '255 255 0')
                             local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
                             CreateWorld:CreateNewWorld(currentWorld.foldername)
                             return false
                         end
             
-                        GameLogic.AddBBS(nil, option, 3000, "255 0 0")
+                        GameLogic.AddBBS(nil, option, 3000, '255 0 0')
                     end
 
                     if type(option) == 'table' then
@@ -154,13 +151,13 @@ function SyncMain:SyncToLocal(callback, _, noShownResult)
                         if option.method == 'UPDATE-PROGRESS-FAIL' then
                             Progress:SetFinish(true)
                             Progress:ClosePage()
-                            GameLogic.AddBBS(nil, option.msg, 3000, "255 0 0")
+                            GameLogic.AddBBS(nil, option.msg, 3000, '255 0 0')
                             return false
                         end
         
                         if option.method == 'UPDATE-PROGRESS-FINISH' then
                             Progress:SetFinish(true)
-                            Progress:UpdateDataBar(1, 1, L"处理完成")
+                            Progress:UpdateDataBar(1, 1, L'处理完成')
 
                             if noShownResult then
                                 if callback and type(callback) == 'function' then
@@ -181,7 +178,7 @@ function SyncMain:SyncToLocal(callback, _, noShownResult)
             Progress:Init(syncInstance)
         end,
         function()
-            GameLogic.AddBBS(nil, L"获取项目信息失败", 3000, "255 0 0")
+            GameLogic.AddBBS(nil, L'获取项目信息失败', 3000, '255 0 0')
         end
     )
 end
@@ -199,7 +196,7 @@ function SyncMain:SyncToLocalSingle(callback)
                     return false
                 end
     
-                GameLogic.AddBBS(nil, option, 3000, "255 0 0")
+                GameLogic.AddBBS(nil, option, 3000, '255 0 0')
             end
 
             if type(option) == 'table' then
@@ -211,13 +208,13 @@ function SyncMain:SyncToLocalSingle(callback)
                 if option.method == 'UPDATE-PROGRESS-FAIL' then
                     Progress:SetFinish(true)
                     Progress:ClosePage()
-                    GameLogic.AddBBS(nil, option.msg, 3000, "255 0 0")
+                    GameLogic.AddBBS(nil, option.msg, 3000, '255 0 0')
                     return false
                 end
 
                 if option.method == 'UPDATE-PROGRESS-FINISH' then
                     Progress:SetFinish(true)
-                    Progress:UpdateDataBar(1, 1, L"处理完成")
+                    Progress:UpdateDataBar(1, 1, L'处理完成')
                     return false
                 end
             end
@@ -292,7 +289,7 @@ function SyncMain:SyncToDataSource(callback)
     
         local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
     
-        if not currentWorld.worldpath or currentWorld.worldpath == "" then
+        if not currentWorld.worldpath or currentWorld.worldpath == '' then
             return false
         end
     
@@ -302,7 +299,7 @@ function SyncMain:SyncToDataSource(callback)
                     Progress:ClosePage()
     
                     if option == 'RE-ENTRY' then
-                        GameLogic.AddBBS(nil, L"请重新登录", 3000, "255 0 0")
+                        GameLogic.AddBBS(nil, L'请重新登录', 3000, '255 0 0')
     
                         LoginModal:Init(function(result)
                             if result then
@@ -317,7 +314,7 @@ function SyncMain:SyncToDataSource(callback)
                         return false
                     end
     
-                    GameLogic.AddBBS(nil, option, 3000, "255 0 0")
+                    GameLogic.AddBBS(nil, option, 3000, '255 0 0')
                 end
     
                 if type(option) == 'table' then
@@ -329,13 +326,13 @@ function SyncMain:SyncToDataSource(callback)
                     if option.method == 'UPDATE-PROGRESS-FAIL' then
                         Progress:SetFinish(true)
                         Progress:ClosePage()
-                        GameLogic.AddBBS(nil, option.msg, 3000, "255 0 0")
+                        GameLogic.AddBBS(nil, option.msg, 3000, '255 0 0')
                         return false
                     end
     
                     if option.method == 'UPDATE-PROGRESS-FINISH' then
                         Progress:SetFinish(true)
-                        Progress:UpdateDataBar(1, 1, L"处理完成")
+                        Progress:UpdateDataBar(1, 1, L'处理完成')
                         return false
                     end
                 end
@@ -361,7 +358,7 @@ function SyncMain:CheckTagName(callback)
         KeepworkServiceProject:GetProject(currentWorld.kpProjectId, function(data)
             Mod.WorldShare.MsgBox:Close()
 
-            local name = currentWorld.name and currentWorld.name or ""
+            local name = currentWorld.name and currentWorld.name or ''
 
             if data.extra and
             data.extra.worldTagName and
@@ -369,11 +366,11 @@ function SyncMain:CheckTagName(callback)
                 local params = Mod.WorldShare.Utils.ShowWindow(
                     630,
                     240,
-                    "Mod/WorldShare/cellar/Theme/Sync/CheckTagName.html?remote_tagname=" ..
+                    'Mod/WorldShare/cellar/Theme/Sync/CheckTagName.html?remote_tagname=' ..
                         data.extra.worldTagName ..
-                        "&local_tagname=" ..
+                        '&local_tagname=' ..
                         name,
-                    "Mod.WorldShare.Sync.CheckTagName"
+                    'Mod.WorldShare.Sync.CheckTagName'
                 )
 
                 params._page.callback = function(params)
@@ -395,22 +392,22 @@ function SyncMain:CheckTagName(callback)
 end
 
 function SyncMain.GetCurrentRevision()
-    return tonumber(Mod.WorldShare.Store:Get("world/currentRevision")) or 0
+    return tonumber(Mod.WorldShare.Store:Get('world/currentRevision')) or 0
 end
 
 function SyncMain.GetRemoteRevision()
-    return tonumber(Mod.WorldShare.Store:Get("world/remoteRevision")) or 0
+    return tonumber(Mod.WorldShare.Store:Get('world/remoteRevision')) or 0
 end
 
 function SyncMain:GetCurrentRevisionInfo()
     WorldShare.worldData = nil
-    local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
+    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
-    return WorldShare:GetWorldData("revision", currentWorld and currentWorld.worldpath .. '/')
+    return WorldShare:GetWorldData('revision', currentWorld and currentWorld.worldpath .. '/')
 end
 
 function SyncMain:CheckWorldSize(callback)
-    local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
+    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
     if not currentWorld or not currentWorld.worldpath  or #currentWorld.worldpath == 0 then
         return false
@@ -419,7 +416,7 @@ function SyncMain:CheckWorldSize(callback)
     local filesTotal = LocalService:GetWorldSize(currentWorld.worldpath)
     local maxSize = 0
 
-    Permission:CheckPermission("OnlineWorldData50Mb", false, function(result)
+    Permission:CheckPermission('OnlineWorldData50Mb', false, function(result)
         if result then
             maxSize = 50 * 1024 * 1024
         else
@@ -429,7 +426,7 @@ function SyncMain:CheckWorldSize(callback)
         if filesTotal > maxSize then
             self:ShowBeyondVolume(result)
         else
-            if type(callback) == "function" then
+            if type(callback) == 'function' then
                 callback()
             end
         end
@@ -437,17 +434,17 @@ function SyncMain:CheckWorldSize(callback)
 end
 
 function SyncMain:GetWorldDateTable()
-    local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
+    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
     local date = {}
 
     if currentWorld and currentWorld.tooltip then
-        for item in string.gmatch(currentWorld.tooltip, "[^:]+") do
+        for item in string.gmatch(currentWorld.tooltip, '[^:]+') do
             date[#date + 1] = item
         end
 
         date = date[1]
     else
-        date = os.date("%Y-%m-%d-%H-%M-%S")
+        date = os.date('%Y-%m-%d-%H-%M-%S')
     end
 
     return date

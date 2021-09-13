@@ -1,7 +1,8 @@
 --[[
-Title: pipe command
+Title: Pipe Command
 Author(s): big
-Date: 2020/9/17
+CreateDate: 2020.9.17
+ModifyDate: 2021.9.10
 Desc: 
 use the lib:
 ------------------------------------------------------------
@@ -16,7 +17,7 @@ local CommandManager = commonlib.gettable("MyCompany.Aries.Game.CommandManager")
 local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
 
 -- UI
-local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
+local CommonLoadWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/CommonLoadWorld.lua')
 
 local PipeCommand = NPL.export()
 
@@ -37,10 +38,10 @@ function PipeCommand:Init()
             end
 
             if cmd_params and cmd_params.value then
-                local pid = UserConsole:GetProjectId(cmd_params.value)
+                local pid = self:GetProjectId(cmd_params.value)
 
                 if pid then
-                    UserConsole:HandleWorldId(pid)
+                    CommonLoadWorld:EnterWorldById(pid)
                 else
                     InternetLoadWorld.GotoUrl(cmd_params.value)
                 end
@@ -51,4 +52,18 @@ function PipeCommand:Init()
     Commands['pipe'] = pipe
 
     return pipe
+end
+
+function PipeCommand:GetProjectId(url)
+    if (tonumber(url or '') or 99999) < 99999 then
+        return url
+    end
+
+    local pid = string.match(url or '', "^p(%d+)$")
+
+    if not pid then
+        pid = string.match(url or '', "/pbl/project/(%d+)")
+    end
+
+    return pid or false
 end

@@ -17,11 +17,11 @@ local Encoding = commonlib.gettable('commonlib.Encoding')
 local KeepworkServiceSession = NPL.load('./Session.lua')
 
 -- api
-local KeepworkProjectsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Projects.lua")
-local KeepworkProjectStarApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/ProjectStar.lua")
-local KeepworkWorldsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Worlds.lua")
-local KeepworkMembersApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Members.lua")
-local KeepworkAppliesApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Applies.lua")
+local KeepworkProjectsApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/Projects.lua')
+local KeepworkProjectStarApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/ProjectStar.lua')
+local KeepworkWorldsApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/Worlds.lua')
+local KeepworkMembersApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/Members.lua')
+local KeepworkAppliesApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/Applies.lua')
 
 local KeepworkServiceProject = NPL.export()
 
@@ -77,13 +77,13 @@ end
 
 -- apply
 function KeepworkServiceProject:Apply(message, callback)
-    local userId = Mod.WorldShare.Store:Get("user/userId")
+    local userId = Mod.WorldShare.Store:Get('user/userId')
 
     if not userId then
         return false
     end
 
-    local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
+    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
     if not currentWorld or not currentWorld.kpProjectId or currentWorld.kpProjectId == 0 then
         return false
@@ -112,7 +112,7 @@ function KeepworkServiceProject:GetProjectIdByWorldName(foldername, shared, call
         return false
     end
 
-    local userId = tonumber(Mod.WorldShare.Store:Get("user/userId"))
+    local userId = tonumber(Mod.WorldShare.Store:Get('user/userId'))
 
     KeepworkWorldsApi:GetWorldByName(foldername, function(data, err)
         if type(data) ~= 'table' then
@@ -178,8 +178,8 @@ end
 
 function KeepworkServiceProject:GetProjectFromUrlProtocol()
     local cmdline = ParaEngine.GetAppCommandLine()
-    local urlProtocol = string.match(cmdline or "", "paracraft://(.*)$")
-    urlProtocol = Encoding.url_decode(urlProtocol or "")
+    local urlProtocol = string.match(cmdline or '', 'paracraft://(.*)$')
+    urlProtocol = Encoding.url_decode(urlProtocol or '')
 
     local kpProjectId = urlProtocol:match('kpProjectId="([%S]+)"')
 

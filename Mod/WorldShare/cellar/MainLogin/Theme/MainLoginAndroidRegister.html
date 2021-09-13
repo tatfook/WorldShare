@@ -496,6 +496,10 @@
 
                         MainLogin:ShowAndroidLogin()
                     end
+
+                    function on_click_exit()
+                        MainLogin:Exit()
+                    end
                 ]]>
             </script>
             <style type='text/mcss' src='Mod/WorldShare/cellar/Theme/Mcss/MainLoginMcss.mcss'>
@@ -528,6 +532,25 @@
                                   height: 59px;
                                   background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#533 8 55 59)'
                             onclick="parent"/>
+                </div>
+            </pe:container>
+            <pe:container
+                alignment='_rt'
+                zorder='-1'
+                width='80px'
+                height='100px'
+                style='position: relative;
+                       background-color:;
+                       margin-top: 20px;
+                       margin-right: 11px;'>
+                <div style='float: left;
+                            width: 80px;
+                            height: 100px;'>
+                    <input type='button'
+                           style='width: 80px;
+                                  height: 44px;
+                                  background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#281 885 81 44)'
+                           onclick='on_click_exit' />
                 </div>
             </pe:container>
             <pe:container alignment='_ct'

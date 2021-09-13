@@ -12,7 +12,6 @@ local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
 ]]
 -- libs
 local GameMainLogin = commonlib.gettable('MyCompany.Aries.Game.MainLogin')
-local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua")
 local Desktop = commonlib.gettable('MyCompany.Aries.Creator.Game.Desktop')
 
 -- service
@@ -21,6 +20,9 @@ local SessionsData = NPL.load('(gl)Mod/WorldShare/database/SessionsData.lua')
 
 -- bottles
 local Create = NPL.load('(gl)Mod/WorldShare/cellar/Create/Create.lua')
+local UserInfo = NPL.load('(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua')
+
+local AccountManager = commonlib.gettable('Mod.Offline.AccountManager')
 
 -- helper
 local Validated = NPL.load('(gl)Mod/WorldShare/helper/Validated.lua')
@@ -28,12 +30,12 @@ local Validated = NPL.load('(gl)Mod/WorldShare/helper/Validated.lua')
 local MainLogin = NPL.export()
 
 -- for register
-MainLogin.m_mode = "account"
-MainLogin.account = ""
-MainLogin.password = ""
-MainLogin.phonenumber = ""
-MainLogin.phonepassword = ""
-MainLogin.phonecaptcha = ""
+MainLogin.m_mode = 'account'
+MainLogin.account = ''
+MainLogin.password = ''
+MainLogin.phonenumber = ''
+MainLogin.phonepassword = ''
+MainLogin.phonecaptcha = ''
 MainLogin.bindphone = nil
 
 function MainLogin:Init()
@@ -50,7 +52,7 @@ function MainLogin:Show()
         return
     end
 
-    local localVersion = ParaEngine.GetAppCommandLineByParam("localVersion", nil)
+    local localVersion = ParaEngine.GetAppCommandLineByParam('localVersion', nil)
 
     if localVersion == 'SCHOOL' then
         if KeepworkServiceSession:GetUserWhere() == 'LOCAL' then
@@ -83,7 +85,7 @@ end
 
 function MainLogin:ShowAndroid()
     Mod.WorldShare.Utils.ShowWindow({
-        url = 'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginAndroid.html',
+        url = 'Mod/WorldShare/cellar/MainLogin/Theme/MainLoginAndroid.html',
         name = 'MainLogin', 
         isShowTitleBar = false,
         DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
@@ -104,7 +106,7 @@ end
 
 function MainLogin:Show1()
     Mod.WorldShare.Utils.ShowWindow({
-        url = 'Mod/WorldShare/cellar/Theme/MainLogin/MainLogin.html', 
+        url = 'Mod/WorldShare/cellar/MainLogin/Theme/MainLogin.html', 
         name = 'MainLogin', 
         isShowTitleBar = false,
         DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
@@ -132,7 +134,7 @@ end
 
 function MainLogin:Show2()
     Mod.WorldShare.Utils.ShowWindow({
-        url = 'Mod/WorldShare/cellar/Theme/MainLogin/MainLogin.html', 
+        url = 'Mod/WorldShare/cellar/MainLogin/Theme/MainLogin.html', 
         name = 'MainLogin', 
         isShowTitleBar = false,
         DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
@@ -160,7 +162,7 @@ end
 
 function MainLogin:Show3()
     Mod.WorldShare.Utils.ShowWindow({
-        url = 'Mod/WorldShare/cellar/Theme/MainLogin/MainLogin.html', 
+        url = 'Mod/WorldShare/cellar/MainLogin/Theme/MainLogin.html', 
         name = 'MainLogin', 
         isShowTitleBar = false,
         DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
@@ -194,7 +196,7 @@ function MainLogin:ShowLogin()
     Mod.WorldShare.Utils.ShowWindow(
         0,
         0,
-        'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginLogin.html',
+        'Mod/WorldShare/cellar/MainLogin/Theme/MainLoginLogin.html',
         'Mod.WorldShare.cellar.MainLogin.Login',
         0,
         0,
@@ -237,7 +239,7 @@ function MainLogin:ShowLogin1()
     Mod.WorldShare.Utils.ShowWindow(
         0,
         0,
-        'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginLogin1.html',
+        'Mod/WorldShare/cellar/MainLogin/Theme/MainLoginLogin1.html',
         'Mod.WorldShare.cellar.MainLogin.Login',
         0,
         0,
@@ -321,7 +323,7 @@ function MainLogin:ShowAndroidLogin()
     Mod.WorldShare.Utils.ShowWindow(
         0,
         0,
-        'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginAndroidLogin.html',
+        'Mod/WorldShare/cellar/MainLogin/Theme/MainLoginAndroidLogin.html',
         'Mod.WorldShare.cellar.MainLogin.MainAndroidLogin',
         0,
         0,
@@ -335,7 +337,7 @@ function MainLogin:ShowAndroidRegister()
     Mod.WorldShare.Utils.ShowWindow(
         0,
         0,
-        'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginAndroidRegister.html',
+        'Mod/WorldShare/cellar/MainLogin/Theme/MainLoginAndroidRegister.html',
         'Mod.WorldShare.cellar.MainLogin.MainAndroidRegister',
         0,
         0,
@@ -349,7 +351,7 @@ function MainLogin:ShowAndroidSetUser()
     Mod.WorldShare.Utils.ShowWindow(
         0,
         0,
-        'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginAndroidSetUser.html',
+        'Mod/WorldShare/cellar/MainLogin/Theme/MainLoginAndroidSetUser.html',
         'Mod.WorldShare.cellar.MainLogin.MainAndroidSetUser',
         0,
         0,
@@ -363,7 +365,7 @@ function MainLogin:ShowLoginNew()
     Mod.WorldShare.Utils.ShowWindow(
         0,
         0,
-        'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginLoginNew.html',
+        'Mod/WorldShare/cellar/MainLogin/Theme/MainLoginLoginNew.html',
         'Mod.WorldShare.cellar.MainLogin.LoginNew',
         0,
         0,
@@ -390,7 +392,7 @@ function MainLogin:ShowLoginAtSchool(mode)
     local params = Mod.WorldShare.Utils.ShowWindow(
         0,
         0,
-        'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginLoginAtSchool.html',
+        'Mod/WorldShare/cellar/MainLogin/Theme/MainLoginLoginAtSchool.html',
         'Mod.WorldShare.cellar.MainLogin.LoginAtSchool',
         0,
         0,
@@ -421,7 +423,7 @@ function MainLogin:ShowRegisterNew(mode)
     Mod.WorldShare.Utils.ShowWindow(
         0,
         0,
-        'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginRegisterNew.html',
+        'Mod/WorldShare/cellar/MainLogin/Theme/MainLoginRegisterNew.html',
         'Mod.WorldShare.cellar.MainLogin.RegisterNew',
         0,
         0,
@@ -435,7 +437,7 @@ function MainLogin:ShowRegister()
     Mod.WorldShare.Utils.ShowWindow(
         0,
         0,
-        'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginRegister.html',
+        'Mod/WorldShare/cellar/MainLogin/Theme/MainLoginRegister.html',
         'Mod.WorldShare.cellar.MainLogin.Register',
         0,
         0,
@@ -449,7 +451,7 @@ function MainLogin:ShowParent()
     Mod.WorldShare.Utils.ShowWindow(
         0,
         0,
-        'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginParent.html',
+        'Mod/WorldShare/cellar/MainLogin/Theme/MainLoginParent.html',
         'Mod.WorldShare.cellar.MainLogin.Parent',
         0,
         0,
@@ -463,7 +465,7 @@ function MainLogin:ShowWhere(callback)
     local params = Mod.WorldShare.Utils.ShowWindow(
         0,
         0,
-        'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginWhere.html',
+        'Mod/WorldShare/cellar/MainLogin/Theme/MainLoginWhere.html',
         'Mod.WorldShare.cellar.MainLogin.Where',
         0,
         0,
@@ -483,7 +485,7 @@ function MainLogin:SelectMode(callback)
     local params = Mod.WorldShare.Utils.ShowWindow(
         0,
         0,
-        'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginSelectMode.html',
+        'Mod/WorldShare/cellar/MainLogin/Theme/MainLoginSelectMode.html',
         'Mod.WorldShare.cellar.MainLogin.SelectMode',
         0,
         0,
@@ -529,7 +531,7 @@ function MainLogin:ShowExtra()
     Mod.WorldShare.Utils.ShowWindow(
         width,
         height,
-        'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginExtra.html',
+        'Mod/WorldShare/cellar/MainLogin/Theme/MainLoginExtra.html',
         'Mod.WorldShare.cellar.MainLogin.Extra',
         left,
         top,
@@ -1032,19 +1034,19 @@ function MainLogin:RegisterWithAccount(callback)
         return false
     end
 
-    Mod.WorldShare.MsgBox:Show(L"正在注册，请稍候...", 10000, L"链接超时", 500, 120)
+    Mod.WorldShare.MsgBox:Show(L'正在注册，请稍候...', 10000, L'链接超时', 500, 120)
 
     KeepworkServiceSession:RegisterWithAccount(self.account, self.password, function(state)
         Mod.WorldShare.MsgBox:Close()
 
         if not state then
-            GameLogic.AddBBS(nil, L"未知错误", 5000, "0 255 0")
+            GameLogic.AddBBS(nil, L'未知错误', 5000, '0 255 0')
             return
         end
 
         if state.id then
             if state.code then
-                GameLogic.AddBBS(nil, format("%s%s(%d)", L"错误信息：", state.message or "", state.code or 0), 5000, "255 0 0")
+                GameLogic.AddBBS(nil, format('%s%s(%d)', L'错误信息：', state.message or '', state.code or 0), 5000, '255 0 0')
             else
                 -- set default user role
                 local filename = UserInfo.GetValidAvatarFilename('boy01')
@@ -1064,7 +1066,7 @@ function MainLogin:RegisterWithAccount(callback)
             return
         end
 
-        GameLogic.AddBBS(nil, format("%s%s(%d)", L"注册失败，错误信息：", state.message or "", state.code or 0), 5000, "255 0 0")
+        GameLogic.AddBBS(nil, format('%s%s(%d)', L'注册失败，错误信息：', state.message or '', state.code or 0), 5000, '255 0 0')
     end)
 end
 
@@ -1081,23 +1083,23 @@ function MainLogin:RegisterWithPhone(callback)
         return false
     end
 
-    if not self.phonecaptcha or self.phonecaptcha == "" then
+    if not self.phonecaptcha or self.phonecaptcha == '' then
         return false
     end
 
-    Mod.WorldShare.MsgBox:Show(L"正在注册，请稍候...", 10000, L"链接超时", 500, 120)
+    Mod.WorldShare.MsgBox:Show(L'正在注册，请稍候...', 10000, L'链接超时', 500, 120)
 
     KeepworkServiceSession:RegisterWithPhone(self.account, self.phonenumber, self.phonecaptcha, self.password, function(state)
         Mod.WorldShare.MsgBox:Close()
 
         if not state then
-            GameLogic.AddBBS(nil, L"未知错误", 5000, "0 255 0")
+            GameLogic.AddBBS(nil, L'未知错误', 5000, '0 255 0')
             return
         end
 
         if state.id then
             if state.code then
-                GameLogic.AddBBS(nil, format("%s%s(%d)", L"错误信息：", state.message or "", state.code or 0), 5000, "255 0 0")
+                GameLogic.AddBBS(nil, format('%s%s(%d)', L'错误信息：', state.message or '', state.code or 0), 5000, '255 0 0')
             else
                 -- set default user role
                 local filename = UserInfo.GetValidAvatarFilename('boy01')
@@ -1117,7 +1119,7 @@ function MainLogin:RegisterWithPhone(callback)
             return
         end
 
-        GameLogic.AddBBS(nil, format("%s%s(%d)", L"注册失败，错误信息：", state.message or "", state.code or 0), 5000, "255 0 0")
+        GameLogic.AddBBS(nil, format('%s%s(%d)', L'注册失败，错误信息：', state.message or '', state.code or 0), 5000, '255 0 0')
     end)
 end
 
@@ -1132,11 +1134,10 @@ function MainLogin:Next(isOffline)
         end
     end
 
-    self:Close()
-
     if System.options.cmdline_world and System.options.cmdline_world ~= '' then
-        Mod.WorldShare.MsgBox:Show(L'请稍候...', 12000)
+        Mod.WorldShare.MsgBox:Wait(12000)
         Mod.WorldShare.Utils.SetTimeOut(function()
+            self:Close()
             GameMainLogin:CheckLoadWorldFromCmdLine()
         end, 500)
         return
@@ -1144,9 +1145,10 @@ function MainLogin:Next(isOffline)
 
     if true then
         if System.options.loginmode == 'offline' then
-            Create:Show()
+            AccountManager:ShowActivationPage()
         else
-            local RedSummerCampMainPage = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/RedSummerCamp/RedSummerCampMainPage.lua")
+            self:Close()
+            local RedSummerCampMainPage = NPL.load('(gl)script/apps/Aries/Creator/Game/Tasks/RedSummerCamp/RedSummerCampMainPage.lua')
             RedSummerCampMainPage.Show()
         end
 

@@ -19,6 +19,10 @@ CODE GUIDELINE
 
 ]]
 
+-- include other mods
+NPL.load('(gl)Mod/DiffWorld/main.lua')
+NPL.load('(gl)Mod/OfflineMod/main.lua')
+
 -- include ide
 NPL.load('(gl)script/ide/Files.lua')
 NPL.load('(gl)script/ide/Encoding.lua')
@@ -46,7 +50,7 @@ NPL.load('(gl)script/ide/System/Core/ToolBase.lua')
 NPL.load('(gl)script/ide/System/os/os.lua')
 
 -- include ide math
-NPL.load("(gl)script/ide/math/StringUtil.lua")
+NPL.load('(gl)script/ide/math/StringUtil.lua')
 
 -- include aries creator
 NPL.load('(gl)script/apps/Aries/Creator/WorldCommon.lua')
@@ -59,12 +63,12 @@ NPL.load('(gl)script/apps/Aries/Creator/Game/Login/RemoteServerList.lua')
 NPL.load('(gl)script/apps/Aries/Creator/Game/Login/DownloadWorld.lua')
 NPL.load('(gl)script/apps/Aries/Creator/Game/Login/RemoteWorld.lua')
 NPL.load('(gl)script/apps/Aries/Creator/Game/Login/TeacherAgent/TeacherAgent.lua')
-NPL.load("(gl)script/apps/Aries/Creator/Game/Login/TeacherAgent/TeacherIcon.lua")
+NPL.load('(gl)script/apps/Aries/Creator/Game/Login/TeacherAgent/TeacherIcon.lua')
 NPL.load('(gl)script/apps/Aries/Creator/Game/Login/ParaWorldLessons.lua')
-NPL.load("(gl)script/apps/Aries/Creator/Game/main.lua")
+NPL.load('(gl)script/apps/Aries/Creator/Game/main.lua')
 
 -- include aries create game movie
-NPL.load("(gl)script/apps/Aries/Creator/Game/Movie/QREncode.lua")
+NPL.load('(gl)script/apps/Aries/Creator/Game/Movie/QREncode.lua')
 
 -- include aries creator game areas
 NPL.load('(gl)script/apps/Aries/Creator/Game/Areas/ShareWorldPage.lua')
@@ -78,20 +82,20 @@ NPL.load('(gl)script/apps/Aries/Creator/Game/Network/NetworkMain.lua')
 NPL.load('(gl)script/apps/Aries/Creator/Game/World/SaveWorldHandler.lua')
 
 -- include aries creator game tasks
-NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/ParaWorld/ParaWorldLoginAdapter.lua");
+NPL.load('(gl)script/apps/Aries/Creator/Game/Tasks/ParaWorld/ParaWorldLoginAdapter.lua')
 
 -- include aries creator game nplbrowser
 NPL.load('(gl)script/apps/Aries/Creator/Game/NplBrowser/NplBrowserLoaderPage.lua')
 NPL.load('(gl)script/apps/Aries/Creator/Game/NplBrowser/NplBrowserPlugin.lua')
 
 --  include aries creator game entity
-NPL.load("(gl)script/apps/Aries/Creator/Game/Entity/EntityManager.lua");
+NPL.load('(gl)script/apps/Aries/Creator/Game/Entity/EntityManager.lua')
+NPL.load('(gl)script/apps/Aries/Creator/Game/Entity/PlayerAssetFile.lua')
 
 -- include worldshare service
 NPL.load('(gl)Mod/WorldShare/service/SocketService.lua')
 NPL.load('(gl)Mod/WorldShare/service/Cef3Manager.lua')
 NPL.load('(gl)Mod/WorldShare/service/FileDownloader/FileDownloader.lua')
-
 
 -- get table lib
 local SocketService = commonlib.gettable('Mod.WorldShare.service.SocketService')
@@ -105,7 +109,7 @@ local OpusSetting = NPL.load('(gl)Mod/WorldShare/cellar/OpusSetting/OpusSetting.
 local HistoryManager = NPL.load('(gl)Mod/WorldShare/cellar/HistoryManager/HistoryManager.lua')
 local PreventIndulge = NPL.load('(gl)Mod/WorldShare/cellar/PreventIndulge/PreventIndulge.lua')
 local Beginner = NPL.load('(gl)Mod/WorldShare/cellar/Beginner/Beginner.lua')
-local Certificate = NPL.load("(gl)Mod/WorldShare/cellar/Certificate/Certificate.lua")
+local Certificate = NPL.load('(gl)Mod/WorldShare/cellar/Certificate/Certificate.lua')
 
 -- service
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
@@ -123,6 +127,10 @@ local WorldShareCommand = NPL.load('(gl)Mod/WorldShare/command/Command.lua')
 
 -- filters
 local Filters = NPL.load('(gl)Mod/WorldShare/filters/Filters.lua')
+
+-- other mods
+local DiffWorld = commonlib.gettable('Mod.DiffWorld')
+local Offline = commonlib.gettable('Mod.Offline')
 
 local WorldShare = commonlib.inherit(commonlib.gettable('Mod.ModBase'), commonlib.gettable('Mod.WorldShare'))
 
@@ -188,12 +196,14 @@ function WorldShare:init()
         MainLogin.state.IsUpdaterStarted = true
     end
 
-    -- load diff world
-    NPL.load('(gl)Mod/DiffWorld/main.lua')
-    local DiffWorld = commonlib.gettable('Mod.DiffWorld')
-
     if DiffWorld and type(DiffWorld) == 'table' and DiffWorld.init then
+        -- load diff world
         DiffWorld:init()
+    end
+
+    if Offline and type(Offline) == 'table' and Offline.init then
+        -- load offline mod
+        Offline:init()
     end
 end
 
@@ -205,7 +215,7 @@ end
 
 function WorldShare:OnWorldLoad()
     if System.options.loginmode ~= 'offline' then
-        -- open from MainLogin:EnterUserConsole
+        -- open from MainLogin:Next
         Mod.WorldShare.MsgBox:Close()
     end
 

@@ -1,11 +1,12 @@
 --[[
 Title: Compare
 Author(s): big
-Date:  2018.6.20
+CreateDate: 2018.06.20
+ModifyDate: 2021.09.10
 Desc: 
 use the lib:
 ------------------------------------------------------------
-local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
+local Compare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
 ------------------------------------------------------------
 
 status meaning:
@@ -18,39 +19,36 @@ status meaning:
 ]]
 
 -- lib
-local Encoding = commonlib.gettable("commonlib.Encoding")
-local WorldRevision = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision")
-local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
-local DesktopMenu = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.DesktopMenu")
-local DesktopMenuPage = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.DesktopMenuPage")
+local Encoding = commonlib.gettable('commonlib.Encoding')
+local WorldRevision = commonlib.gettable('MyCompany.Aries.Creator.Game.WorldRevision')
+local WorldCommon = commonlib.gettable('MyCompany.Aries.Creator.WorldCommon')
+local DesktopMenu = commonlib.gettable('MyCompany.Aries.Creator.Game.Desktop.DesktopMenu')
+local DesktopMenuPage = commonlib.gettable('MyCompany.Aries.Creator.Game.Desktop.DesktopMenuPage')
 
 -- service 
-local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
-local LocalServiceWorld = NPL.load("../LocalService/LocalServiceWorld.lua")
-local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
+local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
+local LocalServiceWorld = NPL.load('../LocalService/LocalServiceWorld.lua')
+local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
-local KeepworkServiceWorld = NPL.load("../KeepworkService/World.lua")
-local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
+local KeepworkServiceWorld = NPL.load('../KeepworkService/World.lua')
+local GitService = NPL.load('(gl)Mod/WorldShare/service/GitService.lua')
 local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
 
 -- helper
-local GitEncoding = NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua")
-local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
+local GitEncoding = NPL.load('(gl)Mod/WorldShare/helper/GitEncoding.lua')
+local Utils = NPL.load('(gl)Mod/WorldShare/helper/Utils.lua')
 
 -- UI
-local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
-local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
-local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua")
-local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
-local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
+local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
+local CreateWorld = NPL.load('(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua')
 
 local Compare = NPL.export()
 
-local REMOTEBIGGER = "REMOTEBIGGER"
-local JUSTLOCAL = "JUSTLOCAL"
-local JUSTREMOTE = "JUSTREMOTE"
-local LOCALBIGGER = "LOCALBIGGER"
-local EQUAL = "EQUAL"
+local REMOTEBIGGER = 'REMOTEBIGGER'
+local JUSTLOCAL = 'JUSTLOCAL'
+local JUSTREMOTE = 'JUSTREMOTE'
+local LOCALBIGGER = 'LOCALBIGGER'
+local EQUAL = 'EQUAL'
 
 Compare.REMOTEBIGGER = REMOTEBIGGER
 Compare.JUSTLOCAL = JUSTLOCAL
@@ -67,8 +65,8 @@ function Compare:Init(worldPath, callback)
     self.worldPath = worldPath
     self.callback = callback
 
-    Mod.WorldShare.Store:Set("world/currentRevision", 0)
-    Mod.WorldShare.Store:Set("world/remoteRevision", 0)
+    Mod.WorldShare.Store:Set('world/currentRevision', 0)
+    Mod.WorldShare.Store:Set('world/remoteRevision', 0)
 
     if not self:IsCompareFinish() then
         return false
@@ -108,7 +106,7 @@ function Compare:CompareRevision()
     local localRevision = WorldRevision:new():init(self.worldPath):Checkout()
 
     if worldTag and worldTag.kpProjectId == 0 then
-        Mod.WorldShare.Store:Set("world/currentRevision", localRevision)
+        Mod.WorldShare.Store:Set('world/currentRevision', localRevision)
         self:SetFinish(true)
         self.callback(self.JUSTLOCAL, 1)
         return
@@ -123,8 +121,8 @@ function Compare:CompareRevision()
 
         local remoteRevision = tonumber(data) or 0
 
-        Mod.WorldShare.Store:Set("world/currentRevision", localRevision)
-        Mod.WorldShare.Store:Set("world/remoteRevision", remoteRevision)
+        Mod.WorldShare.Store:Set('world/currentRevision', localRevision)
+        Mod.WorldShare.Store:Set('world/remoteRevision', remoteRevision)
 
         self:SetFinish(true)
 
@@ -180,15 +178,15 @@ function Compare:GetCurrentWorldInfo(callback)
            currentWorld.status ~= 1 then
             KeepworkServiceWorld:UpdateLockHeartbeatStart(
                 currentWorld.kpProjectId,
-                "exclusive",
+                'exclusive',
                 currentWorld.revision,
                 nil,
                 nil
             )
         end
 
-        Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
-        Mod.WorldShare.Store:Set("world/currentEnterWorld", currentWorld)
+        Mod.WorldShare.Store:Set('world/currentWorld', currentWorld)
+        Mod.WorldShare.Store:Set('world/currentEnterWorld', currentWorld)
 
         -- update world tag
         if currentWorld.kpProjectId and currentWorld.kpProjectId ~= 0 then
@@ -208,10 +206,10 @@ function Compare:GetCurrentWorldInfo(callback)
         end
     end
 
-    if Mod.WorldShare.Store:Get("world/readonly") then
+    if Mod.WorldShare.Store:Get('world/readonly') then
         System.World.readonly = true
         GameLogic.options:ResetWindowTitle()
-        Mod.WorldShare.Store:Remove("world/readonly")
+        Mod.WorldShare.Store:Remove('world/readonly')
     end
 
     if GameLogic.IsReadOnly() then
@@ -291,7 +289,7 @@ function Compare:GetCurrentWorldInfo(callback)
                         level = data.level,
                     })
 
-                    Mod.WorldShare.Store:Set("world/currentRevision", GameLogic.options:GetRevision())
+                    Mod.WorldShare.Store:Set('world/currentRevision', GameLogic.options:GetRevision())
                     afterGetInstance()
                 end)
             end)
@@ -318,7 +316,7 @@ function Compare:GetCurrentWorldInfo(callback)
                 remotefile = currentRemoteFile,
             })
 
-            Mod.WorldShare.Store:Set("world/currentRevision", GameLogic.options:GetRevision())
+            Mod.WorldShare.Store:Set('world/currentRevision', GameLogic.options:GetRevision())
             afterGetInstance()
         end
     else
@@ -487,7 +485,7 @@ function Compare:RefreshWorldList(callback, statusFilter)
 
         local searchText = Mod.WorldShare.Store:Get('world/searchText')
 
-        if type(searchText) == "string" and searchText ~= "" then
+        if type(searchText) == 'string' and searchText ~= '' then
             local searchWorldList = {}
 
             for key, item in ipairs(currentWorldList) do
@@ -504,7 +502,7 @@ function Compare:RefreshWorldList(callback, statusFilter)
 
         local searchFolderName = Mod.WorldShare.Store:Get('world/searchFolderName')
 
-        if type(searchFolderName) == "string" and searchFolderName ~= "" then
+        if type(searchFolderName) == 'string' and searchFolderName ~= '' then
             local searchWorldList = {}
 
             for key, item in ipairs(currentWorldList) do
@@ -518,7 +516,7 @@ function Compare:RefreshWorldList(callback, statusFilter)
         end
 
         self.SortWorldList(currentWorldList)
-        Mod.WorldShare.Store:Set("world/compareWorldList", currentWorldList)
+        Mod.WorldShare.Store:Set('world/compareWorldList', currentWorldList)
 
         if type(callback) == 'function' then
             callback(currentWorldList)
@@ -544,7 +542,7 @@ function Compare:RefreshWorldList(callback, statusFilter)
                     LocalServiceWorld:SetInternetLocalWorldList(currentWorldList)
                 end
 
-                if statusFilter and statusFilter == "ONLINE" then
+                if statusFilter and statusFilter == 'ONLINE' then
                     local filterCurrentWorldList = {}
 
                     for key, item in ipairs(currentWorldList) do
@@ -561,9 +559,9 @@ function Compare:RefreshWorldList(callback, statusFilter)
                     LocalServiceWorld:SetInternetLocalWorldList(currentWorldList)
                 end
 
-                local searchText = Mod.WorldShare.Store:Get("world/searchText")
+                local searchText = Mod.WorldShare.Store:Get('world/searchText')
 
-                if type(searchText) == "string" and searchText ~= "" then
+                if type(searchText) == 'string' and searchText ~= '' then
                     local searchWorldList = {}
 
                     for key, item in ipairs(currentWorldList) do
@@ -580,7 +578,7 @@ function Compare:RefreshWorldList(callback, statusFilter)
 
                 local searchFolderName = Mod.WorldShare.Store:Get('world/searchFolderName')
 
-                if type(searchFolderName) == "string" and searchFolderName ~= "" then
+                if type(searchFolderName) == 'string' and searchFolderName ~= '' then
                     local searchWorldList = {}
 
                     for key, item in ipairs(currentWorldList) do
@@ -595,7 +593,7 @@ function Compare:RefreshWorldList(callback, statusFilter)
 
                 self.SortWorldList(currentWorldList)
 
-                Mod.WorldShare.Store:Set("world/compareWorldList", currentWorldList)
+                Mod.WorldShare.Store:Set('world/compareWorldList', currentWorldList)
                 if type(callback) == 'function' then
                     callback(currentWorldList)
                 end
@@ -642,7 +640,7 @@ function Compare:GetSelectedWorld(index)
 end
 
 function Compare:GetWorldIndexByFoldername(foldername, share, iszip)
-    local currentWorldList = Mod.WorldShare.Store:Get("world/compareWorldList")
+    local currentWorldList = Mod.WorldShare.Store:Get('world/compareWorldList')
 
     if not currentWorldList or type(currentWorldList) ~= 'table' then
         return false
@@ -664,7 +662,7 @@ function Compare:CheckRevision(worldPath, callback)
        return
     end
 
-    local file = ParaIO.open(revisionPath, "w");
-    file:WriteString("1")
+    local file = ParaIO.open(revisionPath, 'w');
+    file:WriteString('1')
     file:close();
 end
