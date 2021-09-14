@@ -15,7 +15,7 @@ local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkServ
 
 local KeepworkServiceProjectFilter = NPL.export()
 
-function KeepworkServiceProjectFilter:init()
+function KeepworkServiceProjectFilter:Init()
     -- filter is project read only
     GameLogic.GetFilters():add_filter(
         'service.keepwork_service_project.is_project_read_only',

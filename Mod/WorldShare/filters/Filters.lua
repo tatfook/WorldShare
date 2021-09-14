@@ -58,6 +58,8 @@ local KeepworkServiceSessionFilter = NPL.load('(gl)Mod/WorldShare/filters/servic
 local LocalServiceWorldFilter = NPL.load('(gl)Mod/WorldShare/filters/service/LocalService/LocalServiceWorldFilter.lua')
 local LocalServiceFilter = NPL.load('(gl)Mod/WorldShare/filters/service/LocalService/LocalServiceFilter.lua')
 local GitServiceFilter = NPL.load('(gl)Mod/WorldShare/filters/service/GitServiceFilter.lua')
+local KeepworkServiceWorldFilter = NPL.load('(gl)Mod/WorldShare/filters/service/KeepworkService/KeepworkServiceWorldFilter.lua')
+local SyncToDataSourceFilter = NPL.load('(gl)Mod/WorldShare/filters/service/SyncService/SyncToDataSourceFilter.lua')
 
 local KeepworkProjectsApiFilter = NPL.load('(gl)Mod/WorldShare/filters/api/Keepwork/KeepworkProjectsApiFilter.lua')
 local KeepworkDragonBoatApiFilter = NPL.load('(gl)Mod/WorldShare/filters/api/Keepwork/KeepworkDragonBoatApiFilter.lua')
@@ -127,7 +129,11 @@ function Filters:Init()
     CertificateFilter:Init()
 
     -- init keepwork service filters
-    KeepworkServiceProjectFilter:init()
+    KeepworkServiceProjectFilter:Init()
+
+    KeepworkServiceWorldFilter:Init()
+
+    SyncToDataSourceFilter:Init()
 
     GameLogic.GetFilters():add_filter(
         'ShowClientUpdaterNotice',

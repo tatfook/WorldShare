@@ -1,40 +1,41 @@
 --[[
 Title: SyncToDataSource
-Author(s):  big
-Date:  2018.6.20
+Author(s): big
+CreateDate: 2018.06.20
+ModifyDate: 2021.09.14
 Desc: 
 use the lib:
 ------------------------------------------------------------
-local SyncToDataSource = NPL.load("(gl)Mod/WorldShare/cellar/Sync/SyncToDataSource.lua")
+local SyncToDataSource = NPL.load('(gl)Mod/WorldShare/service/SyncService/SyncToDataSource.lua')
 ------------------------------------------------------------
 ]]
 
 -- libs
-local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
+local WorldCommon = commonlib.gettable('MyCompany.Aries.Creator.WorldCommon')
 
 -- service
-local GitService = NPL.load("../GitService.lua")
-local LocalService = NPL.load("../LocalService.lua")
-local KeepworkService = NPL.load("../KeepworkService.lua")
-local KeepworkServiceProject = NPL.load("../KeepworkService/Project.lua")
-local KeepworkServiceWorld = NPL.load("../KeepworkService/World.lua")
-local KeepworkServiceSession = NPL.load("../KeepworkService/Session.lua")
-local Compare = NPL.load("./Compare.lua")
+local GitService = NPL.load('../GitService.lua')
+local LocalService = NPL.load('../LocalService.lua')
+local KeepworkService = NPL.load('../KeepworkService.lua')
+local KeepworkServiceProject = NPL.load('../KeepworkService/Project.lua')
+local KeepworkServiceWorld = NPL.load('../KeepworkService/World.lua')
+local KeepworkServiceSession = NPL.load('../KeepworkService/Session.lua')
+local Compare = NPL.load('./Compare.lua')
 local EventTrackingService = NPL.load('../EventTracking.lua')
 
 -- helper
-local KeepworkGen = NPL.load("(gl)Mod/WorldShare/helper/KeepworkGen.lua")
-local GitEncoding = NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua")
+local KeepworkGen = NPL.load('(gl)Mod/WorldShare/helper/KeepworkGen.lua')
+local GitEncoding = NPL.load('(gl)Mod/WorldShare/helper/GitEncoding.lua')
 
 -- api
-local StorageFilesApi = NPL.load("(gl)Mod/WorldShare/api/Storage/Files.lua")
-local QiniuRootApi = NPL.load("(gl)Mod/WorldShare/api/Qiniu/Root.lua")
+local StorageFilesApi = NPL.load('(gl)Mod/WorldShare/api/Storage/Files.lua')
+local QiniuRootApi = NPL.load('(gl)Mod/WorldShare/api/Qiniu/Root.lua')
 
 local SyncToDataSource = NPL.export()
 
-local UPDATE = "UPDATE"
-local UPLOAD = "UPLOAD"
-local DELETE = "DELETE"
+local UPDATE = 'UPDATE'
+local UPLOAD = 'UPLOAD'
+local DELETE = 'DELETE'
 
 function SyncToDataSource:Init(callback)
     if type(callback) ~= 'function' then
@@ -46,8 +47,8 @@ function SyncToDataSource:Init(callback)
     local function Handle()
         self.currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
     
-        if not self.currentWorld.worldpath or self.currentWorld.worldpath == "" then
-            callback(false, L"上传失败，将使用离线模式，原因：上传目录为空")
+        if not self.currentWorld.worldpath or self.currentWorld.worldpath == '' then
+            callback(false, L'上传失败，将使用离线模式，原因：上传目录为空')
             return false
         end
 
@@ -79,13 +80,13 @@ function SyncToDataSource:Init(callback)
                         self.currentWorld.foldername,
                         function(data, err)
                             if err == 400 and data and data.code == 17 then
-                                callback(false, L"您创建的帕拉卡(Paracraft)在线项目数量过多。请删除不需要的项目后再试。")
+                                callback(false, L'您创建的帕拉卡(Paracraft)在线项目数量过多。请删除不需要的项目后再试。')
                                 self:SetFinish(true)
                                 return false
                             end
     
                             if err ~= 200 or not data or not data.id then
-                                callback(false, L"创建项目失败")
+                                callback(false, L'创建项目失败')
                                 self:SetFinish(true)
                                 return false
                             end
@@ -102,7 +103,7 @@ function SyncToDataSource:Init(callback)
                                 end
                             end
     
-                            Mod.WorldShare.Store:Set("world/currentWorld", self.currentWorld)
+                            Mod.WorldShare.Store:Set('world/currentWorld', self.currentWorld)
                             self:Start()
                         end
                     )
@@ -115,7 +116,7 @@ function SyncToDataSource:Init(callback)
         if bIsSuccess then
             Handle()
         else
-            self.callback(false, L"RE-ENTRY")
+            self.callback(false, L'RE-ENTRY')
         end
     end)
 
@@ -124,7 +125,7 @@ function SyncToDataSource:Init(callback)
 end
 
 function SyncToDataSource:IsProjectExist(callback)
-    if type(callback) ~= "function" then
+    if type(callback) ~= 'function' then
         return false
     end
 
@@ -151,7 +152,7 @@ function SyncToDataSource:IsProjectExist(callback)
                         end
                     end
 
-                    self.callback(false, L"该项目不属于您，无法上传分享")
+                    self.callback(false, L'该项目不属于您，无法上传分享')
                     self:SetFinish(true)
                 else
                     callback(true)
@@ -167,11 +168,11 @@ function SyncToDataSource:Start()
     self.compareListIndex = 1
     self.compareListTotal = 0
 
-    self.callback(false, { method = 'UPDATE-PROGRESS', current = 0, total = 0, msg = L"正在对比文件列表..." })
+    self.callback(false, { method = 'UPDATE-PROGRESS', current = 0, total = 0, msg = L'正在对比文件列表...' })
 
     local function Handle(data, err)
         if type(data) ~= 'table' then
-            self.callback(false, L"获取列表失败（上传）")
+            self.callback(false, L'获取列表失败（上传）')
             self:SetFinish(true)
             return false
         end
@@ -195,15 +196,15 @@ function SyncToDataSource:Start()
 end
 
 function SyncToDataSource:IgnoreFiles()
-    local filePath = format("%s/.paraignore", self.currentWorld.worldpath)
-    local file = ParaIO.open(filePath, "r")
+    local filePath = format('%s/.paraignore', self.currentWorld.worldpath)
+    local file = ParaIO.open(filePath, 'r')
     local content = file:GetText(0, -1)
     file:close()
 
     local ignoreFiles = {}
 
     if #content > 0 then
-        for item in string.gmatch(content, "[^\r\n]+") do
+        for item in string.gmatch(content, '[^\r\n]+') do
             ignoreFiles[#ignoreFiles + 1] = item
         end
     end
@@ -225,8 +226,8 @@ function SyncToDataSource:CheckReadmeFile()
     local hasReadme = false
 
     for key, value in ipairs(self.localFiles) do
-        if string.upper(value.filename) == "README.MD" then
-            if (value.filename == "README.md") then
+        if string.upper(value.filename) == 'README.MD' then
+            if (value.filename == 'README.md') then
                 hasReadme = true
             else
                 LocalService:Delete(self.currentWorld.worldpath, value.filename)
@@ -236,15 +237,15 @@ function SyncToDataSource:CheckReadmeFile()
     end
 
     if not hasReadme then
-        local filePath = format("%s/README.md", self.currentWorld.worldpath)
-        local file = ParaIO.open(filePath, "w")
+        local filePath = format('%s/README.md', self.currentWorld.worldpath)
+        local file = ParaIO.open(filePath, 'w')
         local content = KeepworkGen:GetReadmeFile()
 
         file:write(content, #content)
         file:close()
 
         local readMeFiles = {
-            filename = "README.md",
+            filename = 'README.md',
             file_path = filePath,
             file_content_t = content
         }
@@ -296,7 +297,7 @@ function SyncToDataSource:GetCompareList()
 
     -- handle revision in last
     for CKey, CItem in ipairs(self.compareList) do
-        if string.lower(CItem.file) == "revision.xml" then
+        if string.lower(CItem.file) == 'revision.xml' then
             self.compareList:push_back(CItem)
             self.compareList:remove(CKey)
         end
@@ -312,7 +313,7 @@ end
 function SyncToDataSource:HandleCompareList()
     if self.compareListTotal < self.compareListIndex then
         -- sync finish
-        GameLogic.GetFilters():apply_filters("SyncWorldFinish");
+        GameLogic.GetFilters():apply_filters('SyncWorldFinish');
         self:SetFinish(true)
         self:UpdateRecord(
             function()
@@ -328,7 +329,7 @@ function SyncToDataSource:HandleCompareList()
 
     if self.broke then
         self:SetFinish(true)
-        LOG.std("SyncToDataSource", "debug", "SyncToDataSource", "上传被中断")
+        LOG.std('SyncToDataSource', 'debug', 'SyncToDataSource', '上传被中断')
         return false
     end
 
@@ -339,7 +340,7 @@ function SyncToDataSource:HandleCompareList()
             method = 'UPDATE-PROGRESS',
             current = self.compareListIndex,
             total = self.compareListTotal,
-            msg = format(L"%s 处理完成", currentItem.file)
+            msg = format(L'%s 处理完成', currentItem.file)
         })
 
         self.compareListIndex = self.compareListIndex + 1
@@ -393,10 +394,10 @@ function SyncToDataSource:UploadOne(file, callback)
     end
 
     self.callback(false, {
-        method = "UPDATE-PROGRESS",
+        method = 'UPDATE-PROGRESS',
         current = self.compareListIndex,
         total = self.compareListTotal,
-        msg = format(L"%s （%s） 上传中", currentLocalItem.filename, Mod.WorldShare.Utils.FormatFileSize(currentLocalItem.filesize, "KB"))
+        msg = format(L'%s （%s） 上传中', currentLocalItem.filename, Mod.WorldShare.Utils.FormatFileSize(currentLocalItem.filesize, 'KB'))
     })
 
     GitService:Upload(
@@ -406,13 +407,13 @@ function SyncToDataSource:UploadOne(file, callback)
         currentLocalItem.file_content_t,
         function(bIsUpload)
             if bIsUpload then
-                if type(callback) == "function" then
+                if type(callback) == 'function' then
                     callback()
                 end
             else    
                 self.callback(false, {
                     method = 'UPDATE-PROGRESS-FAIL',
-                    msg = format(L"%s 上传失败", currentLocalItem.filename)
+                    msg = format(L'%s 上传失败', currentLocalItem.filename)
                 })
                 self:SetBroke(true)
             end
@@ -426,10 +427,10 @@ function SyncToDataSource:UpdateOne(file, callback)
     local currentRemoteItem = self:GetRemoteFileByPath(file)
 
     self.callback(false, {
-        method = "UPDATE-PROGRESS",
+        method = 'UPDATE-PROGRESS',
         current = self.compareListIndex,
         total = self.compareListTotal,
-        msg = format(L"%s （%s） 对比中", currentLocalItem.filename, Mod.WorldShare.Utils.FormatFileSize(currentLocalItem.filesize, "KB"))
+        msg = format(L'%s （%s） 对比中', currentLocalItem.filename, Mod.WorldShare.Utils.FormatFileSize(currentLocalItem.filesize, 'KB'))
     })
 
     -- These line give a feedback on update record method
@@ -441,13 +442,13 @@ function SyncToDataSource:UpdateOne(file, callback)
         end
     end
 
-    if currentLocalItem.sha1 == currentRemoteItem.id and string.lower(currentLocalItem.filename) ~= "revision.xml" then
-        if type(callback) == "function" then
+    if currentLocalItem.sha1 == currentRemoteItem.id and string.lower(currentLocalItem.filename) ~= 'revision.xml' then
+        if type(callback) == 'function' then
             self.callback(false, {
-                method = "UPDATE-PROGRESS",
+                method = 'UPDATE-PROGRESS',
                 current = self.compareListIndex,
                 total = self.compareListTotal,
-                msg = format(L"%s （%s） 文件一致，跳过", currentLocalItem.filename, Mod.WorldShare.Utils.FormatFileSize(currentLocalItem.filesize, "KB"))
+                msg = format(L'%s （%s） 文件一致，跳过', currentLocalItem.filename, Mod.WorldShare.Utils.FormatFileSize(currentLocalItem.filesize, 'KB'))
             })
 
             Mod.WorldShare.Utils.SetTimeOut(callback, 10)
@@ -457,10 +458,10 @@ function SyncToDataSource:UpdateOne(file, callback)
     end
 
     self.callback(false, {
-        method = "UPDATE-PROGRESS",
+        method = 'UPDATE-PROGRESS',
         current = self.compareListIndex,
         total = self.compareListTotal,
-        msg = format(L"%s （%s） 更新中", currentLocalItem.filename, Mod.WorldShare.Utils.FormatFileSize(currentLocalItem.filesize, "KB"))
+        msg = format(L'%s （%s） 更新中', currentLocalItem.filename, Mod.WorldShare.Utils.FormatFileSize(currentLocalItem.filesize, 'KB'))
     })
 
     GitService:Update(
@@ -470,13 +471,13 @@ function SyncToDataSource:UpdateOne(file, callback)
         currentLocalItem.file_content_t,
         function(bIsUpdate)
             if bIsUpdate then
-                if type(callback) == "function" then
+                if type(callback) == 'function' then
                     callback()
                 end
             else
                 self.callback(false, {
                     method = 'UPDATE-PROGRESS-FAIL',
-                    msg = format(L"%s 更新失败", currentLocalItem.filename)
+                    msg = format(L'%s 更新失败', currentLocalItem.filename)
                 })
                 self:SetBroke(true)
             end
@@ -494,10 +495,10 @@ function SyncToDataSource:DeleteOne(file, callback)
     end
 
     self.callback(false, {
-        method = "UPDATE-PROGRESS",
+        method = 'UPDATE-PROGRESS',
         current = self.compareListIndex,
         total = self.compareListTotal,
-        msg = format(L"%s 删除中", currentRemoteItem.path)
+        msg = format(L'%s 删除中', currentRemoteItem.path)
     })
 
     GitService:DeleteFile(
@@ -506,13 +507,13 @@ function SyncToDataSource:DeleteOne(file, callback)
         currentRemoteItem.path,
         function(bIsDelete)
             if bIsDelete then
-                if type(callback) == "function" then
+                if type(callback) == 'function' then
                     callback()
                 end
             else
                 self.callback(false, {
-                    method = "UPDATE-PROGRESS-FAIL",
-                    msg = format(L"%s 删除失败", currentRemoteItem.name)
+                    method = 'UPDATE-PROGRESS-FAIL',
+                    msg = format(L'%s 删除失败', currentRemoteItem.name)
                 })
                 self:SetBroke(true)
             end
@@ -527,21 +528,21 @@ function SyncToDataSource:UpdateRecord(callback)
     end
 
     local function Handle(data, err)
-        if type(data) ~= "table" or
+        if type(data) ~= 'table' or
            not data.commitId or
            not data.message then
-            self.callback(false, L"获取COMMIT列表失败")
+            self.callback(false, L'获取COMMIT列表失败')
             self:SetFinish(true)
             return
         end
 
-        local lastCommitFile = string.match(data.message, "revision.xml")
+        local lastCommitFile = string.match(data.message, 'revision.xml')
         local lastCommitSha = data.commitId
 
         self.currentWorld.lastCommitId = lastCommitSha
 
-        if not lastCommitFile or string.lower(lastCommitFile) ~= "revision.xml" then
-            self.callback(false, L"上一次同步到数据源同步失败，请重新同步世界到数据源")
+        if not lastCommitFile or string.lower(lastCommitFile) ~= 'revision.xml' then
+            self.callback(false, L'上一次同步到数据源同步失败，请重新同步世界到数据源')
             self:SetFinish(true)
             return
         end
@@ -563,17 +564,17 @@ function SyncToDataSource:UpdateRecord(callback)
 
             commitIds[#commitIds + 1] = {
                 commitId = lastCommitSha,
-                revision = Mod.WorldShare.Store:Get("world/currentRevision"),
-                date = os.date("%Y%m%d", os.time())
+                revision = Mod.WorldShare.Store:Get('world/currentRevision'),
+                date = os.date('%Y%m%d', os.time())
             }
 
             local worldInfo = {}
-            local username = self.currentWorld.user and self.currentWorld.user.username or Mod.WorldShare.Store:Get("user/username")
+            local username = self.currentWorld.user and self.currentWorld.user.username or Mod.WorldShare.Store:Get('user/username')
             local base32Foldername = GitEncoding.Base32(self.currentWorld.foldername or '')
             local repoPath = Mod.WorldShare.Utils.UrlEncode(username .. '/' .. base32Foldername)
 
             worldInfo.worldName = self.currentWorld.foldername
-            worldInfo.revision = Mod.WorldShare.Store:Get("world/currentRevision")
+            worldInfo.revision = Mod.WorldShare.Store:Get('world/currentRevision')
             worldInfo.fileSize = filesTotals
             worldInfo.commitId = lastCommitSha
             worldInfo.archiveUrl = format('%s/repos/%s/archive.zip?ref=%s', KeepworkService:GetApiCdnApi(), repoPath, lastCommitSha)
@@ -594,7 +595,7 @@ function SyncToDataSource:UpdateRecord(callback)
             local function AfterHandlePreview(preview)
                 EventTrackingService:Send(1, 'click.world.after_upload', { blockCount = Mod.WorldShare.Store:Get('world/blockCount') or 0 })
 
-                preview = preview or ""
+                preview = preview or ''
 
                 worldInfo.extra = {
                     coverUrl = preview,
@@ -607,7 +608,7 @@ function SyncToDataSource:UpdateRecord(callback)
                     worldInfo,
                     function(data, err)
                         if err ~= 200 then
-                            self.callback(false, L"更新服务器列表失败")
+                            self.callback(false, L'更新服务器列表失败')
                             self:SetFinish(true)
                             return
                         end
@@ -626,8 +627,8 @@ function SyncToDataSource:UpdateRecord(callback)
                                 -- 家园的话parentId传为-1
                                 local parent_id = self.currentWorld.parentProjectId
                                 if worldInfo and worldInfo.type == 1 then
-                                    local folder_name = self.currentWorld.foldername or ""
-                                    local _, end_index = string.find(folder_name, "_main")
+                                    local folder_name = self.currentWorld.foldername or ''
+                                    local _, end_index = string.find(folder_name, '_main')
                                     if end_index and end_index == #folder_name then
                                         parent_id = -1
                                     end
@@ -657,7 +658,7 @@ function SyncToDataSource:UpdateRecord(callback)
                                     self.currentWorld = KeepworkServiceWorld:GenerateWorldInstance({
                                         text = self.currentWorld.text,
                                         foldername = self.currentWorld.foldername or '',
-                                        revision = Mod.WorldShare.Store:Get("world/currentRevision"),
+                                        revision = Mod.WorldShare.Store:Get('world/currentRevision'),
                                         size = filesTotals,
                                         modifyTime = os.time(),
                                         lastCommitId = self.currentWorld.lastCommitId, 
@@ -684,7 +685,7 @@ function SyncToDataSource:UpdateRecord(callback)
                                     })
                                 end
 
-                                Mod.WorldShare.Store:Set("world/currentWorld", self.currentWorld)
+                                Mod.WorldShare.Store:Set('world/currentWorld', self.currentWorld)
 
                                 -- updated world mod data
                                 KeepworkService:SetCurrentCommitId()
@@ -707,7 +708,7 @@ function SyncToDataSource:UpdateRecord(callback)
                         return false
                     end
 
-                    local targetDir = format("%s/%s/preview.jpg", Mod.WorldShare.Utils.GetWorldFolderFullPath(), commonlib.Encoding.Utf8ToDefault(self.currentWorld.foldername))
+                    local targetDir = format('%s/%s/preview.jpg', Mod.WorldShare.Utils.GetWorldFolderFullPath(), commonlib.Encoding.Utf8ToDefault(self.currentWorld.foldername))
                     local content = LocalService:GetFileContent(targetDir)
 
                     if not content then
