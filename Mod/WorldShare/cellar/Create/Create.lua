@@ -1,8 +1,8 @@
 --[[
 Title: Create Page
-Author(s):  Big
+Author(s): big
 CreateDate: 2020.09.01
-ModifyDate: 2021.09.10
+ModifyDate: 2021.09.16
 Desc: 
 use the lib:
 ------------------------------------------------------------
@@ -335,74 +335,79 @@ function Create:EnterWorld(index, skip)
 
     -- share world step
     if ShareTypeWorld:IsSharedWorld(currentSelectedWorld) and not skip then
-        if not KeepworkServiceSession:IsSignedIn() then
-            LoginModal:CheckSignedIn(L'此世界为多人世界，请先登录', function(bIsSuccessed)
-                if bIsSuccessed then
-                    self:GetWorldList(self.statusFilter, function()
-                        local index = Compare:GetWorldIndexByFoldername(
-                            currentSelectedWorld.foldername,
-                            currentSelectedWorld.shared,
-                            currentSelectedWorld.is_zip
+        GameLogic.IsVip('LimitUserOpenShareWorld', true, function(result)
+            if not result then
+                return
+            end
+
+            if not KeepworkServiceSession:IsSignedIn() then
+                LoginModal:CheckSignedIn(L'此世界为多人世界，请先登录', function(bIsSuccessed)
+                    if bIsSuccessed then
+                        self:GetWorldList(self.statusFilter, function()
+                            local index = Compare:GetWorldIndexByFoldername(
+                                currentSelectedWorld.foldername,
+                                currentSelectedWorld.shared,
+                                currentSelectedWorld.is_zip
+                            )
+                            self:EnterWorld(index)
+                        end)
+                    else
+                        Mod.WorldShare.MsgBox:Dialog(
+                            'MultiPlayerWorldLogin',
+                            L'此世界为多人世界，请登录后再打开世界，或者以只读模式打开世界',
+                            {
+                                Title = L'多人世界',
+                                Yes = L'知道了',
+                                No = L'只读模式打开'
+                            },
+                            function(res)
+                                if res and res == _guihelper.DialogResult.No then
+                                    Mod.WorldShare.Store:Set('world/readonly', true)
+                                    self:EnterWorld(index, true)
+                                end
+                            end,
+                            _guihelper.MessageBoxButtons.YesNo
                         )
-                        self:EnterWorld(index)
-                    end)
-                else
-                    Mod.WorldShare.MsgBox:Dialog(
-                        'MultiPlayerWorldLogin',
-                        L'此世界为多人世界，请登录后再打开世界，或者以只读模式打开世界',
-                        {
-                            Title = L'多人世界',
-                            Yes = L'知道了',
-                            No = L'只读模式打开'
-                        },
-                        function(res)
-                            if res and res == _guihelper.DialogResult.No then
-                                Mod.WorldShare.Store:Set('world/readonly', true)
-                                self:EnterWorld(index, true)
-                            end
-                        end,
-                        _guihelper.MessageBoxButtons.YesNo
-                    )
-                end
-            end)
-
-            return
-        else
-            KeepworkServiceProject:GetMembers(currentSelectedWorld.kpProjectId, function(data, err)
-                if not data or type(data) ~= 'table' then
-                    return
-                end
-
-                local userId = Mod.WorldShare.Store:Get('user/userId')
-
-                for key, item in ipairs(data) do
-                    if item.userId == userId then
-                        if currentSelectedWorld.level == 2 then
-                            -- check ouccupy
-                            ShareTypeWorld:Lock(currentSelectedWorld, function()
-                                self:EnterWorld(index, true)
-                            end)
-                        else
-                            -- download world and encrypted world
-                            CommonLoadWorld:EnterWorldById(currentSelectedWorld.kpProjectId)
-                        end
-
+                    end
+                end)
+            else
+                KeepworkServiceProject:GetMembers(currentSelectedWorld.kpProjectId, function(data, err)
+                    if not data or type(data) ~= 'table' then
                         return
                     end
-                end
-
-                local username = Mod.WorldShare.Store:Get('user/username')
-
-                _guihelper.MessageBox(
-                    format(
-                        L'你没有权限进入此世界（共享世界）（项目ID：%d）（用户名：%s）',
-                        currentSelectedWorld.kpProjectId,
-                        username or ''
+    
+                    local userId = Mod.WorldShare.Store:Get('user/userId')
+    
+                    for key, item in ipairs(data) do
+                        if item.userId == userId then
+                            if currentSelectedWorld.level == 2 then
+                                -- check ouccupy
+                                ShareTypeWorld:Lock(currentSelectedWorld, function()
+                                    self:EnterWorld(index, true)
+                                end)
+                            else
+                                -- download world and encrypted world
+                                CommonLoadWorld:EnterWorldById(currentSelectedWorld.kpProjectId)
+                            end
+    
+                            return
+                        end
+                    end
+    
+                    local username = Mod.WorldShare.Store:Get('user/username')
+    
+                    _guihelper.MessageBox(
+                        format(
+                            L'你没有权限进入此世界（共享世界）（项目ID：%d）（用户名：%s）',
+                            currentSelectedWorld.kpProjectId,
+                            username or ''
+                        )
                     )
-                )
-            end)
-            return
-        end
+                end)
+            end
+        end)
+
+        return
     end
 
     -- uploaded step

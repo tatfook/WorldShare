@@ -33,7 +33,7 @@ local self = Utils
 -- @param allowDrag Is allow window drag
 -- @param window z-axis order
 -- @return table
-function Utils.ShowWindow(option, height, url, name, x, y, align, allowDrag, zorder, isTopLevel)
+function Utils.ShowWindow(option, height, url, name, x, y, align, allowDrag, zorder, isTopLevel, bToggleShowHide)
     local params
 
     if type(option) == 'table' then
@@ -47,6 +47,12 @@ function Utils.ShowWindow(option, height, url, name, x, y, align, allowDrag, zor
 
         if not y then
             y = height
+        end
+
+        if bToggleShowHide == false then
+            bToggleShowHide = false
+        else
+            bToggleShowHide = true
         end
 
         params = {
@@ -65,7 +71,7 @@ function Utils.ShowWindow(option, height, url, name, x, y, align, allowDrag, zor
             width = width,
             height = height,
             cancelShowAnimation = true,
-            bToggleShowHide = true,
+            bToggleShowHide = bToggleShowHide,
         }
 
         if isTopLevel then

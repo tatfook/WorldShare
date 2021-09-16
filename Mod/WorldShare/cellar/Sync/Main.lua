@@ -347,7 +347,23 @@ function SyncMain:SyncToDataSource(callback)
         Progress:Init(syncInstance)
     end
 
-    self:CheckWorldSize(Handle)
+    KeepworkServiceWorld:GetWorldsList(function(data)
+        if not data or type(data) ~= 'table' then
+            return
+        end
+
+        local dataCount = #data
+
+        if dataCount >= 3 then
+            GameLogic.IsVip('Limit3Worlds', true, function(result)
+                if result then
+                    self:CheckWorldSize(Handle)
+                end
+            end)
+        else
+            self:CheckWorldSize(Handle)
+        end
+    end)
 end
 
 function SyncMain:CheckTagName(callback)
@@ -416,19 +432,23 @@ function SyncMain:CheckWorldSize(callback)
     local filesTotal = LocalService:GetWorldSize(currentWorld.worldpath)
     local maxSize = 0
 
-    Permission:CheckPermission('OnlineWorldData50Mb', false, function(result)
+    GameLogic.IsVip('LimitWorldSize10Mb', true, function(result)
         if result then
-            maxSize = 50 * 1024 * 1024
-        else
-            maxSize = 25 * 1024 * 1024
-        end
-    
-        if filesTotal > maxSize then
-            self:ShowBeyondVolume(result)
-        else
-            if type(callback) == 'function' then
-                callback()
-            end
+            Permission:CheckPermission('OnlineWorldData50Mb', false, function(result)
+                if result then
+                    maxSize = 50 * 1024 * 1024
+                else
+                    maxSize = 25 * 1024 * 1024
+                end
+
+                if filesTotal > maxSize then
+                    self:ShowBeyondVolume(result)
+                else
+                    if type(callback) == 'function' then
+                        callback()
+                    end
+                end
+            end)
         end
     end)
 end

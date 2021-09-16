@@ -245,7 +245,9 @@ function MainLogin:ShowLogin1()
         0,
         '_fi',
         false,
-        -1
+        -1,
+        nil,
+        false
     )
 
     local MainLoginLoginPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Login')
@@ -1145,7 +1147,7 @@ function MainLogin:Next(isOffline)
 
     if true then
         if System.options.loginmode == 'offline' then
-            Create:Show()
+            AccountManager:ShowActivationPage()
         else
             self:Close()
             local RedSummerCampMainPage = NPL.load('(gl)script/apps/Aries/Creator/Game/Tasks/RedSummerCamp/RedSummerCampMainPage.lua')

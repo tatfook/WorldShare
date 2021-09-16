@@ -108,6 +108,18 @@ KeepworkServicePermission.AllLocalAuth = {
     RedSummerCampMain = {
         key = 'red_summer_camp_main', -- red summer vip
         desc = nil
+    },
+    Limit3Worlds = {
+        key = 'limit_3_worlds',
+        desc = L'免费用户只能分享3个世界'
+    },
+    LimitWorldSize10Mb = {
+        key = 'limit_world_size_10_mb',
+        desc = L'免费用户只能分享不超过10M的世界'
+    },
+    LimitUserOpenShareWorld = {
+        key = 'limit_user_open_share_world',
+        desc = L'免费用户不能打开别人的世界'
     }
 }
 

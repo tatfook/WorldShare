@@ -1,30 +1,31 @@
 --[[
 Title: KeepworkService World
-Author(s):  big
-Date:  2019.12.9
+Author(s): big
+CreateDate: 2019.12.09
+ModifyDate: 2021.09.16
 Place: Foshan
 use the lib:
 ------------------------------------------------------------
-local KeepworkServiceWorld = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/World.lua")
+local KeepworkServiceWorld = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/World.lua')
 ------------------------------------------------------------
 ]]
 
 -- lib
-local WorldRevision = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision")
-local SaveWorldHandler = commonlib.gettable("MyCompany.Aries.Game.SaveWorldHandler")
+local WorldRevision = commonlib.gettable('MyCompany.Aries.Creator.Game.WorldRevision')
+local SaveWorldHandler = commonlib.gettable('MyCompany.Aries.Game.SaveWorldHandler')
 
 -- service
 local KeepworkService = NPL.load('../KeepworkService.lua')
 local KeepworkServiceSession = NPL.load('./Session.lua')
 local LocalServiceWorld = NPL.load('(gl)Mod/WorldShare/service/LocalService/LocalServiceWorld.lua')
-local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
-local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
+local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
+local GitService = NPL.load('(gl)Mod/WorldShare/service/GitService.lua')
 local Compare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
 
 -- api
-local KeepworkWorldsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Worlds.lua")
-local KeepworkProjectsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Projects.lua")
-local KeepworkWorldLocksApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/WorldLocks.lua")
+local KeepworkWorldsApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/Worlds.lua')
+local KeepworkProjectsApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/Projects.lua')
+local KeepworkWorldLocksApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/WorldLocks.lua')
 
 local KeepworkServiceWorld = NPL.export()
 
@@ -143,7 +144,7 @@ function KeepworkServiceWorld:SetWorldInstanceByPid(pid, callback)
                 level = data.level,
             })
 
-            Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
+            Mod.WorldShare.Store:Set('world/currentWorld', currentWorld)
 
             if callback and type(callback) == 'function' then
                 callback()
@@ -349,7 +350,7 @@ end
 
 function KeepworkServiceWorld:UnlockWorld(callback)
     self.lockHeartbeat = false
-    local currentEnterWorld = Mod.WorldShare.Store:Get("world/currentEnterWorld")
+    local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
     if not currentEnterWorld.members then
         return
@@ -419,7 +420,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
     local userId = Mod.WorldShare.Store:Get('user/userId')
 
     self:GetWorldsList(function(data, err)
-        if type(data) ~= "table" then
+        if type(data) ~= 'table' then
             return false
         end
 
@@ -430,10 +431,10 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
         -- handle both/network newest/local newest/network only worlds
         for DKey, DItem in ipairs(remoteWorldsList) do
             local isExist = false
-            local text = DItem.worldName or ""
-            local worldpath = ""
+            local text = DItem.worldName or ''
+            local worldpath = ''
             local revision = 0
-            local commitId = ""
+            local commitId = ''
             local remoteWorldUserId = DItem.user and DItem.user.id and tonumber(DItem.user.id) or 0
             local status
             local remoteShared = false
@@ -478,7 +479,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                     if LItem.shared then -- share folder
                         if remoteShared == LItem.shared then
                             -- avoid upload same name share world
-                            local sharedUsername = Mod.WorldShare:GetWorldData("username", LItem.worldpath)
+                            local sharedUsername = Mod.WorldShare:GetWorldData('username', LItem.worldpath)
     
                             if sharedUsername == DItem.user.username then
                                 Handle()
@@ -505,7 +506,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                 if remoteShared and remoteWorldUserId ~= tonumber(userId) then
                     -- shared world path
                     worldpath = format(
-                        "%s/_shared/%s/%s/",
+                        '%s/_shared/%s/%s/',
                         Mod.WorldShare.Utils.GetWorldFolderFullPath(),
                         DItem.user.username,
                         commonlib.Encoding.Utf8ToDefault(DItem.worldName)
@@ -513,7 +514,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                 else
                     -- mine world path
                     worldpath = format(
-                        "%s/%s/",
+                        '%s/%s/',
                         Mod.WorldShare.Utils.GetWorldFolderFullPath(),
                         commonlib.Encoding.Utf8ToDefault(DItem.worldName)
                     )

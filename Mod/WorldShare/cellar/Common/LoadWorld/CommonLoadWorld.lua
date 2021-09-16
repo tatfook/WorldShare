@@ -1,7 +1,8 @@
 --[[
 Title: Common Load World
 Author(s): big
-Date: 2021.1.20
+CreateDate: 2021.01.20
+ModifyDate: 2021.09.16
 City: Foshan
 use the lib:
 ------------------------------------------------------------
@@ -260,14 +261,6 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
     end
 
     pid = tonumber(pid)
-
-    if System.options.useFreeworldWhitelist or
-       System.options.maxFreeworldUploadCount then
-       if not self:IdsFilter(pid) then
-           _guihelper.MessageBox(L'您不能进入此类世界。')
-           return
-       end
-    end
 
     local world
     local overtimeEnter = false
@@ -572,6 +565,18 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
         function(data, err)
             Mod.WorldShare.MsgBox:Close()
             fetchSuccess = true
+
+            local username = Mod.WorldShare.Store:Get('user/username')
+
+            if not username or username ~= data.username then
+                if System.options.useFreeworldWhitelist or
+                   System.options.maxFreeworldUploadCount then
+                    if not self:IdsFilter(pid) then
+                        _guihelper.MessageBox(L'您不能进入此类世界。')
+                        return
+                    end
+                end
+            end
 
             if err == 0 then
                 local cacheWorldInfo = CacheProjectId:GetProjectIdInfo(pid)
