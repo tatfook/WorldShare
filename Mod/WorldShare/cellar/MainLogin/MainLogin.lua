@@ -1147,7 +1147,7 @@ function MainLogin:Next(isOffline)
 
     if true then
         if System.options.loginmode == 'offline' then
-            AccountManager:ShowActivationPage()
+            Create:Show()
         else
             self:Close()
             local RedSummerCampMainPage = NPL.load('(gl)script/apps/Aries/Creator/Game/Tasks/RedSummerCamp/RedSummerCampMainPage.lua')
