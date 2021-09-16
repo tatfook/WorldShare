@@ -361,7 +361,7 @@ function SyncMain:SyncToDataSource(callback)
                 end
             end)
         else
-            Handle()
+            self:CheckWorldSize(Handle)
         end
     end)
 end
@@ -432,25 +432,31 @@ function SyncMain:CheckWorldSize(callback)
     local filesTotal = LocalService:GetWorldSize(currentWorld.worldpath)
     local maxSize = 0
 
-    GameLogic.IsVip('LimitWorldSize10Mb', true, function(result)
-        if result then
-            Permission:CheckPermission('OnlineWorldData50Mb', false, function(result)
-                if result then
-                    maxSize = 50 * 1024 * 1024
-                else
-                    maxSize = 25 * 1024 * 1024
-                end
-
-                if filesTotal > maxSize then
-                    self:ShowBeyondVolume(result)
-                else
-                    if type(callback) == 'function' then
-                        callback()
+    if filesTotal > 10 * 1024 * 1024 then
+        GameLogic.IsVip('LimitWorldSize10Mb', true, function(result)
+            if result then
+                Permission:CheckPermission('OnlineWorldData50Mb', false, function(result)
+                    if result then
+                        maxSize = 50 * 1024 * 1024
+                    else
+                        maxSize = 25 * 1024 * 1024
                     end
-                end
-            end)
+    
+                    if filesTotal > maxSize then
+                        self:ShowBeyondVolume(result)
+                    else
+                        if type(callback) == 'function' then
+                            callback()
+                        end
+                    end
+                end)
+            end
+        end)
+    else
+        if type(callback) == 'function' then
+            callback()
         end
-    end)
+    end
 end
 
 function SyncMain:GetWorldDateTable()
