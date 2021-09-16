@@ -361,7 +361,7 @@ function SyncMain:SyncToDataSource(callback)
                 end
             end)
         else
-            self:CheckWorldSize(Handle)
+            Handle()
         end
     end)
 end
