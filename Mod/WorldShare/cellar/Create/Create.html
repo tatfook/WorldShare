@@ -897,6 +897,7 @@
                     <div class="list_search_bar theme1_white1_textfield" style="<%= 'float: left;margin-left: 10px;' %>">
                         <input type="text"
                                name="content"
+                               uiname="Create.content"
                                onfocusin='set_default'
                                class="list_search_textfield"
                                spacing="4"
@@ -904,6 +905,7 @@
                                value=""/>
                         <div class="list_search_button">
                             <input type="button"
+                                   uiname="Create.open_content"
                                    name='open_content'
                                    class="list_search_button_click theme1_gray2_button"
                                    value='<%=L"打开"%>'
@@ -1174,6 +1176,7 @@
                                                     <input type="button"
                                                            class="share_button"
                                                            style="<%= get_share_button('enter') %>"
+                                                           uiname='<%="Create.enter" .. Eval("index")%>'
                                                            onclick="enter"
                                                            tooltip='<%=L"进入"%>'
                                                            name='<%=Eval("index")%>' />
@@ -1280,6 +1283,7 @@
                                                 <input type="button"
                                                         class="share_button"
                                                         style="<%= get_share_button('enter') %>"
+                                                        uiname='<%="Create.enter" .. Eval("index")%>'
                                                         onclick="enter"
                                                         tooltip='<%=L"进入"%>'
                                                         name='<%=Eval("index")%>' />
