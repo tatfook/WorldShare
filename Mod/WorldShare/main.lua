@@ -1,7 +1,8 @@
 ﻿--[[
 Title: WorldShareMod
-Author(s):  Big
-Date: 2017.4.17
+Author(s): big
+CreateDate: 2017.04.17
+ModifyDate: 2021.09.17
 Desc: 
 use the lib:
 ------------------------------------------------------------
@@ -205,6 +206,9 @@ function WorldShare:init()
         -- load offline mod
         Offline:init()
     end
+
+    System.options.useFreeworldWhitelist = true
+    System.options.maxFreeworldUploadCount = 3
 end
 
 function WorldShare:OnInitDesktop()
