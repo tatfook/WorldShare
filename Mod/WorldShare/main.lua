@@ -1,8 +1,9 @@
 ﻿--[[
 Title: WorldShareMod
-Author(s):  Big
-Date: 2017.4.17
-Desc: 
+Author(s): big
+CreateDate: 2017.04.17
+ModifyDate: 2021.09.17
+Desc:
 use the lib:
 ------------------------------------------------------------
 NPL.load('(gl)Mod/WorldShare/main.lua')
