@@ -539,7 +539,9 @@ function MainLogin:ShowExtra()
         top,
         '_rb',
         false,
-        0
+        0,
+        nil,
+        false
     )
     
 end

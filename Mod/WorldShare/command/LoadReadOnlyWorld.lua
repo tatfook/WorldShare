@@ -1,30 +1,31 @@
 --[[
 Title: load read only world command
 Author(s): big
-Date: 2020/9/25
+CreateDate: 2020.09.25
+ModifyDate: 2021.09.17
 Desc: 
 use the lib:
 ------------------------------------------------------------
-local LoadReadOnlyWorldCommand = NPL.load("(gl)Mod/WorldShare/command/LoadReadOnlyWorldCommand.lua")
+local LoadReadOnlyWorldCommand = NPL.load('(gl)Mod/WorldShare/command/LoadReadOnlyWorldCommand.lua')
 -------------------------------------------------------
 ]]
 
 -- load lib
-local CmdParser = commonlib.gettable("MyCompany.Aries.Game.CmdParser")
-local Commands = commonlib.gettable("MyCompany.Aries.Game.Commands")
-local CommandManager = commonlib.gettable("MyCompany.Aries.Game.CommandManager")
+local CmdParser = commonlib.gettable('MyCompany.Aries.Game.CmdParser')
+local Commands = commonlib.gettable('MyCompany.Aries.Game.Commands')
+local CommandManager = commonlib.gettable('MyCompany.Aries.Game.CommandManager')
 
 -- UI
-local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
+local CommonLoadWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/CommonLoadWorld.lua')
 
 local LoadReadOnlyWorldCommand = NPL.export()
 
 function LoadReadOnlyWorldCommand:Init()
     local loadreadonlyworld = {
-        name="loadreadonlyworld", 
-        quick_ref="/loadreadonlyworld [project_id]", 
+        name='loadreadonlyworld', 
+        quick_ref='/loadreadonlyworld [project_id]', 
         desc=[[]],
-        mode_deny = "",
+        mode_deny = '',
         handler = function(cmd_name, cmd_text, cmd_params)
             local options;
             options, cmd_text = CmdParser.ParseOptions(cmd_text)
@@ -40,7 +41,7 @@ function LoadReadOnlyWorldCommand:Init()
                     return false
                 end
 
-                UserConsole:HandleWorldId(projectId, true)
+                CommonLoadWorld:EnterWorldById(projectId, true)
             end
         end,
     }

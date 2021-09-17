@@ -283,14 +283,14 @@ function SyncMain:SyncToDataSourceByWorldName(worldName, callback)
 end
 
 function SyncMain:SyncToDataSource(callback)
+    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+
     local function Handle()
         -- close the notice
         Mod.WorldShare.MsgBox:Close()
     
-        local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
-    
         if not currentWorld.worldpath or currentWorld.worldpath == '' then
-            return false
+            return
         end
     
         local syncInstance = SyncToDataSource:Init(function(result, option)
@@ -311,7 +311,7 @@ function SyncMain:SyncToDataSource(callback)
                             end
                         end)
     
-                        return false
+                        return
                     end
     
                     GameLogic.AddBBS(nil, option, 3000, '255 0 0')
@@ -320,24 +320,24 @@ function SyncMain:SyncToDataSource(callback)
                 if type(option) == 'table' then
                     if option.method == 'UPDATE-PROGRESS' then
                         Progress:UpdateDataBar(option.current, option.total, option.msg)
-                        return false
+                        return
                     end
     
                     if option.method == 'UPDATE-PROGRESS-FAIL' then
                         Progress:SetFinish(true)
                         Progress:ClosePage()
                         GameLogic.AddBBS(nil, option.msg, 3000, '255 0 0')
-                        return false
+                        return
                     end
     
                     if option.method == 'UPDATE-PROGRESS-FINISH' then
                         Progress:SetFinish(true)
                         Progress:UpdateDataBar(1, 1, L'处理完成')
-                        return false
+                        return
                     end
                 end
             end
-    
+
             if type(callback) == 'function' then
                 callback(result, option)
             end
@@ -355,11 +355,31 @@ function SyncMain:SyncToDataSource(callback)
         local dataCount = #data
 
         if dataCount >= 3 then
-            GameLogic.IsVip('Limit3Worlds', true, function(result)
-                if result then
+            if dataCount == 3 then
+                local isModify = false
+
+                for key, item in ipairs(data) do
+                    if item.projectId == currentWorld.kpProjectId then
+                        isModify = true
+                    end
+                end
+
+                if not isModify then
+                    GameLogic.IsVip('Limit3Worlds', true, function(result)
+                        if result then
+                            self:CheckWorldSize(Handle)
+                        end
+                    end)
+                else
                     self:CheckWorldSize(Handle)
                 end
-            end)
+            else
+                GameLogic.IsVip('Limit3Worlds', true, function(result)
+                    if result then
+                        self:CheckWorldSize(Handle)
+                    end
+                end)
+            end
         else
             self:CheckWorldSize(Handle)
         end
