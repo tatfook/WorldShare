@@ -119,11 +119,15 @@ KeepworkServicePermission.AllLocalAuth = {
     },
     LimitUserOpenShareWorld = {
         key = 'limit_user_open_share_world',
-        desc = L'免费用户不能打开别人的世界'
+        desc = L'免费用户不能打开别人的世界',
+        role = {
+            'student',
+            'vip'
+        }
     }
 }
 
-function KeepworkServicePermission:GetAllLocalAuth(authName)
+function KeepworkServicePermission:GetLocalAuthKey(authName)
     if self.AllLocalAuth[authName] then
         return self.AllLocalAuth[authName].key
     end
@@ -131,7 +135,7 @@ function KeepworkServicePermission:GetAllLocalAuth(authName)
     return
 end
 
-function KeepworkServicePermission:GetAuth(authName)
+function KeepworkServicePermission:GetAuthKey(authName)
     if self.AllAuth[authName] then
         return self.AllAuth[authName].key
     end
@@ -139,7 +143,7 @@ function KeepworkServicePermission:GetAuth(authName)
     return
 end
 
-function KeepworkServicePermission:GetAllLocalDesc(authName)
+function KeepworkServicePermission:GetLocalAuthDesc(authName)
     if self.AllLocalAuth[authName] then
         return self.AllLocalAuth[authName].desc
     end
@@ -155,23 +159,62 @@ function KeepworkServicePermission:GetAuthDesc(authName)
     return L'马上开通会员激活功能'
 end
 
+function KeepworkServicePermission:GetLocalAuthRole(authName)
+    if self.AllLocalAuth[authName] then
+        return self.AllLocalAuth[authName].role
+    end
+
+    return
+end
+
 function KeepworkServicePermission:Authentication(authName, callback)
     -- check permission locally for VIP permission
-    if self:GetAllLocalAuth(authName) then
-        if Mod.WorldShare.Store:Get('user/isVip') then
-            if callback and type(callback) == 'function' then
-                callback(true, self:GetAllLocalAuth(authName), self:GetAllLocalDesc(authName))
+    if self:GetLocalAuthKey(authName) then
+        local localAuthRole = self:GetLocalAuthRole(authName)
+
+        if localAuthRole and
+           type(localAuthRole) == 'table' and
+           #localAuthRole > 0 then
+            for _, item in pairs(localAuthRole) do
+                if item == 'vip' then
+                    if Mod.WorldShare.Store:Get('user/isVip') then
+                        callback(true, self:GetLocalAuthKey(authName), self:GetLocalAuthDesc(authName))
+                        return
+                    end
+                elseif item == 'student' then
+                    local userType = Mod.WorldShare.Store:Get('user/userType')
+
+                    if userType.student then
+                        callback(true, self:GetLocalAuthKey(authName), self:GetLocalAuthDesc(authName))
+                        return
+                    end
+                elseif item == 'teacher' then
+                    local userType = Mod.WorldShare.Store:Get('user/userType')
+
+                    if userType.teacher then
+                        callback(true, self:GetLocalAuthKey(authName), self:GetLocalAuthDesc(authName))
+                        return
+                    end
+                end
             end
+
+            callback(false, self:GetLocalAuthKey(authName), self:GetLocalAuthDesc(authName))
         else
-            if callback and type(callback) == 'function' then
-                callback(false, self:GetAllLocalAuth(authName), self:GetAllLocalDesc(authName))
+            if Mod.WorldShare.Store:Get('user/isVip') then
+                if callback and type(callback) == 'function' then
+                    callback(true, self:GetLocalAuthKey(authName), self:GetLocalAuthDesc(authName))
+                end
+            else
+                if callback and type(callback) == 'function' then
+                    callback(false, self:GetLocalAuthKey(authName), self:GetLocalAuthDesc(authName))
+                end
             end
         end
 
         return
     end
 
-    if not self:GetAuth(authName) then
+    if not self:GetAuthKey(authName) then
         if authName == '' or authName == 'Vip' then -- Vip
             if Mod.WorldShare.Store:Get('user/isVip') then
                 if callback and type(callback) == 'function' then
@@ -208,21 +251,21 @@ function KeepworkServicePermission:Authentication(authName, callback)
     end
 
     KeepworkPermissionsApi:Check(
-        self:GetAuth(authName),
+        self:GetAuthKey(authName),
         function(data, err)
             if data and data.data == true then
                 if callback and type(callback) == 'function' then
-                    callback(true, self:GetAuth(authName), self:GetAuthDesc(authName))
+                    callback(true, self:GetAuthKey(authName), self:GetAuthDesc(authName))
                 end
             else
                 if callback and type(callback) == 'function' then
-                    callback(false, self:GetAuth(authName), self:GetAuthDesc(authName))
+                    callback(false, self:GetAuthKey(authName), self:GetAuthDesc(authName))
                 end
             end
         end,
         function(data, err)
             if callback and type(callback) == 'function' then
-                callback(false, self:GetAuth(authName), self:GetAuthDesc(authName))
+                callback(false, self:GetAuthKey(authName), self:GetAuthDesc(authName))
             end
         end
     )
