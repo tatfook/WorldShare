@@ -640,6 +640,7 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                 if (not username or
                     username ~= data.username) and
                     not self.freeUserVerified then
+
                     if System.options.useFreeworldWhitelist or
                        System.options.maxFreeworldUploadCount then
                         if not self:IdsFilter(pid) then
@@ -648,13 +649,19 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                                     return
                                 end
 
-                                self.isVisiblityVerified = true
+                                self.freeUserVerified = true
 
                                 HandleVerified()
                             end)
                             return
                         end
                     end
+
+                    self.freeUserVerified = true
+
+                    HandleVerified()
+
+                    return
                 end
 
                 -- private world verfied
