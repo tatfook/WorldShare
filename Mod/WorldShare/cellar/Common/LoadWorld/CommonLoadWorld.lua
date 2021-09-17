@@ -570,18 +570,6 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
             Mod.WorldShare.MsgBox:Close()
             fetchSuccess = true
 
-            local username = Mod.WorldShare.Store:Get('user/username')
-
-            if not username or username ~= data.username then
-                if System.options.useFreeworldWhitelist or
-                   System.options.maxFreeworldUploadCount then
-                    if not self:IdsFilter(pid) then
-                        _guihelper.MessageBox(L'您不能进入此类世界。')
-                        return
-                    end
-                end
-            end
-
             if err == 0 then
                 local cacheWorldInfo = CacheProjectId:GetProjectIdInfo(pid)
 
@@ -642,9 +630,34 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                 self.instituteVerified = false
                 self.encodeWorldVerified = false
                 self.encryptWorldVerified = false
+                self.freeUserVerified = false
             end
 
             local function HandleVerified()
+                -- free user verifed
+                local username = Mod.WorldShare.Store:Get('user/username')
+
+                if (not username or
+                    username ~= data.username) and
+                    not self.freeUserVerified then
+                    if System.options.useFreeworldWhitelist or
+                       System.options.maxFreeworldUploadCount then
+                        if not self:IdsFilter(pid) then
+                            GameLogic.IsVip('LimitUserOpenShareWorld', true, function(result)
+                                if not result then
+                                    return
+                                end
+
+                                self.isVisiblityVerified = true
+
+                                HandleVerified()
+                            end)
+                            return
+                        end
+                    end
+                end
+
+                -- private world verfied
                 if data.visibility == 1 and
                    not self.isVisiblityVerified then
                     if not KeepworkServiceSession:IsSignedIn() then
