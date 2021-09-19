@@ -111,7 +111,12 @@ KeepworkServicePermission.AllLocalAuth = {
     },
     Limit3Worlds = {
         key = 'limit_3_worlds',
-        desc = L'免费用户只能分享3个世界'
+        desc = L'免费用户只能分享3个世界',
+        role = {
+            'student',
+            'teacher',
+            'vip'
+        }
     },
     LimitWorldSize10Mb = {
         key = 'limit_world_size_10_mb',
@@ -122,6 +127,7 @@ KeepworkServicePermission.AllLocalAuth = {
         desc = L'免费用户不能打开别人的世界',
         role = {
             'student',
+            'teacher',
             'vip'
         }
     }
