@@ -2,7 +2,7 @@
 Title: SyncMain
 Author(s): big
 CreateDate: 2017.04.17
-ModifyDate: 2021.09.10
+ModifyDate: 2021.09.20
 Desc: 
 use the lib:
 ------------------------------------------------------------
@@ -355,30 +355,22 @@ function SyncMain:SyncToDataSource(callback)
         local dataCount = #data
 
         if dataCount >= 3 then
-            if dataCount == 3 then
-                local isModify = false
+            local isModify = false
 
-                for key, item in ipairs(data) do
-                    if item.projectId == currentWorld.kpProjectId then
-                        isModify = true
-                    end
+            for key, item in ipairs(data) do
+                if item.projectId == currentWorld.kpProjectId then
+                    isModify = true
                 end
+            end
 
-                if not isModify then
-                    GameLogic.IsVip('Limit3Worlds', true, function(result)
-                        if result then
-                            self:CheckWorldSize(Handle)
-                        end
-                    end)
-                else
-                    self:CheckWorldSize(Handle)
-                end
-            else
+            if not isModify then
                 GameLogic.IsVip('Limit3Worlds', true, function(result)
                     if result then
                         self:CheckWorldSize(Handle)
                     end
                 end)
+            else
+                self:CheckWorldSize(Handle)
             end
         else
             self:CheckWorldSize(Handle)
