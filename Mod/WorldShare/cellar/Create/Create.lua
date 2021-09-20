@@ -334,12 +334,8 @@ function Create:EnterWorld(index, skip)
     end
 
     -- share world step
-    if ShareTypeWorld:IsSharedWorld(currentSelectedWorld) and not skip then
-        GameLogic.IsVip('LimitUserOpenShareWorld', true, function(result)
-            if not result then
-                return
-            end
-
+    if ShareTypeWorld:IsSharedWorld(currentSelectedWorld) and not self.shareWorldVerified then
+        local function Handle()
             if not KeepworkServiceSession:IsSignedIn() then
                 LoginModal:CheckSignedIn(L'此世界为多人世界，请先登录', function(bIsSuccessed)
                     if bIsSuccessed then
@@ -383,7 +379,8 @@ function Create:EnterWorld(index, skip)
                             if currentSelectedWorld.level == 2 then
                                 -- check ouccupy
                                 ShareTypeWorld:Lock(currentSelectedWorld, function()
-                                    self:EnterWorld(index, true)
+                                    self.shareWorldVerified = true
+                                    self:EnterWorld(index)
                                 end)
                             else
                                 -- download world and encrypted world
@@ -405,7 +402,21 @@ function Create:EnterWorld(index, skip)
                     )
                 end)
             end
-        end)
+        end
+
+        local username = Mod.WorldShare.Store:Get('user/username') 
+
+        if username == currentSelectedWorld.user.username then
+            Handle()
+        else
+            GameLogic.IsVip('LimitUserOpenShareWorld', true, function(result)
+                if not result then
+                    return
+                end
+
+                Handle()
+            end)
+        end
 
         return
     end
@@ -532,6 +543,7 @@ function Create:EnterWorld(index, skip)
         end)
     end
 
+    self.shareWorldVerified = false
     self.vipVerified = false
     self.instituteVerified = false
 end
