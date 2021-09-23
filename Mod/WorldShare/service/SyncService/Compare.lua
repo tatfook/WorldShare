@@ -145,22 +145,6 @@ function Compare:CompareRevision()
     GitService:GetWorldRevision(worldTag.kpProjectId, true, HandleRevision)
 end
 
-function Compare:UpdateSelectWorldInCurrentWorldList(worldName, remoteRevision)
-    -- local currentWorldList = Mod.WorldShare.Store:Get('world/compareWorldList')
-
-    -- if not currentWorldList or not worldName then
-    --     return false
-    -- end
-
-    -- for key, item in ipairs(currentWorldList) do
-    --     if item.worldName == worldName then
-    --         item.revision = remoteRevision
-    --     end
-    -- end
-
-    -- Mod.WorldShare.Store:Set('world/compareWorldList', currentWorldList)
-end
-
 function Compare:GetCurrentWorldInfo(callback)
     local currentWorld
 

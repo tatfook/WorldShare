@@ -262,6 +262,12 @@ function Create:EnterWorld(index, skip)
         return
     end
 
+    -- zip file
+    if currentSelectedWorld.is_zip then
+        Game.Start(currentSelectedWorld.worldpath)
+        return
+    end
+
     -- check world
     if currentSelectedWorld.status ~= 2 then
         if not LocalServiceWorld:CheckWorldIsCorrect(currentSelectedWorld) then
@@ -508,7 +514,7 @@ function Create:EnterWorld(index, skip)
             return
         end
 
-        Mod.WorldShare.MsgBox:Show(L'请稍候...')
+        Mod.WorldShare.MsgBox:Wait()
         Compare:Init(currentWorld.worldpath, function(result)
             Mod.WorldShare.MsgBox:Close()
 
@@ -517,7 +523,7 @@ function Create:EnterWorld(index, skip)
                     if result == 'SYNC' then
                         SyncMain:BackupWorld()
 
-                        Mod.WorldShare.MsgBox:Show(L'请稍候...')
+                        Mod.WorldShare.MsgBox:Wait()
 
                         SyncMain:SyncToLocalSingle(function(result, option)
                             Mod.WorldShare.MsgBox:Close()

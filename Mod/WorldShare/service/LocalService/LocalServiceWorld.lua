@@ -48,10 +48,18 @@ function LocalServiceWorld:GetWorldList()
                 else
                     filterLocalWorlds[#filterLocalWorlds + 1] = item
                 end
+            else
+                if not item.IsFolder then
+                    filterLocalWorlds[#filterLocalWorlds + 1] = item
+                end
             end
         else
             if item and item.foldername and not string.match(item.foldername, "_main$") then
                 filterLocalWorlds[#filterLocalWorlds + 1] = item
+            else
+                if not item.IsFolder then
+                    filterLocalWorlds[#filterLocalWorlds + 1] = item
+                end
             end
         end
     end
@@ -96,10 +104,13 @@ function LocalServiceWorld:GetWorldList()
             instituteVipEnabled = tag.instituteVipEnabled
             parentProjectId = tag.parentProjectId
         else
-            foldername = value.Title
-            Title = value.Title
-            text = value.Title
-            
+            local zipFilename = string.match(value.worldpath, '/([^/.]+)%.zip$')
+            zipFilename = commonlib.Encoding.DefaultToUtf8(zipFilename)
+
+            foldername = zipFilename
+            Title = zipFilename
+            text = zipFilename
+
             is_zip = true
         end
 
