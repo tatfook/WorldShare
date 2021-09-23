@@ -69,7 +69,7 @@ Config.qiniuList = {
 }
 
 Config.qiniuGitZip = {
-  ONLINE = 'http://qiniu-gitzip.keepwork.com',
+  ONLINE = 'https://qiniu-gitzip.keepwork.com',
   STAGE = 'http://qiniu-gitzip-dev.keepwork.com',
   RELEASE = 'http://qiniu-gitzip-dev.keepwork.com',
   LOCAL = 'http://qiniu-gitzip-dev.keepwork.com'

@@ -321,7 +321,7 @@ function Utils:GetCurrentTime(isUTC)
     end
 end
 
--- 0000-00-00 00-00
+-- 0000-00-00 00-00 --> 000000000
 function Utils:UnifiedTimestampFormat(data)
     if not data then
         return 0
@@ -368,7 +368,7 @@ function Utils:UnifiedTimestampFormat(data)
     end
 end
 
--- 0000-00-00 00:00:00
+-- 0000-00-00 00:00:00 --> 000000000
 function Utils:DatetimeToTimestamp(str)
     local years = string.match(str or "", "^(%d+)-")
     local months = string.match(str or "", "-(%d+)-")
@@ -381,6 +381,11 @@ function Utils:DatetimeToTimestamp(str)
     local timestamp = os.time{ year = years, month = months, day = days, hour = hours, min = minutes, sec = seconds }
 
     return timestamp or 0
+end
+
+-- 000000000 --> 0000-00-00 00:00:00
+function Utils:TimestampToDatetime(timestamp)
+    return os.date("%Y-%m-%d %H:%M:%S", timestamp)
 end
 
 -- open a keepwork url with keepwork token

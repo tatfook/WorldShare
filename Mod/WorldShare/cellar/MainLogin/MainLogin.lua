@@ -2,7 +2,7 @@
 Title: Main Login
 Author: big  
 CreateDate: 2019.12.25
-ModifyDate: 2021.07.08
+ModifyDate: 2021.7.8
 place: Foshan
 Desc: 
 use the lib:
@@ -21,6 +21,7 @@ local SessionsData = NPL.load('(gl)Mod/WorldShare/database/SessionsData.lua')
 -- bottles
 local Create = NPL.load('(gl)Mod/WorldShare/cellar/Create/Create.lua')
 local UserInfo = NPL.load('(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua')
+local RedSummerCampMainPage = NPL.load('(gl)script/apps/Aries/Creator/Game/Tasks/RedSummerCamp/RedSummerCampMainPage.lua')
 
 local AccountManager = commonlib.gettable('Mod.Offline.AccountManager')
 
@@ -1147,37 +1148,11 @@ function MainLogin:Next(isOffline)
         return
     end
 
-    if true then
-        if System.options.loginmode == 'offline' then
-            Create:Show()
-        else
-            self:Close()
-            local RedSummerCampMainPage = NPL.load('(gl)script/apps/Aries/Creator/Game/Tasks/RedSummerCamp/RedSummerCampMainPage.lua')
-            RedSummerCampMainPage.Show()
-        end
-
-        return
-    end
-
-    if System.options.loginmode ~= 'offline' then
-        -- close at on world load
-        Mod.WorldShare.MsgBox:Show(L'请稍候...', 12000)
-    end
-    local IsSummerUser = Mod.WorldShare.Utils.IsSummerUser()
-    if KeepworkServiceSession:GetUserWhere() == 'HOME' then
-        if IsSummerUser then
-            GameLogic.RunCommand(format('/loadworld -s -force %s', Mod.WorldShare.Utils:GetConfig('campWorldId')))
-            return 
-        end
-        GameLogic.RunCommand(format('/loadworld -s -force %s', Mod.WorldShare.Utils:GetConfig('homeWorldId')))
-    elseif KeepworkServiceSession:GetUserWhere() == 'SCHOOL' then
-        if IsSummerUser then
-            GameLogic.RunCommand(format('/loadworld -s -force %s', Mod.WorldShare.Utils:GetConfig('campWorldId')))
-            return 
-        end
-        GameLogic.RunCommand(format('/loadworld -s -force %s', Mod.WorldShare.Utils:GetConfig('schoolWorldId')))
+    if System.options.loginmode == 'offline' then
+        AccountManager:ShowActivationPage()
     else
-        GameMainLogin:next_step({IsLoginModeSelected = true})
+        self:Close()
+        RedSummerCampMainPage.Show()
     end
 end
 

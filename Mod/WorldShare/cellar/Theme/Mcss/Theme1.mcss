@@ -1,11 +1,12 @@
 --[[
 Title: Theme1
-Author(s):  big
-Date:  2020.10.27
+Author(s): big
+CreateDate: 2020.10.27
+ModifyDate: 2021.09.23
 Desc: 
 use the lib:
 ------------------------------------------------------------
-local Theme1 = NPL.load("(gl)Mod/WorldShare/cellar/Theme/Mcss/Main.lua")
+<style type='type/mcss' src='Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss'></style>
 ------------------------------------------------------------
 ]]
 
@@ -14,54 +15,57 @@ local Theme1 = NPL.load("(gl)Mod/WorldShare/cellar/Theme/Mcss/Main.lua")
         height = 40,
     },
     theme1_green_button = {
-        background = "Texture/Aries/Creator/keepwork/worldshare_32bits.png#673 198 38 64:12 10 12 15",
-        ["text-offset-y"] = -2,
+        background = 'Texture/Aries/Creator/keepwork/worldshare_32bits.png#673 198 38 64:12 10 12 15',
+        ['text-offset-y'] = -2,
     },
     theme1_baby_bule_button = {
-        background = "Texture/Aries/Creator/keepwork/worldshare_32bits.png#720 209 38 40:12 10 12 13",
-        ["text-offset-y"] = -2,
-        color = "#000000",
+        background = 'Texture/Aries/Creator/keepwork/worldshare_32bits.png#720 209 38 40:12 10 12 13',
+        ['text-offset-y'] = -2,
+        color = '#000000',
     },
     theme1_lime_button = {
-        background = "Texture/Aries/Creator/keepwork/worldshare_32bits.png#765 209 38 40:12 10 12 13",
-        ["text-offset-y"] = -2,
-        ["text-offset-x"] = -1,
+        background = 'Texture/Aries/Creator/keepwork/worldshare_32bits.png#765 209 38 40:12 10 12 13',
+        ['text-offset-y'] = -2,
+        ['text-offset-x'] = -1,
+    },
+    theme1_yellow_button = {
+        background = 'Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#15 113 66 64:20 0 20 0',
     },
     theme1_orange_button = {
-        background = "Texture/Aries/Creator/keepwork/worldshare_32bits.png#576 198 38 64:12 10 12 15",
-        ["text-offset-y"] = -2,
+        background = 'Texture/Aries/Creator/keepwork/worldshare_32bits.png#576 198 38 64:12 10 12 15',
+        ['text-offset-y'] = -2,
     },
     theme1_gray_button = {
-        background = "Texture/Aries/Creator/keepwork/worldshare_32bits.png#624 198 38 64:12 10 12 15",
+        background = 'Texture/Aries/Creator/keepwork/worldshare_32bits.png#624 198 38 64:12 10 12 15',
         ['text-offset-y'] = -2,
     },
     theme1_gray2_button = {
-        background = "Texture/Aries/Creator/keepwork/explorer_32bits.png#225 127 36 28:6 5 7 6",
-        ["text-offset-y"] = -2,
+        background = 'Texture/Aries/Creator/keepwork/explorer_32bits.png#225 127 36 28:6 5 7 6',
+        ['text-offset-y'] = -2,
     },
     theme1_black_button = {
-        background = "Texture/Aries/Creator/keepwork/worldshare_32bits.png#904 205 36 42:11 11 12 11",
+        background = 'Texture/Aries/Creator/keepwork/worldshare_32bits.png#904 205 36 42:11 11 12 11',
         ['text-offset-y'] = -2,
-        color = "#ffffff",
+        color = '#ffffff',
     },
     theme1_white_textfield = {
-        background = "Texture/Aries/Creator/keepwork/explorer_32bits.png#198 132 16 16:4 4 4 4",
-        textcolor = "#000000",
+        background = 'Texture/Aries/Creator/keepwork/explorer_32bits.png#198 132 16 16:4 4 4 4',
+        textcolor = '#000000',
         padding = 0,
     }
     theme1_white1_textfield = {
-        background = "Texture/Aries/Creator/keepwork/explorer_32bits.png#205 162 32 16:5 5 5 5",
-        textcolor = "#000000",
+        background = 'Texture/Aries/Creator/keepwork/explorer_32bits.png#205 162 32 16:5 5 5 5',
+        textcolor = '#000000',
     },
     theme1_black_textfield = {
-        background = "Texture/Aries/Creator/keepwork/worldshare_32bits.png#477 182 16 16:4 4 4 4",
-        textcolor = "#ffffff",
+        background = 'Texture/Aries/Creator/keepwork/worldshare_32bits.png#477 182 16 16:4 4 4 4',
+        textcolor = '#ffffff',
     },
     theme1_gray_container_background = {
-        background = "Texture/Aries/Creator/keepwork/worldshare_32bits.png#660 273 32 32:8 8 8 8",
+        background = 'Texture/Aries/Creator/keepwork/worldshare_32bits.png#660 273 32 32:8 8 8 8',
     },
     theme1_gray_image_mask = {
         position = 'relative',
-        background = "Texture/Aries/Creator/keepwork/worldshare_32bits.png#614 273 32 32:8 8 8 8",
+        background = 'Texture/Aries/Creator/keepwork/worldshare_32bits.png#614 273 32 32:8 8 8 8',
     }
 }

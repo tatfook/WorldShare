@@ -261,6 +261,7 @@ function CommonLoadWorld:IdsFilter(id)
     return false
 end
 
+-- @param refreshMode: nil|"auto"|"check"|"never"|"force".  
 function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
     if not pid then
         return
@@ -282,189 +283,192 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
             return false
         end
 
-        local function LoadWorld(world, refreshMode)
-            if world then
-                -- encrypt mode load world
-                if self.encryptWorldMode then
-                    local localWorldFile = world:GetLocalFileName() or ''
-                    local encryptWorldFile = string.match(localWorldFile, '(.+)%.zip$') .. '.pkg'
+        local function LoadWorld(world, refreshMode) -- refreshMode(force or never)
+            if not world then
+                LOG.std(nil, 'warn', 'CommonLoadWorld:EnterWorldById', 'LoadWorld failed: world is nil')
+                return
+            end
 
-                    local encryptWorldFileExist = false
+            -- encrypt mode load world
+            if self.encryptWorldMode then
+                local localWorldFile = world:GetLocalFileName() or ''
+                local encryptWorldFile = string.match(localWorldFile, '(.+)%.zip$') .. '.pkg'
 
-                    if ParaIO.DoesFileExist(encryptWorldFile) then
-                        encryptWorldFileExist = true     
-                    end
+                local encryptWorldFileExist = false
 
-                    -- TODO: never and auto
-                    if encryptWorldFileExist then
-                        Game.Start(encryptWorldFile)
-                    end
-
-                    if not encryptWorldFileExist or
-                       refreshMode == 'force' then
-                        if ParaIO.DoesFileExist(encryptWorldFile) then
-                            ParaIO.DeleteFile(encryptWorldFile)    
-                        end
-
-                        if ParaIO.DoesFileExist(localWorldFile) then
-                            ParaIO.DeleteFile(localWorldFile)
-                        end
-
-                        DownloadWorld.ShowPage(url)
-
-                        world:DownloadRemoteFile(function(bSucceed, msg)
-                            DownloadWorld.Close()
-
-                            if bSucceed then
-                                if not ParaIO.DoesFileExist(localWorldFile) then
-                                    _guihelper.MessageBox(format(L'下载世界失败，请重新尝试几次（项目ID：%d）', pid))
-
-                                    LOG.std(nil, 'warn', 'CommandLoadWorld', 'Invalid downloaded file not exist: %s', localWorldFile)
-
-                                    return
-                                end
-
-                                ParaAsset.OpenArchive(localWorldFile, true)
-                                
-                                local output = {}
-
-                                commonlib.Files.Find(output, "", 0, 500, ":worldconfig.txt", localWorldFile)
-
-                                if #output == 0 then
-                                    _guihelper.MessageBox(format(L'下载的世界已损坏，请重新尝试几次（项目ID：%d）', pid))
-
-                                    LOG.std(nil, 'warn', 'CommandLoadWorld', 'Invalid downloaded file will be deleted: %s', localWorldFile)
-
-                                    ParaIO.DeleteFile(localWorldFile)
-
-                                    ParaAsset.CloseArchive(localWorldFile)
-
-                                    return
-                                end
-
-                                ParaAsset.CloseArchive(localWorldFile)
-    
-                                LocalServiceWorld:EncryptWorld(localWorldFile, encryptWorldFile)
-
-                                if not ParaEngine.GetAppCommandLineByParam('save_origin_zip', nil) then
-                                    ParaIO.DeleteFile(localWorldFile)
-                                end
-
-                                if ParaIO.DoesFileExist(encryptWorldFile) then
-                                    Game.Start(encryptWorldFile)
-                                end
-                            else
-                                if tryTimes > 0 then
-                                    MainLogin:Close()
-
-                                    local CreatePage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Create')
-
-                                    if not CreatePage then
-                                        Create:Show()
-                                    end
-                                    return
-                                end
-
-                                local cdnArchiveUrl = GitKeepworkService:GetCdnArchiveUrl(
-                                                        worldInfo.worldName,
-                                                        worldInfo.username,
-                                                        worldInfo.commitId
-                                                      )
-
-                                HandleLoadWorld(cdnArchiveUrl, worldInfo)
-                                tryTimes = tryTimes + 1
-                            end
-                        end)
-                    end
-
-                    return
+                if ParaIO.DoesFileExist(encryptWorldFile) then
+                    encryptWorldFileExist = true     
                 end
 
-                -- zip mode load world
                 if refreshMode == 'never' then
                     if not LocalService:IsFileExistInZip(world:GetLocalFileName(), ":worldconfig.txt") then
                         refreshMode = 'force'
                     end
                 end
 
-                DownloadWorld.ShowPage(url)
+                if encryptWorldFileExist and refreshMode ~= 'force' then
+                    Game.Start(encryptWorldFile)
+                    return
+                end
 
-                local mytimer = commonlib.Timer:new(
-                    {
-                        callbackFunc = function(timer)
-                            InternetLoadWorld.LoadWorld(
-                                world,
-                                nil,
-                                refreshMode or 'auto',
-                                function(bSucceed, localWorldPath)
-                                    DownloadWorld.Close()
+                if not encryptWorldFileExist or
+                   refreshMode == 'force' then
+                    if ParaIO.DoesFileExist(encryptWorldFile) then
+                        ParaIO.DeleteFile(encryptWorldFile)    
+                    end
 
-                                    if not bSucceed then
-                                        if tryTimes > 0 then
-                                            MainLogin:Close()
-        
-                                            local CreatePage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Create')
-        
-                                            if not CreatePage then
-                                                Create:Show()
-                                            end
-                                            return true -- always return true
+                    if ParaIO.DoesFileExist(localWorldFile) then
+                        ParaIO.DeleteFile(localWorldFile)
+                    end
+
+                    DownloadWorld.ShowPage(url)
+
+                    world:DownloadRemoteFile(function(bSucceed, msg)
+                        DownloadWorld.Close()
+
+                        if bSucceed then
+                            if not ParaIO.DoesFileExist(localWorldFile) then
+                                _guihelper.MessageBox(format(L'下载世界失败，请重新尝试几次（项目ID：%d）', pid))
+
+                                LOG.std(nil, 'warn', 'CommandLoadWorld', 'Invalid downloaded file not exist: %s', localWorldFile)
+
+                                return
+                            end
+
+                            ParaAsset.OpenArchive(localWorldFile, true)
+                            
+                            local output = {}
+
+                            commonlib.Files.Find(output, "", 0, 500, ":worldconfig.txt", localWorldFile)
+
+                            if #output == 0 then
+                                _guihelper.MessageBox(format(L'下载的世界已损坏，请重新尝试几次（项目ID：%d）', pid))
+
+                                LOG.std(nil, 'warn', 'CommandLoadWorld', 'Invalid downloaded file will be deleted: %s', localWorldFile)
+
+                                ParaIO.DeleteFile(localWorldFile)
+
+                                ParaAsset.CloseArchive(localWorldFile)
+
+                                return
+                            end
+
+                            ParaAsset.CloseArchive(localWorldFile)
+
+                            LocalServiceWorld:EncryptWorld(localWorldFile, encryptWorldFile)
+
+                            if not ParaEngine.GetAppCommandLineByParam('save_origin_zip', nil) then
+                                ParaIO.DeleteFile(localWorldFile)
+                            end
+
+                            if ParaIO.DoesFileExist(encryptWorldFile) then
+                                Game.Start(encryptWorldFile)
+                            end
+                        else
+                            if tryTimes > 0 then
+                                MainLogin:Close()
+
+                                local CreatePage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Create')
+
+                                if not CreatePage then
+                                    Create:Show()
+                                end
+                                return
+                            end
+
+                            local cdnArchiveUrl = GitKeepworkService:GetCdnArchiveUrl(
+                                                    worldInfo.worldName,
+                                                    worldInfo.username,
+                                                    worldInfo.commitId
+                                                  )
+
+                            HandleLoadWorld(cdnArchiveUrl, worldInfo)
+                            tryTimes = tryTimes + 1
+                        end
+                    end)
+                end
+
+                return
+            end
+
+            -- zip mode load world
+
+            if refreshMode == 'never' then
+                if not LocalService:IsFileExistInZip(world:GetLocalFileName(), ":worldconfig.txt") then
+                    refreshMode = 'force'
+                end
+            end
+
+            DownloadWorld.ShowPage(url)
+
+            commonlib.Timer:new(
+                {
+                    callbackFunc = function(timer)
+                        InternetLoadWorld.LoadWorld(
+                            world,
+                            nil,
+                            refreshMode,
+                            function(bSucceed, localWorldPath)
+                                DownloadWorld.Close()
+
+                                if not bSucceed then
+                                    if tryTimes > 0 then
+                                        MainLogin:Close()
+    
+                                        local CreatePage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Create')
+    
+                                        if not CreatePage then
+                                            Create:Show()
                                         end
+                                        return true -- always return true
+                                    end
 
-                                        local cdnArchiveUrl = GitKeepworkService:GetCdnArchiveUrl(
-                                                                worldInfo.worldName,
-                                                                worldInfo.username,
-                                                                worldInfo.commitId
-                                                            )
+                                    local cdnArchiveUrl = GitKeepworkService:GetCdnArchiveUrl(
+                                                            worldInfo.worldName,
+                                                            worldInfo.username,
+                                                            worldInfo.commitId
+                                                        )
 
-                                        HandleLoadWorld(cdnArchiveUrl, worldInfo)
-                                        tryTimes = tryTimes + 1
-                                    else
-                                        if not ParaIO.DoesFileExist(localWorldPath) then
-                                            _guihelper.MessageBox(format(L'下载世界失败，请重新尝试几次（项目ID：%d）', pid))
+                                    HandleLoadWorld(cdnArchiveUrl, worldInfo)
+                                    tryTimes = tryTimes + 1
+                                else
+                                    if not ParaIO.DoesFileExist(localWorldPath) then
+                                        _guihelper.MessageBox(format(L'下载世界失败，请重新尝试几次（项目ID：%d）', pid))
 
-                                            LOG.std(nil, 'warn', 'CommandLoadWorld', 'Invalid downloaded file not exist: %s', localWorldPath)
+                                        LOG.std(nil, 'warn', 'CommandLoadWorld', 'Invalid downloaded file not exist: %s', localWorldPath)
 
-                                            return true -- always return true
-                                        end
+                                        return true -- always return true
+                                    end
 
-                                        ParaAsset.OpenArchive(localWorldPath, true)
-                                        
-                                        local output = {}
+                                    ParaAsset.OpenArchive(localWorldPath, true)
+                                    
+                                    local output = {}
 
-                                        commonlib.Files.Find(output, "", 0, 500, ":worldconfig.txt", localWorldPath)
+                                    commonlib.Files.Find(output, "", 0, 500, ":worldconfig.txt", localWorldPath)
 
-                                        if #output == 0 then
-                                            _guihelper.MessageBox(format(L'下载的世界已损坏，请重新尝试几次（项目ID：%d）', pid))
+                                    if #output == 0 then
+                                        _guihelper.MessageBox(format(L'下载的世界已损坏，请重新尝试几次（项目ID：%d）', pid))
 
-                                            LOG.std(nil, 'warn', 'CommandLoadWorld', 'Invalid downloaded file will be deleted: %s', localWorldPath)
+                                        LOG.std(nil, 'warn', 'CommandLoadWorld', 'Invalid downloaded file will be deleted: %s', localWorldPath)
 
-                                            ParaIO.DeleteFile(localWorldPath)
-
-                                            ParaAsset.CloseArchive(localWorldPath)
-
-                                            return true
-                                        end
+                                        ParaIO.DeleteFile(localWorldPath)
 
                                         ParaAsset.CloseArchive(localWorldPath)
 
-                                        Game.Start(localWorldPath)
+                                        return true
                                     end
 
-                                    return true -- use mod logic
-                                end
-                            )
-                        end
-                    }
-                )
+                                    ParaAsset.CloseArchive(localWorldPath)
 
-                -- prevent recursive calls.
-                mytimer:Change(1, nil)
-            else
-                _guihelper.MessageBox(
-                    format(L'无效的世界信息（项目ID：%d）', pid)
-                )
-            end
+                                    Game.Start(localWorldPath)
+                                end
+
+                                return true -- use mod logic
+                            end
+                        )
+                    end
+                }
+            ):Change(1, nil)  -- prevent recursive calls.
         end
 
         if url:match('^https?://') then
@@ -480,35 +484,51 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
 
             Mod.WorldShare.Store:Set('world/currentRemoteFile', url)
 
-            if ParaIO.DoesFileExist(fileUrl) then
-                if offlineMode then
-                    LoadWorld(world, 'never')
-                    return
-                end
+            if not ParaIO.DoesFileExist(fileUrl) then
+                LoadWorld(world, 'force')
+                return
+            end
 
+            if offlineMode then
+                LoadWorld(world, 'never')
+                return
+            end
+
+            if refreshMode == 'never' or
+               refreshMode == 'force' then
+                if refreshMode == 'never' then
+                    LoadWorld(world, 'never')
+                elseif refreshMode == 'force' then
+                    LoadWorld(world, 'force')
+                end
+            elseif not refreshMode or
+                   refreshMode == 'auto' or
+                   refreshMode == 'check' then
                 Mod.WorldShare.MsgBox:Wait()
+
                 GitService:GetWorldRevision(pid, false, function(data, err)
                     local localRevision = tonumber(LocalService:GetZipRevision(fileUrl)) or 0
                     local remoteRevision = tonumber(data) or 0
 
                     Mod.WorldShare.MsgBox:Close()
 
-                    if localRevision == 0 then
-                        LoadWorld(world, 'auto')
-
-                        return
+                    if refreshMode then
+                        if refreshMode == 'auto' then
+                            -- TODO: compare and enter world(the result is: force or never)
+                        end
+                    else
+                        if localRevision == 0 then
+                            LoadWorld(world, 'force')
+                            return
+                        end
+    
+                        if localRevision == remoteRevision then
+                            LoadWorld(world, 'never')
+                            return
+                        end
                     end
 
-                    if localRevision == remoteRevision then
-                        LoadWorld(world, 'never')
-
-                        return
-                    end
-
-					if refreshMode == 'force' then
-						LoadWorld(world, refreshMode)
-						return
-					end
+                    -- check or revision not equal
 
                     local worldName = ''
 
@@ -541,11 +561,18 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                         end
                     end
                 end)
-            else
-                LoadWorld(world, 'auto')
             end
         end
 	end
+
+    -- offline mode
+    if System.options.loginmode == 'offline' then
+        local cacheWorldInfo = CacheProjectId:GetProjectIdInfo(pid)
+
+        HandleLoadWorld(cacheWorldInfo.worldInfo.archiveUrl, cacheWorldInfo.worldInfo, true)
+
+        return
+    end
 
     -- show view over 10 seconds
     Mod.WorldShare.Utils.SetTimeOut(function()

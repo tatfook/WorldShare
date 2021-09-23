@@ -159,6 +159,12 @@ function KeepworkServiceSession:Login(account, password, callback)
     )
 end
 
+function KeepworkServiceSession:LoginDirectly(account, password, callback)
+    self:Login(account, password, function(response, err)
+        self:LoginResponse(response, err, callback)
+    end)
+end
+
 function KeepworkServiceSession:LoginAndBindThirdPartyAccount(account, password, oauthToken, callback)
     local machineCode = SessionsData:GetDeviceUUID()
     local platform

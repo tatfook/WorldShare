@@ -1,11 +1,12 @@
 --[[
 Title: Main Login Mcss
-Author(s):  big
-Date:  2021.02.25
+Author(s): big
+CreateDate: 2021.02.25
+ModifyDate: 2021.09.23
 Desc: 
 use the lib:
 ------------------------------------------------------------
-local MainLoginMcss = NPL.load("(gl)Mod/WorldShare/cellar/Theme/Mcss/MainLoginMcss.lua")
+<style type='type/mcss' src='Mod/WorldShare/cellar/Theme/Mcss/MainLoginMcss.mcss'></style>
 ------------------------------------------------------------
 ]]
 
