@@ -13,29 +13,29 @@ local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkServ
 local KeepWorkItemManager = NPL.load('(gl)script/apps/Aries/Creator/HttpAPI/KeepWorkItemManager.lua')
 
 -- service
-local KeepworkService = NPL.load("../KeepworkService.lua")
-local KpChatChannel = NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/ChatSystem/KpChatChannel.lua")
-local KeepworkServiceSchoolAndOrg = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/SchoolAndOrg.lua")
+local KeepworkService = NPL.load('../KeepworkService.lua')
+local KpChatChannel = NPL.load('(gl)script/apps/Aries/Creator/Game/Areas/ChatSystem/KpChatChannel.lua')
+local KeepworkServiceSchoolAndOrg = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/SchoolAndOrg.lua')
 local SyncServiceCompare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
 
 -- api
-local KeepworkUsersApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Users.lua")
-local KeepworkKeepworksApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/KeepworkKeepworksApi.lua")
-local KeepworkOauthUsersApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/OauthUsers.lua")
-local KeepworkSocketApi = NPL.load("(gl)Mod/WorldShare/api/Socket/Socket.lua")
-local AccountingVipCodeApi = NPL.load("(gl)Mod/WorldShare/api/Accounting/ParacraftVipCode.lua")
-local KeepworkDragonBoatApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/DragonBoatApi.lua")
+local KeepworkUsersApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/Users.lua')
+local KeepworkKeepworksApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkKeepworksApi.lua')
+local KeepworkOauthUsersApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/OauthUsers.lua')
+local KeepworkSocketApi = NPL.load('(gl)Mod/WorldShare/api/Socket/Socket.lua')
+local AccountingVipCodeApi = NPL.load('(gl)Mod/WorldShare/api/Accounting/ParacraftVipCode.lua')
+local KeepworkDragonBoatApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/DragonBoatApi.lua')
 
 -- database
-local SessionsData = NPL.load("(gl)Mod/WorldShare/database/SessionsData.lua")
+local SessionsData = NPL.load('(gl)Mod/WorldShare/database/SessionsData.lua')
 
 -- helper
-local Validated = NPL.load("(gl)Mod/WorldShare/helper/Validated.lua")
+local Validated = NPL.load('(gl)Mod/WorldShare/helper/Validated.lua')
 
 -- config
-local Config = NPL.load("(gl)Mod/WorldShare/config/Config.lua")
+local Config = NPL.load('(gl)Mod/WorldShare/config/Config.lua')
 
-local Encoding = commonlib.gettable("commonlib.Encoding")
+local Encoding = commonlib.gettable('commonlib.Encoding')
 
 local KeepworkServiceSession = NPL.export()
 
@@ -52,38 +52,38 @@ function KeepworkServiceSession:LongConnectionInit(callback)
         if not KpChatChannel.client then
             KpChatChannel.client = connection
         
-            KpChatChannel.client:AddEventListener("OnOpen", KpChatChannel.OnOpen, KpChatChannel)
-            KpChatChannel.client:AddEventListener("OnMsg", KpChatChannel.OnMsg, KpChatChannel)
-            KpChatChannel.client:AddEventListener("OnClose", KpChatChannel.OnClose, KpChatChannel)
+            KpChatChannel.client:AddEventListener('OnOpen', KpChatChannel.OnOpen, KpChatChannel)
+            KpChatChannel.client:AddEventListener('OnMsg', KpChatChannel.OnMsg, KpChatChannel)
+            KpChatChannel.client:AddEventListener('OnClose', KpChatChannel.OnClose, KpChatChannel)
         end
     
-        connection:AddEventListener("OnOpen", function(self)
+        connection:AddEventListener('OnOpen', function(self)
             local isDebugSocket = false
 
             if isDebugSocket then
-                LOG.std("KeepworkServiceSession", "debug", "LongConnectionInit", "Connected client")
+                LOG.std('KeepworkServiceSession', 'debug', 'LongConnectionInit', 'Connected client')
             end
         end, connection)
     
-        connection:AddEventListener("OnMsg", self.OnMsg, connection)
+        connection:AddEventListener('OnMsg', self.OnMsg, connection)
         connection.uiCallback = callback
         connection.inited = true
     end)
 end
 
 function KeepworkServiceSession:OnMsg(msg)
-    LOG.std("KeepworkServiceSession", "debug", "OnMsg", "data: %s", NPL.ToJson(msg.data))
+    LOG.std('KeepworkServiceSession', 'debug', 'OnMsg', 'data: %s', NPL.ToJson(msg.data))
 
     if not msg or not msg.data then
         return false
     end
 
-    if msg.data.sio_pkt_name and msg.data.sio_pkt_name == "event" then
-        if msg.data.body and msg.data.body[1] == "app/msg" then
+    if msg.data.sio_pkt_name and msg.data.sio_pkt_name == 'event' then
+        if msg.data.body and msg.data.body[1] == 'app/msg' then
 
             local connection = KeepworkSocketApi:GetConnection()
 
-            if type(connection.uiCallback) == "function" then
+            if type(connection.uiCallback) == 'function' then
                 connection.uiCallback(msg.data.body[2])
             end
         end
@@ -98,13 +98,13 @@ function KeepworkServiceSession:LoginSocket()
     local platform
 
     if System.os.GetPlatform() == 'mac' or System.os.GetPlatform() == 'win32' then
-        platform = "PC"
+        platform = 'PC'
     else
-        platform = "MOBILE"
+        platform = 'MOBILE'
     end
 
     local machineCode = SessionsData:GetDeviceUUID()
-    KeepworkSocketApi:SendMsg("app/login", { platform = platform, machineCode = machineCode })
+    KeepworkSocketApi:SendMsg('app/login', { platform = platform, machineCode = machineCode })
 end
 
 function KeepworkServiceSession:OnWorldLoad()
@@ -125,8 +125,8 @@ function KeepworkServiceSession:OnWillLeaveWorld()
 end
 
 function KeepworkServiceSession:IsSignedIn()
-    local token = Mod.WorldShare.Store:Get("user/token")
-    local bLoginSuccessed = Mod.WorldShare.Store:Get("user/bLoginSuccessed")
+    local token = Mod.WorldShare.Store:Get('user/token')
+    local bLoginSuccessed = Mod.WorldShare.Store:Get('user/bLoginSuccessed')
 
     if token ~= nil and bLoginSuccessed then
         return true
@@ -140,9 +140,9 @@ function KeepworkServiceSession:Login(account, password, callback)
     local platform
 
     if System.os.GetPlatform() == 'mac' or System.os.GetPlatform() == 'win32' then
-        platform = "PC"
+        platform = 'PC'
     else
-        platform = "MOBILE"
+        platform = 'MOBILE'
     end
 
     local params = {
@@ -160,9 +160,31 @@ function KeepworkServiceSession:Login(account, password, callback)
 end
 
 function KeepworkServiceSession:LoginDirectly(account, password, callback)
-    self:Login(account, password, function(response, err)
-        self:LoginResponse(response, err, callback)
-    end)
+    if not callback and type(callback) ~= 'function' then
+        return
+    end
+
+    self:Login(
+        account,
+        password,
+        function(response, err)
+            if err ~= 200 then
+                if response and response.code and response.message then
+                    callback(false, format(L'*%s(%d)', response.message, response.code), 'RESPONSE')
+                else
+                    if err == 0 then
+                        callback(false, format(L'*网络异常或超时，请检查网络(%d)', err), 'NETWORK')
+                    else
+                        callback(false, format(L'*系统维护中(%d)', err), 'SERVER')
+                    end
+                end
+
+                return
+            end
+
+            self:LoginResponse(response, err, callback)
+        end
+    )
 end
 
 function KeepworkServiceSession:LoginAndBindThirdPartyAccount(account, password, oauthToken, callback)
@@ -170,9 +192,9 @@ function KeepworkServiceSession:LoginAndBindThirdPartyAccount(account, password,
     local platform
 
     if System.os.GetPlatform() == 'mac' or System.os.GetPlatform() == 'win32' then
-        platform = "PC"
+        platform = 'PC'
     else
-        platform = "MOBILE"
+        platform = 'MOBILE'
     end
 
     local params = {
@@ -204,7 +226,7 @@ function KeepworkServiceSession:SetUserLevels(response, callback)
     
         if response.tLevel and response.tLevel > 0 then
             userType.teacher = true
-            Mod.WorldShare.Store:Set("user/tLevel", response.tLevel)
+            Mod.WorldShare.Store:Set('user/tLevel', response.tLevel)
         end
         
         if response.student and response.student == 1 then
@@ -219,7 +241,7 @@ function KeepworkServiceSession:SetUserLevels(response, callback)
             userType.plain = true
         end
     
-        Mod.WorldShare.Store:Set("user/userType", userType)
+        Mod.WorldShare.Store:Set('user/userType', userType)
 
         if callback and type(callback) == 'function' then
             callback()
@@ -237,29 +259,29 @@ function KeepworkServiceSession:SetUserLevels(response, callback)
 end
 
 function KeepworkServiceSession:LoginResponse(response, err, callback)
-    if err ~= 200 or type(response) ~= "table" then
-        return false
+    if err ~= 200 or type(response) ~= 'table' then
+        return
     end
 
     -- login api success ↓
-    local token = response["token"]
-    local userId = response["id"] or 0
-    local username = response["username"] or ""
-    local nickname = response["nickname"] or ""
-    local realname = response['realname'] or ""
+    local token = response['token']
+    local userId = response['id'] or 0
+    local username = response['username'] or ''
+    local nickname = response['nickname'] or ''
+    local realname = response['realname'] or ''
     local paraWorldId = response['paraWorldId'] or nil
     local isVipSchool = false
 
     if not response.realname then
-        Mod.WorldShare.Store:Set("user/isVerified", false)
+        Mod.WorldShare.Store:Set('user/isVerified', false)
     else
-        Mod.WorldShare.Store:Set("user/isVerified", true)
+        Mod.WorldShare.Store:Set('user/isVerified', true)
     end
 
     if not response.cellphone and not response.email then
-        Mod.WorldShare.Store:Set("user/isBind", false)
+        Mod.WorldShare.Store:Set('user/isBind', false)
     else
-        Mod.WorldShare.Store:Set("user/isBind", true)
+        Mod.WorldShare.Store:Set('user/isBind', true)
     end
 
     Mod.WorldShare.Store:Set('world/paraWorldId', paraWorldId)
@@ -267,9 +289,9 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
     self:SetUserLevels(response)
 
     if response.vip and response.vip == 1 then
-        Mod.WorldShare.Store:Set("user/isVip", true)
+        Mod.WorldShare.Store:Set('user/isVip', true)
     else
-        Mod.WorldShare.Store:Set("user/isVip", false)
+        Mod.WorldShare.Store:Set('user/isVip', false)
     end
 
     if response.school and response.school.isVip == 1 then
@@ -297,7 +319,9 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
                 token = token,
                 autoLogin = response.autoLogin,
                 rememberMe = response.rememberMe,
-                tokenExpire = tokenExpire
+                tokenExpire = tokenExpire,
+                isVip = Mod.WorldShare.Store:Get('user/isVip'),
+                userType = Mod.WorldShare.Store:Get('user/userType')
             }
         )
     end
@@ -308,8 +332,8 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
     -- get user orginfo
     KeepworkServiceSchoolAndOrg:GetMyAllOrgsAndSchools(function(schoolData, orgData)
         if not schoolData and not orgData then
-            if callback and type(callback) == "function" then
-                callback(false, L"获取学校或机构信息失败")
+            if callback and type(callback) == 'function' then
+                callback(false, L'获取学校或机构信息失败')
             end
             return
         end
@@ -317,11 +341,11 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
         local hasJoinedSchool = false
         local hasJoinedOrg = false
 
-        if type(schoolData) == "table" and schoolData.regionId then
+        if type(schoolData) == 'table' and schoolData.regionId then
             hasJoinedSchool = true
         end
 
-        if type(orgData) == "table" and #orgData > 0 then
+        if type(orgData) == 'table' and #orgData > 0 then
             hasJoinedOrg = true
             Mod.WorldShare.Store:Set('user/myOrg', orgData[1] or {})
 
@@ -339,20 +363,20 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
             Mod.WorldShare.Store:Set('user/hasJoinedSchool', false)
         end
 
-        local Login = Mod.WorldShare.Store:Action("user/Login")
+        local Login = Mod.WorldShare.Store:Action('user/Login')
         Login(token, userId, username, nickname, realname, isVipSchool)
 
-        GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", true)
+        GameLogic.GetFilters():apply_filters('OnKeepWorkLogin', true)
 
         -- update enter world info
         if Mod.WorldShare.Store:Get('world/isEnterWorld') then
             SyncServiceCompare:GetCurrentWorldInfo(function()
-                if callback and type(callback) == "function" then
+                if callback and type(callback) == 'function' then
                     callback(true)
                 end
             end)
         else
-            if callback and type(callback) == "function" then
+            if callback and type(callback) == 'function' then
                 callback(true)
             end
         end
@@ -375,26 +399,26 @@ function KeepworkServiceSession:Logout(mode, callback)
             }
         )
 
-        if not mode or mode ~= "KICKOUT" then
+        if not mode or mode ~= 'KICKOUT' then
             KeepworkUsersApi:Logout(function()
-                KeepworkSocketApi:SendMsg("app/logout", {})
-                local Logout = Mod.WorldShare.Store:Action("user/Logout")
+                KeepworkSocketApi:SendMsg('app/logout', {})
+                local Logout = Mod.WorldShare.Store:Action('user/Logout')
                 Logout()
                 self:ResetIndulge()
                 Mod.WorldShare.Store:Remove('user/bLoginSuccessed')
 
-                if callback and type(callback) == "function" then
+                if callback and type(callback) == 'function' then
                     callback()
                 end
             end)
         else
-            KeepworkSocketApi:SendMsg("app/logout", {})
-            local Logout = Mod.WorldShare.Store:Action("user/Logout")
+            KeepworkSocketApi:SendMsg('app/logout', {})
+            local Logout = Mod.WorldShare.Store:Action('user/Logout')
             Logout()
             self:ResetIndulge()
             Mod.WorldShare.Store:Remove('user/bLoginSuccessed')
 
-            if callback and type(callback) == "function" then
+            if callback and type(callback) == 'function' then
                 callback()
             end
         end
@@ -454,7 +478,7 @@ function KeepworkServiceSession:RegisterWithAccount(username, password, callback
                 if type(data) == 'table' and data.code then
                     callback(data)
                 else
-                    callback({ message = L"未知错误", code = err})
+                    callback({ message = L'未知错误', code = err})
                 end
             end
         end,
@@ -518,7 +542,7 @@ function KeepworkServiceSession:RegisterWithPhoneAndLogin(username, cellphone, c
                 if type(data) == 'table' and data.code then
                     callback(data)
                 else
-                    callback({ message = L"未知错误", code = err})
+                    callback({ message = L'未知错误', code = err})
                 end
             end
         end,
@@ -582,7 +606,7 @@ function KeepworkServiceSession:RegisterWithPhone(username, cellphone, cellphone
                 if type(data) == 'table' and data.code then
                     callback(data)
                 else
-                    callback({ message = L"未知错误", code = err})
+                    callback({ message = L'未知错误', code = err})
                 end
             end
         end,
@@ -664,7 +688,7 @@ function KeepworkServiceSession:Register(username, password, captcha, cellphone,
                 if type(data) == 'table' and data.code then
                     callback(data)
                 else
-                    callback({ message = L"未知错误", code = err})
+                    callback({ message = L'未知错误', code = err})
                 end
             end
         end,
@@ -725,7 +749,7 @@ function KeepworkServiceSession:RegisterAndBindThirdPartyAccount(username, passw
         end,
         function(data, err)
             if type(callback) == 'function' then
-                callback({ message = "", code = err})
+                callback({ message = '', code = err})
             end
         end,
         { 400 }
@@ -838,8 +862,8 @@ function KeepworkServiceSession:Profile(callback, token)
 end
 
 function KeepworkServiceSession:GetCurrentUserToken()
-    if Mod.WorldShare.Store:Get("user/token") then
-        return Mod.WorldShare.Store:Get("user/token")
+    if Mod.WorldShare.Store:Get('user/token') then
+        return Mod.WorldShare.Store:Get('user/token')
     end
 end
 
@@ -870,13 +894,13 @@ end
 -- return nil or user token in url protocol
 function KeepworkServiceSession:GetUserTokenFromUrlProtocol()
     local cmdline = ParaEngine.GetAppCommandLine()
-    local urlProtocol = string.match(cmdline or "", "paracraft://(.*)$")
-    urlProtocol = Encoding.url_decode(urlProtocol or "")
+    local urlProtocol = string.match(cmdline or '', 'paracraft://(.*)$')
+    urlProtocol = Encoding.url_decode(urlProtocol or '')
 
-    local usertoken = urlProtocol:match('usertoken="([%S]+)"')
+    local usertoken = urlProtocol:match('usertoken=\'([%S]+)\'')
 
     if usertoken then
-        local SetToken = Mod.WorldShare.Store:Action("user/SetToken")
+        local SetToken = Mod.WorldShare.Store:Action('user/SetToken')
         SetToken(usertoken)
     end
 
@@ -899,7 +923,7 @@ function KeepworkServiceSession:CheckTokenExpire(callback)
         local currentUser = self:LoadSigninInfo()
 
         if not currentUser or not currentUser.account or not currentUser.password then
-            if type(callback) == "function" then
+            if type(callback) == 'function' then
                 callback(false)
             end
             return false
@@ -910,14 +934,14 @@ function KeepworkServiceSession:CheckTokenExpire(callback)
             currentUser.password,
             function(response, err)
                 if err ~= 200 then
-                    if type(callback) == "function" then
+                    if type(callback) == 'function' then
                         callback(false)
                     end
                     return false
                 end
 
                 self:LoginResponse(response, err, function()
-                    if type(callback) == "function" then
+                    if type(callback) == 'function' then
                         callback(true)
                     end
                 end)
@@ -937,7 +961,7 @@ function KeepworkServiceSession:CheckTokenExpire(callback)
             return false
         end
 
-        if type(callback) == "function" then
+        if type(callback) == 'function' then
             callback(true)
         end
     end, token)
@@ -982,7 +1006,7 @@ function KeepworkServiceSession:PreventIndulge(callback)
         end
 
         -- 22:30
-        if os.date("%H:%M", currentServerTime) == '22:30' then
+        if os.date('%H:%M', currentServerTime) == '22:30' then
             if type(callback) == 'function' then
                 callback('22:30')
             end
@@ -1031,7 +1055,7 @@ function KeepworkServiceSession:CheckPhonenumberExist(phone, callback)
         return false
     end
 
-    if type(callback) ~= "function" then
+    if type(callback) ~= 'function' then
         return false
     end
 
@@ -1051,11 +1075,11 @@ function KeepworkServiceSession:CheckPhonenumberExist(phone, callback)
 end
 
 function KeepworkServiceSession:CheckUsernameExist(username, callback)
-    if type(username) ~= "string" then
+    if type(username) ~= 'string' then
         return false
     end
 
-    if type(callback) ~= "function" then
+    if type(callback) ~= 'function' then
         return false
     end
 
@@ -1075,11 +1099,11 @@ function KeepworkServiceSession:CheckUsernameExist(username, callback)
 end
 
 function KeepworkServiceSession:CheckEmailExist(email, callback)
-    if type(email) ~= "string" then
+    if type(email) ~= 'string' then
         return false
     end
 
-    if type(callback) ~= "function" then
+    if type(callback) ~= 'function' then
         return false
     end
 
@@ -1109,11 +1133,11 @@ function KeepworkServiceSession:CheckOauthUserExisted(platform, code, callback)
             end
 
             if data.username then
-                if type(callback) == "function" then
+                if type(callback) == 'function' then
                     callback(true, data)
                 end
             else
-                if type(callback) == "function" then
+                if type(callback) == 'function' then
                     callback(false, data)
                 end
             end
@@ -1121,8 +1145,8 @@ function KeepworkServiceSession:CheckOauthUserExisted(platform, code, callback)
 end
 
 function KeepworkServiceSession:GetOauthClientId(platform)
-    if type(platform) ~= "string" then
-        return ""
+    if type(platform) ~= 'string' then
+        return ''
     end
 
     return Config[platform][KeepworkService:GetEnv()].clientId
@@ -1209,10 +1233,10 @@ function KeepworkServiceSession:LoginWithPhoneNumber(cellphone, cellphoneCaptcha
 
     if System.os.GetPlatform() == 'mac' or
        System.os.GetPlatform() == 'win32' then
-        platform = "PC"
+        platform = 'PC'
     elseif System.os.GetPlatform() == 'android' or
            System.os.GetPlatform() == 'ios' then
-        platform = "MOBILE"
+        platform = 'MOBILE'
     else
         return
     end
@@ -1237,106 +1261,3 @@ function KeepworkServiceSession:CheckVerify()
         end
     end
 end
-
-
--- ⬇️ temp code ⬇️
-
--- function KeepworkServiceSession:AddRice(name)
---     if not self:IsSignedIn() then
---         return
---     end
-
---     local riceObject = SessionsData:GetUserRice()
---     local amount = 0
-
---     if riceObject.amount then
---         amount = riceObject.amount
---     end
-
---     if name == 'login' then
---         if riceObject.lastLoginDate and riceObject.lastLoginDate == os.date("%Y-%m-%d", os.time()) then
---             return
---         end
-
---         amount = amount + 3
-
---         riceObject.amount = amount
---         riceObject.lastLoginDate = os.date("%Y-%m-%d", os.time())
-
---         SessionsData:SetUserRice(riceObject)
---         self:SyncRiceToServer(3)
---     elseif name == 'thumbsup' then
---         if riceObject.lastThumbsUpDate and riceObject.lastThumbsUpDate == os.date("%Y-%m-%d", os.time()) then
---             return
---         end
-
---         amount = amount + 2
---         riceObject.lastThumbsUpDate = os.date("%Y-%m-%d", os.time())
-
---         SessionsData:SetUserRice(riceObject)
---         self:SyncRiceToServer(2)
---     elseif name == 'growup' then
---         if riceObject.lastGrowupDate and riceObject.lastGrowupDate == os.date("%Y-%m-%d", os.time()) then
---             return
---         end
-
---         amount = amount + 5
---         riceObject.lastGrowupDate = os.date("%Y-%m-%d", os.time())
-
---         SessionsData:SetUserRice(riceObject)
---         self:SyncRiceToServer(5)
---     elseif name == 'create' then
---         KeepworkServiceSession.riceMode = name
---         return
---     elseif name == 'explorer' then
---         KeepworkServiceSession.riceMode = name
---         return
---     elseif name == 'work' then
---         KeepworkServiceSession.riceMode = name
---         return
---     elseif name == 'study' then
---         KeepworkServiceSession.riceMode = name
---         return
---     end
--- end
-
--- function KeepworkServiceSession:SyncRiceToServer(riceCount)
---     KeepworkDragonBoatApi:Rice(riceCount)
--- end
-
--- function KeepworkServiceSession:StartRiceTimer()
---     self.riceTimer = commonlib.Timer:new(
---         {
---             callbackFunc = function()
---                 local riceObject = SessionsData:GetUserRice()
---                 local amount = 0
-
---                 if riceObject.amount then
---                     amount = riceObject.amount
---                 end
-
---                 riceObject.amount = amount + 5
-
---                 SessionsData:SetUserRice(riceObject)
---                 self:SyncRiceToServer(5)
---             end
---         }
---     )
-
---     local interval = 10 * 60 * 1000
-
---     self.riceTimer:Change(interval, interval)
--- end
-
--- function KeepworkServiceSession:StopRiceTimer()
---     if self.riceTimer then
---         self.riceMode = nil
---         self.riceTimer:Change(nil, nil)
---     end
--- end
-
--- function KeepworkServiceSession:GetRice()
---     local riceObject = SessionsData:GetUserRice()
-
---     return riceObject.amount or 0
--- end

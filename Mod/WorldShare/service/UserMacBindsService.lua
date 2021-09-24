@@ -14,6 +14,7 @@ local UserMacBindsApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/UserMacBindsAp
 
 -- database
 local BindDatabase = NPL.load('(gl)Mod/WorldShare/database/BindDatabase.lua')
+local SessionsData = NPL.load('(gl)Mod/WorldShare/database/SessionsData.lua')
 
 local UserMacBindsService = NPL.export()
 
@@ -135,4 +136,26 @@ end
 
 function UserMacBindsService:GetUsername()
     return BindDatabase:GetValue('username')
+end
+
+function UserMacBindsService:IsVip()
+    local session = SessionsData:GetSessionByUsername(self:GetUsername())
+
+    if session and type(session) == 'table' then
+        if session.isVip == true then
+            return true
+        else
+            return false
+        end
+    else
+        return false
+    end
+end
+
+function UserMacBindsService:GetUserType()
+    local session = SessionsData:GetSessionByUsername(self:GetUsername())
+
+    if session and type(session) == 'table' then
+        return session.userType
+    end
 end

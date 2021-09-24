@@ -21,6 +21,7 @@ function OfflineAccountManager:ShowActivationPage()
         0,
         0,
         '_fi',
-        false
+        false,
+        1
     )
 end

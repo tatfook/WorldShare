@@ -24,7 +24,7 @@ function DeleteWorld:ShowPage()
     Mod.WorldShare.Utils.ShowWindow(
         0,
         0,
-        'Mod/WorldShare/cellar/Theme/DeleteWorld/DeleteWorld.html',
+        'Mod/WorldShare/cellar/DeleteWorld/Theme/DeleteWorld.html',
         'Mod.WorldShare.DeleteWorld',
         0,
         0,

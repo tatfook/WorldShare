@@ -1,7 +1,8 @@
 --[[
 Title: SessionsData
-Author(s):  big
-Date: 2019.07.24
+Author(s): big
+CreateDate: 2019.07.24
+ModifyDate: 2021.09.24
 place: Foshan
 Desc: 
 use the lib:
@@ -33,6 +34,14 @@ local SessionsData = NPL.export()
                 tokenExpire = 12345678,
                 loginTime = 111111111,
                 doNotNoticeVerify = false,
+                isVip = false,
+                userType = {
+                    orgAdmin = false,
+                    teacher = false,
+                    student = false,
+                    freeStudent = false,
+                    plain = true,
+                }
             },
             allPositions = {
                 {

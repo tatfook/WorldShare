@@ -13,11 +13,15 @@
                         return ''
                     end
                 
+                    local text = ''
+
                     if get_select_world().is_zip then
-                        return get_select_world().text .. '.zip'
+                        text = get_select_world().text .. '.zip'
                     else
-                        return get_select_world().foldername
+                        text = get_select_world().foldername
                     end
+
+                    return Mod.WorldShare.Utils.WordsLimit(text, 300, 50)
                 end
 
                 function get_status(status)
