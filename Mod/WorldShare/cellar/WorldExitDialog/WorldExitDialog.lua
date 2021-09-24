@@ -1,34 +1,35 @@
 --[[
 Title: World Exit Dialog
-Author(s):  Big, LiXizhi
-Date: 2017/5/15
-Desc: 
+Author(s): big, LiXizhi
+CreateDate: 2017.05.15
+ModifyDate: 2021.09.24
+Desc:
 use the lib:
 ------------------------------------------------------------
-local WorldExitDialog = NPL.load("(gl)Mod/WorldShare/cellar/WorldExitDialog/WorldExitDialog.lua")
+local WorldExitDialog = NPL.load('(gl)Mod/WorldShare/cellar/WorldExitDialog/WorldExitDialog.lua')
 WorldExitDialog.ShowPage()
 ------------------------------------------------------------
 ]]
 
 -- lib
-local ShareWorldPage = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.Areas.ShareWorldPage")
-local WorldRevision = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision")
-local NplBrowserPlugin = commonlib.gettable("NplBrowser.NplBrowserPlugin")
-local Desktop = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop")
-local ParaWorldLoginAdapter = commonlib.gettable("MyCompany.Aries.Game.Tasks.ParaWorld.ParaWorldLoginAdapter")
+local ShareWorldPage = commonlib.gettable('MyCompany.Aries.Creator.Game.Desktop.Areas.ShareWorldPage')
+local WorldRevision = commonlib.gettable('MyCompany.Aries.Creator.Game.WorldRevision')
+local NplBrowserPlugin = commonlib.gettable('NplBrowser.NplBrowserPlugin')
+local Desktop = commonlib.gettable('MyCompany.Aries.Creator.Game.Desktop')
+local ParaWorldLoginAdapter = commonlib.gettable('MyCompany.Aries.Game.Tasks.ParaWorld.ParaWorldLoginAdapter')
 
 -- service
-local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
-local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
-local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
-local KeepworkServiceWorld = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/World.lua")
-local KeepworkServiceProject = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Project.lua")
-local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
+local Compare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
+local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+local KeepworkServiceWorld = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/World.lua')
+local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
+local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
 
 -- UI
-local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
+local LoginModal = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua')
 local CommonLoadWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/CommonLoadWorld.lua')
-local Grade = NPL.load("./Grade.lua")
+local Grade = NPL.load('./Grade.lua')
 
 local WorldExitDialog = NPL.export()
 local self = WorldExitDialog
@@ -43,7 +44,7 @@ function WorldExitDialog.ShowPage(callback)
         return false
     end
 
-    Mod.WorldShare.MsgBox:Show(L"请稍候...")
+    Mod.WorldShare.MsgBox:Wait()
 
     local function Handle()
         Mod.WorldShare.MsgBox:Close()
@@ -52,14 +53,14 @@ function WorldExitDialog.ShowPage(callback)
         local height = 420
 
         local params = Mod.WorldShare.Utils.ShowWindow({
-            url = "Mod/WorldShare/cellar/Theme/WorldExitDialog/WorldExitDialog.html",
-            name = "WorldExitDialog",
+            url = 'Mod/WorldShare/cellar/Theme/WorldExitDialog/WorldExitDialog.html',
+            name = 'WorldExitDialog',
             isShowTitleBar = false,
             DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
             style = CommonCtrl.WindowFrame.ContainerStyle,
             allowDrag = true,
             directPosition = true,
-            align = "_ct",
+            align = '_ct',
             x = -width / 2,
             y = -height / 2,
             width = width,
@@ -147,13 +148,13 @@ function WorldExitDialog:IsUserWorld()
 end
 
 function WorldExitDialog.GetPreviewImagePath()
-    return ParaWorld.GetWorldDirectory() .. "preview.jpg"
+    return ParaWorld.GetWorldDirectory() .. 'preview.jpg'
 end
 
 function WorldExitDialog:OnInit()
     Mod.WorldShare.Store:Set('page/WorldExitDialog', document:GetPageCtrl())
 
-    document:GetPageCtrl():SetNodeValue("ShareWorldImage", self.GetPreviewImagePath())
+    document:GetPageCtrl():SetNodeValue('ShareWorldImage', self.GetPreviewImagePath())
 end
 
 function WorldExitDialog:Refresh(sec)
@@ -175,7 +176,7 @@ function WorldExitDialog.OnDialogResult(res)
     end
 
     if res == _guihelper.DialogResult.No or res == _guihelper.DialogResult.Yes then
-        local currentEnterWorld = Mod.WorldShare.Store:Get("world/currentEnterWorld")
+        local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
         local function Handle()
             -- TODO: // check world folder because zip file
@@ -184,7 +185,7 @@ function WorldExitDialog.OnDialogResult(res)
             end
 
             if KeepworkServiceSession:IsSignedIn() then
-                local RedSummerCampMainPage = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/RedSummerCamp/RedSummerCampMainPage.lua")
+                local RedSummerCampMainPage = NPL.load('(gl)script/apps/Aries/Creator/Game/Tasks/RedSummerCamp/RedSummerCampMainPage.lua')
                 RedSummerCampMainPage.Show()
                 return
             end
@@ -202,7 +203,7 @@ function WorldExitDialog.OnDialogResult(res)
 
         -- unlock share world logic
         if Mod.WorldShare.Utils:IsSharedWorld(currentEnterWorld) then
-            Mod.WorldShare.MsgBox:Show(L"请稍候...")
+            Mod.WorldShare.MsgBox:Wait()
             KeepworkServiceWorld:UnlockWorld(function()
                 Mod.WorldShare.MsgBox:Close()
                 Handle()
@@ -229,10 +230,10 @@ function WorldExitDialog.UpdateImage(bRefreshAsset)
     if WorldExitDialogPage then
         local filepath = ShareWorldPage.GetPreviewImagePath()
 
-        WorldExitDialogPage:SetUIValue("ShareWorldImage", filepath)
+        WorldExitDialogPage:SetUIValue('ShareWorldImage', filepath)
 
         if bRefreshAsset then
-            ParaAsset.LoadTexture("", filepath, 1):UnloadAsset()
+            ParaAsset.LoadTexture('', filepath, 1):UnloadAsset()
         end
 
         -- increase version number

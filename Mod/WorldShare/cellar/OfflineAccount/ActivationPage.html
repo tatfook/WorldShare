@@ -1,0 +1,305 @@
+<html>
+    <body>
+        <pe:mcml>
+            <script type="text/npl">
+                <![CDATA[
+                    -- bottles
+                    local Create = NPL.load('(gl)Mod/WorldShare/cellar/Create/Create.lua')
+                    local LoginModal = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua')
+                    local RedSummerCampMainPage = NPL.load('(gl)script/apps/Aries/Creator/Game/Tasks/RedSummerCamp/RedSummerCampMainPage.lua')
+
+                    -- service
+                    local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+                    local UserMacBindsService = NPL.load('(gl)Mod/WorldShare/service/UserMacBindsService.lua')
+
+                    local page = document:GetPageCtrl()
+                    
+                    function close()
+                        page:CloseWindow()
+                    end
+
+                    function get_offline_username()
+                        return UserMacBindsService:GetUsername()
+                    end
+
+                    function set_container(index)
+                        local not_bind_node = page:FindControl('not_bind')
+                        local binded = page:FindControl('binded')
+
+                        if index == 1 then -- not bind
+                            not_bind_node.visible = true
+                            binded.visible = false
+                        elseif index == 2 then -- binded
+                            not_bind_node.visible = false
+                            binded.visible = true
+                        end
+                    end
+
+                    function activate()
+                        -- login
+                        local account = page:GetValue('account')
+                        local password = page:GetValue('password')
+
+                        KeepworkServiceSession:LoginDirectly(
+                            account,
+                            password,
+                            function(bSucceed, reason)
+                                if not bSucceed then
+                                    GameLogic.AddBBS(nil, reason, 3000, '255 0 0')
+                                    return
+                                end
+
+                                UserMacBindsService:BindDevice(function(bSucceed)
+                                    if not bSucceed then
+                                        _guihelper.MessageBox(L'激活失败。该账号已激活2台设备，请解除之前的设置激活后再试。')
+                                        return
+                                    end
+
+                                    set_container(2)
+
+                                    local username = get_offline_username()
+                                    page:SetValue('username', username)
+
+                                    KeepworkServiceSession:Logout()
+                                end)
+                            end
+                        )
+                    end
+
+                    function open_create()
+                        close()
+                        Create:Show()
+                    end
+
+                    function start()
+                        RedSummerCampMainPage.Show()
+                    end
+
+                    function sync_class_world()
+                        -- loadworld -d
+                    end
+
+                    function unbind()
+                        LoginModal:CheckSignedIn(L'登录后才能解绑', function(bSucceed)
+                            if bSucceed then
+                                UserMacBindsService:UnbindDevice(function(bSucceed)
+                                    if not bSucceed then
+                                        return
+                                    end
+
+                                    set_container(1)
+                                    
+                                    KeepworkServiceSession:Logout()
+                                end)
+                            end
+                        end)
+                    end
+
+                    Mod.WorldShare.Utils.SetTimeOut(function()
+                        if UserMacBindsService:IsBindDeviceFromLocal() then
+                            set_container(2)
+                            
+                            local username = get_offline_username()
+                            page:SetValue('username', username)
+                        else
+                            set_container(1)
+                        end
+                    end, 0)
+                ]]>
+            </script>
+            <style type='type/mcss' src='Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss'></style>
+            <style type='type/mcss'>
+                {
+                    text_field = {
+                        background = 'Texture/Aries/Creator/paracraft/offline_mode_32bits.png#267 96 65 65:10 10 10 10',
+                    }
+                }
+            </style>
+            <pe:container
+                alignment='_fi'
+                zorder='-1'
+                width='100%'
+                height='100%'
+                style='position:relative;background-color:#dcdcdc'>
+            </pe:container>
+            <pe:container
+                alignment='_fi'
+                zorder='-1'
+                width='100%'
+                height='100%'
+                class='red_summer_camp_bg'>
+            </pe:container>
+            <div>
+                <div style='height: 56px;'>
+                    <div style='background: url(Texture/Aries/Creator/keepwork/RedSummerCamp/courses/courses_32bits.png#7 249 169 56);
+                                width: 169px;
+                                height: 56px;
+                                float: left;'>
+                        <div align='center'
+                            onclick='close'
+                            style='background: url(Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#5 67 38 33);
+                                    width: 38px;
+                                    height: 33px;
+                                    margin-top: 12px;
+                                    margin-left: -20px;'></div>
+                    </div>
+                    <div style='float: left;
+                                width: 283px;
+                                height: 56px;
+                                margin-left: -73px;
+                                background: url(Texture/Aries/Creator/keepwork/RedSummerCamp/shentongbei/shentongbei_32bits.png#17 794 283 56)'>
+                        <div align='center'
+                            style='background:;
+                                    color: #FFFFFF;
+                                    font-size: 20px;
+                                    base-font-size: 20px;
+                                    font-weight: bolder;
+                                    width: 85px;
+                                    height: 20px;
+                                    margin-top: 15px;
+                                    float: left;'>
+                            <%= L'本地模式' %>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <pe:container alignment='_ct'
+                                  name='not_bind'
+                                  visible='false'
+                                  width='700px'
+                                  height='400px'
+                                  style='background:;
+                                         margin-left: -350px;
+                                         margin-top: -206px;'>
+                        <div style='font-size: 25px;
+                                    base-font-size: 25px;
+                                    text-align: center;
+                                    margin-bottom: 40px;'>
+                            <%= L'请联网激活本地模式使用的账号，每个账号可激活2个设备' %>
+                        </div>
+                        <div width='610px'
+                             align='center'
+                             style='margin-bottom: 40px;'>
+                            <div style='font-size: 25px;
+                                        base-font-size: 25px;
+                                        margin-bottom: 20px;'>
+                                <%= L'*账号：' %>
+                                <input type='text'
+                                       name='account'
+                                       class='text_field'
+                                       CaretColor='#FFFFFFFF'
+                                       spacing='10'
+                                       style='margin-left: 20px;
+                                              height: 45px;
+                                              margin-top: -5px;
+                                              textcolor: #FFFFFF;
+                                              text-valign: center;
+                                              font-size: 25px;
+                                              base-font-size: 25px;'
+                                       value='' />
+                            </div>
+                            <div style='font-size: 25px;
+                                        base-font-size: 25px;'>
+                                <%= L'*密码：' %>
+                                <input type='text'
+                                       PasswordChar='*'
+                                       name='password'
+                                       class='text_field'
+                                       CaretColor='#FFFFFFFF'
+                                       spacing='10'
+                                       style='textcolor: #FFFFFF;
+                                              margin-left: 20px;
+                                              height: 45px;
+                                              margin-top: -5px;
+                                              font-size: 25px;
+                                              base-font-size: 25px;'
+                                       value='' />
+                            </div>
+                        </div>
+                        <div width='430px'
+                             align='center'>
+                            <input type='button'
+                                   onclick='open_create'
+                                   class='theme1_gray2_button'
+                                   style='width: 200px;
+                                          height: 57px;
+                                          font-size: 25px;
+                                          base-font-size: 25px;'
+                                   value='<%= L"不使用账号" %>' />
+                            <input type='button'
+                                   onclick='activate'
+                                   class='theme1_yellow_button'
+                                   style='width: 150px;
+                                          height: 55px;
+                                          margin-left: 80px;
+                                          font-size: 25px;
+                                          base-font-size: 25px;'
+                                   value='<%= L"激活" %>'/>
+                        </div>
+                    </pe:container>
+                    <pe:container alignment='_ct'
+                                  name='binded'
+                                  visible='false'
+                                  width='700px'
+                                  height='400px'
+                                  style='background:;
+                                         margin-left: -350px;
+                                         margin-top: -206px;'>
+                        <div>
+                            <label style='font-size: 55px;
+                                          base-font-size: 55px;
+                                          font-weight: bold;
+                                          text-align: center;
+                                          color: #000000;
+                                          height: 70px;'
+                                    name='username' />
+                        </div>
+                        <div style='font-size: 25px;
+                                    base-font-size: 25px;
+                                    color: #2956ab;
+                                    width: 500px;
+                                    margin-top: 80px;'
+                              align='center'>
+                            <div style='float: left;'
+                                 onclick='sync_class_world'>
+                                <%= '同步离线课程' %>
+                                <div width='155px'
+                                     style='background-color: #2956ab;
+                                            height: 1px;'></div>
+                            </div>
+                            <div style='float: left;
+                                        margin-left: 120px;'
+                                 onclick='unbind'>
+                                <%= L'解除激活（需联网）' %>
+                                <div width='225px'
+                                     style='background-color: #2956ab;
+                                            height: 1px;'></div>
+                            </div>
+                        </div>
+                        <div width='430px'
+                             align='center'
+                             style='margin-top: 80px;'>
+                            <input type='button'
+                                   class='theme1_gray2_button'
+                                   style='width: 200px;
+                                          height: 57px;
+                                          font-size: 25px;
+                                          base-font-size: 25px;'
+                                   onclick='open_create'
+                                   value='<%= L"不使用账号" %>' />
+                            <input type='button'
+                                   onclick='start'
+                                   class='theme1_yellow_button'
+                                   style='width: 150px;
+                                          height: 55px;
+                                          margin-left: 80px;
+                                          font-size: 25px;
+                                          base-font-size: 25px;'
+                                   value='<%= L"开始" %>' />
+                        </div>
+                    </pe:container>
+                </div>
+            </div>
+        </pe:mcml>
+    </body>
+</html>

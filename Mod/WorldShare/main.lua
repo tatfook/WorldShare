@@ -22,7 +22,6 @@ CODE GUIDELINE
 
 -- include other mods
 NPL.load('(gl)Mod/DiffWorld/main.lua')
-NPL.load('(gl)Mod/OfflineMod/main.lua')
 
 -- include ide
 NPL.load('(gl)script/ide/Files.lua')
@@ -111,6 +110,7 @@ local HistoryManager = NPL.load('(gl)Mod/WorldShare/cellar/HistoryManager/Histor
 local PreventIndulge = NPL.load('(gl)Mod/WorldShare/cellar/PreventIndulge/PreventIndulge.lua')
 local Beginner = NPL.load('(gl)Mod/WorldShare/cellar/Beginner/Beginner.lua')
 local Certificate = NPL.load('(gl)Mod/WorldShare/cellar/Certificate/Certificate.lua')
+local Cellar = NPL.load('(gl)Mod/WorldShare/cellar/cellar.lua')
 
 -- service
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
@@ -131,7 +131,6 @@ local Filters = NPL.load('(gl)Mod/WorldShare/filters/Filters.lua')
 
 -- other mods
 local DiffWorld = commonlib.gettable('Mod.DiffWorld')
-local Offline = commonlib.gettable('Mod.Offline')
 
 local WorldShare = commonlib.inherit(commonlib.gettable('Mod.ModBase'), commonlib.gettable('Mod.WorldShare'))
 
@@ -200,11 +199,6 @@ function WorldShare:init()
     if DiffWorld and type(DiffWorld) == 'table' and DiffWorld.init then
         -- load diff world
         DiffWorld:init()
-    end
-
-    if Offline and type(Offline) == 'table' and Offline.init then
-        -- load offline mod
-        Offline:init()
     end
 
     System.options.useFreeworldWhitelist = true

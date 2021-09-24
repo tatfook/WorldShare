@@ -2,7 +2,7 @@
 Title: Main Login
 Author: big  
 CreateDate: 2019.12.25
-ModifyDate: 2021.7.8
+ModifyDate: 2021.09.24
 place: Foshan
 Desc: 
 use the lib:
@@ -13,6 +13,7 @@ local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
 -- libs
 local GameMainLogin = commonlib.gettable('MyCompany.Aries.Game.MainLogin')
 local Desktop = commonlib.gettable('MyCompany.Aries.Creator.Game.Desktop')
+local PlayerAssetFile = commonlib.gettable('MyCompany.Aries.Game.EntityManager.PlayerAssetFile')
 
 -- service
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
@@ -20,10 +21,9 @@ local SessionsData = NPL.load('(gl)Mod/WorldShare/database/SessionsData.lua')
 
 -- bottles
 local Create = NPL.load('(gl)Mod/WorldShare/cellar/Create/Create.lua')
-local UserInfo = NPL.load('(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua')
 local RedSummerCampMainPage = NPL.load('(gl)script/apps/Aries/Creator/Game/Tasks/RedSummerCamp/RedSummerCampMainPage.lua')
 
-local AccountManager = commonlib.gettable('Mod.Offline.AccountManager')
+local OfflineAccountManager = commonlib.gettable('Mod.WorldShare.cellar.OfflineAccountManager')
 
 -- helper
 local Validated = NPL.load('(gl)Mod/WorldShare/helper/Validated.lua')
@@ -1054,7 +1054,7 @@ function MainLogin:RegisterWithAccount(callback)
                 GameLogic.AddBBS(nil, format('%s%s(%d)', L'错误信息：', state.message or '', state.code or 0), 5000, '255 0 0')
             else
                 -- set default user role
-                local filename = UserInfo.GetValidAvatarFilename('boy01')
+                local filename = self.GetValidAvatarFilename('boy01')
                 GameLogic.options:SetMainPlayerAssetName(filename)
 
                 -- register success
@@ -1107,7 +1107,7 @@ function MainLogin:RegisterWithPhone(callback)
                 GameLogic.AddBBS(nil, format('%s%s(%d)', L'错误信息：', state.message or '', state.code or 0), 5000, '255 0 0')
             else
                 -- set default user role
-                local filename = UserInfo.GetValidAvatarFilename('boy01')
+                local filename = self.GetValidAvatarFilename('boy01')
                 GameLogic.options:SetMainPlayerAssetName(filename)
 
                 -- register success
@@ -1149,7 +1149,7 @@ function MainLogin:Next(isOffline)
     end
 
     if System.options.loginmode == 'offline' then
-        AccountManager:ShowActivationPage()
+        OfflineAccountManager:ShowActivationPage()
     else
         self:Close()
         RedSummerCampMainPage.Show()
@@ -1168,3 +1168,11 @@ end
 function MainLogin:Exit()
     Desktop.ForceExit()
 end
+
+function MainLogin.GetValidAvatarFilename(playerName)
+    if playerName then
+        PlayerAssetFile:Init()
+        return PlayerAssetFile:GetValidAssetByString(playerName)
+    end
+end
+
