@@ -58,6 +58,9 @@ function UserMacBindsService:BindDevice(callback)
                     else
                         callback(false)
                     end
+                end,
+                function(data, err)
+                    callback(false)
                 end
             )
         end

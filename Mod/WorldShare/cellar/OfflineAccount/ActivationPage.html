@@ -19,7 +19,7 @@
                     end
 
                     function get_offline_username()
-                        return UserMacBindsService:GetUsername()
+                        return string.upper(UserMacBindsService:GetUsername())
                     end
 
                     function set_container(index)
@@ -51,6 +51,7 @@
 
                                 UserMacBindsService:BindDevice(function(bSucceed)
                                     if not bSucceed then
+                                        KeepworkServiceSession:Logout()
                                         _guihelper.MessageBox(L'激活失败。该账号已激活2台设备，请解除之前的设置激活后再试。')
                                         return
                                     end
@@ -77,7 +78,7 @@
                     end
 
                     function sync_class_world()
-                        -- loadworld -d
+                        GameLogic.RunCommand('/loadworld 84481')
                     end
 
                     function unbind()
@@ -113,6 +114,9 @@
                 {
                     text_field = {
                         background = 'Texture/Aries/Creator/paracraft/offline_mode_32bits.png#267 96 65 65:10 10 10 10',
+                    },
+                    start = {
+                        ['text-offset-y'] = -1
                     }
                 }
             </style>
@@ -241,15 +245,15 @@
                     <pe:container alignment='_ct'
                                   name='binded'
                                   visible='false'
-                                  width='700px'
+                                  width='800px'
                                   height='400px'
                                   style='background:;
-                                         margin-left: -350px;
+                                         margin-left: -400px;
                                          margin-top: -206px;'>
                         <div>
                             <label style='font-size: 55px;
                                           base-font-size: 55px;
-                                          font-weight: bold;
+                                          font-weight: bolder;
                                           text-align: center;
                                           color: #000000;
                                           height: 70px;'
@@ -258,7 +262,7 @@
                         <div style='font-size: 25px;
                                     base-font-size: 25px;
                                     color: #2956ab;
-                                    width: 500px;
+                                    width: 620px;
                                     margin-top: 80px;'
                               align='center'>
                             <div style='float: left;'
@@ -269,15 +273,15 @@
                                             height: 1px;'></div>
                             </div>
                             <div style='float: left;
-                                        margin-left: 120px;'
+                                        margin-left: 240px;'
                                  onclick='unbind'>
                                 <%= L'解除激活（需联网）' %>
-                                <div width='225px'
+                                <div width='220px'
                                      style='background-color: #2956ab;
                                             height: 1px;'></div>
                             </div>
                         </div>
-                        <div width='430px'
+                        <div width='480px'
                              align='center'
                              style='margin-top: 80px;'>
                             <input type='button'
@@ -290,8 +294,8 @@
                                    value='<%= L"不使用账号" %>' />
                             <input type='button'
                                    onclick='start'
-                                   class='theme1_yellow_button'
-                                   style='width: 150px;
+                                   class='theme1_yellow_button start'
+                                   style='width: 200px;
                                           height: 55px;
                                           margin-left: 80px;
                                           font-size: 25px;
