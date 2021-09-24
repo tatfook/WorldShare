@@ -460,6 +460,33 @@ function LoadWorldCommand:Download(cmdText, options)
                 local localWorldFile = world:GetLocalFileName() or ''
                 local encryptWorldFile = string.match(localWorldFile, '(.+)%.zip$') .. '.pkg'
 
+                -- judge commit ID
+                local cacheWorldInfo = CacheProjectId:GetProjectIdInfo(kpProjectId)
+
+                if cacheWorldInfo and
+                   type(cacheWorldInfo) == 'table' and
+                   cacheWorldInfo.worldInfo and
+                   cacheWorldInfo.worldInfo.commitId then
+                    local qiniuWorld = RemoteWorld.LoadFromHref(qiniuZipArchiveUrl, 'self')
+                    qiniuWorld:SetProjectId(kpProjectId)
+
+                    local cdnArchiveWorld = RemoteWorld.LoadFromHref(cdnArchiveUrl, 'self')
+                    cdnArchiveWorld:SetProjectId(kpProjectId)
+
+                    local qiniuWorldFile = qiniuWorld:GetLocalFileName() or ''
+                    local cdnArchiveWorldFile = cdnArchiveWorld:GetLocalFileName() or ''
+
+                    local encryptQiniuWorldFile = string.match(qiniuWorldFile, '(.+)%.zip$') .. '.pkg'
+                    local encryptCdnArchiveWorldFile = string.match(cdnArchiveWorldFile, '(.+)%.zip$') .. '.pkg'
+
+                    if cacheWorldInfo.worldInfo.commitId == data.world.commitId and
+                       (ParaIO.DoesFileExist(encryptQiniuWorldFile) or
+                        ParaIO.DoesFileExist(encryptCdnArchiveWorldFile)) then
+                        LOG.std(nil, 'warn', 'LoadWorldCommand', 'world %s already exists', data.name)
+                        return
+                    end
+                end
+
                 DownloadWorld.ShowPage(url)
 
                 world:DownloadRemoteFile(function(bSucceed, msg)
