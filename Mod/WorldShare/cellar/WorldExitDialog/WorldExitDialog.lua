@@ -2,7 +2,7 @@
 Title: World Exit Dialog
 Author(s): big, LiXizhi
 CreateDate: 2017.05.15
-ModifyDate: 2021.09.24
+ModifyDate: 2021.09.26
 Desc:
 use the lib:
 ------------------------------------------------------------
@@ -27,6 +27,7 @@ local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkServ
 local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
 
 -- UI
+local RedSummerCampMainPage = NPL.load('(gl)script/apps/Aries/Creator/Game/Tasks/RedSummerCamp/RedSummerCampMainPage.lua')
 local LoginModal = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua')
 local CommonLoadWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/CommonLoadWorld.lua')
 local Grade = NPL.load('./Grade.lua')
@@ -53,8 +54,8 @@ function WorldExitDialog.ShowPage(callback)
         local height = 420
 
         local params = Mod.WorldShare.Utils.ShowWindow({
-            url = 'Mod/WorldShare/cellar/Theme/WorldExitDialog/WorldExitDialog.html',
-            name = 'WorldExitDialog',
+            url = 'Mod/WorldShare/cellar/WorldExitDialog/Theme/WorldExitDialog.html',
+            name = 'Mod.WorldShare.WorldExitDialog',
             isShowTitleBar = false,
             DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
             style = CommonCtrl.WindowFrame.ContainerStyle,
@@ -73,10 +74,10 @@ function WorldExitDialog.ShowPage(callback)
 
         params._page.OnClose = function()
             Desktop.is_exiting = false
-            Mod.WorldShare.Store:Remove('page/WorldExitDialog')
+            Mod.WorldShare.Store:Remove('page/Mod.WorldShare.WorldExitDialog')
         end
 
-        local WorldExitDialogPage = Mod.WorldShare.Store:Get('page/WorldExitDialog')
+        local WorldExitDialogPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.WorldExitDialog')
 
         if WorldExitDialogPage then
             if not GameLogic.IsReadOnly() and not ParaIO.DoesFileExist(self.GetPreviewImagePath(), false) then
@@ -151,14 +152,8 @@ function WorldExitDialog.GetPreviewImagePath()
     return ParaWorld.GetWorldDirectory() .. 'preview.jpg'
 end
 
-function WorldExitDialog:OnInit()
-    Mod.WorldShare.Store:Set('page/WorldExitDialog', document:GetPageCtrl())
-
-    document:GetPageCtrl():SetNodeValue('ShareWorldImage', self.GetPreviewImagePath())
-end
-
 function WorldExitDialog:Refresh(sec)
-    local worldExitDialogPage = Mod.WorldShare.Store:Get('page/WorldExitDialog')
+    local worldExitDialogPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.WorldExitDialog')
 
     if worldExitDialogPage then
         worldExitDialogPage:Refresh(sec or 0.01)
@@ -169,7 +164,7 @@ end
 function WorldExitDialog.OnDialogResult(res)
     Desktop.is_exiting = false
 
-    local WorldExitDialogPage = Mod.WorldShare.Store:Get('page/WorldExitDialog')
+    local WorldExitDialogPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.WorldExitDialog')
 
     if WorldExitDialogPage then
         WorldExitDialogPage:CloseWindow()
@@ -185,13 +180,12 @@ function WorldExitDialog.OnDialogResult(res)
             end
 
             if KeepworkServiceSession:IsSignedIn() then
-                local RedSummerCampMainPage = NPL.load('(gl)script/apps/Aries/Creator/Game/Tasks/RedSummerCamp/RedSummerCampMainPage.lua')
                 RedSummerCampMainPage.Show()
                 return
             end
 
             if System.options.loginmode == 'offline' then
-                Desktop.ForceExit(false)
+                Desktop.ForceExit(true)
                 return
             end
 
@@ -225,7 +219,7 @@ function WorldExitDialog.Snapshot()
 end
 
 function WorldExitDialog.UpdateImage(bRefreshAsset)
-    local WorldExitDialogPage = Mod.WorldShare.Store:Get('page/WorldExitDialog')
+    local WorldExitDialogPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.WorldExitDialog')
 
     if WorldExitDialogPage then
         local filepath = ShareWorldPage.GetPreviewImagePath()
