@@ -79,31 +79,33 @@ function Utils.ShowWindow(option, height, url, name, x, y, align, allowDrag, zor
         end
     end
 
-    local matchUrl, matched = string.gsub(params.url, "^%(ws%)", "") -- ws: worldshare
-
-    if matched == 1 then
-        if not string.match(matchUrl, "%.html$") then
-            matchUrl = matchUrl .. "/" .. matchUrl .. ".html"
+    if params.url and type(params.url) == 'string' then
+        local matchUrl, matched = string.gsub(params.url, "^%(ws%)", "") -- ws: worldshare
+    
+        if matched == 1 then
+            if not string.match(matchUrl, "%.html$") then
+                matchUrl = matchUrl .. "/" .. matchUrl .. ".html"
+            end
+    
+            params.url = "Mod/WorldShare/cellar/" .. matchUrl
         end
-
-        params.url = "Mod/WorldShare/cellar/" .. matchUrl
-    end
-
-    local matchUrl, matched = string.gsub(params.url, "^%(ep%)", "") -- ep: explorerapp
-
-    if matched == 1 then
-        if not string.match(matchUrl, "%.html$") then
-            matchUrl = matchUrl .. "/" .. matchUrl .. ".html"
+    
+        local matchUrl, matched = string.gsub(params.url, "^%(ep%)", "") -- ep: explorerapp
+    
+        if matched == 1 then
+            if not string.match(matchUrl, "%.html$") then
+                matchUrl = matchUrl .. "/" .. matchUrl .. ".html"
+            end
+    
+            params.url = "Mod/ExplorerApp/components/" .. matchUrl
         end
-
-        params.url = "Mod/ExplorerApp/components/" .. matchUrl
-    end
-
-    if Mod.WorldShare.Utils.IsEnglish() then
-        local enUrl = string.gsub(params.url, ".html", ".en.html")
-
-        if ParaIO.DoesFileExist(enUrl, true) then
-            params.url = enUrl
+    
+        if Mod.WorldShare.Utils.IsEnglish() then
+            local enUrl = string.gsub(params.url, ".html", ".en.html")
+    
+            if ParaIO.DoesFileExist(enUrl, true) then
+                params.url = enUrl
+            end
         end
     end
 

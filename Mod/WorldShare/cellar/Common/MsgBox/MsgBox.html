@@ -1,13 +1,13 @@
 ﻿<body>
     <pe:mcml>
-        <script type="text/npl" refresh="false">
+        <script type='text/npl' refresh='false'>
             <![CDATA[
-                local MsgBox = NPL.load("./MsgBox.lua")
+                local MsgBox = NPL.load('./MsgBox.lua')
 
                 local page = document:GetPageCtrl()
-                local msgId = page:GetRequestParam("msgId")
-                width = tonumber(page:GetRequestParam("width"))
-                height = tonumber(page:GetRequestParam("height"))
+                local msgId = page:GetRequestParam('msgId')
+                width = tonumber(page:GetRequestParam('width'))
+                height = tonumber(page:GetRequestParam('height'))
 
                 if width == 0 then
                     width = 300
@@ -20,7 +20,7 @@
                 MsgBox.SetPage(msgId)
 
                 function get_window_style()
-                    return "width: " .. width .. "px;height: " .. height .. "px;" .. Mod.WorldShare.Utils.FixCenter(width, height)
+                    return 'width: ' .. width .. 'px;height: ' .. height .. 'px;' .. Mod.WorldShare.Utils.FixCenter(width, height)
                 end
 
                 function get_msg()
@@ -28,12 +28,20 @@
                 end
             ]]>
         </script>
-        <div width="100%" height="100%">
-            <kp:window  mode="lite" style="<%= get_window_style() %>" icon="Texture/Aries/Creator/keepwork/Window/title/biaoti_tishi_32bits.png" title='<%=L"提示" %>'>
-                <div style="height: 38px;"></div>
-                <div style="<%= 'padding:20px;font-size:18px;base-font-size:18px;margin-top:10px;height: ' .. height .. 'px;' %>">
-                    <div style="margin-right:60px;">
-                    <%= get_msg() %>
+        <div width='100%' height='100%'>
+            <kp:window 
+                mode='lite'
+                style='<%= get_window_style() %>'
+                icon='Texture/Aries/Creator/keepwork/Window/title/biaoti_tishi_32bits.png'
+                title='<%=L"提示" %>'>
+                <div style='height: 38px;'></div>
+                <div style='<%= "padding: 20px;\
+                                 font-size: 18px;\
+                                 base-font-size: 18px;\
+                                 margin-top: 10px;\
+                                 height: " .. height .. "px;" %>'>
+                    <div style='margin-right:60px;'>
+                        <%= get_msg() %>
                     </div>
                 </div>
             </kp:window>
