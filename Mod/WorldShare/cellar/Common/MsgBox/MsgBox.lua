@@ -146,7 +146,7 @@ function MsgBox:Dialog(dialogName, content, customLabels, MsgBoxClick_CallBack, 
     )
 end
 
-function MsgBox:ShowNotice(content, script, width, height, index, align, isTopLevel)
+function MsgBox:ShowNotice(content, script, mcss, width, height, index, align, isTopLevel)
     local template = [[
         <html>
             <body>
@@ -163,6 +163,7 @@ function MsgBox:ShowNotice(content, script, width, height, index, align, isTopLe
 
                         ]] .. ']]' .. [[>
                     </script>
+                    {{mcss}}
                     <kp:window mode='lite'
                                style=''
                                width='{{width}}'
@@ -170,9 +171,10 @@ function MsgBox:ShowNotice(content, script, width, height, index, align, isTopLe
                                onclose='close'
                                icon='Texture/Aries/Creator/keepwork/Window/title/biaoti_tishi_32bits.png'
                                title='<%=L"提示" %>'>
-                        <div width='100%' style='height: 40px;'>
+                        <div width='100%'
+                             style='height: 40px;'>
                         </div>
-                        <div>
+                        <div width='100%'>
                             {{content}}
                         </div>
                     </kp:window>
@@ -185,6 +187,7 @@ function MsgBox:ShowNotice(content, script, width, height, index, align, isTopLe
     template = template:gsub('{{height}}', height or 300)
     template = template:gsub('{{content}}', content or '')
     template = template:gsub('{{script}}', script or '')
+    template = template:gsub('{{mcss}}', mcss or '')
 
     self.msgIdCount = self.msgIdCount + 1
 
