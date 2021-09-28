@@ -483,6 +483,8 @@ function LoadWorldCommand:Download(cmdText, options)
                        (ParaIO.DoesFileExist(encryptQiniuWorldFile) or
                         ParaIO.DoesFileExist(encryptCdnArchiveWorldFile)) then
                         LOG.std(nil, 'warn', 'LoadWorldCommand', 'world %s already exists', data.name)
+
+                        GameLogic.RunCommand('/sendevent download_offline_world_finish ' .. kpProjectId)
                         return
                     end
                 end
