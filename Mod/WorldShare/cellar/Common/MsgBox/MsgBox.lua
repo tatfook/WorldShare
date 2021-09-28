@@ -146,7 +146,7 @@ function MsgBox:Dialog(dialogName, content, customLabels, MsgBoxClick_CallBack, 
     )
 end
 
-function MsgBox:ShowNotice(content, width, height, index, align, isTopLevel)
+function MsgBox:ShowNotice(content, script, width, height, index, align, isTopLevel)
     local template = [[
         <html>
             <body>
@@ -158,6 +158,9 @@ function MsgBox:ShowNotice(content, width, height, index, align, isTopLevel)
                             function close()
                                 page:CloseWindow()
                             end
+
+                            {{script}}
+
                         ]] .. ']]' .. [[>
                     </script>
                     <kp:window mode='lite'
@@ -178,9 +181,10 @@ function MsgBox:ShowNotice(content, width, height, index, align, isTopLevel)
         </html>
     ]]
 
-    template = template:gsub('{{width}}', width)
-    template = template:gsub('{{height}}', height)
-    template = template:gsub('{{content}}', content)
+    template = template:gsub('{{width}}', width or 300)
+    template = template:gsub('{{height}}', height or 300)
+    template = template:gsub('{{content}}', content or '')
+    template = template:gsub('{{script}}', script or '')
 
     self.msgIdCount = self.msgIdCount + 1
 
