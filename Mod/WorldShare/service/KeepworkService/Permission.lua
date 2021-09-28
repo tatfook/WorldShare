@@ -1,7 +1,8 @@
 --[[
 Title: KeepworkService Permission
-Author(s):  big
-Date:  2020.05.20
+Author(s): big
+CreateDate: 2020.05.20
+ModifyDate: 2021.09.28
 Place: Foshan
 use the lib:
 ------------------------------------------------------------
@@ -95,7 +96,12 @@ KeepworkServicePermission.AllAuth = {
 KeepworkServicePermission.AllLocalAuth = {
     FlyOnParaWorld = {
         key = 'fly_on_paraworld',
-        desc = L'马上飞行!'
+        desc = L'马上飞行!',
+        role = {
+            'vip',
+            'student',
+            'teacher'
+        }
     },
     PlyText = {
         key = 'play_text',
@@ -103,7 +109,12 @@ KeepworkServicePermission.AllLocalAuth = {
     },
     MakeApk = {
         key = 'make_apk',
-        desc = L'生成APK'
+        desc = L'生成APK',
+        role = {
+            'vip',
+            'student',
+            'teacher'
+        }
     },
     RedSummerCampMain = {
         key = 'red_summer_camp_main', -- red summer vip
