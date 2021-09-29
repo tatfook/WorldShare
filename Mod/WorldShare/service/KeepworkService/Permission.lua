@@ -87,10 +87,14 @@ KeepworkServicePermission.AllAuth = {
         key = 'is_organ',
         desc = L'需要机构会员权限'
     },
-    LongMarch ={
+    LongMarch = {
         key = 'long_march',
         desc = L'畅学征程编程课'
     },
+    VipPrivateWorld = {
+        key = 'vip_private_world',
+        desc = L'自主授权开放及私有空间'
+    } 
 }
 
 KeepworkServicePermission.AllLocalAuth = {
