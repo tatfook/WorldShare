@@ -202,7 +202,9 @@ function Compare:GetCurrentWorldInfo(callback)
         local currentRevision = WorldRevision:new():init(originWorldPath):Checkout()
         local localShared = string.match(worldpath or '', 'shared') == 'shared' and true or false
 
-        if worldTag.kpProjectId and worldTag.kpProjectId ~= 0 then
+        if System.options.loginmode ~= 'offline' and
+           worldTag.kpProjectId and
+           worldTag.kpProjectId ~= 0 then
             KeepworkServiceProject:GetProject(worldTag.kpProjectId, function(data, err)
                 if err == 0 then
                     Mod.WorldShare.MsgBox:Close()
@@ -309,7 +311,9 @@ function Compare:GetCurrentWorldInfo(callback)
         WorldCommon.LoadWorldTag(worldpath)
         local worldTag = WorldCommon.GetWorldInfo() or {}
 
-        if KeepworkServiceSession:IsSignedIn() and worldTag.kpProjectId and worldTag.kpProjectId ~= 0 then
+        if KeepworkServiceSession:IsSignedIn() and
+           worldTag.kpProjectId and
+           worldTag.kpProjectId ~= 0 then
             local kpProjectId = worldTag.kpProjectId
             local fromProjectId = worldTag.fromProjectId
             local parentProjectId = worldTag.parentProjectId

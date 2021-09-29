@@ -440,6 +440,8 @@ function LoadWorldCommand:Download(cmdText, options)
                 return
             end
 
+            data.world.username = data.username
+
             local qiniuZipArchiveUrl = GitKeepworkService:GetQiNiuArchiveUrl(data.name, data.username, data.world.commitId)
             local cdnArchiveUrl = GitKeepworkService:GetCdnArchiveUrl(data.name, data.username, data.world.commitId)
             local tryTimes = 0
@@ -487,12 +489,25 @@ function LoadWorldCommand:Download(cmdText, options)
                         GameLogic.RunCommand('/sendevent download_offline_world_finish ' .. kpProjectId)
                         return
                     else
+                        local oldQiniuWorldFile = qiniuWorldFile:gsub('ref_.+_r', 'ref_' .. cacheWorldInfo.worldInfo.commitId .. '_r')
+                        local oldcdnArchiveWorldFile = cdnArchiveWorldFile:gsub('ref_.+_r', 'ref_' .. cacheWorldInfo.worldInfo.commitId .. '_r')
+
+                        if ParaIO.DoesFileExist(oldQiniuWorldFile) then
+                            ParaIO.DeleteFile(oldQiniuWorldFile)
+                        end
+
+                        if ParaIO.DoesFileExist(oldcdnArchiveWorldFile) then
+                            ParaIO.DeleteFile(oldcdnArchiveWorldFile)
+                        end
+
                         local oldEncryptQiniuWorldFile = encryptQiniuWorldFile:gsub('ref_.+_r', 'ref_' .. cacheWorldInfo.worldInfo.commitId .. '_r')
                         local oldEncryptCdnArchiveWorldFile = encryptCdnArchiveWorldFile:gsub('ref_.+_r', 'ref_' .. cacheWorldInfo.worldInfo.commitId .. '_r')
 
                         if ParaIO.DoesFileExist(oldEncryptQiniuWorldFile) then
                             ParaIO.DeleteFile(oldEncryptQiniuWorldFile)
-                        elseif ParaIO.DoesFileExist(oldEncryptCdnArchiveWorldFile) then
+                        end
+
+                        if ParaIO.DoesFileExist(oldEncryptCdnArchiveWorldFile) then
                             ParaIO.DeleteFile(oldEncryptCdnArchiveWorldFile)
                         end
                     end

@@ -243,7 +243,7 @@ function CommonLoadWorld:IdsFilter(id)
         41150, 41494, 45014, 45903, 47738, 48674, 48815, 75309, 81855, 81857,
         81858, 81859, 81864, 81869, 81871, 81872, 81873, 81874, 81854, 81875,
         81895, 81896, 81898, 81897, 73139, 19405, 71346, 72945, 79969, 19759,
-        52217, 18962, 80684, 42457, 42701, 42670, 58191, 84481, 83044,
+        52217, 18962, 80684, 42457, 42701, 42670, 58191, 84481, 83044, 85544,
         -- class world ID
         1311, 1315, 1316, 1398, 99, 2639, 2639, 2815, 2763, 623,
         685, 703, 756, 853, 984, 1321, 1399, 1401, 1319, 1407,
@@ -481,10 +481,13 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
             end
 
             local fileUrl = world:GetLocalFileName()
+            -- check encrypt file
+            local encryptFileUrl = string.match(fileUrl, '(.+)%.zip$') .. '.pkg'
 
             Mod.WorldShare.Store:Set('world/currentRemoteFile', url)
 
-            if not ParaIO.DoesFileExist(fileUrl) then
+            if not ParaIO.DoesFileExist(fileUrl) and
+               not ParaIO.DoesFileExist(encryptFileUrl) then
                 LoadWorld(world, 'force')
                 return
             end
@@ -569,6 +572,47 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
     local cacheWorldInfo = CacheProjectId:GetProjectIdInfo(pid)
 
     if System.options.loginmode == 'offline' and cacheWorldInfo then
+        local info = {
+            name = cacheWorldInfo.worldInfo.worldName,
+            username = cacheWorldInfo.worldInfo.username,
+            commitId = cacheWorldInfo.worldInfo.commitId,
+        }
+
+        local qiniuZipArchiveUrl = GitKeepworkService:GetQiNiuArchiveUrl(info.name, info.username, info.commitId)
+        local cdnArchiveUrl = GitKeepworkService:GetCdnArchiveUrl(info.name, info.username, info.commitId)
+
+        local qiniuWorld = RemoteWorld.LoadFromHref(qiniuZipArchiveUrl, 'self')
+        qiniuWorld:SetProjectId(pid)
+
+        local cdnArchiveWorld = RemoteWorld.LoadFromHref(cdnArchiveUrl, 'self')
+        cdnArchiveWorld:SetProjectId(pid)
+        
+        local qiniuWorldFile = qiniuWorld:GetLocalFileName() or ''
+        local cdnArchiveWorldFile = cdnArchiveWorld:GetLocalFileName() or ''
+
+        local encryptQiniuWorldFile = string.match(qiniuWorldFile, '(.+)%.zip$') .. '.pkg'
+        local encryptCdnArchiveWorldFile = string.match(cdnArchiveWorldFile, '(.+)%.zip$') .. '.pkg'
+
+        if ParaIO.DoesFileExist(qiniuWorldFile) then
+            self.encryptWorldMode = nil
+            cacheWorldInfo.worldInfo.archiveUrl = qiniuZipArchiveUrl
+        end
+
+        if ParaIO.DoesFileExist(encryptQiniuWorldFile) then
+            self.encryptWorldMode = true
+            cacheWorldInfo.worldInfo.archiveUrl = qiniuZipArchiveUrl
+        end
+
+        if ParaIO.DoesFileExist(cdnArchiveWorldFile) then
+            self.encryptWorldMode = nil
+            cacheWorldInfo.worldInfo.archiveUrl = cdnArchiveUrl
+        end
+
+        if ParaIO.DoesFileExist(encryptCdnArchiveWorldFile) then
+            self.encryptWorldMode = true
+            cacheWorldInfo.worldInfo.archiveUrl = cdnArchiveUrl
+        end
+
         HandleLoadWorld(cacheWorldInfo.worldInfo.archiveUrl, cacheWorldInfo.worldInfo, true)
 
         return
