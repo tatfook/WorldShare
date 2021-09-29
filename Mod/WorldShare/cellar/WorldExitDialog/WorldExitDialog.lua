@@ -2,7 +2,7 @@
 Title: World Exit Dialog
 Author(s): big, LiXizhi
 CreateDate: 2017.05.15
-ModifyDate: 2021.09.26
+ModifyDate: 2021.09.29
 Desc:
 use the lib:
 ------------------------------------------------------------
@@ -179,13 +179,9 @@ function WorldExitDialog.OnDialogResult(res)
                 GameLogic.QuickSave()
             end
 
-            if KeepworkServiceSession:IsSignedIn() then
+            if KeepworkServiceSession:IsSignedIn() or
+               System.options.loginmode == 'offline' then
                 RedSummerCampMainPage.Show()
-                return
-            end
-
-            if System.options.loginmode == 'offline' then
-                Desktop.ForceExit(true)
                 return
             end
 
