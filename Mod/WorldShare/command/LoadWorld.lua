@@ -486,6 +486,15 @@ function LoadWorldCommand:Download(cmdText, options)
 
                         GameLogic.RunCommand('/sendevent download_offline_world_finish ' .. kpProjectId)
                         return
+                    else
+                        local oldEncryptQiniuWorldFile = encryptQiniuWorldFile:gsub('ref_.+_r', 'ref_' .. cacheWorldInfo.worldInfo.commitId .. '_r')
+                        local oldEncryptCdnArchiveWorldFile = encryptCdnArchiveWorldFile:gsub('ref_.+_r', 'ref_' .. cacheWorldInfo.worldInfo.commitId .. '_r')
+
+                        if ParaIO.DoesFileExist(oldEncryptQiniuWorldFile) then
+                            ParaIO.DeleteFile(oldEncryptQiniuWorldFile)
+                        elseif ParaIO.DoesFileExist(oldEncryptCdnArchiveWorldFile) then
+                            ParaIO.DeleteFile(oldEncryptCdnArchiveWorldFile)
+                        end
                     end
                 end
 
