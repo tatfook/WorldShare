@@ -1,0 +1,24 @@
+--[[
+Title: Msg Box Mcss
+Author(s): big
+CreateDate: 2021.09.29
+Desc: 
+use the lib:
+------------------------------------------------------------
+<style type='type/mcss' src='Mod/WorldShare/cellar/Common/MsgBox/Theme/MsgBoxMcss.mcss'></style>
+------------------------------------------------------------
+]]
+
+{
+    msgbox_container1 = {
+        background = 'Texture/Aries/Creator/paracraft/paracraft_msgbox_32bits.png#46 6 32 32:13 13 13 13',
+    },
+    msgbox_gray_radius_background = {
+        background = 'Texture/Aries/Creator/paracraft/paracraft_msgbox_32bits.png#5 6 32 32:9 9 9 9',
+    },
+    msgbox_close = {
+        width = 19,
+        height = 20,
+        background = 'Texture/Aries/Creator/paracraft/paracraft_msgbox_32bits.png#87 9 19 20',
+    }
+}

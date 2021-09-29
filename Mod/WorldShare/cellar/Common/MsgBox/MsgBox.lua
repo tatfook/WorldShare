@@ -32,7 +32,12 @@ function MsgBox:Show(msg, sec, overtimeMsg, width, height, index, align, isTopLe
     local params = Mod.WorldShare.Utils.ShowWindow(
         0,
         0,
-        'Mod/WorldShare/cellar/Common/MsgBox/MsgBox.html?msgId=' .. msgId .. '&width=' .. (width or 0) .. '&height=' .. (height or 0),
+        'Mod/WorldShare/cellar/Common/MsgBox/Theme/MsgBox.html?msgId=' ..
+            msgId ..
+            '&width=' ..
+            (width or 0) ..
+            '&height=' ..
+            (height or 0),
         'MsgBox',
         0,
         0,
@@ -140,14 +145,14 @@ function MsgBox:Dialog(dialogName, content, customLabels, MsgBoxClick_CallBack, 
         MsgBoxClick_CallBack,
         buttons,
         icon,
-        'Mod/WorldShare/cellar/Common/MsgBox/Dialog.html?dialogName=' .. dialogName,
+        'Mod/WorldShare/cellar/Common/MsgBox/Theme/Dialog.html?dialogName=' .. dialogName,
         isNotTopLevel,
         zorder
     )
 end
 
-function MsgBox:ShowNotice(content, script, mcss, width, height, index, align, isTopLevel)
-    local template = [[
+function MsgBox:ShowNotice(content, script, mcss, templateType, width, height, index, align, isTopLevel)
+    local template1 = [[
         <html>
             <body>
                 <pe:mcml>
@@ -182,6 +187,54 @@ function MsgBox:ShowNotice(content, script, mcss, width, height, index, align, i
             </body>
         </html>
     ]]
+
+    local template2 = [[
+        <html>
+            <body>
+                <pe:mcml>
+                    <script type='text/npl'>
+                        <![CDATA[
+                            local page = document:GetPageCtrl()
+
+                            function close()
+                                page:CloseWindow()
+                            end
+
+                            {{script}}
+
+                        ]] .. ']]' .. [[>
+                    </script>
+                    <style type='type/mcss' src='Mod/WorldShare/cellar/Common/MsgBox/Theme/MsgBoxMcss.mcss'></style>
+                    {{mcss}}
+                    <pe:container class='msgbox_container1'
+                                  width='{{width}}'
+                                  height='{{height}}'>
+                        <div width='100%'
+                            style='height: 40px;'>
+                            <div class='msgbox_close'
+                                 align='right'
+                                 style='margin-right: 20px;
+                                        margin-top: 20px;'
+                                 onclick='close'></div>
+                        </div>
+                        <div width='100%'>
+                            {{content}}
+                        </div>
+                    </pe:container>
+                </pe:mcml>
+            </body>
+        </html>
+    ]]
+
+    local template = ''
+
+    if templateType == 1 then
+        template = template1
+    elseif templateType == 2 then
+        template = template2
+    else
+        template = template1
+    end
 
     template = template:gsub('{{width}}', width or 300)
     template = template:gsub('{{height}}', height or 300)
