@@ -703,6 +703,7 @@
                                               width: 190px;
                                               margin-top: 10px;
                                               font-size: 16px;'
+                                       enable_ime='false'
                                        EmptyText='<%= L"请输入您的账号/手机号" %>'
                                        MoveViewWhenAttachWithIME='true' />
                             </div>
@@ -718,6 +719,7 @@
                                                    font-size: 16px;'
                                             onchange='update_login_button_status'
                                             SkipAutoBadWordFilter="true"
+                                            enable_ime='false'
                                             EmptyText='<%= L"请输入密码" %>'
                                             MoveViewWhenAttachWithIME='true' />
                                     <input type='text'
@@ -726,6 +728,7 @@
                                             style='background:;textcolor: #FFFFFF;height: 30px;margin-left: -190px;width: 190px;margin-top: 10px;font-size: 16px;'
                                             onchange='update_login_button_status'
                                             SkipAutoBadWordFilter="true"
+                                            enable_ime='false'
                                             EmptyText='<%= L"请输入密码" %>'
                                             MoveViewWhenAttachWithIME='true' />
                                     <input type="hidden" name="password" value="" />
@@ -834,6 +837,7 @@
                             <div>
                                 <input type='text'
                                        name='phone_number'
+                                       enable_ime='false'
                                        onchange='update_phone_login_button_status'
                                        style='height: 35px;
                                               text-valign: center;
@@ -860,6 +864,7 @@
                                               margin-top: 4px;' />
                                 <input type='text'
                                        name='phone_captcha'
+                                       enable_ime='false'
                                        onchange='update_phone_login_button_status'
                                        style='height: 35px;
                                               text-valign: center;
@@ -917,6 +922,7 @@
                                    value='<%= L"开始"%>' />
                         </div>
                         <input type='text'
+                               enable_ime='false'
                                name='start_button_focus'
                                value=''
                                CaretColor='#00000000'
