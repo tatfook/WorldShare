@@ -101,8 +101,8 @@ end
 
 function Certificate:ShowMyHomePage(callback)
     local params = Mod.WorldShare.Utils.ShowWindow(
-        800,
-        480,
+        760,
+        490,
         '(ws)Certificate/MyHome.html',
         'Mod.WorldShare.Certificate.MyHome'
     )
