@@ -111,7 +111,10 @@ end
 -- method: POST
 -- params:
 --[[
-    token string 必须 token
+    token string necessary token
+    cellphone number necessary cellphone,
+    captcha number necessary captcha,
+    realname boolean necessary true
 ]]
 -- return: object
 function KeepworkUsersApi:RealName(cellphone, captcha, success, error, noTryStatus)
