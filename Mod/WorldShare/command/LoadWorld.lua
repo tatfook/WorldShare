@@ -361,7 +361,7 @@ function LoadWorldCommand:Fork(cmdText, options)
         return
     end
 
-    Mod.WorldShare.MsgBox:Show(L'请稍候...')
+    Mod.WorldShare.MsgBox:Wait()
 
     KeepworkServiceProject:GetProject(projectId, function(data, err)
         if not data or
