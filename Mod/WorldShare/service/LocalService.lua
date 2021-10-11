@@ -414,21 +414,36 @@ function LocalService:GetZipWorldSize(path)
 end
 
 function LocalService:GetZipRevision(path)
-    local parentPath = path:gsub("[^/\\]+$", "")
+    local parentPath = path:gsub('[^/\\]+$', '')
 
     ParaAsset.OpenArchive(path, true)
 
     local revision = 0
     local output = {}
 
-    commonlib.Files.Find(output, "", 0, self.nMaxFilesNum, ":revision.xml", path)
+    commonlib.Files.Find(output, '', 0, self.nMaxFilesNum, ':revision.xml', path)
 
     if #output ~= 0 then
-        local file = ParaIO.open(parentPath .. output[1].filename, "r")
+        local zipFileName = nil
 
-        if file:IsValid() then
-            revision = file:GetText(0, -1)
-            file:close()
+        if #output > 1 then
+            for key, item in ipairs(output) do
+                if string.match(item.filename, '[^/]+/revision.xml') == item.filename then
+                    echo(item.filename, true)
+                    zipFileName = item.filename
+                end
+            end
+        else
+            zipFileName = output[1].filename
+        end
+
+        if zipFileName then
+            local file = ParaIO.open(parentPath .. zipFileName, 'r')
+
+            if file:IsValid() then
+                revision = file:GetText(0, -1)
+                file:close()
+            end
         end
     end
 

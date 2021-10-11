@@ -313,6 +313,18 @@ function LoadWorldCommand:Init()
                 refreshMode = 'force'
             end
 
+            if options and options.never then
+                refreshMode = 'never'
+            end
+
+            if options and options.auto then
+                refreshMode = 'auto'
+            end
+
+            if options and options.check then
+                refreshMode = 'check'
+            end
+
             if options and options.failed then
                 failed = true
             end
