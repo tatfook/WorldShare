@@ -390,6 +390,19 @@ function Utils:TimestampToDatetime(timestamp)
     return os.date("%Y-%m-%d %H:%M:%S", timestamp)
 end
 
+-- get week number by timestamp
+function Utils.GetWeekNum(timestamp)
+    timestamp = timestamp or 0
+
+    local weekNum = os.date("*t",timestamp).wday - 1
+
+    if weekNum == 0 then
+        weekNum = 7
+    end
+
+    return weekNum
+end
+
 -- open a keepwork url with keepwork token
 function Utils.OpenKeepworkUrlByToken(url)
     if not KeepworkServiceSession:IsSignedIn() then

@@ -2,7 +2,7 @@
 Title: Common Load World
 Author(s): big
 CreateDate: 2021.01.20
-ModifyDate: 2021.09.17
+ModifyDate: 2021.10.13
 City: Foshan
 use the lib:
 ------------------------------------------------------------
@@ -11,11 +11,11 @@ local CommonLoadWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/Com
 ]]
 
 -- libs
-local Game = commonlib.gettable("MyCompany.Aries.Game")
+local Game = commonlib.gettable('MyCompany.Aries.Game')
 local DownloadWorld = commonlib.gettable('MyCompany.Aries.Game.MainLogin.DownloadWorld')
 local RemoteWorld = commonlib.gettable('MyCompany.Aries.Creator.Game.Login.RemoteWorld')
 local InternetLoadWorld = commonlib.gettable('MyCompany.Aries.Creator.Game.Login.InternetLoadWorld')
-local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
+local WorldCommon = commonlib.gettable('MyCompany.Aries.Creator.WorldCommon')
 
 -- service
 local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
@@ -35,7 +35,7 @@ local WorldKeyDecodePage = NPL.load('(gl)script/apps/Aries/Creator/Game/Tasks/Wo
 local CacheProjectId = NPL.load('(gl)Mod/WorldShare/database/CacheProjectId.lua')
 
 -- api
-local KeepworkBaseApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/BaseApi.lua")
+local KeepworkBaseApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/BaseApi.lua')
 
 local CommonLoadWorld = NPL.export()
 
@@ -100,7 +100,7 @@ function CommonLoadWorld:EnterCourseWorld(aiCourseId, preRelease, releaseId)
     local function LoadWorld(world, refreshMode)
         if world then
             if refreshMode == 'never' then
-                if not LocalService:IsFileExistInZip(world:GetLocalFileName(), ":worldconfig.txt") then
+                if not LocalService:IsFileExistInZip(world:GetLocalFileName(), ':worldconfig.txt') then
                     refreshMode = 'force'
                 end
             end
@@ -122,7 +122,7 @@ function CommonLoadWorld:EnterCourseWorld(aiCourseId, preRelease, releaseId)
     local token = Mod.WorldShare.Store:Get('user/token')
 
     if token then
-        world:SetHttpHeaders({Authorization = format("Bearer %s", token)})
+        world:SetHttpHeaders({Authorization = format('Bearer %s', token)})
     end
 
     local fileUrl = world:GetLocalFileName()
@@ -154,7 +154,7 @@ function CommonLoadWorld:EnterHomeworkWorld(aiHomeworkId, preRelease, releaseId)
     local function LoadWorld(world, refreshMode)
         if world then
             if refreshMode == 'never' then
-                if not LocalService:IsFileExistInZip(world:GetLocalFileName(), ":worldconfig.txt") then
+                if not LocalService:IsFileExistInZip(world:GetLocalFileName(), ':worldconfig.txt') then
                     refreshMode = 'force'
                 end
             end
@@ -176,7 +176,7 @@ function CommonLoadWorld:EnterHomeworkWorld(aiHomeworkId, preRelease, releaseId)
     local token = Mod.WorldShare.Store:Get('user/token')
 
     if token then
-        world:SetHttpHeaders({Authorization = format("Bearer %s", token)})
+        world:SetHttpHeaders({Authorization = format('Bearer %s', token)})
     end
 
     local fileUrl = world:GetLocalFileName()
@@ -199,14 +199,14 @@ function CommonLoadWorld:EnterCacheWorldById(pid)
 
     local worldInfo = cacheWorldInfo.worldInfo
     local url = cacheWorldInfo.worldInfo.archiveUrl
-    local world = RemoteWorld.LoadFromHref(url, "self")
+    local world = RemoteWorld.LoadFromHref(url, 'self')
     world:SetProjectId(pid)
     local fileUrl = world:GetLocalFileName()
 
     if fileUrl then
         WorldCommon.OpenWorld(fileUrl, true)
     else
-        _guihelper.MessageBox(L"无效的世界文件")
+        _guihelper.MessageBox(L'无效的世界文件')
     end
 end
 
@@ -262,7 +262,101 @@ function CommonLoadWorld:IdsFilter(id)
     return false
 end
 
--- @param refreshMode: nil|"auto"|"check"|"never"|"force".  
+function CommonLoadWorld:TimesFilter(timeRules)
+    local serverTime = Mod.WorldShare.Store:Get('world/currentServerTime')
+    local weekDay = Mod.WorldShare.Utils.GetWeekNum(serverTime)
+    local dateList = {'一', '二', '三', '四', '五', '六', '日'}
+
+    local function Check(timeRule)
+        local year, month, day = timeRule.startDay:match('^(%d+)%D(%d+)%D(%d+)') 
+        local startDateTimestamp = os.time(
+                                    {
+                                        day = tonumber(day),
+                                        month = tonumber(month),
+                                        year = tonumber(year),
+                                        hour = 0,
+                                        min = 0,
+                                        sec = 0
+                                    }
+                                   )
+
+        year, month, day = timeRule.endDay:match('^(%d+)%D(%d+)%D(%d+)')
+        local endDateTimestamp = os.time(
+                                    {
+                                        day = tonumber(day),
+                                        month = tonumber(month),
+                                        year = tonumber(year),
+                                        hour = 23,
+                                        min = 59,
+                                        sec=59
+                                    }
+                                )
+
+        if serverTime < startDateTimestamp then
+            return false, string.format(L'未到上课时间，请在%s之后来学习吧。', timeRule.startDay)
+        end
+
+        if serverTime > endDateTimestamp then
+            return false, L'上课时间已过'
+        end
+
+        local weeks = timeRule.weeks
+        local inWeekDay = false
+
+        local dateStr = ''
+        for i, v in ipairs(weeks) do
+            if v == weekDay then
+                inWeekDay = true
+            end
+
+            dateStr = dateStr .. L'周' .. dateList[v] or ''
+
+            if i ~= #weeks then
+                dateStr = dateStr .. '，'
+            end
+        end
+
+        if not inWeekDay then
+            return false, string.format(L'现在不是上课时间哦，请在上课时间（%s）内再来上课吧。', dateStr)
+        end
+
+        local startTimeStr = timeRule.startTime or '0:0'
+        local startHour, startMin = startTimeStr:match('^(%d+)%D(%d+)') 
+        startHour = tonumber(startHour)
+        startMin = tonumber(startMin)
+
+        local endTimeStr = timeRule.endTime or '23:59'
+        local endHour, endMin = endTimeStr:match('^(%d+)%D(%d+)') 
+        endHour = tonumber(endHour)
+        endMin = tonumber(endMin)
+
+        local timeStr = startTimeStr .. '-' .. endTimeStr
+
+        local todayWeehours = commonlib.timehelp.GetWeeHoursTimeStamp(serverTime)
+        local limitTimeStamp = todayWeehours + startHour * 60 * 60 + startMin * 60
+        local limitTimeEndStamp = todayWeehours + endHour * 60 * 60 + endMin * 60
+
+        if serverTime < limitTimeStamp or serverTime > limitTimeEndStamp then
+            return false, string.format(L'现在不是上课时间哦，请在上课时间（%s）内再来上课吧。', time_str)
+        end
+
+        return true
+    end
+
+    local failedReasonList = {}
+    for _, timeRule in ipairs(timeRules) do
+        local result, reason = Check(timeRule)
+        if result then
+            return true
+        end
+
+        failedReasonList[#failedReasonList + 1] = reason
+    end
+
+    return false, failedReasonList[1]
+end
+
+-- @param refreshMode: nil|'auto'|'check'|'never'|'force'.  
 function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
     if not pid then
         return
@@ -359,7 +453,7 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
             -- encrypt mode load world
             if self.encryptWorldMode then
                 if refreshMode == 'never' then
-                    if not LocalService:IsFileExistInZip(encryptWorldFile, ":worldconfig.txt") then
+                    if not LocalService:IsFileExistInZip(encryptWorldFile, ':worldconfig.txt') then
                         -- broken world
                         refreshMode = 'force'
                     end
@@ -413,7 +507,7 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                                 
                                 local output = {}
     
-                                commonlib.Files.Find(output, "", 0, 500, ":worldconfig.txt", downloadNewLocalWorldFile)
+                                commonlib.Files.Find(output, '', 0, 500, ':worldconfig.txt', downloadNewLocalWorldFile)
     
                                 if #output == 0 then
                                     _guihelper.MessageBox(format(L'下载的世界已损坏，请重新尝试几次（项目ID：%d）', pid))
@@ -467,7 +561,7 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
 
                 if refreshMode == 'never' then
                     -- broken world
-                    if not LocalService:IsFileExistInZip(localWorldFile, ":worldconfig.txt") then
+                    if not LocalService:IsFileExistInZip(localWorldFile, ':worldconfig.txt') then
                         refreshMode = 'force'
                     end
                 end
@@ -513,7 +607,7 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                                 
                                 local output = {}
 
-                                commonlib.Files.Find(output, "", 0, 500, ":worldconfig.txt", downloadNewLocalWorldFile)
+                                commonlib.Files.Find(output, '', 0, 500, ':worldconfig.txt', downloadNewLocalWorldFile)
 
                                 if #output == 0 then
                                     _guihelper.MessageBox(format(L'下载的世界已损坏，请重新尝试几次（项目ID：%d）', pid))
@@ -662,7 +756,7 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
     -- show view over 10 seconds
     Mod.WorldShare.Utils.SetTimeOut(function()
         if fetchSuccess then
-            return false
+            return
         end
 
         MainLogin:Close()
@@ -743,6 +837,7 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                 self.encodeWorldVerified = false
                 self.encryptWorldVerified = false
                 self.freeUserVerified = false
+                self.timesVerified = false
             end
 
             local function HandleVerified()
@@ -776,6 +871,23 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                     return
                 end
 
+                -- times verified
+                if data.timeRules and
+                   data.timeRules[1] and
+                   not self.timesVerified then
+                    local reuslt, reason = self:TimesFilter(data.timeRules)
+
+                    if result then
+                        self.timesVerified = true
+
+                        HandleVerified()
+                    else
+                        _guihelper.MessageBox(reason)
+                    end
+
+                    return
+                end
+
                 -- private world verfied
                 if data.visibility == 1 and
                    not self.isVisiblityVerified then
@@ -795,7 +907,7 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
     
                             for key, item in ipairs(members) do
                                 if item and item.username and item.username == username then    
-                                    data.world.archiveUrl = data.world.archiveUrl .. "&private=true"
+                                    data.world.archiveUrl = data.world.archiveUrl .. '&private=true'
                                     self.isVisiblityVerified = true
 
                                     HandleVerified()
