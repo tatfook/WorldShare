@@ -7,6 +7,7 @@
                     local Create = NPL.load('(gl)Mod/WorldShare/cellar/Create/Create.lua')
                     local LoginModal = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua')
                     local RedSummerCampMainPage = NPL.load('(gl)script/apps/Aries/Creator/Game/Tasks/RedSummerCamp/RedSummerCampMainPage.lua')
+                    local Opus = NPL.load("(gl)Mod/WorldShare/cellar/Opus/Opus.lua")
 
                     -- service
                     local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
@@ -102,7 +103,7 @@
 
                     function open_create()
                         close()
-                        Create:Show()
+                        Opus:Show()
                     end
 
                     function start()
