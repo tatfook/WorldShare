@@ -167,7 +167,7 @@ function WorldShare:init()
 
     -- init cef3 for windows
     if System.os.GetPlatform() == 'win32' then
-        Cef3Manager:Init()
+        -- Cef3Manager:Init()
     end
 
     -- init long tcp connection
