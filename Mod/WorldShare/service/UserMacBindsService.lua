@@ -79,7 +79,7 @@ function UserMacBindsService:UnbindDevice(callback)
             return
         end
 
-        if data and type(data) and #data == 0 then
+        if data and type(data) == 'table' and #data == 0 then
             -- always unbind when bad network    
             BindDatabase:SetValue('username', nil)
             BindDatabase:SetValue('UUID', nil)
@@ -90,7 +90,7 @@ function UserMacBindsService:UnbindDevice(callback)
             BindDatabase:SaveDatabase()
 
             callback(true)
-        elseif data and type(data) and #data > 0 then
+        elseif data and type(data) == 'table' and #data > 0 then
             for _, item in ipairs(data) do
                 local macAddress = self:GetMachineID()
 
@@ -109,6 +109,8 @@ function UserMacBindsService:UnbindDevice(callback)
                     return
                 end
             end
+        else
+            callback(false)
         end
     end)
 end
