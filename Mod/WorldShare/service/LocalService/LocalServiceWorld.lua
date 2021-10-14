@@ -147,6 +147,11 @@ function LocalServiceWorld:GetSharedWorldList()
     end
 
     local sharedWorldPath = LocalLoadWorld.GetDefaultSaveWorldPath() .. '/_shared/'
+
+    if not ParaIO.DoesFileExist(sharedWorldPath) then
+        return dsWorlds
+    end
+
     local sharedFiles = LocalService:Find(sharedWorldPath)
 
     for key, item in ipairs(sharedFiles) do

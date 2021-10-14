@@ -89,7 +89,7 @@ function MainLogin:ShowAndroid()
         url = 'Mod/WorldShare/cellar/MainLogin/Theme/MainLoginAndroid.html',
         name = 'MainLogin', 
         isShowTitleBar = false,
-        DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
+        DestroyOnClose = true,
         style = CommonCtrl.WindowFrame.ContainerStyle,
         zorder = -1,
         allowDrag = false,
@@ -100,6 +100,7 @@ function MainLogin:ShowAndroid()
         width = 0,
         height = 0,
         cancelShowAnimation = true,
+        bToggleShowHide = false
     })
 
     self:ShowAndroidLogin()
@@ -110,7 +111,7 @@ function MainLogin:Show1()
         url = 'Mod/WorldShare/cellar/MainLogin/Theme/MainLogin.html', 
         name = 'MainLogin', 
         isShowTitleBar = false,
-        DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
+        DestroyOnClose = true,
         style = CommonCtrl.WindowFrame.ContainerStyle,
         zorder = -1,
         allowDrag = false,
@@ -138,7 +139,7 @@ function MainLogin:Show2()
         url = 'Mod/WorldShare/cellar/MainLogin/Theme/MainLogin.html', 
         name = 'MainLogin', 
         isShowTitleBar = false,
-        DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
+        DestroyOnClose = true,
         style = CommonCtrl.WindowFrame.ContainerStyle,
         zorder = -1,
         allowDrag = false,
@@ -166,7 +167,7 @@ function MainLogin:Show3()
         url = 'Mod/WorldShare/cellar/MainLogin/Theme/MainLogin.html', 
         name = 'MainLogin', 
         isShowTitleBar = false,
-        DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
+        DestroyOnClose = true,
         style = CommonCtrl.WindowFrame.ContainerStyle,
         zorder = -1,
         allowDrag = false,
@@ -319,7 +320,6 @@ function MainLogin:ShowLogin1()
             end
         end
     end
-
 end
 
 function MainLogin:ShowAndroidLogin()
@@ -332,7 +332,9 @@ function MainLogin:ShowAndroidLogin()
         0,
         '_fi',
         false,
-        -1
+        -1,
+        nil,
+        false
     )
 end
 
