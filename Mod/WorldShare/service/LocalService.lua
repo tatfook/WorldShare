@@ -429,7 +429,6 @@ function LocalService:GetZipRevision(path)
         if #output > 1 then
             for key, item in ipairs(output) do
                 if string.match(item.filename, '[^/]+/revision.xml') == item.filename then
-                    echo(item.filename, true)
                     zipFileName = item.filename
                 end
             end

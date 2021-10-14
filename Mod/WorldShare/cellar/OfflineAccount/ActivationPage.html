@@ -140,7 +140,8 @@
                     end
 
                     function get_sync_date()
-                        return UserMacBindsService:GetSyncDate()
+                        -- return UserMacBindsService:GetSyncDate()
+                        return '未同步'
                     end
 
                     Mod.WorldShare.Utils.SetTimeOut(function()
@@ -267,14 +268,13 @@
                                        value='' />
                             </div>
                         </div>
-                        <div width='430px'
+                        <div width='150px'
                              align='center'>
                             <input type='button'
                                    onclick='activate'
                                    class='theme1_yellow_button'
                                    style='width: 150px;
                                           height: 55px;
-                                          margin-left: 80px;
                                           font-size: 25px;
                                           base-font-size: 25px;'
                                    value='<%= L"激活" %>'/>
@@ -285,21 +285,45 @@
                                   visible='false'
                                   width='300px'
                                   height='100px;'
-                                  style='background:;'>
-                        <div onclick='sync_class_world'>
+                                  style='background:;
+                                         padding-right: 50px;
+                                         margin-top: -30px;'>
+                        <div onclick='sync_class_world'
+                             align='right'
+                             style='font-size: 25px;
+                                    base-font-size: 25px;
+                                    color: #2956ab;
+                                    margin-left: 10px;
+                                    width: 155px;'>
                             <%= L'同步离线课程' %>
                             <div width='155px'
-                                    style='background-color: #2956ab;
+                                 style='background-color: #2956ab;
                                         height: 1px;'></div>
                         </div>
-                        <div>
+                        <div style='color: #6b6b6c;
+                                    font-size: 16px;
+                                    base-font-size: 16px;
+                                    text-align: right;'>
                             <div>
                                 <%= L'请在有网络时经常同步离线课程' %>
                             </div>
-                            <div>
-                                <%= L'上次同步时间：'%>
-                                <%= get_sync_date() %>
-                            </div>
+                            <pe:if condition='<%= get_sync_date() == L"未同步" %>'>
+                                <div align='right'
+                                     style='width: 203px;
+                                            text-align: left;'>
+                                    <%= L'上次同步时间：' %>
+                                    <div style='float: left;'>
+                                        <img style='width: 90px;
+                                                    height: 21px;'
+                                             src='Texture/Aries/Creator/paracraft/paracraft_icon_01_32bits.png#0 0 90 21' />
+                                    </div>
+                                </div>
+                            </pe:if>
+                            <pe:if condition='<%= get_sync_date() ~= L"未同步" %>'>
+                                <div>
+                                    <%= L'上次同步时间：' .. get_sync_date() %>
+                                </div>
+                            </pe:if>
                         </div>
                     </pe:container>
                     <pe:container alignment='_ct'
@@ -311,22 +335,30 @@
                                          margin-left: -400px;
                                          margin-top: -206px;'>
                         <div>
-                            <div style='float: left;
-                                        width: 220px;'>
+                            <div style='width: 483px;
+                                        float: left;'>
                                 <label style='font-size: 55px;
                                               base-font-size: 55px;
                                               font-weight: bolder;
                                               color: #000000;
-                                              height: 70px;'
+                                              height: 70px;
+                                              text-align: right'
                                         name='username' />
                             </div>
                             <pe:container name='unbind_device'
                                           visible='false'
                                           style='float: left;
-                                                 width: 220px;'>
-                                <div onclick='unbind'>
-                                    <%= L'解除激活（需联网）' %>
-                                    <div width='220px'
+                                                 width: 220px;
+                                                 padding-left: 50px;
+                                                 background:;'>
+                                <div onclick='unbind'
+                                     style='font-size: 20px;
+                                            base-font-size: 20px;
+                                            color: #2956ab;
+                                            margin-top: 20px;
+                                            margin-left: 10px;'>
+                                    <%= L'解除绑定' %>
+                                    <div width='83px'
                                          style='background-color: #2956ab;
                                                 height: 1px;'></div>
                                 </div>
@@ -335,46 +367,70 @@
                                           visible='false'
                                           style='float: left;
                                                  width: 220px;
-                                                 margin-left: -220px;'>
-                                <div onclick='show_bind_page'>
+                                                 padding-left: 50px;
+                                                 margin-left: -220px;
+                                                 background:;'>
+                                <div onclick='show_bind_page'
+                                     style='font-size: 20px;
+                                            base-font-size: 20px;
+                                            color: #2956ab;
+                                            margin-top: 20px;
+                                            margin-left: 10px;'>
                                     <%= L'绑定用户' %>
-                                    <div width='220px'
+                                    <div width='83px'
                                          style='background-color: #2956ab;
                                                 height: 1px;'></div>
                                 </div>
                             </pe:container>
                         </div>
-                        <pe:container name='not_bind_notice'
-                                      visible='false'>
-                            <div>
-                                <%= L'匿名用户只能访问有限资源。 如果你在使用个人设备（非学校电脑），可以点击绑定用户，激活后，你将可以在没有网络的情况下访问和编辑属于你的世界。' %>
-                            </div>
-                        </pe:container>
-                        <pe:container name='binded_notice'
-                                      visible='false'>
-                            <div>
-                                <%= L'每个用户可以绑定2台设备，没有网络时仍然具有该用户的访问权限。有网时请正常登录，才能上传分享世界。' %>
-                            </div>
-                        </pe:container>
-                        <div width='480px'
+                        <div style='height: 50px;
+                                    margin-top: 40px;'>
+                            <pe:container name='not_bind_notice'
+                                          style='position: relative;
+                                                 background:;'
+                                          visible='false'>
+                                <div style='font-size: 22px;
+                                            base-font-size: 22px;'>
+                                    <%= L'匿名用户只能访问有限资源。 如果你在使用个人设备（非学校电脑），可以点击绑定用户，激活后，你将可以在没有网络的情况下访问和编辑属于你的世界。' %>
+                                </div>
+                            </pe:container>
+                            <pe:container name='binded_notice'
+                                          style='position: relative;
+                                                 background:;'
+                                          visible='false'>
+                                <div style='font-size: 22px;
+                                            base-font-size: 22px;'>
+                                    <%= L'每个用户可以绑定2台设备，没有网络时仍然具有该用户的访问权限。有网时请正常登录，才能上传分享世界。' %>
+                                </div>
+                            </pe:container>
+                        </div>
+                        <div width='200px'
                              align='center'
-                             style='margin-top: 80px;'>
+                             style='margin-top: 120px;'>
                             <div>
                                 <input type='button'
                                        onclick='start'
                                        class='theme1_yellow_button start'
                                        style='width: 200px;
                                               height: 55px;
-                                              margin-left: 80px;
                                               font-size: 25px;
                                               base-font-size: 25px;'
                                        value='<%= L"开始本地模式" %>' />
                             </div>
                             <pe:container name='anonymous_login'
+                                          style='background:;
+                                                 width: 200px;
+                                                 margin-top: 20px;'
                                           visible='false'>
-                                <div onclick='open_create'>
+                                <div onclick='open_create'
+                                     align='center'
+                                     style='font-size: 20px;
+                                            base-font-size: 20px;
+                                            color: #2956ab;
+                                            width: 82px;
+                                            height: 30px;'>
                                        <%= L"匿名登录" %>
-                                       <div width='220px'
+                                       <div width='82px'
                                          style='background-color: #2956ab;
                                                 height: 1px;'></div>
                                 </div>

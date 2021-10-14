@@ -75,30 +75,42 @@ function UserMacBindsService:UnbindDevice(callback)
     UserMacBindsApi:GetBindList(function(data, err)
         if err ~= 200 or
            type(data) ~= 'table' then
+            callback(false)
             return
         end
 
-        local macAddress = self:GetMachineID()
+        if data and type(data) and #data == 0 then
+            -- always unbind when bad network    
+            BindDatabase:SetValue('username', nil)
+            BindDatabase:SetValue('UUID', nil)
+            BindDatabase:SetValue('machineID', nil)
+            BindDatabase:SetValue('bindDate', nil)
+            BindDatabase:SetValue('isBind', nil)
 
-        for _, item in ipairs(data) do
-            if item.macAddr == macAddress then
-                UserMacBindsApi:RemoveMacAddress(item.id)
+            BindDatabase:SaveDatabase()
 
-                BindDatabase:SetValue('username', nil)
-                BindDatabase:SetValue('UUID', nil)
-                BindDatabase:SetValue('machineID', nil)
-                BindDatabase:SetValue('bindDate', nil)
-                BindDatabase:SetValue('isBind', nil)
+            callback(true)
+        elseif data and type(data) and #data > 0 then
+            for _, item in ipairs(data) do
+                local macAddress = self:GetMachineID()
 
-                BindDatabase:SaveDatabase()
-
-                callback(true)
-                return
+                if item.macAddr == macAddress then
+                    UserMacBindsApi:RemoveMacAddress(item.id)
+    
+                    BindDatabase:SetValue('username', nil)
+                    BindDatabase:SetValue('UUID', nil)
+                    BindDatabase:SetValue('machineID', nil)
+                    BindDatabase:SetValue('bindDate', nil)
+                    BindDatabase:SetValue('isBind', nil)
+    
+                    BindDatabase:SaveDatabase()
+    
+                    callback(true)
+                    return
+                end
             end
         end
     end)
-
-    callback(false)
 end
 
 function UserMacBindsService:IsBindDevice(callback)
