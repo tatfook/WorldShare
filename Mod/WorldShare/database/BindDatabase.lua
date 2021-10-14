@@ -20,6 +20,7 @@ local BindDatabase = NPL.export()
         isBind = true,
         bindUsername = 'xxx',
         bindDate = '',
+        syncDate = '',
     }
 ]]
 function BindDatabase:GetDatabase()

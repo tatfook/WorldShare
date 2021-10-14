@@ -51,7 +51,16 @@
                     end
                 ]]>
             </script>
-            <style type="type/mcss" src='Mod/WorldShare/cellar/Opus/OpusMcss.mcss'>
+            <style type='type/mcss' src='Mod/WorldShare/cellar/Opus/OpusMcss.mcss'></style>
+            <style type='type/mcss'>
+                {
+                    selected_button = {
+                        position = 'relative',
+                        width = 110,
+                        height = 58,
+                        background = 'Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#87 110 111 52:20 0 20 0)'
+                    }
+                }
             </style>
             <div width='1024' height='720'>
                 <div>
@@ -78,10 +87,7 @@
                                            height: 64px;
                                            background:;' />
                             <pe:container name='sel_all' visible='true' style='background:;'>
-                                <div style='position: relative;
-                                            width: 110px;
-                                            height: 64px;
-                                            background: url(Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#87 110 111 52:20 0 20 0);'></div>
+                                <div class='selected_button'></div>
                             </pe:container>
                             <div align='center' style='width: 41px;height: 20px;'>
                                 <img src='Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#196 74 41 20'
@@ -101,10 +107,7 @@
                                            height: 64px;
                                            background:;' />
                             <pe:container name='sel_online' visible='false' style='background:;'>
-                                <div style='position: relative;
-                                            width: 110px;
-                                            height: 64px;
-                                            background: url(Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#87 110 111 52:20 0 20 0);'></div>
+                                <div class='selected_button'></div>
                             </pe:container>
                             <div align='center' style='width: 41px;height: 20px;'>
                                 <img src='Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#241 74 41 20'
@@ -124,10 +127,7 @@
                                           height: 64px;
                                           background:;' />
                             <pe:container name='sel_local' visible='false' style='background:;'>
-                                <div style='position: relative;
-                                            width: 110px;
-                                            height: 64px;
-                                            background: url(Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#87 110 111 52:20 0 20 0);'></div>
+                                <div class='selected_button'></div>
                             </pe:container>
                             <div align='center' style='width: 41px;height: 20px;'>
                                 <img src='Texture/Aries/Creator/keepwork/RedSummerCamp/works/works_32bits.png#286 74 41 20'

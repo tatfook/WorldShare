@@ -141,6 +141,25 @@ function UserMacBindsService:GetUsername()
     return BindDatabase:GetValue('username')
 end
 
+function UserMacBindsService:GetBindDate()
+    return BindDatabase:GetValue('bindDate')
+end
+
+function UserMacBindsService:SetSyncDate()
+    BindDatabase:SetValue('syncDate', Mod.WorldShare.Utils:GetCurrentTime())
+    BindDatabase:SaveDatabase()
+end
+
+function UserMacBindsService:GetSyncDate()
+    local syncDate = BindDatabase:GetValue('syncDate')
+
+    if syncDate then
+        return os.date(L'%Y年%m月%d日', syncDate)
+    else
+        return L'未同步'
+    end
+end
+
 function UserMacBindsService:IsVip()
     local session = SessionsData:GetSessionByUsername(self:GetUsername())
 

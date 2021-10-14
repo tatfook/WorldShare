@@ -24,15 +24,48 @@
 
                     function set_container(index)
                         local not_bind_node = page:FindControl('not_bind')
-                        local binded = page:FindControl('binded')
+                        local binded_node = page:FindControl('binded')
+                        local binded_sync_node = page:FindControl('binded_sync')
 
                         if index == 1 then -- not bind
                             not_bind_node.visible = true
-                            binded.visible = false
+                            binded_node.visible = false
+                            binded_sync_node.visible = false
                         elseif index == 2 then -- binded
                             not_bind_node.visible = false
-                            binded.visible = true
+                            binded_node.visible = true
+                            binded_sync_node.visible = true
+
+                            local not_bind_notice_node = page:FindControl('not_bind_notice')
+                            local binded_notice_node = page:FindControl('binded_notice')
+
+                            local unbind_device_node = page:FindControl('unbind_device')
+                            local bind_device_node = page:FindControl('bind_device')
+
+                            local anonymous_login_node = page:FindControl('anonymous_login')
+
+                            if is_binded() then
+                                not_bind_notice_node.visible = false
+                                binded_notice_node.visible = true
+
+                                unbind_device_node.visible = true
+                                bind_device_node.visible = false
+
+                                anonymous_login_node.visible = true
+                            else
+                                not_bind_notice_node.visible = true
+                                binded_notice_node.visible = false
+
+                                unbind_device_node.visible = false
+                                bind_device_node.visible = true
+
+                                anonymous_login_node.visible = false
+                            end
                         end
+                    end
+
+                    function show_bind_page()
+                        set_container(1)
                     end
 
                     function activate()
@@ -73,12 +106,17 @@
                     end
 
                     function start()
-                        close()
-                        RedSummerCampMainPage.Show()
+                        if is_binded() then
+                            close()
+                            RedSummerCampMainPage.Show()
+                        else
+                            open_create()
+                        end
                     end
 
                     function sync_class_world()
                         GameLogic.RunCommand('/loadworld 84481')
+                        UserMacBindsService:SetSyncDate()
                     end
 
                     function unbind()
@@ -89,22 +127,30 @@
                                         return
                                     end
 
-                                    set_container(1)
-                                    
+                                    set_container(2)
+
                                     KeepworkServiceSession:Logout()
                                 end)
                             end
                         end)
                     end
 
+                    function is_binded()
+                        return UserMacBindsService:IsBindDeviceFromLocal()
+                    end
+
+                    function get_sync_date()
+                        return UserMacBindsService:GetSyncDate()
+                    end
+
                     Mod.WorldShare.Utils.SetTimeOut(function()
+                        set_container(2)
+
                         if UserMacBindsService:IsBindDeviceFromLocal() then
-                            set_container(2)
-                            
                             local username = get_offline_username()
                             page:SetValue('username', username)
                         else
-                            set_container(1)
+                            page:SetValue('username', L'匿名用户')
                         end
                     end, 0)
                 ]]>
@@ -224,14 +270,6 @@
                         <div width='430px'
                              align='center'>
                             <input type='button'
-                                   onclick='open_create'
-                                   class='theme1_gray2_button'
-                                   style='width: 200px;
-                                          height: 57px;
-                                          font-size: 25px;
-                                          base-font-size: 25px;'
-                                   value='<%= L"不使用账号" %>' />
-                            <input type='button'
                                    onclick='activate'
                                    class='theme1_yellow_button'
                                    style='width: 150px;
@@ -240,6 +278,28 @@
                                           font-size: 25px;
                                           base-font-size: 25px;'
                                    value='<%= L"激活" %>'/>
+                        </div>
+                    </pe:container>
+                    <pe:container alignment='_rt'
+                                  name='binded_sync'
+                                  visible='false'
+                                  width='300px'
+                                  height='100px;'
+                                  style='background:;'>
+                        <div onclick='sync_class_world'>
+                            <%= L'同步离线课程' %>
+                            <div width='155px'
+                                    style='background-color: #2956ab;
+                                        height: 1px;'></div>
+                        </div>
+                        <div>
+                            <div>
+                                <%= L'请在有网络时经常同步离线课程' %>
+                            </div>
+                            <div>
+                                <%= L'上次同步时间：'%>
+                                <%= get_sync_date() %>
+                            </div>
                         </div>
                     </pe:container>
                     <pe:container alignment='_ct'
@@ -251,56 +311,74 @@
                                          margin-left: -400px;
                                          margin-top: -206px;'>
                         <div>
-                            <label style='font-size: 55px;
-                                          base-font-size: 55px;
-                                          font-weight: bolder;
-                                          text-align: center;
-                                          color: #000000;
-                                          height: 70px;'
-                                    name='username' />
-                        </div>
-                        <div style='font-size: 25px;
-                                    base-font-size: 25px;
-                                    color: #2956ab;
-                                    width: 620px;
-                                    margin-top: 80px;'
-                              align='center'>
-                            <div style='float: left;'
-                                 onclick='sync_class_world'>
-                                <%= '同步离线课程' %>
-                                <div width='155px'
-                                     style='background-color: #2956ab;
-                                            height: 1px;'></div>
-                            </div>
                             <div style='float: left;
-                                        margin-left: 240px;'
-                                 onclick='unbind'>
-                                <%= L'解除激活（需联网）' %>
-                                <div width='220px'
-                                     style='background-color: #2956ab;
-                                            height: 1px;'></div>
+                                        width: 220px;'>
+                                <label style='font-size: 55px;
+                                              base-font-size: 55px;
+                                              font-weight: bolder;
+                                              color: #000000;
+                                              height: 70px;'
+                                        name='username' />
                             </div>
+                            <pe:container name='unbind_device'
+                                          visible='false'
+                                          style='float: left;
+                                                 width: 220px;'>
+                                <div onclick='unbind'>
+                                    <%= L'解除激活（需联网）' %>
+                                    <div width='220px'
+                                         style='background-color: #2956ab;
+                                                height: 1px;'></div>
+                                </div>
+                            </pe:container>
+                            <pe:container name='bind_device'
+                                          visible='false'
+                                          style='float: left;
+                                                 width: 220px;
+                                                 margin-left: -220px;'>
+                                <div onclick='show_bind_page'>
+                                    <%= L'绑定用户' %>
+                                    <div width='220px'
+                                         style='background-color: #2956ab;
+                                                height: 1px;'></div>
+                                </div>
+                            </pe:container>
                         </div>
+                        <pe:container name='not_bind_notice'
+                                      visible='false'>
+                            <div>
+                                <%= L'匿名用户只能访问有限资源。 如果你在使用个人设备（非学校电脑），可以点击绑定用户，激活后，你将可以在没有网络的情况下访问和编辑属于你的世界。' %>
+                            </div>
+                        </pe:container>
+                        <pe:container name='binded_notice'
+                                      visible='false'>
+                            <div>
+                                <%= L'每个用户可以绑定2台设备，没有网络时仍然具有该用户的访问权限。有网时请正常登录，才能上传分享世界。' %>
+                            </div>
+                        </pe:container>
                         <div width='480px'
                              align='center'
                              style='margin-top: 80px;'>
-                            <input type='button'
-                                   class='theme1_gray2_button'
-                                   style='width: 200px;
-                                          height: 57px;
-                                          font-size: 25px;
-                                          base-font-size: 25px;'
-                                   onclick='open_create'
-                                   value='<%= L"不使用账号" %>' />
-                            <input type='button'
-                                   onclick='start'
-                                   class='theme1_yellow_button start'
-                                   style='width: 200px;
-                                          height: 55px;
-                                          margin-left: 80px;
-                                          font-size: 25px;
-                                          base-font-size: 25px;'
-                                   value='<%= L"开始" %>' />
+                            <div>
+                                <input type='button'
+                                       onclick='start'
+                                       class='theme1_yellow_button start'
+                                       style='width: 200px;
+                                              height: 55px;
+                                              margin-left: 80px;
+                                              font-size: 25px;
+                                              base-font-size: 25px;'
+                                       value='<%= L"开始本地模式" %>' />
+                            </div>
+                            <pe:container name='anonymous_login'
+                                          visible='false'>
+                                <div onclick='open_create'>
+                                       <%= L"匿名登录" %>
+                                       <div width='220px'
+                                         style='background-color: #2956ab;
+                                                height: 1px;'></div>
+                                </div>
+                            </pe:container>
                         </div>
                     </pe:container>
                 </div>
