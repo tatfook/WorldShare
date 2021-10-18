@@ -20,9 +20,6 @@ CODE GUIDELINE
 
 ]]
 
--- include other mods
-NPL.load('(gl)Mod/DiffWorld/main.lua')
-
 -- include ide
 NPL.load('(gl)script/ide/Files.lua')
 NPL.load('(gl)script/ide/Encoding.lua')
@@ -129,9 +126,6 @@ local WorldShareCommand = NPL.load('(gl)Mod/WorldShare/command/Command.lua')
 -- filters
 local Filters = NPL.load('(gl)Mod/WorldShare/filters/Filters.lua')
 
--- other mods
-local DiffWorld = commonlib.gettable('Mod.DiffWorld')
-
 local WorldShare = commonlib.inherit(commonlib.gettable('Mod.ModBase'), commonlib.gettable('Mod.WorldShare'))
 
 WorldShare:Property({'Name', 'WorldShare', 'GetName', 'SetName', { auto = true }})
@@ -196,10 +190,15 @@ function WorldShare:init()
         MainLogin.state.IsUpdaterStarted = true
     end
 
-    if DiffWorld and type(DiffWorld) == 'table' and DiffWorld.init then
-        -- load diff world
-        DiffWorld:init()
-    end
+    -- load diff world
+    Mod.WorldShare.Utils.SetTimeOut(function()
+        NPL.load('(gl)Mod/DiffWorld/main.lua')
+        local DiffWorld = commonlib.gettable('Mod.DiffWorld')
+
+        if DiffWorld and type(DiffWorld) == 'table' and DiffWorld.init then
+            DiffWorld:init()
+        end
+    end, 3000)
 
     System.options.useFreeworldWhitelist = true
     System.options.maxFreeworldUploadCount = 3
