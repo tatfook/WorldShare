@@ -2,7 +2,7 @@
 Title: Permission
 Author(s):  big
 CreateDate: 2020.05.22
-ModifyDate: 2021.09.09
+ModifyDate: 2021.10.18
 place: Foshan
 Desc: 
 use the lib:
@@ -62,15 +62,7 @@ function Permission:CheckPermission(authName, bOpenUIIfNot, callback, uiType)
                         KeepworkServicePermission:Authentication(authName, function(result, key, desc)
                             if result == false then
                                 if not uiType or uiType == 'Vip' then
-                                    local platform = System.os.GetPlatform()
-                                    if platform == 'ios' or platform == 'mac' then
-                                        _guihelper.MessageBox(L'苹果系统暂时不支持开通会员。请下载Windows版本体验会员功能或关注“帕拉卡”微信小程序了解更多。')
-                                        if type(callback) == 'function' then
-                                            callback(false)
-                                        end
-                                    else
-                                        self:ShowFailDialog(key, desc)
-                                    end
+                                    self:ShowFailDialog(key, desc)
                                 end
         
                                 if uiType == 'Teacher' then
