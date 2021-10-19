@@ -144,6 +144,24 @@
                         return UserMacBindsService:GetSyncDate()
                     end
 
+                    function open_manual()
+                        ParaGlobal.ShellExecute(
+                            'open',
+                            'https://keepwork.com/official/docs/teach/lessons/offline_guide',
+                            '',
+                            '',
+                            1
+                        )
+                    end
+
+                    function is_show_notice()
+                        return true
+                    end
+
+                    function notice_status()
+                        return 1
+                    end
+
                     Mod.WorldShare.Utils.SetTimeOut(function()
                         set_container(2)
 
@@ -283,26 +301,53 @@
                     <pe:container alignment='_rt'
                                   name='binded_sync'
                                   visible='false'
-                                  width='300px'
+                                  width='616px'
                                   height='100px;'
                                   style='background:;
                                          padding-right: 50px;
                                          margin-top: -30px;'>
+                        <pe:if condition='<%= is_show_notice() %>'>
+                            <div style="width: 316px;
+                                        height: 97px;
+                                        position: relative;
+                                        margin-right: 300px;
+                                        padding: 10px;
+                                        background: url(Texture/Aries/Creator/paracraft/paracraft_icon_01_32bits.png#107 9 316 97);">
+                                <div>
+                                    <pe:if condition='<%= notice_status() == 1 %>'>       
+                                        <div style='font-size: 16px;
+                                                    base-font-size: 16px;
+                                                    color: #2956ab;'><%= L'尚未进行同步' %></div>
+                                    </pe:if>
+                                    <pe:if condition='<%= notice_status() == 2 %>'>       
+                                        <div style='font-size: 16px;
+                                                    base-font-size: 16px;
+                                                    color: #2956ab;'><%= L'已14天未进行同步' %></div>
+                                    </pe:if>
+                                    <div style='width: 280px;
+                                                font-size: 13px;
+                                                base-font-size: 13px;
+                                                color: #6b6b6c;'>
+                                        <%= L'为保证在无网的环境下正常上课，请在有网时同步，详情见左下角“离线版使用手册”' %>
+                                    </div>
+                                </div>
+                            </div>
+                        </pe:if>
                         <div onclick='sync_class_world'
                              align='right'
-                             style='font-size: 25px;
-                                    base-font-size: 25px;
+                             style='font-size: 22px;
+                                    base-font-size: 22px;
                                     color: #2956ab;
                                     margin-left: 10px;
-                                    width: 155px;'>
+                                    width: 132px;'>
                             <%= L'同步离线课程' %>
-                            <div width='155px'
+                            <div width='134px'
                                  style='background-color: #2956ab;
                                         height: 1px;'></div>
                         </div>
                         <div style='color: #6b6b6c;
-                                    font-size: 16px;
-                                    base-font-size: 16px;
+                                    font-size: 14px;
+                                    base-font-size: 14px;
                                     text-align: right;'>
                             <div>
                                 <%= L'请在有网络时经常同步离线课程' %>
@@ -324,6 +369,22 @@
                                     <%= L'上次同步时间：' .. get_sync_date() %>
                                 </div>
                             </pe:if>
+                        </div>
+                    </pe:container>
+                    <pe:container alignment='_rb'
+                                  style='width: 200px;
+                                         height: 50px;
+                                         background: ;'>
+                        <div onclick='open_manual'
+                             style='font-size: 22px;
+                                    base-font-size: 22px;
+                                    color: #2956ab;
+                                    width: 156px;
+                                    height: 50px;'>
+                            <%= L"离线版使用手册" %>
+                            <div width='156px'
+                                 style='background-color: #2956ab;
+                                        height: 1px;'></div>
                         </div>
                     </pe:container>
                     <pe:container alignment='_ct'
