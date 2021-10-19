@@ -21,6 +21,8 @@ local Create = NPL.load('(gl)Mod/WorldShare/cellar/Create/Create.lua')
 local Opus = NPL.export()
 
 function Opus:Show()
+    self:CloseAll()
+
     local params = self:ShowOpusBackground()
 
     Screen:Connect("sizeChanged", Opus, Opus.OnScreenSizeChange, "UniqueConnection")
