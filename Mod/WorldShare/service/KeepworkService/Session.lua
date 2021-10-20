@@ -797,7 +797,8 @@ function KeepworkServiceSession:ClassificationPhone(cellphone, captcha, callback
         end,
         function(data, err)
             if callback and type(callback) == 'function' then
-                callback(data, err, true)    
+                callback(data, err, false)    
+
             end
         end,
         { 400 }

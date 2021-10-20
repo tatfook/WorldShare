@@ -455,7 +455,13 @@
 
                     Mod.WorldShare.Utils.SetTimeOut(function()
                         result_page = Mod.WorldShare.Store:Get('page/Mod.WorldShare.JoinSchool.Result')
+
+                        if MySchool.SetDefaul then
+                            sel_kind("primary_school")
+                            MySchool.SetDefaul = false
+                        end
                     end, 0)
+                    
                 ]]>
             </script>
             <style type="type/mcss" src='Mod/WorldShare/cellar/MySchool/MySchoolMcss.mcss'></style>
