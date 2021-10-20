@@ -155,11 +155,37 @@
                     end
 
                     function is_show_notice()
-                        return true
+                        local lastSync = UserMacBindsService:GetSyncTimestamp()
+
+                        if not lastSync then
+                            return true
+                        end
+
+                        local now = os.time()
+                        local day14 = 14 * 24 * 3600
+
+                        if (now - lastSync) > day14 then
+                            return true
+                        end
+
+                        return false
                     end
 
                     function notice_status()
-                        return 1
+                        local lastSync = UserMacBindsService:GetSyncTimestamp()
+
+                        if not lastSync then
+                            return 1
+                        end
+
+                        local now = os.time()
+                        local day14 = 14 * 24 * 3600
+
+                        if (now - lastSync) > day14 then
+                            return 2
+                        end
+
+                        return -1
                     end
 
                     Mod.WorldShare.Utils.SetTimeOut(function()
@@ -354,7 +380,7 @@
                             </div>
                             <pe:if condition='<%= get_sync_date() == L"未同步" %>'>
                                 <div align='right'
-                                     style='width: 203px;
+                                     style='width: 189px;
                                             text-align: left;'>
                                     <%= L'上次同步时间：' %>
                                     <div style='float: left;'>

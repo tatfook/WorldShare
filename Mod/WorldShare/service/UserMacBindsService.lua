@@ -164,6 +164,10 @@ function UserMacBindsService:SetSyncDate()
     BindDatabase:SaveDatabase()
 end
 
+function UserMacBindsService:GetSyncTimestamp()
+    return BindDatabase:GetValue('syncDate')
+end
+
 function UserMacBindsService:GetSyncDate()
     local syncDate = BindDatabase:GetValue('syncDate')
 
