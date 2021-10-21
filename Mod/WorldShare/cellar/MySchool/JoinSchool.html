@@ -92,9 +92,9 @@
                                 return
                             end
 
-                            if not MySchool.curId or MySchool.curId == 0 then
+                            --[[if not MySchool.curId or MySchool.curId == 0 then
                                 return
-                            end
+                            end]]--
 
                             MySchool:GetSearchSchoolResult(MySchool.curId, MySchool.kind, function(data)
                                 result_page.set_cur_index(1)
