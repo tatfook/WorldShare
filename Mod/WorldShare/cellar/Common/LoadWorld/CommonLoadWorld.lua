@@ -342,7 +342,7 @@ function CommonLoadWorld:TimesFilter(timeRules)
         local limitTimeEndStamp = todayWeehours + endHour * 60 * 60 + endMin * 60
 
         if serverTime < limitTimeStamp or serverTime > limitTimeEndStamp then
-            return false, string.format(L'现在不是上课时间哦，请在上课时间（%s）内再来上课吧。', dateStr)
+            return false, string.format(L'现在不是上课时间哦，请在上课时间（%s）内再来上课吧。', timeStr)
         end
 
         return true

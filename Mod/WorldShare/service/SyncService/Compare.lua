@@ -202,6 +202,10 @@ function Compare:GetCurrentWorldInfo(callback)
         local currentRevision = WorldRevision:new():init(originWorldPath):Checkout()
         local localShared = string.match(worldpath or '', 'shared') == 'shared' and true or false
 
+        if not worldTag.kpProjectId or worldTag.kpProjectId == 0 then
+            worldTag.kpProjectId = string.match(Game.loadworld_params.worldpath, '/(%d+)_')
+        end
+
         if System.options.loginmode ~= 'offline' and
            worldTag.kpProjectId and
            worldTag.kpProjectId ~= 0 then
