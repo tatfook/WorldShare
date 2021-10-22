@@ -37,6 +37,9 @@ local CacheProjectId = NPL.load('(gl)Mod/WorldShare/database/CacheProjectId.lua'
 -- api
 local KeepworkBaseApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/BaseApi.lua')
 
+-- helper
+local GitEncoding = NPL.load('(gl)Mod/WorldShare/helper/GitEncoding.lua')
+
 local CommonLoadWorld = NPL.export()
 
 function CommonLoadWorld:EnterCommunityWorld()
@@ -397,10 +400,14 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
 
             local qiniuWorld = RemoteWorld.LoadFromHref(qiniuZipArchiveUrl, 'self')
             qiniuWorld:SetProjectId(pid)
-    
+            qiniuWorld:SetRevision(cacheWorldInfo.worldInfo.revision)
+            qiniuWorld:SetSpecifyFilename(cacheWorldInfo.worldInfo.commitId)
+
             local cdnArchiveWorld = RemoteWorld.LoadFromHref(cdnArchiveUrl, 'self')
             cdnArchiveWorld:SetProjectId(pid)
-    
+            cdnArchiveWorld:SetRevision(cacheWorldInfo.worldInfo.revision)
+            cdnArchiveWorld:SetSpecifyFilename(cacheWorldInfo.worldInfo.commitId)
+
             local qiniuWorldFile = qiniuWorld:GetLocalFileName() or ''
             local cdnArchiveWorldFile = cdnArchiveWorld:GetLocalFileName() or ''
     
@@ -442,9 +449,13 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
 
             local newQiniuWorld = RemoteWorld.LoadFromHref(newQiniuZipArchiveUrl, 'self')
             newQiniuWorld:SetProjectId(pid)
-    
+            newQiniuWorld:SetRevision(worldInfo.revision)
+            newQiniuWorld:SetSpecifyFilename(worldInfo.commitId)
+
             local newCdnArchiveWorld = RemoteWorld.LoadFromHref(newCdnArchiveUrl, 'self')
             newCdnArchiveWorld:SetProjectId(pid)
+            newCdnArchiveWorld:SetRevision(worldInfo.revision)
+            newCdnArchiveWorld:SetSpecifyFilename(worldInfo.commitId)
 
             local newQiniuWorldFile = newQiniuWorld:GetLocalFileName() or ''
             local newCdnArchiveWorldFile = newCdnArchiveWorld:GetLocalFileName() or ''
