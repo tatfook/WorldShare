@@ -249,7 +249,7 @@ function CommonLoadWorld:IdsFilter(id)
         81895, 81896, 81898, 81897, 73139, 19405, 71346, 72945, 79969, 19759,
         52217, 18962, 80684, 42457, 42701, 42670, 58191, 84481, 83044, 85544,
         73104, 85615, 12642, 12728, 23496, 41020, 58194, 80682, 72171, 23540,
-        41659, 84530, 88149, 88941, 82849, 
+        41659, 84530, 88149, 88941, 82849, 54805, 89361, 77284, 20000, 89561,
         -- class world ID
         1311, 1315, 1316, 1398, 99, 2639, 2639, 2815, 2763, 623,
         685, 703, 756, 853, 984, 1321, 1399, 1401, 1319, 1407,
@@ -342,7 +342,7 @@ function CommonLoadWorld:TimesFilter(timeRules)
         local limitTimeEndStamp = todayWeehours + endHour * 60 * 60 + endMin * 60
 
         if serverTime < limitTimeStamp or serverTime > limitTimeEndStamp then
-            return false, string.format(L'现在不是上课时间哦，请在上课时间（%s）内再来上课吧。', time_str)
+            return false, string.format(L'现在不是上课时间哦，请在上课时间（%s）内再来上课吧。', dateStr)
         end
 
         return true
