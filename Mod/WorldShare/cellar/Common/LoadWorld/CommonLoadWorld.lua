@@ -539,19 +539,19 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                                     Game.Start(downloadNewEncryptWorldFile)
                                 end
                             else
-                                if tryTimes > 0 then
-                                    MainLogin:Close()
-    
-                                    local CreatePage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Create')
-    
-                                    if not CreatePage then
+                                Mod.WorldShare.MsgBox:Wait()
+
+                                Mod.WorldShare.Utils.SetTimeOut(function()
+                                    Mod.WorldShare.MsgBox:Close()
+
+                                    if tryTimes > 0 then
                                         Create:Show()
+                                        return
                                     end
-                                    return
-                                end
-    
-                                DownloadEncrytWorld(newCdnArchiveUrl)
-                                tryTimes = tryTimes + 1
+
+                                    DownloadEncrytWorld(newCdnArchiveUrl)
+                                    tryTimes = tryTimes + 1
+                                end, 3000)
                             end
                         end)
                     end
@@ -631,19 +631,19 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
 
                                 Game.Start(downloadNewLocalWorldFile)
                             else
-                                if tryTimes > 0 then
-                                    MainLogin:Close()
+                                Mod.WorldShare.MsgBox:Wait()
 
-                                    local CreatePage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Create')
+                                Mod.WorldShare.Utils.SetTimeOut(function()
+                                    Mod.WorldShare.MsgBox:Close()
 
-                                    if not CreatePage then
+                                    if tryTimes > 0 then
                                         Create:Show()
+                                        return
                                     end
-                                    return
-                                end
 
-                                DownloadLocalWorld(newCdnArchiveUrl)
-                                tryTimes = tryTimes + 1
+                                    DownloadLocalWorld(newCdnArchiveUrl)
+                                    tryTimes = tryTimes + 1
+                                end, 3000)
                             end
                         end)
                     end

@@ -229,15 +229,6 @@
 
                         local function handle()
                             Create:Close()
-
-                            if not Mod.WorldShare.Store:Get("world/isEnterWorld") then
-                                if KeepworkServiceSession:IsSignedIn() then
-                                    KeepworkServiceSession:Logout(nil)
-                                    MainLogin:Init()
-                                else
-                                    MainLogin:Init()
-                                end
-                            end
                         end
 
                         if KeepworkServiceSession:GetUserWhere() == 'LOCAL' and
