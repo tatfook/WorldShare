@@ -94,7 +94,11 @@ KeepworkServicePermission.AllAuth = {
     VipPrivateWorld = {
         key = 'vip_private_world',
         desc = L'自主授权开放及私有空间'
-    } 
+    },
+    Limit3Worlds = {
+        key = 'limit_3_worlds',
+        desc = L'免费用户只能分享3个世界',
+    },
 }
 
 KeepworkServicePermission.AllLocalAuth = {
@@ -124,15 +128,15 @@ KeepworkServicePermission.AllLocalAuth = {
         key = 'red_summer_camp_main', -- red summer vip
         desc = nil
     },
-    Limit3Worlds = {
-        key = 'limit_3_worlds',
-        desc = L'免费用户只能分享3个世界',
-        role = {
-            'student',
-            'teacher',
-            'vip'
-        }
-    },
+    -- Limit3Worlds = {
+    --     key = 'limit_3_worlds',
+    --     desc = L'免费用户只能分享3个世界',
+    --     role = {
+    --         'student',
+    --         'teacher',
+    --         'vip'
+    --     }
+    -- },
     LimitWorldSize10Mb = {
         key = 'limit_world_size_10_mb',
         desc = L'免费用户只能分享不超过10M的世界',
