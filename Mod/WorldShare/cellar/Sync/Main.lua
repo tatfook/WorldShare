@@ -364,7 +364,7 @@ function SyncMain:SyncToDataSource(callback)
             end
 
             if not isModify then
-                GameLogic.IsVip('Limit3Worlds', true, function(result)
+                GameLogic.IsVip('UnlimitWorldsNumber', true, function(result)
                     if result then
                         self:CheckWorldSize(Handle)
                     end

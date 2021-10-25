@@ -95,9 +95,9 @@ KeepworkServicePermission.AllAuth = {
         key = 'vip_private_world',
         desc = L'自主授权开放及私有空间'
     },
-    Limit3Worlds = {
-        key = 'limit_3_worlds',
-        desc = L'免费用户只能分享3个世界',
+    UnlimitWorldsNumber = {
+        key = 'unlimit_worlds_number',
+        desc = L'分享更多世界',
     },
 }
 
