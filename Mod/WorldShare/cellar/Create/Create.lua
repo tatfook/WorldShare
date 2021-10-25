@@ -481,13 +481,12 @@ function Create:EnterWorld(index, skip)
             DownloadWorld.ShowPage(format(L'%s（项目ID：%d）', currentWorld.foldername, currentWorld.kpProjectId))
 
             SyncToLocal:Init(function(result, option)
-                DownloadWorld.Close()
-
                 if not result then
                     if type(option) == 'string' then
                         if option == 'NEWWORLD' then
                             GameLogic.AddBBS(nil, L'服务器未找到您的世界数据，请新建', 3000, "255 255 0")
 
+                            DownloadWorld.Close()
                             CreateWorld:CreateNewWorld(currentWorld.foldername)
                         end
 
@@ -501,6 +500,7 @@ function Create:EnterWorld(index, skip)
                                 return
                             end
 
+                            DownloadWorld.Close()
                             InternetLoadWorld.EnterWorld()
                         end
                     end
