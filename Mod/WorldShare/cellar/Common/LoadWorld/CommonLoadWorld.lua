@@ -712,14 +712,16 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                         LoadWorld('never')
                     end
                 elseif not refreshMode or refreshMode == 'check' then
-                    if localRevision == 0 then
-                        LoadWorld('force')
-                        return
-                    end
-
-                    if localRevision == remoteRevision then
-                        LoadWorld('never')
-                        return
+                    if not refreshMode and refreshMode ~= 'check' then
+                        if localRevision == 0 then
+                            LoadWorld('force')
+                            return
+                        end
+    
+                        if localRevision == remoteRevision then
+                            LoadWorld('never')
+                            return
+                        end
                     end
 
                     -- check or revision not equal
