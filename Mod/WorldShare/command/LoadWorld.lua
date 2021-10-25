@@ -309,7 +309,7 @@ function LoadWorldCommand:Init()
             local refreshMode = nil
             local failed = nil
 
-            if options and options.force then
+            if options and options.forcedownload then
                 refreshMode = 'force'
             end
 
@@ -317,7 +317,7 @@ function LoadWorldCommand:Init()
                 refreshMode = 'never'
             end
 
-            if options and options.auto then
+            if options and (options.auto or options.force) then
                 refreshMode = 'auto'
             end
 
