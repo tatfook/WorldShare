@@ -99,6 +99,10 @@ KeepworkServicePermission.AllAuth = {
         key = 'unlimit_worlds_number',
         desc = L'分享更多世界',
     },
+    LimitUserOpenShareWorld = {
+        key = 'limit_user_open_share_world',
+        desc = L'免费用户不能打开别人的世界',
+    }
 }
 
 KeepworkServicePermission.AllLocalAuth = {
@@ -146,15 +150,15 @@ KeepworkServicePermission.AllLocalAuth = {
             'vip'
         }
     },
-    LimitUserOpenShareWorld = {
-        key = 'limit_user_open_share_world',
-        desc = L'免费用户不能打开别人的世界',
-        role = {
-            'student',
-            'teacher',
-            'vip'
-        }
-    }
+    -- LimitUserOpenShareWorld = {
+    --     key = 'limit_user_open_share_world',
+    --     desc = L'免费用户不能打开别人的世界',
+    --     role = {
+    --         'student',
+    --         'teacher',
+    --         'vip'
+    --     }
+    -- }
 }
 
 function KeepworkServicePermission:GetLocalAuthKey(authName)
