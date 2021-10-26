@@ -39,6 +39,11 @@ local self = WorldExitDialog
 -- @param callback: function(res) end.
 -- @return void or boolean
 function WorldExitDialog.ShowPage(callback)
+    if ParaEngine.GetAppCommandLineByParam('IsAppVersion', nil) then
+        Desktop.ForceExit(false)
+        return
+    end
+
     local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
     if not currentEnterWorld then
