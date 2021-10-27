@@ -425,7 +425,7 @@ function KeepworkServiceSession:Logout(mode, callback)
     end
 end
 
-function KeepworkServiceSession:RegisterWithAccount(username, password, callback)
+function KeepworkServiceSession:RegisterWithAccount(username, password, callback, autoLogin)
     if not username or not password then
         return
     end
@@ -454,8 +454,12 @@ function KeepworkServiceSession:RegisterWithAccount(username, password, callback
 
                             return false
                         end
-
-                        loginData.autoLogin = true
+                        if autoLogin ~= nil then
+                            loginData.autoLogin = autoLogin
+                        else
+                            loginData.autoLogin = true
+                        end
+                        
                         loginData.rememberMe = nil
                         loginData.password = nil
 

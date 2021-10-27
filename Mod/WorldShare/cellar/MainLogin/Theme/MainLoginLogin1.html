@@ -105,13 +105,12 @@
 
                         if not MainLogin:LoginAction(function(b_succeed)
                             is_login = false
-
                             if not b_succeed then
                                 return
                             end
 
                             -- close()
-
+                            
                             if true then
                                 local account = page:GetValue('account')
                                 page:SetUIValue('auto_username', account or '')
@@ -154,6 +153,21 @@
                             password = page:GetValue('password_hide')
                         end
 
+                        if string.find(password, "pa") == 1 and not be_show_password then
+                            page:SetValue('eye_show_password', true)
+                            set_show_password()
+                            local node = page:FindControl('password_show')
+                            if node then
+                                node:Focus()
+                                node:SetCaretPosition(#password)
+                            end
+                        end
+
+                        if string.find(password, "palaka.cn") == 1 then
+                            -- 不允许自动登录
+                            page:SetUIValue('auto_login_name', false)
+                        end
+
                         page:SetValue('password', password)
 
                         if not Validated:Password(password) then
@@ -190,6 +204,20 @@
 
                             page:FindControl('password_show').visible = true
                             page:FindControl('password_hide').visible = false
+                        end
+                    end
+
+                    function set_auto_login()
+                        local password
+
+                        if be_show_password then
+                            password = page:GetValue('password_show')
+                        else
+                            password = page:GetValue('password_hide')
+                        end
+                        if string.find(password, "palaka.cn") == 1 then
+                            -- 不允许自动登录
+                            page:SetUIValue('auto_login_name', false)
                         end
                     end
 
@@ -734,6 +762,7 @@
                                     <input type="hidden" name="password" value="" />
                                 </div>
                                 <input type="checkbox"
+                                        name="eye_show_password"
                                         checked="false"
                                         iconsize="20"
                                         CheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#272 52 20 20"
@@ -753,7 +782,8 @@
                                        UncheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#295 79 12 12"
                                        style="float:left;margin-top:3px;min-width:90px;"
                                        name='auto_login_name'
-                                       checked="false"/>
+                                       checked="false"
+                                       onclick="set_auto_login"/>
                                 <div style='float: left;margin-left: 3px;' for='auto_login_name'>
                                     <%= L"自动登录" %>
                                 </div>

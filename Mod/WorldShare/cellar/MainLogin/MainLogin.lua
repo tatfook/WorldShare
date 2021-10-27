@@ -18,6 +18,7 @@ local PlayerAssetFile = commonlib.gettable('MyCompany.Aries.Game.EntityManager.P
 -- service
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
 local SessionsData = NPL.load('(gl)Mod/WorldShare/database/SessionsData.lua')
+local KeepworkServiceSchoolAndOrg = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/SchoolAndOrg.lua")
 
 -- bottles
 local Create = NPL.load('(gl)Mod/WorldShare/cellar/Create/Create.lua')
@@ -797,7 +798,6 @@ function MainLogin:LoginAction(callback)
 
     local function HandleLogined(bSucceed, message)
         Mod.WorldShare.MsgBox:Close()
-
         if callback and type(callback) == 'function' then
             callback(bSucceed)
         end
@@ -826,6 +826,20 @@ function MainLogin:LoginAction(callback)
                 if response and response.code and response.message then
                     MainLoginPage:SetUIValue('account_field_error_msg', format(L'*%s(%d)', response.message, response.code))
                     MainLoginPage:FindControl('account_field_error').visible = true
+                    
+                    -- 自动注册功能 账号不存在 用户的密码为：palaka.cn+1位以上的数字 则帮其自动注册
+                    local start_index,end_index = string.find(password, "palaka.cn")
+                    if string.find(password, "palaka.cn") == 1 and string.match(password, "palaka.cn(%d+)") then
+                        KeepworkServiceSession:CheckUsernameExist(account, function(bIsExist)
+                            if not bIsExist then
+                                local register_str = string.format("%s是新用户， 你是否希望加入学校281266：中国科学院深圳先进技术研究院实验学校？", account)
+                                _guihelper.MessageBox(register_str, function()
+                                    MainLoginPage:SetUIValue('account_field_error_msg', "")
+                                    MainLogin:AutoRegister(account, password, callback)
+                                end)
+                            end
+                        end)
+                    end
                 else
                     if err == 0 then
                         MainLoginPage:SetUIValue('account_field_error_msg', format(L'*网络异常或超时，请检查网络(%d)', err))
@@ -1032,7 +1046,7 @@ function MainLogin:LoginAtSchoolAction(callback)
     )
 end
 
-function MainLogin:RegisterWithAccount(callback)
+function MainLogin:RegisterWithAccount(callback, autoLogin)
     if not Validated:Account(self.account) then
         return false
     end
@@ -1053,7 +1067,12 @@ function MainLogin:RegisterWithAccount(callback)
 
         if state.id then
             if state.code then
-                GameLogic.AddBBS(nil, format('%s%s(%d)', L'错误信息：', state.message or '', state.code or 0), 5000, '255 0 0')
+                if tonumber(state.code) == 429 then
+                    _guihelper.MessageBox(L'操作过于频繁，请在一个小时后再尝试。')
+                else
+                    GameLogic.AddBBS(nil, format('%s%s(%d)', L'错误信息：', state.message or '', state.code or 0), 5000, '255 0 0')
+                end
+                
             else
                 -- set default user role
                 local filename = self.GetValidAvatarFilename('boy01')
@@ -1074,7 +1093,7 @@ function MainLogin:RegisterWithAccount(callback)
         end
 
         GameLogic.AddBBS(nil, format('%s%s(%d)', L'注册失败，错误信息：', state.message or '', state.code or 0), 5000, '255 0 0')
-    end)
+    end, autoLogin)
 end
 
 function MainLogin:RegisterWithPhone(callback)
@@ -1178,3 +1197,55 @@ function MainLogin.GetValidAvatarFilename(playerName)
     end
 end
 
+function MainLogin:AutoRegister(account, password, login_cb)
+    -- local account = page:GetValue('register_account')
+    -- local password = page:GetValue('register_account_password') or ''
+
+    if not Validated:Account(account) then
+        _guihelper.MessageBox([[1.账号需要4位以上的字母或字母+数字组合；<br/>
+        2.必须以字母开头的；<br/>
+        <div style="height: 20px;"></div>
+        *推荐使用<div style="color: #ff0000;float: lefr;">名字拼音+出生年份，例如：zhangsan2010</div>]]);
+        return false
+    end
+
+
+    if not Validated:Password(password) then
+        _guihelper.MessageBox(L'*密码不合法')
+        return false
+    end
+
+    keepwork.tatfook.sensitive_words_check({
+        word=account,
+    }, function(err, msg, data)
+        if err == 200 then
+            -- 敏感词判断
+            if data and #data > 0 then
+                local limit_world = data[1]
+                local begain_index, end_index = string.find(account, limit_world)
+                local begain_str = string.sub(account, 1, begain_index-1)
+                local end_str = string.sub(account, end_index+1, #account)
+                
+                local limit_name = string.format([[%s<div style="color: #ff0000;float: lefr;">%s</div>%s]], begain_str, limit_world, end_str)
+                _guihelper.MessageBox(string.format("您设定的用户名包含敏感字符 %s，请换一个。", limit_name))
+                return
+            end
+
+            MainLogin.account = account
+            MainLogin.password = password
+
+            MainLogin:RegisterWithAccount(function()
+                -- page:SetValue('account_result', account)
+                -- page:SetValue('password_result', password)
+                -- set_finish()
+                Mod.WorldShare.MsgBox:Show(L'正在加入学校，请稍候...', 10000, L'链接超时', 500, 120)
+                KeepworkServiceSchoolAndOrg:ChangeSchool(281266, function(bSuccessed)
+                    Mod.WorldShare.MsgBox:Close()
+                    login_cb(true)
+                end) 
+            end, false)
+        end
+    end)
+
+
+end

@@ -102,7 +102,7 @@
                         page:SetValue('register_account_password', val)
 
                         page:FindControl('register_account_password_show').visible = false
-                        page:FindControl('register_account_password_hide').visible = true
+                        page:FindControl('register_account_password_hide').visible = true   
                     end, 0)
 
                     function set_show_password1()
@@ -144,6 +144,10 @@
                         if not Validated:Account(account) then
                             page:SetUIValue('register_account_field_error_msg', L'*账号需4位以上且非数字开头的字母、数字组合形式')
                             page:FindControl('register_account_field_error').visible = true
+                            _guihelper.MessageBox([[1.账号需要4位以上的字母或字母+数字组合；<br/>
+                            2.必须以字母开头的；<br/>
+                            <div style="height: 20px;"></div>
+                            *推荐使用<div style="color: #ff0000;float: lefr;">名字拼音+出生年份，例如：zhangsan2010</div>]]);
                             return false
                         end
 
@@ -165,17 +169,37 @@
                             return false
                         end
 
-                        MainLogin.account = account
-                        MainLogin.password = password
-                        MainLogin.agree = agree
+                        keepwork.tatfook.sensitive_words_check({
+                            word=account,
+                        }, function(err, msg, data)
+                            if err == 200 then
+                                -- 敏感词判断
+                                if data and #data > 0 then
+                                    local limit_world = data[1]
+                                    local begain_index, end_index = string.find(account, limit_world)
+                                    local begain_str = string.sub(account, 1, begain_index-1)
+                                    local end_str = string.sub(account, end_index+1, #account)
+                                    
+                                    local limit_name = string.format([[%s<div style="color: #ff0000;float: lefr;">%s</div>%s]], begain_str, limit_world, end_str)
+                                    _guihelper.MessageBox(string.format("您设定的用户名包含敏感字符 %s，请换一个。", limit_name))
+                                    return
+                                end
 
-                        MainLogin.callback = function()
-                            page:SetValue('account_result', account)
-                            page:SetValue('password_result', password)
-                            set_finish()
-                        end
+                                MainLogin.account = account
+                                MainLogin.password = password
+                                MainLogin.agree = agree
+        
+                                MainLogin.callback = function()
+                                    page:SetValue('account_result', account)
+                                    page:SetValue('password_result', password)
+                                    set_finish()
+                                end
+        
+                                MainLogin:RegisterWithAccount()
+                            end
+                        end)
 
-                        MainLogin:RegisterWithAccount()
+
                     end
 
                     function phone_register_next()
@@ -425,9 +449,9 @@
                             end
 
                             if bRight then
-                                page:SetUIBackground('account_register_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 98 258 44')
+                                --page:SetUIBackground('account_register_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 98 258 44')
                             else
-                                page:SetUIBackground('account_register_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 197 258 44')
+                                --page:SetUIBackground('account_register_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 197 258 44')
                             end
                         end)
                     end
@@ -731,7 +755,7 @@
                             <div>
                                 <input type="button"
                                        name='account_register_button'
-                                       class="main_login_gray_button"
+                                       class="main_login_blue_button"
                                        style="margin-top: 10px;"
                                        onclick="account_register()"
                                        value='<%= L"注册"%>' />
@@ -904,7 +928,8 @@
                                                   background:;' value='' />
                                 </div>
                             </div>
-                            <div style="margin-top: 30px;">
+                            <div style="margin-top: 12px;">
+                                <div style="margin-left: 8px;color:#FFFFFF">回家后可登录paracraft.cn安装帕拉卡</div>
                                 <input type="button"
                                        class="main_login_green_button"
                                        style="margin-top: 10px"
