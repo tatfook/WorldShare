@@ -545,10 +545,10 @@ function MainLogin:ShowExtra()
         left = 1000
         top = 160
     else
-        width = 300
+        width = 400
         height = 130
-        left = 600
-        top = 160
+        left = 680
+        top = 360
     end
 
     Mod.WorldShare.Utils.ShowWindow(

@@ -8,7 +8,18 @@
 
                     -- libs
                     local Desktop = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop")
+                    local is_setting_menu_show = false
+                    local page = document:GetPageCtrl()
 
+                    page.OnCreate = function()
+                        local menu_bg_node = page:FindControl("menu_bg")
+                        local setting_menu_container = page:FindControl("setting_menu")
+                        setting_menu_container.height = menu_bg_node.height
+
+                        local setting_bt = page:FindControl("setting_button")
+                        setting_menu_container.y = setting_bt.y - setting_menu_container.height + 15
+                        setting_menu_container.x = setting_bt.x
+                    end
                     function GetModCountAsString()
                         NPL.load('(gl)script/apps/Aries/Creator/Game/Mod/ModManager.lua')
                         local ModManager = commonlib.gettable('Mod.ModManager')
@@ -45,6 +56,17 @@
                     function on_click_exit()
                         Desktop.ForceExit()
                     end
+
+                    function ShowSettingMenu()
+                        is_setting_menu_show = not is_setting_menu_show
+
+                        local setting_menu = page:FindControl('setting_menu')
+                        setting_menu.visible = is_setting_menu_show
+                    end
+
+                    function OnOpenLocalServer()
+                        GameLogic.RunCommand("/lan -server_setting=true")
+                    end
                 ]]>
             </script>
             <style type="text/mcss" src='Mod/WorldShare/cellar/Theme/Mcss/MainLoginMcss.mcss'>
@@ -53,18 +75,44 @@
                 }
             </style>
             <div>
-                <pe:if condition='<%= System.options.isDevEnv == false %>'>
+                <!-- <pe:if condition='<%= System.options.isDevEnv == false %>'>
                     <pe:if  condition='<%= System.os.GetPlatform() ~= "ios" and System.os.GetPlatform() ~= "android" %>'>
                         <input type="button"
                                style="width: 80px;height: 44px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#284 523 80 44)"
                                onclick="OnOpenModulePage" /> 
                     </pe:if>        
-                </pe:if>
+                </pe:if> -->
+                <pe:container name="setting_menu" visible="false" style="position: relative; width: 120px;height: 100px;background:;">
+                    <div name="menu_bg" style="padding: 5px;padding-bottom: 20px; width: 120px;min-height: 44px;background: url(Texture/Aries/Creator/paracraft/login/menu_bg_36X36_32bits.png#0 0 36 36:9 9 9 9);">
+                        <pe:if condition='<%= System.options.isDevEnv == false %>'>
+                            <pe:if  condition='<%= System.os.GetPlatform() ~= "ios" and System.os.GetPlatform() ~= "android" %>'>
+                                <input type="button"
+                                    style="width: 110px;height: 32px;margin-left: 5px; background: url(Texture/Aries/Creator/paracraft/login/2_32bits.png#0 0 110 32)"
+                                onclick="OnOpenModulePage" />
+                                <div style='width: 110px; 
+                                            height: 1px;
+                                            background-color: #9b9b9b;
+                                            margin-top: 4px;
+                                            margin-bottom: 4px;'></div> 
+                            </pe:if>        
+                        </pe:if>
+
+                        <input type="button"
+                               style="width: 110px;height: 32px;margin-left: 5px; background: url(Texture/Aries/Creator/paracraft/login/3_32bits.png#0 0 110 32)"
+                               onclick="OnOpenLocalServer" /> 
+                    </div>
+                </pe:container>
+
                 <input type="button"
-                       style="margin-left: 20px;width: 81px;height: 44px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#281 575 81 44)"
+                        name="setting_button"
+                        style="margin-top: 100px; width: 120px;height: 44px;background: url(Texture/Aries/Creator/paracraft/login/setting_120X44_32bits.png#0 0 120 44)"
+                        onclick="ShowSettingMenu" /> 
+
+                <input type="button"
+                       style="margin-top: 100px; margin-left: 20px;width: 81px;height: 44px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#281 575 81 44)"
                        onclick="OnChangeLanguagePage" />
                 <input type="button"
-                       style="margin-left: 20px;width: 80px;height: 44px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#284 471 80 44)"
+                       style="margin-top: 100px; margin-left: 20px;width: 80px;height: 44px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#284 471 80 44)"
                        onclick="OnClickCustomerService" />
             </div>
         </pe:mcml>
