@@ -23,6 +23,13 @@
                     local page = document:GetPageCtrl()
                     local account_list_data = MainLogin:GetHistoryUsers()
 
+                    page.OnCreate = function()
+                        local PWDInfo = KeepworkServiceSession:LoadSigninInfo()
+                        if not PWDInfo or not PWDInfo.autoLogin then
+                            page:FindControl('login_button'):SetDefault(true)
+                        end
+                    end
+
                     if type(account_list_data) == 'table' and #account_list_data > 0 then
                         local tmp = {}
 
@@ -304,6 +311,7 @@
                         local login_with_account = page:FindControl('account_mode')
                         local auto_login_mode = page:FindControl('auto_login_mode')
                         local change_button = page:FindControl('change_button')
+                        local update_password_button = page:FindControl('update_password_button')
 
                         if mode == 'account' then
                             page:FindControl('login_button'):SetDefault(true)
@@ -323,6 +331,10 @@
                             if auto_login_mode then
                                 change_button.visible = false
                             end
+
+                            if auto_login_mode then
+                                update_password_button.visible = false
+                            end
                         elseif mode == 'phone' then
                             page:FindControl('phone_login_button'):SetDefault(true)
 
@@ -341,6 +353,10 @@
                             if auto_login_mode then
                                 change_button.visible = false
                             end
+
+                            if auto_login_mode then
+                                update_password_button.visible = false
+                            end
                         elseif mode == 'auto_login' then
                             if login_with_phone_number then
                                 login_with_phone_number.visible = false
@@ -356,6 +372,10 @@
 
                             if auto_login_mode then
                                 change_button.visible = true
+                            end
+
+                            if auto_login_mode then
+                                update_password_button.visible = true
                             end
 
                             page:FindControl('start_button'):SetDefault(true)
@@ -544,6 +564,11 @@
                         MainLogin:Exit()
                     end
 
+                    function update_password()
+                        close()
+                        MainLogin:ShowUpdatePassword()
+                    end
+
                     -- don't remove
                     Mod.WorldShare.Utils.SetTimeOut(function()
                         local val = page:GetValue('password_show')
@@ -593,13 +618,23 @@
             <pe:container
                 alignment='_rt'
                 zorder='-1'
-                width='210px'
+                width='329px'
                 height='100px'
                 style='position: relative;
                        background:;
                        margin-top: 20px;
                        margin-right: 11px;'>
-                <div style='width: 111px;float: left;'>
+                <div style='width: 109px;float: left;'>
+                    <pe:container name='update_password_button' visible='false' style='background:;'>
+                        <input type='button'
+                        onclick='update_password'
+                        style='width: 109px;
+                                height: 45px;
+                                background: url(Texture/Aries/Creator/paracraft/login/btn1_109X45_32bits.png#0 0 109 45)' />
+                    </pe:container>
+                </div>
+
+                <div style='width: 111px;float: left;margin-left: 10px;'>
                     <pe:container name='change_button' visible='false' style='background:;'>
                         <input type='button'
                             onclick='change'

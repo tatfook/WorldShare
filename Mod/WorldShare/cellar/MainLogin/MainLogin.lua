@@ -8,6 +8,7 @@ Desc:
 use the lib:
 ------------------------------------------------------------
 local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
+MainLogin:ShowUpdatePassword()
 ------------------------------------------------------------
 ]]
 -- libs
@@ -264,6 +265,7 @@ function MainLogin:ShowLogin1()
         MainLoginLoginPage:FindControl('account_mode').visible = false
         MainLoginLoginPage:FindControl('auto_login_mode').visible = true
         MainLoginLoginPage:FindControl('change_button').visible = true
+        MainLoginLoginPage:FindControl('update_password_button').visible = true
         MainLoginLoginPage:SetUIValue('auto_username', Mod.WorldShare.Store:Get('user/username') or '')
 
         MainLoginLoginPage:FindControl('title_login').visible = false
@@ -297,6 +299,7 @@ function MainLogin:ShowLogin1()
                         MainLoginLoginPage:FindControl('account_mode').visible = false
                         MainLoginLoginPage:FindControl('auto_login_mode').visible = true
                         MainLoginLoginPage:FindControl('change_button').visible = true
+                        MainLoginLoginPage:FindControl('update_password_button').visible = true
                         MainLoginLoginPage:SetUIValue('auto_username', PWDInfo.account or '')
     
                         MainLoginLoginPage:FindControl('title_login').visible = false
@@ -316,12 +319,12 @@ function MainLogin:ShowLogin1()
                         end
                     end
                 end)
-            else
-                MainLoginLoginPage:FindControl('login_button'):SetDefault(true)
             end
         end
     end
 end
+
+
 
 function MainLogin:ShowAndroidLogin()
     Mod.WorldShare.Utils.ShowWindow(
@@ -445,6 +448,20 @@ function MainLogin:ShowRegister()
         0,
         'Mod/WorldShare/cellar/MainLogin/Theme/MainLoginRegister.html',
         'Mod.WorldShare.cellar.MainLogin.Register',
+        0,
+        0,
+        '_fi',
+        false,
+        -1
+    )
+end
+
+function MainLogin:ShowUpdatePassword()
+    Mod.WorldShare.Utils.ShowWindow(
+        0,
+        0,
+        'Mod/WorldShare/cellar/MainLogin/Theme/MainLoginUpdatePassword.html',
+        'Mod.WorldShare.cellar.MainLogin.UpdatePassword',
         0,
         0,
         '_fi',
@@ -826,17 +843,23 @@ function MainLogin:LoginAction(callback)
                 if response and response.code and response.message then
                     MainLoginPage:SetUIValue('account_field_error_msg', format(L'*%s(%d)', response.message, response.code))
                     MainLoginPage:FindControl('account_field_error').visible = true
-                    
                     -- 自动注册功能 账号不存在 用户的密码为：palaka.cn+1位以上的数字 则帮其自动注册
                     local start_index,end_index = string.find(password, "palaka.cn")
-                    if string.find(password, "palaka.cn") == 1 and string.match(password, "palaka.cn(%d+)") then
+                    local school_id = string.match(password, "palaka.cn(%d+)")
+                    if string.find(password, "palaka.cn") == 1 and school_id then
                         KeepworkServiceSession:CheckUsernameExist(account, function(bIsExist)
                             if not bIsExist then
-                                local register_str = string.format("%s是新用户， 你是否希望加入学校281266：中国科学院深圳先进技术研究院实验学校？", account)
-                                _guihelper.MessageBox(register_str, function()
-                                    MainLoginPage:SetUIValue('account_field_error_msg', "")
-                                    MainLogin:AutoRegister(account, password, callback)
+                                -- 查询学校
+                                KeepworkServiceSchoolAndOrg:SearchSchoolBySchoolId(tonumber(school_id), function(data)
+                                    if data and data[1] and data[1].id then
+                                        local register_str = string.format("%s是新用户， 你是否希望加入学校%s：%s？", account, data[1].id, data[1].name)
+                                        MainLoginPage:SetUIValue('account_field_error_msg', "")
+                                        _guihelper.MessageBox(register_str, function()
+                                            MainLogin:AutoRegister(account, password, callback, data[1])
+                                        end)
+                                    end
                                 end)
+
                             end
                         end)
                     end
@@ -1197,13 +1220,13 @@ function MainLogin.GetValidAvatarFilename(playerName)
     end
 end
 
-function MainLogin:AutoRegister(account, password, login_cb)
+function MainLogin:AutoRegister(account, password, login_cb, school_data)
     -- local account = page:GetValue('register_account')
     -- local password = page:GetValue('register_account_password') or ''
 
     if not Validated:Account(account) then
         _guihelper.MessageBox([[1.账号需要4位以上的字母或字母+数字组合；<br/>
-        2.必须以字母开头的；<br/>
+        2.必须以字母开头；<br/>
         <div style="height: 20px;"></div>
         *推荐使用<div style="color: #ff0000;float: lefr;">名字拼音+出生年份，例如：zhangsan2010</div>]]);
         return false
@@ -1238,11 +1261,13 @@ function MainLogin:AutoRegister(account, password, login_cb)
                 -- page:SetValue('account_result', account)
                 -- page:SetValue('password_result', password)
                 -- set_finish()
+                login_cb(true)
                 Mod.WorldShare.MsgBox:Show(L'正在加入学校，请稍候...', 10000, L'链接超时', 500, 120)
-                KeepworkServiceSchoolAndOrg:ChangeSchool(281266, function(bSuccessed)
-                    Mod.WorldShare.MsgBox:Close()
-                    login_cb(true)
-                end) 
+                Mod.WorldShare.Utils.SetTimeOut(function()
+                    KeepworkServiceSchoolAndOrg:ChangeSchool(school_data.id, function(bSuccessed)
+                        Mod.WorldShare.MsgBox:Close()
+                    end) 
+                end, 500)
             end, false)
         end
     end)

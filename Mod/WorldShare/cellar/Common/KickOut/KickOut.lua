@@ -18,6 +18,11 @@ local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkServ
 local KickOut = NPL.export()
 
 function KickOut:ShowKickOutPage(reason)
+    -- 修改密码之后的退出 由接口返回的回调来处理
+    if reason == 2 then
+        return
+    end
+
     if self.isKickOutPageOpened then
         return false
     end
