@@ -358,6 +358,8 @@
                                 update_password_button.visible = false
                             end
                         elseif mode == 'auto_login' then
+                            page:FindControl('login_button'):SetDefault(false)
+                            
                             if login_with_phone_number then
                                 login_with_phone_number.visible = false
                             end
@@ -383,17 +385,17 @@
                             page:FindControl('title_username').visible = true
 
                             -- for default button
-                            for i = 1, 10000 do
-                                Mod.WorldShare.Utils.SetTimeOut(function()
-                                    if page then
-                                        local node = page:FindControl('start_button_focus')
+                            --for i = 1, 10000 do
+                                --Mod.WorldShare.Utils.SetTimeOut(function()
+                                    --if page then
+                                        --local node = page:FindControl('start_button_focus')
                     
-                                        if node then
-                                            node:Focus()
-                                        end
-                                    end
-                                end, 0 + i)
-                            end
+                                        --if node then
+                                            --node:Focus()
+                                        --end
+                                    --end
+                                --end, 0 + i)
+                            --end
                         end
                     end
 
@@ -986,12 +988,12 @@
                                    onclick='start()'
                                    value='<%= L"开始"%>' />
                         </div>
-                        <input type='text'
+                        <!-- <input type='text'
                                enable_ime='false'
                                name='start_button_focus'
                                value=''
                                CaretColor='#00000000'
-                               style='background:;'/>
+                               style='background:;'/> -->
                     </pe:container>
                 </div>
             </pe:container>

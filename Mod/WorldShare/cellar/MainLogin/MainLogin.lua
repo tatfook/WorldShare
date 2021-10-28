@@ -272,17 +272,17 @@ function MainLogin:ShowLogin1()
         MainLoginLoginPage:FindControl('title_username').visible = true
 
         -- for default button
-        for i = 1, 10000 do
-            Mod.WorldShare.Utils.SetTimeOut(function()
-                if MainLoginLoginPage then
-                    local node = MainLoginLoginPage:FindControl('start_button_focus')
+        -- for i = 1, 10000 do
+        --     Mod.WorldShare.Utils.SetTimeOut(function()
+        --         if MainLoginLoginPage then
+        --             local node = MainLoginLoginPage:FindControl('start_button_focus')
 
-                    if node then
-                        node:Focus()
-                    end
-                end
-            end, 0 + i)
-        end
+        --             if node then
+        --                 node:Focus()
+        --             end
+        --         end
+        --     end, 0 + i)
+        -- end
     else
         local PWDInfo = KeepworkServiceSession:LoadSigninInfo()
     
@@ -306,17 +306,17 @@ function MainLogin:ShowLogin1()
                         MainLoginLoginPage:FindControl('title_username').visible = true
 
                         -- for default button
-                        for i = 1, 10000 do
-                            Mod.WorldShare.Utils.SetTimeOut(function()
-                                if MainLoginLoginPage then
-                                    local node = MainLoginLoginPage:FindControl('start_button_focus')
+                        -- for i = 1, 10000 do
+                        --     Mod.WorldShare.Utils.SetTimeOut(function()
+                        --         if MainLoginLoginPage then
+                        --             local node = MainLoginLoginPage:FindControl('start_button_focus')
                 
-                                    if node then
-                                        node:Focus()
-                                    end
-                                end
-                            end, 0 + i)
-                        end
+                        --             if node then
+                        --                 node:Focus()
+                        --             end
+                        --         end
+                        --     end, 0 + i)
+                        -- end
                     end
                 end)
             end
@@ -546,7 +546,7 @@ function MainLogin:ShowExtra()
         top = 160
     else
         width = 400
-        height = 130
+        height = 140
         left = 680
         top = 360
     end
