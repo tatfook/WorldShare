@@ -843,10 +843,10 @@ function MainLogin:LoginAction(callback)
                 if response and response.code and response.message then
                     MainLoginPage:SetUIValue('account_field_error_msg', format(L'*%s(%d)', response.message, response.code))
                     MainLoginPage:FindControl('account_field_error').visible = true
-                    -- 自动注册功能 账号不存在 用户的密码为：palaka.cn+1位以上的数字 则帮其自动注册
-                    local start_index,end_index = string.find(password, "palaka.cn")
-                    local school_id = string.match(password, "palaka.cn(%d+)")
-                    if string.find(password, "palaka.cn") == 1 and school_id then
+                    -- 自动注册功能 账号不存在 用户的密码为：paracraft.cn+1位以上的数字 则帮其自动注册
+                    local start_index,end_index = string.find(password, "paracraft.cn")
+                    local school_id = string.match(password, "paracraft.cn(%d+)")
+                    if string.find(password, "paracraft.cn") == 1 and school_id then
                         KeepworkServiceSession:CheckUsernameExist(account, function(bIsExist)
                             if not bIsExist then
                                 -- 查询学校
