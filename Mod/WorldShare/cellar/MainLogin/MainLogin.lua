@@ -852,11 +852,8 @@ function MainLogin:LoginAction(callback)
                                 -- 查询学校
                                 KeepworkServiceSchoolAndOrg:SearchSchoolBySchoolId(tonumber(school_id), function(data)
                                     if data and data[1] and data[1].id then
-                                        local register_str = string.format("%s是新用户， 你是否希望加入学校%s：%s？", account, data[1].id, data[1].name)
                                         MainLoginPage:SetUIValue('account_field_error_msg', "")
-                                        _guihelper.MessageBox(register_str, function()
-                                            MainLogin:AutoRegister(account, password, callback, data[1])
-                                        end)
+                                        MainLogin:AutoRegister(account, password, callback, data[1])
                                     end
                                 end)
 
@@ -1254,21 +1251,34 @@ function MainLogin:AutoRegister(account, password, login_cb, school_data)
                 return
             end
 
-            MainLogin.account = account
-            MainLogin.password = password
-
-            MainLogin:RegisterWithAccount(function()
-                -- page:SetValue('account_result', account)
-                -- page:SetValue('password_result', password)
-                -- set_finish()
-                login_cb(true)
-                Mod.WorldShare.MsgBox:Show(L'正在加入学校，请稍候...', 10000, L'链接超时', 500, 120)
-                Mod.WorldShare.Utils.SetTimeOut(function()
-                    KeepworkServiceSchoolAndOrg:ChangeSchool(school_data.id, function(bSuccessed)
-                        Mod.WorldShare.MsgBox:Close()
-                    end) 
-                end, 500)
-            end, false)
+            local region_desc = ""
+            local region = school_data.region
+            if region then
+                local state = region.state and region.state.name or ""
+                local city = region.city and region.city.name or ""
+                local county = region.county and region.county.name or ""
+                region_desc = state .. city .. county
+            end
+            
+            local register_str = string.format("%s是新用户， 你是否希望加入学校%s：%s？%s", account, school_data.id, school_data.name, region_desc)
+            
+            _guihelper.MessageBox(register_str, function()
+                MainLogin.account = account
+                MainLogin.password = password
+    
+                MainLogin:RegisterWithAccount(function()
+                    -- page:SetValue('account_result', account)
+                    -- page:SetValue('password_result', password)
+                    -- set_finish()
+                    login_cb(true)
+                    Mod.WorldShare.MsgBox:Show(L'正在加入学校，请稍候...', 10000, L'链接超时', 500, 120)
+                    Mod.WorldShare.Utils.SetTimeOut(function()
+                        KeepworkServiceSchoolAndOrg:ChangeSchool(school_data.id, function(bSuccessed)
+                            Mod.WorldShare.MsgBox:Close()
+                        end) 
+                    end, 500)
+                end, false)
+            end)
         end
     end)
 
