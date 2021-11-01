@@ -525,7 +525,9 @@ function LoadWorldCommand:Download(cmdText, options)
                     end
                 end
 
-                DownloadWorld.ShowPage(url)
+                if not options or not options.s then
+                    DownloadWorld.ShowPage(url)
+                end
 
                 world:DownloadRemoteFile(function(bSucceed, msg)
                     DownloadWorld.Close()
