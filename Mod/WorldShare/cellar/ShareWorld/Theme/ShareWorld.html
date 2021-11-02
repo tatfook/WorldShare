@@ -60,6 +60,10 @@
                     ShareWorld:OnClick()
                 end
 
+                function save_now()
+                    GameLogic.QuickSave()
+                end
+
                 function remote_revision()
                     return ShareWorld:GetRemoteRevision()
                 end
@@ -194,7 +198,7 @@
                                               height: 28px;
                                               background: url(Texture/Aries/Creator/paracraft/share_world_32bits.png#0 81 32 28);'
                                        value=''
-                                       tooltip='<%= get_full_world_name() %>'
+                                       tooltip='<%=L"点击打开本地目录+目录路径"%>'
                                        onclick='open_world()' />
                             </div>
                             <div class="info"><%=L"大小：" %><%= size() %></div>
@@ -204,15 +208,11 @@
                             <div class="info"><%=L"本地版本号：" %>
                                 <label name='current_revision' value='<%= current_revision() %>' />
                             </div>
-                            <input type='button'
-                                   style='font-size: 11px;
-                                          margin-top: 10px;
-                                          margin-left: -3px;
-                                          height: 40px;
-                                          width: 120px;
-                                          background: url(Texture/Aries/Creator/paracraft/share_world_32bits.png#108 5 120 40);'
-                                   value=''
-                                   onclick='snapshot' />
+                            <div onclick='snapshot()' tooltip='<%= L"重新截图" %>' 
+                                style="margin-top: 43px;font-size: 18px;base-font-size:18px;color: #0c61cf;">
+                                重新截图
+                                <div style="margin-top: -3px;margin-left: 2px; width:70px;height: 2px;background-color: #0c61cf;"></div>
+                            </div>
                         </div>
                     </div>
                     <div style='margin-top:20px;'>
@@ -222,10 +222,10 @@
                                class='text_field theme1_black_textfield' />
                     </div>
                 </div>
-                <div style='width: 595px;'
+                <div style='width: 600px;'
                      align='center'>
                     <div style='position: relative;
-                                margin-top: 10px;'>
+                                margin-top: 40px;'>
                         <input type='checkbox'
                                iconsize='18'
                                CheckedBG='Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#275 79 12 12'
@@ -242,15 +242,27 @@
                         </div>
                     </div>
                     <input type='button'
+                           uiname="ShareWorld.save_now"
+                           onclick='save_now()'
+                           value='<%=L"保存" %>'
+                           class='theme1_gray_button'
+                           tooltip='ctrl+s'
+                           style='margin-left: 375px;
+                                  float: left;
+                                  margin-top: 30px;
+                                  min-width: 100px;
+                                  height:40px' />
+                    <input type='button'
                            uiname="ShareWorld.share_now"
                            onclick='share_now()'
-                           value='<%=L"上传并分享" %>'
+                           value='<%=L"上传分享" %>'
                            class='theme1_orange_button'
-                           align='right'
-                           style='margin-right: -3px;
-                                  margin-top: 10px;
-                                  min-width: 160px;
-                                  height:50px' />
+                           tooltip='上传分享前请先点击“保存”按钮或按快捷键“ctrl+s”保存世界'
+                           style='margin-left: 20px;
+                                  float: left;
+                                  margin-top: 30px;
+                                  min-width: 100px;
+                                  height:40px' />
                 </div>
             </div>
         </kp:window>
