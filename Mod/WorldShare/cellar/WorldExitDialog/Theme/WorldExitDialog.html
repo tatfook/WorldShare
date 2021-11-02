@@ -88,8 +88,15 @@
 
                     function on_click_save_and_share()
                         GameLogic.QuickSave()
-                        ShareWorld:Init()
                         WorldExitDialog.OnDialogResult(_guihelper.DialogResult.Cancel)
+                        --ShareWorld:Init()
+                        ShareWorld.callback = function()
+                            _guihelper.MessageBox(L'保存并上传成功！是否要继续退出世界', function()
+                                WorldExitDialog.OnDialogResult(_guihelper.DialogResult.No)
+                            end)
+                        end
+                        --ShareWorld:ClosePage()
+                        ShareWorld:OnClick()
                     end
 
                     function save_as()
