@@ -1260,7 +1260,7 @@ function MainLogin:AutoRegister(account, password, login_cb, school_data)
                 region_desc = state .. city .. county
             end
             
-            local register_str = string.format("%s是新用户， 你是否希望加入学校%s：%s？%s", account, school_data.id, school_data.name, region_desc)
+            local register_str = string.format("%s是新用户， 你是否希望注册并默认加入学校%s：%s%s", account, school_data.id, region_desc, school_data.name)
             
             _guihelper.MessageBox(register_str, function()
                 MainLogin.account = account

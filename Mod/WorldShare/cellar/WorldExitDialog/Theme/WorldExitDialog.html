@@ -200,9 +200,9 @@
 
                     function has_project_id()
                         local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
-
                         if currentWorld and
-                           currentWorld.kpProjectId then
+                           currentWorld.kpProjectId and
+                           currentWorld.kpProjectId ~= 0 then
                             return true
                         else
                             return false
