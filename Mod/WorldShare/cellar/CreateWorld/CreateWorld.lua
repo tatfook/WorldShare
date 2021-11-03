@@ -17,7 +17,7 @@ local CreateNewWorld = commonlib.gettable('MyCompany.Aries.Game.MainLogin.Create
 local CreateWorld = NPL.export()
 
 function CreateWorld:CreateNewWorld(foldername)
-    CreateNewWorld.ShowPage()
+    CreateNewWorld.ShowPage(true)
 
     if type(foldername) == 'string' then
         CreateNewWorld.page:SetValue('new_world_name', foldername)

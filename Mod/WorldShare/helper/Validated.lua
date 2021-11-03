@@ -1,10 +1,11 @@
 --[[
 Title: Validated
 Author(s): big
-Date: 2019.09.24
+CreateDate: 2019.09.24
+ModifyDate: 2021.10.21
 Desc: 
 -------------------------------------------------------
-local Validated = NPL.load("(gl)Mod/WorldShare/helper/Validated.lua")
+local Validated = NPL.load('(gl)Mod/WorldShare/helper/Validated.lua')
 -------------------------------------------------------
 ]]
 
@@ -49,7 +50,7 @@ function Validated:AccountCompatible(str)
 end
 
 function Validated:Email(str)
-    if not string.find(str, "^%s*[%w%._%-]+@[%w%.%-]+%.[%a]+%s*$") then
+    if not string.find(str, '^%s*[%w%._%-]+@[%w%.%-]+%.[%a]+%s*$') then
         return false
     else
         return true
@@ -57,7 +58,7 @@ function Validated:Email(str)
 end
 
 function Validated:Phone(str)
-    if not string.find(tostring(str), "^%d%d%d%d%d%d%d%d%d%d%d$") then
+    if not string.find(tostring(str), '^%d%d%d%d%d%d%d%d%d%d%d$') then
         return false
     else
         return true
@@ -66,11 +67,25 @@ end
 
 function Validated:Password(str)
     if not str or
-       type(str) ~= "string" or
+       type(str) ~= 'string' or
        str == '' or
        #str < 4 or
        #str > 24 then
         return false
+    else
+        return true
+    end
+end
+
+function Validated:CheckSensitive(str)
+    if not str or type(str) ~= 'string' then
+        return false
+    end
+
+    str = MyCompany.Aries.Chat.BadWordFilter.FilterString(str)
+
+    if string.find(str, '*+') then
+        return false, str
     else
         return true
     end

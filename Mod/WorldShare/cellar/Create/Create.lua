@@ -256,6 +256,26 @@ function Create:GetWorldList(statusFilter, callback)
 end
 
 function Create:EnterWorld(index, skip)
+    if System.options.loginmode == 'online' then
+        GameLogic.IsVip('UnlimitWorldsNumber', false, function(result)
+            if result then
+                self:HandleEnterWorld(index, skip)
+            else
+                _guihelper.MessageBox(L'操作被禁止了，免费用户最多只能拥有3个本地世界，请删除不要的本地世界，或者联系老师或家长成为会员。')
+            end
+        end)
+    else
+        local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+
+        if currentWorld.kpProjectId and currentWorld.kpProjectId ~= 0 then
+            _guihelper.MessageBox(L'请先登录！')
+        else
+            self:HandleEnterWorld(index, skip)
+        end
+    end
+end
+
+function Create:HandleEnterWorld(index, skip)
     local currentSelectedWorld = Compare:GetSelectedWorld(index)
 
     if not currentSelectedWorld or type(currentSelectedWorld) ~= 'table' then
@@ -287,7 +307,7 @@ function Create:EnterWorld(index, skip)
                             currentSelectedWorld.shared,
                             currentSelectedWorld.is_zip
                         )
-                        self:EnterWorld(index)
+                        self:HandleEnterWorld(index)
                     end)
                 end
             end)
@@ -295,7 +315,7 @@ function Create:EnterWorld(index, skip)
             GameLogic.IsVip('Vip', true, function(result)
                 if result then
                     self.vipVerified = true
-                    self:EnterWorld(index)
+                    self:HandleEnterWorld(index)
                 end
             end, 'Vip')
         end
@@ -314,7 +334,7 @@ function Create:EnterWorld(index, skip)
                             currentSelectedWorld.shared,
                             currentSelectedWorld.is_zip
                         )
-                        self:EnterWorld(index)
+                        self:HandleEnterWorld(index)
                     end)
                 end
             end)
@@ -322,7 +342,7 @@ function Create:EnterWorld(index, skip)
             VipTypeWorld:CheckInstituteVipWorld(currentSelectedWorld, function(result)
                 if result then
                     self.instituteVerified = true
-                    self:EnterWorld(index)
+                    self:HandleEnterWorld(index)
                 else
                     local username = Mod.WorldShare.Store:Get('user/username')
 
@@ -351,7 +371,7 @@ function Create:EnterWorld(index, skip)
                                 currentSelectedWorld.shared,
                                 currentSelectedWorld.is_zip
                             )
-                            self:EnterWorld(index)
+                            self:HandleEnterWorld(index)
                         end)
                     else
                         Mod.WorldShare.MsgBox:Dialog(
@@ -365,7 +385,7 @@ function Create:EnterWorld(index, skip)
                             function(res)
                                 if res and res == _guihelper.DialogResult.No then
                                     Mod.WorldShare.Store:Set('world/readonly', true)
-                                    self:EnterWorld(index, true)
+                                    self:HandleEnterWorld(index, true)
                                 end
                             end,
                             _guihelper.MessageBoxButtons.YesNo
@@ -386,7 +406,7 @@ function Create:EnterWorld(index, skip)
                                 -- check ouccupy
                                 ShareTypeWorld:Lock(currentSelectedWorld, function()
                                     self.shareWorldVerified = true
-                                    self:EnterWorld(index)
+                                    self:HandleEnterWorld(index)
                                 end)
                             else
                                 -- download world and encrypted world
@@ -442,7 +462,7 @@ function Create:EnterWorld(index, skip)
                                 currentSelectedWorld.shared,
                                 currentSelectedWorld.is_zip
                             )
-                            self:EnterWorld(index)
+                            self:HandleEnterWorld(index)
                         end)
                     end
                 end
@@ -454,10 +474,10 @@ function Create:EnterWorld(index, skip)
                         currentSelectedWorld.shared,
                         currentSelectedWorld.is_zip
                     )
-                    self:EnterWorld(index)
+                    self:HandleEnterWorld(index)
                 end)
             else
-                self:EnterWorld(index, true)
+                self:HandleEnterWorld(index, true)
             end
         end)
         return
