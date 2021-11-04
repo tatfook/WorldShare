@@ -613,6 +613,20 @@ function KeepworkServiceWorld:LimitFreeUser(isShowUI, callback)
         return
     end
 
+    local localWorldList = LocalServiceWorld:GetWorldList()
+    local localWorldListCount = #localWorldList
+
+    if isShowUI == true then
+        isShowUI = true
+    else
+        isShowUI = false
+    end
+
+    if localWorldListCount >= 3 then
+        GameLogic.IsVip('UnlimitWorldsNumber', isShowUI, callback)
+        return
+    end
+
     self:GetWorldsList(function(data)
         if not data or type(data) ~= 'table' then
             return
@@ -620,13 +634,7 @@ function KeepworkServiceWorld:LimitFreeUser(isShowUI, callback)
 
         local dataCount = #data
 
-        if dataCount >= 3 then
-            if isShowUI == true then
-                isShowUI = true
-            else
-                isShowUI = false
-            end
-
+        if (dataCount + localWorldListCount) >= 3 then
             GameLogic.IsVip('UnlimitWorldsNumber', isShowUI, callback)
         else
             callback(true)
