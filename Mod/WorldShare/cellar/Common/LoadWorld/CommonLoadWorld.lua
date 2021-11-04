@@ -839,12 +839,6 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
             -- update world info
             data.world.username = data.username
 
-            local archiveUrl = GitKeepworkService:GetQiNiuArchiveUrl(
-                                data.world.worldName,
-                                data.world.username,
-                                data.world.commitId
-                               )
-
             local function ResetVerified()
                 self.isVisiblityVerified = false
                 self.vipVerified = false
@@ -890,7 +884,7 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                 if data.timeRules and
                    data.timeRules[1] and
                    not self.timesVerified then
-                    local reuslt, reason = self:TimesFilter(data.timeRules)
+                    local result, reason = self:TimesFilter(data.timeRules)
 
                     if result then
                         self.timesVerified = true
