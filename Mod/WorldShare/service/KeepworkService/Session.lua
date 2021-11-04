@@ -294,9 +294,9 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
         Mod.WorldShare.Store:Set('user/isVip', false)
     end
 
-    if response.school and response.school.isVip == 1 then
-        isVipSchool = true
-    end
+    -- if response.school and response.school.isVip == 1 then
+    --     isVipSchool = true
+    -- end
 
     if response and response.region and type(response.region) == 'table' then
         Mod.WorldShare.Store:Set('user/region', response.region)
@@ -380,6 +380,19 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
                 callback(true)
             end
         end
+
+        -- 2021.11.4修改 是否vip学校通过身份来验证
+        keepwork.user.roles({},function(err, msg, data)
+            if err == 200 then
+                for k, role in pairs(data) do
+                    if role.name == "vip_school_student" then
+                        local SetIsVipSchool = Mod.WorldShare.Store:Action('user/SetIsVipSchool')
+                        SetIsVipSchool(true)
+                        break
+                    end
+                end
+            end
+        end)
     end)
 
     self:ResetIndulge()

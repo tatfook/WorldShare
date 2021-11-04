@@ -228,7 +228,12 @@
                         else
                             local is_auto = page:GetUIValue('auto_login_name')
                             if is_auto then
-                                _guihelper.MessageBox(L'只有在自己家里的电脑才能使用“自动登录”，并且要牢记自己的账号和密码哦。')
+                                _guihelper.MessageBox(L'只有在自己家里的电脑才能使用“自动登录”，并且要牢记自己的账号和密码哦。', function(result)
+                                    if result == _guihelper.DialogResult.OK then
+                                        page:SetUIValue('auto_login_name', false)
+                                    end
+                                   
+                                end, _guihelper.MessageBoxButtons.OKCancel_CustomLabel_Highlight_Right, nil, nil, nil, nil, {cancel="记住密码",ok="取消"});
                             end
                         end
                     end

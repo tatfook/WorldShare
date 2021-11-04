@@ -186,17 +186,29 @@ function KeepworkServiceSchoolAndOrg:ChangeSchool(schoolId, callback)
                 KeepworkServiceSession:Profile(function(response, err)
                     local isVipSchool = false
 
-                    if response and response.school and response.school.isVip == 1 then
-                        isVipSchool = true
-                    end
+                    -- if response and response.school and response.school.isVip == 1 then
+                    --     isVipSchool = true
+                    -- end
 
-                    local SetIsVipSchool = Mod.WorldShare.Store:Action("user/SetIsVipSchool")
-                    SetIsVipSchool(isVipSchool)
+                    -- 2021.11.4修改 是否vip学校通过身份来验证
+                    keepwork.user.roles({},function(err, msg, data)
+                        if err == 200 then
+                            for k, role in pairs(data) do
+                                if role.name == "vip_school_student" then
+                                    isVipSchool = true
+                                    break
+                                end
+                            end
+                        end
 
-                    -- 1. for 柴桑小学 2. updated libs info
-                    KeepWorkItemManager.school = response.school
+                        local SetIsVipSchool = Mod.WorldShare.Store:Action('user/SetIsVipSchool')
+                        SetIsVipSchool(isVipSchool)
 
-                    callback(true)
+                        -- 1. for 柴桑小学 2. updated libs info
+                        KeepWorkItemManager.school = response.school
+
+                        callback(true)
+                    end)
                 end)
             end
         end,
