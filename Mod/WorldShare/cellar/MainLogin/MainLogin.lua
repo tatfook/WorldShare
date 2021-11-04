@@ -1271,6 +1271,7 @@ function MainLogin:AutoRegister(account, password, login_cb, school_data)
                     -- page:SetValue('password_result', password)
                     -- set_finish()
                     login_cb(true)
+                    MainLogin:UpdatePasswordRemindVisible(true)
                     Mod.WorldShare.MsgBox:Show(L'正在加入学校，请稍候...', 10000, L'链接超时', 500, 120)
                     Mod.WorldShare.Utils.SetTimeOut(function()
                         KeepworkServiceSchoolAndOrg:ChangeSchool(school_data.id, function(bSuccessed)
@@ -1281,6 +1282,12 @@ function MainLogin:AutoRegister(account, password, login_cb, school_data)
             end)
         end
     end)
+end
 
-
+function MainLogin:UpdatePasswordRemindVisible(flag)
+    local MainLoginLoginPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Login')
+    local remind = MainLoginLoginPage:FindControl('update_button_remind')
+    if remind and remind:IsValid() then
+        remind.visible = flag
+    end
 end

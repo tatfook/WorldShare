@@ -567,6 +567,15 @@
                     end
 
                     function update_password()
+                        MainLogin:UpdatePasswordRemindVisible(false)
+                        if not KeepworkServiceSession:IsRealName() then
+                            _guihelper.MessageBox(L'*修改密码前请先完成实名认证。', function()
+                                local Certificate = NPL.load("(gl)Mod/WorldShare/cellar/Certificate/Certificate.lua")
+                                Certificate:ShowMyHomePage()
+                            end)
+                            return
+                        end
+
                         close()
                         MainLogin:ShowUpdatePassword()
                     end
@@ -628,11 +637,35 @@
                        margin-right: 11px;'>
                 <div style='width: 109px;float: left;'>
                     <pe:container name='update_password_button' visible='false' style='background:;'>
+                        <pe:container name='update_button_remind' visible='false' style='margin-left: -355px;margin-top: -8px;
+                                position: relative;width:346px;height:90px;
+                                background:url(Texture/Aries/Creator/keepwork/worldshare/remind_bg_53X64_32bits.png#0 0 53 64:20 45 20 10)'>
+                        <div style="float: left;
+                                    margin-top: 27px;
+                                    margin-left: 13px;
+                                    width: 32px;
+                                    height: 32px;    
+                                    background: url(Texture/Aries/Creator/keepwork/worldshare/warn_32X32_32bits.png#0 0 32 32);">
+                        </div>
+                        <div style="font-size: 14px; float: left;margin-left: 10px;margin-top: 10px; width: 274px;height: 85px;color: #FFFFFF;">
+                            你还没有修改公共密码，存在账号被盗用的风险，请尽快点击“修改密码”进行修改。<br/>（需要先完成实名认证才能修改密码。）
+                        </div>
+                        </pe:container>
+                        
                         <input type='button'
+                        value="修改密码" 
                         onclick='update_password'
-                        style='width: 109px;
+                        icon="Texture/Aries/Creator/keepwork/worldshare/mima_32X32_32bits.png#0 0 32 32"
+                        icon_width=32
+                        icon_height=32
+                        icon_off_y=5
+                        icon_off_x=-28
+                        style='width: 111px;
                                 height: 45px;
-                                background: url(Texture/Aries/Creator/paracraft/login/btn1_109X45_32bits.png#0 0 109 45)' />
+                                font-size: 18px;
+                                text-offset-x: 9;
+                                text-offset-y: -2;
+                                background: url(Texture/Aries/Creator/keepwork/Window/button/btn_hui109X45_32bits.png#0 0 109 45:15 15 15 15)' />
                     </pe:container>
                 </div>
 
@@ -640,9 +673,18 @@
                     <pe:container name='change_button' visible='false' style='background:;'>
                         <input type='button'
                             onclick='change'
+                            value="切换账号" 
+                            icon="Texture/Aries/Creator/keepwork/worldshare/icon3_16X16_32bits.png#0 0 16 16"
+                            icon_width=16
+                            icon_height=16
+                            icon_off_y=-2
+                            icon_off_x=-34
                             style='width: 111px;
-                                    height: 43px;
-                                    background: url(Texture/Aries/Creator/paracraft/paracraft_mobile_login_32bits.png#26 797 192 74)' />
+                                    height: 45px;
+                                    font-size: 18px;
+                                    text-offset-x: 12;
+                                    text-offset-y: -3;
+                                    background: url(Texture/Aries/Creator/keepwork/Window/button/btn_hui109X45_32bits.png#0 0 109 45:15 15 15 15)' />
                     </pe:container>
                 </div>
                 <div style='float: left;
