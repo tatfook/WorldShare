@@ -225,6 +225,11 @@
                         if string.find(password, "paracraft.cn") == 1 then
                             -- 不允许自动登录
                             page:SetUIValue('auto_login_name', false)
+                        else
+                            local is_auto = page:GetUIValue('auto_login_name')
+                            if is_auto then
+                                _guihelper.MessageBox(L'只有在自己家里的电脑才能使用“自动登录”，并且要牢记自己的账号和密码哦。')
+                            end
                         end
                     end
 
