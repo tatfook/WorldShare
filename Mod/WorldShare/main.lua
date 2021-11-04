@@ -2,7 +2,7 @@
 Title: WorldShareMod
 Author(s): big
 CreateDate: 2017.04.17
-ModifyDate: 2021.09.17
+ModifyDate: 2021.11.04
 Desc:
 use the lib:
 ------------------------------------------------------------
@@ -115,6 +115,9 @@ local EventTrackingService = NPL.load('(gl)Mod/WorldShare/service/EventTracking.
 local LocalServiceSession = NPL.load('(gl)Mod/WorldShare/service/LocalService/LocalServiceSession.lua')
 local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
 
+-- database
+local SessionsData = NPL.load('(gl)Mod/WorldShare/database/SessionsData.lua')
+
 -- helper
 local Store = NPL.load('(gl)Mod/WorldShare/store/Store.lua')
 local MsgBox = NPL.load('(gl)Mod/WorldShare/cellar/Common/MsgBox/MsgBox.lua')
@@ -202,6 +205,16 @@ function WorldShare:init()
 
     System.options.useFreeworldWhitelist = true
     System.options.maxFreeworldUploadCount = 3
+
+    GameLogic.GetFilters():add_filter('CheckInstallUrlProtocol', function()
+        local sessions = SessionsData:GetSessions()
+
+        if not sessions or not sessions.allUsers then
+            return false
+        else
+            return true
+        end
+    end)
 end
 
 function WorldShare:OnInitDesktop()
