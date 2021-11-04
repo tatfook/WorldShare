@@ -27,7 +27,7 @@ local CreateWorld = NPL.load('(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.
 local Compare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
 local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
 local LocalServiceWorld = NPL.load('(gl)Mod/WorldShare/service/LocalService/LocalServiceWorld.lua')
-local KeepworkServiceWorld = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/World.lua')
+local KeepworkServiceWorld = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceWorld.lua')
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
 local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
 local SyncToLocal = NPL.load('(gl)Mod/WorldShare/service/SyncService/SyncToLocal.lua')
@@ -257,7 +257,7 @@ end
 
 function Create:EnterWorld(index, skip)
     if System.options.loginmode == 'online' then
-        GameLogic.IsVip('UnlimitWorldsNumber', false, function(result)
+        KeepworkServiceWorld:LimitFreeUser(false, function(result)
             if result then
                 self:HandleEnterWorld(index, skip)
             else

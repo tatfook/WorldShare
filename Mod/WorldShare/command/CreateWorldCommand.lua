@@ -18,7 +18,7 @@ local CreateNewWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.Create
 local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
 
 -- services
-local KeepworkServiceWorld = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/World.lua')
+local KeepworkServiceWorld = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceWorld.lua')
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
 local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
 local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')

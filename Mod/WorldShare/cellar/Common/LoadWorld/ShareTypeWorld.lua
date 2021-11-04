@@ -11,7 +11,7 @@ local ShareTypeWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/Shar
 
 -- service
 local Compare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
-local KeepworkServiceWorld = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/World.lua')
+local KeepworkServiceWorld = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceWorld.lua')
 
 local ShareTypeWorld = NPL.export()
 

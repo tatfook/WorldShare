@@ -16,7 +16,7 @@ local CommandManager = commonlib.gettable('MyCompany.Aries.Game.CommandManager')
 local WorldCommon = commonlib.gettable('MyCompany.Aries.Creator.WorldCommon')
 
 -- service
-local KeepworkServiceWorld = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/World.lua')
+local KeepworkServiceWorld = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceWorld.lua')
 local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
 
 -- UI

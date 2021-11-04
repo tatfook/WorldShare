@@ -32,7 +32,7 @@ local SocketBaseApi = NPL.load("(gl)Mod/WorldShare/api/Socket/BaseApi.lua")
 -- service
 local Compare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
 local KeepworkServiceSchoolAndOrg = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/SchoolAndOrg.lua")
-local KeepworkServiceWorld = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/World.lua")
+local KeepworkServiceWorld = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceWorld.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
 local EventTrackingService = NPL.load('(gl)Mod/WorldShare/service/EventTracking.lua')

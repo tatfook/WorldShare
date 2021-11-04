@@ -6,7 +6,7 @@ ModifyDate: 2021.09.16
 Place: Foshan
 use the lib:
 ------------------------------------------------------------
-local KeepworkServiceWorld = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/World.lua')
+local KeepworkServiceWorld = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceWorld.lua')
 ------------------------------------------------------------
 ]]
 
@@ -607,6 +607,33 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
         callback(currentWorldList)
     end)
 end
+
+function KeepworkServiceWorld:LimitFreeUser(isShowUI, callback)
+    if not callback or type(callback) ~= 'function' then
+        return
+    end
+
+    self:GetWorldsList(function(data)
+        if not data or type(data) ~= 'table' then
+            return
+        end
+
+        local dataCount = #data
+
+        if dataCount >= 3 then
+            if isShowUI == true then
+                isShowUI = true
+            else
+                isShowUI = false
+            end
+
+            GameLogic.IsVip('UnlimitWorldsNumber', isShowUI, callback)
+        else
+            callback(true)
+        end
+    end)
+end
+
 
 function KeepworkServiceWorld:GenerateWorldInstance(params)
     if not params or type(params) ~= 'table' then

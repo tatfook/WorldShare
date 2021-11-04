@@ -12,7 +12,7 @@ KeepworkServiceWorldFilter:Init()
 ]]
 
 -- libs
-local KeepworkServiceWorld = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/World.lua')
+local KeepworkServiceWorld = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceWorld.lua')
 
 local KeepworkServiceWorldFilter = NPL.export()
 
@@ -22,6 +22,13 @@ function KeepworkServiceWorldFilter:Init()
         'service.keepwork_service_world.set_world_instance_by_pid',
         function(...)
             return KeepworkServiceWorld:SetWorldInstanceByPid(...)
+        end
+    )
+
+    GameLogic.GetFilters():add_filter(
+        'service.keepwork_service_world.limit_free_user',
+        function(...)
+            return KeepworkServiceWorld:LimitFreeUser(...)
         end
     )
 end
