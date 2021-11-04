@@ -105,6 +105,10 @@
                     GameLogic.RunCommand('/diffworld')
                 end
 
+                function get_open_desc()
+                    return string.format("点击打开本地目录:%s" , ParaWorld.GetWorldDirectory())
+                end
+
                 Mod.WorldShare.Utils.SetTimeOut(function()
                     local current_enter_world = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
@@ -198,7 +202,7 @@
                                               height: 28px;
                                               background: url(Texture/Aries/Creator/paracraft/share_world_32bits.png#0 81 32 28);'
                                        value=''
-                                       tooltip='<%=L"点击打开本地目录+目录路径"%>'
+                                       tooltip='<%=get_open_desc()%>'
                                        onclick='open_world()' />
                             </div>
                             <div class="info"><%=L"大小：" %><%= size() %></div>

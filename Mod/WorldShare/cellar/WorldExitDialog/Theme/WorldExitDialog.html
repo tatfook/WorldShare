@@ -352,6 +352,10 @@
                     function has_real_name()
                         return KeepworkServiceSession:IsRealName()
                     end
+
+                    function get_open_desc()
+                        return string.format("点击打开本地目录:%s" , ParaWorld.GetWorldDirectory())
+                    end
                 ]]>
             </script>
             <style type='text/mcss'
@@ -524,7 +528,7 @@
                                                     <input type='button'
                                                            style="width: 32px;height: 28px;text-offset-y: -4;
                                                                 background: url(Texture/Aries/Creator/keepwork/worldshare/btn_jubaoweigui_32x28_32bits.png#0 0 32 28);"
-                                                           tooltip='<%= L"点击打开本地目录+目录路径" %>'
+                                                           tooltip='<%= get_open_desc()%>'
                                                            value='...'
                                                            onclick='on_open_world_dir()' />
                                                 </div>
