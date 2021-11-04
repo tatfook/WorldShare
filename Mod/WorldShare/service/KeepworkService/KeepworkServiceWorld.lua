@@ -613,6 +613,10 @@ function KeepworkServiceWorld:LimitFreeUser(isShowUI, callback)
         return
     end
 
+    if not ParaEngine.GetAppCommandLineByParam('isDevMode', nil) then
+       return
+    end
+
     local localWorldList = LocalServiceWorld:GetWorldList()
     local localWorldListCount = #localWorldList
 
@@ -634,10 +638,32 @@ function KeepworkServiceWorld:LimitFreeUser(isShowUI, callback)
 
         local dataCount = #data
 
-        if (dataCount + localWorldListCount) >= 3 then
-            GameLogic.IsVip('UnlimitWorldsNumber', isShowUI, callback)
+        if localWorldListCount > 0 then
+            if dataCount > 0 then
+                local totalCount = 0
+
+                for key, item in ipairs(localWorldList) do
+                    for DKey, DItem in ipairs(data) do
+                        if item.foldername ~= DItem.worldName then
+                            totalCount = totalCount + 1
+                        end
+                    end
+                end
+
+                if totalCount >= 3 then
+                    GameLogic.IsVip('UnlimitWorldsNumber', isShowUI, callback)
+                else
+                    callback(true)
+                end
+            else
+                callback(true)
+            end
         else
-            callback(true)
+            if dataCount >= 3 then
+                GameLogic.IsVip('UnlimitWorldsNumber', isShowUI, callback)
+            else
+                callback(true)
+            end
         end
     end)
 end
