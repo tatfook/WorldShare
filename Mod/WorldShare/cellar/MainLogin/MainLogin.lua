@@ -847,16 +847,18 @@ function MainLogin:LoginAction(callback)
                     local start_index,end_index = string.find(password, "paracraft.cn")
                     local school_id = string.match(password, "paracraft.cn(%d+)")
                     if string.find(password, "paracraft.cn") == 1 and school_id then
+                        MainLoginPage:SetUIValue('account_field_error_msg', "")
                         KeepworkServiceSession:CheckUsernameExist(account, function(bIsExist)
                             if not bIsExist then
                                 -- 查询学校
                                 KeepworkServiceSchoolAndOrg:SearchSchoolBySchoolId(tonumber(school_id), function(data)
                                     if data and data[1] and data[1].id then
-                                        MainLoginPage:SetUIValue('account_field_error_msg', "")
+                                        
                                         MainLogin:AutoRegister(account, password, callback, data[1])
                                     end
                                 end)
-
+                            else
+                                _guihelper.MessageBox(string.format("用户名%s已经被注册，请更换用户名，建议使用名字拼音加出生日期，例如： zhangsan2010", account))
                             end
                         end)
                     end
