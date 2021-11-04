@@ -613,6 +613,11 @@ function KeepworkServiceWorld:LimitFreeUser(isShowUI, callback)
         return
     end
 
+    if true then
+        callback(true)
+        return
+    end
+
     self:GetWorldsList(function(data)
         if not data or type(data) ~= 'table' then
             return
