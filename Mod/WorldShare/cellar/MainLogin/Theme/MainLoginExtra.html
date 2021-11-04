@@ -34,6 +34,7 @@
                     end
 
                     function OnOpenModulePage()
+                        ShowSettingMenu()
                         NPL.load('(gl)script/apps/Aries/Creator/Game/Login/SelectModulePage.lua');
                         local SelectModulePage = commonlib.gettable('MyCompany.Aries.Game.MainLogin.SelectModulePage')
                         SelectModulePage.ShowPage()
@@ -65,6 +66,7 @@
                     end
 
                     function OnOpenLocalServer()
+                        ShowSettingMenu()
                         GameLogic.RunCommand("/lan -server_setting=true")
                     end
                 ]]>
