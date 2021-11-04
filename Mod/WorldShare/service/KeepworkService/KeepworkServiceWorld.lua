@@ -614,7 +614,8 @@ function KeepworkServiceWorld:LimitFreeUser(isShowUI, callback)
     end
 
     if not ParaEngine.GetAppCommandLineByParam('isDevMode', nil) then
-       return
+        callback(true)
+        return
     end
 
     local localWorldList = LocalServiceWorld:GetWorldList()
