@@ -384,6 +384,7 @@
 
                             if auto_login_mode then
                                 change_button.visible = true
+                                MainLogin:UpdatePasswordRemindVisible(true)
                             end
 
                             if auto_login_mode then
@@ -577,15 +578,20 @@
                     end
 
                     function update_password()
-                        MainLogin:UpdatePasswordRemindVisible(false)
+                        
                         if not KeepworkServiceSession:IsRealName() then
                             _guihelper.MessageBox(L'*修改密码前请先完成实名认证。', function()
                                 local Certificate = NPL.load("(gl)Mod/WorldShare/cellar/Certificate/Certificate.lua")
-                                Certificate:ShowMyHomePage()
+                                Certificate:ShowMyHomePage(function()
+                                    MainLogin:UpdatePasswordRemindVisible(false)
+                                    close()
+                                    MainLogin:ShowUpdatePassword()
+                                end)
                             end)
                             return
                         end
 
+                        MainLogin:UpdatePasswordRemindVisible(false)
                         close()
                         MainLogin:ShowUpdatePassword()
                     end
