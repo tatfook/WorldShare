@@ -87,7 +87,10 @@
                     end
 
                     function on_click_save_and_share()
+                        _guihelper.SetMessageBoxLockHide(true)
                         GameLogic.QuickSave()
+                        _guihelper.SetMessageBoxLockHide(false)
+
                         WorldExitDialog.OnDialogResult(_guihelper.DialogResult.Cancel)
                         --ShareWorld:Init()
                         ShareWorld.callback = function()
