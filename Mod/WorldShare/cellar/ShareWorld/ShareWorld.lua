@@ -64,9 +64,10 @@ function ShareWorld:Init(callback)
                         function()
                             Compare:Init(currentEnterWorld.worldpath, function(result)
                                 if result then
-                                    self:CheckRealName(function()                                        
-                                        self:ShowPage()
-                                    end)
+                                    -- self:CheckRealName(function()                                        
+                                        
+                                    -- end)
+                                    self:ShowPage()
                                 end
                             end)
                         end
@@ -87,9 +88,10 @@ function ShareWorld:Init(callback)
         Mod.WorldShare.MsgBox:Close()
 
         if result then
-            self:CheckRealName(function()
-                self:ShowPage()
-            end)
+            -- self:CheckRealName(function()
+                
+            -- end)
+            self:ShowPage()
         end
     end)
 end
