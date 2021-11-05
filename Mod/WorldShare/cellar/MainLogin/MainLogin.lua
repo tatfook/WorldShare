@@ -49,8 +49,11 @@ end
 
 function MainLogin:Show()
     local platform = System.os.GetPlatform()
+    local isTouchDevice = ParaEngine.GetAppCommandLineByParam('IsTouchDevice', nil);
 
-    if platform == 'android' or platform == 'ios' then
+    if platform == 'android' or
+       platform == 'ios' or
+       (isTouchDevice and isTouchDevice =='true') then
         self:ShowAndroid()
         return
     end
