@@ -442,8 +442,12 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
             local instituteVipEnabled
             local name = ''
 
-            if DItem.project and DItem.project.memberCount and DItem.project.memberCount > 1 then
+            if DItem.project.managed == 1 then
                 remoteShared = true
+            else
+                if DItem.project and DItem.project.memberCount and DItem.project.memberCount > 1 then
+                    remoteShared = true
+                end
             end
 
             for LKey, LItem in ipairs(localWorlds) do
