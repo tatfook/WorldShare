@@ -256,6 +256,12 @@ function Create:GetWorldList(statusFilter, callback)
 end
 
 function Create:EnterWorld(index, skip)
+    local currentSelectedWorld = Compare:GetSelectedWorld(index)
+
+    if not currentSelectedWorld or type(currentSelectedWorld) ~= 'table' then
+        return
+    end
+
     if System.options.loginmode == 'online' then
         KeepworkServiceWorld:LimitFreeUser(false, function(result)
             if result then
@@ -265,9 +271,7 @@ function Create:EnterWorld(index, skip)
             end
         end)
     else
-        local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
-
-        if currentWorld.kpProjectId and currentWorld.kpProjectId ~= 0 then
+        if currentSelectedWorld.kpProjectId and currentSelectedWorld.kpProjectId ~= 0 then
             LoginModal:CheckSignedIn(L'请先登录！', function(bIsSuccessed)
                 if bIsSuccessed then
                     _guihelper.MessageBox(L'登录成功')
