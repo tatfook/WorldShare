@@ -51,7 +51,7 @@ function DeleteWorld:DeleteWorld(callback)
     local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
     if not currentWorld then
-        return false
+        return
     end
 
     if isEnterWorld then
@@ -62,15 +62,15 @@ function DeleteWorld:DeleteWorld(callback)
                 if currentWorld.shared then
                     if currentWorld.kpProjectId == currentEnterWorld.kpProjectId then
                         _guihelper.MessageBox(L'不能刪除正在编辑的世界')
-                        return false
+                        return
                     end
                 else
                     _guihelper.MessageBox(L'不能刪除正在编辑的世界')
-                    return false
+                    return
                 end
             else
                 _guihelper.MessageBox(L'不能刪除正在编辑的世界')
-                return false
+                return
             end
         end
     end

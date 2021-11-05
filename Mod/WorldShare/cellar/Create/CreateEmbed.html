@@ -75,8 +75,27 @@
                         return Eval("index") == Create.worldIndex
                     end
 
-                    function get_world_status(index)
-                        return UserInfo.IsSignedIn() and not WorldList.GetCurWorldInfo("is_zip", Eval("index")) and WorldList.GetCurWorldInfo("status", Eval("index")) == index;
+                    function get_world_status(status_number)
+                        if KeepworkServiceSession:IsSignedIn() then
+                            if WorldList.GetCurWorldInfo('level', Eval('index')) == 0 or
+                               WorldList.GetCurWorldInfo('level', Eval('index')) == 1 then
+                                if status_number == 6 then
+                                    return true
+                                else
+                                    return false
+                                end
+                            end
+
+                            if not WorldList.GetCurWorldInfo("is_zip", Eval("index")) then
+                                if WorldList.GetCurWorldInfo("status", Eval("index")) == status_number then
+                                    return true
+                                end
+                            end
+
+                            return false
+                        else
+                            return false
+                        end
                     end
 
                     function get_world_status_icon(index)
@@ -916,8 +935,8 @@
                                                     <div style='position: relative;
                                                                 width: 70px;
                                                                 height: 36px;
-                                                                margin-top: -4px;
-                                                                margin-left: -4px;
+                                                                margin-top: 2px;
+                                                                margin-left: 0px;
                                                                 padding-top: 4px;
                                                                 padding-left: 6px;
                                                                 background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#356 136 70 36)'>
@@ -952,22 +971,22 @@
                                                              style="<%= 'height: 130px;background: url(' .. get_world_preview() .. ')' %>"></div>
                                                     </div>
                                                     <div style="position: relative; width: 32px;height: 32px;">
-                                                        <pe:if condition='<%= get_world_status(1)%>'>
+                                                        <pe:if condition='<%= get_world_status(1) %>'>
                                                             <div class="status" style="<%= get_world_status_icon(1) %>" tooltip='<%= get_world_status_tips()%>' />
                                                         </pe:if>
-                                                        <pe:if condition='<%= get_world_status(2)%>'>
+                                                        <pe:if condition='<%= get_world_status(2) %>'>
                                                             <div class="status" style="<%= get_world_status_icon(2) %>" tooltip='<%= get_world_status_tips()%>' />
                                                         </pe:if>
-                                                        <pe:if condition='<%= get_world_status(3)%>'>
+                                                        <pe:if condition='<%= get_world_status(3) %>'>
                                                             <div class="status" style="<%= get_world_status_icon(3) %>" tooltip='<%= get_world_status_tips()%>' />
                                                         </pe:if>
-                                                        <pe:if condition='<%= get_world_status(4)%>'>
+                                                        <pe:if condition='<%= get_world_status(4) %>'>
                                                             <div class="status" style="<%= get_world_status_icon(4) %>" tooltip='<%= get_world_status_tips()%>' />
                                                         </pe:if>
-                                                        <pe:if condition='<%= get_world_status(5)%>'>
+                                                        <pe:if condition='<%= get_world_status(5) %>'>
                                                             <div class="status" style="<%= get_world_status_icon(5) %>" tooltip='<%= get_world_status_tips()%>' />
                                                         </pe:if>
-                                                        <pe:if condition='<%= not can_be_sync()%>'>
+                                                        <pe:if condition='<%= get_world_status(6) %>'>
                                                             <div style="float:left;width:9px;height:32px;background:#fff" />
                                                         </pe:if>
                                                     </div>
@@ -1111,7 +1130,14 @@
                                                        name='<%=Eval("index")%>'
                                                        onclick="switch_world" />
                                                 <pe:if condition="<%= has_rated() %>">
-                                                    <div style="position: relative;width: 70px;height: 36px;margin-top: -6.8px;margin-left: -8px;padding-top: 4px;padding-left: 6px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#356 136 70 36)">
+                                                    <div style="position: relative;
+                                                                width: 70px;
+                                                                height: 36px;
+                                                                margin-top: -6.8px;
+                                                                margin-left: -8px;
+                                                                padding-top: 4px;
+                                                                padding-left: 6px;
+                                                                background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#356 136 70 36)">
                                                         <%= get_art_number()%>
                                                     </div>
                                                 </pe:if>
@@ -1165,7 +1191,7 @@
                                                     <pe:if condition='<%= get_world_status(5) %>'>
                                                         <div class="status" style="<%= get_world_status_icon(5) %>" tooltip='<%= get_world_status_tips()%>' />
                                                     </pe:if>
-                                                    <pe:if condition='<%= not can_be_sync()%>'>
+                                                    <pe:if condition='<%= get_world_status(6) %>'>
                                                         <div style="float:left;width:9px;height:32px;background:#fff" />
                                                     </pe:if>
                                                 </div>

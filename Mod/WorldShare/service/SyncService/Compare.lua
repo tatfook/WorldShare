@@ -327,8 +327,13 @@ function Compare:GetCurrentWorldInfo(callback)
 
                 local userId = Mod.WorldShare.Store:Get('user/userId')
                 local shared = false
-                if data and data.memberCount and data.memberCount > 1 then
+
+                if data.managed == 1 then
                     shared = true
+                else
+                    if data and data.memberCount and data.memberCount > 1 then
+                        shared = true
+                    end
                 end
 
                 if userId ~= data.userId then

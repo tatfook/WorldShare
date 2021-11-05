@@ -402,32 +402,16 @@ function Create:HandleEnterWorld(index, skip)
                     end
                 end)
             else
-                KeepworkServiceProject:GetMembers(currentSelectedWorld.kpProjectId, function(data, err)
-                    if not data or type(data) ~= 'table' then
-                        return
-                    end
-    
-                    local userId = Mod.WorldShare.Store:Get('user/userId')
-    
-                    for key, item in ipairs(data) do
-                        if item.userId == userId then
-                            if currentSelectedWorld.level == 2 then
-                                -- check ouccupy
-                                ShareTypeWorld:Lock(currentSelectedWorld, function()
-                                    self.shareWorldVerified = true
-                                    self:HandleEnterWorld(index)
-                                end)
-                            else
-                                -- download world and encrypted world
-                                CommonLoadWorld:EnterWorldById(currentSelectedWorld.kpProjectId)
-                            end
-    
-                            return
-                        end
-                    end
-    
-                    local username = Mod.WorldShare.Store:Get('user/username')
-    
+                if currentSelectedWorld.level == 2 then
+                    -- check ouccupy
+                    ShareTypeWorld:Lock(currentSelectedWorld, function()
+                        self.shareWorldVerified = true
+                        self:HandleEnterWorld(index)
+                    end)
+                elseif currentSelectedWorld.level == 1 then
+                    -- download world and encrypted world
+                    GameLogic.RunCommand('/loadworld -s -auto ' .. currentSelectedWorld.kpProjectId)
+                else
                     _guihelper.MessageBox(
                         format(
                             L'你没有权限进入此世界（共享世界）（项目ID：%d）（用户名：%s）',
@@ -435,7 +419,7 @@ function Create:HandleEnterWorld(index, skip)
                             username or ''
                         )
                     )
-                end)
+                end
             end
         end
 

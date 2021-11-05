@@ -266,7 +266,7 @@ end
 
 function KeepworkServiceWorld:GetLockInfo(pid, callback)
     if type(callback) ~= 'function' then
-        return false
+        return
     end
 
     KeepworkWorldLocksApi:GetWorldLockInfo(
