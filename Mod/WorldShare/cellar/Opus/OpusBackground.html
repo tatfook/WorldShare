@@ -7,6 +7,7 @@
                     local Opus = NPL.load('./Opus.lua')
                     local CommonLoadWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/CommonLoadWorld.lua')
                     local Server = NPL.load("(gl)Mod/WorldShare/cellar/Server/Server.lua")
+                    local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
 
                     -- libs
                     local InternetLoadWorld = commonlib.gettable('MyCompany.Aries.Creator.Game.Login.InternetLoadWorld')
@@ -14,6 +15,8 @@
                     local page = document:GetPageCtrl()
 
                     function sel(index)
+                        CreateWorld.ClosePage()
+                        
                         local my_opus_sel = page:FindControl('my_opus_sel')
                         local my_opus_unsel = page:FindControl('my_opus_unsel')
                         local my_home_sel = page:FindControl('my_home_sel')

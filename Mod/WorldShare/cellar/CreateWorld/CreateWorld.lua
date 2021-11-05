@@ -44,3 +44,7 @@ function CreateWorld.OnClickCreateWorld()
 
     return false
 end
+
+function CreateWorld.ClosePage()
+    CreateNewWorld.ClosePage()
+end

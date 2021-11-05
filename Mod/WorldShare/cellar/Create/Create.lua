@@ -268,7 +268,12 @@ function Create:EnterWorld(index, skip)
         local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
         if currentWorld.kpProjectId and currentWorld.kpProjectId ~= 0 then
-            _guihelper.MessageBox(L'请先登录！')
+            LoginModal:CheckSignedIn(L'请先登录！', function(bIsSuccessed)
+                if bIsSuccessed then
+                    _guihelper.MessageBox(L'登录成功')
+                    self:GetWorldList()
+                end
+            end)
         else
             self:HandleEnterWorld(index, skip)
         end
