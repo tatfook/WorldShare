@@ -1,11 +1,12 @@
 --[[
 Title: MdParser
 Author(s): big
-Date: 2018.09.14
+CreateDate: 2018.09.14
+ModifyDate: 2021.11.08
 Place: Foshan
 Desc: parse markdown document
 -------------------------------------------------------
-local MdParser = NPL.load("(gl)Mod/WorldShare/parser/MdParse.lua")
+local MdParser = NPL.load('(gl)Mod/WorldShare/parser/MdParser.lua')
 -------------------------------------------------------
 ]]
 local MdParser = NPL.export()
@@ -22,7 +23,7 @@ function MdParser:MdToTable(data)
         return false
     end
 
-    local dataList = commonlib.split(data, "\r\n")
+    local dataList = commonlib.split(data, '\r\n')
 
     if (not dataList or type(dataList) ~= 'table') then
         return false

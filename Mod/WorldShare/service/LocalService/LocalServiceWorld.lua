@@ -2,11 +2,11 @@
 Title: LocalService World
 Author(s):  big
 CreateDate: 2020.02.12
-ModifyDate: 2021.08.05
+ModifyDate: 2021.11.08
 Place: Foshan
 use the lib:
 ------------------------------------------------------------
-local LocalServiceWorld = NPL.load("(gl)Mod/WorldShare/service/LocalService/LocalServiceWorld.lua")
+local LocalServiceWorld = NPL.load('(gl)Mod/WorldShare/service/LocalService/LocalServiceWorld.lua')
 ------------------------------------------------------------
 ]]
 
@@ -19,13 +19,16 @@ local GitKeepworkService = NPL.load('(gl)Mod/WorldShare/service/GitService/GitKe
 
 -- libs
 local FileDownloader = commonlib.gettable('Mod.WorldShare.service.FileDownloader.FileDownloader')
-local LocalLoadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalLoadWorld")
-local WorldRevision = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision")
-local SaveWorldHandler = commonlib.gettable("MyCompany.Aries.Game.SaveWorldHandler")
-local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
-local RemoteServerList = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.RemoteServerList")
-local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
-local ParaWorldLoginAdapter = commonlib.gettable("MyCompany.Aries.Game.Tasks.ParaWorld.ParaWorldLoginAdapter")
+local LocalLoadWorld = commonlib.gettable('MyCompany.Aries.Game.MainLogin.LocalLoadWorld')
+local WorldRevision = commonlib.gettable('MyCompany.Aries.Creator.Game.WorldRevision')
+local SaveWorldHandler = commonlib.gettable('MyCompany.Aries.Game.SaveWorldHandler')
+local InternetLoadWorld = commonlib.gettable('MyCompany.Aries.Creator.Game.Login.InternetLoadWorld')
+local RemoteServerList = commonlib.gettable('MyCompany.Aries.Creator.Game.Login.RemoteServerList')
+local WorldCommon = commonlib.gettable('MyCompany.Aries.Creator.WorldCommon')
+local ParaWorldLoginAdapter = commonlib.gettable('MyCompany.Aries.Game.Tasks.ParaWorld.ParaWorldLoginAdapter')
+
+-- parse
+local MdParser = NPL.load('(gl)Mod/WorldShare/parser/MdParser.lua')
 
 local LocalServiceWorld = NPL.export()
 
@@ -39,7 +42,7 @@ function LocalServiceWorld:GetWorldList()
             local username = Mod.WorldShare.Store:Get('user/username')
 
             if item and item.foldername then
-                local matchFoldername = string.match(item.foldername, "(.+)_main$")
+                local matchFoldername = string.match(item.foldername, '(.+)_main$')
 
                 if matchFoldername then
                     if matchFoldername == username then
@@ -54,7 +57,7 @@ function LocalServiceWorld:GetWorldList()
                 end
             end
         else
-            if item and item.foldername and not string.match(item.foldername, "_main$") then
+            if item and item.foldername and not string.match(item.foldername, '_main$') then
                 filterLocalWorlds[#filterLocalWorlds + 1] = item
             else
                 if not item.IsFolder then
@@ -138,7 +141,7 @@ end
 function LocalServiceWorld:GetSharedWorldList()
     local dsWorlds = {}
     local SelectedWorld_Index = nil
-    local username = Mod.WorldShare.Store:Get("user/username")
+    local username = Mod.WorldShare.Store:Get('user/username')
 
     local function AddWorldToDS(worldInfo)
         if LocalLoadWorld.AutoCompleteWorldInfo(worldInfo) then
@@ -163,22 +166,22 @@ function LocalServiceWorld:GetSharedWorldList()
             if output and #output > 0 then
                 for _, item in ipairs(output) do
                     local bLoadedWorld
-                    local xmlRoot = ParaXML.LuaXML_ParseFile(folderPath .. "/" .. item.filename .. "/tag.xml")
+                    local xmlRoot = ParaXML.LuaXML_ParseFile(folderPath .. '/' .. item.filename .. '/tag.xml')
         
                     if xmlRoot then
-                        for node in commonlib.XPath.eachNode(xmlRoot, "/pe:mcml/pe:world") do
+                        for node in commonlib.XPath.eachNode(xmlRoot, '/pe:mcml/pe:world') do
                             if node.attr then
                                 local display_name = node.attr.name or item.filename
                                 local filenameUTF8 = commonlib.Encoding.DefaultToUtf8(item.filename)
         
                                 if filenameUTF8 ~= node.attr.name then
                                     -- show dir name if differs from world name
-                                    display_name = format("%s(%s)", node.attr.name or "", filenameUTF8)
+                                    display_name = format('%s(%s)', node.attr.name or '', filenameUTF8)
                                 end
 
-                                local worldpath = folderPath .. "/" .. item.filename
-                                local remotefile = "local://" .. worldpath
-                                local worldUsername = Mod.WorldShare:GetWorldData("username", worldpath .. "/") or ""
+                                local worldpath = folderPath .. '/' .. item.filename
+                                local remotefile = 'local://' .. worldpath
+                                local worldUsername = Mod.WorldShare:GetWorldData('username', worldpath .. '/') or ''
 
                                 -- only add world with the same nid
                                 AddWorldToDS(
@@ -186,20 +189,20 @@ function LocalServiceWorld:GetSharedWorldList()
                                         worldpath = worldpath,
                                         remotefile = remotefile,
                                         foldername = filenameUTF8,
-                                        Title = worldUsername .. "/" .. display_name,
+                                        Title = worldUsername .. '/' .. display_name,
                                         writedate = item.writedate,
                                         filesize = item.filesize,
                                         nid = node.attr.nid,
                                         -- world's new property
-                                        author = item.author or "None",
-                                        mode = item.mode or "survival",
+                                        author = item.author or 'None',
+                                        mode = item.mode or 'survival',
                                         -- the max value of the progress is 1
-                                        progress = item.progress or "0",
-                                        -- the format of costTime:  "day:hour:minute"
-                                        costTime = item.progress or "0:0:0",
-                                        -- maybe grade is "primary" or "middle" or "adventure" or "difficulty" or "ultimate"
-                                        grade = item.grade or "primary",
-                                        ip = item.ip or "127.0.0.1",
+                                        progress = item.progress or '0',
+                                        -- the format of costTime:  'day:hour:minute'
+                                        costTime = item.progress or '0:0:0',
+                                        -- maybe grade is 'primary' or 'middle' or 'adventure' or 'difficulty' or 'ultimate'
+                                        grade = item.grade or 'primary',
+                                        ip = item.ip or '127.0.0.1',
                                         order = item.order,
                                         IsFolder = true,
                                         time_text = item.time_text,
@@ -213,13 +216,13 @@ function LocalServiceWorld:GetSharedWorldList()
                         end
                     end
 
-                    if not bLoadedWorld and ParaIO.DoesFileExist(folderPath .. "/" .. item.filename .. "/worldconfig.txt") then
+                    if not bLoadedWorld and ParaIO.DoesFileExist(folderPath .. '/' .. item.filename .. '/worldconfig.txt') then
                         local filenameUTF8 = commonlib.Encoding.DefaultToUtf8(item.filename)
         
-                        LOG.std(nil, "info", "LocalWorld", "missing tag.xml in %s", filenameUTF8)
+                        LOG.std(nil, 'info', 'LocalWorld', 'missing tag.xml in %s', filenameUTF8)
                         AddWorldToDS(
                             {
-                                worldpath = folderPath.."/"..item.filename, 
+                                worldpath = folderPath..'/'..item.filename, 
                                 foldername = filenameUTF8,
                                 Title = filenameUTF8,
                                 writedate = item.writedate, filesize=item.filesize,
@@ -245,8 +248,8 @@ function LocalServiceWorld:GetInternetLocalWorldList()
   local ServerPage = InternetLoadWorld.GetCurrentServerPage()
 
   RemoteServerList:new():Init(
-      "local",
-      "localworld",
+      'local',
+      'localworld',
       function(bSucceed, serverlist)
           if not serverlist:IsValid() then
               return false
@@ -282,7 +285,7 @@ function LocalServiceWorld:SetWorldInstanceByFoldername(foldername)
 
     local worldTag = LocalService:GetTag(worldpath) or {}
     local revision = WorldRevision:new():init(worldpath):GetDiskRevision()
-    local shared = string.match(worldpath, "shared") == "shared" and true or false
+    local shared = string.match(worldpath, 'shared') == 'shared' and true or false
     
     if worldTag.name ~= commonlib.Encoding.DefaultToUtf8(foldername) then
         text = worldTag.name .. '(' .. commonlib.Encoding.DefaultToUtf8(foldername) .. ')'
@@ -390,7 +393,7 @@ function LocalServiceWorld:CheckWorldIsCorrect(world)
         return
     end
 
-    local output = commonlib.Files.Find({}, world.worldpath, 0, 500, "worldconfig.txt")
+    local output = commonlib.Files.Find({}, world.worldpath, 0, 500, 'worldconfig.txt')
 
     if not output or #output == 0 then
         return false
@@ -505,7 +508,7 @@ function LocalServiceWorld:DownLoadZipWorld(foldername, username, lastCommitId, 
                 end
 
             end,
-            "access plus 5 mins",
+            'access plus 5 mins',
             false
         )
     end
@@ -529,4 +532,31 @@ function LocalServiceWorld:EncryptWorld(originFile, encryptFile)
     encryptFile = encryptFile:gsub(base, '')
 
     return ParaAsset.GeneratePkgFile(originFile, encryptFile)
+end
+
+function LocalServiceWorld:GetWhiteList()
+    local filePath = 'Mod/WorldShare/data/WorldWhiteList.md'
+
+    local readFile = ParaIO.open(filePath, 'r')
+    local whiteList = {}
+
+    if readFile:IsValid() then
+        local content = readFile:GetText(0, -1)
+
+        local _, items = MdParser:MdToTable(content)
+        
+        for key, item in ipairs(items) do
+            if item and type(item) == 'table' then
+                for IKey, IItem in pairs(item) do
+                    if IKey ~= 'displayName' then
+                        whiteList[#whiteList + 1] = tonumber(IItem)
+                    end
+                end
+            end
+        end
+
+        readFile:close()
+    end
+
+    return whiteList
 end
