@@ -465,7 +465,9 @@ function LoadWorldCommand:Download(cmdText, options)
 
                 world = RemoteWorld.LoadFromHref(url, 'self')
                 world:SetProjectId(kpProjectId)
-    
+                world:SetRevision(data.world.revision)
+                world:SetSpecifyFilename(data.world.commitId)
+
                 local token = Mod.WorldShare.Store:Get('user/token')
                 if token then
                     world:SetHttpHeaders({Authorization = format('Bearer %s', token)})
@@ -481,46 +483,33 @@ function LoadWorldCommand:Download(cmdText, options)
                    type(cacheWorldInfo) == 'table' and
                    cacheWorldInfo.worldInfo and
                    cacheWorldInfo.worldInfo.commitId then
-                    local qiniuWorld = RemoteWorld.LoadFromHref(qiniuZipArchiveUrl, 'self')
-                    qiniuWorld:SetProjectId(kpProjectId)
-
-                    local cdnArchiveWorld = RemoteWorld.LoadFromHref(cdnArchiveUrl, 'self')
-                    cdnArchiveWorld:SetProjectId(kpProjectId)
-
-                    local qiniuWorldFile = qiniuWorld:GetLocalFileName() or ''
-                    local cdnArchiveWorldFile = cdnArchiveWorld:GetLocalFileName() or ''
-
-                    local encryptQiniuWorldFile = string.match(qiniuWorldFile, '(.+)%.zip$') .. '.pkg'
-                    local encryptCdnArchiveWorldFile = string.match(cdnArchiveWorldFile, '(.+)%.zip$') .. '.pkg'
-
                     if cacheWorldInfo.worldInfo.commitId == data.world.commitId and
-                       (ParaIO.DoesFileExist(encryptQiniuWorldFile) or
-                        ParaIO.DoesFileExist(encryptCdnArchiveWorldFile)) then
+                       ParaIO.DoesFileExist(encryptWorldFile) then
                         LOG.std(nil, 'warn', 'LoadWorldCommand', 'world %s already exists', data.name)
 
                         GameLogic.RunCommand('/sendevent download_offline_world_finish ' .. kpProjectId)
                         return
                     else
-                        local oldQiniuWorldFile = qiniuWorldFile:gsub('ref_.+_r', 'ref_' .. cacheWorldInfo.worldInfo.commitId .. '_r')
-                        local oldcdnArchiveWorldFile = cdnArchiveWorldFile:gsub('ref_.+_r', 'ref_' .. cacheWorldInfo.worldInfo.commitId .. '_r')
+                        local oldWorldFile = format(
+                                                'worlds/DesignHouse/userworlds/%d_%s_r%d.zip',
+                                                kpProjectId,
+                                                cacheWorldInfo.worldInfo.commitId,
+                                                cacheWorldInfo.worldInfo.revision
+                                             )
 
-                        if ParaIO.DoesFileExist(oldQiniuWorldFile) then
-                            ParaIO.DeleteFile(oldQiniuWorldFile)
+                        if ParaIO.DoesFileExist(oldWorldFile) then
+                            ParaIO.DeleteFile(oldWorldFile)
                         end
 
-                        if ParaIO.DoesFileExist(oldcdnArchiveWorldFile) then
-                            ParaIO.DeleteFile(oldcdnArchiveWorldFile)
-                        end
+                        local oldEncryptWorldFile = format(
+                                                        'worlds/DesignHouse/userworlds/%d_%s_r%d.pkg',
+                                                        kpProjectId,
+                                                        cacheWorldInfo.worldInfo.commitId,
+                                                        cacheWorldInfo.worldInfo.revision
+                                                    )
 
-                        local oldEncryptQiniuWorldFile = encryptQiniuWorldFile:gsub('ref_.+_r', 'ref_' .. cacheWorldInfo.worldInfo.commitId .. '_r')
-                        local oldEncryptCdnArchiveWorldFile = encryptCdnArchiveWorldFile:gsub('ref_.+_r', 'ref_' .. cacheWorldInfo.worldInfo.commitId .. '_r')
-
-                        if ParaIO.DoesFileExist(oldEncryptQiniuWorldFile) then
-                            ParaIO.DeleteFile(oldEncryptQiniuWorldFile)
-                        end
-
-                        if ParaIO.DoesFileExist(oldEncryptCdnArchiveWorldFile) then
-                            ParaIO.DeleteFile(oldEncryptCdnArchiveWorldFile)
+                        if ParaIO.DoesFileExist(oldEncryptWorldFile) then
+                            ParaIO.DeleteFile(oldEncryptWorldFile)
                         end
                     end
                 end

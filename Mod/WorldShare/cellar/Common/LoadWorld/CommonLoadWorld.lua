@@ -466,6 +466,12 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                             downloadNewEncryptWorldFile = newEncryptCdnArchiveWorldFile
                         end
 
+                        local token = Mod.WorldShare.Store:Get('user/token')
+
+                        if token then
+                            world:SetHttpHeaders({Authorization = format('Bearer %s', token)})
+                        end
+
                         world:DownloadRemoteFile(function(bSucceed, msg)
                             DownloadWorld.Close()
 
