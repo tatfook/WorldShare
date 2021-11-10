@@ -12,6 +12,10 @@
                     -- service
                     local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
                     local UserMacBindsService = NPL.load('(gl)Mod/WorldShare/service/UserMacBindsService.lua')
+                    local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
+
+                    -- database
+                    local CacheProjectId = NPL.load('(gl)Mod/WorldShare/database/CacheProjectId.lua')
 
                     local page = document:GetPageCtrl()
                     
@@ -116,8 +120,51 @@
                     end
 
                     function sync_class_world()
-                        GameLogic.RunCommand('/loadworld -auto -s 84481')
-                        UserMacBindsService:SetSyncDate()
+                        local pid = 84481
+
+                        KeepworkServiceProject:GetProject(
+                            pid,
+                            function(data, err)
+                                echo(data, true)
+                                if not data or
+                                type(data) ~= 'table' or
+                                not data.name or
+                                not data.username or
+                                not data.world or
+                                not data.world.commitId then
+                                    return
+                                end
+
+                                local cacheWorldInfo = CacheProjectId:GetProjectIdInfo(pid)
+
+                                if cacheWorldInfo and
+                                   cacheWorldInfo.worldInfo.commitId ~= data.world.commitId then
+                                    local oldWorldFile = format(
+                                                            'worlds/DesignHouse/userworlds/%d_%s_r%d.zip',
+                                                            pid,
+                                                            cacheWorldInfo.worldInfo.commitId,
+                                                            cacheWorldInfo.worldInfo.revision
+                                                        )
+
+                                    local oldEncryptWorldFile = format(
+                                                            'worlds/DesignHouse/userworlds/%d_%s_r%d.pkg',
+                                                            pid,
+                                                            cacheWorldInfo.worldInfo.commitId,
+                                                            cacheWorldInfo.worldInfo.revision
+                                                        )
+
+                                    if ParaIO.DoesFileExist(oldWorldFile) or
+                                       ParaIO.DoesFileExist(oldEncryptWorldFile) then
+                                        ParaIO.DeleteFile(oldWorldFile)
+                                        ParaIO.DeleteFile(oldEncryptWorldFile)
+                                        CacheProjectId:RemoveProjectIdInfo(pid)
+                                    end
+                                end
+
+                                GameLogic.RunCommand('/loadworld -s -auto ' .. pid)
+                                UserMacBindsService:SetSyncDate()
+                            end
+                        )
                     end
 
                     function unbind()

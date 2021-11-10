@@ -28,7 +28,6 @@ function CacheProjectId:SetProjectIdInfo(pid, worldInfo)
     projects[pid] = project
 
     GameLogic.GetPlayerController():SaveLocalData('pid' .. pid, project, true)
-    return true
 end
 
 function CacheProjectId:GetProjectIdInfo(pid)
@@ -47,4 +46,14 @@ function CacheProjectId:GetProjectIdInfo(pid)
 
         return project
     end
+end
+
+function CacheProjectId:RemoveProjectIdInfo(pid)
+    if type(pid) ~= 'number' then
+        return false
+    end
+
+    projects[pid] = nil
+
+    GameLogic.GetPlayerController():SaveLocalData('pid' .. pid, nil ,true)
 end
