@@ -172,7 +172,8 @@ function UserMacBindsService:GetSyncDate()
     local syncDate = BindDatabase:GetValue('syncDate')
 
     if syncDate then
-        return os.date(L'%Y年%m月%d日', syncDate)
+        local syncDateTable = os.date('*t', syncDate)
+        return format('%d年%d月%d日', syncDateTable.year, syncDateTable.month, syncDateTable.day)
     else
         return L'未同步'
     end
