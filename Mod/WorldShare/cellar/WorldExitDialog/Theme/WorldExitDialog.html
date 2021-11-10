@@ -83,23 +83,35 @@
                     end
 
                     function on_click_save_and_exit()
-                        WorldExitDialog.OnDialogResult(_guihelper.DialogResult.Yes)
+                        KeepworkServiceWorld:LimitFreeUser(false, function(result)
+                            if result then
+                                WorldExitDialog.OnDialogResult(_guihelper.DialogResult.Yes)
+                            else
+                                _guihelper.MessageBox(L'操作被禁止了，免费用户最多只能拥有3个本地世界，请删除不要的本地世界，或者联系老师或家长成为会员。')
+                            end
+                        end)
                     end
 
                     function on_click_save_and_share()
-                        _guihelper.SetMessageBoxLockHide(true)
-                        GameLogic.QuickSave()
-                        _guihelper.SetMessageBoxLockHide(false)
-
-                        WorldExitDialog.OnDialogResult(_guihelper.DialogResult.Cancel)
-                        --ShareWorld:Init()
-                        ShareWorld.callback = function()
-                            _guihelper.MessageBox(L'保存并上传成功！是否要继续退出世界', function()
-                                WorldExitDialog.OnDialogResult(_guihelper.DialogResult.No)
-                            end)
-                        end
-                        --ShareWorld:ClosePage()
-                        ShareWorld:OnClick()
+                        KeepworkServiceWorld:LimitFreeUser(false, function(result)
+                            if result then
+                                _guihelper.SetMessageBoxLockHide(true)
+                                GameLogic.QuickSave()
+                                _guihelper.SetMessageBoxLockHide(false)
+        
+                                WorldExitDialog.OnDialogResult(_guihelper.DialogResult.Cancel)
+                                --ShareWorld:Init()
+                                ShareWorld.callback = function()
+                                    _guihelper.MessageBox(L'保存并上传成功！是否要继续退出世界', function()
+                                        WorldExitDialog.OnDialogResult(_guihelper.DialogResult.No)
+                                    end)
+                                end
+                                --ShareWorld:ClosePage()
+                                ShareWorld:OnClick()
+                            else
+                                _guihelper.MessageBox(L'操作被禁止了，免费用户最多只能拥有3个本地世界，请删除不要的本地世界，或者联系老师或家长成为会员。')
+                            end
+                        end)
                     end
 
                     function save_as()

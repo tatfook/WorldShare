@@ -43,7 +43,7 @@ function Progress:Init(syncInstance)
     local progressParams = Mod.WorldShare.Utils.ShowWindow(
         0,
         0,
-        'Mod/WorldShare/cellar/Theme/Sync/Progress/Progress.html',
+        'Mod/WorldShare/cellar/Sync/Progress/Theme/Progress.html',
         'Mod.WorldShare.Progress',
         0,
         0,
@@ -55,7 +55,7 @@ function Progress:Init(syncInstance)
     local operateParams = Mod.WorldShare.Utils.ShowWindow(
         270,
         65,
-        'Mod/WorldShare/cellar/Theme/Sync/Progress/Operate.html',
+        'Mod/WorldShare/cellar/Sync/Progress/Theme/Operate.html',
         'Mod.WorldShare.Progress.ProgressOperate',
         270,
         -150,
@@ -113,7 +113,7 @@ function Progress:ShowFinishPage()
             Mod.WorldShare.Utils.ShowWindow(
                 550,
                 400,
-                'Mod/WorldShare/cellar/Theme/Sync/Progress/Finish.html?wxacode=' .. (wxacode or ''),
+                'Mod/WorldShare/cellar/Sync/Progress/Theme/Finish.html?wxacode=' .. (wxacode or ''),
                 'Mod.WorldShare.Progress.Finish'
             )
         end

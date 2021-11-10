@@ -8,6 +8,7 @@
 
                 -- service
                 local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
+                local KeepworkServiceWorld = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceWorld.lua')
 
                 -- libs
                 local CommandManager = commonlib.gettable('MyCompany.Aries.Game.CommandManager')
@@ -75,14 +76,20 @@
                 end
 
                 function load_world()
-                    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+                    KeepworkServiceWorld:LimitFreeUser(false, function(result)
+                        if result then
+                            local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
-                    if currentWorld and
-                       type(currentWorld) == 'table' and
-                       currentWorld.kpProjectId and
-                       currentWorld.kpProjectId ~= 0 then
-                       CommandManager:RunCommand('/loadpersonalworld -nosync ' .. currentWorld.kpProjectId)
-                    end
+                            if currentWorld and
+                               type(currentWorld) == 'table' and
+                               currentWorld.kpProjectId and
+                               currentWorld.kpProjectId ~= 0 then
+                                CommandManager:RunCommand('/loadpersonalworld -nosync ' .. currentWorld.kpProjectId)
+                            end
+                        else
+                            _guihelper.MessageBox(L'操作被禁止了，免费用户最多只能拥有3个本地世界，请删除不要的本地世界，或者联系老师或家长成为会员。')
+                        end
+                    end)
                 end
              ]]>
         </script>
