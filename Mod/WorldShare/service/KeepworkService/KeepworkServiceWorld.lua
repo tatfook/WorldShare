@@ -217,7 +217,8 @@ function KeepworkServiceWorld:GetWorld(foldername, shared, worldUserId, callback
                     return
                 end
             else
-                if item.project.memberCount > 1 and worldUserId == item.user.id then
+                if (item.project.memberCount > 1 or item.project.managed == 1) and
+                   worldUserId == item.user.id then
                     -- exist
                     callback(item)
                     return
