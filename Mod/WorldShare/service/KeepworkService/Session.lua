@@ -408,7 +408,7 @@ function KeepworkServiceSession:Logout(mode, callback)
                 account = username,
                 loginServer = KeepworkService:GetEnv(),
                 autoLogin = false,
-                rememberMe = false,
+                --rememberMe = false,
             }
         )
 
@@ -473,8 +473,13 @@ function KeepworkServiceSession:RegisterWithAccount(username, password, callback
                             loginData.autoLogin = true
                         end
                         
-                        loginData.rememberMe = nil
-                        loginData.password = nil
+                        if string.find(password, "paracraft.cn") == 1 then
+                            loginData.rememberMe = true
+                            loginData.password = password
+                        else
+                            loginData.rememberMe = nil
+                            loginData.password = nil
+                        end
 
                         self:LoginResponse(loginData, err, function()
                             if type(callback) == 'function' then
