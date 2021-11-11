@@ -644,7 +644,7 @@ function MainLogin:LoginWithToken(token, callback)
 
         response.token = token
         response.autoLogin = true
-        response.rememberMe = true
+        -- response.rememberMe = true
 
         KeepworkServiceSession:LoginResponse(response, err, function(bSucceed, message)
             Mod.WorldShare.MsgBox:Close()
