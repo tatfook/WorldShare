@@ -255,7 +255,7 @@
                         if string.find(password, "paracraft.cn") == 1 then
                             -- 不允许自动登录
                             page:SetUIValue('auto_login_name', false)
-                            _guihelper.MessageBox(L'你的密码为通用密码， 不可以自动登陆，请回家后绑定手机并修改密码，防止别人使用你的账号。');
+                            _guihelper.MessageBox(L'你的密码为通用密码， 不可以自动登录，请回家后绑定手机并修改密码，防止别人使用你的账号。');
                         else
                             local is_auto = page:GetUIValue('auto_login_name')
                             if is_auto then
