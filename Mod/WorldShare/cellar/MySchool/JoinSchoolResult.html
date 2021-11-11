@@ -88,13 +88,17 @@
                                        name='<%= Eval("index") %>'
                                        onclick='sel_item'
                                        class='item_button_selected'
-                                       style='height: 70px;
+                                       style='position: relative;
+                                            height: 70px;
                                               text-align: left;
                                               font-size: 16px;
                                               base-font-size: 16px;
                                               font-weight: bold;'
                                        tooltip='<%= GetSchoolNameTooltip(Eval("text"),Eval("regionString"))%>'
                                        value='<%=GetSchoolName(Eval("text"),Eval("regionString"))%>' />
+                                       <pe:if condition='<%=GetHasRegion(Eval("regionString"))%>'>
+                                            <div width='100%' style=" margin-left:20px;margin-top:10px;height: 70px;text-left: left;font-size: 16px;base-font-size: 16px;color:#000000;font-weight: bold;"><%=GetSchoolFullName(Eval("text"),Eval("regionString"))%></div>
+                                        </pe:if>
                             </pe:if>
                             <pe:if condition='<%= cur_index ~= Eval("index") %>'>
                                 <input type='button'
