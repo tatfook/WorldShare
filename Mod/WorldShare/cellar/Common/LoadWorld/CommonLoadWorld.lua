@@ -754,7 +754,7 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                                 if ParaIO.DoesFileExist(downloadNewEncryptWorldFile) then
                                     Mod.WorldShare.Store:Set('world/currentRemoteFile', url)
 
-                                    worldInfo.encryptWorldVerified = self.encryptWorldVerified
+                                    worldInfo.encryptWorldMode = self.encryptWorldMode
                                     CacheProjectId:SetProjectIdInfo(pid, worldInfo)
 
                                     self:Start(downloadNewEncryptWorldFile, worldInfo)
@@ -847,7 +847,7 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
 
                                 Mod.WorldShare.Store:Set('world/currentRemoteFile', url)
 
-                                worldInfo.encryptWorldVerified = self.encryptWorldVerified
+                                worldInfo.encryptWorldMode = self.encryptWorldMode
                                 CacheProjectId:SetProjectIdInfo(pid, worldInfo)
 
                                 self:Start(downloadNewLocalWorldFile, worldInfo)
@@ -974,7 +974,7 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
     local cacheWorldInfo = CacheProjectId:GetProjectIdInfo(pid)
 
     if System.options.loginmode == 'offline' and cacheWorldInfo then
-        self.encryptWorldVerified = cacheWorldInfo.worldInfo.encryptWorldVerified
+        self.encryptWorldMode = cacheWorldInfo.worldInfo.encryptWorldMode
         HandleLoadWorld(cacheWorldInfo.worldInfo, true)
         return
     end

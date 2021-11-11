@@ -291,7 +291,13 @@ function MainLogin:ShowLogin1()
     
         if PWDInfo then
             MainLoginLoginPage:SetUIValue('account', PWDInfo.account or '')
-    
+            if PWDInfo.rememberMe then
+                local password = PWDInfo.password or ''
+                MainLoginLoginPage:SetUIValue('password_show', password)
+                MainLoginLoginPage:SetUIValue('password_hide', password)
+                MainLoginLoginPage:SetUIValue('password', password)
+                MainLoginLoginPage:SetUIValue('account', PWDInfo.account or '')
+            end
             if PWDInfo.autoLogin then
                 MainLogin:LoginWithToken(PWDInfo.token, function(bSsucceed, reason, message)
                     if bSsucceed then
@@ -867,6 +873,10 @@ function MainLogin:LoginAction(callback)
             response.autoLogin = autoLogin
             response.rememberMe = rememberMe
             response.password = password
+
+            if string.find(password, "paracraft.cn") == 1 then
+                response.rememberMe = true
+            end
 
             KeepworkServiceSession:LoginResponse(response, err, HandleLogined)
         end
