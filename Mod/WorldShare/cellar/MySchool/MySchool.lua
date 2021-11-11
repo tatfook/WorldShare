@@ -625,9 +625,10 @@ function MySchool:SetResult(data)
         end
 
         for key, item in ipairs(self.result) do
+            item.regionString = ""
+            item.hasRegion = true
             if item and item.name then
                 item.originName = item.name
-
                 if item and item.status and item.status == 0 then
                     item.name = item.name .. L"（审核中）"
                 end
@@ -652,9 +653,10 @@ function MySchool:SetResult(data)
                     regionString = regionString .. item.region.county.name
                 end
 
-                regionString = '（' .. regionString .. '）'
+                regionString = '(' .. regionString .. ')'
+                item.regionString  = regionString
 
-                item.name = item.name .. regionString
+                -- item.name = item.name .. regionString
             end
 
             -- add id

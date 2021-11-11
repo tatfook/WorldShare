@@ -43,6 +43,31 @@
 
                     page.get_cur_index = get_cur_index
                     page.set_cur_index = set_cur_index
+
+                    function GetHasRegion(region)
+                        if region == nil or region == "" then
+                            return false
+                        else
+                            return true
+                        end
+                    end
+
+                    function GetSchoolName(name,region)
+                        local hasRegion = GetHasRegion(region) 
+                        if hasRegion then 
+                            return ""
+                        else
+                            return "    "..name
+                        end
+                    end
+
+                    function GetSchoolFullName(name,region)
+                        return name.."<br/>"..region
+                    end
+
+                    function GetSchoolNameTooltip(name,region)
+                        return name..region
+                    end
                 ]]>
             </script>
             <style type="type/mcss" src='Mod/WorldShare/cellar/MySchool/MySchoolMcss.mcss'></style>
@@ -68,8 +93,8 @@
                                               font-size: 16px;
                                               base-font-size: 16px;
                                               font-weight: bold;'
-                                       tooltip='<%= Eval("text") %>'
-                                       value='<%= "  " .. Eval("text") %>' />
+                                       tooltip='<%= GetSchoolNameTooltip(Eval("text"),Eval("regionString"))%>'
+                                       value='<%=GetSchoolName(Eval("text"),Eval("regionString"))%>' />
                             </pe:if>
                             <pe:if condition='<%= cur_index ~= Eval("index") %>'>
                                 <input type='button'
@@ -77,13 +102,18 @@
                                        name='<%= Eval("index") %>'
                                        onclick='sel_item'
                                        class='item_button'
-                                       style='height: 70px;
+                                       style='position: relative;
+                                              height: 70px;
                                               text-align: left;
                                               font-size: 16px;
                                               base-font-size: 16px;
                                               font-weight: bold;'
-                                       tooltip='<%= Eval("text") %>'
-                                       value='<%= "  " ..Eval("text") %>' />
+                                       tooltip='<%= GetSchoolNameTooltip(Eval("text"),Eval("regionString"))%>'
+                                       value='<%=GetSchoolName(Eval("text"),Eval("regionString"))%>'  />
+                                        <pe:if condition='<%=GetHasRegion(Eval("regionString"))%>'>
+                                            <div width='120%' style=" margin-left:30px;margin-top:12px;height: 70px;text-left: left;font-size: 16px;base-font-size: 16px;color:#666666;font-weight: bold;"><%=GetSchoolFullName(Eval("text"),Eval("regionString"))%></div>
+                                        </pe:if>
+                                        
                                        <!-- Mod.WorldShare.Utils.WordsLimit(Eval("text"), 200, 38) -->
                             </pe:if>
                         </div>
