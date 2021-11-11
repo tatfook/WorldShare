@@ -62,11 +62,11 @@
                     end
 
                     function GetSchoolFullName(name,region)
-                        return name.."<br/>"..region
+                        return "    "..name.."<br/>"..region
                     end
 
                     function GetSchoolNameTooltip(name,region)
-                        return name..region
+                        return "    "..name..region
                     end
                 ]]>
             </script>
@@ -111,7 +111,7 @@
                                        tooltip='<%= GetSchoolNameTooltip(Eval("text"),Eval("regionString"))%>'
                                        value='<%=GetSchoolName(Eval("text"),Eval("regionString"))%>'  />
                                         <pe:if condition='<%=GetHasRegion(Eval("regionString"))%>'>
-                                            <div width='120%' style=" margin-left:30px;margin-top:12px;height: 70px;text-left: left;font-size: 16px;base-font-size: 16px;color:#666666;font-weight: bold;"><%=GetSchoolFullName(Eval("text"),Eval("regionString"))%></div>
+                                            <div width='120%' style=" margin-left:20px;margin-top:10px;height: 70px;text-left: left;font-size: 16px;base-font-size: 16px;color:#666666;font-weight: bold;"><%=GetSchoolFullName(Eval("text"),Eval("regionString"))%></div>
                                         </pe:if>
                                         
                                        <!-- Mod.WorldShare.Utils.WordsLimit(Eval("text"), 200, 38) -->
