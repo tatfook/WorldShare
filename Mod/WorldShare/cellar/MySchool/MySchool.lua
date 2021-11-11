@@ -255,19 +255,19 @@ function MySchool:ShowJoinSchool(callback)
 
                     local lastSchoolId = SessionsData:GetAnonymousInfo().lastSchoolId or 0
 
-                    -- if lastSchoolId and type(lastSchoolId) == 'number' and lastSchoolId ~= 0 then
-                    --     params._page:SetValue('search_text', lastSchoolId)
+                    if lastSchoolId and type(lastSchoolId) == 'number' and lastSchoolId ~= 0 then
+                        params._page:SetValue('search_text', lastSchoolId)
 
-                    --     self.searchText = tostring(lastSchoolId)
+                        self.searchText = tostring(lastSchoolId)
 
-                    --     self:GetSearchSchoolResultByName(self.searchText, function()
-                    --         resultPage:GetNode('school_list'):SetUIAttribute('DataSource', self.result)
-                    --     end)
-                    -- else
+                        self:GetSearchSchoolResultByName(self.searchText, function()
+                            resultPage:GetNode('school_list'):SetUIAttribute('DataSource', self.result)
+                        end)
+                    else
                         self:GetSearchSchoolResult(region.info.city.id, nil, function()
                             resultPage:GetNode('school_list'):SetUIAttribute('DataSource', self.result)
                         end)
-                    -- end
+                    end
                 end)
             end)
         end
