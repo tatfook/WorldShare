@@ -2,7 +2,7 @@
 Title: Common Load World
 Author(s): big
 CreateDate: 2021.01.20
-ModifyDate: 2021.11.08
+ModifyDate: 2021.11.11
 City: Foshan
 use the lib:
 ------------------------------------------------------------
@@ -16,6 +16,7 @@ local DownloadWorld = commonlib.gettable('MyCompany.Aries.Game.MainLogin.Downloa
 local RemoteWorld = commonlib.gettable('MyCompany.Aries.Creator.Game.Login.RemoteWorld')
 local InternetLoadWorld = commonlib.gettable('MyCompany.Aries.Creator.Game.Login.InternetLoadWorld')
 local WorldCommon = commonlib.gettable('MyCompany.Aries.Creator.WorldCommon')
+local Screen = commonlib.gettable('System.Windows.Screen')
 
 -- service
 local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
@@ -466,6 +467,18 @@ function CommonLoadWorld:StartOldVersion()
     HandleDownload(qiniuZipArchiveUrl)
 end
 
+function CommonLoadWorld.UpdateStartOldVersionButtonPosition()
+    if not CommonLoadWorld.startOldVersionButtonNode then
+        return
+    end
+
+    local barNode = ParaUI.GetUIObject('apps.aries.creator.game.login.swf_loading_bar.bar')
+    local x, y = barNode:GetAbsPosition()
+
+    CommonLoadWorld.startOldVersionButtonNode.x = x + 800
+    CommonLoadWorld.startOldVersionButtonNode.y = y
+end
+
 function CommonLoadWorld:ToggleStartOldVersionButton(isShow)
     if isShow == true then
         if self.startOldVersionButtonNode then
@@ -515,6 +528,8 @@ function CommonLoadWorld:Start(file, worldInfo)
 
     self.ShowStartOldVersionButton = function()
         self:ToggleStartOldVersionButton(true)
+
+        Screen:Connect('sizeChanged', CommonLoadWorld, CommonLoadWorld.UpdateStartOldVersionButtonPosition, 'UniqueConnection')
     end
 
     self.HideStartOldVersionButton = function()
@@ -533,6 +548,8 @@ function CommonLoadWorld:Start(file, worldInfo)
         self.worldInfo = nil
         self.ShowStartOldVersionButton = nil
         self.HideStartOldVersionButton = nil
+
+        Screen:Connect('Disconnect', CommonLoadWorld, CommonLoadWorld.UpdateStartOldVersionButtonPosition, 'UniqueConnection')
     end
 
     GameLogic.GetFilters():add_filter(
