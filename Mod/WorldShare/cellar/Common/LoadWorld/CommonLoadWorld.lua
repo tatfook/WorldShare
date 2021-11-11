@@ -49,16 +49,16 @@ function CommonLoadWorld:EnterCommunityWorld()
     local IsSummerUser = Mod.WorldShare.Utils.IsSummerUser()
     if KeepworkServiceSession:GetUserWhere() == 'HOME' then
         if IsSummerUser then
-            GameLogic.RunCommand(format('/loadworld -s -force %s', Mod.WorldShare.Utils:GetConfig('campWorldId')))
+            GameLogic.RunCommand(format('/loadworld -s -auto %s', Mod.WorldShare.Utils:GetConfig('campWorldId')))
             return 
         end
-        GameLogic.RunCommand(format('/loadworld -s -force %s', Mod.WorldShare.Utils:GetConfig('homeWorldId')))
+        GameLogic.RunCommand(format('/loadworld -s -auto %s', Mod.WorldShare.Utils:GetConfig('homeWorldId')))
     elseif KeepworkServiceSession:GetUserWhere() == 'SCHOOL' then
         if IsSummerUser then
-            GameLogic.RunCommand(format('/loadworld -s -force %s', Mod.WorldShare.Utils:GetConfig('campWorldId')))
+            GameLogic.RunCommand(format('/loadworld -s -auto %s', Mod.WorldShare.Utils:GetConfig('campWorldId')))
             return 
         end
-        GameLogic.RunCommand(format('/loadworld -s -force %s', Mod.WorldShare.Utils:GetConfig('schoolWorldId')))
+        GameLogic.RunCommand(format('/loadworld -s -auto %s', Mod.WorldShare.Utils:GetConfig('schoolWorldId')))
     else
         CommonLoadWorld:SelectPlaceAndEnterCommunityWorld()
     end
@@ -69,16 +69,16 @@ function CommonLoadWorld:SelectPlaceAndEnterCommunityWorld()
     MainLogin:ShowWhere(function(result)
         if result == 'HOME' then
             if IsSummerUser then
-                GameLogic.RunCommand(format('/loadworld -s -force %s', Mod.WorldShare.Utils:GetConfig('campWorldId')))
+                GameLogic.RunCommand(format('/loadworld -s -auto %s', Mod.WorldShare.Utils:GetConfig('campWorldId')))
                 return 
             end
-            GameLogic.RunCommand(format('/loadworld -s -force %s', Mod.WorldShare.Utils:GetConfig('homeWorldId')))
+            GameLogic.RunCommand(format('/loadworld -s -auto %s', Mod.WorldShare.Utils:GetConfig('homeWorldId')))
         elseif result == 'SCHOOL' then
             if IsSummerUser then
-                GameLogic.RunCommand(format('/loadworld -s -force %s', Mod.WorldShare.Utils:GetConfig('campWorldId')))
+                GameLogic.RunCommand(format('/loadworld -s -auto %s', Mod.WorldShare.Utils:GetConfig('campWorldId')))
                 return 
             end
-            GameLogic.RunCommand(format('/loadworld -s -force %s', Mod.WorldShare.Utils:GetConfig('schoolWorldId')))
+            GameLogic.RunCommand(format('/loadworld -s -auto %s', Mod.WorldShare.Utils:GetConfig('schoolWorldId')))
         end
     end)
 end
@@ -323,6 +323,231 @@ function CommonLoadWorld:TimesFilter(timeRules)
     return false, failedReasonList[1]
 end
 
+function CommonLoadWorld:StartOldVersion()
+    local worldInfo = self.worldInfo
+    self.HideStartOldVersionButton()
+
+    if not worldInfo or
+       not worldInfo.extra or
+       not worldInfo.extra.commitIds then
+        return
+    end
+
+    local commitIds = worldInfo.extra.commitIds
+
+    if type(commitIds) ~= 'table' or #commitIds <= 1 then
+        return
+    end
+
+    local previousCommit = commitIds[#commitIds - 1]
+
+    if not previousCommit or not previousCommit.commitId then
+        return
+    end
+
+    Game.Exit()
+
+    Mod.WorldShare.MsgBox:Show(L'正在加载旧版本，请稍后...', 30000, nil, 320, 130, 1002)
+
+    -- TODO: clean old worlds
+
+    local previousCommitId = previousCommit.commitId
+    local tryTimes = 0
+    local qiniuZipArchiveUrl = GitKeepworkService:GetQiNiuArchiveUrl(
+                                        worldInfo.worldName,
+                                        worldInfo.username,
+                                        previousCommitId)
+    local cdnArchiveUrl = GitKeepworkService:GetCdnArchiveUrl(
+                            worldInfo.worldName,
+                            worldInfo.username,
+                            previousCommitId)
+
+    local function HandleDownload(url)
+        local world = RemoteWorld.LoadFromHref(url, 'self')
+        world:SetProjectId(worldInfo.projectId)
+        world:SetRevision(worldInfo.revision)
+        world:SetSpecifyFilename(previousCommitId)
+        local token = Mod.WorldShare.Store:Get('user/token')
+
+        if token then
+            world:SetHttpHeaders({Authorization = format('Bearer %s', token)})
+        end
+
+        local worldFile = world:GetLocalFileName() or ''
+        local encryptWorldFile = string.match(worldFile, '(.+)%.zip$') .. '.pkg'
+
+        if self.encryptWorldMode then
+            if ParaIO.DoesFileExist(encryptWorldFile) then
+                Game.Start(encryptWorldFile)
+                return
+            end
+        else
+            if ParaIO.DoesFileExist(worldFile) then
+                Game.Start(worldFile)
+                return
+            end
+        end
+
+        ParaIO.DeleteFile(worldFile)
+        ParaIO.DeleteFile(encryptWorldFile)
+
+        world:DownloadRemoteFile(function(bSucceed, msg)
+            if bSucceed then
+                if not ParaIO.DoesFileExist(worldFile) then
+                    Map3DSystem.App.MiniGames.SwfLoadingBarPage.ClosePage()
+                    MainLogin:Show()
+
+                    _guihelper.MessageBox(format(L'下载世界失败，请重新尝试几次（项目ID：%d）', worldInfo.projectId))
+                    LOG.std(nil, 'warn', 'CommandLoadWorld', 'Invalid downloaded file not exist: %s', worldFile)
+
+                    Mod.WorldShare.MsgBox:Close()
+                    return
+                end
+
+                ParaAsset.OpenArchive(worldFile, true)
+                
+                local output = {}
+
+                commonlib.Files.Find(output, '', 0, 500, ':worldconfig.txt', worldFile)
+
+                if #output == 0 then
+                    Map3DSystem.App.MiniGames.SwfLoadingBarPage.ClosePage()
+                    MainLogin:Show()
+
+                    _guihelper.MessageBox(format(L'下载的世界已损坏，请重新尝试几次（项目ID：%d）', worldInfo.projectId))
+                    LOG.std(nil, 'warn', 'CommandLoadWorld', 'Invalid downloaded file will be deleted: %s', worldFile)
+
+                    ParaAsset.CloseArchive(worldFile)
+                    ParaIO.DeleteFile(worldFile)
+
+                    Mod.WorldShare.MsgBox:Close()
+                    return
+                end
+
+                ParaAsset.CloseArchive(worldFile)
+
+                if self.encryptWorldMode then
+                    LocalServiceWorld:EncryptWorld(worldFile, encryptWorldFile)
+
+                    if not ParaEngine.GetAppCommandLineByParam('save_origin_zip', nil) then
+                        ParaIO.DeleteFile(worldFile)
+                    end
+
+                    if ParaIO.DoesFileExist(encryptWorldFile) then
+                        Mod.WorldShare.Store:Set('world/currentRemoteFile', url)
+
+                        Mod.WorldShare.MsgBox:Close()
+                        Game.Start(encryptWorldFile)
+                    end
+                else
+                    Mod.WorldShare.MsgBox:Close()
+                    Game.Start(worldFile)
+                end
+            else
+                Mod.WorldShare.Utils.SetTimeOut(function()
+                    Mod.WorldShare.MsgBox:Close()
+
+                    if tryTimes > 0 then
+                        Map3DSystem.App.MiniGames.SwfLoadingBarPage.ClosePage()
+                        MainLogin:Show()
+
+                        Mod.WorldShare.MsgBox:Close()
+                        return
+                    end
+
+                    Mod.WorldShare.MsgBox:Show(L'正在加载旧版本，请稍后...', 30000, nil, 320, 130, 1002)
+                    HandleDownload(cdnArchiveUrl)
+                    tryTimes = tryTimes + 1
+                end, 3000)
+            end
+        end)
+    end
+
+    HandleDownload(qiniuZipArchiveUrl)
+end
+
+function CommonLoadWorld:ToggleStartOldVersionButton(isShow)
+    if isShow == true then
+        if self.startOldVersionButtonNode then
+            self.startOldVersionButtonNode = nil
+            ParaUI.Destroy('start_old_version_button')
+        end
+
+        local barNode = ParaUI.GetUIObject('apps.aries.creator.game.login.swf_loading_bar.bar')
+        local rootNode = ParaUI.GetUIObject('root')
+        self.startOldVersionButtonNode = ParaUI.CreateUIObject(
+                                            'button',
+                                            'start_old_version_button',
+                                            '_lt',
+                                            0,
+                                            0,
+                                            90,
+                                            35
+                                        )
+
+        local x, y = barNode:GetAbsPosition()
+
+        self.startOldVersionButtonNode.x = x + 800
+        self.startOldVersionButtonNode.y = y
+        self.startOldVersionButtonNode.background = 'Texture/Aries/Creator/keepwork/worldshare_32bits.png#624 198 38 64:12 10 12 15'
+        self.startOldVersionButtonNode.zorder = 1002
+        _guihelper.SetFontColor(self.startOldVersionButtonNode, '#000000')
+        self.startOldVersionButtonNode:SetField('TextOffsetY', -2)
+        self.startOldVersionButtonNode.text = L'启动旧版'
+        self.startOldVersionButtonNode:SetCurrentState('highlight')
+        self.startOldVersionButtonNode.color = '255 255 255'
+        self.startOldVersionButtonNode:SetCurrentState('pressed')
+        self.startOldVersionButtonNode.color = '160 160 160'
+        self.startOldVersionButtonNode.onclick = [[;NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/CommonLoadWorld.lua'):StartOldVersion()]]
+
+        rootNode:AddChild(self.startOldVersionButtonNode)
+    elseif isShow == false then
+        if self.startOldVersionButtonNode then
+            self.startOldVersionButtonNode = nil
+            ParaUI.Destroy('start_old_version_button')
+            return
+        end
+    end
+end
+
+function CommonLoadWorld:Start(file, worldInfo)
+    self.worldInfo = worldInfo
+
+    self.ShowStartOldVersionButton = function()
+        self:ToggleStartOldVersionButton(true)
+    end
+
+    self.HideStartOldVersionButton = function()
+        self:ToggleStartOldVersionButton(false)
+
+        GameLogic.GetFilters():remove_filter(
+            'apply:apps.aries.creator.game.login.swf_loading_bar.show_for_light_calculation',
+            self.ShowStartOldVersionButton
+        )
+
+        GameLogic.GetFilters():remove_filter(
+            'apply:apps.aries.creator.game.login.swf_loading_bar.close_page',
+            self.HideStartOldVersionButton
+        )
+
+        self.worldInfo = nil
+        self.ShowStartOldVersionButton = nil
+        self.HideStartOldVersionButton = nil
+    end
+
+    GameLogic.GetFilters():add_filter(
+        'apply:apps.aries.creator.game.login.swf_loading_bar.show_for_light_calculation',
+        self.ShowStartOldVersionButton
+    )
+
+    GameLogic.GetFilters():add_filter(
+        'apply:apps.aries.creator.game.login.swf_loading_bar.close_page',
+        self.HideStartOldVersionButton
+    )
+
+    Game.Start(file)
+end
+
 -- @param refreshMode: nil|'auto'|'check'|'never'|'force'.  
 function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
     if not pid then
@@ -435,7 +660,7 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                 end
 
                 if encryptWorldFileExist and refreshMode ~= 'force' then
-                    Game.Start(encryptWorldFile)
+                    self:Start(encryptWorldFile, worldInfo)
                     return
                 end
 
@@ -495,9 +720,8 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
     
                                     LOG.std(nil, 'warn', 'CommandLoadWorld', 'Invalid downloaded file will be deleted: %s', downloadNewLocalWorldFile)
     
-                                    ParaIO.DeleteFile(downloadNewLocalWorldFile)
-    
                                     ParaAsset.CloseArchive(downloadNewLocalWorldFile)
+                                    ParaIO.DeleteFile(downloadNewLocalWorldFile)
     
                                     return
                                 end
@@ -513,9 +737,10 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                                 if ParaIO.DoesFileExist(downloadNewEncryptWorldFile) then
                                     Mod.WorldShare.Store:Set('world/currentRemoteFile', url)
 
+                                    worldInfo.encryptWorldVerified = self.encryptWorldVerified
                                     CacheProjectId:SetProjectIdInfo(pid, worldInfo)
 
-                                    Game.Start(downloadNewEncryptWorldFile)
+                                    self:Start(downloadNewEncryptWorldFile, worldInfo)
                                 end
                             else
                                 Mod.WorldShare.MsgBox:Wait()
@@ -548,7 +773,7 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                 end
     
                 if worldFileExist and refreshMode ~= 'force' then
-                    Game.Start(localWorldFile)
+                    self:Start(localWorldFile, worldInfo)
                     return
                 end
 
@@ -595,9 +820,8 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
 
                                     LOG.std(nil, 'warn', 'CommandLoadWorld', 'Invalid downloaded file will be deleted: %s', downloadNewLocalWorldFile)
 
-                                    ParaIO.DeleteFile(downloadNewLocalWorldFile)
-
                                     ParaAsset.CloseArchive(downloadNewLocalWorldFile)
+                                    ParaIO.DeleteFile(downloadNewLocalWorldFile)
 
                                     return
                                 end
@@ -606,9 +830,10 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
 
                                 Mod.WorldShare.Store:Set('world/currentRemoteFile', url)
 
+                                worldInfo.encryptWorldVerified = self.encryptWorldVerified
                                 CacheProjectId:SetProjectIdInfo(pid, worldInfo)
 
-                                Game.Start(downloadNewLocalWorldFile)
+                                self:Start(downloadNewLocalWorldFile, worldInfo)
                             else
                                 Mod.WorldShare.MsgBox:Wait()
 
@@ -732,6 +957,7 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
     local cacheWorldInfo = CacheProjectId:GetProjectIdInfo(pid)
 
     if System.options.loginmode == 'offline' and cacheWorldInfo then
+        self.encryptWorldVerified = cacheWorldInfo.worldInfo.encryptWorldVerified
         HandleLoadWorld(cacheWorldInfo.worldInfo, true)
         return
     end
