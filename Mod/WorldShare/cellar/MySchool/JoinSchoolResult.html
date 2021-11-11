@@ -50,12 +50,12 @@
                 <pe:gridview RememberScrollPos='true'
                              AllowPaging='false'
                              VerticalScrollBarStep='60'
-                             DefaultNodeHeight='85'
+                             DefaultNodeHeight='80'
                              CellPadding='0'
                              ItemsPerLine='2'
                              name='school_list'>
                     <Columns width='50%'>
-                        <div width='97%'
+                        <div width='120%'
                              align='center'>
                             <pe:if condition='<%= cur_index == Eval("index") %>'>
                                 <input type='button'
@@ -65,11 +65,11 @@
                                        class='item_button_selected'
                                        style='height: 70px;
                                               text-align: left;
-                                              font-size: 24px;
-                                              base-font-size: 24px;
+                                              font-size: 16px;
+                                              base-font-size: 16px;
                                               font-weight: bold;'
                                        tooltip='<%= Eval("text") %>'
-                                       value='<%= "   " .. Mod.WorldShare.Utils.WordsLimit(Eval("text"), 200, 38) %>' />
+                                       value='<%= "  " .. Eval("text") %>' />
                             </pe:if>
                             <pe:if condition='<%= cur_index ~= Eval("index") %>'>
                                 <input type='button'
@@ -79,11 +79,12 @@
                                        class='item_button'
                                        style='height: 70px;
                                               text-align: left;
-                                              font-size: 24px;
-                                              base-font-size: 24px;
+                                              font-size: 16px;
+                                              base-font-size: 16px;
                                               font-weight: bold;'
                                        tooltip='<%= Eval("text") %>'
-                                       value='<%= "   " .. Mod.WorldShare.Utils.WordsLimit(Eval("text"), 200, 38) %>' />
+                                       value='<%= "  " ..Eval("text") %>' />
+                                       <!-- Mod.WorldShare.Utils.WordsLimit(Eval("text"), 200, 38) -->
                             </pe:if>
                         </div>
                     </Columns>

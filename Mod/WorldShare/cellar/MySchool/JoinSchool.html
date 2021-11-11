@@ -112,8 +112,7 @@
                         local province_down_button_node = page:FindControl('province_down_button')
 
                         local province_down_x, province_down_y = province_down_button_node:GetAbsPosition()
-
-                        province_list_node.x = province_down_x - 110
+                        province_list_node.x = province_down_x - 90
                         province_list_node.y = province_down_y + 46
 
                         if is_province_list_show then
@@ -136,6 +135,7 @@
                     end
 
                     function sel_province_item(index, _, toggle)
+                        ChangeSelectBg()
                         if not index or type(index) ~= 'string' then
                             if not toggle then
                                 toggle_province_list()
@@ -158,7 +158,6 @@
                             page:SetUIValue('province', cur_province.text)
                             page:SetUIValue('city', L'市')
                             page:SetUIValue('areas', L'区（县、镇、街道）')
-
                             MySchool.curId = cur_province.id
                             MySchool.lastProvinceId = MySchool.curId
 
@@ -196,6 +195,7 @@
                                     result_page:GetNode('school_list'):SetUIAttribute('DataSource', MySchool.result)
                                 end)
                             end)
+                            ChangeSelectBg()
                         end
 
                         if not toggle then
@@ -212,7 +212,7 @@
 
                         local city_down_x, city_down_y = city_down_button_node:GetAbsPosition()
 
-                        city_list_node.x = city_down_x - 110
+                        city_list_node.x = city_down_x - 90
                         city_list_node.y = city_down_y + 46
 
                         if is_city_list_show then
@@ -235,6 +235,7 @@
                     end
 
                     function sel_city_item(index, _, toggle)
+                        ChangeSelectBg()
                         if not index or type(index) ~= 'string' then
                             if not toggle then
                                 toggle_city_list()
@@ -297,6 +298,7 @@
                                     result_page:GetNode('school_list'):SetUIAttribute('DataSource', MySchool.result)
                                 end)
                             end)
+                            ChangeSelectBg()
                         end
 
                         if not toggle then
@@ -313,7 +315,7 @@
 
                         local area_down_x, area_down_y = area_down_button_node:GetAbsPosition()
 
-                        area_list_node.x = area_down_x - 290
+                        area_list_node.x = area_down_x - 250
                         area_list_node.y = area_down_y + 46
 
                         if is_area_list_show then
@@ -335,7 +337,42 @@
                         end
                     end
 
+                    function ChangeSelectBg()
+                        local function set_default(node,bg)
+                            node.background = bg
+                        end
+                        local normalBg = "Texture/Aries/Creator/paracraft/my_school_32bits.png#6 107 154 42:16 16 16 16"
+                        local selectBg = "Texture/Aries/Creator/paracraft/my_school_32bits.png#53 241 48 70:16 16 16 16"
+
+                        local province_node = page:FindControl('province_bg')
+                        local city_node = page:FindControl('city_bg')
+                        local area_node = page:FindControl('area_bg')
+                        
+                        local province_text = page:GetUIValue("province")
+                        local city_text = page:GetUIValue("city")
+                        local area_text = page:GetUIValue("areas")
+
+                        local function checkBg(node,text,value)
+                            if text == value then
+                                set_default(node,normalBg)
+                            else
+                                set_default(node,selectBg)
+                            end
+                        end
+
+                        checkBg(province_node,province_text,"省")
+                        checkBg(city_node,city_text,"市")
+                        checkBg(area_node,area_text,"区（县、镇、街道）")
+                    end
+
                     function sel_area_item(index)
+                        ChangeSelectBg()
+                        --local area_node = page:FindControl('area_bg')
+                        --local function set_default(node,bg)
+                            --node.background = bg
+                        --end
+                        --set_default(area_node,"Texture/Aries/Creator/paracraft/my_school_32bits.png#6 107 154 42:16 16 16 16")
+                        
                         if not index or type(index) ~= 'string' then
                             toggle_area_list()
                             return
@@ -352,7 +389,7 @@
 
                         if cur_area and type(cur_area) == 'table' then
                             page:SetUIValue('areas', cur_area.text)
-
+                            ChangeSelectBg()
                             if cur_area.value == 0 then
                                 for key, item in ipairs(MySchool.cities or {}) do
                                     if item.id == MySchool.lastCityId then
@@ -385,6 +422,7 @@
                                 result_page.set_cur_index(1)
                                 result_page:GetNode('school_list'):SetUIAttribute('DataSource', MySchool.result)
                             end)
+                            ChangeSelectBg()
                         end
 
                         toggle_area_list()
@@ -494,7 +532,7 @@
                                  background:;' />
             <!-- province list -->
             <pe:container name='province_list'
-                          width='160px'
+                          width='140px'
                           zorder=2
                           visible='false'
                           class='text_field_background'
@@ -526,7 +564,7 @@
             </pe:container>
             <!-- city list -->
             <pe:container name='city_list'
-                          width='160px'
+                          width='140px'
                           zorder=2
                           visible='false'
                           class='text_field_background'
@@ -558,7 +596,7 @@
             </pe:container>
             <!-- area list -->
             <pe:container name='area_list'
-                          width='340px'
+                          width='300'
                           zorder=2
                           visible='false'
                           class='text_field_background'
@@ -627,32 +665,11 @@
                                       width='100%'
                                       style='background:;'>
                             <!-- bottom content -->
-                            <div width='30%'
+                            <div width='26%'
                                 style='float: left;'>
                                 <div align='center'
-                                    style='width: 340px;
+                                    style='width: 300px;
                                            margin-bottom: 20px;'>
-                                    <div style='font-size: 22px;
-                                                base-font-size: 22px;
-                                                margin-bottom: 15px;'>
-                                        <img style='width: 272px;
-                                                    height: 22px;'
-                                             src='Texture/Aries/Creator/paracraft/my_school_32bits.png#6 69 272 22' />
-                                    </div>
-                                    <div style='margin-bottom: 20px;'>
-                                        <input type='text'
-                                               EmptyText='<%= L"请输入学校名称或编号搜索" %>'
-                                               EmptyTextColor='#FF666666'
-                                               spacing=10
-                                               name='search_text'
-                                               onchange='on_enter_text'
-                                               class='text_field_background'
-                                               style='width: 338px;
-                                                      height: 52px;
-                                                      font-size: 22px;
-                                                      base-font-size: 22px;
-                                                      text-valign: center;' />
-                                    </div>
                                     <div style='font-size: 22px;
                                                 base-font-size: 22px;
                                                 margin-bottom: 10px;'>
@@ -674,7 +691,7 @@
                                                        onclick='toggle_province_list'
                                                        value='' />
                                             </div>
-                                            <div class='text_field_background'
+                                            <div name = "province_bg" class='text_field_background'
                                                  style='height: 45px;'>
                                                 <pe:label name='province'
                                                           value='<%= L"省" %>'
@@ -700,7 +717,7 @@
                                                        value=''
                                                        onclick='toggle_city_list' />
                                             </div>
-                                            <div class='text_field_background'
+                                            <div name = "city_bg" class='text_field_background'
                                                  style='height: 45px;'>
                                                 <pe:label name='city'
                                                           value='<%= L"市" %>'
@@ -716,6 +733,7 @@
                                     </div>
                                     <div style='margin-bottom: 20px;'>
                                         <div width='100%'
+                                            name = "area_bg"
                                              class='text_field_background'
                                              style='height: 45px;'>
                                             <div style='position: relative;'>
@@ -798,50 +816,57 @@
                                                    value='<%= L"综合" %>' />
                                         </div>
                                     </div>
-                                    <div align='center'
-                                         style='width: 180px;
-                                                margin-top: 40px;'>
-                                        <input type='button'
-                                               onclick='join_school'
-                                               zorder='1'
-                                               style='width: 180px;
-                                                      height: 65px;
-                                                      background:;
-                                                      position: relative;' />
-                                        <div type='button'
-                                             class='theme1_orange_button'
-                                             style='width: 180px;
-                                                    height: 65px;'>
-                                            <img style='width: 129px;
-                                                        height: 29px;
-                                                        margin-left: 24.5px;
-                                                        margin-top: 18px;'
-                                                 src='Texture/Aries/Creator/paracraft/my_school_32bits.png#366 24 129 29' />
-                                        </div>
+                                    <div style='font-size: 22px;base-font-size: 22px;margin-top: 40px;'>
+                                        <img style='width: 272px;height: 22px;'src='Texture/Aries/Creator/paracraft/my_school_32bits.png#6 69 272 22' />
                                     </div>
-                                    <div style='margin-top: 20px;
-                                                font-size: 23px;
-                                                base-font-size: 23px;'>
-                                        <%= L'*如果您的学校未出现再列表中，请联系客服。我们会尽快添加。客服QQ：2850955888。' %>
+                                    <div style='margin-top: 15px;'>
+                                        <input type='text'
+                                               EmptyText='<%= L"请输入学校名称或编号搜索" %>'
+                                               EmptyTextColor='#FF666666'
+                                               spacing=10
+                                               name='search_text'
+                                               onchange='on_enter_text'
+                                               class='text_field_background'
+                                               style='width: 300px;
+                                                      height: 52px;
+                                                      font-size: 22px;
+                                                      base-font-size: 22px;
+                                                      text-valign: center;' 
+                                                      />
+                                    </div>
+                                    <div style='margin-top:20px;height: 190px;'>
+                                        <div style='margin-top:80px;
+                                                    height: 100px;
+                                                    font-size: 22px;
+                                                    base-font-size: 22px;'>
+                                            <%= L'*如果您的学校未出现再列表中，请联系客服。我们会尽快添加。客服QQ：2850955888。' %>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div width='70%'
+                            <div width='74%'
                                  style='float: left;
-                                       padding-right: 20px;'>
-                                <div style='margin-bottom: 15px;'>
+                                       padding-right: 10px;'>
+                                <div style='margin-bottom: 10px;'>
                                     <img style='width: 125px;
                                                 height: 30px;'
                                          src='Texture/Aries/Creator/paracraft/my_school_32bits.png#225 23 125 30' />
                                 </div>
                                 <div width='100%'
                                      class='list_background'
-                                     style='padding: 15px;'>
+                                     style='padding: 10px;'>
                                     <iframe width='100%'
-                                            style='height: 510px;'
+                                            style='height: 465px;'
                                             name='school_list_iframe'
                                             src='Mod/WorldShare/cellar/MySchool/JoinSchoolResult.html'></iframe>
                                 </div>
+
+                                <div align='right'style='width: 180px; margin-top: 10px;'>
+                                    <input type='button' onclick='join_school'  zorder='1' style='width: 180px; height: 65px; background:; position: relative;' />
+                                    <div type='button'  class='theme1_orange_button' style='width: 180px; height: 65px;'>
+                                    <img style='width: 129px; height: 29px; margin-left: 24.5px; margin-top: 18px;' src='Texture/Aries/Creator/paracraft/my_school_32bits.png#366 24 129 29' />
+                                </div>
+                            </div>
                             </div>
                         </pe:container>
                     </div>

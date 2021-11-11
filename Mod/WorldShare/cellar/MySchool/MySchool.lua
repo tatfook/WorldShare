@@ -26,7 +26,6 @@ local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkServ
 local SessionsData = NPL.load("(gl)Mod/WorldShare/database/SessionsData.lua")
 
 local MySchool = NPL.export()
-
 function MySchool:Show(callback)
     self.hasJoined = false
     self.hasSchoolJoined = false
@@ -208,6 +207,12 @@ function MySchool:ShowJoinSchool(callback)
                     if item.id == region.info.state.id then
                         item.selected = true
                         params._page:SetUIValue('province', item.text)
+                        local province_node =  params._page:FindControl('province_bg')
+                        local bg = 'Texture/Aries/Creator/paracraft/my_school_32bits.png#53 241 48 70:16 16 16 16'
+                        local function set_default(node)
+                            node.background = bg
+                        end
+                        set_default(province_node)
                     end
                 end
             end
@@ -229,6 +234,12 @@ function MySchool:ShowJoinSchool(callback)
                         if item.id == region.info.city.id then
                             item.selected = true
                             params._page:SetUIValue('city', item.text)
+                            local city_node =  params._page:FindControl('city_bg')
+                            local bg = 'Texture/Aries/Creator/paracraft/my_school_32bits.png#53 241 48 70:16 16 16 16'
+                            local function set_default(node)
+                                node.background = bg
+                            end
+                            set_default(city_node)
                         end
                     end
                 end
@@ -244,19 +255,19 @@ function MySchool:ShowJoinSchool(callback)
 
                     local lastSchoolId = SessionsData:GetAnonymousInfo().lastSchoolId or 0
 
-                    if lastSchoolId and type(lastSchoolId) == 'number' and lastSchoolId ~= 0 then
-                        params._page:SetValue('search_text', lastSchoolId)
+                    -- if lastSchoolId and type(lastSchoolId) == 'number' and lastSchoolId ~= 0 then
+                    --     params._page:SetValue('search_text', lastSchoolId)
 
-                        self.searchText = tostring(lastSchoolId)
+                    --     self.searchText = tostring(lastSchoolId)
 
-                        self:GetSearchSchoolResultByName(self.searchText, function()
-                            resultPage:GetNode('school_list'):SetUIAttribute('DataSource', self.result)
-                        end)
-                    else
+                    --     self:GetSearchSchoolResultByName(self.searchText, function()
+                    --         resultPage:GetNode('school_list'):SetUIAttribute('DataSource', self.result)
+                    --     end)
+                    -- else
                         self:GetSearchSchoolResult(region.info.city.id, nil, function()
                             resultPage:GetNode('school_list'):SetUIAttribute('DataSource', self.result)
                         end)
-                    end
+                    -- end
                 end)
             end)
         end
