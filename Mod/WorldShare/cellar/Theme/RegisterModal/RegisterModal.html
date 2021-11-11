@@ -208,13 +208,11 @@
                         RegisterModal.password = password
                         RegisterModal.agree = agree
 
-                        RegisterModal.callback = function()
+                        RegisterModal:RegisterWithAccount(function()
                             page:SetValue('account_result', account)
                             page:SetValue('password_result', password)
                             set_finish()
-                        end
-
-                        RegisterModal:RegisterWithAccount()
+                        end)
                     end
 
                     function checkout_phonecaptcha(callback)
@@ -430,13 +428,11 @@
                         RegisterModal.phonecaptcha = phonecaptcha
                         RegisterModal.account = username
 
-                        RegisterModal.callback = function()
+                        RegisterModal:RegisterWithPhone(function()
                             page:SetValue('account_result', username)
                             page:SetValue('password_result', phonepassword)
                             set_finish()
-                        end
-
-                        RegisterModal:RegisterWithPhone()
+                        end)
                     end
 
                     function finish()

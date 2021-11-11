@@ -262,7 +262,7 @@ function Create:EnterWorld(index, skip)
         return
     end
 
-    if System.options.loginmode == 'online' then
+    if KeepworkServiceSession:IsSignedIn() then
         KeepworkServiceWorld:LimitFreeUser(false, function(result)
             if result then
                 self:HandleEnterWorld(index, skip)

@@ -441,7 +441,7 @@ function MainLogin:ShowRegisterNew(mode)
         0,
         '_fi',
         false,
-        -1
+        1
     )
 end
 
@@ -846,25 +846,7 @@ function MainLogin:LoginAction(callback)
                 if response and response.code and response.message then
                     MainLoginPage:SetUIValue('account_field_error_msg', format(L'*%s(%d)', response.message, response.code))
                     MainLoginPage:FindControl('account_field_error').visible = true
-                    -- 自动注册功能 账号不存在 用户的密码为：paracraft.cn+1位以上的数字 则帮其自动注册
-                    local start_index,end_index = string.find(password, "paracraft.cn")
-                    local school_id = string.match(password, "paracraft.cn(%d+)")
-                    if string.find(password, "paracraft.cn") == 1 and school_id then
-                        MainLoginPage:SetUIValue('account_field_error_msg', "")
-                        KeepworkServiceSession:CheckUsernameExist(account, function(bIsExist)
-                            if not bIsExist then
-                                -- 查询学校
-                                KeepworkServiceSchoolAndOrg:SearchSchoolBySchoolId(tonumber(school_id), function(data)
-                                    if data and data[1] and data[1].id then
-                                        
-                                        MainLogin:AutoRegister(account, password, callback, data[1])
-                                    end
-                                end)
-                            else
-                                _guihelper.MessageBox(string.format("用户名%s已经被注册，请更换用户名，建议使用名字拼音加出生日期，例如： zhangsan2010", account))
-                            end
-                        end)
-                    end
+                    MainLogin:CheckAutoRegister(account, password, callback)
                 else
                     if err == 0 then
                         MainLoginPage:SetUIValue('account_field_error_msg', format(L'*网络异常或超时，请检查网络(%d)', err))
@@ -873,10 +855,10 @@ function MainLogin:LoginAction(callback)
                         MainLoginPage:SetUIValue('account_field_error_msg', format(L'*系统维护中(%d)', err))
                         MainLoginPage:FindControl('account_field_error').visible = true
                     end
-                end
 
-                if callback and type(callback) == 'function' then
-                    callback(false)
+                    if callback and type(callback) == 'function' then
+                        callback(false)
+                    end
                 end
 
                 return false
@@ -1219,6 +1201,36 @@ function MainLogin.GetValidAvatarFilename(playerName)
     if playerName then
         PlayerAssetFile:Init()
         return PlayerAssetFile:GetValidAssetByString(playerName)
+    end
+end
+
+-- 自动注册功能 账号不存在 用户的密码为：paracraft.cn+1位以上的数字 则帮其自动注册
+function MainLogin:CheckAutoRegister(account, password, callback)
+    local MainLoginPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Login')
+    local start_index,end_index = string.find(password, "paracraft.cn")
+    local school_id = string.match(password, "paracraft.cn(%d+)")
+    if string.find(password, "paracraft.cn") == 1 and school_id then
+        if MainLoginPage then
+            MainLoginPage:SetUIValue('account_field_error_msg', "")
+        end
+        
+        KeepworkServiceSession:CheckUsernameExist(account, function(bIsExist)
+            if not bIsExist then
+                -- 查询学校
+                KeepworkServiceSchoolAndOrg:SearchSchoolBySchoolId(tonumber(school_id), function(data)
+                    if data and data[1] and data[1].id then
+                        
+                        MainLogin:AutoRegister(account, password, callback, data[1])
+                    end
+                end)
+            else
+                _guihelper.MessageBox(string.format("用户名%s已经被注册，请更换用户名，建议使用名字拼音加出生日期，例如： zhangsan2010", account))
+            end
+        end)
+    else
+        if callback and type(callback) == 'function' then
+            callback(false)
+        end
     end
 end
 

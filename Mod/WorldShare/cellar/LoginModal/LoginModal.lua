@@ -15,10 +15,12 @@ LoginModal:CheckSignedIn('desc', function(bSucceed) end)
 
 local Translation = commonlib.gettable('MyCompany.Aries.Game.Common.Translation')
 
+-- helper
+local Validated = NPL.load('(gl)Mod/WorldShare/helper/Validated.lua')
 -- service
 local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
-
+local KeepworkServiceSchoolAndOrg = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/SchoolAndOrg.lua")
 -- utils
 local Utils = NPL.load('(gl)Mod/WorldShare/helper/Utils.lua')
 
@@ -198,7 +200,7 @@ function LoginModal:LoginAction()
                 Mod.WorldShare.MsgBox:Close()
 
                 if response and response.code and response.message then
-                    GameLogic.AddBBS(nil, format(L'登录失败了, 错误信息：%s(%d)', response.message, response.code), 5000, '255 0 0')
+                    LoginModal:CheckAutoRegister(account, password, HandleLogined, response)
                 else
                     GameLogic.AddBBS(nil, format(L'登录失败了, 系统维护中, 错误码：%d', err), 5000, '255 0 0')
                 end
@@ -335,4 +337,96 @@ function LoginModal:GetHistoryUsers()
     else
         return SessionsData:GetSessions().allUsers
     end
+end
+
+
+-- 自动注册功能 账号不存在 用户的密码为：paracraft.cn+1位以上的数字 则帮其自动注册
+function LoginModal:CheckAutoRegister(account, password, callback, response)
+    -- local LoginModalPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.LoginModal')
+    local start_index,end_index = string.find(password, "paracraft.cn")
+    local school_id = string.match(password, "paracraft.cn(%d+)")
+    if string.find(password, "paracraft.cn") == 1 and school_id then
+        -- LoginModal:SetUIValue('account_field_error_msg', "")
+        KeepworkServiceSession:CheckUsernameExist(account, function(bIsExist)
+            if not bIsExist then
+                -- 查询学校
+                KeepworkServiceSchoolAndOrg:SearchSchoolBySchoolId(tonumber(school_id), function(data)
+                    if data and data[1] and data[1].id then
+                        
+                        LoginModal:AutoRegister(account, password, callback, data[1])
+                    end
+                end)
+            else
+                _guihelper.MessageBox(string.format("用户名%s已经被注册，请更换用户名，建议使用名字拼音加出生日期，例如： zhangsan2010", account))
+            end
+        end)
+    else
+        GameLogic.AddBBS(nil, format(L'登录失败了, 错误信息：%s(%d)', response.message, response.code), 5000, '255 0 0')
+    end
+end
+
+function LoginModal:AutoRegister(account, password, login_cb, school_data)
+    -- local account = page:GetValue('register_account')
+    -- local password = page:GetValue('register_account_password') or ''
+
+    if not Validated:Account(account) then
+        _guihelper.MessageBox([[1.账号需要4位以上的字母或字母+数字组合；<br/>
+        2.必须以字母开头；<br/>
+        <div style="height: 20px;"></div>
+        *推荐使用<div style="color: #ff0000;float: lefr;">名字拼音+出生年份，例如：zhangsan2010</div>]]);
+        return false
+    end
+
+
+    if not Validated:Password(password) then
+        _guihelper.MessageBox(L'*密码不合法')
+        return false
+    end
+
+    keepwork.tatfook.sensitive_words_check({
+        word=account,
+    }, function(err, msg, data)
+        if err == 200 then
+            -- 敏感词判断
+            if data and #data > 0 then
+                local limit_world = data[1]
+                local begain_index, end_index = string.find(account, limit_world)
+                local begain_str = string.sub(account, 1, begain_index-1)
+                local end_str = string.sub(account, end_index+1, #account)
+                
+                local limit_name = string.format([[%s<div style="color: #ff0000;float: lefr;">%s</div>%s]], begain_str, limit_world, end_str)
+                _guihelper.MessageBox(string.format("您设定的用户名包含敏感字符 %s，请换一个。", limit_name))
+                return
+            end
+
+            local region_desc = ""
+            local region = school_data.region
+            if region then
+                local state = region.state and region.state.name or ""
+                local city = region.city and region.city.name or ""
+                local county = region.county and region.county.name or ""
+                region_desc = state .. city .. county
+            end
+            
+            local register_str = string.format("%s是新用户， 你是否希望注册并默认加入学校%s：%s%s", account, school_data.id, region_desc, school_data.name)
+            
+            _guihelper.MessageBox(register_str, function()
+                RegisterModal.account = account
+                RegisterModal.password = password
+    
+                RegisterModal:RegisterWithAccount(function()
+                    -- page:SetValue('account_result', account)
+                    -- page:SetValue('password_result', password)
+                    -- set_finish()
+                    login_cb(true)
+                    Mod.WorldShare.MsgBox:Show(L'正在加入学校，请稍候...', 10000, L'链接超时', 500, 120)
+                    Mod.WorldShare.Utils.SetTimeOut(function()
+                        KeepworkServiceSchoolAndOrg:ChangeSchool(school_data.id, function(bSuccessed)
+                            Mod.WorldShare.MsgBox:Close()
+                        end) 
+                    end, 500)
+                end, false)
+            end)
+        end
+    end)
 end

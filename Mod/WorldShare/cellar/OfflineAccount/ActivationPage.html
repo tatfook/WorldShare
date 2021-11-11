@@ -7,6 +7,7 @@
                     local Create = NPL.load('(gl)Mod/WorldShare/cellar/Create/Create.lua')
                     local LoginModal = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua')
                     local RedSummerCampMainPage = NPL.load('(gl)script/apps/Aries/Creator/Game/Tasks/RedSummerCamp/RedSummerCampMainPage.lua')
+                    local RegisterModal = NPL.load("(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua")
                     local Opus = NPL.load("(gl)Mod/WorldShare/cellar/Opus/Opus.lua")
 
                     -- service
@@ -78,31 +79,38 @@
                         local account = page:GetValue('account')
                         local password = page:GetValue('password')
 
-                        KeepworkServiceSession:LoginDirectly(
-                            account,
-                            password,
-                            function(bSucceed, reason)
+                        local login_cb = function()
+                            UserMacBindsService:BindDevice(function(bSucceed)
                                 if not bSucceed then
-                                    GameLogic.AddBBS(nil, reason, 3000, '255 0 0')
+                                    KeepworkServiceSession:Logout()
+                                    _guihelper.MessageBox(L'激活失败。该账号已激活2台设备，请解除之前的设置激活后再试。')
                                     return
                                 end
 
-                                UserMacBindsService:BindDevice(function(bSucceed)
+                                set_container(2)
+
+                                local username = get_offline_username()
+                                page:SetValue('username', username)
+
+                                KeepworkServiceSession:Logout()
+                            end)
+                        end
+                        if KeepworkServiceSession:IsSignedIn() then
+                            login_cb()
+                        else
+                            KeepworkServiceSession:LoginDirectly(
+                                account,
+                                password,
+                                function(bSucceed, reason)
                                     if not bSucceed then
-                                        KeepworkServiceSession:Logout()
-                                        _guihelper.MessageBox(L'激活失败。该账号已激活2台设备，请解除之前的设置激活后再试。')
+                                        GameLogic.AddBBS(nil, reason, 3000, '255 0 0')
                                         return
                                     end
 
-                                    set_container(2)
-
-                                    local username = get_offline_username()
-                                    page:SetValue('username', username)
-
-                                    KeepworkServiceSession:Logout()
-                                end)
-                            end
-                        )
+                                    login_cb()
+                                end
+                            )
+                        end
                     end
 
                     function open_create()
@@ -235,6 +243,20 @@
                         return -1
                     end
 
+                    function register()
+                        if System.options.isForceOffline then
+                            --_guihelper.MessageBox(L'只有最新版才能登录， 否则只能用离线版，请退出程序后更新。')
+                            --return
+                        end
+
+                        LoginModal:Close('REGISTER')
+                        RegisterModal:ShowPage(function()
+                            page:SetValue("account", RegisterModal.account)
+                            page:SetValue("password", RegisterModal.password)
+                            activate()
+                        end,1)
+                    end
+
                     Mod.WorldShare.Utils.SetTimeOut(function()
                         set_container(2)
 
@@ -358,6 +380,16 @@
                                               base-font-size: 25px;'
                                        value='' />
                             </div>
+                        </div>
+                        <div onclick="register" style='position: relative;
+                                    font-size: 17px;
+                                    base-font-size: 17px;
+                                    color: #2956ab;
+                                    margin-top: 33px;
+                                    margin-left: 47px;
+                                    width: 156px;
+                                    height: 50px;'>
+                                    <%= L"没有账号？立即注册" %>
                         </div>
                         <div width='150px'
                              align='center'>

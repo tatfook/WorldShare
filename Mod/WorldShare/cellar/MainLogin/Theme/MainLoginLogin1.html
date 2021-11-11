@@ -160,13 +160,38 @@
                             password = page:GetValue('password_hide')
                         end
 
-                        if string.find(password, "pa") == 1 and not be_show_password then
-                            page:SetValue('eye_show_password', true)
-                            set_show_password()
-                            local node = page:FindControl('password_show')
-                            if node then
-                                node:Focus()
-                                node:SetCaretPosition(#password)
+                        if string.find(password, "pa") == 1 and not has_click_change_show_password then
+                            local check_str = {"p","a","r","a"} 
+                            local is_macth = true
+                            for i = 1, #check_str do
+                                local char = string.sub(password, i, i)
+                                if char and char ~= "" and check_str[i] ~= char then
+                                    is_macth = false
+                                    break
+                                end
+                            end
+                            if not is_macth then
+                                if auto_show_password then
+                                    page:SetValue('eye_show_password', false)
+                                    auto_show_password = false
+                                    be_show_password = true
+                                    set_show_password()
+
+                                    local node = page:FindControl('password_hide')
+                                    if node then
+                                        node:Focus()
+                                        node:SetCaretPosition(#password)
+                                    end
+                                end
+                            elseif not be_show_password then
+                                page:SetValue('eye_show_password', true)
+                                set_show_password()
+                                auto_show_password = true
+                                local node = page:FindControl('password_show')
+                                if node then
+                                    node:Focus()
+                                    node:SetCaretPosition(#password)
+                                end
                             end
                         end
 
@@ -190,6 +215,11 @@
                         else
                             page:SetUIBackground('login_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 197 258 44')
                         end
+                    end
+
+                    function click_set_show_password()
+                        has_click_change_show_password = true
+                        set_show_password()
                     end
 
                     function set_show_password()
@@ -863,7 +893,7 @@
                                         CheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#272 52 20 20"
                                         UncheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#297 52 20 20"
                                         style="position: relative;margin-left: -21px;margin-top: 14px;"
-                                        onclick="set_show_password"/>
+                                        onclick="click_set_show_password"/>
                             </div>
                         </div>
                         <div style="margin-top: 5px;">

@@ -35,7 +35,7 @@ RegisterModal.phonepassword = ''
 RegisterModal.phonecaptcha = ''
 RegisterModal.bindphone = nil
 
-function RegisterModal:ShowPage(callback)
+function RegisterModal:ShowPage(callback, zorder)
     local LoginModalPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.LoginModal')
 
     if LoginModalPage then
@@ -55,7 +55,12 @@ function RegisterModal:ShowPage(callback)
         320,
         360,
         'Mod/WorldShare/cellar/Theme/RegisterModal/RegisterModal.html',
-        'Mod.WorldShare.RegisterModal'
+        'Mod.WorldShare.RegisterModal',
+        nil,
+        nil,
+        nil,
+        nil,
+        zorder
     )
 end
 
