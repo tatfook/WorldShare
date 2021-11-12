@@ -533,6 +533,9 @@ function MySchool:GetAreas(id, callback)
 end
 
 function MySchool:GetSearchSchoolResult(id, kind, callback)
+    if id == 0 or id == nil then
+        return
+    end
     KeepworkServiceSchoolAndOrg:SearchSchool(id, kind, function(data)
         self:SetResult(data)
 
@@ -606,7 +609,6 @@ end
 
 function MySchool:SetResult(data)
     self.result = data
-
     if self.result and type(self.result) == 'table' then
         -- find out same school name
         for aKey, aItem in ipairs(self.result) do
@@ -698,3 +700,4 @@ function MySchool:OpenTeachingPlanCenter(orgUrl)
         end
     end)
 end
+
