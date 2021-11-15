@@ -418,6 +418,7 @@ function KeepworkServiceSession:Logout(mode, callback)
                 local Logout = Mod.WorldShare.Store:Action('user/Logout')
                 Logout()
                 self:ResetIndulge()
+                System.options.loginmode = 'offline'
                 Mod.WorldShare.Store:Remove('user/bLoginSuccessed')
 
                 if callback and type(callback) == 'function' then
@@ -429,6 +430,7 @@ function KeepworkServiceSession:Logout(mode, callback)
             local Logout = Mod.WorldShare.Store:Action('user/Logout')
             Logout()
             self:ResetIndulge()
+            System.options.loginmode = 'offline'
             Mod.WorldShare.Store:Remove('user/bLoginSuccessed')
 
             if callback and type(callback) == 'function' then
