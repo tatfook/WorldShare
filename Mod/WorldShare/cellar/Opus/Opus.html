@@ -49,6 +49,24 @@
                     function create_new_world()
                         CreateWorld:CreateNewWorld()
                     end
+
+                    Mod.WorldShare.Utils.SetTimeOut(function()
+                        local sel_all = page:FindControl('sel_all')
+                        local sel_online = page:FindControl('sel_online')
+                        local sel_local = page:FindControl('sel_local')
+
+                        sel_all.visible = false
+                        sel_online.visible = false
+                        sel_local.visible = false
+
+                        if Create.statusFilter == nil then
+                            sel_all.visible = true
+                        elseif Create.statusFilter == 'ONLINE' then
+                            sel_online.visible = true
+                        elseif Create.statusFilter == 'LOCAL' then
+                            sel_local.visible = true
+                        end
+                    end, 0)
                 ]]>
             </script>
             <style type='type/mcss' src='Mod/WorldShare/cellar/Opus/OpusMcss.mcss'></style>
