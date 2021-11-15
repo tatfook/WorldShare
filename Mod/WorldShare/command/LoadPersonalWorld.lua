@@ -21,7 +21,6 @@ local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkServ
 
 -- UI
 local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
-local WorldList = NPL.load('(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua')
 local LoginModal = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua')
 
 local LoadPersonalWorldCommand = NPL.export()

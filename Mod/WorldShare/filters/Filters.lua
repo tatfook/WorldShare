@@ -1,7 +1,8 @@
 --[[
 Title: filters
-Author(s):  Big
-Date: 2020.12.11
+Author(s): big
+CreateDate: 2020.12.11
+ModifyDate: 2021.11.15
 Desc: 
 use the lib:
 ------------------------------------------------------------
@@ -12,7 +13,6 @@ Filters:Init()
 
 -- bottles
 local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
-local UserConsole = NPL.load('(gl)Mod/WorldShare/cellar/UserConsole/Main.lua')
 local Create = NPL.load('(gl)Mod/WorldShare/cellar/Create/Create.lua')
 local WorldExitDialog = NPL.load('(gl)Mod/WorldShare/cellar/WorldExitDialog/WorldExitDialog.lua')
 local ShareWorld = NPL.load('(gl)Mod/WorldShare/cellar/ShareWorld/ShareWorld.lua')
@@ -20,7 +20,6 @@ local CreateWorld = NPL.load('(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.
 local Permission = NPL.load('(gl)Mod/WorldShare/cellar/Permission/Permission.lua')
 local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
 local Server = NPL.load("(gl)Mod/WorldShare/cellar/Server/Server.lua")
-local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua")
 local Menu = NPL.load('(gl)Mod/WorldShare/cellar/Menu/Menu.lua')
 local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
 local Certificate = NPL.load("(gl)Mod/WorldShare/cellar/Certificate/Certificate.lua")
@@ -361,7 +360,7 @@ function Filters:Init()
     GameLogic.GetFilters():add_filter(
         'get_project_id_by_lesson_id',
         function(txtLessonId)
-            return UserConsole:GetProjectId(txtLessonId)
+            return Create:GetProjectId(txtLessonId)
         end
     )
 
@@ -501,7 +500,7 @@ function Filters:Init()
     GameLogic.GetFilters():add_filter(
         'login_with_token',
         function(callback)
-            UserInfo:LoginWithToken(callback)
+            KeepworkServiceSession:LoginWithToken(callback)
         end
     )
 

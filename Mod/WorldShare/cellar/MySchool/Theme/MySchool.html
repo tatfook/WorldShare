@@ -6,10 +6,9 @@
                 -- libs
                 local UniString = commonlib.gettable("System.Core.UniString")
 
-                -- UI
+                -- bottles
                 local MySchool = NPL.load("(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua")
                 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
-                local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
 
                 local page = document:GetPageCtrl()
                 local global_type = type
@@ -82,13 +81,13 @@
                             format(L"即将离开【%s】进入【%s】", currentEnterWorld.text, curData.paraWorld.name),
                             function(res)
                                 if res and res == _guihelper.DialogResult.Yes then
-                                    UserConsole:HandleWorldId(curData.paraWorld.projectId, true) 
+                                    GameLogic.RunCommand('/loadworld -auto -s ' .. curData.paraWorld.projectId)
                                 end
                             end,
                             _guihelper.MessageBoxButtons.YesNo
                         )
                     else
-                        UserConsole:HandleWorldId(curData.paraWorld.projectId, true)
+                        GameLogic.RunCommand('/loadworld -auto -s ' .. curData.paraWorld.projectId)
                     end
                 end
 

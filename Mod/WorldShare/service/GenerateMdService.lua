@@ -1,23 +1,29 @@
 --[[
 Title: GenerateMdPage
 Author(s): big
-Date: 2018.6.20
+CreateDate: 2018.06.20
+ModifyDate: 2021.11.15
 City: Foshan
 use the lib:
 ------------------------------------------------------------
 local GenerateMdPage = NPL.load("(gl)Mod/WorldShare/cellar/Common/GenerateMdPage.lua")
 ------------------------------------------------------------
 ]]
-local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
+
+-- bottles
 local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
+
+-- helper
 local KeepworkGen = NPL.load("(gl)Mod/WorldShare/helper/KeepworkGen.lua")
+
+-- service
 local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
 
 local GenerateMdPage = NPL.export()
 
 function GenerateMdPage:GetSetting()
-    local dataSourceInfo = Store:Get("user/dataSourceInfo")
-    local userinfo = Store:Get("user/userinfo")
+    local dataSourceInfo = Mod.WorldShare.Store:Get("user/dataSourceInfo")
+    local userinfo = Mod.WorldShare.Store:Get("user/userinfo")
 
     return dataSourceInfo, userinfo
 end
@@ -142,9 +148,11 @@ end
 
 function GenerateMdPage:DeleteWorldMD(path, callback)
     local function DeleteFile(keepworkId)
-        local path = UserConsole.username .. "/paracraft/world_" .. _path .. ".md"
+        local username = Mod.WorldShare.Store:Get('user/username')
+        local path = username .. "/paracraft/world_" .. _path .. ".md"
+
         GitService:deleteFileService(
-            UserConsole.keepWorkDataSource,
+            keepWorkDataSource,
             path,
             "",
             function(data, err)
@@ -155,11 +163,12 @@ function GenerateMdPage:DeleteWorldMD(path, callback)
             keepworkId
         )
     end
-    if (UserConsole.dataSourceType == "github") then
+
+    if (dataSourceType == "github") then
         DeleteFile()
-    elseif (UserConsole.dataSourceType == "gitlab") then
+    elseif (dataSourceType == "gitlab") then
         GitService:GetProjectIdByName(
-            UserConsole.keepWorkDataSource,
+            keepWorkDataSource,
             function(keepworkId)
                 DeleteFile(keepworkId)
             end

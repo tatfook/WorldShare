@@ -2,7 +2,7 @@
 Title: VersionNotice
 Author(s):  big
 CreateDate: 2020.01.14
-ModifyDate: 2021.10.18
+ModifyDate: 2021.11.15
 place: Foshan
 Desc: 
 use the lib:
@@ -10,12 +10,14 @@ use the lib:
 local VipNotice = NPL.load('(gl)Mod/WorldShare/cellar/VipNotice/VipNotice.lua')
 ------------------------------------------------------------
 ]]
+
 -- service
 local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+
 --lib
-local QREncode = NPL.load('(gl)script/apps/Aries/Creator/Game/Movie/QREncode.lua');
-local UserInfo = NPL.load('(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua')
+local QREncode = NPL.load('(gl)script/apps/Aries/Creator/Game/Movie/QREncode.lua')
+
 local VipNotice = NPL.export()
 local page
 

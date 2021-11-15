@@ -697,3 +697,38 @@ function Create:GetProjectId(url)
 
     return pid or false
 end
+
+function Create:GetCurWorldInfo(infoType, worldIndex)
+    local index = tonumber(worldIndex)
+    local selectedWorld = self:GetSelectWorld(index)
+
+    if selectedWorld then
+        return selectedWorld[infoType]
+    end
+end
+
+function Create:GetSelectWorld(index)
+    local compareWorldList = Mod.WorldShare.Store:Get("world/compareWorldList")
+
+    if compareWorldList then
+        return compareWorldList[index]
+    else
+        return nil
+    end
+end
+
+function Create.FormatStatus(status)
+    if status == 1 then
+        return L"仅本地"
+    elseif status == 2 then
+        return L"仅网络"
+    elseif status == 3 then
+        return L"本地版本与远程数据源一致"
+    elseif status == 4 then
+        return L"本地版本更加新"
+    elseif status == 5 then
+        return L"远程版本更加新"
+    else
+        return L"获取状态中"
+    end
+end

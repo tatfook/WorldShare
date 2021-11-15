@@ -1,6 +1,5 @@
-<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <title>StartSync,by big,2017.4.18</title>
+    <title></title>
 </head>
 <body>
     <pe:mcml>
@@ -9,7 +8,6 @@
                 page_ctrl = document:GetPageCtrl()
                 use_offline = page_ctrl:GetRequestParam("useOffline")
                 local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
-                local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
 
                 SyncMain = NPL.load("../Main.lua")
                 Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
@@ -64,9 +62,8 @@
                         return false
                     end
 
-                    InternetLoadWorld.LoadWorld(currentWorld)
-                    UserConsole:ClosePage()
                     SyncMain:CloseStartSyncPage()
+                    InternetLoadWorld.LoadWorld(currentWorld)
                 end
 
                 function get_current_world_name()

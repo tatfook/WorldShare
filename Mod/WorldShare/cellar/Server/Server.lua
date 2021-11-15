@@ -1,21 +1,24 @@
 --[[
 Title: Server Page
 Author(s):  big
-Date:  2019.11.5
+CreateDate: 2019.11.05
+ModifyDate: 2021.11.15
 Desc: 
 use the lib:
 ------------------------------------------------------------
-local Server = NPL.load("(gl)Mod/WorldShare/cellar/Server/Server.lua")
+local Server = NPL.load('(gl)Mod/WorldShare/cellar/Server/Server.lua')
 ------------------------------------------------------------
 ]]
-local Screen = commonlib.gettable("System.Windows.Screen")
-local SocketService = commonlib.gettable("Mod.WorldShare.service.SocketService")
-local NetworkMain = commonlib.gettable("MyCompany.Aries.Game.Network.NetworkMain")
 
--- UI
-local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
-local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
-local Permission = NPL.load("(gl)Mod/WorldShare/cellar/Permission/Permission.lua")
+-- libs
+local Screen = commonlib.gettable('System.Windows.Screen')
+local SocketService = commonlib.gettable('Mod.WorldShare.service.SocketService')
+local NetworkMain = commonlib.gettable('MyCompany.Aries.Game.Network.NetworkMain')
+
+-- bottles
+local LoginModal = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua')
+local Permission = NPL.load('(gl)Mod/WorldShare/cellar/Permission/Permission.lua')
+local Compare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
 
 local Server = NPL.export()
 
@@ -24,23 +27,23 @@ Server.seachFinished = false
 function Server:ShowPage()
     local function Handle(result)
         if result then
-            local params = Mod.WorldShare.Utils.ShowWindow(0, 0, "Mod/WorldShare/cellar/Server/Server.html", "Server", 0, 0, "_fi", false)
+            local params = Mod.WorldShare.Utils.ShowWindow(0, 0, 'Mod/WorldShare/cellar/Server/Server.html', 'Server', 0, 0, '_fi', false)
 
-            Screen:Connect("sizeChanged", self, self.OnScreenSizeChange, "UniqueConnection")
+            Screen:Connect('sizeChanged', self, self.OnScreenSizeChange, 'UniqueConnection')
             self.OnScreenSizeChange()
         
             params._page.OnClose = function()
                 Mod.WorldShare.Store:Remove('page/Server')
-                Screen:Disconnect("sizeChanged", self, self.OnScreenSizeChange)
+                Screen:Disconnect('sizeChanged', self, self.OnScreenSizeChange)
             end
         
             self:GetOnlineList()
         end
 
-        WorldList:RefreshCurrentServerList()
+        Compare:RefreshWorldList()
     end
 
-    Permission:CheckPermission("OnlineLearning", true, Handle)
+    Permission:CheckPermission('OnlineLearning', true, Handle)
 end
 
 function Server.OnScreenSizeChange()
@@ -52,12 +55,12 @@ function Server.OnScreenSizeChange()
 
     local height = math.floor(Screen:GetHeight())
 
-    local areaHeaderNode = ServerPage:GetNode("area_header")
+    local areaHeaderNode = ServerPage:GetNode('area_header')
     local marginLeft = math.floor((Screen:GetWidth() - 600) / 2)
 
     areaHeaderNode:SetCssStyle('margin-left', marginLeft)
 
-    local areaContentNode = ServerPage:GetNode("area_content")
+    local areaContentNode = ServerPage:GetNode('area_content')
 
     areaContentNode:SetCssStyle('height', height - 47)
     areaContentNode:SetCssStyle('margin-left', marginLeft)
@@ -75,7 +78,7 @@ function Server:GetOnlineList()
     Mod.WorldShare.Utils.SetTimeOut(function()
         local udpServerList = Mod.WorldShare.Store:Get('user/udpServerList') or {}
 
-        ServerPage:GetNode("udp_server_list"):SetAttribute("DataSource", udpServerList)
+        ServerPage:GetNode('udp_server_list'):SetAttribute('DataSource', udpServerList)
 
         self.seachFinished = true
         ServerPage:Refresh(0.01)

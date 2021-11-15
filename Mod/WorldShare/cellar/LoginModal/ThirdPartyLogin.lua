@@ -1,7 +1,8 @@
 --[[
 Title: third party login
 Author(s):  big
-Date: 2020.06.01
+CreateDate: 2020.06.01
+ModifyDate: 2021.11.15
 City: Foshan
 Desc: 
 use the lib:
@@ -16,9 +17,6 @@ local NPLWebServer = commonlib.gettable("MyCompany.Aries.Game.Network.NPLWebServ
 local Cef3Manager = commonlib.gettable("Mod.WorldShare.service.Cef3Manager")
 local NplBrowserPlugin = commonlib.gettable("NplBrowser.NplBrowserPlugin")
 local GameLogic = commonlib.gettable("MyCompany.Aries.Game.GameLogic")
-
--- bottles
-local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua")
 
 -- service
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
@@ -102,7 +100,7 @@ function ThirdPartyLogin:Init(thirdPartyType, callback)
                 if bExisted then
                     Mod.WorldShare.Store:Set("user/token", data.token)
 
-                    UserInfo:LoginWithToken(function()
+                    KeepworkServiceSession:LoginWithToken(function()
                         if self.callback and type(self.callback) == "function" then
                             self.callback()
                         end      

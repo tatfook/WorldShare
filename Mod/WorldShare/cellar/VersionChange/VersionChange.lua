@@ -9,15 +9,20 @@ use the lib:
 local VersionChange = NPL.load("(gl)Mod/WorldShare/cellar/VersionChange/VersionChange.lua")
 ------------------------------------------------------------
 ]]
+
+-- libs
 local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 
+-- bottles
 local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
+
+-- service
 local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 local KeepworkServiceWorld = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceWorld.lua")
-local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
 local SyncToLocal = NPL.load("(gl)Mod/WorldShare/service/SyncService/SyncToLocal.lua")
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+local Compare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
 
 local Encoding = commonlib.gettable("commonlib.Encoding")
 
@@ -163,7 +168,7 @@ function VersionChange:SelectVersion(index)
             GameLogic.AddBBS(nil, msg, 3000, "255 0 0")
         end
 
-        WorldList:RefreshCurrentServerList()
+        Compare:RefreshWorldList()
     end)
 
     self:ClosePage()

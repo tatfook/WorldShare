@@ -7,7 +7,6 @@
                     local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
                     local ForgetPassword = NPL.load('(gl)Mod/WorldShare/cellar/ForgetPassword/ForgetPassword.lua')
                     local ThirdPartyLogin = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/ThirdPartyLogin.lua')
-                    local UserConsole = NPL.load('(gl)Mod/WorldShare/cellar/UserConsole/Main.lua')
                     local MySchool = NPL.load('(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua')
 
                     -- service
@@ -37,7 +36,6 @@
 
                     function login_with_wx()
                         ThirdPartyLogin:Init('WECHAT', function()
-                            UserConsole.notFirstTimeShown = nil
 
                             close()
 
@@ -57,8 +55,6 @@
 
                     function login_with_qq()
                         ThirdPartyLogin:Init('QQ', function()
-                            UserConsole.notFirstTimeShown = nil
-
                             close()
 
                             MainLogin:ShowWhere(function(where)
