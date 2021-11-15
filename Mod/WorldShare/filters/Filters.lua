@@ -360,7 +360,7 @@ function Filters:Init()
     GameLogic.GetFilters():add_filter(
         'get_project_id_by_lesson_id',
         function(txtLessonId)
-            return Create:GetProjectId(txtLessonId)
+            return Mod.WorldShare.Utils.GetProjectId(txtLessonId)
         end
     )
 

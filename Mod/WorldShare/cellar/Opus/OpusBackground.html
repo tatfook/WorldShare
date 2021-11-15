@@ -54,7 +54,7 @@
                     function open()
                         local opus_content = page:GetValue('opus_content', '')
 
-                        local pid = get_project_id(opus_content)
+                        local pid = Mod.WorldShare.Utils.GetProjectId(opus_content)
 
                         if pid then
                             CommonLoadWorld:EnterWorldById(pid)
@@ -63,26 +63,12 @@
                         end
                     end
 
-                    function get_project_id(opus_content)
-                        if (tonumber(opus_content or '') or 99999) < 99999 then
-                            return opus_content
-                        end
-
-                        local pid = string.match(opus_content or '', "^p(%d+)$")
-
-                        if not pid then
-                            pid = string.match(opus_content or '', "/pbl/project/(%d+)")
-                        end
-
-                        return pid or false
-                    end
-
                     function close()
                         Opus:CloseAll()
                     end
 
                     function open_vip()
-                        GameLogic.IsVip("RedSummerCampWorks", true, function(result)
+                        GameLogic.IsVip('RedSummerCampWorks', true, function(result)
                             if result then
                             end
                         end)

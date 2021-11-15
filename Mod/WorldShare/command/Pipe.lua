@@ -38,7 +38,7 @@ function PipeCommand:Init()
             end
 
             if cmd_params and cmd_params.value then
-                local pid = self:GetProjectId(cmd_params.value)
+                local pid = Mod.WorldShare.Utils.GetProjectId(cmd_params.value)
 
                 if pid then
                     CommonLoadWorld:EnterWorldById(pid)
@@ -52,18 +52,4 @@ function PipeCommand:Init()
     Commands['pipe'] = pipe
 
     return pipe
-end
-
-function PipeCommand:GetProjectId(url)
-    if (tonumber(url or '') or 99999) < 99999 then
-        return url
-    end
-
-    local pid = string.match(url or '', "^p(%d+)$")
-
-    if not pid then
-        pid = string.match(url or '', "/pbl/project/(%d+)")
-    end
-
-    return pid or false
 end

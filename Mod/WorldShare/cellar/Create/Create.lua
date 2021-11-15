@@ -72,7 +72,7 @@ function Create:ShowCreateEmbed(width, height, x, y)
             allowDrag = false,
             bShow = nil,
             directPosition = true,
-            align = "_ct",
+            align = '_ct',
             x = -768 / 2,
             y = y / 2,
             width = 1024,
@@ -177,13 +177,13 @@ function Create:Sync()
 
     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
-    Mod.WorldShare.MsgBox:Show(L"请稍候...")
+    Mod.WorldShare.MsgBox:Show(L'请稍候...')
 
     Compare:Init(currentWorld.worldpath, function(result)
         Mod.WorldShare.MsgBox:Close()
 
         if not result then
-            GameLogic.AddBBS(nil, L"版本号对比失败", 3000, "255 0 0")
+            GameLogic.AddBBS(nil, L'版本号对比失败', 3000, '255 0 0')
             return false
         end
 
@@ -497,7 +497,7 @@ function Create:HandleEnterWorld(index, skip)
                 if not result then
                     if type(option) == 'string' then
                         if option == 'NEWWORLD' then
-                            GameLogic.AddBBS(nil, L'服务器未找到您的世界数据，请新建', 3000, "255 255 0")
+                            GameLogic.AddBBS(nil, L'服务器未找到您的世界数据，请新建', 3000, '255 255 0')
 
                             DownloadWorld.Close()
                             CreateWorld:CreateNewWorld(currentWorld.foldername)
@@ -589,11 +589,11 @@ function Create:WorldRename(currentItemIndex, tempModifyWorldname, callback)
     end
 
     if currentWorld.is_zip then
-        GameLogic.AddBBS(nil, L"暂不支持重命名zip世界", 3000, "255 0 0")
+        GameLogic.AddBBS(nil, L'暂不支持重命名zip世界', 3000, '255 0 0')
         return false
     end
 
-    if tempModifyWorldname == "" then
+    if tempModifyWorldname == '' then
         return false
     end
 
@@ -684,20 +684,6 @@ function Create:WorldRename(currentItemIndex, tempModifyWorldname, callback)
     return true
 end
 
-function Create:GetProjectId(url)
-    if (tonumber(url or '') or 99999) < 99999 then
-        return url
-    end
-
-    local pid = string.match(url or '', "^p(%d+)$")
-
-    if not pid then
-        pid = string.match(url or '', "/pbl/project/(%d+)")
-    end
-
-    return pid or false
-end
-
 function Create:GetCurWorldInfo(infoType, worldIndex)
     local index = tonumber(worldIndex)
     local selectedWorld = self:GetSelectWorld(index)
@@ -708,7 +694,7 @@ function Create:GetCurWorldInfo(infoType, worldIndex)
 end
 
 function Create:GetSelectWorld(index)
-    local compareWorldList = Mod.WorldShare.Store:Get("world/compareWorldList")
+    local compareWorldList = Mod.WorldShare.Store:Get('world/compareWorldList')
 
     if compareWorldList then
         return compareWorldList[index]
@@ -719,16 +705,16 @@ end
 
 function Create.FormatStatus(status)
     if status == 1 then
-        return L"仅本地"
+        return L'仅本地'
     elseif status == 2 then
-        return L"仅网络"
+        return L'仅网络'
     elseif status == 3 then
-        return L"本地版本与远程数据源一致"
+        return L'本地版本与远程数据源一致'
     elseif status == 4 then
-        return L"本地版本更加新"
+        return L'本地版本更加新'
     elseif status == 5 then
-        return L"远程版本更加新"
+        return L'远程版本更加新'
     else
-        return L"获取状态中"
+        return L'获取状态中'
     end
 end

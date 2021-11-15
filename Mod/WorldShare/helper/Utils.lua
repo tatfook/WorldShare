@@ -1,17 +1,18 @@
 --[[
 Title: Utils
 Author(s): big
-Date: 2018.06.21
+CreateDate: 2018.06.21
+ModifyDate: 2021.11.15
 Desc: 
 -------------------------------------------------------
-local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
+local Utils = NPL.load('(gl)Mod/WorldShare/helper/Utils.lua')
 -------------------------------------------------------
 ]]
 
 -- libs
-local Encoding = commonlib.gettable("commonlib.Encoding")
-local Translation = commonlib.gettable("MyCompany.Aries.Game.Common.Translation")
-local LocalLoadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalLoadWorld")
+local Encoding = commonlib.gettable('commonlib.Encoding')
+local Translation = commonlib.gettable('MyCompany.Aries.Game.Common.Translation')
+local LocalLoadWorld = commonlib.gettable('MyCompany.Aries.Game.MainLogin.LocalLoadWorld')
 
 -- service
 local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
@@ -65,7 +66,7 @@ function Utils.ShowWindow(option, height, url, name, x, y, align, allowDrag, zor
             allowDrag = allowDrag == nil and true or allowDrag,
             bShow = nil,
             directPosition = true,
-            align = align or "_ct",
+            align = align or '_ct',
             x = -x / 2,
             y = -y / 2,
             width = width,
@@ -80,28 +81,28 @@ function Utils.ShowWindow(option, height, url, name, x, y, align, allowDrag, zor
     end
 
     if params.url and type(params.url) == 'string' then
-        local matchUrl, matched = string.gsub(params.url, "^%(ws%)", "") -- ws: worldshare
+        local matchUrl, matched = string.gsub(params.url, '^%(ws%)', '') -- ws: worldshare
     
         if matched == 1 then
-            if not string.match(matchUrl, "%.html$") then
-                matchUrl = matchUrl .. "/" .. matchUrl .. ".html"
+            if not string.match(matchUrl, '%.html$') then
+                matchUrl = matchUrl .. '/' .. matchUrl .. '.html'
             end
     
-            params.url = "Mod/WorldShare/cellar/" .. matchUrl
+            params.url = 'Mod/WorldShare/cellar/' .. matchUrl
         end
     
-        local matchUrl, matched = string.gsub(params.url, "^%(ep%)", "") -- ep: explorerapp
+        local matchUrl, matched = string.gsub(params.url, '^%(ep%)', '') -- ep: explorerapp
     
         if matched == 1 then
-            if not string.match(matchUrl, "%.html$") then
-                matchUrl = matchUrl .. "/" .. matchUrl .. ".html"
+            if not string.match(matchUrl, '%.html$') then
+                matchUrl = matchUrl .. '/' .. matchUrl .. '.html'
             end
     
-            params.url = "Mod/ExplorerApp/components/" .. matchUrl
+            params.url = 'Mod/ExplorerApp/components/' .. matchUrl
         end
     
         if Mod.WorldShare.Utils.IsEnglish() then
-            local enUrl = string.gsub(params.url, ".html", ".en.html")
+            local enUrl = string.gsub(params.url, '.html', '.en.html')
     
             if ParaIO.DoesFileExist(enUrl, true) then
                 params.url = enUrl
@@ -109,7 +110,7 @@ function Utils.ShowWindow(option, height, url, name, x, y, align, allowDrag, zor
         end
     end
 
-    System.App.Commands.Call("File.MCMLWindowFrame", params)
+    System.App.Commands.Call('File.MCMLWindowFrame', params)
 
     if not params or not params._page then
         return params
@@ -124,34 +125,48 @@ function Utils.ShowWindow(option, height, url, name, x, y, align, allowDrag, zor
     return params
 end
 
+function Utils.GetProjectId(url)
+    if (tonumber(url or '') or 99999) < 99999 then
+        return url
+    end
+
+    local pid = string.match(url or '', '^p(%d+)$')
+
+    if not pid then
+        pid = string.match(url or '', '/pbl/project/(%d+)')
+    end
+
+    return pid or false
+end
+
 function Utils.FormatFileSize(size, unit)
     local s
     size = tonumber(size)
 
     function GetPreciseDecimal(nNum, n)
-        if type(nNum) ~= "number" then
+        if type(nNum) ~= 'number' then
             return nNum
         end
 
         n = n or 0
         n = math.floor(n)
-        local fmt = "%." .. n .. "f"
+        local fmt = '%.' .. n .. 'f'
         local nRet = tonumber(string.format(fmt, nNum))
 
         return nRet
     end
 
-    if (size and size ~= "") then
+    if (size and size ~= '') then
         if (not unit) then
-            s = GetPreciseDecimal(size / 1024 / 1024, 2) .. "M"
-        elseif (unit == "KB") then
-            s = GetPreciseDecimal(size / 1024, 2) .. "KB"
+            s = GetPreciseDecimal(size / 1024 / 1024, 2) .. 'M'
+        elseif (unit == 'KB') then
+            s = GetPreciseDecimal(size / 1024, 2) .. 'KB'
         end
     else
         s = nil
     end
 
-    return s or "0"
+    return s or '0'
 end
 
 function Utils.SetTimeOut(callback, times)
@@ -159,17 +174,17 @@ function Utils.SetTimeOut(callback, times)
 end
 
 function Utils.FixCenter(width, height)
-    local Screen = commonlib.gettable("System.Windows.Screen")
+    local Screen = commonlib.gettable('System.Windows.Screen')
 
     local marginLeft = math.floor((Screen:GetWidth() / 2))
     local marginTop = math.floor((Screen:GetHeight() / 2))
 
-    return format("margin-left:%s;margin-top: %s", marginLeft - width / 2, marginTop - height / 2)
+    return format('margin-left:%s;margin-top: %s', marginLeft - width / 2, marginTop - height / 2)
 end
 
 function Utils.GetFileData(url)
-    local file = ParaIO.open(url, "r")
-    local fileContent = ""
+    local file = ParaIO.open(url, 'r')
+    local fileContent = ''
 
     if (file:IsValid()) then
         fileContent = file:GetText(0, -1)
@@ -180,7 +195,7 @@ function Utils.GetFileData(url)
 end
 
 function Utils:IsEquivalent(a, b)
-    if type(a) ~= "table" or type(b) ~= "table" then
+    if type(a) ~= 'table' or type(b) ~= 'table' then
         return false
     end
 
@@ -193,7 +208,7 @@ function Utils:IsEquivalent(a, b)
             return false
         end
 
-        if type(value) == "table" then
+        if type(value) == 'table' then
             if not self:IsEquivalent(value, b[key]) then
                 return false
             end
@@ -208,7 +223,7 @@ function Utils:IsEquivalent(a, b)
 end
 
 function Utils.MergeTable(target, source)
-    if type(target) ~= "table" or type(source) ~= "table" then
+    if type(target) ~= 'table' or type(source) ~= 'table' then
         return false
     end
 
@@ -223,16 +238,16 @@ function Utils.MergeTable(target, source)
 end
 
 function Utils.Implode(glue, pieces)
-    glue = glue or ""
+    glue = glue or ''
 
     local k, v
-    local result = ""
+    local result = ''
 
     for k, v in ipairs(pieces) do
         if (k == 1) then
             result = tostring(v)
         else
-            result = string.format("%s%s%s", result, glue, tostring(v))
+            result = string.format('%s%s%s', result, glue, tostring(v))
         end
     end
 
@@ -241,20 +256,20 @@ end
 
 function Utils.UrlEncode(str)
     if (str) then
-		str = string.gsub(str, "\n", "\r\n")
-		str = string.gsub(str, "([^%w _ %- . ~])",
-			function (c) return string.format ("%%%02X", string.byte(c)) end)
-		str = string.gsub(str, " ", "+")
+		str = string.gsub(str, '\n', '\r\n')
+		str = string.gsub(str, '([^%w _ %- . ~])',
+			function (c) return string.format ('%%%02X', string.byte(c)) end)
+		str = string.gsub(str, ' ', '+')
 	end
 	return str
 end
 
 function Utils.EncodeURIComponent(str)
     if (str) then
-		str = string.gsub(str, "\n", "\r\n")
-		str = string.gsub(str, "([^%w _ %- . ~])",
-			function (c) return string.format ("%%%02X", string.byte(c)) end)
-		str = string.gsub(str, " ", "%%20")
+		str = string.gsub(str, '\n', '\r\n')
+		str = string.gsub(str, '([^%w _ %- . ~])',
+			function (c) return string.format ('%%%02X', string.byte(c)) end)
+		str = string.gsub(str, ' ', '%%20')
 	end
 	return str
 end
@@ -272,18 +287,18 @@ function Utils.GetWorldFolderFullPath()
 end
 
 function Utils.GetRootFolderFullPath()
-    if System.os.GetExternalStoragePath() ~= "" then
-        return System.os.GetExternalStoragePath() .. "paracraft/"
+    if System.os.GetExternalStoragePath() ~= '' then
+        return System.os.GetExternalStoragePath() .. 'paracraft/'
     else
         return ParaIO.GetWritablePath()
     end
 end
 
 function Utils.GetTempFolderFullPath()
-    if System.os.GetExternalStoragePath() ~= "" then
-        return System.os.GetExternalStoragePath() .. "paracraft/temp/"
+    if System.os.GetExternalStoragePath() ~= '' then
+        return System.os.GetExternalStoragePath() .. 'paracraft/temp/'
     else
-        return ParaIO.GetWritablePath() .. "temp/"
+        return ParaIO.GetWritablePath() .. 'temp/'
     end
 end
 
@@ -294,15 +309,15 @@ end
 function Utils:GetFolderName()
     local originWorldPath = ParaWorld.GetWorldDirectory()
 
-    originWorldPath = string.gsub(originWorldPath, "\\", "/")
+    originWorldPath = string.gsub(originWorldPath, '\\', '/')
 
-    if string.sub(originWorldPath, -1, -1) == "/" then
+    if string.sub(originWorldPath, -1, -1) == '/' then
         originWorldPath = string.sub(originWorldPath, 0, -2)
     end
 
     local pathArray = {}
 
-    for item in string.gmatch(originWorldPath, "[^/]+") do
+    for item in string.gmatch(originWorldPath, '[^/]+') do
         pathArray[#pathArray + 1] = item
     end
 
@@ -317,7 +332,7 @@ end
 
 function Utils:GetCurrentTime(isUTC)
     if isUTC then
-        return os.time(os.date("!*t"))
+        return os.time(os.date('!*t'))
     else
         return os.time()
     end
@@ -335,16 +350,16 @@ function Utils:UnifiedTimestampFormat(data)
     local hours = 0
     local minutes = 0
 
-    if string.find(data, "T") then
-        local date = string.match(data or "", "^%d+-%d+-%d+")
-        local time = string.match(data or "", "%d+:%d+")
+    if string.find(data, 'T') then
+        local date = string.match(data or '', '^%d+-%d+-%d+')
+        local time = string.match(data or '', '%d+:%d+')
 
-        years = string.match(date or "", "^(%d+)-")
-        months = string.match(date or "", "-(%d+)-")
-        days = string.match(date or "", "-(%d+)$")
+        years = string.match(date or '', '^(%d+)-')
+        months = string.match(date or '', '-(%d+)-')
+        days = string.match(date or '', '-(%d+)$')
 
-        hours = string.match(time or "", "^(%d+):")
-        minutes = string.match(time or "", ":(%d+)")
+        hours = string.match(time or '', '^(%d+):')
+        minutes = string.match(time or '', ':(%d+)')
 
         local timestamp = os.time{ year = years, month = months, day = days, hour = hours, min = minutes }
 
@@ -354,15 +369,15 @@ function Utils:UnifiedTimestampFormat(data)
             return 0
         end
     else
-        local date = string.match(data or "", "^%d+-%d+-%d+")
-        local time = string.match(data or "", "%d+-%d+$")
+        local date = string.match(data or '', '^%d+-%d+-%d+')
+        local time = string.match(data or '', '%d+-%d+$')
 
-        years = string.match(date or "", "^(%d+)-")
-        months = string.match(date or "", "-(%d+)-")
-        days = string.match(date or "", "-(%d+)$")
+        years = string.match(date or '', '^(%d+)-')
+        months = string.match(date or '', '-(%d+)-')
+        days = string.match(date or '', '-(%d+)$')
 
-        hours = string.match(time or "", "^(%d+)-")
-        minutes = string.match(time or "", "-(%d+)$")
+        hours = string.match(time or '', '^(%d+)-')
+        minutes = string.match(time or '', '-(%d+)$')
 
         local timestamp = os.time{ year = years, month = months, day = days, hour = hours, min = minutes }
 
@@ -372,13 +387,13 @@ end
 
 -- 0000-00-00 00:00:00 --> 000000000
 function Utils:DatetimeToTimestamp(str)
-    local years = string.match(str or "", "^(%d+)-")
-    local months = string.match(str or "", "-(%d+)-")
-    local days = string.match(str or "", "-(%d+) ")
+    local years = string.match(str or '', '^(%d+)-')
+    local months = string.match(str or '', '-(%d+)-')
+    local days = string.match(str or '', '-(%d+) ')
 
-    local hours = string.match(str or "", " (%d+):")
-    local minutes = string.match(str or "", ":(%d+):")
-    local seconds = string.match(str or "", ":(%d+)$")
+    local hours = string.match(str or '', ' (%d+):')
+    local minutes = string.match(str or '', ':(%d+):')
+    local seconds = string.match(str or '', ':(%d+)$')
 
     local timestamp = os.time{ year = years, month = months, day = days, hour = hours, min = minutes, sec = seconds }
 
@@ -387,14 +402,14 @@ end
 
 -- 000000000 --> 0000-00-00 00:00:00
 function Utils:TimestampToDatetime(timestamp)
-    return os.date("%Y-%m-%d %H:%M:%S", timestamp)
+    return os.date('%Y-%m-%d %H:%M:%S', timestamp)
 end
 
 -- get week number by timestamp
 function Utils.GetWeekNum(timestamp)
     timestamp = timestamp or 0
 
-    local weekNum = os.date("*t",timestamp).wday - 1
+    local weekNum = os.date('*t',timestamp).wday - 1
 
     if weekNum == 0 then
         weekNum = 7
@@ -422,9 +437,9 @@ function Utils.OpenKeepworkUrlByToken(url)
             url = keepworkUrl .. url
         end
 
-        local openUrl = format("%s/p?url=%s&token=%s", keepworkUrl, self.EncodeURIComponent(url), token)
+        local openUrl = format('%s/p?url=%s&token=%s', keepworkUrl, self.EncodeURIComponent(url), token)
     
-        ParaGlobal.ShellExecute('open', openUrl, "", "", 1)
+        ParaGlobal.ShellExecute('open', openUrl, '', '', 1)
     end)
 end
 
@@ -478,9 +493,9 @@ function Utils.WordsLimit(text, size, charCount)
 end
 
 function Utils.RemoveLineEnding(str)
-    str = string.gsub(str, " ", "")
-    str = string.gsub(str, "\r", "")
-    str = string.gsub(str, "\n", "")
+    str = string.gsub(str, ' ', '')
+    str = string.gsub(str, '\r', '')
+    str = string.gsub(str, '\n', '')
 
     return str
 end
@@ -530,47 +545,47 @@ function Utils:RecentDatetimeFormat(timestamp)
     ------------ min ------------
 
     if timeDiff > 0 and timeDiff < 30 then
-        return L"刚刚"
+        return L'刚刚'
     end
 
     if timeDiff >= 30 and timeDiff < 60 then
-        return L"1分钟前"
+        return L'1分钟前'
     end
 
     if timeDiff >= 60 and timeDiff < 120 then
-        return L"2分钟前"
+        return L'2分钟前'
     end
 
     if timeDiff >= 120 and timeDiff < 180 then
-        return L"3分钟前"
+        return L'3分钟前'
     end
 
     if timeDiff >= 180 and timeDiff < 240 then
-        return L"4分钟前"
+        return L'4分钟前'
     end
 
     if timeDiff >= 240 and timeDiff < 300 then
-        return L"5分钟前"
+        return L'5分钟前'
     end
 
     if timeDiff >= 300 and timeDiff < 360 then
-        return L"6分钟前"
+        return L'6分钟前'
     end
 
     if timeDiff >= 360 and timeDiff < 420 then
-        return L"7分钟前"
+        return L'7分钟前'
     end
 
     if timeDiff >= 420 and timeDiff < 480 then
-        return L"8分钟前"
+        return L'8分钟前'
     end
 
     if timeDiff >= 480 and timeDiff < 540 then
-        return L"9分钟前"
+        return L'9分钟前'
     end
 
     if timeDiff >= 540 and timeDiff < 600 then
-        return L"10分钟前"
+        return L'10分钟前'
     end
 
     ------------ hours ------------
@@ -578,7 +593,7 @@ function Utils:RecentDatetimeFormat(timestamp)
     if timeDiff >= 600 and timeDiff < 86400 then
         local h = math.ceil(timeDiff / 3600)
 
-        return format(L"%d小时前", h)
+        return format(L'%d小时前', h)
     end
 
     ------------ days ------------
@@ -586,7 +601,7 @@ function Utils:RecentDatetimeFormat(timestamp)
     if timeDiff > 36000 and timeDiff < 2592000 then
         local d = math.ceil(timeDiff / 86400)
 
-        return format(L"%d天前", d)
+        return format(L'%d天前', d)
     end
 
     ------------ months ------------
@@ -594,7 +609,7 @@ function Utils:RecentDatetimeFormat(timestamp)
     if timeDiff > 2592000 and timeDiff < 31104000 then
         local m = math.ceil(timeDiff / 2592000)
 
-        return format(L"%d个月前", m)
+        return format(L'%d个月前', m)
     end
 
     ------------ years ------------
@@ -602,10 +617,10 @@ function Utils:RecentDatetimeFormat(timestamp)
     if timeDiff > 31104000 and timeDiff < 622080000 then
         local y = math.ceil(timeDiff / 31104000)
 
-        return format(L"%d年前", y)
+        return format(L'%d年前', y)
     end
 
-    return os.date("%Y-%m-%d %H:%M", timestamp)
+    return os.date('%Y-%m-%d %H:%M', timestamp)
 end
 
 function Utils:GetConfig(field)
