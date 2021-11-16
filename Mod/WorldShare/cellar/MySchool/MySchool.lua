@@ -273,6 +273,10 @@ function MySchool:ShowJoinSchool(callback)
                             resultPage:GetNode('school_list'):SetUIAttribute('DataSource', self.result)
                         end)
                     end
+                    if not self.Inited then
+                        self.Inited = true
+                    end
+                    GameLogic.GetFilters():apply_filters("showSchoolResult");
                 end)
             end)
         end
@@ -568,9 +572,6 @@ function MySchool:GetAreas(id, callback)
 end
 
 function MySchool:GetSearchSchoolResult(id, kind, callback)
-    if id == 0 or id == nil then
-        return
-    end
     KeepworkServiceSchoolAndOrg:SearchSchool(id, kind, function(data)
         self:SetResult(data)
 

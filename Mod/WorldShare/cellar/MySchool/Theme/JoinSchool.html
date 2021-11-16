@@ -96,10 +96,17 @@
                                 return
                             end]]--
 
-                            MySchool:GetSearchSchoolResult(MySchool.curId, MySchool.kind, function(data)
-                                result_page.set_cur_index(1)
-                                result_page:GetNode('school_list'):SetUIAttribute('DataSource', MySchool.result)
-                            end)
+                           local filterFunc = function()
+                                MySchool:GetSearchSchoolResult(MySchool.curId, MySchool.kind, function(data)
+                                    result_page.set_cur_index(1)
+                                    result_page:GetNode('school_list'):SetUIAttribute('DataSource', MySchool.result)
+                                end)
+                           end 
+                           if not MySchool.Inited then
+                                GameLogic.GetFilters():add_filter("showSchoolResult", filterFunc);
+                            else
+                                filterFunc()
+                            end
                         end
                     end
 
