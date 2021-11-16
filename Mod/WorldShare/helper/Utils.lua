@@ -126,7 +126,7 @@ function Utils.ShowWindow(option, height, url, name, x, y, align, allowDrag, zor
 end
 
 function Utils.GetProjectId(url)
-    if (tonumber(url or '') or 99999) < 99999 then
+    if (tonumber(url or '') or 9999999) < 9999999 then
         return url
     end
 
