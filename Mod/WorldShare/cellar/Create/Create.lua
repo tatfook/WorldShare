@@ -22,6 +22,7 @@ local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
 local DeleteWorld = NPL.load('(gl)Mod/WorldShare/cellar/DeleteWorld/DeleteWorld.lua')
 local CommonLoadWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/CommonLoadWorld.lua')
 local CreateWorld = NPL.load('(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua')
+local Opus = NPL.load('(gl)Mod/WorldShare/cellar/Opus/Opus.lua')
 
 -- service
 local Compare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
@@ -37,17 +38,7 @@ local Create = NPL.export()
 Create.currentMenuSelectIndex = 1
 
 function Create:Show()
-    local CreatePage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Create')
-
-    if CreatePage then
-        self:Close()
-    end
-
-    Create.currentMenuSelectIndex = 1
-
-    Mod.WorldShare.Utils.ShowWindow(920, 530, '(ws)Create/Create.html', 'Mod.WorldShare.Create')
-
-    self:GetWorldList(self.statusFilter)
+    Opus:Show()
 end
 
 function Create:ShowCreateEmbed(width, height, x, y)

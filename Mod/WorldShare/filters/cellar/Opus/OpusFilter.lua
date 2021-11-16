@@ -12,7 +12,7 @@ OpusFilter:Init()
 ]]
 
 -- bottles
-local Opus = NPL.load("(gl)Mod/WorldShare/cellar/Opus/Opus.lua")
+local Opus = NPL.load('(gl)Mod/WorldShare/cellar/Opus/Opus.lua')
 
 local OpusFilter = NPL.export()
 
