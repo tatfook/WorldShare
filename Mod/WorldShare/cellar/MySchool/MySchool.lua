@@ -162,7 +162,7 @@ function MySchool:ShowJoinSchool(callback)
     self.kind = nil
     self.joinSchoolCallback = callback
 
-    self.SetDefaul = true
+    self.SetDefault = true
     local params = Mod.WorldShare.Utils.ShowWindow(
         {
             url = '(ws)MySchool/Theme/JoinSchool.html',

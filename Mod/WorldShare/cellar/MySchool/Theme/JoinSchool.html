@@ -4,7 +4,7 @@
             <script type="text/npl" refresh="false">
                 <![CDATA[
                     -- bottles
-                    local MySchool = NPL.load('./MySchool.lua')
+                    local MySchool = NPL.load('(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua')
                     local CommonLoadWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/CommonLoadWorld.lua')
 
                     -- service
@@ -494,9 +494,9 @@
                     Mod.WorldShare.Utils.SetTimeOut(function()
                         result_page = Mod.WorldShare.Store:Get('page/Mod.WorldShare.JoinSchool.Result')
 
-                        if MySchool.SetDefaul then
+                        if MySchool.SetDefault then
                             sel_kind("primary_school")
-                            MySchool.SetDefaul = false
+                            MySchool.SetDefault = false
                         end
                     end, 0)
                     
