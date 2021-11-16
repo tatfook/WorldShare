@@ -477,6 +477,7 @@
                                 page:CloseWindow()
                                 KeepworkServiceSession:CheckVerify()
                                 GameLogic.AddBBS(nil, L"加入学校成功", 3000, "0 255 0")
+                                GameLogic.GetFilters():apply_filters("join_school")
                             else
                                 GameLogic.AddBBS(nil, L"加入学校失败", 3000, "255 0 0")
                             end
