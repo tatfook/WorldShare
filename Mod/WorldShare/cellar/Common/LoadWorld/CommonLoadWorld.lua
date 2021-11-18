@@ -324,9 +324,20 @@ function CommonLoadWorld:TimesFilter(timeRules)
     return false, failedReasonList[1]
 end
 
-function CommonLoadWorld:StartOldVersion()
-    local worldInfo = self.worldInfo
-    self.HideStartOldVersionButton()
+function CommonLoadWorld.StartOldVersion(index)
+    local self = CommonLoadWorld
+
+    if not self.downloadWorldInstances[index] then
+        return
+    end
+
+    local downloadWorldInstance = self.downloadWorldInstances[index]
+
+    downloadWorldInstance.breakDownload = true
+
+    local worldInfo = downloadWorldInstance.worldInfo
+    downloadWorldInstance.ShowOrHideStartOldVersionButton(false)
+    DownloadWorld.Close()
 
     if not worldInfo or
        not worldInfo.extra or
@@ -467,102 +478,106 @@ function CommonLoadWorld:StartOldVersion()
     HandleDownload(qiniuZipArchiveUrl)
 end
 
-function CommonLoadWorld.UpdateStartOldVersionButtonPosition()
-    if not CommonLoadWorld.startOldVersionButtonNode then
-        return
+function CommonLoadWorld:InjectShowCustomDownloadWorldFilter(worldInfo, downloadWorldInstance)
+    if not self.downloadWorldInstancesCount then
+        self.downloadWorldInstancesCount = 0
     end
 
-    local barNode = ParaUI.GetUIObject('apps.aries.creator.game.login.swf_loading_bar.bar')
-    local x, y = barNode:GetAbsPosition()
+    if not self.downloadWorldInstances then
+        self.downloadWorldInstances = {}
+    end
 
-    CommonLoadWorld.startOldVersionButtonNode.x = x + 800
-    CommonLoadWorld.startOldVersionButtonNode.y = y
-end
+    self.downloadWorldInstancesCount = self.downloadWorldInstancesCount + 1
+    self.downloadWorldInstances[self.downloadWorldInstancesCount] = downloadWorldInstance
 
-function CommonLoadWorld:ToggleStartOldVersionButton(isShow)
-    if isShow == true then
-        if self.startOldVersionButtonNode then
-            self.startOldVersionButtonNode = nil
-            ParaUI.Destroy('start_old_version_button')
+    downloadWorldInstance.worldInfo = worldInfo
+
+    downloadWorldInstance.ToggleStartOldVersionButton = function(isShow)
+        if isShow == true then
+            if downloadWorldInstance.startOldVersionButtonNode then
+                downloadWorldInstance.startOldVersionButtonNode = nil
+                ParaUI.Destroy('start_old_version_button')
+            end
+    
+            local rootNode = ParaUI.GetUIObject('root')
+            downloadWorldInstance.startOldVersionButtonNode = ParaUI.CreateUIObject(
+                                                                  'button',
+                                                                  'start_old_version_button',
+                                                                  '_ct',
+                                                                  -45,
+                                                                  110,
+                                                                  90,
+                                                                  35
+                                                              )
+
+            downloadWorldInstance.startOldVersionButtonNode.enabled = false
+            downloadWorldInstance.startOldVersionButtonNode.background = 'Texture/Aries/Creator/keepwork/worldshare_32bits.png#624 198 38 64:12 10 12 15'
+            downloadWorldInstance.startOldVersionButtonNode.zorder = 1002
+            _guihelper.SetFontColor(self.startOldVersionButtonNode, '#000000')
+            downloadWorldInstance.startOldVersionButtonNode:SetField('TextOffsetY', -2)
+            downloadWorldInstance.startOldVersionButtonNode.text = L'启动旧版'
+            downloadWorldInstance.startOldVersionButtonNode:SetCurrentState('highlight')
+            downloadWorldInstance.startOldVersionButtonNode.color = '255 255 255'
+            downloadWorldInstance.startOldVersionButtonNode:SetCurrentState('pressed')
+            downloadWorldInstance.startOldVersionButtonNode.color = '160 160 160'
+            downloadWorldInstance.startOldVersionButtonNode.onclick = format(
+                ';NPL.load("(gl)Mod/WorldShare/cellar/Common/LoadWorld/CommonLoadWorld.lua").StartOldVersion(%d)',
+                self.downloadWorldInstancesCount
+            )
+
+            local count = 10
+            downloadWorldInstance.startCountdownTimer = commonlib.Timer:new(
+                {
+                    callbackFunc = function()
+                        if count > 0 then
+                            downloadWorldInstance.startOldVersionButtonNode.text = format(L'启动旧版(%d)', count)
+                            count = count - 1
+                        else
+                            downloadWorldInstance.startOldVersionButtonNode.text = L'启动旧版'
+                            downloadWorldInstance.startOldVersionButtonNode.enabled = true
+                            downloadWorldInstance.startCountdownTimer:Change(nil, nil)
+                        end
+                    end
+                }
+            )
+
+            downloadWorldInstance.startCountdownTimer:Change(0, 1000)
+
+            rootNode:AddChild(downloadWorldInstance.startOldVersionButtonNode)
+        elseif isShow == false then
+            if downloadWorldInstance.startOldVersionButtonNode then
+                downloadWorldInstance.startCountdownTimer:Change(nil, nil)
+                downloadWorldInstance.startOldVersionButtonNode = nil
+                ParaUI.Destroy('start_old_version_button')
+                return
+            end
         end
+    end
 
-        local barNode = ParaUI.GetUIObject('apps.aries.creator.game.login.swf_loading_bar.bar')
-        local rootNode = ParaUI.GetUIObject('root')
-        self.startOldVersionButtonNode = ParaUI.CreateUIObject(
-                                            'button',
-                                            'start_old_version_button',
-                                            '_lt',
-                                            0,
-                                            0,
-                                            90,
-                                            35
-                                        )
+    downloadWorldInstance.ShowOrHideStartOldVersionButton = function(result)
+        if result == 'show' then
+            downloadWorldInstance.ToggleStartOldVersionButton(true)
 
-        local x, y = barNode:GetAbsPosition()
+            return 'show'
+        elseif result == 'close' then
+            downloadWorldInstance.ToggleStartOldVersionButton(false)
 
-        self.startOldVersionButtonNode.x = x + 800
-        self.startOldVersionButtonNode.y = y
-        self.startOldVersionButtonNode.background = 'Texture/Aries/Creator/keepwork/worldshare_32bits.png#624 198 38 64:12 10 12 15'
-        self.startOldVersionButtonNode.zorder = 1002
-        _guihelper.SetFontColor(self.startOldVersionButtonNode, '#000000')
-        self.startOldVersionButtonNode:SetField('TextOffsetY', -2)
-        self.startOldVersionButtonNode.text = L'启动旧版'
-        self.startOldVersionButtonNode:SetCurrentState('highlight')
-        self.startOldVersionButtonNode.color = '255 255 255'
-        self.startOldVersionButtonNode:SetCurrentState('pressed')
-        self.startOldVersionButtonNode.color = '160 160 160'
-        self.startOldVersionButtonNode.onclick = [[;NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/CommonLoadWorld.lua'):StartOldVersion()]]
+            GameLogic.GetFilters():remove_filter(
+                'show_custom_download_world',
+                downloadWorldInstance.ShowOrHideStartOldVersionButton
+            )
 
-        rootNode:AddChild(self.startOldVersionButtonNode)
-    elseif isShow == false then
-        if self.startOldVersionButtonNode then
-            self.startOldVersionButtonNode = nil
-            ParaUI.Destroy('start_old_version_button')
-            return
+            downloadWorldInstance.worldInfo = nil
+            downloadWorldInstance.ShowOrHideStartOldVersionButton = nil
+
+            return 'close'
         end
-    end
-end
-
-function CommonLoadWorld:Start(file, worldInfo)
-    self.worldInfo = worldInfo
-
-    self.ShowStartOldVersionButton = function()
-        self:ToggleStartOldVersionButton(true)
-
-        Screen:Connect('sizeChanged', CommonLoadWorld, CommonLoadWorld.UpdateStartOldVersionButtonPosition, 'UniqueConnection')
-    end
-
-    self.HideStartOldVersionButton = function()
-        self:ToggleStartOldVersionButton(false)
-
-        GameLogic.GetFilters():remove_filter(
-            'apply:apps.aries.creator.game.login.swf_loading_bar.show_for_light_calculation',
-            self.ShowStartOldVersionButton
-        )
-
-        GameLogic.GetFilters():remove_filter(
-            'apply:apps.aries.creator.game.login.swf_loading_bar.close_page',
-            self.HideStartOldVersionButton
-        )
-
-        self.worldInfo = nil
-        self.ShowStartOldVersionButton = nil
-        self.HideStartOldVersionButton = nil
-
-        Screen:Connect('Disconnect', CommonLoadWorld, CommonLoadWorld.UpdateStartOldVersionButtonPosition, 'UniqueConnection')
     end
 
     GameLogic.GetFilters():add_filter(
-        'apply:apps.aries.creator.game.login.swf_loading_bar.show_for_light_calculation',
-        self.ShowStartOldVersionButton
+        'show_custom_download_world',
+        downloadWorldInstance.ShowOrHideStartOldVersionButton
     )
-
-    GameLogic.GetFilters():add_filter(
-        'apply:apps.aries.creator.game.login.swf_loading_bar.close_page',
-        self.HideStartOldVersionButton
-    )
-
-    Game.Start(file)
 end
 
 -- @param refreshMode: nil|'auto'|'check'|'never'|'force'.  
@@ -677,7 +692,7 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                 end
 
                 if encryptWorldFileExist and refreshMode ~= 'force' then
-                    self:Start(encryptWorldFile, worldInfo)
+                    Game.Start(encryptWorldFile)
                     return
                 end
 
@@ -692,8 +707,6 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                     end
 
                     local function DownloadEncrytWorld(url)
-                        DownloadWorld.ShowPage(url)
-
                         local world = nil
                         local downloadNewLocalWorldFile = nil
                         local downloadNewEncryptWorldFile = nil
@@ -714,7 +727,14 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                             world:SetHttpHeaders({Authorization = format('Bearer %s', token)})
                         end
 
+                        self:InjectShowCustomDownloadWorldFilter(worldInfo, world)
+                        DownloadWorld.ShowPage(url)
+
                         world:DownloadRemoteFile(function(bSucceed, msg)
+                            if world.breakDownload then
+                                return
+                            end
+
                             DownloadWorld.Close()
 
                             if bSucceed then
@@ -757,7 +777,7 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                                     worldInfo.encryptWorldMode = self.encryptWorldMode
                                     CacheProjectId:SetProjectIdInfo(pid, worldInfo)
 
-                                    self:Start(downloadNewEncryptWorldFile, worldInfo)
+                                    Game.Start(downloadNewEncryptWorldFile)
                                 end
                             else
                                 Mod.WorldShare.MsgBox:Wait()
@@ -790,7 +810,7 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                 end
     
                 if worldFileExist and refreshMode ~= 'force' then
-                    self:Start(localWorldFile, worldInfo)
+                    Game.Start(localWorldFile)
                     return
                 end
 
@@ -801,8 +821,6 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                     end
 
                     local function DownloadLocalWorld(url)
-                        DownloadWorld.ShowPage(url)
-
                         local world = nil
                         local downloadNewLocalWorldFile = nil
 
@@ -814,7 +832,18 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                             downloadNewLocalWorldFile = newCdnArchiveWorldFile
                         end
 
+                        if token then
+                            world:SetHttpHeaders({Authorization = format('Bearer %s', token)})
+                        end
+
+                        self:InjectShowCustomDownloadWorldFilter(worldInfo, world)
+                        DownloadWorld.ShowPage(url)
+
                         world:DownloadRemoteFile(function(bSucceed, msg)
+                            if world.breakDownload then
+                                return
+                            end
+                            
                             DownloadWorld.Close()
 
                             if bSucceed then
@@ -850,7 +879,7 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                                 worldInfo.encryptWorldMode = self.encryptWorldMode
                                 CacheProjectId:SetProjectIdInfo(pid, worldInfo)
 
-                                self:Start(downloadNewLocalWorldFile, worldInfo)
+                                Game.Start(downloadNewLocalWorldFile)
                             else
                                 Mod.WorldShare.MsgBox:Wait()
 
