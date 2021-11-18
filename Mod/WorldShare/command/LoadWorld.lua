@@ -258,7 +258,11 @@ function LoadWorldCommand:Init()
             end
 
             if options and options.personal then
-                CommandManager:RunCommand('/loadpersonalworld ' .. cmdText)
+                if options.nosync then
+                    CommandManager:RunCommand('/loadpersonalworld -nosync ' .. cmdText)
+                else
+                    CommandManager:RunCommand('/loadpersonalworld ' .. cmdText)
+                end
                 return false
             end
 
