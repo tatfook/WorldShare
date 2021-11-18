@@ -89,8 +89,19 @@
                         <pe:if condition='<%= System.options.isDevEnv == false %>'>
                             <pe:if  condition='<%= System.os.GetPlatform() ~= "ios" and System.os.GetPlatform() ~= "android" %>'>
                                 <input type="button"
-                                    style="width: 110px;height: 32px;margin-left: 5px; background: url(Texture/Aries/Creator/paracraft/login/2_32bits.png#0 0 110 32)"
-                                onclick="OnOpenModulePage" />
+                                    value='<%=L"插件"%>'
+                                    icon="Texture/Aries/Creator/paracraft/login/plug_16x16_32bits.png#0 0 16 16"
+                                    icon_width=16
+                                    icon_height=16
+                                    icon_off_y=0
+                                    icon_off_x=-48
+                                    style="width: 110px;height: 32px;margin-left: 5px; 
+                                        color: #ffffff;
+                                        text-offset-x: -20;
+                                        text-offset-y: 1;
+                                        font-size: 13px;
+                                        background: url()"
+                                    onclick="OnOpenModulePage" />
                                 <div style='width: 110px; 
                                             height: 1px;
                                             background-color: #9b9b9b;
@@ -100,7 +111,18 @@
                         </pe:if>
 
                         <input type="button"
-                               style="width: 110px;height: 32px;margin-left: 5px; background: url(Texture/Aries/Creator/paracraft/login/3_32bits.png#0 0 110 32)"
+                        value='<%=L"教师服务器"%>'
+                                icon="Texture/Aries/Creator/paracraft/login/server_16x16_32bits.png#0 0 16 16"
+                                icon_width=16
+                                icon_height=16
+                                icon_off_y=0
+                                icon_off_x=-48
+                                style="width: 110px;height: 32px;margin-left: 5px; 
+                                    color: #ffffff;
+                                    text-offset-x: 3;
+                                    text-offset-y: 1;
+                                    font-size: 13px;
+                                    background: url()"
                                onclick="OnOpenLocalServer" /> 
                     </div>
                 </pe:container>

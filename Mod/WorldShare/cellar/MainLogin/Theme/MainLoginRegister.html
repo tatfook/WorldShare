@@ -66,6 +66,8 @@
                     -- don't remove, beacause set account mode button realtime
                     Mod.WorldShare.Utils.SetTimeOut(function()
                         set_account_mode()
+
+                        page:FindControl('account_register_button'):SetDefault(true)
                     end, 0)
 
                     function set_finish()
@@ -602,6 +604,8 @@
                     function on_click_exit()
                         MainLogin:Exit()
                     end
+
+
                 ]]>
             </script>
             <style type="text/mcss" src='Mod/WorldShare/cellar/Theme/Mcss/MainLoginMcss.mcss'>
