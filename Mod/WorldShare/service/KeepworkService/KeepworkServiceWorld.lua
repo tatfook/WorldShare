@@ -577,6 +577,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                 members = {},
                 name = name,
                 level = DItem.level and DItem.level or 0,
+                isSystemGroup = DItem.isSystemGroup or false,
             })
 
             currentWorldList:push_back(currentWorld)
@@ -709,5 +710,6 @@ function KeepworkServiceWorld:GenerateWorldInstance(params)
         members = params.members or {},
         parentProjectId = params.parentProjectId or 0,
         level = params.level or 0, -- Is the world readable. 1. read only, 2. read and write
+        isSystemGroup = params.isSystemGroup or false, -- Is the world in system group.
     }
 end

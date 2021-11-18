@@ -79,7 +79,7 @@ function DeleteWorld:DeleteWorld(callback)
     self:ShowPage()
 end
 
-function DeleteWorld:DeleteLocal(callback)
+function DeleteWorld:DeleteLocal(callback, isSlient)
     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
     if not currentWorld then
@@ -130,15 +130,19 @@ function DeleteWorld:DeleteLocal(callback)
     end
 
     if currentWorld.status ~= 2 then
-        _guihelper.MessageBox(
-            format(L'确定删除本地世界:%s?', currentWorld.text or ''),
-            function(res)
-                if res and res == _guihelper.DialogResult.Yes then
-                    Delete()
-                end
-            end,
-            _guihelper.MessageBoxButtons.YesNo
-        )
+        if isSlient then
+            Delete()
+        else
+            _guihelper.MessageBox(
+                format(L'确定删除本地世界:%s?', currentWorld.text or ''),
+                function(res)
+                    if res and res == _guihelper.DialogResult.Yes then
+                        Delete()
+                    end
+                end,
+                _guihelper.MessageBoxButtons.YesNo
+            )
+        end
     end
 end
 

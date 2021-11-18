@@ -24,6 +24,9 @@ local CommonLoadWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/Com
 local CreateWorld = NPL.load('(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua')
 local Opus = NPL.load('(gl)Mod/WorldShare/cellar/Opus/Opus.lua')
 
+-- components
+local ParacraftEditWorldComponent = NPL.load('(gl)Mod/WorldShare/cellar/Create/Components/ParacraftEditWorld/ParacraftEditWorldComponent.lua')
+
 -- service
 local Compare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
 local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
@@ -47,6 +50,8 @@ function Create:ShowCreateEmbed(width, height, x, y)
     if CreateEmbedPage then
         CreateEmbedPage:CloseWindow()
     end
+
+    self:RegisterComponents()
 
     Create.currentMenuSelectIndex = 1
 
@@ -76,6 +81,14 @@ function Create:ShowCreateEmbed(width, height, x, y)
     self:GetWorldList(self.statusFilter)
 end
 
+function Create:RegisterComponents()
+    Map3DSystem.mcml_controls.RegisterUserControl('pe:paracraft_edit_world', ParacraftEditWorldComponent)
+end
+
+function Create:UnRegisterComponents()
+    Map3DSystem.mcml_controls.UnRegisterUserControl('pe:paracraft_edit_world')
+end
+
 function Create:Close()
     self.statusFilter = nil
 
@@ -84,6 +97,8 @@ function Create:Close()
     if not CreatePage then
         return
     end
+
+    self:UnRegisterComponents()
 
     CreatePage:CloseWindow()
 end 
@@ -168,7 +183,7 @@ function Create:Sync()
 
     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
-    Mod.WorldShare.MsgBox:Show(L'请稍候...')
+    Mod.WorldShare.MsgBox:Wait()
 
     Compare:Init(currentWorld.worldpath, function(result)
         Mod.WorldShare.MsgBox:Close()

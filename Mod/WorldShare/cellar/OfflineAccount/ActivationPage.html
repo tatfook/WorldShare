@@ -133,9 +133,8 @@
                         KeepworkServiceProject:GetProject(
                             pid,
                             function(data, err)
-                                echo(data, true)
                                 if not data or
-                                type(data) ~= 'table' or
+                                   type(data) ~= 'table' or
                                 not data.name or
                                 not data.username or
                                 not data.world or
