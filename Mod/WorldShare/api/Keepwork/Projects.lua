@@ -166,3 +166,24 @@ end
 function KeepworkProjectsApi:MySchools(xPerPage, xPage, success, error)
     KeepworkBaseApi:Get('/projects/mySchools', nil, nil, success, error)
 end
+
+-- url: /projects/:id/leave
+-- method: POST
+-- params:
+--[[
+    id int necessary project id
+]]
+-- return: object
+function KeepworkProjectsApi:Leave(pid, success, error)
+    if not pid or type(pid) ~= 'number' then
+        return
+    end
+
+    KeepworkBaseApi:Post(
+        format('/projects/%d/leave', pid),
+        nil,
+        nil,
+        success,
+        error
+    )
+end

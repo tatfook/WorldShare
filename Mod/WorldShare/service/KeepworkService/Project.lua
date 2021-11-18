@@ -248,3 +248,8 @@ function KeepworkServiceProject:IsProjectReadOnly(pid, callback)
         end
     end)
 end
+
+-- level multi-project
+function KeepworkServiceProject:LeaveMultiProject(pid, callback)
+    KeepworkProjectsApi:Leave(pid, callback, callback)
+end

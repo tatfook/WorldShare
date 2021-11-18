@@ -772,15 +772,19 @@
                         end
 
                         _guihelper.MessageBox(
-                            format(L'确定要退出《%s》项目？(注意：退出后本地数据也会删除！)', selectedWorld.foldername),
+                            format(L'确定要退出《%s》项目？<br />(注意：退出后本地数据也会删除！)', selectedWorld.text),
                             function(res)
                                 if res and res == _guihelper.DialogResult.Yes then
                                     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
-                                    if currentWorld.foldername == selectedWorld.foldername then
-                                        DeleteWorld:DeleteLocal(function()
-                                            Create:GetWorldList(Create.statusFilter)
-                                        end, true)
+                                    if currentWorld.kpProjectId == selectedWorld.kpProjectId then
+                                        KeepworkServiceProject:LeaveMultiProject(currentWorld.kpProjectId, function(data, err)
+                                            if err == 200 then
+                                                DeleteWorld:DeleteLocal(function()
+                                                    Create:GetWorldList(Create.statusFilter)
+                                                end, true)
+                                            end
+                                        end)
                                     end
                                 else
                                     page:Refresh(0)
