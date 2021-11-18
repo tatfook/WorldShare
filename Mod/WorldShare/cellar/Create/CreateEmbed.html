@@ -786,8 +786,6 @@
                                             end
                                         end)
                                     end
-                                else
-                                    page:Refresh(0)
                                 end
                             end,
                             _guihelper.MessageBoxButtons.YesNo
@@ -998,7 +996,7 @@
                                 ItemsPerLine='3'
                                 name='gw_world_ds'>
                                 <Columns>
-                                    <pe:paracraft_edit_world></pe:paracraft_edit_world>
+                                    <pe:paracraft_edit_world />
                                 </Columns>
                                 <EmptyDataTemplate>
                                     <div style='margin: 10px;
