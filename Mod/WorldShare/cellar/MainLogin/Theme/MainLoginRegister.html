@@ -191,11 +191,13 @@
                                 MainLogin.password = password
                                 MainLogin.agree = agree
         
-                                MainLogin:RegisterWithAccount(function()
+                                MainLogin.callback = function()
                                     page:SetValue('account_result', account)
                                     page:SetValue('password_result', password)
                                     set_finish()
-                                end)
+                                end
+        
+                                MainLogin:RegisterWithAccount()
                             end
                         end)
 
