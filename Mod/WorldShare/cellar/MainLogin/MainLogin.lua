@@ -1293,6 +1293,7 @@ function MainLogin:AutoRegister(account, password, login_cb, school_data)
                 MainLogin.account = account
                 MainLogin.password = password
     
+                self.callback = nil
                 MainLogin:RegisterWithAccount(function()
                     -- page:SetValue('account_result', account)
                     -- page:SetValue('password_result', password)
