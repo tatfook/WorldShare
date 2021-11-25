@@ -655,3 +655,19 @@ function Utils.ShortNumber(num)
         return 0    
     end
 end
+
+function Utils.FormatString(text, count)
+    local newC = ''
+
+    for cI = 1, #text do
+        local curC = string.sub(text, cI, cI)
+
+        if cI % count == 0 then
+            newC = newC .. curC .. '\n'
+        else
+            newC = newC .. curC
+        end
+    end
+
+    return newC
+end
