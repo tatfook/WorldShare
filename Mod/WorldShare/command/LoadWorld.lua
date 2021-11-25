@@ -40,7 +40,6 @@ function LoadWorldCommand:Init()
         'cmd_loadworld', 
         function(cmdText, options)
             -- a boolean value needs to be returned.
-
             if options and options.d then
                 self:Download(cmdText, options)
                 return false
@@ -234,7 +233,21 @@ function LoadWorldCommand:Init()
                 return cmdText
             end
 
-            if cmdText == 'back' then
+            if cmdText:match('back') then
+                local nosync = false
+
+                if options.nosync then
+                    nosync = true
+                else
+                    cmdText = cmdText:gsub('back', '')
+
+                    local option, cmdText = CmdParser.ParseOption(cmdText)
+
+                    if option == 'nosync' then
+                        nosync = true
+                    end
+                end
+
                 local lastWorld = Mod.WorldShare.Store:Get('world/lastWorld')
 
                 if not lastWorld then
@@ -246,9 +259,13 @@ function LoadWorldCommand:Init()
                     local userId = Mod.WorldShare.Store:Get('user/userId')
 
                     if tonumber(lastWorld.user.id) == tonumber(userId) then
-                        GameLogic.RunCommand(format('/loadworld -s -personal %d', lastWorld.kpProjectId))
+                        if nosync then
+                            GameLogic.RunCommand(format('/loadworld -s -nosync -personal %d', lastWorld.kpProjectId))
+                        else
+                            GameLogic.RunCommand(format('/loadworld -s -personal %d', lastWorld.kpProjectId))
+                        end
                     else
-                        GameLogic.RunCommand(format('/loadworld -s -force %d', lastWorld.kpProjectId))
+                        GameLogic.RunCommand(format('/loadworld -s -auto %d', lastWorld.kpProjectId))
                     end
                 else
                     WorldCommon.OpenWorld(lastWorld.worldpath)
