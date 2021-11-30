@@ -76,47 +76,34 @@
                         return Eval('index') == Create.worldIndex
                     end
 
-                    function get_world_status(status_number)
-                        if KeepworkServiceSession:IsSignedIn() then
-                            if Create:GetCurWorldInfo('level', Eval('index')) == 0 or
-                               Create:GetCurWorldInfo('level', Eval('index')) == 1 then
-                                if status_number == 6 then
-                                    return true
-                                else
-                                    return false
-                                end
-                            end
-
-                            if not Create:GetCurWorldInfo('is_zip', Eval('index')) then
-                                if Create:GetCurWorldInfo('status', Eval('index')) == status_number then
-                                    return true
-                                end
-                            end
-
-                            return false
+                    function has_world_status()
+                        if Create:GetCurWorldInfo('level', Eval('index')) then
+                            return true
                         else
                             return false
                         end
                     end
 
-                    function get_world_status_icon(index)
-                        if(index == 1) then
+                    function get_world_status_icon()
+                        local status = Create:GetCurWorldInfo('level', Eval('index'))
+
+                        if status == 1 then
                             return 'background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#72 104 16 16)';
                         end
 
-                        if(index == 2) then
+                        if status == 2 then
                             return 'background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#98 104 16 16)';
                         end
 
-                        if(index == 3) then
+                        if status == 3 then
                             return 'background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#20 104 16 16)';
                         end
 
-                        if(index == 4) then
+                        if status == 4 then
                             return 'background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#46 104 16 16)';
                         end
 
-                        if(index == 5) then
+                        if status == 5 then
                             return 'background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#124 104 16 16)';
                         end
                     end
@@ -157,6 +144,12 @@
 
                     function get_world_version()
                         return Create:GetCurWorldInfo('revision', Eval('index')) or 0
+                    end
+
+                    function get_world_version_width()
+                        local version = 'v' .. tostring(get_world_version())
+
+                        return 'width: ' .. _guihelper.GetTextWidth(version, 'System;12') .. 'px'
                     end
 
                     function get_world_size()
@@ -667,7 +660,7 @@
                     },
                     share_selected_item_bg = {
                         background = 'Texture/Aries/Creator/keepwork/worldshare_32bits.png;471 212 30 30:11 11 11 11',
-                        ['margin-left'] = 4,
+                        ['margin-left'] = 2.5,
                     },
                     share_unselect_item_bg = {
                         background = 'Texture/Aries/Creator/keepwork/worldshare_32bits.png;435 212 30 30:11 11 11 11',
@@ -680,16 +673,8 @@
                         ['font-size'] = 16,
                         ['base-font-size'] = 16,
                         ['margin-top'] = 3,
-                        ['margin-left'] = 5,
                         ['text-align'] = 'left',
                         color = '#000000',
-                    },
-                    share_world_info = {
-                        ['text-singleline'] = 'true',
-                        height = 18,
-                        ['font-size'] = 12,
-                        ['base-font-size'] = 12,
-                        color = '#9E9E9E',
                     },
                     share_button = {
                         width = 36,

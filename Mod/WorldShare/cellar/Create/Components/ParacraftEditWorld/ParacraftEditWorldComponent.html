@@ -30,10 +30,11 @@
                                 width: 28px;
                                 height: 31px;
                                 background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#310 53 28 31)'></div>
-            </pe:if>                    
+            </pe:if>
             <div width='93%'
                  align='center'
-                 style='margin-top: 10px;
+                 style='margin-left: -1px;
+                        margin-top: 10px;
                         background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#72 20 16 16:2 2 2 2)'>
                 <div width='100%'
                      style='height: 130px;
@@ -65,33 +66,17 @@
                     </div>
                 </div>
             </div>
-            <div>
-                <div style='width: 16px;
-                            height: 32px;
-                            margin-left: 11px;
-                            float: left;'>
-                    <pe:if condition='<%= get_world_status(1) %>'>
-                        <div class='status' style='<%= get_world_status_icon(1) %>' tooltip='<%= get_world_status_tips()%>' />
-                    </pe:if>
-                    <pe:if condition='<%= get_world_status(2) %>'>
-                        <div class='status' style='<%= get_world_status_icon(2) %>' tooltip='<%= get_world_status_tips()%>' />
-                    </pe:if>
-                    <pe:if condition='<%= get_world_status(3) %>'>
-                        <div class='status' style='<%= get_world_status_icon(3) %>' tooltip='<%= get_world_status_tips()%>' />
-                    </pe:if>
-                    <pe:if condition='<%= get_world_status(4) %>'>
-                        <div class='status' style='<%= get_world_status_icon(4) %>' tooltip='<%= get_world_status_tips()%>' />
-                    </pe:if>
-                    <pe:if condition='<%= get_world_status(5) %>'>
-                        <div class='status' style='<%= get_world_status_icon(5) %>' tooltip='<%= get_world_status_tips()%>' />
-                    </pe:if>
-                    <pe:if condition='<%= get_world_status(6) %>'>
-                        <div style='float: left;
-                                    width: 9px;
-                                    height: 32px;
-                                    background: #FFFFFF' />
-                    </pe:if>
-                </div>
+            <div style='margin-left: 13px'>
+                <pe:if condition='<%= has_world_status() %>'>
+                    <div style='width: 16px;
+                                height: 32px;
+                                margin-right: 5px;
+                                float: left;'>
+                        <div class='status'
+                             style='<%= get_world_status_icon() %>'
+                             tooltip='<%= get_world_status_tips()%>' />
+                    </div>
+                </pe:if>
                 <div class='share_world_name'>
                     <pe:if condition='<%= be_selected() %>'>
                         <pe:if condition='<%= is_modifying() %>'>
@@ -160,16 +145,21 @@
                 </div>
             </div>
             <div style='margin-left: 13px;'>
-                <div class='share_world_info'>
-                    <div style='float: left;'>
-                        <%= get_world_date() %>
-                    </div>
-                    <div style='float: left;
-                                font-size: 12px;
-                                base-font-size: 12px;
-                                margin-left: 150px;'>
-                        <%= 'v' .. get_world_version() %>
-                    </div>
+                <div align='right'
+                     style='<%= "position: relative;\
+                                 font-size: 12px;\
+                                 base-font-size: 12px;\
+                                 margin-right: 11px;\
+                                 color: #9E9E9E;" ..
+                                 get_world_version_width() %>'>
+                    <%= 'v' .. get_world_version() %>
+                </div>
+                <div style='text-singleline: true;
+                            height: 18px;
+                            font-size: 12px;
+                            base-font-size: 12px;
+                            color: #9E9E9E;'>
+                    <%= get_world_date() %>
                 </div>
                 <div style='font-size: 12px;
                             base-font-size: 12px;
