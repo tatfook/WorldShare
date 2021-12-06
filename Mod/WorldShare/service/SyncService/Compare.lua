@@ -601,28 +601,16 @@ end
 
 function Compare.SortWorldList(currentWorldList)
     if type(currentWorldList) == 'table' and #currentWorldList > 0 then
-        local tmp = 0
-
-        for i = 1, #currentWorldList - 1 do
-            for j = 1, #currentWorldList - i do
-                local curItemModifyTime = 0
-                local nextItemModifyTime = 0
-
-                if currentWorldList[j] and currentWorldList[j].modifyTime then
-                    curItemModifyTime = currentWorldList[j].modifyTime
-                end
-
-                if currentWorldList[j + 1] and currentWorldList[j + 1].modifyTime then
-                    nextItemModifyTime = currentWorldList[j + 1].modifyTime
-                end
-
-                if curItemModifyTime < nextItemModifyTime then
-                    tmp = currentWorldList[j]
-                    currentWorldList[j] = currentWorldList[j + 1]
-                    currentWorldList[j + 1] = tmp
-                end
+        table.sort(currentWorldList, function(a, b)
+            if not a or
+               not a.modifyTime or
+               not b or
+               not b.modifyTime then
+                return false
             end
-        end
+
+            return a.modifyTime > b.modifyTime
+        end)
     end
 end
 
