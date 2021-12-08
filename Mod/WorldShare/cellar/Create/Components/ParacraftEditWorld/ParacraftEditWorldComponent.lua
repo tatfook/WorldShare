@@ -36,7 +36,7 @@ function ParacraftEditWorldComponent.RenderCallback(mcmlNode, rootName, bindingC
     local xmlRoot
 
     if not self.xmlRoot then
-        self.xmlRoot = ParaXML.LuaXML_ParseFile('Mod/WorldShare/cellar/Create/components/ParacraftEditWorld/ParacraftEditWorldComponent.html')
+        self.xmlRoot = ParaXML.LuaXML_ParseFile('Mod/WorldShare/cellar/Create/Components/ParacraftEditWorld/ParacraftEditWorldComponent.html')
         xmlRoot = commonlib.copy(self.xmlRoot)
     else
         xmlRoot = commonlib.copy(self.xmlRoot)
