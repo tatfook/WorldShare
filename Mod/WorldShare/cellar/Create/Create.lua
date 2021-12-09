@@ -559,7 +559,9 @@ function Create:HandleEnterWorld(index, skip)
                 end)
             else
                 if result == Compare.REMOTEBIGGER then
-                    SyncMain:ShowStartSyncPage(true)
+                    SyncMain:ShowStartSyncPage(true, function()
+                        self:GetWorldList(self.statusFilter)
+                    end)
                 else
                     InternetLoadWorld.EnterWorld()
                     self:Close()

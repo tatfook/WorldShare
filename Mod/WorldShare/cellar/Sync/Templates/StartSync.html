@@ -30,7 +30,7 @@
                     SyncMain:CloseStartSyncPage()
 
                     if SyncMain.GetRemoteRevision() < SyncMain.GetCurrentRevision() then
-                        SyncMain:ShowStartSyncUseDataSourcePage();
+                        SyncMain:ShowStartSyncUseDataSourcePage()
                     elseif SyncMain.GetRemoteRevision() >= SyncMain.GetCurrentRevision() then
                         SyncMain:SyncToLocal()
                     end
