@@ -47,7 +47,11 @@
                 end
 
                 function select_version(index)
-                    VersionChange:SelectVersion(index)
+                    _guihelper.MessageBox(L'请确定本地数据已保存上传，否则会丢失数据！', function(res)
+                        if res == _guihelper.DialogResult.Yes then
+                            VersionChange:SelectVersion(index)
+                        end
+                    end, _guihelper.MessageBoxButtons.YesNo)
                 end
 
                 function close()
