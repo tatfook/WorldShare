@@ -172,7 +172,7 @@
                     end
 
                     function selected_version(index)
-                        local selectedWorld = Create:GetSelectWorld(Eval('index'))
+                        local selectedWorld = Create:GetSelectWorld(index)
 
                         if not selectedWorld then
                             return
@@ -183,7 +183,9 @@
                             return
                         end
 
-                        VersionChange:Init(selectedWorld.foldername)
+                        VersionChange:Init(selectedWorld.foldername, function()
+                            refresh()
+                        end)
                     end
 
                     function go_to_url()

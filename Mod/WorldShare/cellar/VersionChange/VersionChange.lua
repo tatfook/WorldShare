@@ -1,36 +1,35 @@
 --[[
 Title: VersionChange
-Author(s):  big
-Date: 2018.06.25
+Author(s): big
+CreateDate: 2018.06.25
+ModifyDate: 2021.12.09
 place: Foshan
 Desc: 
 use the lib:
 ------------------------------------------------------------
-local VersionChange = NPL.load("(gl)Mod/WorldShare/cellar/VersionChange/VersionChange.lua")
+local VersionChange = NPL.load('(gl)Mod/WorldShare/cellar/VersionChange/VersionChange.lua')
 ------------------------------------------------------------
 ]]
 
--- libs
-local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
-
 -- bottles
-local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
+local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
 
 -- service
-local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
-local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
-local KeepworkServiceWorld = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceWorld.lua")
-local SyncToLocal = NPL.load("(gl)Mod/WorldShare/service/SyncService/SyncToLocal.lua")
+local KeepworkServiceWorld = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceWorld.lua')
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
 local Compare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
 
-local Encoding = commonlib.gettable("commonlib.Encoding")
+local Encoding = commonlib.gettable('commonlib.Encoding')
 
 local VersionChange = NPL.export()
 
-function VersionChange:Init(foldername)
-    if not KeepworkService:IsSignedIn() then
-        return false
+function VersionChange:Init(foldername, callback)
+    if not KeepworkServiceSession:IsSignedIn() then
+        return
+    end
+
+    if callback then
+        self.callback = callback
     end
 
     local isEnterWorld = Mod.WorldShare.Store:Get('world/isEnterWorld')
@@ -45,25 +44,25 @@ function VersionChange:Init(foldername)
                 if currentWorld.shared then
                     if currentWorld.kpProjectId == currentEnterWorld.kpProjectId then
                         _guihelper.MessageBox(L'不能切换当前编辑的世界')
-                        return false
+                        return
                     end
                 else
                     _guihelper.MessageBox(L'不能切换当前编辑的世界')
-                    return false
+                    return
                 end
             else
                 _guihelper.MessageBox(L'不能切换当前编辑的世界')
-                return false
+                return
             end
         end
     end
 
     if not currentWorld.status then
-        _guihelper.MessageBox(L"此世界仅在本地，无需切换版本")
+        _guihelper.MessageBox(L'此世界仅在本地，无需切换版本')
         return
     end
 
-    Mod.WorldShare.MsgBox:Show(L"请稍候...")
+    Mod.WorldShare.MsgBox:Wait()
 
     self.foldername = foldername
 
@@ -76,11 +75,11 @@ function VersionChange:Init(foldername)
 end
 
 function VersionChange:SetPage()
-    Mod.WorldShare.Store:Set('page/VersionChange', document:GetPageCtrl())
+    Mod.WorldShare.Store:Set('page/Mod.WorldShare.VersionChange', document:GetPageCtrl())
 end
 
 function VersionChange:ClosePage()
-    local VersionChangePage = Mod.WorldShare.Store:Get('page/VersionChange')
+    local VersionChangePage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.VersionChange')
 
     if VersionChangePage then
         VersionChangePage:CloseWindow()
@@ -88,15 +87,24 @@ function VersionChange:ClosePage()
 end
 
 function VersionChange:ShowPage()
-    local params = Mod.WorldShare.Utils.ShowWindow(0, 0, "Mod/WorldShare/cellar/VersionChange/VersionChange.html", "VersionChange", 0, 0, "_fi", false)
+    local params = Mod.WorldShare.Utils.ShowWindow(
+                    0,
+                    0,
+                    'Mod/WorldShare/cellar/VersionChange/VersionChange.html',
+                    'Mod.WorldShare.VersionChange',
+                    0,
+                    0,
+                    '_fi',
+                    false
+                )
 
     params._page.OnClose = function()
-        Mod.WorldShare.Store:Remove('page/VersionChange')
+        Mod.WorldShare.Store:Remove('page/Mod.WorldShare.VersionChange')
     end
 end
 
 function VersionChange:GetVersionSource(callback)
-    local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
+    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
     local commitId = SyncMain:GetCurrentRevisionInfo() or {}
 
     if not currentWorld then
@@ -134,7 +142,7 @@ function VersionChange:GetVersionSource(callback)
                     item.isActiveFull = false
                 end
 
-                self.allRevision:push_back(item)
+                self.allRevision:push_front(item)
             end
 
             callback()
@@ -147,17 +155,21 @@ function VersionChange:GetAllRevision()
 end
 
 function VersionChange:SelectVersion(index)
-    local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
-    local commitId = self.allRevision[index]["commitId"]
+    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+    local commitId = self.allRevision[index]['commitId']
 
-    local targetDir = format("%s/%s/", Mod.WorldShare.Utils.GetWorldFolderFullPath(), commonlib.Encoding.Utf8ToDefault(currentWorld.foldername))
+    local targetDir = format(
+                        '%s/%s/',
+                        Mod.WorldShare.Utils.GetWorldFolderFullPath(),
+                        commonlib.Encoding.Utf8ToDefault(currentWorld.foldername)
+                      )
 
     commonlib.Files.DeleteFolder(targetDir)
     ParaIO.CreateDirectory(targetDir)
 
     currentWorld.status = 2
     currentWorld.lastCommitId = commitId
-    Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
+    Mod.WorldShare.Store:Set('world/currentWorld', currentWorld)
 
     SyncMain:SyncToLocalSingle(function(result, msg)
         if result == false then
@@ -165,10 +177,12 @@ function VersionChange:SelectVersion(index)
                 return false
             end
 
-            GameLogic.AddBBS(nil, msg, 3000, "255 0 0")
+            GameLogic.AddBBS(nil, msg, 3000, '255 0 0')
         end
 
-        Compare:RefreshWorldList()
+        if self.callback and type(self.callback) == 'function' then
+            self.callback()
+        end
     end)
 
     self:ClosePage()
