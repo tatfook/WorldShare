@@ -376,6 +376,10 @@ function Create:HandleEnterWorld(index, skip)
 
     -- share world step
     if ShareTypeWorld:IsSharedWorld(currentSelectedWorld) and not self.shareWorldVerified then
+        if not currentSelectedWorld.user then
+            return
+        end
+
         local function Handle()
             if not KeepworkServiceSession:IsSignedIn() then
                 LoginModal:CheckSignedIn(L'此世界为多人世界，请先登录', function(bIsSuccessed)
