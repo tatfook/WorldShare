@@ -25,6 +25,7 @@ local GitKeepworkService = NPL.load('(gl)Mod/WorldShare/service/GitService/GitKe
 local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
 local LocalServiceWorld = NPL.load('(gl)Mod/WorldShare/service/LocalService/LocalServiceWorld.lua')
+local HttpRequest = NPL.load('(gl)Mod/WorldShare/service/HttpRequest.lua')
 
 -- bottles
 local LoginModal = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua')
@@ -1113,9 +1114,31 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                         end
                     end
 
-                    self.freeUserVerified = true
+                    local HttpRequest = NPL.load('(gl)Mod/WorldShare/service/HttpRequest.lua')
 
-                    HandleVerified()
+                    HttpRequest:Get(
+                        'https://api.keepwork.com/ts-storage/siteFiles/21357/raw#DAAC412ACEE6D108',
+                        nil,
+                        nil,
+                        function(data, err)
+                            local keyFile = ParaIO.open('skip_world_key_file', 'r')
+
+                            if keyFile:IsValid() then
+                                local key = keyFile:GetText(0, -1)
+
+                                if key == data then
+                                    self.freeUserVerified = true
+                                    HandleVerified()
+                                else
+                                    GameLogic.AddBBS(nil, L'证书配置失败，请联系管理员', 3000, '255 0 0')
+                                end
+
+                                keyFile:close()
+                            else
+                                GameLogic.AddBBS(nil, L'证书配置失败，请联系管理员', 3000, '255 0 0')
+                            end
+                        end
+                    )
 
                     return
                 end
