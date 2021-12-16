@@ -384,42 +384,35 @@ function Create:HandleEnterWorld(index, skip)
 
     -- share world step
     if ShareTypeWorld:IsSharedWorld(currentSelectedWorld) and not self.shareWorldVerified then
-        if not currentSelectedWorld.user then
-            return
-        end
-
-        local function Handle()
-            if not KeepworkServiceSession:IsSignedIn() then
-                LoginModal:CheckSignedIn(L'此世界为多人世界，请先登录', function(bIsSuccessed)
-                    if bIsSuccessed then
-                        self:GetWorldList(self.statusFilter, function()
-                            local index = Compare:GetWorldIndexByFoldername(
-                                currentSelectedWorld.foldername,
-                                currentSelectedWorld.shared,
-                                currentSelectedWorld.is_zip
-                            )
-                            self:HandleEnterWorld(index)
-                        end)
-                    else
-                        Mod.WorldShare.MsgBox:Dialog(
-                            'MultiPlayerWorldLogin',
-                            L'此世界为多人世界，请登录后再打开世界，或者以只读模式打开世界',
-                            {
-                                Title = L'多人世界',
-                                Yes = L'知道了',
-                                No = L'只读模式打开'
-                            },
-                            function(res)
-                                if res and res == _guihelper.DialogResult.No then
-                                    Mod.WorldShare.Store:Set('world/readonly', true)
-                                    self:HandleEnterWorld(index, true)
-                                end
-                            end,
-                            _guihelper.MessageBoxButtons.YesNo
+        if not KeepworkServiceSession:IsSignedIn() then
+            LoginModal:CheckSignedIn(L'此世界为多人世界，请先登录', function(bIsSuccessed)
+                if bIsSuccessed then
+                    self:GetWorldList(self.statusFilter, function()
+                        local index = Compare:GetWorldIndexByFoldername(
+                            currentSelectedWorld.foldername,
+                            currentSelectedWorld.shared,
+                            currentSelectedWorld.is_zip
                         )
-                    end
-                end)
-            else
+                        self:HandleEnterWorld(index)
+                    end)
+                end
+            end)
+        else
+            local username = Mod.WorldShare.Store:Get('user/username')
+
+            if not currentSelectedWorld.user then
+                _guihelper.MessageBox(
+                    format(
+                        L'你没有权限进入此世界（共享世界）（项目ID：%d）（用户名：%s）',
+                        currentSelectedWorld.kpProjectId or 0,
+                        username or ''
+                    )
+                )
+
+                return
+            end
+
+            local function Handle()
                 if currentSelectedWorld.level == 2 then
                     -- check ouccupy
                     ShareTypeWorld:Lock(currentSelectedWorld, function()
@@ -439,20 +432,18 @@ function Create:HandleEnterWorld(index, skip)
                     )
                 end
             end
-        end
 
-        local username = Mod.WorldShare.Store:Get('user/username') 
-
-        if username == currentSelectedWorld.user.username then
-            Handle()
-        else
-            GameLogic.IsVip('LimitUserOpenShareWorld', true, function(result)
-                if not result then
-                    return
-                end
-
+            if username == currentSelectedWorld.user.username then
                 Handle()
-            end)
+            else
+                GameLogic.IsVip('LimitUserOpenShareWorld', true, function(result)
+                    if not result then
+                        return
+                    end
+    
+                    Handle()
+                end)
+            end
         end
 
         return
