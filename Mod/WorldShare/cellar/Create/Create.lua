@@ -45,7 +45,7 @@ function Create:Show()
     Opus:Show()
 end
 
-function Create:ShowCreateEmbed(width, height, x, y)
+function Create:ShowCreateEmbed(width, height, x, y, useDesginResolution)
     local CreateEmbedPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Create')
 
     if CreateEmbedPage then
@@ -58,26 +58,31 @@ function Create:ShowCreateEmbed(width, height, x, y)
 
     y = y or -400
 
-    Mod.WorldShare.Utils.ShowWindow(
-        {
-            url = '(ws)Create/CreateEmbed.html',
-            name = 'Mod.WorldShare.Create',
-            isShowTitleBar = false,
-            DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
-            style = CommonCtrl.WindowFrame.ContainerStyle,
-            zorder = 0,
-            allowDrag = false,
-            bShow = nil,
-            directPosition = true,
-            align = '_ct',
-            x = -768 / 2,
-            y = y / 2,
-            width = 1024,
-            height = 580,
-            cancelShowAnimation = true,
-            bToggleShowHide = false,
-        }
-    )
+    local params = {
+        url = '(ws)Create/CreateEmbed.html',
+        name = 'Mod.WorldShare.Create',
+        isShowTitleBar = false,
+        DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
+        style = CommonCtrl.WindowFrame.ContainerStyle,
+        zorder = 0,
+        allowDrag = false,
+        bShow = nil,
+        directPosition = true,
+        align = '_ct',
+        x = -768 / 2,
+        y = y / 2,
+        width = 1024,
+        height = 580,
+        cancelShowAnimation = true,
+        bToggleShowHide = false,
+    }
+
+    if useDesginResolution then
+        params.DesignResolutionWidth = 1280
+        params.DesignResolutionHeight = 720
+    end
+
+    Mod.WorldShare.Utils.ShowWindow(params)
 
     self:GetWorldList(self.statusFilter)
 end

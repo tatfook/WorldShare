@@ -98,6 +98,8 @@ function Opus:ShowOpusBackground()
 end
 
 function Opus:ShowOpus()
+    Mod.WorldShare.Store:Remove('world/searchFolderName')
+
     Mod.WorldShare.Utils.ShowWindow(
         {
             url = 'Mod/WorldShare/cellar/Opus/Opus.html',
@@ -127,7 +129,7 @@ function Opus:ShowMyHome()
     local username = Mod.WorldShare.Store:Get('user/username')
 
     Mod.WorldShare.Store:Set('world/searchFolderName', username .. '_main')
-    Create:ShowCreateEmbed(nil, nil, nil, -530)
+    Create:ShowCreateEmbed(nil, nil, nil, -530, true)
 end
 
 function Opus:CloseMyHome()

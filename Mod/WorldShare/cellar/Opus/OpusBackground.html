@@ -36,9 +36,9 @@
                         my_history_sel.visible = false
                         my_history_unsel.visible = true
 
-                        Opus:CloseMyHome()
-                        Opus:CloseOpus()
-                        MainPage:CloseExplorerEmbed()
+                        
+                        
+                        
 
                         if index == '1' then
                             my_opus_sel.visible = true
@@ -46,6 +46,8 @@
 
                             if index ~= Opus.cur_sel then
                                 Opus.cur_sel = index
+                                Opus:CloseMyHome()
+                                MainPage:CloseExplorerEmbed()
                                 Opus:ShowOpus()
                             end
                         elseif index == '2' then
@@ -54,6 +56,10 @@
 
                             if index ~= Opus.cur_sel then
                                 Opus.cur_sel = index
+
+                                Opus:CloseOpus()
+                                MainPage:CloseExplorerEmbed()
+
                                 Opus:ShowMyHome()
                             end
                         elseif index == '3' then
@@ -62,6 +68,9 @@
 
                             if index ~= Opus.cur_sel then
                                 Opus.cur_sel = index
+
+                                Opus:CloseOpus()
+                                Opus:CloseMyHome()
 
                                 MainPage:ShowExporerEmbed()
                                 MainPage:SetMyFavoriteWorksTree()
@@ -72,6 +81,9 @@
 
                             if index ~= Opus.cur_sel then
                                 Opus.cur_sel = index
+
+                                Opus:CloseOpus()
+                                Opus:CloseMyHome()
 
                                 MainPage:ShowExporerEmbed()
                                 MainPage:SetMyHistoryWorksTree()
