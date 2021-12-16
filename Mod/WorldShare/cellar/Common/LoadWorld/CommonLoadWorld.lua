@@ -1110,11 +1110,14 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
 
                                 HandleVerified()
                             end)
-                            return
-                        end
-                    end
+                        else
+                            self.freeUserVerified = true
 
-                    local HttpRequest = NPL.load('(gl)Mod/WorldShare/service/HttpRequest.lua')
+                            HandleVerified()
+                        end
+
+                        return
+                    end
 
                     HttpRequest:Get(
                         'https://api.keepwork.com/ts-storage/siteFiles/21357/raw#DAAC412ACEE6D108',
