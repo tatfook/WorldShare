@@ -10,9 +10,6 @@
                     local CreateWorld = NPL.load('(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua')
                     local MainPage = NPL.load('(gl)Mod/ExplorerApp/pages/MainPage/MainPage.lua')
 
-                    -- libs
-                    local InternetLoadWorld = commonlib.gettable('MyCompany.Aries.Creator.Game.Login.InternetLoadWorld')
-
                     local page = document:GetPageCtrl()
 
                     function sel(index)
@@ -101,7 +98,7 @@
                         if pid then
                             CommonLoadWorld:EnterWorldById(pid)
                         else
-                            InternetLoadWorld.GotoUrl(opus_content)
+                            CommonLoadWorld.GotoUrl(opus_content)
                         end
                     end
 

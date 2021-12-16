@@ -53,7 +53,6 @@ NPL.load('(gl)script/ide/math/StringUtil.lua')
 NPL.load('(gl)script/apps/Aries/Creator/WorldCommon.lua')
 
 -- include aries creator game login
-NPL.load('(gl)script/apps/Aries/Creator/Game/Login/InternetLoadWorld.lua')
 NPL.load('(gl)script/apps/Aries/Creator/Game/Login/CreateNewWorld.lua')
 NPL.load('(gl)script/apps/Aries/Creator/Game/Login/LocalLoadWorld.lua')
 NPL.load('(gl)script/apps/Aries/Creator/Game/Login/RemoteServerList.lua')

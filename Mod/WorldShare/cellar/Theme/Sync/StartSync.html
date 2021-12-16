@@ -3,9 +3,6 @@
         <pe:mcml>
             <script type="text/npl" refresh="false">
                 <![CDATA[
-                    -- libs
-                    local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
-
                     -- bottles
                     SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
 
@@ -101,7 +98,7 @@
                             return false
                         end
 
-                        InternetLoadWorld.LoadWorld(currentWorld)
+                        Game.Start(currentWorld.worldpath)
                         SyncMain:CloseStartSyncPage()
                     end
 

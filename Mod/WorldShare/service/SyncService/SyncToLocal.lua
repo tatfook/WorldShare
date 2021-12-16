@@ -11,7 +11,6 @@ local SyncToLocal = NPL.load("(gl)Mod/WorldShare/service/SyncService/SyncToLocal
 
 -- libs
 local Encoding = commonlib.gettable("commonlib.Encoding")
-local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
 
 -- service
 local KeepworkService = NPL.load("../KeepworkService.lua")
@@ -62,8 +61,6 @@ function SyncToLocal:Init(callback)
             self.currentWorld.worldpath = Encoding.Utf8ToDefault(format("%s/%s/", Mod.WorldShare.Utils.GetWorldFolderFullPath(), self.currentWorld.foldername))
         end
         self.currentWorld.remotefile = "local://" .. self.currentWorld.worldpath
-
-        InternetLoadWorld.cur_ds[InternetLoadWorld.selected_world_index] = self.currentWorld
     end
 
     if not self.currentWorld.worldpath or self.currentWorld.worldpath == "" then

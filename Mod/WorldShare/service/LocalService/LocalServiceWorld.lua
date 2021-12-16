@@ -22,7 +22,6 @@ local FileDownloader = commonlib.gettable('Mod.WorldShare.service.FileDownloader
 local LocalLoadWorld = commonlib.gettable('MyCompany.Aries.Game.MainLogin.LocalLoadWorld')
 local WorldRevision = commonlib.gettable('MyCompany.Aries.Creator.Game.WorldRevision')
 local SaveWorldHandler = commonlib.gettable('MyCompany.Aries.Game.SaveWorldHandler')
-local InternetLoadWorld = commonlib.gettable('MyCompany.Aries.Creator.Game.Login.InternetLoadWorld')
 local RemoteServerList = commonlib.gettable('MyCompany.Aries.Creator.Game.Login.RemoteServerList')
 local WorldCommon = commonlib.gettable('MyCompany.Aries.Creator.WorldCommon')
 local ParaWorldLoginAdapter = commonlib.gettable('MyCompany.Aries.Game.Tasks.ParaWorld.ParaWorldLoginAdapter')
@@ -242,35 +241,6 @@ function LocalServiceWorld:GetSharedWorldList()
     end)
 
     return dsWorlds
-end
-
-function LocalServiceWorld:GetInternetLocalWorldList()
-  local ServerPage = InternetLoadWorld.GetCurrentServerPage()
-
-  RemoteServerList:new():Init(
-      'local',
-      'localworld',
-      function(bSucceed, serverlist)
-          if not serverlist:IsValid() then
-              return false
-          end
-
-          ServerPage.ds = serverlist.worlds or {}
-          InternetLoadWorld.OnChangeServerPage()
-      end
-  )
-
-  return ServerPage.ds or {}
-end
-
-function LocalServiceWorld:SetInternetLocalWorldList(currentWorldList)
-    InternetLoadWorld.cur_ds = currentWorldList
-end
-
-function LocalServiceWorld:MergeInternetLocalWorldList(currentWorldList)
-    InternetLoadWorld.cur_ds = currentWorldList
-    
-    return currentWorldList
 end
 
 function LocalServiceWorld:SetWorldInstanceByFoldername(foldername)

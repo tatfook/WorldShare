@@ -11,7 +11,6 @@ local Create = NPL.load('(gl)Mod/WorldShare/cellar/Create/Create.lua')
 ]]
 
 -- libs
-local InternetLoadWorld = commonlib.gettable('MyCompany.Aries.Creator.Game.Login.InternetLoadWorld')
 local DownloadWorld = commonlib.gettable('MyCompany.Aries.Game.MainLogin.DownloadWorld')
 
 -- bottles
@@ -111,10 +110,9 @@ end
 
 function Create:OnSwitchWorld(index)
     if not index then
-        return false
+        return
     end
 
-    InternetLoadWorld.OnSwitchWorld(index)
     self:UpdateWorldInfo(index)
 end
 
@@ -122,7 +120,7 @@ function Create:UpdateWorldInfo(worldIndex)
     local currentSelectedWorld = Compare:GetSelectedWorld(worldIndex)
 
     if not currentSelectedWorld  then
-        return false
+        return
     end
 
     if currentSelectedWorld.status ~= 2 then
@@ -523,7 +521,7 @@ function Create:HandleEnterWorld(index, skip)
                             end
 
                             DownloadWorld.Close()
-                            InternetLoadWorld.EnterWorld()
+                            Game.Start(currentWorld.worldpath)
                         end
                     end
                 end
@@ -531,7 +529,7 @@ function Create:HandleEnterWorld(index, skip)
         end)
     else
         if currentWorld.status == 1 or not currentWorld.status then
-            InternetLoadWorld.EnterWorld()
+            Game.Start(currentWorld.worldpath)
             self:Close()
             return
         end
@@ -551,12 +549,12 @@ function Create:HandleEnterWorld(index, skip)
                             Mod.WorldShare.MsgBox:Close()
 
                             if result == true then
-                                InternetLoadWorld.EnterWorld()
+                                Game.Start(currentWorld.worldpath)
                                 self:Close()
                             end
                         end)
                     else
-                        InternetLoadWorld.EnterWorld()
+                        Game.Start(currentWorld.worldpath)
                         self:Close()
                     end
                 end)
@@ -566,7 +564,7 @@ function Create:HandleEnterWorld(index, skip)
                         self:GetWorldList(self.statusFilter)
                     end)
                 else
-                    InternetLoadWorld.EnterWorld()
+                    Game.Start(currentWorld.worldpath)
                     self:Close()
                 end
             end

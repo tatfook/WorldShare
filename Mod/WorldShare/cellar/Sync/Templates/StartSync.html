@@ -5,9 +5,9 @@
     <pe:mcml>
         <script type="text/npl" refresh="false">
             <![CDATA[
+                local CommonLoadWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/CommonLoadWorld.lua')
                 page_ctrl = document:GetPageCtrl()
                 use_offline = page_ctrl:GetRequestParam("useOffline")
-                local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
 
                 SyncMain = NPL.load("../Main.lua")
                 Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
@@ -63,7 +63,7 @@
                     end
 
                     SyncMain:CloseStartSyncPage()
-                    InternetLoadWorld.LoadWorld(currentWorld)
+                    CommonLoadWorld.LoadWorld(currentWorld)
                 end
 
                 function get_current_world_name()

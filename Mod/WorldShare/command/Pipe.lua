@@ -14,7 +14,6 @@ NPL.load("(gl)Mod/WorldShare/command/Pipe.lua")
 local CmdParser = commonlib.gettable("MyCompany.Aries.Game.CmdParser")
 local Commands = commonlib.gettable("MyCompany.Aries.Game.Commands")
 local CommandManager = commonlib.gettable("MyCompany.Aries.Game.CommandManager")
-local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
 
 -- UI
 local CommonLoadWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/CommonLoadWorld.lua')
@@ -43,7 +42,7 @@ function PipeCommand:Init()
                 if pid then
                     CommonLoadWorld:EnterWorldById(pid)
                 else
-                    InternetLoadWorld.GotoUrl(cmd_params.value)
+                    CommonLoadWorld.GotoUrl(cmd_params.value)
                 end
             end
         end,

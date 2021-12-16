@@ -3,9 +3,8 @@
     <pe:mcml>
         <script type="text/npl" refresh="false" src="Server.lua">
             <![CDATA[
-                InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
-
                 Server = NPL.load('./Server.lua')
+                local CommonLoadWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/CommonLoadWorld.lua')
 
                 local page = document.GetPageCtrl()
                 Mod.WorldShare.Store:Set('page/Server', page)
@@ -35,7 +34,7 @@
                 function open_url()
                     local url = Page:GetValue("server_url","");
 
-                    InternetLoadWorld.GotoUrl(url)
+                    CommonLoadWorld.GotoUrl(url)
                 end
             ]]>
         </script>

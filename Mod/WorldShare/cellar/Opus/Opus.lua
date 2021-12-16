@@ -19,6 +19,9 @@ local Page = NPL.load("Mod/GeneralGameServerMod/UI/Page.lua");
 local Create = NPL.load('(gl)Mod/WorldShare/cellar/Create/Create.lua')
 local MainPage = NPL.load('(gl)Mod/ExplorerApp/pages/MainPage/MainPage.lua')
 
+-- service
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+
 local Opus = NPL.export()
 
 function Opus:Show()
@@ -126,6 +129,10 @@ function Opus:ShowOpus()
 end
 
 function Opus:ShowMyHome()
+    if not KeepworkServiceSession:IsSignedIn() then
+        return
+    end
+
     local username = Mod.WorldShare.Store:Get('user/username')
 
     Mod.WorldShare.Store:Set('world/searchFolderName', username .. '_main')

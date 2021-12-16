@@ -155,15 +155,6 @@ function Filters:Init()
         end
     )
 
-    -- replace load world page
-    GameLogic.GetFilters():add_filter(
-        'InternetLoadWorld.ShowPage',
-        function(bEnable, bShow)
-            Create:Show()
-            return false
-        end
-    )
-
     -- replace the exit world dialog
     GameLogic.GetFilters():add_filter(
         'ShowExitDialog',
