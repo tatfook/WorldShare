@@ -670,7 +670,6 @@ function KeepworkServiceWorld:LimitFreeUser(isShowUI, callback)
     end)
 end
 
-
 function KeepworkServiceWorld:GenerateWorldInstance(params)
     if not params or type(params) ~= 'table' then
         return {}

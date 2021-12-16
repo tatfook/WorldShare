@@ -35,6 +35,7 @@ local KeepworkServiceWorld = NPL.load('(gl)Mod/WorldShare/service/KeepworkServic
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
 local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
 local SyncToLocal = NPL.load('(gl)Mod/WorldShare/service/SyncService/SyncToLocal.lua')
+local LocalServiceHistory = NPL.load('(gl)Mod/WorldShare/service/LocalService/LocalServiceHistory.lua')
 
 local Create = NPL.export()
 
@@ -267,6 +268,8 @@ function Create:EnterWorld(index, skip)
     if not currentSelectedWorld or type(currentSelectedWorld) ~= 'table' then
         return
     end
+
+    LocalServiceHistory:LoadWorld(currentSelectedWorld)
 
     if KeepworkServiceSession:IsSignedIn() then
         KeepworkServiceWorld:LimitFreeUser(false, function(result)

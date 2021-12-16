@@ -26,6 +26,7 @@ local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkServ
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
 local LocalServiceWorld = NPL.load('(gl)Mod/WorldShare/service/LocalService/LocalServiceWorld.lua')
 local HttpRequest = NPL.load('(gl)Mod/WorldShare/service/HttpRequest.lua')
+local LocalServiceHistory = NPL.load('(gl)Mod/WorldShare/service/LocalService/LocalServiceHistory.lua')
 
 -- bottles
 local LoginModal = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua')
@@ -599,6 +600,11 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
             -- stop here when overtime enter
             return
         end
+
+        LocalServiceHistory:LoadWorld({
+            name = worldInfo.worldName,
+            kpProjectId = worldInfo.projectId,
+        })
 
         local localWorldFile = nil
         local encryptWorldFile = nil

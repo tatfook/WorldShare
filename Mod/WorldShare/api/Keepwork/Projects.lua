@@ -82,6 +82,27 @@ function KeepworkProjectsApi:Visit(kpProjectId, callback)
     KeepworkBaseApi:Get(url, nil, nil, callback)
 end
 
+-- url: /projects/search
+-- method: POST
+-- params:
+--[[
+    { id: { $in : [1, 2, 3] } }
+]]
+-- return: object
+function KeepworkProjectsApi:Search(xPerPage, xPage, params, success, error)
+    local url = '/projects/search'
+
+    if type(xPerPage) == 'number' then
+        url = url .. '?x-per-page=' .. xPerPage
+
+        if type(xPerPage) == 'number' then
+            url = url .. '&x-page=' .. xPage
+        end
+    end
+
+    KeepworkBaseApi:Post(url, params, nil, success, error)
+end
+
 -- url: /projects/searchForParacraft
 -- method: POST
 -- params:

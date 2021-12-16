@@ -17,6 +17,7 @@ local Page = NPL.load("Mod/GeneralGameServerMod/UI/Page.lua");
 
 -- bottles
 local Create = NPL.load('(gl)Mod/WorldShare/cellar/Create/Create.lua')
+local MainPage = NPL.load('(gl)Mod/ExplorerApp/pages/MainPage/MainPage.lua')
 
 local Opus = NPL.export()
 
@@ -47,6 +48,7 @@ function Opus:CloseAll()
 
     self:CloseOpus()
     self:CloseHonour()
+    MainPage:CloseExplorerEmbed()
 end
 
 function Opus:CloseOpus()

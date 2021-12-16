@@ -1,13 +1,14 @@
 <html>
     <body>
         <pe:mcml>
-            <script type="text/npl" refresh="false">
+            <script type='text/npl' refresh='false'>
                 <![CDATA[
                     -- bottles
                     local Opus = NPL.load('./Opus.lua')
                     local CommonLoadWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/CommonLoadWorld.lua')
-                    local Server = NPL.load("(gl)Mod/WorldShare/cellar/Server/Server.lua")
-                    local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
+                    local Server = NPL.load('(gl)Mod/WorldShare/cellar/Server/Server.lua')
+                    local CreateWorld = NPL.load('(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua')
+                    local MainPage = NPL.load('(gl)Mod/ExplorerApp/pages/MainPage/MainPage.lua')
 
                     -- libs
                     local InternetLoadWorld = commonlib.gettable('MyCompany.Aries.Creator.Game.Login.InternetLoadWorld')
@@ -16,35 +17,64 @@
 
                     function sel(index)
                         CreateWorld.ClosePage()
-                        
+
                         local my_opus_sel = page:FindControl('my_opus_sel')
                         local my_opus_unsel = page:FindControl('my_opus_unsel')
                         local my_home_sel = page:FindControl('my_home_sel')
                         local my_home_unsel = page:FindControl('my_home_unsel')
+                        local my_favorite_sel = page:FindControl('my_favorite_sel')
+                        local my_favorite_unsel = page:FindControl('my_favorite_unsel')
+                        local my_history_sel = page:FindControl('my_history_sel')
+                        local my_history_unsel = page:FindControl('my_history_unsel')
+
+                        my_opus_sel.visible = false
+                        my_opus_unsel.visible = true
+                        my_home_sel.visible = false
+                        my_home_unsel.visible = true
+                        my_favorite_sel.visible = false
+                        my_favorite_unsel.visible = true
+                        my_history_sel.visible = false
+                        my_history_unsel.visible = true
+
+                        Opus:CloseMyHome()
+                        Opus:CloseOpus()
+                        MainPage:CloseExplorerEmbed()
 
                         if index == '1' then
                             my_opus_sel.visible = true
                             my_opus_unsel.visible = false
-                            my_home_sel.visible = false
-                            my_home_unsel.visible = true
 
                             if index ~= Opus.cur_sel then
                                 Opus.cur_sel = index
-
-                                Opus:CloseMyHome()
                                 Opus:ShowOpus()
                             end
                         elseif index == '2' then
-                            my_opus_sel.visible = false
-                            my_opus_unsel.visible = true
                             my_home_sel.visible = true
                             my_home_unsel.visible = false
 
                             if index ~= Opus.cur_sel then
                                 Opus.cur_sel = index
-
-                                Opus:CloseOpus()
                                 Opus:ShowMyHome()
+                            end
+                        elseif index == '3' then
+                            my_favorite_sel.visible = true
+                            my_favorite_unsel.visible = false
+
+                            if index ~= Opus.cur_sel then
+                                Opus.cur_sel = index
+
+                                MainPage:ShowExporerEmbed()
+                                MainPage:SetMyFavoriteWorksTree()
+                            end
+                        elseif index == '4' then
+                            my_history_sel.visible = true
+                            my_history_unsel.visible = false
+
+                            if index ~= Opus.cur_sel then
+                                Opus.cur_sel = index
+
+                                MainPage:ShowExporerEmbed()
+                                MainPage:SetMyHistoryWorksTree()
                             end
                         end
                     end
@@ -85,8 +115,8 @@
                     end
                 ]]>
             </script>
-            <style type="type/mcss" src='Mod/WorldShare/cellar/Opus/OpusMcss.mcss'></style>
-            <style type="type/mcss" src='Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss'></style>
+            <style type='type/mcss' src='Mod/WorldShare/cellar/Opus/OpusMcss.mcss'></style>
+            <style type='type/mcss' src='Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss'></style>
             <pe:container
                 alignment='_fi'
                 zorder='-1'
@@ -147,7 +177,7 @@
                                     margin-top: 10px;'>
                             <div style='width: 495px;'>
                                 <input type='text'
-                                       uiname="OpusBackground.opus_content"
+                                       uiname='OpusBackground.opus_content'
                                        name='opus_content'
                                        spacing='10'
                                        EmptyText='<%= L"输入项目ID或课程ID或服务器地址" %>'
@@ -161,7 +191,7 @@
                                 <input type='button'
                                        class='opus_bar_button'
                                        DefaultButton='true'
-                                       uiname="OpusBackground.open"
+                                       uiname='OpusBackground.open'
                                        style='width: 86px;
                                               height: 46px;
                                               text-offset-y: -3px;
@@ -193,14 +223,14 @@
                                      margin-top:-340px;
                                      background:;'>
                     <div width='100%' style='padding-top: 20px;'>
-                        <pe:container alignment="_ct" style="margin-left:-640px;margin-top:-360px;width:1280px;height:720px;background:url();">
+                        <pe:container alignment='_ct' style='margin-left:-640px;margin-top:-360px;width:1280px;height:720px;background:url();'>
                             <!--背景水印-->
                             <div>
-                                <div style="position:relative;margin-left:24px;margin-top:104px;width:512px;height:256px;background:url(Texture/Aries/Creator/keepwork/RedSummerCamp/courses/watermark_bg_32bits.png);" />
-                                <div style="position:relative;margin-left:557px;margin-top:26px;width:512px;height:256px;background:url(Texture/Aries/Creator/keepwork/RedSummerCamp/courses/watermark_bg_32bits.png);" />
-                                <div style="position:relative;margin-left:103px;margin-top:282px;width:512px;height:256px;background:url(Texture/Aries/Creator/keepwork/RedSummerCamp/courses/watermark_bg_32bits.png);" />
-                                <div style="position:relative;margin-left:879px;margin-top:311px;width:512px;height:256px;background:url(Texture/Aries/Creator/keepwork/RedSummerCamp/courses/watermark_bg_32bits.png);" />
-                                <div style="position:relative;margin-left:438px;margin-top:477px;width:512px;height:256px;background:url(Texture/Aries/Creator/keepwork/RedSummerCamp/courses/watermark_bg_32bits.png);" />
+                                <div style='position:relative;margin-left:24px;margin-top:104px;width:512px;height:256px;background:url(Texture/Aries/Creator/keepwork/RedSummerCamp/courses/watermark_bg_32bits.png);' />
+                                <div style='position:relative;margin-left:557px;margin-top:26px;width:512px;height:256px;background:url(Texture/Aries/Creator/keepwork/RedSummerCamp/courses/watermark_bg_32bits.png);' />
+                                <div style='position:relative;margin-left:103px;margin-top:282px;width:512px;height:256px;background:url(Texture/Aries/Creator/keepwork/RedSummerCamp/courses/watermark_bg_32bits.png);' />
+                                <div style='position:relative;margin-left:879px;margin-top:311px;width:512px;height:256px;background:url(Texture/Aries/Creator/keepwork/RedSummerCamp/courses/watermark_bg_32bits.png);' />
+                                <div style='position:relative;margin-left:438px;margin-top:477px;width:512px;height:256px;background:url(Texture/Aries/Creator/keepwork/RedSummerCamp/courses/watermark_bg_32bits.png);' />
                             </div>
                         </pe:container>
                         <!-- bottom content -->
@@ -298,6 +328,78 @@
                                                        margin-bottom: 40px;
                                                        color: #FFFFFF;'
                                                value='<%= "我的家园" %>' />
+                                    </div>
+                                </pe:container>
+                            </div>
+                            <div align='center'
+                                 style='height: 64px;
+                                        width: 160px;
+                                        margin-bottom: 20px;'>
+                                <pe:container name='my_favorite_sel' visible='false' style='position: relative;background:;'>
+                                    <div style='width: 160px;'>
+                                        <input type='button'
+                                               onclick='sel'
+                                               name='3'
+                                               class='opus_menu_button'
+                                               textscale=1.2
+                                               style='width: 160px;
+                                                      font-weight: bold;
+                                                      font-size: 20px;
+                                                      base-font-size: 20px;
+                                                       margin-bottom: 40px;'
+                                               value='<%= "收藏列表" %>' />
+                                    </div>
+                                </pe:container>
+                                <pe:container name='my_favorite_unsel' visible='true' style='position: relative;background:;'>
+                                    <div style='width: 160px;'>
+                                        <input type='button'
+                                               onclick='sel'
+                                               name='3'
+                                               class='opus_menu_button_unsel'
+                                               textscale=1.2
+                                               style='width: 160px;
+                                                      font-weight: bold;
+                                                      font-size: 20px;
+                                                      base-font-size: 20px;
+                                                       margin-bottom: 40px;
+                                                       color: #FFFFFF;'
+                                               value='<%= "收藏列表" %>' />
+                                    </div>
+                                </pe:container>
+                            </div>
+                            <div align='center'
+                                 style='height: 64px;
+                                        width: 160px;
+                                        margin-bottom: 20px;'>
+                                <pe:container name='my_history_sel' visible='false' style='position: relative;background:;'>
+                                    <div style='width: 160px;'>
+                                        <input type='button'
+                                               onclick='sel'
+                                               name='4'
+                                               class='opus_menu_button'
+                                               textscale=1.2
+                                               style='width: 160px;
+                                                      font-weight: bold;
+                                                      font-size: 20px;
+                                                      base-font-size: 20px;
+                                                       margin-bottom: 40px;'
+                                               value='<%= "访问历史" %>' />
+                                    </div>
+                                </pe:container>
+                                <pe:container name='my_history_unsel' visible='true' style='position: relative;background:;'>
+                                    <div style='width: 160px;'>
+                                        <input type='button'
+                                               onclick='sel'
+                                               name='4'
+                                               class='opus_menu_button_unsel'
+                                               textscale=1.2
+                                               style='width: 160px;
+                                                      font-weight: bold;
+                                                      font-size: 20px;
+                                                      base-font-size: 20px;
+                                                       margin-bottom: 40px;
+                                                       color: #FFFFFF;'
+                                               value='<%= "访问历史" %>' />
                                     </div>
                                 </pe:container>
                             </div>

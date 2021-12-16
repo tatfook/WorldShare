@@ -1,223 +1,160 @@
 --[[
 Title: Bookmark
-Author(s):  big
-Date: 2018.09.30
+Author(s): big
+CreateDate: 2018.09.30
+ModifyDate: 2021.12.16
 place: Foshan
 Desc: 
 use the lib:
 ------------------------------------------------------------
-local Bookmark = NPL.load("(gl)Mod/WorldShare/database/Bookmark.lua")
+local Bookmark = NPL.load('(gl)Mod/WorldShare/database/Bookmark.lua')
 ------------------------------------------------------------
 ]]
-local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
-local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 
 local Bookmark = NPL.export()
 
-Bookmark.tag = {
-    FAVORITE = "favorite"
-}
-
 function Bookmark:GetBookmark()
-    local playerController = Store:Getter("user/GetPlayerController")
+    local playerController = Mod.WorldShare.Store:Getter('user/GetPlayerController')
 
     if not playerController then
         playerController = GameLogic.GetPlayerController()
-        local SetPlayerController = Store:Action("user/SetPlayerController")
+        local SetPlayerController = Mod.WorldShare.Store:Action('user/SetPlayerController')
 
         SetPlayerController(playerController)
     end
 
-    local bookmark = playerController:LoadLocalData("bookmark", nil, true)
-
-    if type(bookmark) ~= "table" then
-        return {}, {}
-    end
-
-    local tree
-    local items
-
-    if type(bookmark["tree"]) == "table" then
-        tree = bookmark["tree"]
-    end
-
-    if type(bookmark["items"] == "table") then
-        items = bookmark["items"]
-    end
-
-    return tree or {}, items or {}
+    return playerController:LoadLocalData('my_bookmark', {}, true)
 end
 
-function Bookmark:SetBookmark(tree, items)
-    if type(tree) ~= "table" or type(items) ~= "table" then
-        return false
+function Bookmark:SetBookmark(items)
+    if not items or type(items) ~= 'table' then
+        return
     end
 
     local playerController = GameLogic.GetPlayerController()
-
-    local list = {
-        tree = tree,
-        items = items
-    }
-
-    playerController:SaveLocalData("bookmark", list, true)
+    playerController:SaveLocalData('my_bookmark', items, true)
 end
 
-function Bookmark:GetItem(displayName)
-    if type(displayName) ~= "string" then
-        return false
+function Bookmark:GetItemByProjectId(id)
+    if not id or type(id) ~= 'number' then
+        return
     end
 
-    local BookmarkTree, BookmarkItems = self:GetBookmark()
+    local BookmarkItems = self:GetBookmark()
 
-    if type(BookmarkItems) ~= "table" then
-        return false
+    if not BookmarkItems or type(BookmarkItems) ~= 'table' then
+        return nil
     end
 
     for key, item in ipairs(BookmarkItems) do
-        if item and item.displayName and item.displayName == displayName then
+        if item and
+           item.projectId and
+           item.projectId == id then
             return item
         end
     end
-
-    return false
 end
 
-function Bookmark:SetItem(displayName, curItem)
-    local tree, items = self:GetBookmark()
-
-    if type(curItem) ~= "table" and not curItem.displayName then
-        return false
+function Bookmark:GetItemByFoldername(foldername)
+    if not foldername or type(foldername) ~= 'string' then
+        return
     end
 
-    items = commonlib.Array:new(items)
+    local BookmarkItems = self:GetBookmark()
 
-    for key, item in ipairs(items) do
-        if item and item.displayName and item.displayName == curItem.displayName then
-            items:remove(key)
-            break
+    if not BookmarkItems or type(BookmarkItems) ~= 'table' then
+        return nil
+    end
+
+    for key, item in ipairs(BookmarkItems) do
+        if item and
+           item.foldername and
+           item.foldername == foldername then
+            return item
         end
     end
-
-    items:push_back(curItem)
-
-    self:SetBookmark(tree, items)
 end
 
-function Bookmark:RemoveItem(displayName)
-    local tree, items = self:GetBookmark()
-
-    if type(displayName) ~= "string" then
-        return false
+function Bookmark:SetItem(world)
+    if not world or
+       type(world) ~= 'table' or
+       (not world.foldername and not world.kpProjectId) then
+        return
     end
 
-    for key, item in ipairs(items) do
-        if item['displayName'] and displayName then
-            if item['displayName'] == displayName then
-                for k=key, #items do
-                    items[k] = items[k+1]
-                end
+    local items = self:GetBookmark()
+    local curData = {
+        date = os.time(),
+        foldername = world.foldername,
+        name = world.name,
+        projectId = world.kpProjectId,
+    }
+
+    local beExisted = false
+
+    if curData.projectId then
+        for key, item in ipairs(items) do
+            if item and
+               item.projectId and
+               item.projectId == curData.projectId then
+                items[key] = curData
+                beExisted = true
+                break
+            end
+        end
+    else
+        for key, item in ipairs(items) do
+            if item and
+               item.foldername and
+               item.foldername == curData.foldername then
+                items[key] = curData
+                beExisted = true
                 break
             end
         end
     end
 
-    self:SetBookmark(tree, items)
+    if not beExisted then
+        items[#items + 1] = curData
+    end
+
+    self:SetBookmark(items)
 end
 
-function Bookmark:SetTag(displayName, tagName)
-    if type(displayName) ~= "string" or type(tagName) ~= "string" then
-        return false
+function Bookmark:RemoveItemByProjectId(id)
+    if not id or type(id) ~= 'number' then
+        return
     end
 
-    local curItem = self:GetItem(displayName)
+    local items = self:GetBookmark()
 
-    if not curItem then
-        return false
-    end
-
-    local tagArray = commonlib.Array:new(commonlib.split(curItem["tag"] or "", ","))
-
-    local tagBeExist = false
-
-    for key, item in ipairs(tagArray) do
-        if item == tagName then
-            tagArray:remove(key)
-            tagBeExist = true
+    for key, item in ipairs(items) do
+        if item and
+           item.projectId and
+           item.projectId == id then
+            items[key] = nil
             break
         end
     end
 
-    if not tagBeExist then
-        -- add
-        tagArray:push_back(tagName)
-    end
-
-    curItem["tag"] = Mod.WorldShare.Utils.Implode(",", tagArray)
-
-    self:SetItem(displayName, curItem)
+    self:SetBookmark(items)
 end
 
-function Bookmark:RemoveTag(displayName, tagName)
-    if type(displayName) ~= "string" or type(tagName) ~= "string" then
-        return false
+function Bookmark:RemoveItemByFoldername(foldername)
+    if not id or type(foldername) ~= 'string' then
+        return
     end
 
-    local curItem = self:GetItem(displayName)
+    local items = self:GetBookmark()
 
-    if not curItem then
-        return false
-    end
-
-    local tagArray = commonlib.Array:new(commonlib.split(curItem["tag"] or "", ","))
-
-    for key, item in ipairs(tagArray) do
-        if item == tagName then
-            tagArray:remove(key)
+    for key, item in ipairs(items) do
+        if item and
+           item.foldername and
+           item.foldername == foldername then
+            items[key] = nil
             break
         end
     end
 
-    curItem["tag"] = Mod.WorldShare.Utils.Implode(",", tagArray)
-
-    self:SetItem(displayName, curItem)
-end
-
-function Bookmark:IsTagExist(displayName, tagName)
-    if type(displayName) ~= "string" or type(tagName) ~= "string" then
-        return false
-    end
-
-    local curItem = self:GetItem(displayName)
-
-    if not curItem then
-        return false
-    end
-
-    local tagArray = commonlib.Array:new(commonlib.split(curItem["tag"] or "", ","))
-
-    local tagBeExist = false
-
-    for key, item in ipairs(tagArray) do
-        if item == tagName then
-            tagBeExist = true
-            break
-        end
-    end
-
-    return tagBeExist
-end
-
-function Bookmark:IsItemExist(displayName)
-    if type(displayName) ~= 'string' then
-        return false
-    end
-
-    local curItem = self:GetItem(displayName)
-
-    if not curItem then
-        return false
-    else
-        return true
-    end
+    self:SetBookmark(items)
 end

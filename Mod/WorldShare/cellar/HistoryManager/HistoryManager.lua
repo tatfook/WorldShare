@@ -1,43 +1,42 @@
 --[[
 Title: History Manager
-Author(s):  big
-Date: 2018.09.03
+Author(s): big
+CreateDate: 2018.09.03
+ModifyDate: 2021.12.16
 place: Foshan
 Desc: 
 use the lib:
 ------------------------------------------------------------
-local HistoryManager = NPL.load("(gl)Mod/WorldShare/cellar/HistoryManager/HistoryManager.lua")
+local HistoryManager = NPL.load('(gl)Mod/WorldShare/cellar/HistoryManager/HistoryManager.lua')
 ------------------------------------------------------------
 ]]
-local Screen = commonlib.gettable("System.Windows.Screen")
-local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
+local Screen = commonlib.gettable('System.Windows.Screen')
 
-local MdParser = NPL.load("(gl)Mod/WorldShare/parser/MdParser.lua")
-local HttpRequest = NPL.load("(gl)Mod/WorldShare/service/HttpRequest.lua")
-local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
-local KeepworkServiceProject = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Project.lua")
-local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
-local Bookmark = NPL.load("(gl)Mod/WorldShare/database/Bookmark.lua")
-local Config = NPL.load("(gl)Mod/WorldShare/config/Config.lua")
+local MdParser = NPL.load('(gl)Mod/WorldShare/parser/MdParser.lua')
+local HttpRequest = NPL.load('(gl)Mod/WorldShare/service/HttpRequest.lua')
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
+local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
+local Config = NPL.load('(gl)Mod/WorldShare/config/Config.lua')
 
 local HistoryManager = NPL.export()
 
 function HistoryManager:ShowPage()
-    local params = Mod.WorldShare.Utils.ShowWindow(0, 0, "Mod/WorldShare/cellar/HistoryManager/HistoryManager.html", "HistoryManager", 0, 0, "_fi", false)
+    local params = Mod.WorldShare.Utils.ShowWindow(0, 0, 'Mod/WorldShare/cellar/HistoryManager/HistoryManager.html', 'HistoryManager', 0, 0, '_fi', false)
 
-    Screen:Connect("sizeChanged", HistoryManager, HistoryManager.OnScreenSizeChange, "UniqueConnection")
+    Screen:Connect('sizeChanged', HistoryManager, HistoryManager.OnScreenSizeChange, 'UniqueConnection')
     HistoryManager.OnScreenSizeChange()
 
     params._page.OnClose = function()
         Mod.WorldShare.Store:Remove('page/HistoryManager')
-        Screen:Disconnect("sizeChanged", HistoryManager, HistoryManager.OnScreenSizeChange)
+        Screen:Disconnect('sizeChanged', HistoryManager, HistoryManager.OnScreenSizeChange)
     end
 
     self:GetWorldList()
 end
 
 function HistoryManager:SetPage()
-    Mod.WorldShare.Store:Set("page/HistoryManager", document:GetPageCtrl())
+    Mod.WorldShare.Store:Set('page/HistoryManager', document:GetPageCtrl())
 end
 
 function HistoryManager.Refresh()
@@ -65,26 +64,26 @@ function HistoryManager.OnScreenSizeChange()
 
     local height = math.floor(Screen:GetHeight())
 
-    local areaHeaderNode = HistoryManagerPage:GetNode("area_header")
+    local areaHeaderNode = HistoryManagerPage:GetNode('area_header')
     local marginLeft = math.floor((Screen:GetWidth() - 850) / 2)
 
     areaHeaderNode:SetCssStyle('margin-left', marginLeft)
 
-    local areaContentNode = HistoryManagerPage:GetNode("area_content")
+    local areaContentNode = HistoryManagerPage:GetNode('area_content')
 
 
     areaContentNode:SetCssStyle('height', height - 47)
     areaContentNode:SetCssStyle('margin-left', marginLeft)
 
-    local splitNode = HistoryManagerPage:GetNode("area_split")
+    local splitNode = HistoryManagerPage:GetNode('area_split')
 
-    splitNode:SetCssStyle("height", height - 47)
+    splitNode:SetCssStyle('height', height - 47)
 
     HistoryManager.Refresh()
 end
 
 function HistoryManager:HasData()
-    local historyItems = Mod.WorldShare.Store:Get("user/historyItems")
+    local historyItems = Mod.WorldShare.Store:Get('user/historyItems')
 
     return true
 end
@@ -141,7 +140,7 @@ function HistoryManager:GetWorldList()
     local mergeItems = self:MergeItems(localItems, bookmarkItems)
 
     mergeTree['favorite'] = {
-        displayName = L"收藏",
+        displayName = L'收藏',
         name = 'favorite',
         type = 'category'
     }
@@ -239,7 +238,7 @@ function HistoryManager:UpdateList()
         return false
     end
 
-    HistoryManagerPage:GetNode("historyTree"):SetAttribute('DataSource', treeList)
+    HistoryManagerPage:GetNode('historyTree'):SetAttribute('DataSource', treeList)
     HistoryManagerPage:GetNode('historyItems'):SetAttribute('DataSource', itemsList)
 end
 
@@ -292,8 +291,8 @@ function HistoryManager:SortItems(items)
 
     local itemsListArray = commonlib.ArrayMap:new()
 
-    local today = os.date("%Y%m%d", os.time())
-    local yesterday = os.date("%Y%m%d", os.time() - 86400)
+    local today = os.date('%Y%m%d', os.time())
+    local yesterday = os.date('%Y%m%d', os.time() - 86400)
 
     itemsListArray:push(today, commonlib.Array:new())
     itemsListArray:push(yesterday, commonlib.Array:new())
@@ -390,7 +389,7 @@ function HistoryManager:DeleteItem(index)
     local itemsList = Mod.WorldShare.Store:Get('user/historyItemsList')
 
     _guihelper.MessageBox(
-        L"是否删除此记录？",
+        L'是否删除此记录？',
         function(res)
             if (res and res == 6) then
                 local currentItem = itemsList[index]
@@ -441,43 +440,22 @@ function HistoryManager.FormatDate(date)
 
     local formatDate = ''
 
-    local today = os.date("%Y%m%d", os.time())
-    local yesterday = os.date("%Y%m%d", os.time() - 86400)
+    local today = os.date('%Y%m%d', os.time())
+    local yesterday = os.date('%Y%m%d', os.time() - 86400)
 
     if tonumber(date) == tonumber(today) then
-        formatDate = format("%s-", L'今天')
+        formatDate = format('%s-', L'今天')
     end
 
     if tonumber(date) == tonumber(yesterday) then
-        formatDate = format("%s-", L'昨天')
+        formatDate = format('%s-', L'昨天')
     end
 
     local year = string.sub(date, 1, 4)
     local month = string.sub(date, 5, 6)
     local day = string.sub(date, 7, 8)
 
-    return format("%s%s%s%s%s%s%s", formatDate, year or '', L"年", month or '', L"月", day or '', L"日")
-end
-
--- That will be execute when world loaded
-function HistoryManager:OnWorldLoad()
-    local curLesson = Mod.WorldShare.Store:Getter("lesson/GetCurLesson")
-    local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
-
-    if curLesson then
-        self:WriteLessonRecord(curLesson)
-        return true
-    end
-
-    if currentWorld then
-        self:WriteWorldRecord(currentWorld)
-    end
-
-    self:Visit()
-end
-
-function HistoryManager:Visit()
-    KeepworkServiceProject:Visit(KeepworkServiceProject:GetProjectId())
+    return format('%s%s%s%s%s%s%s', formatDate, year or '', L'年', month or '', L'月', day or '', L'日')
 end
 
 function HistoryManager:WriteLessonRecord(curLesson)
@@ -486,78 +464,12 @@ function HistoryManager:WriteLessonRecord(curLesson)
     end
 
     local curData = {
-        date = os.date("%Y%m%d", os.time()),
+        date = os.date('%Y%m%d', os.time()),
         displayName = curLesson:GetName(),
         revision = 0,
-        tag = "",
-        worldType="class" 
+        tag = '',
+        worldType='class' 
     }
 
     Bookmark:SetItem(displayName, curData)
-end
-
-function HistoryManager:WriteWorldRecord(currentWorld)
-    if type(currentWorld) ~= "table" then
-        return false
-    end
-
-    local curData
-
-    if KeepworkService:IsSignedIn() then
-        local username = Mod.WorldShare.Store:Get('user/username')
-
-        curData = {
-            author = username,
-            date = os.date("%Y%m%d", os.time()),
-            displayName = currentWorld.foldername,
-            revision = currentWorld.revision,
-            size = currentWorld.size,
-            tag = "",
-            worldType="world" 
-        }
-    else
-        curData = {
-            date = os.date("%Y%m%d", os.time()),
-            displayName = currentWorld.foldername,
-            revision = currentWorld.revision,
-            size = currentWorld.size,
-            tag = "",
-            worldType="world" 
-        }
-    end
-
-    local displayName = currentWorld.foldername
-
-    if not displayName then
-        return false
-    end
-
-    Bookmark:SetItem(displayName, curData)
-end
-
-function HistoryManager:Enter(index)
-    if type(index) ~= 'number' then
-        return false
-    end
-
-    local historyItemsList = Mod.WorldShare.Store:Get('user/historyItemsList')
-
-    if type(historyItemsList) ~= 'table' or type(historyItemsList[index]) ~= 'table' then
-        return false
-    end
-
-    local curItem = historyItemsList[index]
-
-    if curItem.worldType == 'world' and curItem.displayName then
-        local compareWorldList = Mod.WorldShare.Store:Get('world/compareWorldList') or {}
-
-        for key, item in ipairs(compareWorldList) do
-            if item.foldername == curItem.displayName then
-                InternetLoadWorld.LoadWorld(item)
-                return true
-            end
-        end
-    end
-
-    _guihelper.MessageBox(L"本地世界已删除")
 end
