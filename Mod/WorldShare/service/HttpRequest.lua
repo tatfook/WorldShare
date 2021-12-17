@@ -318,13 +318,13 @@ function HttpRequest:PostFields(url, params, headers, success, error, timeout)
         end
 
         if item.type == 'string' then
-            postfields = postfields .. 'Content-Disposition: form-data; name=\'' .. item.name .. '\'\n\n' ..
+            postfields = postfields .. 'Content-Disposition: form-data; name="' .. item.name .. '"\n\n' ..
                          item.value .. '\n'
         end
 
         if item.type == 'file' then
             if item.filename then
-                postfields = postfields .. 'Content-Disposition: form-data; name=\'file\'; filename=\'' .. item.filename .. '\'\n' ..
+                postfields = postfields .. 'Content-Disposition: form-data; name="file"; filename="' .. item.filename .. '"\n' ..
                              'Content-Type: application/octet-stream\n' ..
                              'Content-Transfer-Encoding: binary\n\n' ..
                              item.value .. '\n'

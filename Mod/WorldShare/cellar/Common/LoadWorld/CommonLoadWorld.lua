@@ -157,6 +157,7 @@ function CommonLoadWorld:EnterCourseWorld(aiCourseId, preRelease, releaseId)
 
             world:DownloadRemoteFile(function(bSucceed, msg)
                 if bSucceed then
+                    DownloadWorld.Close()
                     Game.Start(url)
                 end
             end)
