@@ -1,0 +1,80 @@
+<html>
+    <body>
+        <pe:mcml>
+            <script type='text/npl'>
+                <![CDATA[
+                    local SyncMain = NPL.load('../Main.lua')
+
+                    page = document:GetPageCtrl()
+
+                    function close()
+                        page:CloseWindow()
+                    end
+
+                    function replace()
+                        SyncMain:BackupWorld()
+                        SyncMain:SyncToLocal(page.afterSyncCallback)
+                        close()
+                    end
+
+                    function cancel()
+                        SyncMain:ShowStartSyncPage(page.afterSyncCallback)
+                        close()
+                    end
+
+                    function get_window_style()
+                        return Mod.WorldShare.Utils.FixCenter(500, 270)
+                    end
+
+                    function get_current_revision()
+                        return Mod.WorldShare.Store:Get('world/currentRevision') or ''
+                    end
+
+                    function get_remote_revision()
+                        return Mod.WorldShare.Store:Get('world/remoteRevision') or ''
+                    end
+                ]]>
+            </script>
+            <style type='text/mcss' src='Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss'></style>
+            <kp:window
+                width='500'
+                height='270'
+                style='<%= get_window_style()%>'
+                title='<%= L"与数据源同步" %>'>
+                <div height='40px'></div>
+                <div style='font-size: 18px;
+                            base-font-size: 18px;
+                            padding-top: 55px'>
+                    <div align='center'
+                         style='width: 285px;'>
+                        <div>
+                            <%= format(L'你是否确定用远程的更低的版本%s,', get_remote_revision()) %>
+                        </div>
+                        <div>
+                            <%= format(L'替换本地更高的版本%s？', get_current_revision()) %>
+                        </div>
+                    </div>
+                    <div align='center'
+                         style='margin-top:30px;
+                                width: 285px;'>
+                        <input type='button'
+                               onclick='replace'
+                               class='theme1_gray_button'
+                               style='width: 70px;
+                                      height: 35px;'
+                               name=''
+                               value='<%= L"替换" %>' />
+                        <input type='button'
+                               onclick='cancel'
+                               class='theme1_gray_button'
+                               style='margin-left: 145px;
+                                      width: 70px;
+                                      height: 35px;'
+                               name=''
+                               value='<%= L"取消" %>' />
+                    </div>
+                </div>
+            </kp:window>
+        </pe:mcml>
+    </body>
+</html>

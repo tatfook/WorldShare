@@ -1,0 +1,95 @@
+﻿<body>
+    <pe:mcml>
+        <script type='text/npl'>
+            <![CDATA[
+                local SyncMain = NPL.load('../Main.lua')
+
+                local page = document:GetPageCtrl()
+                Mod.WorldShare.Store:Set('page/BeyondVolume', document:GetPageCtrl())
+
+                local bEnabled = page:GetRequestParam('bEnabled')
+
+                function get_title()
+                    if bEnabled == 'true' then
+                        return L'提示'
+                    else
+                        return L'购买VIP'
+                    end
+                end
+
+                function get_beyond_msg()
+                    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+
+                    local str
+                    if bEnabled == 'true' then
+                        str = format(L'世界《%s》文件总大小超过了%dMB，是否清理文件？(请使用MP3、OGG格式音频，避免使用FBX格式)', currentWorld.foldername, 50)
+                    else
+                        str = format(L'世界《%s》文件总大小超过了%dMB，是否清理文件？(请使用MP3、OGG格式音频，避免使用FBX格式，VIP用户最大可上传%dMB)', currentWorld.foldername, 25, 50)
+                    end
+
+                    return str
+                end
+
+                function is_show_vip_button()
+                    return bEnabled == 'false'
+                end
+
+                function open_world_folder()
+                    SyncMain:CloseBeyondVolumePage()
+
+                    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+                    ParaGlobal.ShellExecute('open', currentWorld and currentWorld.worldpath, '', '', 1);
+                end
+
+                function get_window_style()
+                    return Mod.WorldShare.Utils.FixCenter(500, 270)
+                end
+
+                function close()
+                    SyncMain:CloseBeyondVolumePage()
+                end
+            ]]>
+        </script>
+        <style type='text/mcss' src='Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss'></style>
+        <kp:window width='500'
+                   height='270'
+                   style='<%= get_window_style() %>'
+                   title='<%= get_title() %>'
+                   onclose='close()'>
+            <div height='40px'></div>
+            <div style='font-size: 16px;
+                        base-font-size: 16px;
+                        padding-top: 30px;'>
+                <div align='center'
+                     style='width: 350px;'>
+                    <div>
+                        <%= get_beyond_msg() %>
+                    </div>
+                    <div style='margin-top: 10px;'>
+                        <%= L'是否现在清理？' %>
+                    </div>
+                </div>
+                <div align='center'
+                     style='width: 350px;
+                            margin-top: 30px;'>
+                    <input type='button'
+                           onclick='open_world_folder'
+                           class='theme1_baby_bule_button'
+                           style='float: left;
+                                  width: 90px;
+                                  height: 35px;'
+                           value='<%= L"是" %>' />
+                    <input type='button'
+                           onclick='close'
+                           class='theme1_baby_bule_button'
+                           style='float: left;
+                                  width: 90px;
+                                  height: 35px;
+                                  margin-left: 170px;'
+                                  value='<%= L"否" %>'/>
+                </div>
+            </div>
+        </kp:window>
+    </pe:mcml>
+</body>
+</html>

@@ -2,7 +2,7 @@
 Title: SyncMain
 Author(s): big
 CreateDate: 2017.04.17
-ModifyDate: 2021.09.20
+ModifyDate: 2021.12.17
 Desc: 
 use the lib:
 ------------------------------------------------------------
@@ -52,22 +52,25 @@ function SyncMain:OnWorldLoad(callback)
 end
 
 function SyncMain:ShowNewVersionFoundPage(callback)
-    local params = SyncMain:ShowDialog('Mod/WorldShare/cellar/Theme/Sync/NewVersionFound.html', 'Mod.WorldShare.NewVersionFound')
+    local params = SyncMain:ShowDialog(
+                    'Mod/WorldShare/cellar/Sync/Theme/NewVersionFound.html',
+                    'Mod.WorldShare.Sync.NewVersionFound'
+                   )
 
     params._page.afterSyncCallback = callback
 end
 
 function SyncMain:ShowStartSyncPage(useOffline, callback)
     local params = SyncMain:ShowDialog(
-        'Mod/WorldShare/cellar/Theme/Sync/StartSync.html?useOffline=' .. (useOffline and 'true' or 'false'),
-        'Mod.WorldShare.StartSync'
+        'Mod/WorldShare/cellar/Sync/Theme/StartSync.html?useOffline=' .. (useOffline and 'true' or 'false'),
+        'Mod.WorldShare.Sync.StartSync'
     )
 
     params._page.afterSyncCallback = callback
 end
 
 function SyncMain:CloseStartSyncPage()
-    local StartSyncPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.StartSync')
+    local StartSyncPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Sync.StartSync')
 
     if StartSyncPage then
         StartSyncPage:CloseWindow()
@@ -75,11 +78,14 @@ function SyncMain:CloseStartSyncPage()
 end
 
 function SyncMain:ShowBeyondVolume(bEnabled)
-    SyncMain:ShowDialog('Mod/WorldShare/cellar/Sync/Templates/BeyondVolume.html?bEnabled=' .. (bEnabled and 'true' or 'false'), 'Mod.WorldShare.BeyondVolume')
+    SyncMain:ShowDialog(
+        'Mod/WorldShare/cellar/Sync/Theme/BeyondVolume.html?bEnabled=' .. (bEnabled and 'true' or 'false'),
+        'Mod.WorldShare.Sync.BeyondVolume'
+    )
 end
 
 function SyncMain:CloseBeyondVolumePage()
-    local BeyondVolumePage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.BeyondVolume')
+    local BeyondVolumePage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Sync.BeyondVolume')
 
     if BeyondVolumePage then
         BeyondVolumePage:CloseWindow()
@@ -87,13 +93,19 @@ function SyncMain:CloseBeyondVolumePage()
 end
 
 function SyncMain:ShowStartSyncUseLocalPage(callback)
-    local params = SyncMain:ShowDialog('Mod/WorldShare/cellar/Sync/Templates/UseLocal.html', 'Mod.WorldShare.StartSyncUseLocal')
+    local params = SyncMain:ShowDialog(
+                    'Mod/WorldShare/cellar/Sync/Theme/UseLocal.html',
+                    'Mod.WorldShare.Sync.UseLocal'
+                   )
 
     params._page.afterSyncCallback = callback
 end
 
 function SyncMain:ShowStartSyncUseDataSourcePage(callback)
-    local params = SyncMain:ShowDialog('Mod/WorldShare/cellar/Sync/Templates/UseDataSource.html', 'Mod.WorldShare.StartSyncUseDataSource')
+    local params = SyncMain:ShowDialog(
+                    'Mod/WorldShare/cellar/Sync/Theme/UseDataSource.html',
+                    'Mod.WorldShare.Sync.UseDataSource'
+                   )
 
     params._page.afterSyncCallback = callback
 end
@@ -394,7 +406,7 @@ function SyncMain:CheckTagName(callback)
                 local params = Mod.WorldShare.Utils.ShowWindow(
                     630,
                     240,
-                    'Mod/WorldShare/cellar/Theme/Sync/CheckTagName.html?remote_tagname=' ..
+                    'Mod/WorldShare/cellar/Sync/Theme/CheckTagName.html?remote_tagname=' ..
                         data.extra.worldTagName ..
                         '&local_tagname=' ..
                         name,
