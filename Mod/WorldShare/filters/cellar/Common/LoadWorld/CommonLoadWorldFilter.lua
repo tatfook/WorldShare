@@ -17,6 +17,13 @@ local CommonLoadWorldFilter = NPL.export()
 
 function CommonLoadWorldFilter:Init()
     GameLogic.GetFilters():add_filter(
+        'cellar.common.common_load_world.go_to_url',
+        function(...)
+            CommonLoadWorld.GotoUrl(...)
+        end
+    )
+
+    GameLogic.GetFilters():add_filter(
         'cellar.common.common_load_world.enter_community_world',
         function(...)
             CommonLoadWorld:EnterCommunityWorld(...)

@@ -478,7 +478,6 @@ function Compare:RefreshWorldList(callback, statusFilter)
     local localWorlds = LocalServiceWorld:GetWorldList()
 
     if not KeepworkService:IsSignedIn() then
-        -- local currentWorldList = LocalServiceWorld:MergeInternetLocalWorldList(localWorlds)
         local currentWorldList = localWorlds
 
         local searchText = Mod.WorldShare.Store:Get('world/searchText')
@@ -495,7 +494,6 @@ function Compare:RefreshWorldList(callback, statusFilter)
             end
 
             currentWorldList = searchWorldList
-            -- LocalServiceWorld:SetInternetLocalWorldList(currentWorldList)
         end
 
         local searchFolderName = Mod.WorldShare.Store:Get('world/searchFolderName')
@@ -510,7 +508,6 @@ function Compare:RefreshWorldList(callback, statusFilter)
             end
 
             currentWorldList = searchWorldList
-            -- LocalServiceWorld:SetInternetLocalWorldList(currentWorldList)
         end
 
         self.SortWorldList(currentWorldList)
@@ -523,8 +520,6 @@ function Compare:RefreshWorldList(callback, statusFilter)
         KeepworkServiceWorld:MergeRemoteWorldList(
             localWorlds,
             function(currentWorldList)
-                -- currentWorldList = LocalServiceWorld:MergeInternetLocalWorldList(currentWorldList)
-
                 if statusFilter and statusFilter == 'LOCAL' then
                     local filterCurrentWorldList = {}
 
@@ -537,7 +532,6 @@ function Compare:RefreshWorldList(callback, statusFilter)
                     end
 
                     currentWorldList = filterCurrentWorldList
-                    -- LocalServiceWorld:SetInternetLocalWorldList(currentWorldList)
                 end
 
                 if statusFilter and statusFilter == 'ONLINE' then
@@ -554,7 +548,6 @@ function Compare:RefreshWorldList(callback, statusFilter)
                     end
 
                     currentWorldList = filterCurrentWorldList
-                    -- LocalServiceWorld:SetInternetLocalWorldList(currentWorldList)
                 end
 
                 local searchText = Mod.WorldShare.Store:Get('world/searchText')
@@ -571,7 +564,6 @@ function Compare:RefreshWorldList(callback, statusFilter)
                     end
 
                     currentWorldList = searchWorldList
-                    -- LocalServiceWorld:SetInternetLocalWorldList(currentWorldList)
                 end
 
                 local searchFolderName = Mod.WorldShare.Store:Get('world/searchFolderName')
@@ -586,7 +578,6 @@ function Compare:RefreshWorldList(callback, statusFilter)
                     end
 
                     currentWorldList = searchWorldList
-                    -- LocalServiceWorld:SetInternetLocalWorldList(currentWorldList)
                 end
 
                 self.SortWorldList(currentWorldList)

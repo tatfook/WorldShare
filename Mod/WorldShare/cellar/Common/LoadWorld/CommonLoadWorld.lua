@@ -16,6 +16,8 @@ local DownloadWorld = commonlib.gettable('MyCompany.Aries.Game.MainLogin.Downloa
 local RemoteWorld = commonlib.gettable('MyCompany.Aries.Creator.Game.Login.RemoteWorld')
 local WorldCommon = commonlib.gettable('MyCompany.Aries.Creator.WorldCommon')
 local Screen = commonlib.gettable('System.Windows.Screen')
+local RemoteUrl = commonlib.gettable('MyCompany.Aries.Creator.Game.Login.RemoteUrl')
+local ParaWorldLessons = commonlib.gettable('MyCompany.Aries.Game.MainLogin.ParaWorldLessons')
 
 -- service
 local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
@@ -45,39 +47,43 @@ local GitEncoding = NPL.load('(gl)Mod/WorldShare/helper/GitEncoding.lua')
 local CommonLoadWorld = NPL.export()
 
 function CommonLoadWorld.GotoUrl(url)
-	NPL.load("(gl)script/apps/Aries/Creator/Game/Login/ParaWorldLessons.lua");
-	local ParaWorldLessons = commonlib.gettable("MyCompany.Aries.Game.MainLogin.ParaWorldLessons")
-	local bIsLessonWorld = ParaWorldLessons.EnterWorldById(url)
-	if(not bIsLessonWorld) then
-		local cmdName = url:match("^/(%w+)");
-		if(cmdName) then
-			NPL.load("(gl)script/apps/Aries/Creator/Game/Commands/CommandManager.lua");
-			local CommandManager = commonlib.gettable("MyCompany.Aries.Game.CommandManager");
-			CommandManager:RunCommand(url);
-			return true;
-		end
-
-		NPL.load("(gl)script/apps/Aries/Creator/Game/Login/RemoteUrl.lua");
-		local RemoteUrl = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.RemoteUrl");
-		local urlObj = RemoteUrl:new():Init(url);
-		if(urlObj and urlObj:IsRemoteServer()) then
-			LOG.std(nil, "debug", "OnAddSearchPage", {urlObj:GetHost(), urlObj:GetPort()});
-			NPL.load("(gl)script/apps/Aries/Creator/Game/Commands/CommandManager.lua");
-			local CommandManager = commonlib.gettable("MyCompany.Aries.Game.CommandManager");
-			
-			local relativePath = urlObj:GetRelativePath() or ""
-			local room_key = relativePath:match("^@(.+)")
-			if(room_key and room_key~="") then
-				CommandManager:RunCommand(string.format("/connect -tunnel %s %s %s", room_key, urlObj:GetHost(), urlObj:GetPort() or 8099));	
-			else
-				CommandManager:RunCommand(string.format("/connect %s %s", urlObj:GetHost(), urlObj:GetPort() or 8099));	
-			end
-			return true;
-		elseif(not url or url == "") then
-			_guihelper.MessageBox(L"请输入服务器IP地址, 例如: <br/>127.0.0.1 8099")
-			return true;
-		end
+	if ParaWorldLessons.EnterWorldById(url) then
+        return
 	end
+
+    local cmdName = url:match('^/(%w+)')
+
+    if cmdName then
+        GameLogic.RunCommand(url)
+        return
+    end
+
+    local urlObj = RemoteUrl:new():Init(url)
+
+    if urlObj and urlObj:IsRemoteServer() then        
+        local relativePath = urlObj:GetRelativePath() or ''
+        local room_key = relativePath:match('^@(.+)')
+
+        if room_key and room_key~='' then
+            GameLogic.RunCommand(string.format(
+                                    '/connect -tunnel %s %s %s',
+                                    room_key,
+                                    urlObj:GetHost(),
+                                    urlObj:GetPort() or 8099
+                                ))
+        else
+            GameLogic.RunCommand(string.format(
+                                    '/connect %s %s',
+                                    urlObj:GetHost(),
+                                    urlObj:GetPort() or 8099
+                                ))
+        end
+
+        return
+    elseif not url or url == '' then
+        _guihelper.MessageBox(L'请输入服务器IP地址, 例如: <br/>127.0.0.1 8099')
+        return
+    end
 end
 
 function CommonLoadWorld:EnterCommunityWorld()

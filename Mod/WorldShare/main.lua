@@ -61,6 +61,7 @@ NPL.load('(gl)script/apps/Aries/Creator/Game/Login/RemoteWorld.lua')
 NPL.load('(gl)script/apps/Aries/Creator/Game/Login/TeacherAgent/TeacherAgent.lua')
 NPL.load('(gl)script/apps/Aries/Creator/Game/Login/TeacherAgent/TeacherIcon.lua')
 NPL.load('(gl)script/apps/Aries/Creator/Game/Login/ParaWorldLessons.lua')
+NPL.load('(gl)script/apps/Aries/Creator/Game/Login/RemoteUrl.lua')
 NPL.load('(gl)script/apps/Aries/Creator/Game/main.lua')
 
 -- include aries create game movie
