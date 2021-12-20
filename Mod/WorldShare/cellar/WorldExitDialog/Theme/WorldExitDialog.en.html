@@ -1,372 +1,706 @@
-<!-- "Mod/WorldShare/login/WorldExitDialog.html" -->
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-    <title>exit world</title>
-</head>
-<body>
-    <pe:mcml>
-        <script type="text/npl" src="WorldExitDialog.lua" refresh="false">
-            <![CDATA[
-                -- UI
-                local WorldExitDialog = NPL.load('Mod/WorldShare/cellar/WorldExitDialog/WorldExitDialog.lua')
-                local ShareWorld = NPL.load('(gl)Mod/WorldShare/cellar/ShareWorld/ShareWorld.lua')
-                local Grade = NPL.load('Mod/WorldShare/cellar/WorldExitDialog/Grade.lua')
-                local Panorama = NPL.load('Mod/WorldShare/cellar/Panorama/Panorama.lua')
-                
-                -- service
-                local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
-                
-                -- lib
-                local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
-                local os = commonlib.gettable("System.os")
+<html>
+    <body>
+        <pe:mcml>
+            <script type='text/npl'
+                    src='WorldExitDialog.lua'
+                    refresh='false'>
+                <![CDATA[
+                    -- UI
+                    local WorldExitDialog = NPL.load('Mod/WorldShare/cellar/WorldExitDialog/WorldExitDialog.lua')
+                    local ShareWorld = NPL.load('(gl)Mod/WorldShare/cellar/ShareWorld/ShareWorld.lua')
+                    local Grade = NPL.load('Mod/WorldShare/cellar/WorldExitDialog/Grade.lua')
+                    local Panorama = NPL.load('Mod/WorldShare/cellar/Panorama/Panorama.lua')
+ 
+                    -- service
+                    local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
+                    local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+                    local KeepworkServiceWorld = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceWorld.lua')
 
-                WorldExitDialog:OnInit()
+                    -- lib
+                    local WorldCommon = commonlib.gettable('MyCompany.Aries.Creator.WorldCommon')
+                    local os = commonlib.gettable('System.os')
+                    local Desktop = commonlib.gettable('MyCompany.Aries.Creator.Game.Desktop')
 
-                function get_cur_world_name()
-                    local text = WorldCommon.GetWorldTag("name")
-                
-                    if _guihelper.GetTextWidth(text) > 400 then
-                        local function chsize(char)
-                            if not char then
-                                return 0
-                            elseif char > 240 then
-                                return 4
-                            elseif char > 225 then
-                                return 3
-                            elseif char > 192 then
-                                return 2
-                            else
-                                return 1
-                            end
-                        end
+                    local page = document:GetPageCtrl()
 
-                        local len = 0
-                        local count = 0
-                        local currentIndex = 1
+                    page:SetNodeValue('ShareWorldImage', WorldExitDialog.GetPreviewImagePath())
 
-                        while currentIndex <= #text do
-                            local charsizenum = chsize(string.byte(text, currentIndex))
-
-                            currentIndex = currentIndex + charsizenum
-
-                            if len >= 90 then
-                                break
-                            end
-
-                            if charsizenum ~= 0 then
-                                count = count + 1
-
-                                if charsizenum >= 3 then
-                                    len = len + 3.2
+                    function get_cur_world_name()
+                        local text = WorldCommon.GetWorldTag('name')
+                    
+                        if _guihelper.GetTextWidth(text) > 400 then
+                            local function chsize(char)
+                                if not char then
+                                    return 0
+                                elseif char > 240 then
+                                    return 4
+                                elseif char > 225 then
+                                    return 3
+                                elseif char > 192 then
+                                    return 2
                                 else
-                                    len = len + 1.6
+                                    return 1
                                 end
                             end
+
+                            local len = 0
+                            local count = 0
+                            local currentIndex = 1
+
+                            while currentIndex <= #text do
+                                local charsizenum = chsize(string.byte(text, currentIndex))
+
+                                currentIndex = currentIndex + charsizenum
+
+                                if len >= 90 then
+                                    break
+                                end
+
+                                if charsizenum ~= 0 then
+                                    count = count + 1
+
+                                    if charsizenum >= 3 then
+                                        len = len + 3.2
+                                    else
+                                        len = len + 1.6
+                                    end
+                                end
+                            end
+
+                            text = System.Core.UniString:new(text):sub(1, count).text .. '...'
                         end
 
-                        text = System.Core.UniString:new(text):sub(1, count).text .. '...'
+                        return text
                     end
 
-                    return text
-                end
-
-                function on_click_cancel()
-                    WorldExitDialog.OnDialogResult(_guihelper.DialogResult.Cancel)
-                end
-
-                function on_click_share_world()
-                    WorldExitDialog.OnDialogResult(_guihelper.DialogResult.Cancel);
-                    GameLogic.RunCommand("/menu file.uploadworld");
-                end
-
-                function on_click_save_and_exit()
-                    WorldExitDialog.OnDialogResult(_guihelper.DialogResult.Yes)
-                end
-
-                function save_as()
-                    WorldExitDialog.OnDialogResult(_guihelper.DialogResult.Cancel)
-                    GameLogic.RunCommand("/menu file.saveworldas")
-                end
-
-                function on_click_exit_without_save()
-                    WorldExitDialog.OnDialogResult(_guihelper.DialogResult.No)
-                end
-
-                function get_elapsed_unsaved_seconds()
-                    return math.floor(GameLogic.options:GetElapsedUnSavedTime()/1000);
-                end
-
-                function open_keepwork_project()
-                    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
-
-                    if currentWorld and currentWorld.kpProjectId and currentWorld.kpProjectId ~= 0 then
-                        ParaGlobal.ShellExecute("open", format("%s/pbl/project/%d/", KeepworkService:GetKeepworkUrl(), currentWorld.kpProjectId or 0), "", "", 1)
-                    end
-                end
-
-                function on_click_share_world()
-                    ShareWorld:Init()
-                    WorldExitDialog.OnDialogResult(_guihelper.DialogResult.Cancel)
-                end
-
-                function on_click_revision()
-                    GameLogic.RunCommand("/menu file.worldrevision");
-                end
-
-                function on_open_world_dir()
-                    GameLogic.RunCommand("/menu file.openworlddir");
-                end
-
-                function snapshot()
-                    WorldExitDialog.Snapshot();
-                end
-
-                function get_english_style(styleStr)
-                    if Mod.WorldShare.Utils.IsEnglish() then
-                        return styleStr
-                    else
-                        return ''
-                    end
-                end
-
-                function get_star()
-                    return Grade.starTable
-                end
-
-                function set_star(index)
-                    if not WorldExitDialog:CanSetStart() then
-                        return false
+                    function on_click_cancel()
+                        WorldExitDialog.OnDialogResult(_guihelper.DialogResult.Cancel)
                     end
 
-                    for key, item in ipairs(Grade.starTable) do
-                        if key > index then
-                            item.selected = false
+                    function on_click_share_world()
+                        WorldExitDialog.OnDialogResult(_guihelper.DialogResult.Cancel)
+                        GameLogic.RunCommand('/menu file.uploadworld')
+                    end
+
+                    function on_click_save_and_exit()
+                        KeepworkServiceWorld:LimitFreeUser(false, function(result)
+                            if result then
+                                WorldExitDialog.OnDialogResult(_guihelper.DialogResult.Yes)
+                            else
+                                _guihelper.MessageBox(L'操作被禁止了，免费用户最多只能拥有3个本地世界，请删除不要的本地世界，或者联系老师（或家长）开通权限。')
+                            end
+                        end)
+                    end
+
+                    function on_click_save_and_share()
+                        KeepworkServiceWorld:LimitFreeUser(false, function(result)
+                            if result then
+                                _guihelper.SetMessageBoxLockHide(true)
+                                GameLogic.QuickSave()
+                                _guihelper.SetMessageBoxLockHide(false)
+        
+                                WorldExitDialog.OnDialogResult(_guihelper.DialogResult.Cancel)
+                                --ShareWorld:Init()
+                                ShareWorld.callback = function()
+                                    _guihelper.MessageBox(L'保存并上传成功！是否要继续退出世界', function()
+                                        WorldExitDialog.OnDialogResult(_guihelper.DialogResult.No)
+                                    end)
+                                end
+                                --ShareWorld:ClosePage()
+                                ShareWorld:OnClick()
+                            else
+                                _guihelper.MessageBox(L'操作被禁止了，免费用户最多只能拥有3个本地世界，请删除不要的本地世界，或者联系老师（或家长）开通权限。')
+                            end
+                        end)
+                    end
+
+                    function save_as()
+                        WorldExitDialog.OnDialogResult(_guihelper.DialogResult.Cancel)
+                        GameLogic.RunCommand('/menu file.saveworldas')
+                    end
+
+                    function on_click_exit_without_save()
+                        WorldExitDialog.OnDialogResult(_guihelper.DialogResult.No)
+                    end
+
+                    function get_elapsed_unsaved_seconds()
+                        return math.floor(GameLogic.options:GetElapsedUnSavedTime()/1000)
+                    end
+
+                    function open_keepwork_project()
+                        local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+
+                        if currentWorld and
+                           currentWorld.kpProjectId and
+                           currentWorld.kpProjectId ~= 0 then
+                            ParaGlobal.ShellExecute(
+                                'open',
+                                format(
+                                    '%s/pbl/project/%d/',
+                                    KeepworkService:GetKeepworkUrl(),
+                                    currentWorld.kpProjectId or 0
+                                ),
+                                '',
+                                '',
+                                1
+                            )
+                        end
+                    end
+
+                    function on_click_share_world()
+                        ShareWorld:Init()
+                        WorldExitDialog.OnDialogResult(_guihelper.DialogResult.Cancel)
+                    end
+
+                    function on_click_revision()
+                        GameLogic.RunCommand('/menu file.worldrevision')
+                    end
+
+                    function on_open_world_dir()
+                        GameLogic.RunCommand('/menu file.openworlddir')
+                    end
+
+                    function snapshot()
+                        WorldExitDialog.Snapshot()
+                    end
+
+                    function get_english_style(styleStr)
+                        if Mod.WorldShare.Utils.IsEnglish() then
+                            return styleStr
                         else
-                            item.selected = true
+                            return ''
                         end
                     end
 
-                    update_score()
-                end
+                    function get_star()
+                        return Grade.starTable
+                    end
 
-                function update_score()
-                    local count_score = 0
+                    function set_star(index)
+                        if not WorldExitDialog:CanSetStart() then
+                            return false
+                        end
 
-                    for key, item in ipairs(Grade.starTable) do
-                        if item.selected == true then
-                            count_score = count_score + 1
+                        for key, item in ipairs(Grade.starTable) do
+                            if key > index then
+                                item.selected = false
+                            else
+                                item.selected = true
+                            end
+                        end
+
+                        update_score()
+                    end
+
+                    function update_score()
+                        local count_score = 0
+
+                        for key, item in ipairs(Grade.starTable) do
+                            if item.selected == true then
+                                count_score = count_score + 1
+                            end
+                        end
+
+                        score = count_score
+
+                        Grade:UpdateScore(score, function()
+                            WorldExitDialog:Refresh(0.01)
+                        end)
+                    end
+
+                    function get_project_id()
+                        local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+
+                        if currentWorld and
+                           currentWorld.kpProjectId and
+                           currentWorld.kpProjectId ~= 0 then
+                            return tostring(currentWorld.kpProjectId)
+                        end
+
+                        return L'上传世界后获得'
+                    end
+
+                    function has_project_id()
+                        local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+                        if currentWorld and
+                           currentWorld.kpProjectId and
+                           currentWorld.kpProjectId ~= 0 then
+                            return true
+                        else
+                            return false
                         end
                     end
 
-                    score = count_score
-
-                    Grade:UpdateScore(score, function()
-                        WorldExitDialog:Refresh(0.01)
-                    end)
-                end
-
-                function get_project_id()
-                    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
-
-                    if currentWorld and currentWorld.kpProjectId or currentWorld.kpProjectId ~= 0 then
-                        return tostring(currentWorld.kpProjectId)
+                    function is_rated()
+                        return WorldExitDialog.isRated
                     end
 
-                    return L"上传世界后获得"
-                end
-
-                function has_project_id()
-                    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
-
-                    if currentWorld and currentWorld.kpProjectId or currentWorld.kpProjectId ~= 0 then
-                        return true
-                    else
-                        return false
-                    end
-                end
-
-                function is_rated()
-                    return WorldExitDialog.isRated
-                end
-
-                function get_remote_revision()
-                    return Mod.WorldShare.Store:Get('world/remoteRevision') or L'无'
-                end
-
-                function get_current_revision()
-                    return Mod.WorldShare.Store:Get("world/currentRevision") or L'无'
-                end
-
-                function is_user_world()
-                    return WorldExitDialog:IsUserWorld()
-                end
-
-                function get_platform()
-                    return os.GetPlatform()
-                end
-
-                function share_short_video()
-                    on_click_cancel()
-                    GameLogic.RunCommand("/share")
-                end
-
-                function get_share_short_video_style()
-                    local default = "height: 30px;width: 95px;"
-
-                    local text = get_cur_world_name() --WorldCommon.GetWorldTag("name")
-                    local text_width = _guihelper.GetTextWidth(text) or 0
-
-                    if text_width > 0 then
-                        default = default .. "margin-left: " .. (text_width + 20) .. "px;"
+                    function get_remote_revision()
+                        return Mod.WorldShare.Store:Get('world/remoteRevision') or L'无'
                     end
 
-                    return default
-                end
+                    function get_current_revision()
+                        return Mod.WorldShare.Store:Get('world/currentRevision') or L'无'
+                    end
 
-                function share_panorama()
-                    on_click_cancel()
-                    Panorama:ShowCreate()
-                end
-            ]]>
-        </script>
-        <style type="text/mcss" src="Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss">
-            {
-                button1 = {
-                    width = 100,
-                    height = 32
-                },
-                button2 = {
-                    width = 140,
-                    height = 28,
-                    background = 'Texture/Aries/Creator/keepwork/worldshare_32bits.png;256 21 16 16:3 3 3 3',
-                    color = '#ffffff'
-                },
-                star_area = {
-                    ['margin-top'] = 0,
-                    ['margin-left'] = 50
-                },
-                dialog_container = {
-                    width = 610,
-                    height = 400
-                },
-                dialog_header = {
-                    height = 40
+                    function is_user_world()
+                        return WorldExitDialog:IsUserWorld()
+                    end
+
+                    function get_platform()
+                        return os.GetPlatform()
+                    end
+
+                    function share_short_video()
+                        on_click_cancel()
+                        GameLogic.RunCommand('/share')
+                    end
+
+                    function get_share_short_video_style()
+                        local default = 'height: 30px;width: 95px;'
+
+                        local text = get_cur_world_name()
+                        local text_width = _guihelper.GetTextWidth(text) or 0
+
+                        if text_width > 0 then
+                            default = default .. 'margin-left: ' .. (text_width + 20) .. 'px;'
+                        end
+
+                        return default
+                    end
+
+                    function share_panorama()
+                        on_click_cancel()
+                        Panorama:ShowCreate()
+                    end
+
+                    function reload()
+                        WorldExitDialog.OnDialogResult()
+                        GameLogic.RunCommand('/reload')
+                    end
+
+                    function notice()
+                        if KeepworkServiceSession:IsSignedIn() then
+                            local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
+
+                            if currentEnterWorld and currentEnterWorld.is_zip then
+                                return
+                            end
+
+                            local remote_revision = tonumber(Mod.WorldShare.Store:Get('world/remoteRevision') or 0)
+                            local current_revision = tonumber(Mod.WorldShare.Store:Get('world/currentRevision') or 0)
+
+                            if remote_revision < current_revision then
+                                return '<div style="margin-left: 20px;float:left;color: #ff6a00">注意：您还没有分享本地版本</div>'
+                            end
+                        end
+                    end
+
+                    function is_community_world_exit()
+                        if KeepworkServiceSession:IsSignedIn() then
+                            local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
+                            if currentEnterWorld.communityWorld then
+                                if currentEnterWorld.members and type(currentEnterWorld.members) == 'table' then
+                                    local username = Mod.WorldShare.Store:Get('user/username')
+
+                                    for key, item in ipairs(currentEnterWorld.members) do
+                                        if username == item then
+                                            return false
+                                        end
+                                    end
+
+                                end
+
+                                return true
+                            else
+                                return false
+                            end
+                        else
+                            return false
+                        end
+                    end
+
+                    function get_last_world_name()
+                        local lastWorld = Mod.WorldShare.Store:Get('world/lastWorld')
+
+                        if lastWorld then
+                            return format(L'你确定要离开当前世界，返回 <span style="color:#ff6a00">%s</span>？', lastWorld.text)
+                        else
+                            return ''
+                        end
+                    end
+
+                    function go_back()
+                        GameLogic.RunCommand('/loadworld -s back')
+                    end
+
+                    function is_show_unlock_button()
+                        local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
+
+                        if currentEnterWorld.shared then
+                            return true
+                        else
+                            return false
+                        end
+                    end
+
+                    function unlock()
+                        _guihelper.MessageBox(
+                            L'强制解锁后，其他成员可能会覆盖您当前编辑的内容，是否继续？',
+                            function(res)
+                                if res and res == _guihelper.DialogResult.Yes then
+                                    KeepworkServiceWorld:UnlockWorld(function(result)
+                                        if result then
+                                            _guihelper.MessageBox(L'解锁成功')
+                                        end
+                                    end)
+                                end
+                            end,
+                            _guihelper.MessageBoxButtons.YesNo
+                        )                    
+                    end
+
+                    function home_install()
+                        NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/WorldShare/InstanllGuide.lua").Show();
+                    end
+
+                    function has_real_name()
+                        return KeepworkServiceSession:IsRealName()
+                    end
+
+                    function get_open_desc()
+                        return string.format("点击打开本地目录:%s" , ParaWorld.GetWorldDirectory())
+                    end
+                ]]>
+            </script>
+            <style type='text/mcss'
+                   src='Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss'>
+                {
+                    button1 = {
+                        width = 100,
+                        height = 32
+                    },
+                    button2 = {
+                        width = 140,
+                        height = 28,
+                        background = 'Texture/Aries/Creator/keepwork/worldshare_32bits.png;256 21 16 16:3 3 3 3',
+                        color = '#ffffff'
+                    },
+                    star_area = {
+                        ['margin-top'] = 0,
+                        ['margin-left'] = 50
+                    },
+                    dialog_container = {
+                        width = 630,
+                        height = 400
+                    },
+                    dialog_header = {
+                        height = 40
+                    }
                 }
-            }
-        </style>
-        <kp:window width="610" height="420" onclose="on_click_cancel()">
-            <div class="dialog_container">
-                <div class="dialog_header">
-                    <div style="position: relative;margin-top: 9px;margin-left: 8px;color: white;">
-                        <%=format("%s", get_cur_world_name() or "") %>
-                    </div>
-                </div>
-                <div>
-                    <div style="padding:20px;padding-top: 5px;padding-bottom:5px;color:#ffffff;">
-                        <div style="margin-bottom: 5px;">
-                            <pe:if condition='<%= System.os.GetPlatform() == "win32" %>'>
-                                <input type="button" class="theme1_gray_button" style='height: 35px;width: 140px;' value='<%= L"短视频分享" %>' onclick="share_short_video()" />
-                                <div class="theme1_black_button" style="float:left;width: 150px;height: 35px;padding-top: 4px;">
-                                    <input type="button" style='position: relative;width: 150px;height: 35px;background: url()' value='' onclick="share_panorama()" />
-                                    <img style="width: 20px;height: 21px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#950 216 20 21);margin-left: 10px;margin-top: 1px;" />
-                                    <%= L"全景图分享" %>
-                                </div>
-                            </pe:if>
-                            <pe:if condition='<%= System.os.GetPlatform() ~= "win32" %>'>
-                                <div class="theme1_black_button" style="float:left;width: 140px;height: 35px;padding-top: 4px;">
-                                    <input type="button" style='position: relative;width: 140px;height: 35px;background: url()' value='' onclick="share_panorama()" />
-                                    <img style="width: 20px;height: 21px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#950 216 20 21);margin-left: 10px;margin-top: 1px;" />
-                                    <%= L"全景图分享" %>
-                                </div>
-                            </pe:if>
+            </style>
+            <kp:window width='660'
+                       height='420'
+                       onclose='on_click_cancel()'>
+                <div class='dialog_container'>
+                    <div class='dialog_header'>
+                        <div style='position: relative;
+                                    margin-top: 9px;
+                                    margin-left: 8px;
+                                    color: white;'>
+                            <%=format('%s', get_cur_world_name() or '') %>
                         </div>
-                        <div style="width: 571px;padding: 10px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#660 273 32 32:8 8 8 8);">
-                            <div style="float:left;width: 280px;height: 185px;">
-                                <div zorder="2" style="position: relative; width: 280px;height: 185px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#614 273 32 32:8 8 8 8);"></div>
-                                <img name="ShareWorldImage" zorder="1" width="280" height="185" onclick="snapshot()" tooltip='<%= L"重新截图" %>' />
-                            </div>
-                            <div style="float:right;padding-left:28px;">
-                                <div style="margin-top:-5px;margin-bottom: 20px;">
-                                    <span style="color: #000000"><%= L"项目ID：" %></span>
-                                    <input type="button" style="float:left;height: 25px;min-width: 10px;" class="theme1_baby_bule_button" value="<%= get_project_id() %>" onclick="open_keepwork_project()" tooltip='<%= L"点击访问作品项目页面" %>' />&nbsp;
-                                    <pe:if condition="<%= not GameLogic.IsReadOnly() and (not has_project_id() or is_user_world()) %>">
-                                        <input type="button" class="theme1_black_button" style="font-size: 12px;width: 50px;height: 25px;" value="<%= L'上传' %>" onclick="on_click_share_world()"/>
-                                    </pe:if>
-                                </div>
-                                <div>
-                                    <div style="float:right;width: 120px;">
-                                        <div style="color: #000000">
-                                            <%= L'本地版本'%>：<%= get_current_revision() %>
+                    </div>
+                    <div>
+                        <div style='padding: 20px;
+                                    padding-top: 5px;
+                                    padding-bottom: 5px;
+                                    color:#ffffff;'>
+                            <div style='margin-bottom: 5px;'>
+                                <pe:if condition='<%= System.os.GetPlatform() == "win32" %>'>
+                                    <input type='button'
+                                           class='theme1_gray_button'
+                                           style='height: 36px;
+                                                  width: 150px;'
+                                           value='<%= L"短视频分享" %>'
+                                           onclick='share_short_video()' />
+                                    <div class='theme1_black_button'
+                                         style='float: left;
+                                                width: 150px;
+                                                height: 35px;
+                                                padding-top: 4px;'>
+                                        <input type='button'
+                                               style='position: relative;
+                                                      width: 150px;
+                                                      height: 35px;
+                                                      background: url()'
+                                               value=''
+                                               onclick='share_panorama()' />
+                                        <img style='width: 20px;
+                                                    height: 21px;
+                                                    background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#950 216 20 21);
+                                                    margin-left: 9px;
+                                                    margin-top: 1px;' />
+                                        <div style='float: left;
+                                                    margin-left: 4px;
+                                                    margin-top: 1px;'>
+                                            <%= L'全景图分享' %>
                                         </div>
                                     </div>
-                                    <pe:if condition="<%= get_platform() ~= 'android' and get_platform() ~= 'ios' %>">
-                                        <div style="float:right;">
-                                            <div style="margin-bottom: 6px;">
-                                                <input type="button" style="width: 120px;" class="button1 theme1_baby_bule_button" tooltip='<%= L"点击打开所在目录" %>' value="<%= L'本地目录' %>" onclick="on_open_world_dir()" />
+                                </pe:if>
+                                <pe:if condition='<%= System.os.GetPlatform() ~= "win32" %>'>
+                                    <div class='theme1_black_button'
+                                         style='float: left;
+                                                width: 110px;
+                                                height: 35px;
+                                                padding-top: 4px;'>
+                                        <input type='button'
+                                               style='position: relative;
+                                                      width: 110px;
+                                                      height: 35px;
+                                                      background: url()'
+                                               value=''
+                                               onclick='share_panorama()' />
+                                        <img style='width: 20px;
+                                                    height: 21px;
+                                                    background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#950 216 20 21);
+                                                    margin-left: 10px;
+                                                    margin-top: 1px;' />
+                                        <%= L'全景图分享' %>
+                                    </div>
+                                </pe:if>
+                                <pe:if condition='<%= is_show_unlock_button() %>'>
+                                    <input type='button'
+                                           class='theme1_gray_button'
+                                           style='width: 90px;
+                                                  height: 35px;'
+                                           value='<%= L"强制解锁" %>'
+                                           onclick='unlock()' />
+                                </pe:if>
+                            </div>
+                            <div style='width: 615x;
+                                        padding: 10px;
+                                        background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#660 273 32 32:8 8 8 8);'>
+                                <div style='float:left;
+                                            width: 280px;
+                                            height: 185px;'>
+                                    <div zorder='2'
+                                         class='theme1_gray_image_mask'
+                                         style='width: 280px;
+                                                height: 185px;'></div>
+                                    <img name='ShareWorldImage'
+                                         zorder='1'
+                                         width='280'
+                                         height='185'
+                                         onclick='snapshot()'
+                                         tooltip='<%= L"重新截图" %>' />
+                                </div>
+                                <div style='float: right;
+                                            base-font-size: 18px;
+                                            font-size: 18px;
+                                            padding-left: 28px;'>
+                                    <div style='margin-top: 0px;
+                                                margin-bottom: 10px;'>
+                                        <span style='color: #181818'><%= '项目ID：' %></span>
+                                        <input type='button'
+                                               style='float: left;
+                                                      min-width: 70px;
+                                                      height: 30px;'
+                                               class='theme1_gray_button'
+                                               value='<%= get_project_id() %>'
+                                               onclick='open_keepwork_project()'
+                                               tooltip='<%= L"点击打开项目主页" %>' />&nbsp;
+                                        <!-- <pe:if condition='<%= not GameLogic.IsReadOnly() and (not has_project_id() or is_user_world()) %>'>
+                                            <input type='button'
+                                                   class='theme1_black_button'
+                                                   style='font-size: 12px;
+                                                          width: 40px;
+                                                          height: 25px;'
+                                                   value='<%= L"上传" %>'
+                                                   onclick='on_click_share_world()'/>
+                                        </pe:if> -->
+                                    </div>
+                                    <div>
+                                        <div style='float: right;
+                                                    min-width: 110px;'>
+                                            <div style='color: #181818'>
+                                                <%= L'本地版本'%>：<%= get_current_revision() %>
                                             </div>
-                                            <pe:if condition="<%= not GameLogic.IsReadOnly() %>">
-                                                <div style="margin-bottom: 6px;">
-                                                    <input type="button" style="width: 120px;" class="button1 theme1_lime_button" tooltip='<%=L"点击查看历史版本目录, 解压可恢复到最近几天的版本"%>' value="<%= L'历史版本' %>" onclick="on_click_revision()" />
+                                        </div>
+                                        <pe:if condition='<%= get_platform() ~= "android" and get_platform() ~= "ios" %>'>
+                                            <div style='float:right;'>
+                                                <pe:if condition='<%= not GameLogic.IsReadOnly() %>'>
+                                                    <div style='float: left;margin-left: 7px;'>
+                                                        <input type='button'
+                                                               style="width: 45px;height: 27px;font-size: 12px;"
+                                                               class='theme1_black_button'
+                                                               tooltip='<%= L"点击查看历史版本" %>'
+                                                               value='<%= L"历史" %>'
+                                                               onclick='on_click_revision()' />
+                                                    </div>
+                                                </pe:if>
+                                                <div style='float: left;margin-top: -1px;margin-left: 5px;'>
+                                                    <input type='button'
+                                                           style="width: 32px;height: 28px;text-offset-y: -4;
+                                                                background: url(Texture/Aries/Creator/keepwork/worldshare/btn_jubaoweigui_32x28_32bits.png#0 0 32 28);"
+                                                           tooltip='<%= get_open_desc()%>'
+                                                           value='...'
+                                                           onclick='on_open_world_dir()' />
                                                 </div>
-                                            </pe:if>
+                                            </div>
+                                        </pe:if>
+                                    </div>
+                                    <pe:if condition='<%= not GameLogic.IsReadOnly() and (not has_project_id() or is_user_world()) and has_project_id() %>'>
+                                        <div>
+                                            <div style='float:right;min-width: 110px;margin-top: 10px;'>
+                                                <div style='color: #181818'>
+                                                    <%= L'在线版本'%>：<%= get_remote_revision()%>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div onclick='snapshot()' tooltip='<%= L"重新截图" %>' 
+                                            style="margin-top: 55px;font-size: 18px;base-font-size:18px;color: #0c61cf;">
+                                            重新截图
+                                            <div style="margin-top: -3px;margin-left: 2px; width:70px;height: 2px;background-color: #0c61cf;"></div>
+                                        </div>
+                                    </pe:if>
+                                    <pe:if condition='<%= has_project_id() and not is_user_world() and not is_rated() %>'>
+                                        <div>
+                                            <div style='color:#000000;margin-top: 10px;'><%= L'为作品打分：' %></div>
+                                            <div class='star_area'>
+                                                <pe:repeat DataSource='<%=get_star()%>'>
+                                                    <pe:repeatitem>
+                                                        <pe:if condition='<%=Eval("selected") == true %>'>
+                                                            <div style='float: left;
+                                                                        margin-right: 10px;
+                                                                        background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#810 208 42 38);
+                                                                        width: 25px;
+                                                                        height: 25px;'
+                                                                 name='<%= Eval("index")%>'
+                                                                 onclick='set_star'>
+                                                            </div>
+                                                        </pe:if>
+                                                        <pe:if condition='<%=Eval("selected") == false %>'>
+                                                            <div style='float: left;
+                                                                        margin-right: 10px;
+                                                                        background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#858 208 42 38);
+                                                                        width: 25px;
+                                                                        height: 25px;'
+                                                                 name='<%= Eval("index")%>'
+                                                                 onclick='set_star'>
+                                                            </div>
+                                                        </pe:if>
+                                                    </pe:repeatitem>
+                                                </pe:repeat>
+                                            </div>
                                         </div>
                                     </pe:if>
                                 </div>
-                                <pe:if condition="<%= not GameLogic.IsReadOnly() and (not has_project_id() or is_user_world()) and has_project_id() %>">
-                                    <div>
-                                        <div style="float:right;width: 130px;">
-                                            <div style="color: #000000">
-                                                <%= L'在线版本'%>：<%= get_remote_revision()%>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </pe:if>
-                                <pe:if condition="<%= has_project_id() and not is_user_world() and not is_rated() %>">
-                                    <div>
-                                        <div style="color:#000000"><%= L"为作品打分：" %></div>
-                                        <div class="star_area">
-                                            <pe:repeat DataSource="<%=get_star()%>">
-                                                <pe:repeatitem>
-                                                    <pe:if condition="<%=Eval('selected') == true %>">
-                                                        <div style="float:left;margin-right: 10px;background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#810 208 42 38);width: 25px;height: 25px;" name='<%=Eval("index")%>' onclick="set_star"></div>
-                                                    </pe:if>
-                                                    <pe:if condition="<%=Eval('selected') == false %>">
-                                                        <div style="float:left;margin-right: 10px;background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#858 208 42 38);width: 25px;height: 25px;" name='<%=Eval("index")%>' onclick="set_star"></div>
-                                                    </pe:if>
-                                                </pe:repeatitem>
-                                            </pe:repeat>
-                                        </div>
-                                    </div>
-                                </pe:if>
                             </div>
                         </div>
-                    </div>
-                    <div style="padding-left:30px;color:#000000">
-                        <div style="margin-top:3px;height:20px;">
-                            <pe:if condition="<%= not GameLogic.IsReadOnly() %>">
-                                <a style="font-size:12px;color:#1456b4;max-width:120px;text-singleline:false;background: url()" onclick="snapshot()">
-                                    <%=L"重新截图" %>
-                                </a>
+                        <div style='padding-left: 20px;
+                                    color: #000000'>
+                            <pe:if condition='<%= is_community_world_exit() %>'>
+                                <div style='margin-top: -10x;
+                                            margin-bottom: 5px;
+                                            base-font-size: 15px;
+                                            font-size:15px;'>
+                                    <%= get_last_world_name() %>
+                                </div>
+                                <div style='margin-top: 10px;'>
+                                    <input type='button'
+                                           onclick='on_click_exit_without_save()'
+                                           value='<%= L"返回" %>'
+                                           class='theme1_orange_button'
+                                           style='margin-left: 140px;
+                                                  min-width: 130px;
+                                                  height:50px;' />
+                                    <input type='button'
+                                           onclick='on_click_cancel()'
+                                           value='<%= L"取消" %>'
+                                           class='theme1_gray_button'
+                                           style='margin-left: 60px;
+                                                  min-width: 130px;
+                                                  height:50px;' />
+                                </div>
                             </pe:if>
-                        </div>
-                        <div style="margin-top:5x;base-font-size:15px;font-size:15px;">
-                            <%= L"您上次保存世界是:"%> <span style="color:#ff6a00"><%=format(L"%d秒前", get_elapsed_unsaved_seconds())%></span>
-                        </div>
-                        <div style="margin-top:10x;">
-                            <pe:if condition="<%= GameLogic.IsReadOnly() %>">
-                                <input type="button" onclick="save_as()" value='<%=L"另存为..." %>' class="theme1_orange_button" style="min-width:155px;height:45px;" />
+                            <pe:if condition='<%= not is_community_world_exit() %>'>
+                                <pe:if condition='<%= not has_real_name() %>'>
+                                    <div onclick='home_install()'
+                                        style="position: relative; margin-left: 520px;font-size: 16px;base-font-size:16px;color: #0c61cf;">
+                                        回家安装指南
+                                        <div style="margin-top: -3px;margin-left: 2px; width:93px;height: 2px;background-color: #0c61cf;"></div>
+                                    </div>
+                                </pe:if>
+                                
+                                <div style='margin-left: 5px; 
+                                            color: #181818;
+                                            margin-top: 5x;
+                                            base-font-size: 15px;
+                                            font-size:15px;'>
+                                    <%= L'您上次保存世界是:'%>
+                                        <span style='color:#ef6500'>
+                                            <%= format(L'%d秒前', get_elapsed_unsaved_seconds())%>
+                                        </span>
+                                    <%= notice() %>
+                                </div>
+
+                                <div style='margin-top: 38x;'>
+                                    <pe:if condition='<%= GameLogic.IsReadOnly() %>'>
+                                        <input type='button'
+                                               onclick='save_as()'
+                                               value='<%= L"另存为..." %>'
+                                               class='theme1_orange_button'
+                                               style='min-width: 114px;
+                                                      margin-left: 57px;
+                                                      height: 44px;' />
+                                    </pe:if>
+                                    <pe:if condition='<%= not GameLogic.IsReadOnly() and (not has_project_id() or is_user_world()) %>'>
+                                        <input type='button'
+                                               onclick='on_click_save_and_share()'
+                                               value='<%= L"保存并分享" %>'
+                                               class='theme1_orange_button'
+                                               style='min-width:114px;
+                                                      height:44px;' />
+                                        <div style="float: left;margin-left: -50px;width: 10px;"></div>
+                                    </pe:if>
+                                    <pe:if condition='<%= not GameLogic.IsReadOnly() %>'>
+                                        <input type='button'
+                                               onclick='on_click_save_and_exit()'
+                                               value='<%= L"保存并退出" %>'
+                                               class='theme1_gray_button'
+                                               style='min-width:114px;
+                                                      margin-left: 53px;
+                                                      height:44px;' />
+                                    </pe:if>
+                                    <input type='button'
+                                           onclick='on_click_exit_without_save()'
+                                           value='<%= L"直接退出" %>'
+                                           class='theme1_gray_button'
+                                           style='margin-left: 13px;
+                                                  min-width: 114px;
+                                                  height: 44px;' />
+                                    <input type='button'
+                                           onclick='reload()'
+                                           value='<%= L"重启世界" %>'
+                                           class='theme1_gray_button'
+                                           style='margin-left: 13px;
+                                                  min-width: 114px;
+                                                  height: 44px;' />
+                                    <input type='button'
+                                           onclick='on_click_cancel()'
+                                           value='<%= L"取消" %>'
+                                           class='theme1_gray_button'
+                                           style='margin-left: 13px;
+                                                  min-width: 114px;
+                                                  height: 44px;' />
+                                </div>
                             </pe:if>
-                            <pe:if condition="<%= not GameLogic.IsReadOnly() %>">
-                                <input type="button" onclick="on_click_save_and_exit()" value='<%=L"保存并退出" %>' class="theme1_orange_button" style="min-width:155px;height:50px;" />
-                            </pe:if>
-                            <input type="button" onclick="on_click_exit_without_save()" value='<%=L"直接退出" %>' class="theme1_gray_button" style="margin-left:45px;min-width:155px;height:50px;" />
-                            <input type="button" onclick="on_click_cancel()" value='<%=L"取消" %>' class="theme1_gray_button" style="margin-left:45x;min-width:155px;height:50px;" />
                         </div>
                     </div>
                 </div>
-            </div>
-        </kp:window>
-    </pe:mcml>
-</body>
+            </kp:window>
+        </pe:mcml>
+    </body>
 </html>
