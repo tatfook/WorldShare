@@ -39,6 +39,9 @@ EventTrackingService.map = {
         },
         learning_daily = 'duration.learning_daily' -- 成长日记
     },
+    count = {
+        learning_situation = 'count.learning_situation', -- 学习情况[chapter, learning, finished]
+    },
     click = {
         main_login = {
             offline_enter = 'click.main_login.offline_enter', -- 本地模式
