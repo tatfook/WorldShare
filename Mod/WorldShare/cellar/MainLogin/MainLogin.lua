@@ -41,6 +41,15 @@ MainLogin.phonepassword = ''
 MainLogin.phonecaptcha = ''
 MainLogin.bindphone = nil
 
+function MainLogin:LoginBackgroundPageInit()
+    GameLogic.GetFilters():add_filter(
+        'apply:apps.aries.creator.game.login.login_background_page.get_background',
+        function()
+            return 'Texture/Aries/Creator/Paracraft/WorldShare/dengluye_1280x720_32bits.png'
+        end
+    )
+end
+
 function MainLogin:Init()
     if System.options.mc == true then
         GameMainLogin:next_step({ IsLoginModeSelected = false })
