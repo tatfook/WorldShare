@@ -283,16 +283,12 @@ function Create:EnterWorld(index, skip)
             end
         end)
     else
-        if currentSelectedWorld.kpProjectId and currentSelectedWorld.kpProjectId ~= 0 then
-            LoginModal:CheckSignedIn(L'请先登录！', function(bIsSuccessed)
-                if bIsSuccessed then
-                    _guihelper.MessageBox(L'登录成功')
-                    self:GetWorldList()
-                end
-            end)
-        else
-            self:HandleEnterWorld(index, skip)
-        end
+        LoginModal:CheckSignedIn(L'请先登录！', function(bIsSuccessed)
+            if bIsSuccessed then
+                _guihelper.MessageBox(L'登录成功')
+                self:GetWorldList()
+            end
+        end)
     end
 end
 
