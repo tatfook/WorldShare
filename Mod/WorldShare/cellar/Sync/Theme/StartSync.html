@@ -148,7 +148,8 @@
                                       base-font-size: 18px;'
                                value='<%= get_current_world_name() %>' />
                     </div>
-                    <div style='margin-top: 20px;'>
+                    <div style='margin-top: 20px;
+                                width: 500px;'>
                         <%= format(L'远程版本号：%s', get_remote_revision()) %>
                         <pe:if condition='<%= be_show_use_remote()%>'>
                             <input onclick='use_remote()'
@@ -161,7 +162,8 @@
                                    value='<%= L"使用远程版本" %>' />
                         </pe:if>
                     </div>
-                    <div style='margin-top:20px;'>
+                    <div style='margin-top:20px;
+                                width: 500px;'>
                         <%= format(L'本地版本号：%s', get_current_revision()) %>
                         <pe:if condition='<%= use_offline == "true" %>'>
                             <input onclick='enter_offline_world()'
