@@ -14,14 +14,43 @@ local CreateWorld = NPL.load('(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.
 -- libs
 local CreateNewWorld = commonlib.gettable('MyCompany.Aries.Game.MainLogin.CreateNewWorld')
 
+-- bottles
+local LoginModal = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua')
+
+-- service
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+local KeepworkServiceWorld = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceWorld.lua')
+
 local CreateWorld = NPL.export()
 
-function CreateWorld:CreateNewWorld(foldername)
-    CreateNewWorld.ShowPage(true)
+function CreateWorld:CreateNewWorld(foldername, callback)
+    local function Handle()
+        CreateNewWorld.ShowPage(true)
 
-    if type(foldername) == 'string' then
-        CreateNewWorld.page:SetValue('new_world_name', foldername)
-        CreateNewWorld.page:Refresh(0.01)
+        if type(foldername) == 'string' then
+            CreateNewWorld.page:SetValue('new_world_name', foldername)
+            CreateNewWorld.page:Refresh(0.01)
+        end
+    end
+
+    if KeepworkServiceSession:IsSignedIn() then
+        KeepworkServiceWorld:LimitFreeUser(false, function(result)
+            if result then
+                Handle()
+            else
+                _guihelper.MessageBox(L'操作被禁止了，免费用户最多只能拥有3个本地世界，请删除不要的本地世界，或者联系老师（或家长）开通权限。')
+            end
+        end)
+    else
+        LoginModal:CheckSignedIn(L'请先登录！', function(bIsSuccessed)
+            if bIsSuccessed then
+                _guihelper.MessageBox(L'登录成功')
+
+                if callback and type(callback) == 'function' then
+                    callback()
+                end
+            end
+        end)
     end
 end
 
