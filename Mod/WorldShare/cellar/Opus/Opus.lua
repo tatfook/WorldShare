@@ -24,7 +24,7 @@ local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkServ
 
 local Opus = NPL.export()
 
-function Opus:Show()
+function Opus:Show(callback)
     self:CloseAll()
 
     local params = self:ShowOpusBackground()
@@ -33,6 +33,10 @@ function Opus:Show()
 
     params._page.OnClose = function()
         Screen:Disconnect("sizeChanged", Opus, Opus.OnScreenSizeChange)
+
+        if callback and type(callback) == 'function' then
+            callback()
+        end
     end
     
     params._page:SetValue('opus_content', '')

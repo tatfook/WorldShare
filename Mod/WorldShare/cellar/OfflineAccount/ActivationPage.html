@@ -1,14 +1,15 @@
 <html>
     <body>
         <pe:mcml>
-            <script type="text/npl">
+            <script type='text/npl'>
                 <![CDATA[
                     -- bottles
                     local Create = NPL.load('(gl)Mod/WorldShare/cellar/Create/Create.lua')
                     local LoginModal = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua')
                     local RedSummerCampMainPage = NPL.load('(gl)script/apps/Aries/Creator/Game/Tasks/RedSummerCamp/RedSummerCampMainPage.lua')
-                    local RegisterModal = NPL.load("(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua")
-                    local Opus = NPL.load("(gl)Mod/WorldShare/cellar/Opus/Opus.lua")
+                    local RegisterModal = NPL.load('(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua')
+                    local Opus = NPL.load('(gl)Mod/WorldShare/cellar/Opus/Opus.lua')
+                    local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
 
                     -- service
                     local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
@@ -115,7 +116,10 @@
 
                     function open_create()
                         close()
-                        Opus:Show()
+                        Opus:Show(function()
+                            MainLogin:Close()
+                            MainLogin:Show()
+                        end)
                     end
 
                     function start()
@@ -250,8 +254,8 @@
 
                         LoginModal:Close('REGISTER')
                         RegisterModal:ShowPage(function()
-                            page:SetValue("account", RegisterModal.account)
-                            page:SetValue("password", RegisterModal.password)
+                            page:SetValue('account', RegisterModal.account)
+                            page:SetValue('password', RegisterModal.password)
                             activate()
                         end,1)
                     end
@@ -380,7 +384,7 @@
                                        value='' />
                             </div>
                         </div>
-                        <div onclick="register" style='position: relative;
+                        <div onclick='register' style='position: relative;
                                     font-size: 17px;
                                     base-font-size: 17px;
                                     color: #2956ab;
@@ -388,7 +392,7 @@
                                     margin-left: 47px;
                                     width: 156px;
                                     height: 50px;'>
-                                    <%= L"没有账号？立即注册" %>
+                                    <%= L'没有账号？立即注册' %>
                         </div>
                         <div width='150px'
                              align='center'>
@@ -411,12 +415,12 @@
                                          padding-right: 50px;
                                          margin-top: -30px;'>
                         <pe:if condition='<%= is_show_notice() %>'>
-                            <div style="width: 316px;
+                            <div style='width: 316px;
                                         height: 97px;
                                         position: relative;
                                         margin-right: 300px;
                                         padding: 10px;
-                                        background: url(Texture/Aries/Creator/paracraft/paracraft_icon_01_32bits.png#107 9 316 97);">
+                                        background: url(Texture/Aries/Creator/paracraft/paracraft_icon_01_32bits.png#107 9 316 97);'>
                                 <div>
                                     <pe:if condition='<%= notice_status() == 1 %>'>       
                                         <div style='font-size: 16px;
@@ -485,7 +489,7 @@
                                     color: #2956ab;
                                     width: 156px;
                                     height: 50px;'>
-                            <%= L"离线版使用手册" %>
+                            <%= L'离线版使用手册' %>
                             <div width='156px'
                                  style='background-color: #2956ab;
                                         height: 1px;'></div>
@@ -594,7 +598,7 @@
                                             color: #2956ab;
                                             width: 82px;
                                             height: 30px;'>
-                                       <%= L"匿名登录" %>
+                                       <%= L'匿名登录' %>
                                        <div width='82px'
                                          style='background-color: #2956ab;
                                                 height: 1px;'></div>
