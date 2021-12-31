@@ -43,6 +43,15 @@ EventTrackingService.map = {
         learning_situation = 'count.learning_situation', -- 学习情况[chapter, learning, finished]
     },
     click = {
+        login_main_page = {
+            course_page = 'click.login_main_page.course_page', -- 新手入门
+            match = 'click.login_main_page.match', -- 大赛
+            ai_school = 'click.login_main_page.ai_school', -- 虚拟校园
+            parent_page = 'click.login_main_page.parent_page', -- 家长指南
+            main_world = 'click.login_main_page.main_world', -- 创意空间
+            leyuan = 'click.login_main_page.leyuan', -- 乐园设计师
+            explore = 'click.login_main_page.explore ', -- 推荐列表
+        },
         main_login = {
             offline_enter = 'click.main_login.offline_enter', -- 本地模式
             find_password = 'click.main_login.find_password', -- 找回密码
