@@ -52,6 +52,13 @@ function CommonLoadWorld:CheckLoadWorldFromCmdLine(cmdLineWorld)
         return
     end
 
+    local paramWorld = ParaEngine.GetAppCommandLineByParam('world', nil)
+
+    if paramWorld and paramWorld == cmdLineWorld then
+        WorldCommon.OpenWorld(cmdLineWorld, true)
+        return
+    end
+
     if cmdLineWorld:match('^https?://') then
         GameLogic.RunCommand(format('/loadworld -auto %s', cmdLineWorld))
         return
@@ -130,7 +137,7 @@ function CommonLoadWorld:CheckLoadWorldFromCmdLine(cmdLineWorld)
         end
     end
 
-    local urlProtocol = UrlProtocolHandler:GetParacraftProtocol()
+    local urlProtocol = UrlProtocolHandler:GetParacraftProtocol() or ''
     urlProtocol = commonlib.Encoding.url_decode(urlProtocol)
 
     local userToken = urlProtocol:match('usertoken="([%S]+)"')
