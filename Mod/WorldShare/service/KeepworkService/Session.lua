@@ -213,6 +213,10 @@ function KeepworkServiceSession:LoginAndBindThirdPartyAccount(account, password,
 end
 
 function KeepworkServiceSession:LoginWithToken(token, callback)
+    if not token or type(token) ~= 'string' then
+        return
+    end
+
     KeepworkUsersApi:Profile(token, callback, callback)
 end
 

@@ -2,7 +2,7 @@
 Title: Common Load World
 Author(s): big
 CreateDate: 2021.01.20
-ModifyDate: 2021.11.11
+ModifyDate: 2022.1.5
 City: Foshan
 use the lib:
 ------------------------------------------------------------
@@ -18,6 +18,7 @@ local WorldCommon = commonlib.gettable('MyCompany.Aries.Creator.WorldCommon')
 local Screen = commonlib.gettable('System.Windows.Screen')
 local RemoteUrl = commonlib.gettable('MyCompany.Aries.Creator.Game.Login.RemoteUrl')
 local ParaWorldLessons = commonlib.gettable('MyCompany.Aries.Game.MainLogin.ParaWorldLessons')
+local UrlProtocolHandler = commonlib.gettable("MyCompany.Aries.Creator.Game.UrlProtocolHandler");
 
 -- service
 local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
@@ -45,6 +46,113 @@ local KeepworkBaseApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/BaseApi.lua')
 local GitEncoding = NPL.load('(gl)Mod/WorldShare/helper/GitEncoding.lua')
 
 local CommonLoadWorld = NPL.export()
+
+function CommonLoadWorld:CheckLoadWorldFromCmdLine(cmdLineWorld)
+    if not cmdLineWorld or type(cmdLineWorld) ~= 'string' then
+        return
+    end
+
+    if cmdLineWorld:match('^https?://') then
+        GameLogic.RunCommand(format('/loadworld -auto %s', cmdLineWorld))
+        return
+    end
+
+    local function Handle()
+        local id = tonumber(cmdLineWorld)
+    
+        if not id then
+            System.options.cmdline_world = nil
+    
+            if not Mod.WorldShare.Store:Get('world/isEnterWorld') then
+                Game.MainLogin:next_step({IsLoginModeSelected = false})
+            end
+    
+            return
+        end
+    
+        if self:IdsFilter(id) then
+            GameLogic.RunCommand(format('/loadworld -auto %d', id))
+        else
+            if not Mod.WorldShare.Store:Get('world/isEnterWorld') then
+                if KeepworkServiceSession:IsSignedIn() then
+                    GameLogic.IsVip('LimitUserOpenShareWorld', true, function(result)
+                        if not result then
+                            System.options.cmdline_world = nil
+                            MainLogin:Next()
+                        else
+                            KeepworkServiceProject:GetProject(
+                                id,
+                                function(data, err)
+                                    if err == 200 then
+                                        GameLogic.RunCommand(format('/loadworld -auto %d', id))
+                                    else
+                                        GameLogic.RunCommand(format('/loadworld -auto %d', id)) -- show error msg
+                                        System.options.cmdline_world = nil
+                                        MainLogin:Next()
+                                    end
+                                end
+                            )
+                        end
+                    end)
+                else
+                    KeepworkServiceProject:GetProject(
+                        id,
+                        function(data, err)
+                            if err == 200 then
+                                local info = KeepworkServiceSession:LoadSigninInfo()
+
+                                if info and type(info) == 'table' then
+                                    info.autoLogin = false
+                                    KeepworkServiceSession:SaveSigninInfo(info)
+                                end
+
+                                MainLogin:Show()
+                                Game.MainLogin.cmdWorldLoaded = false
+                            else
+                                GameLogic.RunCommand(format('/loadworld -auto %d', id)) -- show error msg
+                                System.options.cmdline_world = nil
+                                Game.MainLogin:next_step({IsLoginModeSelected = false})
+                            end
+                        end
+                    )
+                end
+            else
+                if KeepworkServiceSession:IsSignedIn() then
+                    GameLogic.RunCommand(format('/loadworld -auto %d', id))
+                else
+                    LoginModal:CheckSignedIn(L'该项目需要登录后访问', function(bIsSuccessed)
+                        if bIsSuccessed then
+                            GameLogic.RunCommand(format('/loadworld -auto %d', id))
+                        end
+                    end)
+                end
+            end
+        end
+    end
+
+    local urlProtocol = UrlProtocolHandler:GetParacraftProtocol()
+    urlProtocol = commonlib.Encoding.url_decode(urlProtocol)
+
+    local userToken = urlProtocol:match('usertoken="([%S]+)"')
+
+    if userToken then
+        local token = Mod.WorldShare.Store:Get('user/token')
+
+        if token == userToken then
+            Handle()
+        else
+            MainLogin:LoginWithToken(userToken, function(bIsSuccessed, reason, message)
+                if not bIsSuccessed then
+                    _guihelper.MessageBox(message)
+                end
+    
+                Handle()
+            end)
+        end        
+    else
+        Handle()
+    end
+end
 
 function CommonLoadWorld.GotoUrl(url)
 	if ParaWorldLessons.EnterWorldById(url) then

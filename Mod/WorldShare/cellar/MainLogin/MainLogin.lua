@@ -2,7 +2,7 @@
 Title: Main Login
 Author: big  
 CreateDate: 2019.12.25
-ModifyDate: 2021.09.24
+ModifyDate: 2022.1.5
 place: Foshan
 Desc: 
 use the lib:
@@ -41,13 +41,8 @@ MainLogin.phonepassword = ''
 MainLogin.phonecaptcha = ''
 MainLogin.bindphone = nil
 
-function MainLogin:LoginBackgroundPageInit()
-    GameLogic.GetFilters():add_filter(
-        'apply:apps.aries.creator.game.login.login_background_page.get_background',
-        function()
-            return 'Texture/Aries/Creator/Paracraft/WorldShare/dengluye_1280x720_32bits.png'
-        end
-    )
+function MainLogin:GetLoginBackground()
+    return 'Texture/Aries/Creator/Paracraft/WorldShare/dengluye_1280x720_32bits.png'
 end
 
 function MainLogin:Init()
@@ -282,19 +277,6 @@ function MainLogin:ShowLogin1()
 
         MainLoginLoginPage:FindControl('title_login').visible = false
         MainLoginLoginPage:FindControl('title_username').visible = true
-
-        -- for default button
-        -- for i = 1, 10000 do
-        --     Mod.WorldShare.Utils.SetTimeOut(function()
-        --         if MainLoginLoginPage then
-        --             local node = MainLoginLoginPage:FindControl('start_button_focus')
-
-        --             if node then
-        --                 node:Focus()
-        --             end
-        --         end
-        --     end, 0 + i)
-        -- end
     else
         local PWDInfo = KeepworkServiceSession:LoadSigninInfo()
     
@@ -322,19 +304,6 @@ function MainLogin:ShowLogin1()
     
                         MainLoginLoginPage:FindControl('title_login').visible = false
                         MainLoginLoginPage:FindControl('title_username').visible = true
-
-                        -- for default button
-                        -- for i = 1, 10000 do
-                        --     Mod.WorldShare.Utils.SetTimeOut(function()
-                        --         if MainLoginLoginPage then
-                        --             local node = MainLoginLoginPage:FindControl('start_button_focus')
-                
-                        --             if node then
-                        --                 node:Focus()
-                        --             end
-                        --         end
-                        --     end, 0 + i)
-                        -- end
                     end
                 end)
             end
@@ -1187,11 +1156,8 @@ function MainLogin:Next(isOffline)
     end
 
     if System.options.cmdline_world and System.options.cmdline_world ~= '' then
-        Mod.WorldShare.MsgBox:Wait(12000)
-        Mod.WorldShare.Utils.SetTimeOut(function()
-            self:Close()
-            GameMainLogin:CheckLoadWorldFromCmdLine()
-        end, 500)
+        self:Close()
+        GameMainLogin:CheckLoadWorldFromCmdLine()
         return
     end
 

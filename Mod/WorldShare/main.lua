@@ -2,7 +2,7 @@
 Title: WorldShareMod
 Author(s): big
 CreateDate: 2017.04.17
-ModifyDate: 2021.11.04
+ModifyDate: 2022.1.5
 Desc:
 use the lib:
 ------------------------------------------------------------
@@ -107,7 +107,6 @@ local PreventIndulge = NPL.load('(gl)Mod/WorldShare/cellar/PreventIndulge/Preven
 local Beginner = NPL.load('(gl)Mod/WorldShare/cellar/Beginner/Beginner.lua')
 local Certificate = NPL.load('(gl)Mod/WorldShare/cellar/Certificate/Certificate.lua')
 local Cellar = NPL.load('(gl)Mod/WorldShare/cellar/cellar.lua')
-local WorldShareMainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
 
 -- service
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
@@ -147,8 +146,6 @@ WorldShare.Utils = Utils
 LOG.std(nil, 'info', 'WorldShare', 'world share version %s', WorldShare.version)
 
 function WorldShare:init()
-    WorldShareMainLogin:LoginBackgroundPageInit()
-
     -- init all filters
     Filters:Init()
 

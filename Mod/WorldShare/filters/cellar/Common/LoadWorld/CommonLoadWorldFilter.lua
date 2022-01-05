@@ -43,4 +43,12 @@ function CommonLoadWorldFilter:Init()
             CommonLoadWorld:EnterHomeworkWorld(...)
         end
     )
+
+    GameLogic.GetFilters():add_filter(
+        'cellar.common.common_load_world.check_load_world_from_cmd_line',
+        function(...)
+            CommonLoadWorld:CheckLoadWorldFromCmdLine(...)
+            return true
+        end
+    )
 end
