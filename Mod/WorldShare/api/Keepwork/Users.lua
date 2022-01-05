@@ -1,7 +1,8 @@
 --[[
 Title: Keepwork Users API
-Author(s):  big
-Date:  2019.11.8
+Author(s): big
+CreateDate: 2019.11.8
+ModifyDate: 2022.1.5
 Place: Foshan
 use the lib:
 ------------------------------------------------------------
@@ -51,8 +52,8 @@ end
 ]]
 -- return: object
 function KeepworkUsersApi:Profile(token, success, error)
-    if type(token) ~= "string" and #token == 0 then
-        return false
+    if not token or type(token) ~= "string" or #token == 0 then
+        return
     end
 
     local headers = { Authorization = format("Bearer %s", token) }

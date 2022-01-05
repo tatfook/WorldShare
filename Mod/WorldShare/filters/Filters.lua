@@ -487,22 +487,6 @@ function Filters:Init()
         end
     )
 
-    -- filter login width token
-    GameLogic.GetFilters():add_filter(
-        'login_with_token',
-        function(callback)
-            KeepworkServiceSession:LoginWithToken(callback)
-        end
-    )
-
-    -- filter logout
-    GameLogic.GetFilters():add_filter(
-        'logout',
-        function(mode, callback)
-            KeepworkServiceSession:Logout(mode, callback);
-        end
-    )
-
     -- filter get single file
     GameLogic.GetFilters():add_filter(
         'get_single_file',

@@ -34,4 +34,11 @@ function MainLoginFilter:Init()
             return false
         end
     )
+
+    GameLogic.GetFilters():add_filter(
+        'cellar.main_login.get_login_background',
+        function()
+            return MainLogin:GetLoginBackground()
+        end
+    )
 end
