@@ -87,6 +87,8 @@ function CommonLoadWorld:CheckLoadWorldFromCmdLine(cmdLineWorld)
                             System.options.cmdline_world = nil
                             MainLogin:Next()
                         else
+                            Mod.WorldShare.MsgBox:Wait()
+
                             KeepworkServiceProject:GetProject(
                                 id,
                                 function(data, err)
