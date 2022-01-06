@@ -66,7 +66,7 @@ function CommonLoadWorld:CheckLoadWorldFromCmdLine(cmdLineWorld)
 
     local function Handle()
         local id = tonumber(cmdLineWorld)
-    
+
         if not id then
             System.options.cmdline_world = nil
     
@@ -76,7 +76,7 @@ function CommonLoadWorld:CheckLoadWorldFromCmdLine(cmdLineWorld)
     
             return
         end
-    
+
         if self:IdsFilter(id) then
             GameLogic.RunCommand(format('/loadworld -auto %d', id))
         else
@@ -91,7 +91,24 @@ function CommonLoadWorld:CheckLoadWorldFromCmdLine(cmdLineWorld)
                                 id,
                                 function(data, err)
                                     if err == 200 then
-                                        GameLogic.RunCommand(format('/loadworld -auto %d', id))
+                                        if data.timeRules and
+                                           data.timeRules[1] then
+                                            local result, reason = self:TimesFilter(data.timeRules)
+
+                                            if result then
+                                                System.options.cmdline_world = nil
+                                                MainLogin:Next()
+                                                GameLogic.RunCommand(format('/loadworld -auto %d', id))
+                                            else
+                                                _guihelper.MessageBox(reason)
+                                                System.options.cmdline_world = nil
+                                                MainLogin:Next()
+                                            end
+                                        else
+                                            System.options.cmdline_world = nil
+                                            MainLogin:Next()
+                                            GameLogic.RunCommand(format('/loadworld -auto %d', id))
+                                        end
                                     else
                                         GameLogic.RunCommand(format('/loadworld -auto %d', id)) -- show error msg
                                         System.options.cmdline_world = nil
