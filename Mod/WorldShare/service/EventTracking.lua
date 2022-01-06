@@ -43,6 +43,9 @@ EventTrackingService.map = {
         learning_situation = 'count.learning_situation', -- 学习情况[chapter, learning, finished]
     },
     click = {
+        live_model = {
+            drag = 'click.live_model.drag', -- paralife物品的拖动
+        },
         login_main_page = {
             course_page = 'click.login_main_page.course_page', -- 新手入门
             match = 'click.login_main_page.match', -- 大赛
