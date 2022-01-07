@@ -1267,6 +1267,7 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                 self.encryptWorldVerified = false
                 self.freeUserVerified = false
                 self.timesVerified = false
+                self.systemGroupMemberVerified = false
             end
 
             local function HandleVerified()
@@ -1409,8 +1410,11 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                                 else
                                     local username = Mod.WorldShare.Store:Get('user/username')
 
-                                    _guihelper.MessageBox(
-                                        format(L'你没有权限进入此世界（VIP）(项目ID：%d)（用户名：%s）', pid or 0, username or '')
+                                    GameLogic.AddBBS(
+                                        nil,
+                                        format(L'您没有权限进入此世界（VIP）(项目ID：%d)（用户名：%s）', pid or 0, username or ''),
+                                        3000,
+                                        '255 0 0'
                                     )
 
                                     ResetVerified()
@@ -1421,7 +1425,7 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
     
                     return
                 end
-    
+
                 -- vip institute enter
                 if data and
                    data.extra and
@@ -1443,13 +1447,37 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                             else
                                 local username = Mod.WorldShare.Store:Get('user/username')
 
-                                _guihelper.MessageBox(
-                                    format(L'你没有权限进入此世界（机构VIP）(项目ID：%d)（用户名：%s）', pid or 0, username or '')
+                                GameLogic.AddBBS(
+                                    nil,
+                                    format(L'您没有权限进入此世界（机构VIP）(项目ID：%d)（用户名：%s）', pid or 0, username or ''),
+                                    3000,
+                                    '255 0 0'
                                 )
 
                                 ResetVerified()
                             end
                         end, 'Institute')
+                    end
+
+                    return
+                end
+
+                -- system group world
+                if data and
+                   data.isSystemGroupMember and
+                   not self.systemGroupMemberVerified then
+                    if not data.level or data.level == 0 then
+                        local username = Mod.WorldShare.Store:Get('user/username')
+
+                        GameLogic.AddBBS(
+                            nil,
+                            format(L'您没有权限进入此世界（系统组世界）(项目ID：%d)（用户名：%s）', pid or 0, username or ''),
+                            3000,
+                            '255 0 0'
+                        )
+                    else
+                        self.systemGroupMemberVerified = true
+                        HandleVerified()
                     end
 
                     return
