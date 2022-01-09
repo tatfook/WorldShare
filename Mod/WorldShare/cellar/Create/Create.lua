@@ -285,7 +285,6 @@ function Create:EnterWorld(index, skip)
     else
         LoginModal:CheckSignedIn(L'请先登录！', function(bIsSuccessed)
             if bIsSuccessed then
-                _guihelper.MessageBox(L'登录成功')
                 self:GetWorldList()
             end
         end)
