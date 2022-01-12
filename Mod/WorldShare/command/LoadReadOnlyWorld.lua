@@ -41,7 +41,7 @@ function LoadReadOnlyWorldCommand:Init()
                     return false
                 end
 
-                CommonLoadWorld:EnterWorldById(projectId, true)
+                CommonLoadWorld:EnterWorldById(projectId)
             end
         end,
     }
