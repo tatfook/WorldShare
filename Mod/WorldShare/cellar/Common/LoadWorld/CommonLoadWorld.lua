@@ -55,7 +55,21 @@ function CommonLoadWorld:CheckLoadWorldFromCmdLine(cmdLineWorld)
     local paramWorld = ParaEngine.GetAppCommandLineByParam('world', nil)
 
     if paramWorld and paramWorld == cmdLineWorld then
-        WorldCommon.OpenWorld(cmdLineWorld, true)
+        local loginEnable = ParaEngine.GetAppCommandLineByParam('login_enable', '')
+
+        loginEnable = loginEnable == 'true' and true or false
+
+        if loginEnable then
+            if KeepworkServiceSession:IsSignedIn() then
+                WorldCommon.OpenWorld(cmdLineWorld, true)
+            else
+                MainLogin:Show()
+                Game.MainLogin.cmdWorldLoaded = false
+            end
+        else
+            WorldCommon.OpenWorld(cmdLineWorld, true)
+        end
+
         return
     end
 
@@ -1276,52 +1290,24 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
 
                 if (not username or
                     username ~= data.username) and
+                    not data.isSystemGroupMember and
                     not self.freeUserVerified then
 
-                    if System.options.useFreeworldWhitelist or
-                       System.options.maxFreeworldUploadCount then
-                        if not self:IdsFilter(pid) then
-                            GameLogic.IsVip('LimitUserOpenShareWorld', true, function(result)
-                                if not result then
-                                    return
-                                end
+                    if not self:IdsFilter(pid) then
+                        GameLogic.IsVip('LimitUserOpenShareWorld', true, function(result)
+                            if not result then
+                                return
+                            end
 
-                                self.freeUserVerified = true
-
-                                HandleVerified()
-                            end)
-                        else
                             self.freeUserVerified = true
 
                             HandleVerified()
-                        end
+                        end)
+                    else
+                        self.freeUserVerified = true
 
-                        return
+                        HandleVerified()
                     end
-
-                    HttpRequest:Get(
-                        'https://api.keepwork.com/ts-storage/siteFiles/21357/raw#DAAC412ACEE6D108',
-                        nil,
-                        nil,
-                        function(data, err)
-                            local keyFile = ParaIO.open('skip_world_key_file', 'r')
-
-                            if keyFile:IsValid() then
-                                local key = keyFile:GetText(0, -1)
-
-                                if key == data then
-                                    self.freeUserVerified = true
-                                    HandleVerified()
-                                else
-                                    GameLogic.AddBBS(nil, L'证书配置失败，请联系管理员', 3000, '255 0 0')
-                                end
-
-                                keyFile:close()
-                            else
-                                GameLogic.AddBBS(nil, L'证书配置失败，请联系管理员', 3000, '255 0 0')
-                            end
-                        end
-                    )
 
                     return
                 end
@@ -1386,10 +1372,11 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
 
                     return
                 end
-    
+
                 -- vip enter
                 if not self.vipVerified and
                    data and
+                   not data.isSystemGroupMember and
                    data.extra and
                    ((data.extra.vipEnabled and data.extra.vipEnabled == 1) or
                    (data.extra.isVipWorld and data.extra.isVipWorld == 1)) then
