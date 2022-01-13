@@ -471,14 +471,6 @@
                             _guihelper.MessageBox(L'请选择一所学校')
                             return
                         end
-                        local region = Mod.WorldShare.Store:Get('user/region')
-                        if region and type(region) == 'table' and region.info then
-                            if region.info.city.id ~= cur_sel_school.region.city.id then
-                                needShowTip = true
-                                _guihelper.MessageBox(L"该学校不在你当前所在地区，不可加入，快去选择你当前所在地区的学校加入吧。");
-                                return
-                            end
-                        end
 
                         Mod.WorldShare.MsgBox:Wait()
 
