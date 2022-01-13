@@ -55,7 +55,21 @@ function CommonLoadWorld:CheckLoadWorldFromCmdLine(cmdLineWorld)
     local paramWorld = ParaEngine.GetAppCommandLineByParam('world', nil)
 
     if paramWorld and paramWorld == cmdLineWorld then
-        WorldCommon.OpenWorld(cmdLineWorld, true)
+        local loginEnable = ParaEngine.GetAppCommandLineByParam('login_enable', '')
+
+        loginEnable = loginEnable == 'true' and true or false
+
+        if loginEnable then
+            if KeepworkServiceSession:IsSignedIn() then
+                WorldCommon.OpenWorld(cmdLineWorld, true)
+            else
+                MainLogin:Show()
+                Game.MainLogin.cmdWorldLoaded = false
+            end
+        else
+            WorldCommon.OpenWorld(cmdLineWorld, true)
+        end
+
         return
     end
 
