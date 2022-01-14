@@ -171,37 +171,44 @@
                             return false
                         end
 
-                        keepwork.tatfook.sensitive_words_check({
-                            word=account,
-                        }, function(err, msg, data)
-                            if err == 200 then
-                                -- 敏感词判断
-                                if data and #data > 0 then
-                                    local limit_world = data[1]
-                                    local begain_index, end_index = string.find(account, limit_world)
-                                    local begain_str = string.sub(account, 1, begain_index-1)
-                                    local end_str = string.sub(account, end_index+1, #account)
-                                    
-                                    local limit_name = string.format([[%s<div style="color: #ff0000;float: lefr;">%s</div>%s]], begain_str, limit_world, end_str)
-                                    _guihelper.MessageBox(string.format("您设定的用户名包含敏感字符 %s，请换一个。", limit_name))
-                                    return
-                                end
+                        Mod.WorldShare.MsgBox:Show(L'正在注册，请稍候...', 10000, L'链接超时', 500, 120, 10)
+                        echo(111111, true)
 
-                                MainLogin.account = account
-                                MainLogin.password = password
-                                MainLogin.agree = agree
-        
-                                MainLogin.callback = function()
-                                    page:SetValue('account_result', account)
-                                    page:SetValue('password_result', password)
-                                    set_finish()
+                        keepwork.tatfook.sensitive_words_check(
+                            {
+                                word = account,
+                            },
+                            function(err, msg, data)
+                                Mod.WorldShare.MsgBox:Close()
+                                echo(22222, true)
+
+                                if err == 200 then
+                                    -- 敏感词判断
+                                    if data and #data > 0 then
+                                        local limit_world = data[1]
+                                        local begain_index, end_index = string.find(account, limit_world)
+                                        local begain_str = string.sub(account, 1, begain_index-1)
+                                        local end_str = string.sub(account, end_index+1, #account)
+
+                                        local limit_name = string.format([[%s<div style="color: #ff0000;float: lefr;">%s</div>%s]], begain_str, limit_world, end_str)
+                                        _guihelper.MessageBox(string.format("您设定的用户名包含敏感字符 %s，请换一个。", limit_name))
+                                        return
+                                    end
+
+                                    MainLogin.account = account
+                                    MainLogin.password = password
+                                    MainLogin.agree = agree
+            
+                                    MainLogin.callback = function()
+                                        page:SetValue('account_result', account)
+                                        page:SetValue('password_result', password)
+                                        set_finish()
+                                    end
+            
+                                    MainLogin:RegisterWithAccount()
                                 end
-        
-                                MainLogin:RegisterWithAccount()
                             end
-                        end)
-
-
+                        )
                     end
 
                     function phone_register_next()
@@ -381,7 +388,7 @@
 
                     function check_account(callback)
                         if not callback or type(callback) ~='function' then
-                            return false
+                            return
                         end
 
                         local username = page:GetValue('register_account')
@@ -438,24 +445,40 @@
                         end
                     end
 
+                    local last_func
+                    local last_timer
+
                     function update_register_account_button_status()
-                        local bRight = true    
+                        last_func = function()
+                            local bRight = false    
 
-                        if not check_register_password() then
-                            bRight = false
-                        end
-
-                        check_account(function(result)
-                            if not result then
+                            if not check_register_password() then
                                 bRight = false
                             end
 
-                            if bRight then
-                                --page:SetUIBackground('account_register_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 98 258 44')
-                            else
-                                --page:SetUIBackground('account_register_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 197 258 44')
-                            end
-                        end)
+                            check_account(function(result)
+                                bRight = result
+                            end)
+                        end
+
+                        if not last_timer then
+                            last_timer = commonlib.Timer:new({
+                                    callbackFunc = function()
+                                        last_func()
+
+                                        last_timer:Change(nil, nil)
+                                        last_timer = nil
+                                    end
+                            })
+
+                            last_timer:Change(1000, 1000)
+
+                            echo(11111, true)
+                        else
+                            last_timer:Change(1000, 1000)
+
+                            echo(22222, true)
+                        end
                     end
 
                     function check_phone_number(callback)

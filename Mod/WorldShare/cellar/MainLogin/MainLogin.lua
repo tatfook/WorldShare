@@ -1043,52 +1043,56 @@ end
 
 function MainLogin:RegisterWithAccount(callback, autoLogin)
     if not Validated:Account(self.account) then
-        return false
+        return
     end
 
     if not Validated:Password(self.password) then
-        return false
+        return
     end
 
-    Mod.WorldShare.MsgBox:Show(L'正在注册，请稍候...', 10000, L'链接超时', 500, 120)
+    Mod.WorldShare.MsgBox:Show(L'正在注册，请稍候...', 10000, L'链接超时', 500, 120, 10)
 
-    KeepworkServiceSession:RegisterWithAccount(self.account, self.password, function(state)
-        Mod.WorldShare.MsgBox:Close()
+    KeepworkServiceSession:RegisterWithAccount(
+        self.account,
+        self.password,
+        function(state)
+            Mod.WorldShare.MsgBox:Close()
 
-        if not state then
-            GameLogic.AddBBS(nil, L'未知错误', 5000, '0 255 0')
-            return
-        end
+            if not state then
+                GameLogic.AddBBS(nil, L'未知错误', 5000, '0 255 0')
+                return
+            end
 
-        if state.id then
-            if state.code then
-                if tonumber(state.code) == 429 then
-                    _guihelper.MessageBox(L'操作过于频繁，请在一个小时后再尝试。')
+            if state.id then
+                if state.code then
+                    if tonumber(state.code) == 429 then
+                        _guihelper.MessageBox(L'操作过于频繁，请在一个小时后再尝试。')
+                    else
+                        GameLogic.AddBBS(nil, format('%s%s(%d)', L'错误信息：', state.message or '', state.code or 0), 5000, '255 0 0')
+                    end
                 else
-                    GameLogic.AddBBS(nil, format('%s%s(%d)', L'错误信息：', state.message or '', state.code or 0), 5000, '255 0 0')
+                    -- set default user role
+                    local filename = self.GetValidAvatarFilename('boy01')
+                    GameLogic.options:SetMainPlayerAssetName(filename)
+
+                    -- register success
                 end
-                
-            else
-                -- set default user role
-                local filename = self.GetValidAvatarFilename('boy01')
-                GameLogic.options:SetMainPlayerAssetName(filename)
 
-                -- register success
+                if self.callback and type(self.callback) == 'function' then
+                    self.callback(true)
+                end
+
+                if callback and type(callback) == 'function' then
+                    callback(true)
+                end
+
+                return
             end
 
-            if self.callback and type(self.callback) == 'function' then
-                self.callback(true)
-            end
-
-            if callback and type(callback) == 'function' then
-                callback(true)
-            end
-
-            return
-        end
-
-        GameLogic.AddBBS(nil, format('%s%s(%d)', L'注册失败，错误信息：', state.message or '', state.code or 0), 5000, '255 0 0')
-    end, autoLogin)
+            GameLogic.AddBBS(nil, format('%s%s(%d)', L'注册失败，错误信息：', state.message or '', state.code or 0), 5000, '255 0 0')
+        end,
+        autoLogin
+    )
 end
 
 function MainLogin:RegisterWithPhone(callback)
@@ -1220,9 +1224,6 @@ function MainLogin:CheckAutoRegister(account, password, callback)
 end
 
 function MainLogin:AutoRegister(account, password, login_cb, school_data)
-    -- local account = page:GetValue('register_account')
-    -- local password = page:GetValue('register_account_password') or ''
-
     if not Validated:Account(account) then
         _guihelper.MessageBox([[1.账号需要4位以上的字母或字母+数字组合；<br/>
         2.必须以字母开头；<br/>
@@ -1230,7 +1231,6 @@ function MainLogin:AutoRegister(account, password, login_cb, school_data)
         *推荐使用<div style="color: #ff0000;float: lefr;">名字拼音+出生年份，例如：zhangsan2010</div>]]);
         return false
     end
-
 
     if not Validated:Password(password) then
         _guihelper.MessageBox(L'*密码不合法')
@@ -1262,7 +1262,7 @@ function MainLogin:AutoRegister(account, password, login_cb, school_data)
                 region_desc = state .. city .. county
             end
             
-            local register_str = string.format("%s是新用户， 你是否希望注册并默认加入学校%s：%s%s", account, school_data.id, region_desc, school_data.name)
+            local register_str = string.format("%s是新用户，你是否希望注册并默认加入学校%s：%s%s", account, school_data.id, region_desc, school_data.name)
             
             _guihelper.MessageBox(register_str, function()
                 MainLogin.account = account

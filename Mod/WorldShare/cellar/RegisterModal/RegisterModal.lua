@@ -54,7 +54,7 @@ function RegisterModal:ShowPage(callback, zorder)
     Mod.WorldShare.Utils.ShowWindow(
         320,
         360,
-        'Mod/WorldShare/cellar/Theme/RegisterModal/RegisterModal.html',
+        'Mod/WorldShare/cellar/RegisterModal/Theme/RegisterModal.html',
         'Mod.WorldShare.RegisterModal',
         nil,
         nil,
@@ -88,14 +88,14 @@ end
 
 function RegisterModal:RegisterWithAccount(callback)
     if not Validated:Account(self.account) then
-        return false
+        return
     end
 
     if not Validated:Password(self.password) then
-        return false
+        return
     end
 
-    Mod.WorldShare.MsgBox:Show(L'正在注册，请稍候...', 10000, L'链接超时', 500, 120)
+    Mod.WorldShare.MsgBox:Show(L'正在注册，请稍候...', 10000, L'链接超时', 500, 120, 20)
 
     KeepworkServiceSession:RegisterWithAccount(self.account, self.password, function(state)
         Mod.WorldShare.MsgBox:Close()
