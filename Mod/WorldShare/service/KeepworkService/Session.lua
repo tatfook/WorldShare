@@ -267,6 +267,8 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
         return
     end
 
+    System.options.loginmode = 'online'
+
     -- login api success ↓
     local token = response['token']
     local userId = response['id'] or 0
