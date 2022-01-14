@@ -172,7 +172,6 @@
                         end
 
                         Mod.WorldShare.MsgBox:Show(L'正在注册，请稍候...', 10000, L'链接超时', 500, 120, 10)
-                        echo(111111, true)
 
                         keepwork.tatfook.sensitive_words_check(
                             {
@@ -180,7 +179,6 @@
                             },
                             function(err, msg, data)
                                 Mod.WorldShare.MsgBox:Close()
-                                echo(22222, true)
 
                                 if err == 200 then
                                     -- 敏感词判断
@@ -472,12 +470,8 @@
                             })
 
                             last_timer:Change(1000, 1000)
-
-                            echo(11111, true)
                         else
                             last_timer:Change(1000, 1000)
-
-                            echo(22222, true)
                         end
                     end
 
