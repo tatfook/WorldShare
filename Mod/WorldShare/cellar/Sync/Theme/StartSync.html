@@ -141,7 +141,13 @@
                             padding-top: 25px;'>
                     <div style='margin-top: 20px;
                                 width: 500px;'>
-                        <%= format(L'世界名称：%s', get_current_world_name()) %>
+                        <%= L'世界名称：' %>
+                        <input type='text'
+                               style='background:;
+                                      height: 30px;
+                                      font-size: 18px;
+                                      base-font-size: 18px;'
+                               value='<%= get_current_world_name() %>' />
                     </div>
                     <div style='margin-top: 20px;
                                 width: 500px;'>
