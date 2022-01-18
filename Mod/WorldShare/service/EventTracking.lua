@@ -403,13 +403,11 @@ function EventTrackingService:Send(eventType, action, extra, offlineMode)
         return false
     end
 
-    if not eventType or not action then
-        return false
-    end
-
-    action = self:GetAction(action)
-
-    if not action then
+    if not eventType or
+       type(evnetType) ~= 'number' or
+       (evnetType ~= 1 and eventType ~= 2) or
+       not action or
+       type(action) ~= 'string' then
         return false
     end
 

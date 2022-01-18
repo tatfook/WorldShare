@@ -98,6 +98,7 @@ NPL.load('(gl)Mod/WorldShare/service/FileDownloader/FileDownloader.lua')
 local SocketService = commonlib.gettable('Mod.WorldShare.service.SocketService')
 local Cef3Manager = commonlib.gettable('Mod.WorldShare.service.Cef3Manager')
 local MainLogin = commonlib.gettable('MyCompany.Aries.Game.MainLogin')
+local EntityManager = commonlib.gettable("MyCompany.Aries.Game.EntityManager")
 
 -- bottles
 local KickOut = NPL.load('(gl)Mod/WorldShare/cellar/Common/KickOut/KickOut.lua')
@@ -235,7 +236,19 @@ function WorldShare:OnWorldLoad()
         OpusSetting:OnWorldLoad()
 
         -- ensure current enter world exist
-        EventTrackingService:Send(2, 'duration.world.stay', { started = true })
+        local entityPlayer = EntityManager.GetFocus()
+
+        if entityPlayer then
+            local x, y, z = entityPlayer:GetBlockPos()
+            local position = { x = x, y = y, z = z }
+
+            EventTrackingService:Send(2, 'duration.world.stay', { started = true, position = position })
+        else
+            EventTrackingService:Send(2, 'duration.world.stay', { started = true })
+        end
+
+
+        
         GameLogic.GetFilters():apply_filters('set_mode', GameLogic.GameMode:GetMode())
     end)
 
@@ -259,7 +272,17 @@ function WorldShare:OnLeaveWorld()
     local isEnterWorld = Mod.WorldShare.Store:Get('world/isEnterWorld')
 
     if isEnterWorld then
-        EventTrackingService:Send(2, 'duration.world.stay', { ended = true })
+        local entityPlayer = EntityManager.GetFocus()
+
+        if entityPlayer then
+            local x, y, z = entityPlayer:GetBlockPos()
+            local position = { x = x, y = y, z = z }
+
+            EventTrackingService:Send(2, 'duration.world.stay', { ended = true, position = position })
+        else
+            EventTrackingService:Send(2, 'duration.world.stay', { ended = true })
+        end
+
         EventTrackingService:Send(2, 'duration.world.edit', { ended = true })
         EventTrackingService:Send(2, 'duration.world.play', { ended = true })
     end
