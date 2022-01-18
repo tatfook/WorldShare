@@ -176,7 +176,9 @@ end
 function KeepworkServiceSchoolAndOrg:ChangeSchool(schoolId, callback)
     KeepworkUsersApi:ChangeSchool(
         schoolId,
-        function(data, err)
+        function(data, error)
+            local _data = data
+            local _error = err
             Mod.WorldShare.Store:Set('user/hasJoinedSchool', true)
 
             SessionsData:SetAnyonymousInfo('lastSchoolId', schoolId)
@@ -207,14 +209,16 @@ function KeepworkServiceSchoolAndOrg:ChangeSchool(schoolId, callback)
                         -- 1. for 柴桑小学 2. updated libs info
                         KeepWorkItemManager.school = response.school
 
-                        callback(true)
+                        callback({responseData = _data,error = _error,success = true})
                     end)
                 end)
             end
         end,
-        function()
+        function(data,error)
+            local _data = data
+            local _error = error
             if callback and type(callback) == 'function' then
-                callback(false)
+                callback({responseData = _data,error = _error,success = false})
             end
         end
     )

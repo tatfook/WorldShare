@@ -474,16 +474,22 @@
 
                         Mod.WorldShare.MsgBox:Wait()
 
-                        MySchool:ChangeSchool(cur_sel_school.value, function(bSuccessed)
+                        MySchool:ChangeSchool(cur_sel_school.value, function(data)
                             Mod.WorldShare.MsgBox:Close()
-
+                            local bSuccessed = data.success
+                            local responseData = data.responseData
                             if bSuccessed then
                                 page:CloseWindow()
                                 KeepworkServiceSession:CheckVerify()
                                 GameLogic.AddBBS(nil, L"加入学校成功", 3000, "0 255 0")
                                 GameLogic.GetFilters():apply_filters("join_school",{school_name = cur_sel_school.originName})
                             else
-                                GameLogic.AddBBS(nil, L"加入学校失败", 3000, "255 0 0")
+                                if responseData.code ~= nil and tonumber(responseData.code) == 61 then
+                                    _guihelper.MessageBox(responseData.message);
+                                    return
+                                else
+                                    GameLogic.AddBBS(nil, L"加入学校失败", 3000, "255 0 0")
+                                end
                             end
 
                             if MySchool.callback and type(MySchool.callback) == 'function' then
