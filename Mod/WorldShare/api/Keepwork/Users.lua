@@ -288,7 +288,7 @@ function KeepworkUsersApi:ChangeSchool(schoolId, success, error)
         return false
     end
 
-    KeepworkBaseApi:Put('/users/school', { schoolId = schoolId }, nil, success, error)
+    KeepworkBaseApi:Put('/v2/users/school', { schoolId = schoolId }, nil, success, error)
 end
 
 -- url: /users/school/register
