@@ -404,8 +404,8 @@ function EventTrackingService:Send(eventType, action, extra, offlineMode)
     end
 
     if not eventType or
-       type(evnetType) ~= 'number' or
-       (evnetType ~= 1 and eventType ~= 2) or
+       type(eventType) ~= 'number' or
+       (eventType ~= 1 and eventType ~= 2) or
        not action or
        type(action) ~= 'string' then
         return false
