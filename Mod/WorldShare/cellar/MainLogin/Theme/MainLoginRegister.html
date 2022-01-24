@@ -392,10 +392,8 @@
                         KeepworkServiceSession:CheckUsernameExist(
                             username,
                             function(bIsExist)
-                                echo('from check account', true)
-                                echo(bIsExist, true)
                                 if bIsExist then
-                                    _guihelper.MessageBox(L'*账号已存在，请使用其他账号')
+                                    _guihelper.MessageBox(format(L'*账号名%s已经被其他人注册，请使用其他账号名。', username))
                                     callback(false)
                                 else
                                     callback(true)
