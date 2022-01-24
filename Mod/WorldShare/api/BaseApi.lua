@@ -58,17 +58,17 @@ function BaseApi:Logger(method, fullUrl, url, error)
 
     return function(data, err)
         -- send directly
-        self.logger:collect(
-            "worldshare_api_error",
-            "API: " .. method .. " " .. url,
-            format("httpstatus: %d, url: %s, content: %s",
-                err,
-                fullUrl,
-                NPL.ToJson(data, true)
-            )
-        )
+        -- self.logger:collect(
+        --     "worldshare_api_error",
+        --     "API: " .. method .. " " .. url,
+        --     format("httpstatus: %d, url: %s, content: %s",
+        --         err,
+        --         fullUrl,
+        --         NPL.ToJson(data, true)
+        --     )
+        -- )
 
-        if type(error) == 'function' then
+        if error and type(error) == 'function' then
             error(data, err)
         end
     end

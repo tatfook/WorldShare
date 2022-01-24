@@ -67,7 +67,12 @@
                     Mod.WorldShare.Utils.SetTimeOut(function()
                         set_account_mode()
 
-                        page:FindControl('account_register_button'):SetDefault(true)
+                        local val = page:GetValue('phonepassword_show')
+                        page:SetValue('phonepassword_hide', val)
+                        page:SetValue('phonepassword', val)
+
+                        page:FindControl('phonepassword_show').visible = false
+                        page:FindControl('phonepassword_hide').visible = true
                     end, 0)
 
                     function set_finish()
@@ -129,84 +134,71 @@
                         end
                     end
 
-                    -- don't remove
-                    Mod.WorldShare.Utils.SetTimeOut(function()
-                        local val = page:GetValue('phonepassword_show')
-                        page:SetValue('phonepassword_hide', val)
-                        page:SetValue('phonepassword', val)
-
-                        page:FindControl('phonepassword_show').visible = false
-                        page:FindControl('phonepassword_hide').visible = true
-                    end, 0)
-
                     function account_register()
                         local account = page:GetValue('register_account')
                         local password = page:GetValue('register_account_password') or ''
 
                         if not Validated:Account(account) then
-                            page:SetUIValue('register_account_field_error_msg', L'*账号需4位以上且非数字开头的字母、数字组合形式')
-                            page:FindControl('register_account_field_error').visible = true
                             _guihelper.MessageBox([[1.账号需要4位以上的字母或字母+数字组合；<br/>
-                            2.必须以字母开头；<br/>
-                            <div style="height: 20px;"></div>
-                            *推荐使用<div style="color: #ff0000;float: lefr;">名字拼音+出生年份，例如：zhangsan2010</div>]]);
-                            return false
-                        end
-
-                        if MainLogin.accountExist then
-                            page:SetUIValue('register_account_field_error_msg', L'*账号已存在，请使用其他账号')
-                            page:FindControl('register_account_field_error').visible = true
-                            return false
+                                                    2.必须以字母开头；<br/>
+                                                    <div style="height: 20px;"></div>
+                                                    *推荐使用<div style="color: #ff0000;float: lefr;">名字拼音+出生年份，例如：zhangsan2010</div>]]);
+                            return
                         end
 
                         if not account_agree then
-                            page:SetUIValue('agree_field_error_msg', L'*您未同意用户协议')
-                            page:FindControl('agree_field_error').visible = true
-                            return false
+                            _guihelper.MessageBox(L'*您未同意用户协议')
+                            return
                         end
 
                         if not Validated:Password(password) then
-                            page:SetUIValue('register_account_password_field_error_msg', L'*密码不合法')
-                            page:FindControl('register_account_password_field_error').visible = true
-                            return false
+                            _guihelper.MessageBox(L'*密码不合法')
+                            return
                         end
 
                         Mod.WorldShare.MsgBox:Show(L'正在注册，请稍候...', 10000, L'链接超时', 500, 120, 10)
 
-                        keepwork.tatfook.sensitive_words_check(
-                            {
-                                word = account,
-                            },
-                            function(err, msg, data)
+                        check_account(function(result)
+                            if not result then
                                 Mod.WorldShare.MsgBox:Close()
-
-                                if err == 200 then
-                                    -- 敏感词判断
-                                    if data and #data > 0 then
-                                        local limit_world = data[1]
-                                        local begain_index, end_index = string.find(account, limit_world)
-                                        local begain_str = string.sub(account, 1, begain_index-1)
-                                        local end_str = string.sub(account, end_index+1, #account)
-
-                                        local limit_name = string.format([[%s<div style="color: #ff0000;float: lefr;">%s</div>%s]], begain_str, limit_world, end_str)
-                                        _guihelper.MessageBox(string.format("您设定的用户名包含敏感字符 %s，请换一个。", limit_name))
-                                        return
-                                    end
-
-                                    MainLogin.account = account
-                                    MainLogin.password = password
-                                    MainLogin.agree = agree
-            
-                                    MainLogin.callback = function()
-                                        page:SetValue('account_result', account)
-                                        page:SetValue('password_result', password)
-                                        set_finish()
-                                    end
-            
-                                    MainLogin:RegisterWithAccount()
-                                end
+                                return
                             end
-                        )
+
+                            keepwork.tatfook.sensitive_words_check(
+                                {
+                                    word = account,
+                                },
+                                function(err, msg, data)
+                                    Mod.WorldShare.MsgBox:Close()
+
+                                    if err == 200 then
+                                        -- 敏感词判断
+                                        if data and #data > 0 then
+                                            local limit_world = data[1]
+                                            local begain_index, end_index = string.find(account, limit_world)
+                                            local begain_str = string.sub(account, 1, begain_index-1)
+                                            local end_str = string.sub(account, end_index+1, #account)
+
+                                            local limit_name = string.format([[%s<div style="color: #ff0000;float: lefr;">%s</div>%s]], begain_str, limit_world, end_str)
+                                            _guihelper.MessageBox(string.format("您设定的用户名包含敏感字符 %s，请换一个。", limit_name))
+                                            return
+                                        end
+
+                                        MainLogin.account = account
+                                        MainLogin.password = password
+                                        MainLogin.agree = agree
+                
+                                        MainLogin.callback = function()
+                                            page:SetValue('account_result', account)
+                                            page:SetValue('password_result', password)
+                                            set_finish()
+                                        end
+                
+                                        MainLogin:RegisterWithAccount()
+                                    end
+                                end
+                            )
+                        end)
                     end
 
                     function phone_register_next()
@@ -391,38 +383,28 @@
 
                         local username = page:GetValue('register_account')
 
-                        if #username < 4 then
-                            page:SetUIValue('register_account_field_error_msg', L'请输入4位以上的英文字母、数字')
-                            _guihelper.SetFontColor(page:FindControl('register_account_field_error_msg'), '#00FF00')
-                            page:FindControl('register_account_field_error').visible = true
+                        if not Validated:Account(username) then
+                            _guihelper.MessageBox(L'*账号需大于3位且非数字开头的字母、数字组合形式')
                             callback(false)
                             return
-                        else
-                            if not Validated:Account(username) then
-                                page:SetUIValue('register_account_field_error_msg', L'*账号需大于3位且非数字开头的字母、数字组合形式')
-                                _guihelper.SetFontColor(page:FindControl('register_account_field_error_msg'), '#FF0000')
-                                page:FindControl('register_account_field_error').visible = true
-                                callback(false)
-                                return
-                            end
                         end
 
-                        KeepworkServiceSession:CheckUsernameExist(username, function(bIsExist)
-                            if bIsExist then
-                                MainLogin.accountExist = true
-                                page:SetUIValue('register_account_field_error_msg', L'*账号已存在，请使用其他账号')
-                                _guihelper.SetFontColor(page:FindControl('register_account_field_error_msg'), '#FF0000')
-                                page:FindControl('register_account_field_error').visible = true
-                                callback(false)
-                            else
-                                MainLogin.accountExist = false
-                                page:FindControl('register_account_field_error').visible = false
-                                callback(true)
+                        KeepworkServiceSession:CheckUsernameExist(
+                            username,
+                            function(bIsExist)
+                                echo('from check account', true)
+                                echo(bIsExist, true)
+                                if bIsExist then
+                                    _guihelper.MessageBox(L'*账号已存在，请使用其他账号')
+                                    callback(false)
+                                else
+                                    callback(true)
+                                end
                             end
-                        end)
+                        )
                     end
 
-                    function check_register_password()
+                    function update_register_account_button_status()
                         local password
 
                         if be_show_password then
@@ -432,47 +414,6 @@
                         end
 
                         page:SetValue('register_account_password', password)
-
-                        if not Validated:Password(password) then
-                            -- page:SetUIValue('register_account_password_field_error_msg', L'*密码不合法')
-                            -- page:FindControl('register_account_password_field_error').visible = true
-                            return false
-                        else
-                            page:FindControl('register_account_password_field_error').visible = false
-                            return true
-                        end
-                    end
-
-                    local last_func
-                    local last_timer
-
-                    function update_register_account_button_status()
-                        last_func = function()
-                            local bRight = false    
-
-                            if not check_register_password() then
-                                bRight = false
-                            end
-
-                            check_account(function(result)
-                                bRight = result
-                            end)
-                        end
-
-                        if not last_timer then
-                            last_timer = commonlib.Timer:new({
-                                    callbackFunc = function()
-                                        last_func()
-
-                                        last_timer:Change(nil, nil)
-                                        last_timer = nil
-                                    end
-                            })
-
-                            last_timer:Change(1000, 1000)
-                        else
-                            last_timer:Change(1000, 1000)
-                        end
                     end
 
                     function check_phone_number(callback)
@@ -483,10 +424,6 @@
                         local phonenumber = page:GetValue('phonenumber')
 
                         if not Validated:Phone(phonenumber) then
-                            if phone_show_field == 'phonenumber' then
-                                --page:SetUIValue('phone_field_error_msg', L'*手机号码格式错误')
-                                --page:FindControl('phone_field_error').visible = true
-                            end
                             callback(false)
                             return
                         end
@@ -494,10 +431,6 @@
                         KeepworkServiceSession:CheckPhonenumberExist(phonenumber, function(bIsExist)
                             if bIsExist then
                                 phone_account_exist = true
-                                if phone_show_field == 'phonenumber' then
-                                    --page:SetUIValue('phone_field_error_msg', L'*手机号码已存在')
-                                    --page:FindControl('phone_field_error').visible = true
-                                end
                                 callback(false)
                             else
                                 phone_account_exist = false
@@ -716,7 +649,6 @@
                             <div style='width: 240px; height: 88.1px;padding-left: 35px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#9 0 256 94)'>
                                 <div>
                                     <input type="text"
-                                           onchange='update_register_account_button_status'
                                            EmptyText='<%= L"请输入账号" %>'
                                            style='background:;textcolor: #FFFFFF;height: 30px;width: 200px;margin-top: 12px;font-size: 12px;'
                                            name="register_account" />
@@ -724,21 +656,34 @@
                                 <div>
                                     <div style="float: left;width: 200px;">
                                         <input type="text"
-                                            onchange="update_register_account_button_status"
-                                            SkipAutoBadWordFilter="true"
-                                            EmptyText='<%= L"请输入4位以上的密码" %>'
-                                            style='background:;textcolor: #FFFFFF;height: 30px;width: 200px;margin-top: 10px;font-size: 12px;'
-                                            name="register_account_password_show"
-                                            visible="false" />
+                                               onchange="update_register_account_button_status"
+                                               SkipAutoBadWordFilter="true"
+                                               EmptyText='<%= L"请输入4位以上的密码" %>'
+                                               style='background:;
+                                                      textcolor: #FFFFFF;
+                                                      height: 30px;
+                                                      width: 200px;
+                                                      margin-top: 10px;
+                                                      font-size: 12px;'
+                                               name="register_account_password_show"
+                                               visible="false" />
                                         <input type="text"
-                                            onchange="update_register_account_button_status"
-                                            PasswordChar="*"
-                                            SkipAutoBadWordFilter="true"
-                                            EmptyText='<%= L"请输入4位以上的密码" %>'
-                                            style='background:;textcolor: #FFFFFF;height: 30px;width: 200px;margin-top: 10px;font-size: 12px;margin-left: -200px;'
-                                            name="register_account_password_hide"
-                                            visible="true" />
-                                        <input type="hidden" name="register_account_password" value="" />
+                                               onchange="update_register_account_button_status"
+                                               PasswordChar="*"
+                                               SkipAutoBadWordFilter="true"
+                                               EmptyText='<%= L"请输入4位以上的密码" %>'
+                                               style='background:;
+                                                      textcolor: #FFFFFF;
+                                                      height: 30px;
+                                                      width: 200px;
+                                                      margin-top: 10px;
+                                                      font-size: 12px;
+                                                      margin-left: -200px;'
+                                               name="register_account_password_hide"
+                                               visible="true" />
+                                        <input type="hidden"
+                                               name="register_account_password"
+                                               value="" />
                                     </div>
                                     <input name="checkbox_password"
                                         type="checkbox"

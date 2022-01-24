@@ -414,7 +414,6 @@ function KeepworkServiceSession:Logout(mode, callback)
                 account = username,
                 loginServer = KeepworkService:GetEnv(),
                 autoLogin = false,
-                --rememberMe = false,
             }
         )
 
@@ -490,7 +489,7 @@ function KeepworkServiceSession:RegisterWithAccount(username, password, callback
                         end
 
                         self:LoginResponse(loginData, err, function()
-                            if type(callback) == 'function' then
+                            if callback and type(callback) == 'function' then
                                 callback(registerData)
                             end
                         end)
@@ -499,13 +498,13 @@ function KeepworkServiceSession:RegisterWithAccount(username, password, callback
                 return true
             end
 
-            if type(callback) == 'function' then
+            if callback and type(callback) == 'function' then
                 callback(registerData)
             end
         end,
         function(data, err)
-            if type(callback) == 'function' then
-                if type(data) == 'table' and data.code then
+            if callback and type(callback) == 'function' then
+                if data and type(data) == 'table' and data.code then
                     callback(data)
                 else
                     callback({ message = L'未知错误', code = err})
@@ -1106,12 +1105,12 @@ function KeepworkServiceSession:CheckPhonenumberExist(phone, callback)
 end
 
 function KeepworkServiceSession:CheckUsernameExist(username, callback)
-    if type(username) ~= 'string' then
-        return false
+    if not username or type(username) ~= 'string' then
+        return
     end
 
-    if type(callback) ~= 'function' then
-        return false
+    if not callback or type(callback) ~= 'function' then
+        return
     end
 
     KeepworkUsersApi:GetUserByUsernameBase64(

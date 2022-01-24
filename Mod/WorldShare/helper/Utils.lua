@@ -169,9 +169,7 @@ function Utils.FormatFileSize(size, unit)
     return s or '0'
 end
 
-function Utils.SetTimeOut(callback, times)
-    commonlib.TimerManager.SetTimeout(callback, times or 100)
-end
+Utils.SetTimeOut = commonlib.TimerManager.SetTimeout
 
 function Utils.FixCenter(width, height)
     local Screen = commonlib.gettable('System.Windows.Screen')

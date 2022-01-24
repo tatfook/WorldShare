@@ -203,7 +203,7 @@ end
 -- return: object
 function KeepworkUsersApi:GetUserByPhonenumber(phonenumber, success, error)
     if not phonenumber then
-        return false
+        return
     end
 
     KeepworkBaseApi:Get('/users?cellphone=' .. phonenumber, nil, nil, success, error)
@@ -213,17 +213,21 @@ end
 -- method: GET
 -- return: object
 function KeepworkUsersApi:GetUserByUsernameBase64(username, success, error)
-    if type(username) ~= "string" then
-        return false
-    end
-
-    if #username == 0 then
-        return false
+    if not username or
+       type(username) ~= 'string' or
+       #username == 0 then
+        return
     end
 
     local usernameBase64 = Encoding.to_base64(NPL.ToJson({username = username}))
 
-    KeepworkBaseApi:Get('/users/PP' .. usernameBase64, nil, nil, success, error)
+    KeepworkBaseApi:Get(
+        '/users/PP' .. usernameBase64,
+        nil,
+        nil,
+        success,
+        error
+    )
 end
 
 -- url: /users?email={email}
