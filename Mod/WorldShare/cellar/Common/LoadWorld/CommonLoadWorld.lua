@@ -947,7 +947,7 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                                 commonlib.Files.Find(output, '', 0, 500, ':worldconfig.txt', downloadNewLocalWorldFile)
     
                                 if #output == 0 then
-                                    _guihelper.MessageBox(format(L'下载的世界已损坏，请重新尝试几次（项目ID：%d）', pid))
+                                    _guihelper.MessageBox(format(L'worldconfig.txt不存在，请联系作者检查世界目录（项目ID：%d）', pid))
     
                                     LOG.std(nil, 'warn', 'CommandLoadWorld', 'Invalid downloaded file will be deleted: %s', downloadNewLocalWorldFile)
     
