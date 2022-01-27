@@ -61,13 +61,13 @@ function CommonLoadWorld:CheckLoadWorldFromCmdLine(cmdLineWorld)
 
         if loginEnable then
             if KeepworkServiceSession:IsSignedIn() then
-                WorldCommon.OpenWorld(cmdLineWorld, true)
+                WorldCommon.OpenWorld(Mod.WorldShare.Utils.GetTrueFilename(cmdLineWorld), true)
             else
                 MainLogin:Show()
                 Game.MainLogin.cmdWorldLoaded = false
             end
         else
-            WorldCommon.OpenWorld(cmdLineWorld, true)
+            WorldCommon.OpenWorld(Mod.WorldShare.Utils.GetTrueFilename(cmdLineWorld), true)
         end
 
         return

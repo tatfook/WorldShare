@@ -669,3 +669,23 @@ function Utils.FormatString(text, count)
 
     return newC
 end
+
+function Utils.GetTrueFilename(filename)
+    -- tricky: we do not know which encoding the filename in the zip archive is,
+    -- so we will assume it is utf8, we will convert it to default and then back to utf8.
+    -- if the file does not change, it might be utf8. 
+    local trueFilename = ''
+    local defaultEncodingFilename = commonlib.Encoding.Utf8ToDefault(filename)
+
+    if defaultEncodingFilename == filename then
+        trueFilename = filename
+    else
+        if commonlib.Encoding.DefaultToUtf8(defaultEncodingFilename) == filename then
+            trueFilename = defaultEncodingFilename
+        else
+            trueFilename = filename
+        end
+    end
+
+    return trueFilename
+end
