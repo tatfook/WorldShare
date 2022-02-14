@@ -93,7 +93,7 @@ function LocalService:FilesFind(result, path, subPath)
         local zipFile = {[".xml"] = true, [".bmax"] = true}
 
         for key, item in ipairs(curResult) do
-            if (item.filesize ~= 0) then
+            if (item.fileattr == 32) then
                 -- file
                 item.file_path = curPath .. "/" .. item.filename
 
