@@ -88,34 +88,34 @@ function LocalService:FilesFind(result, path, subPath)
     local curPath = path
     local curSubPath = subPath
 
-    if (type(curResult) == "table") then
+    if curResult and type(curResult) == "table" then
         local convertLineEnding = {[".xml"] = true, [".bmax"] = true, [".txt"] = true, [".md"] = true, [".lua"] = true}
         local zipFile = {[".xml"] = true, [".bmax"] = true}
 
         for key, item in ipairs(curResult) do
-            if (item.fileattr == 32) then
+            if item.fileattr == 32 then
                 -- file
                 item.file_path = curPath .. "/" .. item.filename
 
-                if (curSubPath) then
+                if curSubPath then
                     item.filename = curSubPath .. "/" .. item.filename
                 end
 
                 local sExt = item.filename:match("%.[^&.]+$")
 
-                if (sExt == ".bak") then
+                if sExt == ".bak" then
                     item = false
                 else
                     if self.isGetContent then
                         local bConvert = false
     
-                        if (convertLineEnding[sExt] and zipFile[sExt]) then
+                        if convertLineEnding[sExt] and zipFile[sExt] then
                             bConvert = not self:IsZip(item.file_path)
                         elseif (convertLineEnding[sExt]) then
                             bConvert = true
                         end
-    
-                        if (bConvert) then
+ 
+                        if bConvert then
                             item.file_content_t = self:GetFileContent(item.file_path):gsub("\r\n", "\n") or ""
                             item.filesize = #item.file_content_t or 0
                             item.sha1 = SystemEncoding.sha1("blob " .. item.filesize .. "\0" .. item.file_content_t, "hex")
@@ -132,7 +132,7 @@ function LocalService:FilesFind(result, path, subPath)
                 local newResult = self:Find(newPath)
                 local newSubPath = nil
 
-                if (curSubPath) then
+                if curSubPath then
                     newSubPath = curSubPath .. "/" .. item.filename
                 else
                     newSubPath = item.filename
@@ -153,11 +153,14 @@ end
 
 function LocalService:GetFileContent(filePath)
     local file = ParaIO.open(filePath, "r")
-    if (file:IsValid()) then
+
+    if file:IsValid() then
         local fileContent = file:GetText(0, -1)
         file:close()
-        return fileContent
+        return fileContent or ""
     end
+
+    return ""
 end
 
 function LocalService:Write(worldpath, path, content)
