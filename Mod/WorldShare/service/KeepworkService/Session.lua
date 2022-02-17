@@ -1036,11 +1036,11 @@ function KeepworkServiceSession:PreventIndulge(callback)
         end
 
         -- 22:30
-        if os.date('%H:%M', currentServerTime) == '22:30' then
-            if type(callback) == 'function' then
-                callback('22:30')
-            end
-        end
+        -- if os.date('%H:%M', currentServerTime) == '22:30' then
+        --     if type(callback) == 'function' then
+        --         callback('22:30')
+        --     end
+        -- end
     end
 
     KeepworkKeepworksApi:CurrentTime(
