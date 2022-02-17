@@ -1293,7 +1293,8 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                     not data.isSystemGroupMember and
                     not self.freeUserVerified then
 
-                    if not self:IdsFilter(pid) then
+                    if not data.isFreeWorld or
+                       data.isFreeWorld == 0 then
                         GameLogic.IsVip('LimitUserOpenShareWorld', true, function(result)
                             if not result then
                                 return
