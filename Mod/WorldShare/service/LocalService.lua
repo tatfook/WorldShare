@@ -451,6 +451,10 @@ function LocalService:GetZipRevision(path)
 
     ParaAsset.CloseArchive(path)
 
+    if not revision then
+        revision = 0
+    end
+
     return revision
 end
 
