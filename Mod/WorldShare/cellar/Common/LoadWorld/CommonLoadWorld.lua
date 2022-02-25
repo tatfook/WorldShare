@@ -1306,8 +1306,11 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                         end)
                     else
                         self.freeUserVerified = true
-
                         HandleVerified()
+                    end
+
+                    if GameLogic.QuestAction then
+                        GameLogic.QuestAction.SetCurWorldData(data)
                     end
 
                     return

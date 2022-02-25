@@ -40,8 +40,7 @@
 
                     -- only classification
                     Mod.WorldShare.MsgBox:Wait()
-                    RegisterModal:Classification(phonenumber, phonecaptcha, function()
-                    
+                    RegisterModal:Classification(phonenumber, phonecaptcha, function(data)
                         KeepworkServiceSession:CheckVerify()
                         Mod.WorldShare.MsgBox:Close()
                         close()
@@ -136,7 +135,7 @@
                         end
                     end, Mod.WorldShare.Store:Get('user/token'))
                 end
-                
+
                 checkRealName()
             ]]>
         </script>
@@ -199,13 +198,15 @@
                         </div>
 
                     </div>
-                    <div style="margin-left: 240px;margin-top: 30px;">
+                    <div style="margin-left: 240px;margin-top: 18px;">
                         <input type="button" class="theme1_myhome_blue_bt" value="<%= L'确认' %>" onclick="bind()" />
                         <input type="button" style="margin-left: 56px;" class="theme1_myhome_gray_bt" value="<%= L'跳过' %>" onclick="close()" />
                     </div>
-                    <div align='center' style="width: 418px;margin-top: 22px;">
-                        <img style="width: 418px;height: 140px;" src="Texture/Aries/Creator/paracraft/paracraft_certification_a_32bits.png#12 264 418 140" />
+
+                    <div align='center' style="width: 420px;margin-top: 15px;">
+                        <img style="width: 420px;height: 161px;" src="Texture/Aries/Creator/keepwork/RedSummerCamp/UserVip/huiyuanlibao_420x161_32bits.png#0 0 420 161" />
                     </div>
+
                 </div>
             </kp:window>
         </div>

@@ -189,10 +189,16 @@ function RegisterModal:Classification(phonenumber, captcha, callback)
         if bSuccess then
             GameLogic.AddBBS(nil, L'实名认证成功', 5000, '0 255 0')
 
+            local desc = "感谢你完成实名认证，本机器或您实名时用的手机号已经被赠送过会员，本账号无法重复赠送试用会员"
+            if data.isGetVip then
+                desc = "恭喜你完成实名认证，我们已经免费为您开通了七天的会员"
+            end
+            _guihelper.MessageBox(desc);
+            
             if data.isGetVip then
                 commonlib.setfield("System.User.isVip", data.isGetVip)
             end
-            
+
             if callback and type(callback) == 'function' then
                 callback(data)
             end
