@@ -194,13 +194,19 @@ function RegisterModal:Classification(phonenumber, captcha, callback)
                 desc = "恭喜你完成实名认证，我们已经免费为您开通了七天的会员"
             end
             _guihelper.MessageBox(desc);
-            
+
             if data.isGetVip then
                 commonlib.setfield("System.User.isVip", data.isGetVip)
-            end
-
-            if callback and type(callback) == 'function' then
-                callback(data)
+                local KeepWorkItemManager = NPL.load("(gl)script/apps/Aries/Creator/HttpAPI/KeepWorkItemManager.lua");
+                KeepWorkItemManager.LoadProfile(true, function()
+                    if callback and type(callback) == 'function' then
+                        callback(data)
+                    end
+                end)
+            else
+                if callback and type(callback) == 'function' then
+                    callback(data)
+                end
             end
 
             return
