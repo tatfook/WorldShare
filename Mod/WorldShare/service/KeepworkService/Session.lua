@@ -455,7 +455,11 @@ function KeepworkServiceSession:RegisterWithAccount(username, password, callback
         password = password,
         channel = 3
     }
-
+    -- 加上设备唯一标识
+    local device_encode_uid = self:GetEncodeDeviceId()
+    if device_encode_uid and device_encode_uid ~= "" then
+        params.macAddress = device_encode_uid
+    end
     KeepworkUsersApi:Register(
         params,
         function(registerData, err)
@@ -592,6 +596,12 @@ function KeepworkServiceSession:RegisterWithPhone(username, cellphone, cellphone
         channel = 3,
         isBind = true
     }
+    
+    -- 加上设备唯一标识
+    local device_encode_uid = self:GetEncodeDeviceId()
+    if device_encode_uid and device_encode_uid ~= "" then
+        params.macAddress = device_encode_uid
+    end
 
     KeepworkUsersApi:Register(
         params,
@@ -815,6 +825,9 @@ function KeepworkServiceSession:GetPhoneCaptcha(phone, callback)
 end
 
 function KeepworkServiceSession:ClassificationPhone(cellphone, captcha, callback)
+    -- 加上设备唯一标识
+    local macAddress = self:GetEncodeDeviceId()
+
     KeepworkUsersApi:RealName(
         cellphone,
         captcha,
@@ -830,7 +843,8 @@ function KeepworkServiceSession:ClassificationPhone(cellphone, captcha, callback
 
             end
         end,
-        { 400 }
+        { 400 },
+        macAddress
     )
 end
 
@@ -1290,4 +1304,18 @@ function KeepworkServiceSession:CheckVerify()
             KeepWorkItemManager.DoExtendedCost(40006)
         end
     end
+end
+
+function KeepworkServiceSession:GetEncodeDeviceId()
+    local device_uid = SessionsData:GetDeviceUUID()
+    device_uid = device_uid .. os.time()
+    if not device_uid or device_uid == "" then
+        return ""
+    end
+    -- local device_uid = "19eb2894-9e6b-45f3-87f4-30f31ad7eb1a-4C4C4544-0056-3110-804A-C8C04F373433"
+    local tab = {macAddress=device_uid}
+    local json_str = NPL.ToJson(tab);
+    local base64_str = System.Encoding.base64(json_str)
+
+    return base64_str
 end

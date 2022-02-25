@@ -189,8 +189,12 @@ function RegisterModal:Classification(phonenumber, captcha, callback)
         if bSuccess then
             GameLogic.AddBBS(nil, L'实名认证成功', 5000, '0 255 0')
 
+            if data.isGetVip then
+                commonlib.setfield("System.User.isVip", data.isGetVip)
+            end
+            
             if callback and type(callback) == 'function' then
-                callback()
+                callback(data)
             end
 
             return

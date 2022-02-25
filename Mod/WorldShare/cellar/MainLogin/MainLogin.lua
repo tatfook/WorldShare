@@ -1062,7 +1062,7 @@ function MainLogin:RegisterWithAccount(callback, autoLogin)
                 GameLogic.AddBBS(nil, L'未知错误', 5000, '0 255 0')
                 return
             end
-
+            
             if state.id then
                 if state.code then
                     if tonumber(state.code) == 429 then
@@ -1084,6 +1084,11 @@ function MainLogin:RegisterWithAccount(callback, autoLogin)
 
                 if callback and type(callback) == 'function' then
                     callback(true)
+                end
+
+                if state.isGetVip then
+                    local VipRewardPage = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/User/VipRewardPage.lua");
+                    VipRewardPage.SetShow(true);
                 end
 
                 return
@@ -1139,6 +1144,11 @@ function MainLogin:RegisterWithPhone(callback)
 
             if callback and type(callback) == 'function' then
                 callback(true)
+            end
+            
+            if state.isGetVip then
+                local VipRewardPage = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/User/VipRewardPage.lua");
+                VipRewardPage.SetShow(true);
             end
 
             return

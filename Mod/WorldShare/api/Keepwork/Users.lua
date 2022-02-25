@@ -14,7 +14,6 @@ local Encoding = commonlib.gettable("System.Encoding.basexx")
 local KeepworkBaseApi = NPL.load('./BaseApi.lua')
 
 local KeepworkUsersApi = NPL.export()
-
 -- url: /users/login
 -- method: POST
 -- params:
@@ -118,13 +117,14 @@ end
     realname boolean necessary true
 ]]
 -- return: object
-function KeepworkUsersApi:RealName(cellphone, captcha, success, error, noTryStatus)
+function KeepworkUsersApi:RealName(cellphone, captcha, success, error, noTryStatus, macAddress)
     local params = {
         cellphone = cellphone,
         captcha = captcha,
-        realname = true
+        realname = true,
+        macAddress = macAddress
     }
-
+    
     KeepworkBaseApi:Post('/users/cellphone_captcha', params, nil, success, error, noTryStatus)
 end
 

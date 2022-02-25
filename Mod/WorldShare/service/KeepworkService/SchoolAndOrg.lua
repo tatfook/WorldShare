@@ -191,7 +191,6 @@ function KeepworkServiceSchoolAndOrg:ChangeSchool(schoolId, callback)
                     -- if response and response.school and response.school.isVip == 1 then
                     --     isVipSchool = true
                     -- end
-
                     -- 2021.11.4修改 是否vip学校通过身份来验证
                     keepwork.user.roles({},function(err, msg, data)
                         if err == 200 then
@@ -202,7 +201,6 @@ function KeepworkServiceSchoolAndOrg:ChangeSchool(schoolId, callback)
                                 end
                             end
                         end
-
                         local SetIsVipSchool = Mod.WorldShare.Store:Action('user/SetIsVipSchool')
                         SetIsVipSchool(isVipSchool)
 
