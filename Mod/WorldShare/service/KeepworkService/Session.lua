@@ -1308,7 +1308,7 @@ end
 
 function KeepworkServiceSession:GetEncodeDeviceId()
     local device_uid = SessionsData:GetDeviceUUID()
-    device_uid = device_uid .. os.time()
+    -- device_uid = device_uid .. os.time()
     if not device_uid or device_uid == "" then
         return ""
     end
