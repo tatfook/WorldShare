@@ -504,8 +504,8 @@
 
                     Mod.WorldShare.Utils.SetTimeOut(function()
                         result_page = Mod.WorldShare.Store:Get('page/Mod.WorldShare.JoinSchool.Result')
-
-                        if MySchool.SetDefault then
+                                   
+                        if MySchool.SetDefault and MySchool.searchText and  MySchool.searchText ~= "" then
                             sel_kind("primary_school")
                             MySchool.SetDefault = false
                         end
