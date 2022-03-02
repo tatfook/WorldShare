@@ -44,6 +44,7 @@ local CommonlibEncoding = commonlib.gettable("commonlib.Encoding")
 local FileDownloader = commonlib.gettable("Mod.WorldShare.service.FileDownloader.FileDownloader")
 local LocalLoadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalLoadWorld")
 local SaveWorldHandler = commonlib.gettable("MyCompany.Aries.Game.SaveWorldHandler")
+local WorldInfo = commonlib.gettable("MyCompany.Aries.Game.WorldInfo")
 
 local LocalService = NPL.export()
 
@@ -414,6 +415,58 @@ end
 
 function LocalService:GetZipWorldSize(path)
     return ParaIO.GetFileSize(path)
+end
+
+function LocalService:GetZipProjectId(path)
+    local parentPath = path:gsub('[^/\\]+$', '')
+
+    ParaAsset.OpenArchive(path, true)
+
+    local projectId = 0
+    local output = {}
+
+    commonlib.Files.Find(output, '', 0, self.nMaxFilesNum, ':tag.xml', path)
+
+    if #output ~= 0 then
+        local zipFileName = nil
+
+        if #output > 1 then
+            for key, item in ipairs(output) do
+                if string.match(item.filename, '[^/]+/tag.xml') == item.filename then
+                    zipFileName = item.filename
+                end
+            end
+        else
+            zipFileName = output[1].filename
+        end
+
+        if zipFileName then
+            local xmlRoot = ParaXML.LuaXML_ParseFile(parentPath .. zipFileName)
+
+            local worldInfo = WorldInfo:new()
+
+            if xmlRoot then
+                local node
+
+                for node in commonlib.XPath.eachNode(xmlRoot, "/pe:mcml/pe:world") do
+                    worldInfo:LoadFromXMLNode(node);
+                    break
+                end
+            end
+
+            if worldInfo and type(worldInfo) == 'table' then
+                projectId = worldInfo.kpProjectId
+            end
+        end
+    end
+
+    ParaAsset.CloseArchive(path)
+
+    if not projectId then
+        projectId = 0
+    end
+
+    return projectId
 end
 
 function LocalService:GetZipRevision(path)
