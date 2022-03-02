@@ -83,6 +83,7 @@ function CommonLoadWorld:CheckLoadWorldFromCmdLine(cmdLineWorld)
             -- fetch apk world revision and project id
             if cmdLineWorld:match("%.zip$") then
                 apkWorldRevision = tonumber(LocalService:GetZipRevision(Mod.WorldShare.Utils.GetTrueFilename(cmdLineWorld)))
+                apkProjectId = LocalService:GetZipProjectId(Mod.WorldShare.Utils.GetTrueFilename(cmdLineWorld))
             else
                 local readRevisionFile = ParaIO.open(Mod.WorldShare.Utils.GetTrueFilename(cmdLineWorld) .. '/revision.xml', 'r')
 
