@@ -75,6 +75,13 @@ Config.qiniuGitZip = {
   LOCAL = 'http://qiniu-gitzip-dev.keepwork.com'
 }
 
+Config.xpGitZip = {
+  ONLINE = 'http://api.keepwork.com/core/v0',
+  STAGE = 'http://api-dev.keepwork.com/core/v0',
+  RELEASE = 'http:/api-dev.keepwork.com/core/v0',
+  LOCAL = 'http://api-dev.keepwork.com/core/v0'
+}
+
 Config.keepworkServerList = {
   ONLINE = 'https://api.keepwork.com/core/v0',
   STAGE = 'http://api-dev.kp-para.cn/core/v0',

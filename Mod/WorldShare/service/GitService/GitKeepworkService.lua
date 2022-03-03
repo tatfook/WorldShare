@@ -23,18 +23,34 @@ local Config = NPL.load('(gl)Mod/WorldShare/config/Config.lua')
 local GitKeepworkService = NPL.export()
 
 function GitKeepworkService:GetQiNiuArchiveUrl(foldername, username, commitId)
+    local baseUrl = ''
+
+    if System.os.IsWindowsXP() then
+        baseUrl = Config:GetValue('xpGitZip')
+    else
+        baseUrl = Config:GetValue('qiniuGitZip')
+    end
+
     return format(
             '%s/%s-%s.zip',
-            Config:GetValue('qiniuGitZip'),
+            baseUrl,
             GitService:GetRepoPath(foldername, username),
             commitId
            )
 end
 
 function GitKeepworkService:GetCdnArchiveUrl(foldername, username, commitId)
+    local baseUrl = ''
+
+    if System.os.IsWindowsXP() then
+        baseUrl = Config:GetValue('xpGitZip')
+    else
+        baseUrl = Config:GetValue('qiniuGitZip')
+    end
+
     return format(
             '%s/repos/%s/download?ref=%s',
-            Config:GetValue('keepworkApiCdnList'),
+            baseUrl,
             GitService:GetRepoPath(foldername, username),
             commitId
            )
