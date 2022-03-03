@@ -45,7 +45,7 @@ function GitKeepworkService:GetCdnArchiveUrl(foldername, username, commitId)
     if System.os.IsWindowsXP() then
         baseUrl = Config:GetValue('xpGitZip')
     else
-        baseUrl = Config:GetValue('qiniuGitZip')
+        baseUrl = Config:GetValue('keepworkApiCdnList')
     end
 
     return format(
