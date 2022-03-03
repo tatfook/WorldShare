@@ -47,6 +47,22 @@ local GitEncoding = NPL.load('(gl)Mod/WorldShare/helper/GitEncoding.lua')
 
 local CommonLoadWorld = NPL.export()
 
+function CommonLoadWorld:OnWorldLoad()
+    if self.setCacheWorldForSingletonApp then
+        if not ParaIO.DoesFileExist('temp/use_cache_world') then
+            local writeFile = ParaIO.open('temp/use_cache_world', 'w')
+
+            if writeFile:IsValid() then
+                local content = "use_cache_world"
+                writeFile:write(content, #content)
+                writeFile:close()
+            end
+        end
+
+        self.setCacheWorldForSingletonApp = nil
+    end
+end
+
 function CommonLoadWorld:CheckLoadWorldFromCmdLine(cmdLineWorld)
     if not cmdLineWorld or type(cmdLineWorld) ~= 'string' then
         return
@@ -56,18 +72,89 @@ function CommonLoadWorld:CheckLoadWorldFromCmdLine(cmdLineWorld)
 
     if paramWorld and paramWorld == cmdLineWorld then
         local loginEnable = ParaEngine.GetAppCommandLineByParam('login_enable', '')
+        local autoUpdateWorld = ParaEngine.GetAppCommandLineByParam('auto_update_world', '')
 
         loginEnable = loginEnable == 'true' and true or false
 
+        local function EnterAutoUpdateWorld()
+            local apkWorldRevision
+            local apkProjectId
+
+            -- fetch apk world revision and project id
+            if cmdLineWorld:match("%.zip$") then
+                apkWorldRevision = tonumber(LocalService:GetZipRevision(Mod.WorldShare.Utils.GetTrueFilename(cmdLineWorld)))
+                apkProjectId = LocalService:GetZipProjectId(Mod.WorldShare.Utils.GetTrueFilename(cmdLineWorld))
+            else
+                local readRevisionFile = ParaIO.open(Mod.WorldShare.Utils.GetTrueFilename(cmdLineWorld) .. '/revision.xml', 'r')
+
+                if readRevisionFile:IsValid() then
+                    apkWorldRevision = readRevisionFile:GetText(0, -1)
+
+                    if apkWorldRevision and type(apkWorldRevision) == 'string' then
+                        apkWorldRevision = tonumber(apkWorldRevision)
+                    end
+
+                    readRevisionFile:close()
+                end
+
+                local tag = LocalService:GetTag(Mod.WorldShare.Utils.GetTrueFilename(cmdLineWorld))
+                
+                if tag and type(tag) == 'table' then
+                    apkProjectId = tag.kpProjectId
+                end
+            end
+
+            if apkWorldRevision and
+               type(apkWorldRevision) == 'number' and
+               apkProjectId and
+               type(apkProjectId) == 'number' then
+                -- Determines whether there is a cache file.
+                if ParaIO.DoesFileExist('temp/use_cache_world') then
+                    GameLogic.RunCommand("/loadworld -auto " .. apkProjectId)
+                else
+                    GitService:GetWorldRevision(
+                        apkProjectId,
+                        false,
+                        function(remoteRevision, err)
+                            if not remoteRevision or type(remoteRevision) ~= 'number' then
+                                WorldCommon.OpenWorld(Mod.WorldShare.Utils.GetTrueFilename(cmdLineWorld), true)
+                                return
+                            end
+
+                            if remoteRevision > apkWorldRevision then
+                                -- Enter world by project ID and set the cache file.
+                                GameLogic.RunCommand("/loadworld -auto " .. apkProjectId)
+
+                                self.setCacheWorldForSingletonApp = true
+                            else
+                                -- open world
+                                WorldCommon.OpenWorld(Mod.WorldShare.Utils.GetTrueFilename(cmdLineWorld), true)
+                            end
+                        end
+                    )
+                end
+            else
+                WorldCommon.OpenWorld(Mod.WorldShare.Utils.GetTrueFilename(cmdLineWorld), true)
+            end
+        end
+
         if loginEnable then
             if KeepworkServiceSession:IsSignedIn() then
-                WorldCommon.OpenWorld(Mod.WorldShare.Utils.GetTrueFilename(cmdLineWorld), true)
+                if autoUpdateWorld == 'true' then
+                    EnterAutoUpdateWorld()
+                else
+                    WorldCommon.OpenWorld(Mod.WorldShare.Utils.GetTrueFilename(cmdLineWorld), true)
+                end
             else
                 MainLogin:Show()
                 Game.MainLogin.cmdWorldLoaded = false
             end
         else
-            WorldCommon.OpenWorld(Mod.WorldShare.Utils.GetTrueFilename(cmdLineWorld), true)
+            if autoUpdateWorld == 'true' then
+                EnterAutoUpdateWorld()
+            else
+                WorldCommon.OpenWorld(Mod.WorldShare.Utils.GetTrueFilename(cmdLineWorld), true)
+            end
         end
 
         return

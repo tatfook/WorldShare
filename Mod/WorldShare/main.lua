@@ -108,6 +108,7 @@ local PreventIndulge = NPL.load('(gl)Mod/WorldShare/cellar/PreventIndulge/Preven
 local Beginner = NPL.load('(gl)Mod/WorldShare/cellar/Beginner/Beginner.lua')
 local Certificate = NPL.load('(gl)Mod/WorldShare/cellar/Certificate/Certificate.lua')
 local Cellar = NPL.load('(gl)Mod/WorldShare/cellar/cellar.lua')
+local CommonLoadWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/CommonLoadWorld.lua')
 
 -- service
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
@@ -257,6 +258,7 @@ function WorldShare:OnWorldLoad()
     KeepworkServiceProject:OnWorldLoad()
     KeepworkServiceSession:OnWorldLoad()
     Certificate:OnWorldLoad()
+    CommonLoadWorld:OnWorldLoad()
 
     Mod.WorldShare.Store:Set('world/isEnterWorld', true)
 end
