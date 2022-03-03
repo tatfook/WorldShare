@@ -455,11 +455,6 @@ function KeepworkServiceSession:RegisterWithAccount(username, password, callback
         password = password,
         channel = 3
     }
-    -- 加上设备唯一标识
-    local device_encode_uid = self:GetEncodeDeviceId()
-    if device_encode_uid and device_encode_uid ~= "" then
-        params.macAddress = device_encode_uid
-    end
     KeepworkUsersApi:Register(
         params,
         function(registerData, err)
@@ -596,12 +591,6 @@ function KeepworkServiceSession:RegisterWithPhone(username, cellphone, cellphone
         channel = 3,
         isBind = true
     }
-    
-    -- 加上设备唯一标识
-    local device_encode_uid = self:GetEncodeDeviceId()
-    if device_encode_uid and device_encode_uid ~= "" then
-        params.macAddress = device_encode_uid
-    end
 
     KeepworkUsersApi:Register(
         params,
@@ -824,9 +813,12 @@ function KeepworkServiceSession:GetPhoneCaptcha(phone, callback)
     KeepworkUsersApi:CellphoneCaptcha(phone, callback, callback)
 end
 
-function KeepworkServiceSession:ClassificationPhone(cellphone, captcha, callback)
+function KeepworkServiceSession:ClassificationPhone(cellphone, captcha, callback, is_bind_mac_address)
     -- 加上设备唯一标识
-    local macAddress = self:GetEncodeDeviceId()
+    local macAddress
+    if is_bind_mac_address then
+        macAddress = self:GetEncodeDeviceId()
+    end
 
     KeepworkUsersApi:RealName(
         cellphone,

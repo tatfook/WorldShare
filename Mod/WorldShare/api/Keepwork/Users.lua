@@ -122,8 +122,11 @@ function KeepworkUsersApi:RealName(cellphone, captcha, success, error, noTryStat
         cellphone = cellphone,
         captcha = captcha,
         realname = true,
-        macAddress = macAddress
     }
+
+    if macAddress then
+        params.macAddress = macAddress
+    end
     
     KeepworkBaseApi:Post('/users/cellphone_captcha', params, nil, success, error, noTryStatus)
 end
