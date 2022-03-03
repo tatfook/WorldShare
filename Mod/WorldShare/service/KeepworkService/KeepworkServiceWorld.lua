@@ -614,7 +614,8 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
     end)
 end
 
-function KeepworkServiceWorld:LimitFreeUser(isShowUI, callback)
+--allowMax 保存的时候允许临界值（localWorldListCount==freeMaxWorldCount）
+function KeepworkServiceWorld:LimitFreeUser(isShowUI, callback,allowMax)
     if not callback or type(callback) ~= 'function' then
         return
     end
@@ -628,7 +629,9 @@ function KeepworkServiceWorld:LimitFreeUser(isShowUI, callback)
         isShowUI = false
     end
 
-    if localWorldListCount >= 3 then
+    local freeMaxWorldCount = 2 --免费用户最多能创建几个本地世界（包含家园）
+
+    if localWorldListCount > freeMaxWorldCount or (not allowMax and localWorldListCount == freeMaxWorldCount) then
         GameLogic.IsVip('UnlimitWorldsNumber', isShowUI, callback)
         return
     end
@@ -642,17 +645,19 @@ function KeepworkServiceWorld:LimitFreeUser(isShowUI, callback)
 
         if localWorldListCount > 0 then
             if dataCount > 0 then
-                local totalCount = 0
-
-                for key, item in ipairs(localWorldList) do
-                    for DKey, DItem in ipairs(data) do
-                        if item.foldername ~= DItem.worldName then
-                            totalCount = totalCount + 1
+                local totalCount = localWorldListCount
+                for DKey, DItem in ipairs(data) do
+                    local contain = false
+                    for key, item in ipairs(localWorldList) do
+                        if item.foldername == DItem.worldName then
+                            contain = true
                         end
                     end
+                    if not contain then 
+                        totalCount = totalCount + 1
+                    end
                 end
-
-                if totalCount >= 3 then
+                if totalCount > freeMaxWorldCount or (not allowMax and totalCount == freeMaxWorldCount) then
                     GameLogic.IsVip('UnlimitWorldsNumber', isShowUI, callback)
                 else
                     callback(true)
@@ -661,7 +666,7 @@ function KeepworkServiceWorld:LimitFreeUser(isShowUI, callback)
                 callback(true)
             end
         else
-            if dataCount >= 3 then
+            if dataCount > freeMaxWorldCount or (not allowMax and dataCount == freeMaxWorldCount) then
                 GameLogic.IsVip('UnlimitWorldsNumber', isShowUI, callback)
             else
                 callback(true)

@@ -87,9 +87,9 @@
                             if result then
                                 WorldExitDialog.OnDialogResult(_guihelper.DialogResult.Yes)
                             else
-                                _guihelper.MessageBox(L'操作被禁止了，免费用户最多只能拥有3个本地世界，请删除不要的本地世界，或者联系老师（或家长）开通权限。')
+                                _guihelper.MessageBox(L'操作被禁止了，免费用户最多只能拥有家园+1个本地世界，请删除不要的本地世界，或者联系老师（或家长）开通权限。')
                             end
-                        end)
+                        end,true)
                     end
 
                     function on_click_save_and_share()
@@ -109,14 +109,20 @@
                                 --ShareWorld:ClosePage()
                                 ShareWorld:OnClick()
                             else
-                                _guihelper.MessageBox(L'操作被禁止了，免费用户最多只能拥有3个本地世界，请删除不要的本地世界，或者联系老师（或家长）开通权限。')
+                                _guihelper.MessageBox(L'操作被禁止了，免费用户最多只能拥有家园+1个本地世界，请删除不要的本地世界，或者联系老师（或家长）开通权限。')
                             end
-                        end)
+                        end,true)
                     end
 
                     function save_as()
-                        WorldExitDialog.OnDialogResult(_guihelper.DialogResult.Cancel)
-                        GameLogic.RunCommand('/menu file.saveworldas')
+                        KeepworkServiceWorld:LimitFreeUser(false, function(result)
+                            if result then
+                                WorldExitDialog.OnDialogResult(_guihelper.DialogResult.Cancel)
+                                GameLogic.RunCommand('/menu file.saveworldas')
+                            else
+                                _guihelper.MessageBox(L'操作被禁止了，免费用户最多只能拥有家园+1个本地世界，请删除不要的本地世界，或者联系老师（或家长）开通权限。')
+                            end
+                        end)
                     end
 
                     function on_click_exit_without_save()
