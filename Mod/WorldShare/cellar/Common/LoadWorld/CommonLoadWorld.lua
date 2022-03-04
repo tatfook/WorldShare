@@ -77,21 +77,21 @@ function CommonLoadWorld:CheckLoadWorldFromCmdLine(cmdLineWorld)
         loginEnable = loginEnable == 'true' and true or false
 
         local function EnterAutoUpdateWorld()
-            local apkWorldRevision
-            local apkProjectId
+            local packageWorldRevision
+            local packageProjectId
 
             -- fetch apk world revision and project id
             if cmdLineWorld:match("%.zip$") then
-                apkWorldRevision = tonumber(LocalService:GetZipRevision(Mod.WorldShare.Utils.GetTrueFilename(cmdLineWorld)))
-                apkProjectId = LocalService:GetZipProjectId(Mod.WorldShare.Utils.GetTrueFilename(cmdLineWorld))
+                packageWorldRevision = tonumber(LocalService:GetZipRevision(Mod.WorldShare.Utils.GetTrueFilename(cmdLineWorld)))
+                packageProjectId = LocalService:GetZipProjectId(Mod.WorldShare.Utils.GetTrueFilename(cmdLineWorld))
             else
                 local readRevisionFile = ParaIO.open(Mod.WorldShare.Utils.GetTrueFilename(cmdLineWorld) .. '/revision.xml', 'r')
 
                 if readRevisionFile:IsValid() then
-                    apkWorldRevision = readRevisionFile:GetText(0, -1)
+                    packageWorldRevision = readRevisionFile:GetText(0, -1)
 
-                    if apkWorldRevision and type(apkWorldRevision) == 'string' then
-                        apkWorldRevision = tonumber(apkWorldRevision)
+                    if packageWorldRevision and type(packageWorldRevision) == 'string' then
+                        packageWorldRevision = tonumber(packageWorldRevision)
                     end
 
                     readRevisionFile:close()
@@ -100,20 +100,20 @@ function CommonLoadWorld:CheckLoadWorldFromCmdLine(cmdLineWorld)
                 local tag = LocalService:GetTag(Mod.WorldShare.Utils.GetTrueFilename(cmdLineWorld))
                 
                 if tag and type(tag) == 'table' then
-                    apkProjectId = tag.kpProjectId
+                    packageProjectId = tag.kpProjectId
                 end
             end
 
-            if apkWorldRevision and
-               type(apkWorldRevision) == 'number' and
-               apkProjectId and
-               type(apkProjectId) == 'number' then
+            if packageWorldRevision and
+               type(packageWorldRevision) == 'number' and
+               packageProjectId and
+               type(packageProjectId) == 'number' then
                 -- Determines whether there is a cache file.
                 if ParaIO.DoesFileExist('temp/use_cache_world') then
-                    GameLogic.RunCommand("/loadworld -auto " .. apkProjectId)
+                    GameLogic.RunCommand("/loadworld -auto " .. packageProjectId)
                 else
                     GitService:GetWorldRevision(
-                        apkProjectId,
+                        packageProjectId,
                         false,
                         function(remoteRevision, err)
                             if not remoteRevision or type(remoteRevision) ~= 'number' then
@@ -121,9 +121,9 @@ function CommonLoadWorld:CheckLoadWorldFromCmdLine(cmdLineWorld)
                                 return
                             end
 
-                            if remoteRevision > apkWorldRevision then
+                            if remoteRevision > packageWorldRevision then
                                 -- Enter world by project ID and set the cache file.
-                                GameLogic.RunCommand("/loadworld -auto " .. apkProjectId)
+                                GameLogic.RunCommand("/loadworld -auto " .. packageProjectId)
 
                                 self.setCacheWorldForSingletonApp = true
                             else
@@ -1382,15 +1382,34 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
 
                     if not data.isFreeWorld or
                        data.isFreeWorld == 0 then
-                        GameLogic.IsVip('LimitUserOpenShareWorld', true, function(result)
-                            if not result then
-                                return
-                            end
+                        local paramWorld = ParaEngine.GetAppCommandLineByParam('world', nil) or ''
+                        local packageProjectId = 0
 
+                        if paramWorld:match("%.zip$") then
+                            packageProjectId = LocalService:GetZipProjectId(Mod.WorldShare.Utils.GetTrueFilename(cmdLineWorld)) or 0
+                        else
+                            local tag = LocalService:GetTag(Mod.WorldShare.Utils.GetTrueFilename(cmdLineWorld))
+
+                            if tag and type(tag) == 'table' then
+                                packageProjectId = tag.kpProjectId or 0
+                            end
+                        end
+
+                        if packageProjectId == pid then
                             self.freeUserVerified = true
 
                             HandleVerified()
-                        end)
+                        else
+                            GameLogic.IsVip('LimitUserOpenShareWorld', true, function(result)
+                                if not result then
+                                    return
+                                end
+    
+                                self.freeUserVerified = true
+    
+                                HandleVerified()
+                            end)
+                        end
                     else
                         self.freeUserVerified = true
                         HandleVerified()
