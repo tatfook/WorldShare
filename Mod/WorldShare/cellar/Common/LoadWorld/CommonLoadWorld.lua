@@ -1386,9 +1386,9 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                         local packageProjectId = 0
 
                         if paramWorld:match("%.zip$") then
-                            packageProjectId = LocalService:GetZipProjectId(Mod.WorldShare.Utils.GetTrueFilename(cmdLineWorld)) or 0
+                            packageProjectId = LocalService:GetZipProjectId(Mod.WorldShare.Utils.GetTrueFilename(paramWorld)) or 0
                         else
-                            local tag = LocalService:GetTag(Mod.WorldShare.Utils.GetTrueFilename(cmdLineWorld))
+                            local tag = LocalService:GetTag(Mod.WorldShare.Utils.GetTrueFilename(paramWorld))
 
                             if tag and type(tag) == 'table' then
                                 packageProjectId = tag.kpProjectId or 0
