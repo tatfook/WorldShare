@@ -304,7 +304,7 @@ function LoadWorldCommand:Init()
                     local execCommand = string.match(cmdText, '|[ ]+(%/[%w]+[ ]+[ {}=_\',%w]+)$')
                     local event = string.match(cmdText, '|[ ]+%/[%w]+[ ]+([%w]+)')
 
-                    if currentEnterWorld and
+                    if currentEnterWorld and not (options and options.auto)and
                        type(currentEnterWorld) == 'table' and
                        currentEnterWorld.kpProjectId and
                        currentEnterWorld.kpProjectId ~= 0 and
@@ -316,12 +316,12 @@ function LoadWorldCommand:Init()
                         if string.match(event, '^global') then
                             WorldShareCommand:PushAfterLoadWorldCommand(execCommand or '')
                         end
-
-                        if options and options.force then
-                            CommandManager:RunCommand('/loadworld -s -force ' .. pid)
-                        else
-                            CommandManager:RunCommand('/loadworld -s ' .. pid)
-                        end
+                        CommandManager:RunCommand('/loadworld -s -force ' .. pid)
+                        -- if options and options.force then
+                        --     CommandManager:RunCommand('/loadworld -s -force ' .. pid)
+                        -- else
+                        --     CommandManager:RunCommand('/loadworld -s ' .. pid)
+                        -- end
                     end
                 end
                 return false
