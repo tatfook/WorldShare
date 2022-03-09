@@ -298,6 +298,38 @@ function KeepworkUsersApi:ChangeSchool(schoolId, success, error)
     KeepworkBaseApi:Put('/users/school', { schoolId = schoolId }, nil, success, error)
 end
 
+-- url: /paralife/wxmini/buySchemes 生成小程序跳转链接
+-- method: Post
+-- header:
+--[[
+    Authorization string necessary
+]]
+-- params:
+--[[
+    macAddress int necessary
+    productCode int necessary
+]]
+-- return: object
+function KeepworkUsersApi:BuySchemes(macAddress,productCode, success, error)
+    KeepworkBaseApi:Post('/paralife/wxmini/buySchemes', {macAddress = macAddress,productCode = productCode }, nil, success, error)
+end
+
+-- url: /paralife/licenses 判断是否获得了许可
+-- method: PUT
+-- header:
+--[[
+    Authorization string necessary
+]]
+-- params:
+--[[
+    macAddress int necessary
+    productCode int necessary
+]]
+-- return: object
+function KeepworkUsersApi:ParalifeLicenses(macAddress,productCode, success, error)
+    KeepworkBaseApi:Get('/paralife/licenses', {macAddress = macAddress,productCode = productCode }, nil, success, error)
+end
+
 -- url: /users/school/register
 -- method: POST
 -- header:
