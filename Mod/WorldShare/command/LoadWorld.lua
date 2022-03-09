@@ -283,7 +283,7 @@ function LoadWorldCommand:Init()
                 return false
             end
 
-            local pid = string.match(cmdText, '^%s-(%d+)%s-$')
+            local pid = string.match(cmdText, '^%s-(%d+)%s-')
 
             if not pid then
                 return false
