@@ -874,7 +874,8 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
             -- stop here when overtime enter
             return
         end
-
+        -- 上报世界下载到加载耗时
+        GameLogic.GetFilters():apply_filters("user_behavior", 2, "duration.world_load", { started = true, projectId = worldInfo.projectId});
         LocalServiceHistory:LoadWorld({
             name = worldInfo.worldName,
             kpProjectId = worldInfo.projectId,
