@@ -118,7 +118,7 @@ function EventTrackingService:Send(eventType, action, extra, offlineMode)
     local userId = Mod.WorldShare.Store:Get('user/userId') or 0
     local dataPacket = self:GenerateDataPacket(eventType, userId, action, extra and extra.started or false)
 
-    if extra.useNoId == true then
+    if extra and extra.useNoId == true then
         dataPacket.projectId = 0
     end    
 
