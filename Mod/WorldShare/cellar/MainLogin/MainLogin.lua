@@ -305,6 +305,10 @@ function MainLogin:ShowLogin1()
     
                         MainLoginLoginPage:FindControl('title_login').visible = false
                         MainLoginLoginPage:FindControl('title_username').visible = true
+
+                        commonlib.TimerManager.SetTimeout(function()  
+                            self:Next()
+                        end,0)
                     end
                 end)
             end

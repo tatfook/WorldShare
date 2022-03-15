@@ -122,7 +122,9 @@
                                 local account = page:GetValue('account')
                                 page:SetUIValue('auto_username', account or '')
                                 set_mode('auto_login')
-
+                                commonlib.TimerManager.SetTimeout(function()  
+                                    MainLogin:Next()
+                                end,0)
                                 return
                             end
 
@@ -264,7 +266,7 @@
                                         page:SetUIValue('auto_login_name', false)
                                     end
                                    
-                                end, _guihelper.MessageBoxButtons.OKCancel_CustomLabel_Highlight_Right, nil, nil, nil, nil, {cancel="记住密码",ok="取消"});
+                                end, _guihelper.MessageBoxButtons.OKCancel_CustomLabel_Gray_All, nil, nil, nil, nil, {cancel="记住密码",ok="取消"});
                             end
                         end
                     end
@@ -483,6 +485,9 @@
                                                 local account = Mod.WorldShare.Store:Get('user/username')
                                                 page:SetUIValue('auto_username', account or '')
                                                 set_mode('auto_login')
+                                                commonlib.TimerManager.SetTimeout(function()  
+                                                    MainLogin:Next()
+                                                end,0)
                                                 return
                                             end
 
