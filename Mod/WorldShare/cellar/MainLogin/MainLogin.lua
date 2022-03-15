@@ -290,6 +290,7 @@ function MainLogin:ShowLogin1()
                 MainLoginLoginPage:SetUIValue('account', PWDInfo.account or '')
             end
             if PWDInfo.autoLogin then
+                GameLogic.GetFilters():apply_filters("on_start_login");
                 MainLogin:LoginWithToken(PWDInfo.token, function(bSsucceed, reason, message)
                     if bSsucceed then
                         MainLoginLoginPage:SetUIValue('auto_login_name', true)

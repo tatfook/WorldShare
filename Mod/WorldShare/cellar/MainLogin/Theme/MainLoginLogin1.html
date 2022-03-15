@@ -109,6 +109,7 @@
 
                         is_login = true
 
+                        GameLogic.GetFilters():apply_filters("on_start_login");
                         if not MainLogin:LoginAction(function(b_succeed)
                             is_login = false
                             if not b_succeed then
