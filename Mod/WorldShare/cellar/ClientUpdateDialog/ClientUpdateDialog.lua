@@ -11,7 +11,11 @@ local ClientUpdateDialog = NPL.load('(gl)Mod/WorldShare/cellar/ClientUpdateDialo
 
 local ClientUpdateDialog = NPL.export()
 
+--只有当前版本号 < 允许启动的最低版本号，才弹出这个弹窗
 function ClientUpdateDialog:Show(updater, gamename)
+    if updater:isAutoSkip() then 
+        return
+    end
     System.App.Commands.Call("File.MCMLWindowFrame", {
         url = format("Mod/WorldShare/cellar/ClientUpdateDialog/ClientUpdateDialog.html?latestVersion=%s&curVersion=%s&curGame=%s", updater:getLatestVersion(), updater:getCurVersion(), gamename), 
         name = "Mod.WorldShare.ClientUpdateDialog", 
