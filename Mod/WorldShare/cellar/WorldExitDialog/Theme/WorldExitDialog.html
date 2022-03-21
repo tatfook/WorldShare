@@ -10,6 +10,8 @@
                     local ShareWorld = NPL.load('(gl)Mod/WorldShare/cellar/ShareWorld/ShareWorld.lua')
                     local Grade = NPL.load('Mod/WorldShare/cellar/WorldExitDialog/Grade.lua')
                     local Panorama = NPL.load('Mod/WorldShare/cellar/Panorama/Panorama.lua')
+                    local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
+                    local Compare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
  
                     -- service
                     local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
@@ -93,21 +95,29 @@
                     end
 
                     function on_click_save_and_share()
+                        if not KeepworkServiceSession:IsSignIn() then
+                            return
+                        end
+
                         KeepworkServiceWorld:LimitFreeUser(false, function(result)
                             if result then
                                 _guihelper.SetMessageBoxLockHide(true)
                                 GameLogic.QuickSave()
                                 _guihelper.SetMessageBoxLockHide(false)
-        
+
                                 WorldExitDialog.OnDialogResult(_guihelper.DialogResult.Cancel)
-                                --ShareWorld:Init()
-                                ShareWorld.callback = function()
-                                    _guihelper.MessageBox(L'保存并上传成功！是否要继续退出世界', function()
-                                        WorldExitDialog.OnDialogResult(_guihelper.DialogResult.No)
+                                
+                                local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
+                                Compare:Init(currentEnterWorld.worldpath, function()
+                                    Mod.WorldShare.Store:Set('world/currentWorld', currentEnterWorld)
+
+                                    SyncMain:SyncToDataSource(function()
+                                        _guihelper.MessageBox(L'保存并上传成功！是否要继续退出世界', function()
+                                            WorldExitDialog.OnDialogResult(_guihelper.DialogResult.No)
+                                        end)
                                     end)
-                                end
-                                --ShareWorld:ClosePage()
-                                ShareWorld:OnClick()
+                                end)
+
                             else
                                 _guihelper.MessageBox(L'操作被禁止了，免费用户最多只能拥有家园+1个本地世界，请删除不要的本地世界，或者联系老师（或家长）开通权限。')
                             end

@@ -58,7 +58,7 @@ Compare.EQUAL = EQUAL
 Compare.compareFinish = true
 
 function Compare:Init(worldPath, callback)
-    if type(callback) ~= 'function' then
+    if not callback or type(callback) ~= 'function' then
         return false
     end
 
