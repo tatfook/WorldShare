@@ -164,6 +164,8 @@ function KeepworkServiceSession:LoginDirectly(account, password, callback)
         return
     end
 
+    password = string.gsub(password, ' ', '')
+
     self:Login(
         account,
         password,
@@ -299,10 +301,6 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
     else
         Mod.WorldShare.Store:Set('user/isVip', false)
     end
-
-    -- if response.school and response.school.isVip == 1 then
-    --     isVipSchool = true
-    -- end
 
     if response and response.region and type(response.region) == 'table' then
         Mod.WorldShare.Store:Set('user/region', response.region)
@@ -450,11 +448,14 @@ function KeepworkServiceSession:RegisterWithAccount(username, password, callback
         return
     end
 
+    password = string.gsub(password, ' ', '')
+
     local params = {
         username = username,
         password = password,
         channel = 3
     }
+
     KeepworkUsersApi:Register(
         params,
         function(registerData, err)
@@ -519,6 +520,8 @@ function KeepworkServiceSession:RegisterWithPhoneAndLogin(username, cellphone, c
         return
     end
 
+    password = string.gsub(password, ' ', '')
+
     local params = {
         username = username,
         cellphone = cellphone,
@@ -582,6 +585,8 @@ function KeepworkServiceSession:RegisterWithPhone(username, cellphone, cellphone
     if not cellphone or not cellphoneCaptcha or not password then
         return
     end
+
+    password = string.gsub(password, ' ', '')
 
     local params = {
         username = username,
@@ -650,6 +655,8 @@ function KeepworkServiceSession:Register(username, password, captcha, cellphone,
        type(cellphoneCaptcha) ~= 'string' then
         return false
     end
+
+    password = string.gsub(password, ' ', '')
 
     local params
 
@@ -730,6 +737,8 @@ function KeepworkServiceSession:RegisterAndBindThirdPartyAccount(username, passw
        type(oauthToken) ~= 'string' then
         return false
     end
+
+    password = string.gsub(password, ' ', '')
 
     local params = {
         username = username,
@@ -958,12 +967,17 @@ function KeepworkServiceSession:CheckTokenExpire(callback)
 
         local currentUser = self:LoadSigninInfo()
 
-        if not currentUser or not currentUser.account or not currentUser.password then
-            if type(callback) == 'function' then
+        if not currentUser or
+           not currentUser.account or
+           not currentUser.password then
+            if callback and type(callback) == 'function' then
                 callback(false)
             end
+
             return false
         end
+
+        currentUser.password = string.gsub(currentUser.password, ' ', '')
 
         self:Login(
             currentUser.account,
