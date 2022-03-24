@@ -47,6 +47,11 @@ function WorldExitDialog.ShowPage(callback)
     local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
     if not currentEnterWorld or type(currentEnterWorld) ~= 'table' then
+        if GameLogic.IsReadOnly() then
+            -- no world info when use offline mode
+            Desktop.ForceExit(false)
+        end
+
         return
     end
 
