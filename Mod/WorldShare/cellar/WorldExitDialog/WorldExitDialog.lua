@@ -111,7 +111,7 @@ function WorldExitDialog.ShowPage(callback)
     end
 
     if GameLogic.IsReadOnly() then
-        if KeepworkServiceSession:IsSignedIn() then
+        if KeepworkServiceSession:IsSignedIn() and System.options.networkNormal then
             if currentEnterWorld.kpProjectId and currentEnterWorld.kpProjectId ~= 0 then
                 Grade:IsRated(currentEnterWorld.kpProjectId, function(isRated)
                     self.isRated = isRated
@@ -124,7 +124,7 @@ function WorldExitDialog.ShowPage(callback)
             Handle()
         end
     else
-        if KeepworkServiceSession:IsSignedIn() then
+        if KeepworkServiceSession:IsSignedIn() and System.options.networkNormal then
             Compare:Init(currentEnterWorld.worldpath, function(result)
                 if not result then
                     return
@@ -202,8 +202,7 @@ function WorldExitDialog.OnDialogResult(res)
                 GameLogic.QuickSave()
             end
 
-            if KeepworkServiceSession:IsSignedIn() or
-               System.options.loginmode == 'offline' then
+            if KeepworkServiceSession:IsSignedIn() then
                 RedSummerCampMainPage.Show()
                 return
             end

@@ -18,6 +18,7 @@ local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkServ
 local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
 local LocalServiceWorld = NPL.load('(gl)Mod/WorldShare/service/LocalService/LocalServiceWorld.lua')
 local GitKeepworkService = NPL.load('(gl)Mod/WorldShare/service/GitService/GitKeepworkService.lua')
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
 
 -- libs
 local CommandManager = commonlib.gettable('MyCompany.Aries.Game.CommandManager')
@@ -139,7 +140,10 @@ function LoadWorldCommand:Init()
                 if pid then
                     local cacheWorldInfo = CacheProjectId:GetProjectIdInfo(tonumber(pid))
 
-                    if (System.options.loginmode == 'offline' or options.e) and
+                    if (not KeepworkServiceSession:IsSignedIn() or
+                        System.options.loginmode == 'local' or
+                        not System.options.networkNormal or
+                        options.e) and
                        cacheWorldInfo then
                         local optionsStr = ''
     

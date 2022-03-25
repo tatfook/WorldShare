@@ -1163,15 +1163,11 @@ function MainLogin:RegisterWithPhone(callback)
     end)
 end
 
-function MainLogin:Next(isOffline)
-    if KeepworkServiceSession:IsSignedIn() then
-        System.options.loginmode = 'online'
+function MainLogin:Next(isLocal)
+    if isLocal == true then
+        System.options.loginmode = 'local'
     else
-        if isOffline then
-            System.options.loginmode = 'offline'
-        else
-            System.options.loginmode = 'local'
-        end
+        System.options.loginmode = nil
     end
 
     if System.options.cmdline_world and System.options.cmdline_world ~= '' then
@@ -1180,7 +1176,7 @@ function MainLogin:Next(isOffline)
         return
     end
 
-    if System.options.loginmode == 'offline' then
+    if System.options.loginmode == 'local' then
         OfflineAccountManager:ShowActivationPage()
     else
         self:Close()

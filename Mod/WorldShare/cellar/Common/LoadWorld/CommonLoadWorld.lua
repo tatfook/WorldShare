@@ -1284,7 +1284,9 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
     -- offline mode
     local cacheWorldInfo = CacheProjectId:GetProjectIdInfo(pid)
 
-    if System.options.loginmode == 'offline' and cacheWorldInfo then
+    if (System.options.loginmode == 'local' or not System.options.networkNormal) and
+       not KeepworkServiceSession:IsSignedIn() and
+       cacheWorldInfo then
         self.encryptWorldMode = cacheWorldInfo.worldInfo.encryptWorldMode
         HandleLoadWorld(cacheWorldInfo.worldInfo, true)
         return

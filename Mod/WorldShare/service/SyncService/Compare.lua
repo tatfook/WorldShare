@@ -206,7 +206,8 @@ function Compare:GetCurrentWorldInfo(callback)
             worldTag.kpProjectId = string.match(Game.loadworld_params.worldpath, '/(%d+)_')
         end
 
-        if System.options.loginmode ~= 'offline' and
+        if KeepworkServiceSession:IsSignedIn() and 
+           System.options.networkNormal and
            worldTag.kpProjectId and
            worldTag.kpProjectId ~= 0 then
             KeepworkServiceProject:GetProject(worldTag.kpProjectId, function(data, err)
@@ -316,6 +317,7 @@ function Compare:GetCurrentWorldInfo(callback)
         local worldTag = WorldCommon.GetWorldInfo() or {}
 
         if KeepworkServiceSession:IsSignedIn() and
+           System.options.networkNormal and
            worldTag.kpProjectId and
            worldTag.kpProjectId ~= 0 then
             local kpProjectId = worldTag.kpProjectId

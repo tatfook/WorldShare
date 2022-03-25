@@ -22,7 +22,7 @@ local SyncServiceCompare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Comp
 local KeepworkUsersApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/Users.lua')
 local KeepworkKeepworksApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkKeepworksApi.lua')
 local KeepworkOauthUsersApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/OauthUsers.lua')
-local KeepworkSocketApi = NPL.load('(gl)Mod/WorldShare/api/Socket/Socket.lua')
+local SocketApi = NPL.load('(gl)Mod/WorldShare/api/Socket/SocketApi.lua')
 local AccountingVipCodeApi = NPL.load('(gl)Mod/WorldShare/api/Accounting/ParacraftVipCode.lua')
 local KeepworkDragonBoatApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/DragonBoatApi.lua')
 
@@ -40,7 +40,7 @@ local Encoding = commonlib.gettable('commonlib.Encoding')
 local KeepworkServiceSession = NPL.export()
 
 function KeepworkServiceSession:LongConnectionInit(callback)
-    KeepworkSocketApi:Connect(function(connection)
+    SocketApi:Connect(function(connection)
         if not connection then
             return false
         end
@@ -48,46 +48,51 @@ function KeepworkServiceSession:LongConnectionInit(callback)
         if connection.inited then
             return nil
         end
-    
+
         if not KpChatChannel.client then
             KpChatChannel.client = connection
-        
+
             KpChatChannel.client:AddEventListener('OnOpen', KpChatChannel.OnOpen, KpChatChannel)
             KpChatChannel.client:AddEventListener('OnMsg', KpChatChannel.OnMsg, KpChatChannel)
             KpChatChannel.client:AddEventListener('OnClose', KpChatChannel.OnClose, KpChatChannel)
         end
-    
-        connection:AddEventListener('OnOpen', function(self)
-            local isDebugSocket = false
 
-            if isDebugSocket then
-                LOG.std('KeepworkServiceSession', 'debug', 'LongConnectionInit', 'Connected client')
-            end
-        end, connection)
-    
+        connection:AddEventListener('OnOpen', self.OnOpen, connection)
         connection:AddEventListener('OnMsg', self.OnMsg, connection)
+        connection:AddEventListener('OnClose', self.OnClose, connection)
+
         connection.uiCallback = callback
         connection.inited = true
     end)
+end
+
+function KeepworkServiceSession:OnOpen(msg)
+    LOG.std('KeepworkServiceSession', 'debug', 'OnOpen', 'OnOpen')
+    System.options.networkNormal = true
 end
 
 function KeepworkServiceSession:OnMsg(msg)
     LOG.std('KeepworkServiceSession', 'debug', 'OnMsg', 'data: %s', NPL.ToJson(msg.data))
 
     if not msg or not msg.data then
-        return false
+        return
     end
 
     if msg.data.sio_pkt_name and msg.data.sio_pkt_name == 'event' then
         if msg.data.body and msg.data.body[1] == 'app/msg' then
 
-            local connection = KeepworkSocketApi:GetConnection()
+            local connection = SocketApi:GetConnection()
 
             if type(connection.uiCallback) == 'function' then
                 connection.uiCallback(msg.data.body[2])
             end
         end
     end
+end
+
+function KeepworkServiceSession:OnClose()
+    LOG.std('KeepworkServiceSession', 'debug', 'OnClose', 'OnClose')
+    System.options.networkNormal = false
 end
 
 function KeepworkServiceSession:LoginSocket()
@@ -104,7 +109,7 @@ function KeepworkServiceSession:LoginSocket()
     end
 
     local machineCode = SessionsData:GetDeviceUUID()
-    KeepworkSocketApi:SendMsg('app/login', { platform = platform, machineCode = machineCode })
+    SocketApi:SendMsg('app/login', { platform = platform, machineCode = machineCode })
 end
 
 function KeepworkServiceSession:OnWorldLoad()
@@ -269,8 +274,6 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
         return
     end
 
-    System.options.loginmode = 'online'
-
     -- login api success ↓
     local token = response['token']
     local userId = response['id'] or 0
@@ -417,11 +420,10 @@ function KeepworkServiceSession:Logout(mode, callback)
 
         if not mode or mode ~= 'KICKOUT' then
             KeepworkUsersApi:Logout(function()
-                KeepworkSocketApi:SendMsg('app/logout', {})
+                SocketApi:SendMsg('app/logout', {})
                 local Logout = Mod.WorldShare.Store:Action('user/Logout')
                 Logout()
                 self:ResetIndulge()
-                System.options.loginmode = 'offline'
                 Mod.WorldShare.Store:Remove('user/bLoginSuccessed')
 
                 if callback and type(callback) == 'function' then
@@ -429,11 +431,10 @@ function KeepworkServiceSession:Logout(mode, callback)
                 end
             end)
         else
-            KeepworkSocketApi:SendMsg('app/logout', {})
+            SocketApi:SendMsg('app/logout', {})
             local Logout = Mod.WorldShare.Store:Action('user/Logout')
             Logout()
             self:ResetIndulge()
-            System.options.loginmode = 'offline'
             Mod.WorldShare.Store:Remove('user/bLoginSuccessed')
 
             if callback and type(callback) == 'function' then

@@ -163,11 +163,6 @@ function WorldShare:init()
     -- event tracking init
     EventTrackingService:Init()
 
-    -- init cef3 for windows
-    if System.os.GetPlatform() == 'win32' then
-        -- Cef3Manager:Init()
-    end
-
     -- init long tcp connection
     KeepworkServiceSession:LongConnectionInit(function(result)
         if type(result) ~= 'table' then
@@ -225,7 +220,7 @@ function WorldShare:OnLogin()
 end
 
 function WorldShare:OnWorldLoad()
-    if System.options.loginmode ~= 'offline' then
+    if KeepworkServiceSession:IsSignedIn() then
         -- open from MainLogin:Next
         Mod.WorldShare.MsgBox:Close()
     end
