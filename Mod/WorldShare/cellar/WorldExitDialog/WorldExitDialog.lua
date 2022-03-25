@@ -46,11 +46,29 @@ function WorldExitDialog.ShowPage(callback)
 
     local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
-    if not currentEnterWorld then
-        return false
+    if not currentEnterWorld or type(currentEnterWorld) ~= 'table' then
+        if GameLogic.IsReadOnly() then
+            -- no world info when use offline mode
+            Desktop.ForceExit(false)
+        end
+
+        return
     end
 
-    Mod.WorldShare.MsgBox:Wait()
+    if KeepworkServiceSession:IsSignedIn() then
+        Mod.WorldShare.MsgBox:Show(
+            L'请稍候...',
+            10000,
+            L'网络异常，再点一次关闭即可退出程序',
+            nil,
+            nil,
+            10,
+            nil,
+            true
+        )
+    else
+        Mod.WorldShare.MsgBox:Wait()
+    end
 
     local function Handle()
         Mod.WorldShare.MsgBox:Close()
@@ -93,28 +111,28 @@ function WorldExitDialog.ShowPage(callback)
     end
 
     if GameLogic.IsReadOnly() then
-        if KeepworkService:IsSignedIn() then
+        if KeepworkServiceSession:IsSignedIn() then
             if currentEnterWorld.kpProjectId and currentEnterWorld.kpProjectId ~= 0 then
                 Grade:IsRated(currentEnterWorld.kpProjectId, function(isRated)
                     self.isRated = isRated
                     Handle()
                 end)
-
-                return true
+            else
+                Handle()
             end
-
-            Handle()
         else
             Handle()
         end
     else
-        if KeepworkService:IsSignedIn() then
+        if KeepworkServiceSession:IsSignedIn() then
             Compare:Init(currentEnterWorld.worldpath, function(result)
                 if not result then
-                    return false
+                    return
                 end
 
-                if currentEnterWorld and currentEnterWorld.kpProjectId and currentEnterWorld.kpProjectId ~= 0 then
+                if currentEnterWorld and
+                   currentEnterWorld.kpProjectId and
+                   currentEnterWorld.kpProjectId ~= 0 then
                     KeepworkServiceProject:GetProject(currentEnterWorld.kpProjectId, function(data)
                         if data and data.world and data.world.worldName then
                             self.currentWorldKeepworkInfo = data
@@ -237,7 +255,7 @@ function WorldExitDialog.UpdateImage(bRefreshAsset)
 end
 
 function WorldExitDialog:CanSetStart()
-    if not KeepworkService:IsSignedIn() then
+    if not KeepworkServiceSession:IsSignedIn() then
         LoginModal:Init(function()
             local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
