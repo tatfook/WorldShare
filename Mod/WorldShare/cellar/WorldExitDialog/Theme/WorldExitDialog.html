@@ -95,7 +95,7 @@
                     end
 
                     function on_click_save_and_share()
-                        if not KeepworkServiceSession:IsSignIn() then
+                        if not KeepworkServiceSession:IsSignedIn() then
                             return
                         end
 
