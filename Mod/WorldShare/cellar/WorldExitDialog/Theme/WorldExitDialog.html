@@ -440,6 +440,7 @@
                                                   width: 110px;'
                                            value='<%= L"短视频分享" %>'
                                            onclick='share_short_video()' />
+                                    <pe:if condition='<%= System.options.enable_npl_brower %>'>
                                     <div class='theme1_black_button'
                                          style='float: left;
                                                 width: 112px;
@@ -463,6 +464,7 @@
                                             <%= L'全景图分享' %>
                                         </div>
                                     </div>
+                                    </pe:if>
                                 </pe:if>
                                 <pe:if condition='<%= System.os.GetPlatform() ~= "win32" %>'>
                                     <div class='theme1_black_button'
