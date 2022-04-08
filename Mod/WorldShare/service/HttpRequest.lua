@@ -159,7 +159,7 @@ function HttpRequest:GetUrl(params, callback, noTryStatus, timeout, noShowLog)
             end
 
             -- fail try
-            HttpRequest:Retry(err, msg, data, params, callback, noTryStatus, timeout)
+            -- HttpRequest:Retry(err, msg, data, params, callback, noTryStatus, timeout)
         end
     )
 end
