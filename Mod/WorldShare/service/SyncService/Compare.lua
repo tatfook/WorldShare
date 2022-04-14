@@ -358,6 +358,7 @@ function Compare:GetCurrentWorldInfo(callback)
                             isVipWorld = worldTag.isVipWorld,
                             instituteVipEnabled = worldTag.instituteVipEnabled,
                             shared = false,
+                            size = LocalService:GetWorldSize(worldpath),
                         })
     
                         afterGetInstance()
@@ -419,7 +420,7 @@ function Compare:GetCurrentWorldInfo(callback)
                             instituteVipEnabled = worldTag.instituteVipEnabled,
                             memberCount = data.memberCount,
                             members = members,
-                            size = 0,
+                            size = LocalService:GetWorldSize(worldpath),
                             level = data.level,
                         })
 

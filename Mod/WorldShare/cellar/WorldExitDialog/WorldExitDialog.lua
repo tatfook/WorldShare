@@ -218,10 +218,12 @@ function WorldExitDialog.OnDialogResult(res)
         -- unlock share world logic
         if Mod.WorldShare.Utils:IsSharedWorld(currentEnterWorld) then
             Mod.WorldShare.MsgBox:Wait()
-            KeepworkServiceWorld:UnlockWorld(function()
+            KeepworkServiceWorld:UnlockWorld(function() end)
+            -- api error, force exit
+            Mod.WorldShare.Utils.SetTimeOut(function()
                 Mod.WorldShare.MsgBox:Close()
                 Handle()
-            end)
+            end, 1000)
         else
             Handle()
         end
