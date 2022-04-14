@@ -14,14 +14,26 @@ ForgetPassword:ShowPage()
 local Validated = NPL.load("(gl)Mod/WorldShare/helper/Validated.lua")
 local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/Service/KeepworkService/Session.lua")
 
+local Desktop = commonlib.gettable('MyCompany.Aries.Creator.Game.Desktop')
+
 local ForgetPassword = NPL.export()
 
 function ForgetPassword:ShowPage()
-    local params = Mod.WorldShare.Utils.ShowWindow(360, 480, "Mod/WorldShare/cellar/ForgetPassword/ForgetPassword.html", "ForgetPassword", nil, nil, nil, nil)
+    local params = 
+        Mod.WorldShare.Utils.ShowWindow(
+            0,
+            0,
+            'Mod/WorldShare/cellar/ForgetPassword/Theme/ForgetPassword.html',
+            'Mod.WorldShare.ForgetPassword',
+            0,
+            0,
+            '_fi',
+            false
+        )
 end
 
 function ForgetPassword:Reset()
-    local ForgetPasswordPage = Mod.WorldShare.Store:Get("page/ForgetPassword")
+    local ForgetPasswordPage = Mod.WorldShare.Store:Get("page/Mod.WorldShare.ForgetPassword")
 
     if not ForgetPasswordPage then
         return false
@@ -49,7 +61,10 @@ function ForgetPassword:Reset()
     KeepworkServiceSession:ResetPassword(key, password, captcha, function(data, err)
         if err == 200 and data == 'OK' then
             GameLogic.AddBBS(nil, L"重置密码成功", 3000, "0 255 0")
-            ForgetPasswordPage:CloseWindow()
+
+            Mod.WorldShare.Utils.SetTimeOut(function()
+                Desktop.ForceExit(false)
+            end, 3000)
             return true
         end
 

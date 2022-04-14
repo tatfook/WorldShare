@@ -20,42 +20,30 @@
                     KickOut.isKickOutPageOpened = false
                     page:CloseWindow()
 
-                    local isEnterWorld = Mod.WorldShare.Store:Get('world/isEnterWorld')
-
-                    if isEnterWorld then
-                        SyncMain:BackupWorld()
-                        Desktop.ForceExit(true)
-                    else
-                        ForgetPassword:ShowPage()
-                    end
+                    ForgetPassword:ShowPage()
                 end
 
                 function logout()
-                    KickOut.isKickOutPageOpened = false
-                    page:CloseWindow()
-
-                    local isEnterWorld = Mod.WorldShare.Store:Get('world/isEnterWorld')
-
-                    if isEnterWorld then
-                        SyncMain:BackupWorld()
-                        Desktop.ForceExit(true)
-                    end
+                    Desktop.ForceExit(false)
                 end
 
                 function re_login()
                     KickOut.isKickOutPageOpened = false
                     page:CloseWindow()
 
-                    LoginModal:Init()
+                    LoginModal:Init(function(bIsSucceed)
+                        if not bIsSucceed then
+                            logout()
+                        end
+                    end)
                 end
             </script>
-            <style type="text/mcss">
+            <style type='text/mcss' src='Mod/WorldShare/cellar/Theme/Mcss/MainLoginMcss.mcss'>
                 {
-                    container = {
+                    k_container = {
                         width = 400,
                         height = 200,
-                        padding = 40,
-                        background = "Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#267 89 34 34:8 8 8 8"
+                        padding = 40
                     },
                     common_button = {
                         width = 80,
@@ -64,7 +52,9 @@
                 }
             </style>
             <div width="100%" height="100%">
-                <div style="<%= get_window_style() %>" class="container">
+                <pe:container
+                    style="<%= get_window_style() %>"
+                    class='main_login_container_bg k_container'>
                     <pe:if condition='<%= reason == "1" %>'>
                         <div>
                             <div style="float: left;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#20 130 80 80);width: 60px;height: 60px;margin-top: 5px;"></div>
@@ -89,7 +79,7 @@
                             <input type="button" style="margin-left: 200px;" class="mc_light_grey_button_with_fillet common_button" value="<%= L'确定'%>" onclick="logout"/>
                         </div>
                     </pe:if>
-                </div>
+                </pe:container>
             </div>
         </pe:mcml>
     </body>

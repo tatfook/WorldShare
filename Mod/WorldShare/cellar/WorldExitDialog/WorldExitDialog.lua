@@ -197,6 +197,8 @@ function WorldExitDialog.OnDialogResult(res)
         local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
         local function Handle()
+            Mod.WorldShare.Store:Remove('world/currentEnterWorld')
+
             -- TODO: // check world folder because zip file
             if res == _guihelper.DialogResult.Yes then
                 GameLogic.QuickSave()

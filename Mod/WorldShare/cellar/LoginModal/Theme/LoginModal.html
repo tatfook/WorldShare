@@ -39,7 +39,7 @@
 
                     function register()
                         if System.options.isForceOffline then
-                            _guihelper.MessageBox(L'只有最新版才能登录， 否则只能用离线版，请退出程序后更新。')
+                            _guihelper.MessageBox(L'只有最新版才能登录，否则只能用离线版，请退出程序后更新。')
                             return
                         end
 
@@ -223,104 +223,112 @@
                     },
                 }
             </style>
-            <pe:container ClickThrough='true' height='430' class='main_login_container_bg'>
-                <div style='padding-top: 12px;padding-left: 18px;'>
-                    <div class='main_login_title_bg' style='float: left;width: 172px;height: 49px;'>
-                        <img style='margin-top: 13px;margin-left: 30px;width: 54px;height: 23px;' src='Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#72 422 54 23' />
+            <div width='100%' height='100%'>
+                <pe:container 
+                    alignment='_ct'
+                    width='320'
+                    height='430'
+                    style='margin-left: -160px;
+                           margin-top: -215px;'
+                    class='main_login_container_bg'>
+                    <div style='padding-top: 12px;padding-left: 18px;'>
+                        <div class='main_login_title_bg' style='float: left;width: 172px;height: 49px;'>
+                            <img style='margin-top: 13px;margin-left: 30px;width: 54px;height: 23px;' src='Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#72 422 54 23' />
+                        </div>
+                        <div style='float: left;margin-left: 70px;margin-top: 10px;'>
+                            <input type='button' class='main_login_close_button' onclick="close"/>
+                        </div>
                     </div>
-                    <div style='float: left;margin-left: 70px;margin-top: 10px;'>
-                        <input type='button' class='main_login_close_button' onclick="close"/>
-                    </div>
-                </div>
-                <div class='main_area'>
-                    <pe:if condition="<%= login_text() ~= nil%>">
-                        <div style="margin-top:10px;"><%= login_text()%></div>
-                    </pe:if>
-                    <pe:container name='account_field_error' visible='false' style='display:none;background:'>
-                        <!-- error message -->
-                        <div>
-                            <label style='font-size: 12px;base-font-size: 12px;color: #EB2222;' name='account_field_error_msg' />
-                        </div>
-                    </pe:container>
-                    <pe:container name='password_field_error' visible='false' style='display:none;background:'>
-                        <!-- error message -->
-                        <div>
-                            <label style='font-size: 12px;base-font-size: 12px;color: #EB2222;' name='password_field_error_msg' />
-                        </div>
-                    </pe:container>
-                    <div style='width: 240px; height: 88.1px;padding-left: 35px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#9 0 256 94)'>
-                        <div>
-                            <input type='text'
-                                   name='account'
-                                   style='background:;textcolor: #FFFFFF;height: 30px;width: 190px;margin-top: 10px;font-size: 16px;'
-                                   onchange='update_login_button_status'
-                                   EmptyText='<%= L"请输入您的账号/手机号" %>'
-                                   MoveViewWhenAttachWithIME='true' />
-                        </div>
-                        <div style='margin-bottom:12px;'>
-                            <div style="float: left;width: 190px;">
+                    <div class='main_area'>
+                        <pe:if condition="<%= login_text() ~= nil%>">
+                            <div style="margin-top:10px;"><%= login_text()%></div>
+                        </pe:if>
+                        <pe:container name='account_field_error' visible='false' style='display:none;background:'>
+                            <!-- error message -->
+                            <div>
+                                <label style='font-size: 12px;base-font-size: 12px;color: #EB2222;' name='account_field_error_msg' />
+                            </div>
+                        </pe:container>
+                        <pe:container name='password_field_error' visible='false' style='display:none;background:'>
+                            <!-- error message -->
+                            <div>
+                                <label style='font-size: 12px;base-font-size: 12px;color: #EB2222;' name='password_field_error_msg' />
+                            </div>
+                        </pe:container>
+                        <div style='width: 240px; height: 88.1px;padding-left: 35px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#9 0 256 94)'>
+                            <div>
                                 <input type='text'
-                                        name='password_show'
-                                        style='background:;textcolor: #FFFFFF;height: 30px;width: 190px;margin-top: 10px;font-size: 16px;'
-                                        onchange='update_login_button_status'
-                                        SkipAutoBadWordFilter="true"
-                                        EmptyText='<%= L"请输入密码" %>'
-                                        MoveViewWhenAttachWithIME='true' />
-                                <input type='text'
-                                        name='password_hide'
-                                        PasswordChar="*"
-                                        style='background:;textcolor: #FFFFFF;height: 30px;margin-left: -190px;width: 190px;margin-top: 10px;font-size: 16px;'
-                                        onchange='update_login_button_status'
-                                        SkipAutoBadWordFilter="true"
-                                        EmptyText='<%= L"请输入密码" %>'
-                                        MoveViewWhenAttachWithIME='true' />
-                                <input type="hidden" name="password" value="" />
+                                       name='account'
+                                       style='background:;textcolor: #FFFFFF;height: 30px;width: 190px;margin-top: 10px;font-size: 16px;'
+                                       onchange='update_login_button_status'
+                                       EmptyText='<%= L"请输入您的账号/手机号" %>'
+                                       MoveViewWhenAttachWithIME='true' />
                             </div>
-                            <input type="checkbox"
-                                    name="eye_show_password"
-                                    checked="false"
-                                    iconsize="20"
-                                    CheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#272 52 20 20"
-                                    UncheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#297 52 20 20"
-                                    style="position: relative;margin-left: -12px;margin-top: 14px;"
-                                    onclick="click_set_show_password"/>
-                        </div>
-                    </div>
-                    <div style="margin-top: 10px;padding-left: 110px;">
-                        <a name="forgot"
-                           onclick="forget_password()"
-                           style="background:;
-                                  base-font-size: 13px;
-                                  font-size: 13px;
-                                  color: #9A9DA2;">
-                           <%= L"忘记密码" %>
-                        </a>
-                        <span style="color:#9A9DA2;">|</span>
-                        <a name="register"
-                           onclick="register()"
-                           style="background:;
-                                  base-font-size: 13px;
-                                  font-size: 13px;
-                                  color: #ED8853;">
-                           <%= L"点击注册" %>
-                        </a>
-                    </div>
-                    <div style='margin-top:10px;margin-bottom:10px;'>
-                        <input type='button' name='login_button' DefaultButton='true' class='main_login_gray_button' onclick='login()' value='<%= L"登录"%>' />
-                    </div>
-                    <pe:if condition='<%= is_support_third_party_login() and is_show_third_part_login() %>'>
-                        <div>
-                            <div style='width: 240px;text-align: center;base-font-size: 12px;font-size: 12px;color: #9A9DA2;'>
-                                <%= L'第三方账号登录' %>
-                            </div>
-                            <div style='margin-top: 10px;'>
-                                <div onclick='login_with_wx()' style='width: 44px;height: 44px;background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#245 135 44 44);float: left;margin-left: 63px;'></div>
-                                <div onclick='login_with_qq()' style='width: 44px;height: 44px;background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#301 135 44 44);float: left;margin-left: 30x;'></div>
+                            <div style='margin-bottom:12px;'>
+                                <div style="float: left;width: 190px;">
+                                    <input type='text'
+                                            name='password_show'
+                                            style='background:;textcolor: #FFFFFF;height: 30px;width: 190px;margin-top: 10px;font-size: 16px;'
+                                            onchange='update_login_button_status'
+                                            SkipAutoBadWordFilter="true"
+                                            EmptyText='<%= L"请输入密码" %>'
+                                            MoveViewWhenAttachWithIME='true' />
+                                    <input type='text'
+                                            name='password_hide'
+                                            PasswordChar="*"
+                                            style='background:;textcolor: #FFFFFF;height: 30px;margin-left: -190px;width: 190px;margin-top: 10px;font-size: 16px;'
+                                            onchange='update_login_button_status'
+                                            SkipAutoBadWordFilter="true"
+                                            EmptyText='<%= L"请输入密码" %>'
+                                            MoveViewWhenAttachWithIME='true' />
+                                    <input type="hidden" name="password" value="" />
+                                </div>
+                                <input type="checkbox"
+                                        name="eye_show_password"
+                                        checked="false"
+                                        iconsize="20"
+                                        CheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#272 52 20 20"
+                                        UncheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#297 52 20 20"
+                                        style="position: relative;margin-left: -12px;margin-top: 14px;"
+                                        onclick="click_set_show_password"/>
                             </div>
                         </div>
-                    </pe:if>
-                </div>
-            </pe:container>
+                        <div style="margin-top: 10px;padding-left: 110px;">
+                            <a name="forgot"
+                               onclick="forget_password()"
+                               style="background:;
+                                      base-font-size: 13px;
+                                      font-size: 13px;
+                                      color: #9A9DA2;">
+                               <%= L"忘记密码" %>
+                            </a>
+                            <span style="color:#9A9DA2;">|</span>
+                            <a name="register"
+                               onclick="register()"
+                               style="background:;
+                                      base-font-size: 13px;
+                                      font-size: 13px;
+                                      color: #ED8853;">
+                               <%= L"点击注册" %>
+                            </a>
+                        </div>
+                        <div style='margin-top:10px;margin-bottom:10px;'>
+                            <input type='button' name='login_button' DefaultButton='true' class='main_login_gray_button' onclick='login()' value='<%= L"登录"%>' />
+                        </div>
+                        <pe:if condition='<%= is_support_third_party_login() and is_show_third_part_login() %>'>
+                            <div>
+                                <div style='width: 240px;text-align: center;base-font-size: 12px;font-size: 12px;color: #9A9DA2;'>
+                                    <%= L'第三方账号登录' %>
+                                </div>
+                                <div style='margin-top: 10px;'>
+                                    <div onclick='login_with_wx()' style='width: 44px;height: 44px;background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#245 135 44 44);float: left;margin-left: 63px;'></div>
+                                    <div onclick='login_with_qq()' style='width: 44px;height: 44px;background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#301 135 44 44);float: left;margin-left: 30x;'></div>
+                                </div>
+                            </div>
+                        </pe:if>
+                    </div>
+                </pe:container>
+            </div>
         </pe:mcml>
     </body>
 </html>
