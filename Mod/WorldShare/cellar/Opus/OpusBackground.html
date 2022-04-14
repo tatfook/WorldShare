@@ -92,7 +92,7 @@
                         local pid = Mod.WorldShare.Utils.GetProjectId(opus_content)
 
                         if pid then
-                            CommonLoadWorld:EnterWorldById(pid)
+                            GameLogic.RunCommand('/loadworld -auto ' .. pid)
                         else
                             CommonLoadWorld.GotoUrl(opus_content)
                         end
