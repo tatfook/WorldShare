@@ -55,7 +55,7 @@ function LoadWorldCommand:Init()
                 if cmdText:match('^https?://') then
                     local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
-                    if currentEnterWorld then
+                    if currentEnterWorld and not Mod.WorldShare.Store:Get('world/isShowExitPage') then
                         _guihelper.MessageBox(
                             format(L'即将离开【%s】', currentEnterWorld.name or ''),
                             function(res)
@@ -91,7 +91,7 @@ function LoadWorldCommand:Init()
                 if cmdText == 'home' then
                     local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
-                    if currentEnterWorld then
+                    if currentEnterWorld and not Mod.WorldShare.Store:Get('world/isShowExitPage') then
                         _guihelper.MessageBox(
                             format(L'即将离开【%s】进入【%s】', currentEnterWorld.name or '', L'家园'),
                             function(res)
@@ -155,7 +155,7 @@ function LoadWorldCommand:Init()
 
                         local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
-                        if currentEnterWorld and cacheWorldInfo and cacheWorldInfo.worldName then
+                        if currentEnterWorld and cacheWorldInfo and cacheWorldInfo.worldName and not Mod.WorldShare.Store:Get('world/isShowExitPage') then
                             local remoteWorldName = ''
 
                             if cacheWorldInfo and cacheWorldInfo.extra and cacheWorldInfo.extra.worldTagName then
@@ -198,7 +198,7 @@ function LoadWorldCommand:Init()
 
                         local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
-                        if currentEnterWorld then
+                        if currentEnterWorld and not Mod.WorldShare.Store:Get('world/isShowExitPage') then
                             local remoteWorldName = ''
 
                             if data and data.extra and data.extra.worldTagName then
@@ -384,15 +384,19 @@ function LoadWorldCommand:Fork(cmdText, options)
         if options.s then
             WorldCommon.OpenWorld(worldPath, true)
         else
-            _guihelper.MessageBox(
-                format(L'即将离开【%s】进入【%s】', currentEnterWorld.text, tag.name),
-                function(res)
-                    if res and res == _guihelper.DialogResult.Yes then
-                        WorldCommon.OpenWorld(worldPath, true)
-                    end
-                end,
-                _guihelper.MessageBoxButtons.YesNo
-            )
+            if not Mod.WorldShare.Store:Get('world/isShowExitPage') then
+                _guihelper.MessageBox(
+                    format(L'即将离开【%s】进入【%s】', currentEnterWorld.text, tag.name),
+                    function(res)
+                        if res and res == _guihelper.DialogResult.Yes then
+                            WorldCommon.OpenWorld(worldPath, true)
+                        end
+                    end,
+                    _guihelper.MessageBoxButtons.YesNo
+                )
+            else
+                WorldCommon.OpenWorld(worldPath, true)
+            end
         end
 
         return
@@ -441,15 +445,17 @@ function LoadWorldCommand:Fork(cmdText, options)
                 if options.s then
                     WorldCommon.OpenWorld(worldPath, true)
                 else
-                    _guihelper.MessageBox(
-                        format(L'即将离开【%s】进入【%s】', currentEnterWorld.text, data.name),
-                        function(res)
-                            if res and res == _guihelper.DialogResult.Yes then
-                                WorldCommon.OpenWorld(worldPath, true)
-                            end
-                        end,
-                        _guihelper.MessageBoxButtons.YesNo
-                    )
+                    if not Mod.WorldShare.Store:Get('world/isShowExitPage') then
+                        _guihelper.MessageBox(
+                            format(L'即将离开【%s】进入【%s】', currentEnterWorld.text, data.name),
+                            function(res)
+                                if res and res == _guihelper.DialogResult.Yes then
+                                    WorldCommon.OpenWorld(worldPath, true)
+                                end
+                            end,
+                            _guihelper.MessageBoxButtons.YesNo
+                        )
+                    end
                 end
             end
         )

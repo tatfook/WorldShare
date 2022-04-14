@@ -19,6 +19,8 @@ local EntityManager = commonlib.gettable("MyCompany.Aries.Game.EntityManager")
 local LocalServiceSession = NPL.export()
 
 function LocalServiceSession:OnWorldLoad()
+    Mod.WorldShare.Store:Remove('world/isShowExitPage')
+
     -- for strange issue
     -- if GameLogic.options:IsCommunityWorld() then
     --     if not KeepworkServiceSession:IsSignedIn() then
@@ -49,11 +51,7 @@ function LocalServiceSession:OnWillLeaveWorld()
     local lastWorld = Mod.WorldShare.Store:Get('world/lastWorld')
     local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
-    if not lastWorld or not currentEnterWorld then
-        return
-    end
-
-    if (lastWorld.foldername ~= currentEnterWorld.foldername) and not Mod.WorldShare.Store:Get('world/reloadStatus') then
+    if (not lastWorld or lastWorld.foldername ~= currentEnterWorld.foldername) and not Mod.WorldShare.Store:Get('world/reloadStatus') then
         Mod.WorldShare.Store:Set('world/lastWorld', Mod.WorldShare.Store:Get('world/currentEnterWorld'))
     end
 
