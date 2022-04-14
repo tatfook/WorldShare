@@ -18,7 +18,9 @@ local Desktop = commonlib.gettable('MyCompany.Aries.Creator.Game.Desktop')
 
 local ForgetPassword = NPL.export()
 
-function ForgetPassword:ShowPage()
+function ForgetPassword:ShowPage(isKick)
+    self.isKick = isKick
+
     local params = 
         Mod.WorldShare.Utils.ShowWindow(
             0,
