@@ -313,8 +313,8 @@ function SyncToLocal:UpdateOne(file, callback)
             msg = format(L"%s 相等跳过", currentRemoteItem.path)
         })
 
-        if type(callback) == "function" then
-            Mod.WorldShare.Utils.SetTimeOut(callback, 10)
+        if callback and type(callback) == "function" then
+            callback()
         end
 
         return false
