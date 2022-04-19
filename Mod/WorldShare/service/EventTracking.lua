@@ -26,7 +26,7 @@ local EventTrackingService = NPL.export()
 
 EventTrackingService.firstInit = false
 EventTrackingService.firstSave = false
-EventTrackingService.timeIntervalƒ = 10000 * 6 -- 60 seconds
+EventTrackingService.timeInterval = 10000 * 6 -- 60 seconds
 EventTrackingService.currentLoop = nil
 
 
