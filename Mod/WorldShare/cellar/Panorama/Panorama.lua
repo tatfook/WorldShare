@@ -28,6 +28,25 @@ local EventTrackingService = NPL.load("(gl)Mod/WorldShare/service/EventTracking.
 
 local Panorama = NPL.export()
 
+--宇哥的需求，录制模式下不显示esc，记录原有的esc状态
+Panorama.IsShowEscDock = nil
+function Panorama.UpdateEscDock(bShow)
+	local EscDock = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/Dock/EscDock.lua") 
+    if not EscDock or not EscDock.ShowView then
+        return 
+    end
+	if Panorama.IsShowEscDock  == nil then
+		Panorama.IsShowEscDock = EscDock.IsVisible() == true
+	end
+	if bShow then
+		EscDock.ShowView(not bShow)
+	else
+		local isShow = Panorama.IsShowEscDock ~= nil and Panorama.IsShowEscDock or false
+		EscDock.ShowView(isShow)
+		Panorama.IsShowEscDock = nil
+	end
+end
+
 function Panorama:ShowCreate(force)
     LoginModal:CheckSignedIn(L"登录后才能分享全景图", function(bSucceed)
         if bSucceed then
@@ -77,6 +96,7 @@ function Panorama:ShowCreate(force)
                     local userId = Mod.WorldShare.Store:Get('user/userId')
 
                     if data.userId == userId then
+                        Panorama.UpdateEscDock(true)
                         local params = Mod.WorldShare.Utils.ShowWindow(
                             width,
                             height,
