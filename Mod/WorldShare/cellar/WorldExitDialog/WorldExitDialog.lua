@@ -39,6 +39,11 @@ local self = WorldExitDialog
 -- @param callback: function(res) end.
 -- @return void or boolean
 function WorldExitDialog.ShowPage(callback)
+    if Mod.WorldShare.Store:Get('world/isShowExitPage') then
+        Desktop.ForceExit(false)
+		return
+	end
+
     if ParaEngine.GetAppCommandLineByParam('IsAppVersion', nil) then
         Desktop.ForceExit(false)
         return
@@ -203,6 +208,12 @@ function WorldExitDialog.OnDialogResult(res)
             end
 
             if KeepworkServiceSession:IsSignedIn() then
+                local titlename = GameLogic.GetFilters():apply_filters('GameName', L"帕拉卡 Paracraft")
+                local desc = GameLogic.GetFilters():apply_filters('GameDescription', L"3D动画编程创作工具")
+
+                System.options.WindowTitle = string.format("%s -- ver %s", titlename, GameLogic.options.GetClientVersion());
+                ParaEngine.SetWindowText(format("%s : %s", System.options.WindowTitle, desc));
+
                 Mod.WorldShare.Store:Set('world/isShowExitPage', true)
                 RedSummerCampMainPage.Show()
                 return
