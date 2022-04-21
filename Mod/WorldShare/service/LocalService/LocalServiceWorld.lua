@@ -18,6 +18,8 @@ local GitService = NPL.load('(gl)Mod/WorldShare/service/GitService.lua')
 local GitKeepworkService = NPL.load('(gl)Mod/WorldShare/service/GitService/GitKeepworkService.lua')
 
 -- libs
+NPL.load('(gl)Mod/WorldShare/service/FileDownloader/FileDownloader.lua')
+
 local FileDownloader = commonlib.gettable('Mod.WorldShare.service.FileDownloader.FileDownloader')
 local LocalLoadWorld = commonlib.gettable('MyCompany.Aries.Game.MainLogin.LocalLoadWorld')
 local WorldRevision = commonlib.gettable('MyCompany.Aries.Creator.Game.WorldRevision')

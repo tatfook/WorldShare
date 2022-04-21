@@ -8,6 +8,10 @@ use the lib: corvent base32 and fit to github or gitlab
 local GitEncoding = NPL.load('(gl)Mod/WorldShare/helper/GitEncoding.lua')
 ------------------------------------------------------------
 ]]
+
+-- libs
+NPL.load('(gl)script/ide/System/Encoding/basexx.lua')
+
 local Encoding = commonlib.gettable("System.Encoding.basexx")
 
 local GitEncoding = NPL.export()

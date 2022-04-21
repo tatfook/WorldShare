@@ -9,6 +9,9 @@ NPL.load("(gl)Mod/WorldShare/service/SocketService.lua")
 local SocketService = commonlib.gettable("Mod.WorldShare.service.SocketService")
 ------------------------------------------------------------
 ]]
+
+NPL.load('(gl)script/ide/System/Encoding/guid.lua')
+
 local NetworkMain = commonlib.gettable("MyCompany.Aries.Game.Network.NetworkMain")
 
 local SocketService = commonlib.inherit(commonlib.gettable("System.Core.ToolBase"), commonlib.gettable("Mod.WorldShare.service.SocketService"))

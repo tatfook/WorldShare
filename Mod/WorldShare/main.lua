@@ -20,83 +20,11 @@ CODE GUIDELINE
 
 ]]
 
--- include ide
-NPL.load('(gl)script/ide/Files.lua')
-NPL.load('(gl)script/ide/Encoding.lua')
-
--- include ide system encoding
-NPL.load('(gl)script/ide/System/Encoding/sha1.lua')
-NPL.load('(gl)script/ide/System/Encoding/base64.lua')
-NPL.load('(gl)script/ide/System/Encoding/guid.lua')
-NPL.load('(gl)script/ide/System/Encoding/jwt.lua')
-NPL.load('(gl)script/ide/System/Encoding/basexx.lua')
-
--- include ide system windows
-NPL.load('(gl)script/ide/System/Windows/Screen.lua')
-NPL.load('(gl)script/ide/System/Windows/Window.lua')
-
--- include ide system scene
-NPL.load('(gl)script/ide/System/Scene/Viewports/ViewportManager.lua')
-
--- include ide system core
-NPL.load('(gl)script/ide/System/Core/UniString.lua')
-NPL.load('(gl)script/ide/System/Core/Event.lua')
-NPL.load('(gl)script/ide/System/Core/ToolBase.lua')
-
--- include ide system os
-NPL.load('(gl)script/ide/System/os/os.lua')
-
--- include ide math
-NPL.load('(gl)script/ide/math/StringUtil.lua')
-
--- include aries creator
-NPL.load('(gl)script/apps/Aries/Creator/WorldCommon.lua')
-
--- include aries creator game login
-NPL.load('(gl)script/apps/Aries/Creator/Game/Login/CreateNewWorld.lua')
-NPL.load('(gl)script/apps/Aries/Creator/Game/Login/LocalLoadWorld.lua')
-NPL.load('(gl)script/apps/Aries/Creator/Game/Login/RemoteServerList.lua')
-NPL.load('(gl)script/apps/Aries/Creator/Game/Login/DownloadWorld.lua')
-NPL.load('(gl)script/apps/Aries/Creator/Game/Login/RemoteWorld.lua')
-NPL.load('(gl)script/apps/Aries/Creator/Game/Login/TeacherAgent/TeacherAgent.lua')
-NPL.load('(gl)script/apps/Aries/Creator/Game/Login/TeacherAgent/TeacherIcon.lua')
-NPL.load('(gl)script/apps/Aries/Creator/Game/Login/ParaWorldLessons.lua')
-NPL.load('(gl)script/apps/Aries/Creator/Game/Login/RemoteUrl.lua')
-NPL.load('(gl)script/apps/Aries/Creator/Game/main.lua')
-
--- include aries create game movie
-NPL.load('(gl)script/apps/Aries/Creator/Game/Movie/QREncode.lua')
-
--- include aries creator game areas
-NPL.load('(gl)script/apps/Aries/Creator/Game/Areas/ShareWorldPage.lua')
-NPL.load('(gl)script/apps/Aries/Creator/Game/Areas/DesktopMenu.lua')
-
--- include aries creator game network
-NPL.load('(gl)script/apps/Aries/Creator/Game/Network/NPLWebServer.lua')
-NPL.load('(gl)script/apps/Aries/Creator/Game/Network/NetworkMain.lua')
-
--- include aries creator game world
-NPL.load('(gl)script/apps/Aries/Creator/Game/World/SaveWorldHandler.lua')
-
--- include aries creator game tasks
-NPL.load('(gl)script/apps/Aries/Creator/Game/Tasks/ParaWorld/ParaWorldLoginAdapter.lua')
-
--- include aries creator game nplbrowser
-NPL.load('(gl)script/apps/Aries/Creator/Game/NplBrowser/NplBrowserLoaderPage.lua')
-NPL.load('(gl)script/apps/Aries/Creator/Game/NplBrowser/NplBrowserPlugin.lua')
-
---  include aries creator game entity
-NPL.load('(gl)script/apps/Aries/Creator/Game/Entity/EntityManager.lua')
-NPL.load('(gl)script/apps/Aries/Creator/Game/Entity/PlayerAssetFile.lua')
-
 -- include worldshare service
 NPL.load('(gl)Mod/WorldShare/service/SocketService.lua')
-NPL.load('(gl)Mod/WorldShare/service/Cef3Manager.lua')
-NPL.load('(gl)Mod/WorldShare/service/FileDownloader/FileDownloader.lua')
 
 -- get table lib
 local SocketService = commonlib.gettable('Mod.WorldShare.service.SocketService')
-local Cef3Manager = commonlib.gettable('Mod.WorldShare.service.Cef3Manager')
 local MainLogin = commonlib.gettable('MyCompany.Aries.Game.MainLogin')
 local EntityManager = commonlib.gettable("MyCompany.Aries.Game.EntityManager")
 
@@ -105,7 +33,6 @@ local KickOut = NPL.load('(gl)Mod/WorldShare/cellar/Common/KickOut/KickOut.lua')
 local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
 local OpusSetting = NPL.load('(gl)Mod/WorldShare/cellar/OpusSetting/OpusSetting.lua')
 local PreventIndulge = NPL.load('(gl)Mod/WorldShare/cellar/PreventIndulge/PreventIndulge.lua')
-local Beginner = NPL.load('(gl)Mod/WorldShare/cellar/Beginner/Beginner.lua')
 local Certificate = NPL.load('(gl)Mod/WorldShare/cellar/Certificate/Certificate.lua')
 local Cellar = NPL.load('(gl)Mod/WorldShare/cellar/cellar.lua')
 local CommonLoadWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/CommonLoadWorld.lua')

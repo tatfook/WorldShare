@@ -12,6 +12,8 @@ local CreateWorld = NPL.load('(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.
 ]]
 
 -- libs
+NPL.load('(gl)script/apps/Aries/Creator/Game/Login/CreateNewWorld.lua')
+
 local CreateNewWorld = commonlib.gettable('MyCompany.Aries.Game.MainLogin.CreateNewWorld')
 
 -- bottles
