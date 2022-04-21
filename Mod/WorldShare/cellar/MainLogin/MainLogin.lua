@@ -279,9 +279,10 @@ function MainLogin:ShowLogin1()
         MainLoginLoginPage:FindControl('title_username').visible = true
     else
         local PWDInfo = KeepworkServiceSession:LoadSigninInfo()
-    
+
         if PWDInfo then
             MainLoginLoginPage:SetUIValue('account', PWDInfo.account or '')
+
             if PWDInfo.rememberMe then
                 local password = PWDInfo.password or ''
                 MainLoginLoginPage:SetUIValue('password_show', password)
@@ -289,13 +290,14 @@ function MainLogin:ShowLogin1()
                 MainLoginLoginPage:SetUIValue('password', password)
                 MainLoginLoginPage:SetUIValue('account', PWDInfo.account or '')
             end
+
             if PWDInfo.autoLogin then
                 GameLogic.GetFilters():apply_filters("on_start_login");
                 MainLogin:LoginWithToken(PWDInfo.token, function(bSsucceed, reason, message)
                     if bSsucceed then
                         MainLoginLoginPage:SetUIValue('auto_login_name', true)
                         MainLoginLoginPage:SetUIBackground('login_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 98 258 44')
-    
+
                         MainLoginLoginPage:FindControl('phone_mode').visible = false
                         MainLoginLoginPage:FindControl('account_mode').visible = false
                         MainLoginLoginPage:FindControl('auto_login_mode').visible = true
@@ -306,9 +308,8 @@ function MainLogin:ShowLogin1()
                         MainLoginLoginPage:FindControl('title_login').visible = false
                         MainLoginLoginPage:FindControl('title_username').visible = true
 
-                        if Mod.WorldShare.Store:Get('user/isSettingLanguage') or
-                           ParaEngine.GetAppCommandLineByParam('IsSettingLanguage', nil) == 'true' then
-                            Mod.WorldShare.Store:Remove('user/isSettingLanguage')
+                        if Mod.WorldShare.Store:Get('user/isSettingLanguage') then
+                            Mod.WorldShare.Store:Set('user/isSettingLanguage', false)
                             return
                         end
 
@@ -317,12 +318,42 @@ function MainLogin:ShowLogin1()
                         end,0)
                     end
                 end)
+            else
+                if Mod.WorldShare.Store:Get('user/isSettingLanguage') then
+                    Mod.WorldShare.Store:Set('user/isSettingLanguage', false)
+    
+                    local token = ParaEngine.GetAppCommandLineByParam('temptoken', nil)
+                    if not token or token == '' then
+                        Mod.WorldShare.Store:Remove('user/token')
+                        return
+                    end
+    
+                    GameLogic.GetFilters():apply_filters("on_start_login");
+    
+                    MainLogin:LoginWithToken(
+                        token,
+                        function(bSsucceed, reason, message)
+                            if bSsucceed then
+                                MainLoginLoginPage:SetUIValue('auto_login_name', true)
+                                MainLoginLoginPage:SetUIBackground('login_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 98 258 44')
+            
+                                MainLoginLoginPage:FindControl('phone_mode').visible = false
+                                MainLoginLoginPage:FindControl('account_mode').visible = false
+                                MainLoginLoginPage:FindControl('auto_login_mode').visible = true
+                                MainLoginLoginPage:FindControl('change_button').visible = true
+                                MainLoginLoginPage:FindControl('update_password_button').visible = true
+                                MainLoginLoginPage:SetUIValue('auto_username', PWDInfo.account or '')
+            
+                                MainLoginLoginPage:FindControl('title_login').visible = false
+                                MainLoginLoginPage:FindControl('title_username').visible = true
+                            end
+                        end
+                    )
+                end
             end
         end
     end
 end
-
-
 
 function MainLogin:ShowAndroidLogin()
     Mod.WorldShare.Utils.ShowWindow(
@@ -606,6 +637,10 @@ function MainLogin:Close()
 end
 
 function MainLogin:LoginWithToken(token, callback)
+    if not token then
+        return
+    end
+
     Mod.WorldShare.MsgBox:Show(L'正在登录，请稍候(TOKEN登录)...', 24000, L'链接超时', 450, 120)
 
     KeepworkServiceSession:LoginWithToken(token, function(response, err)

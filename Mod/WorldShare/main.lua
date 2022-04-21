@@ -135,6 +135,11 @@ function WorldShare:init()
             return true
         end
     end)
+
+    if ParaEngine.GetAppCommandLineByParam('IsSettingLanguage', nil) == 'true' and
+       Mod.WorldShare.Store:Get('user/isSettingLanguage') == nil then
+        Mod.WorldShare.Store:Set('user/isSettingLanguage', true)
+    end
 end
 
 function WorldShare:OnInitDesktop()
