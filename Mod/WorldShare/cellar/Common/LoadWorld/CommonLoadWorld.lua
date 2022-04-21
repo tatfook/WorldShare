@@ -12,6 +12,7 @@ local CommonLoadWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/Com
 
 -- libs
 NPL.load('(gl)script/apps/Aries/Creator/Game/Login/ParaWorldLessons.lua')
+NPL.load('(gl)script/apps/Aries/Creator/Game/Login/RemoteUrl.lua')
 
 local Game = commonlib.gettable('MyCompany.Aries.Game')
 local DownloadWorld = commonlib.gettable('MyCompany.Aries.Game.MainLogin.DownloadWorld')
