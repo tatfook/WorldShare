@@ -869,6 +869,7 @@
                                               font-size: 16px;'
                                        enable_ime='false'
                                        EmptyText='<%= L"请输入您的账号/手机号" %>'
+                                       RemoveSpaces='true'
                                        MoveViewWhenAttachWithIME='true' />
                             </div>
                             <div style='margin-bottom:12px;'>
@@ -882,7 +883,8 @@
                                                    margin-top: 10px;
                                                    font-size: 16px;'
                                             onchange='update_login_button_status'
-                                            SkipAutoBadWordFilter="true"
+                                            SkipAutoBadWordFilter='true'
+                                            RemoveSpaces='true'
                                             enable_ime='false'
                                             EmptyText='<%= L"请输入密码" %>'
                                             MoveViewWhenAttachWithIME='true' />
@@ -891,7 +893,8 @@
                                             PasswordChar="*"
                                             style='background:;textcolor: #FFFFFF;height: 30px;margin-left: -190px;width: 190px;margin-top: 10px;font-size: 16px;'
                                             onchange='update_login_button_status'
-                                            SkipAutoBadWordFilter="true"
+                                            SkipAutoBadWordFilter='true'
+                                            RemoveSpaces='true'
                                             enable_ime='false'
                                             EmptyText='<%= L"请输入密码" %>'
                                             MoveViewWhenAttachWithIME='true' />
@@ -1004,6 +1007,7 @@
                                 <input type='text'
                                        name='phone_number'
                                        enable_ime='false'
+                                       RemoveSpaces='true'
                                        onchange='update_phone_login_button_status'
                                        style='height: 35px;
                                               text-valign: center;
@@ -1036,6 +1040,7 @@
                                               text-valign: center;
                                               background:;
                                               textcolor: #FFFFFF;'
+                                       RemoveSpaces='true'
                                        EmptyText='<%= L"请输入验证码" %>' />
                             </div>
                         </div>

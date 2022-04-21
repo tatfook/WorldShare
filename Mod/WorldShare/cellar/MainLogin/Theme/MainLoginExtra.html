@@ -45,8 +45,7 @@
 
                         local Translation = commonlib.gettable('MyCompany.Aries.Game.Common.Translation')
                         Translation.ShowPage(function()
-                            MainLogin:Close()
-                            MainLogin:Show()
+                            Mod.WorldShare.Store:Set('user/isSettingLanguage', true)
                         end)
                     end
 

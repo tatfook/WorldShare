@@ -2,8 +2,8 @@
 Title: WorldShareMod
 Author(s): big
 CreateDate: 2017.04.17
-ModifyDate: 2022.1.5
-Desc:
+ModifyDate: 2022.04.21
+Version: 0.5
 use the lib:
 ------------------------------------------------------------
 NPL.load('(gl)Mod/WorldShare/main.lua')
@@ -134,7 +134,6 @@ local WorldShare = commonlib.inherit(commonlib.gettable('Mod.ModBase'), commonli
 
 WorldShare:Property({'Name', 'WorldShare', 'GetName', 'SetName', { auto = true }})
 WorldShare:Property({'Desc', 'World share mod can share world to keepwork online', 'GetDesc', 'SetDesc', { auto = true }})
-WorldShare.version = '0.0.42'
 
 if Config.defaultEnv == 'RELEASE' or Config.defaultEnv == 'STAGE' then
     System.options.isAB_SDK = true
@@ -144,8 +143,6 @@ end
 WorldShare.Store = Store
 WorldShare.MsgBox = MsgBox
 WorldShare.Utils = Utils
-
-LOG.std(nil, 'info', 'WorldShare', 'world share version %s', WorldShare.version)
 
 function WorldShare:init()
     -- init all filters

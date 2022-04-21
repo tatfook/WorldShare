@@ -306,7 +306,13 @@ function MainLogin:ShowLogin1()
                         MainLoginLoginPage:FindControl('title_login').visible = false
                         MainLoginLoginPage:FindControl('title_username').visible = true
 
-                        commonlib.TimerManager.SetTimeout(function()  
+                        if Mod.WorldShare.Store:Get('user/isSettingLanguage') or
+                           ParaEngine.GetAppCommandLineByParam('IsSettingLanguage', nil) == 'true' then
+                            Mod.WorldShare.Store:Remove('user/isSettingLanguage')
+                            return
+                        end
+
+                        commonlib.TimerManager.SetTimeout(function()
                             self:Next()
                         end,0)
                     end
