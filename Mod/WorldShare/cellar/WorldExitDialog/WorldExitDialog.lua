@@ -12,6 +12,8 @@ WorldExitDialog.ShowPage()
 ]]
 
 -- lib
+NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/ShareWorldPage.lua")
+
 local ShareWorldPage = commonlib.gettable('MyCompany.Aries.Creator.Game.Desktop.Areas.ShareWorldPage')
 local WorldRevision = commonlib.gettable('MyCompany.Aries.Creator.Game.WorldRevision')
 local NplBrowserPlugin = commonlib.gettable('NplBrowser.NplBrowserPlugin')
