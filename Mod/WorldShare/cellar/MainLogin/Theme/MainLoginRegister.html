@@ -1,7 +1,7 @@
 <html>
     <body> 
         <pe:mcml>
-            <script type="text/npl">
+            <script type='text/npl'>
                 <![CDATA[
                     -- bottles
                     local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
@@ -569,15 +569,16 @@
                     end
                 ]]>
             </script>
-            <style type="text/mcss" src='Mod/WorldShare/cellar/Theme/Mcss/MainLoginMcss.mcss'>
+            <style type='text/mcss' src='Mod/WorldShare/cellar/Theme/Mcss/MainLoginMcss.mcss'>
                 {
                     container_size = {
-                        ['margin-left'] = -160,
+                        width = 562,
+                        ['margin-left'] = -281,
                         ['margin-top'] = -100,
                         background = 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#602 12 339 382:80 80 80 80'
                     },
                     main_area = {
-                        width = 320,
+                        width = 562,
                         ['min-height'] = 320,
                         ["base-font-size"] = 16,
                         ["font-size"] = 16,
@@ -596,14 +597,14 @@
                     height='100px'
                     style='position: relative; background:;'>
                     <div align='left'
-                        style='width: 55px;
-                            margin-left: 20px;
-                            margin-top: 20px;'>
+                         style='width: 55px;
+                                margin-left: 20px;
+                                margin-top: 20px;'>
                         <input type='button'
-                            style='width: 55px;
-                                height: 59px;
-                                background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#533 8 55 59)'
-                                onclick="parent"/>
+                               style='width: 55px;
+                                      height: 59px;
+                                      background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#533 8 55 59)'
+                               onclick='parent' />
                     </div>
                 </pe:container>
                 <pe:container
@@ -622,312 +623,368 @@
                 </pe:container>
             </pe:if>
             <pe:container alignment='_ct'
-                          ClickThrough='true'
                           style='<%= get_container_style() %>'
                           class='main_login_container_bg container_size'>
+                <div width='100%'
+                     style='position: relative;'>
+                    <pe:if condition='<%= get_is_modal() %>'>
+                        <div align='right'
+                             width='40'
+                             style='margin-right: 20px;
+                                    margin-top: 20px;'>
+                            <input type='button' class='main_login_close_button' onclick='back' />
+                        </div>
+                    </pe:if>
+                    <pe:if condition='<%= not get_is_modal() %>'>
+                        <div align='right'
+                             width='40'
+                             style='margin-right: 20px;
+                                    margin-top: 20px;'>
+                            <input type='button' class='main_login_back_button' onclick='back' />
+                        </div>
+                    </pe:if>
+                </div>
                 <div style='padding-top: 12px;
                             padding-left: 18px;'>
                     <div class='main_login_title_bg' style='float: left;width: 172px;height: 49px;'>
                         <img style='margin-top: 13px;margin-left: 30px;width: 53px;height: 24px;' src='Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#12 421 53 24' />
                     </div>
-                    <pe:if condition='<%= get_is_modal() %>'>
-                        <div style='float: left;margin-left: 70px;margin-top: 10px;'>
-                            <input type='button' class='main_login_close_button' onclick="back"/>
-                        </div>
-                    </pe:if>
-                    <pe:if condition='<%= not get_is_modal() %>'>
-                        <div style='float: left;margin-left: 70px;margin-top: 10px;'>
-                            <input type='button' class='main_login_back_button' onclick="back"/>
-                        </div>
-                    </pe:if>
                 </div>
                 <div class='main_area'>
-                    <!-- register finish -->
-                    <pe:container name='register_not_finish' visible='true' style='width: 240px;height: 260px;background:;'>
-                        <div style="width: 240px;height: 24.37px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#5 345 256 26)">
-                            <input type='button'
-                                name='account_button'
-                                style="width: 120px;height: 24.37px;color: #ffffff;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#5 378 128 26);"
-                                value='<%= "账号注册" %>'
-                                onclick='set_account_mode'/>
-                            <input type='button'
-                                name='phone_button'
-                                style="width: 120px;height: 24.37px;color: #ffffff;background:;"
-                                value='<%= "手机注册" %>'
-                                onclick='set_phone_mode'/>
-                        </div>
-                        <!-- account -->
-                        <pe:container name='account_register_mode' visible='true' style="width: 260px;height: 260px;background:;">
-                            <pe:container name="register_account_field_error" visible="false" style="display:none;background:">
-                                <!-- error message -->
-                                <div>
-                                    <label style="font-size: 12px;base-font-size: 12px;color: #EB2222;" name="register_account_field_error_msg" />
-                                </div>
-                            </pe:container>
-                            <pe:container name="register_account_password_field_error" visible="false" style="display:none;background:">
-                                <!-- error message -->
-                                <div>
-                                    <label style="font-size: 12px;base-font-size: 12px;color: #EB2222;" name="register_account_password_field_error_msg" />
-                                </div>
-                            </pe:container>
-                            <div style='width: 240px; height: 88.1px;padding-left: 35px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#9 0 256 94)'>
-                                <div>
-                                    <input type="text"
-                                           EmptyText='<%= L"请输入账号" %>'
-                                           style='background:;textcolor: #FFFFFF;height: 30px;width: 200px;margin-top: 12px;font-size: 12px;'
-                                           name="register_account" />
-                                </div>
-                                <div>
-                                    <div style="float: left;width: 200px;">
-                                        <input type="text"
-                                               onchange="update_register_account_button_status"
-                                               SkipAutoBadWordFilter="true"
-                                               EmptyText='<%= L"请输入4位以上的密码" %>'
-                                               style='background:;
-                                                      textcolor: #FFFFFF;
-                                                      height: 30px;
-                                                      width: 200px;
-                                                      margin-top: 10px;
-                                                      font-size: 12px;'
-                                               name="register_account_password_show"
-                                               visible="false" />
-                                        <input type="text"
-                                               onchange="update_register_account_button_status"
-                                               PasswordChar="*"
-                                               SkipAutoBadWordFilter="true"
-                                               EmptyText='<%= L"请输入4位以上的密码" %>'
-                                               style='background:;
-                                                      textcolor: #FFFFFF;
-                                                      height: 30px;
-                                                      width: 200px;
-                                                      margin-top: 10px;
-                                                      font-size: 12px;
-                                                      margin-left: -200px;'
-                                               name="register_account_password_hide"
-                                               visible="true" />
-                                        <input type="hidden"
-                                               name="register_account_password"
-                                               value="" />
-                                    </div>
-                                    <input name="checkbox_password"
-                                        type="checkbox"
-                                        checked="false"
-                                        iconsize="20"
-                                        style="position: relative;margin-left: -30px;margin-top: 10px;"
-                                        CheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#272 52 20 20"
-                                        UncheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#297 52 20 20"
-                                        onclick="set_show_password"/>
-                                </div>
+                    <div width='50%'
+                         style='float: left;'>
+                        <!-- register finish -->
+                        <pe:container name='register_not_finish'
+                                      visible='true'
+                                      style='width: 240px;
+                                             height: 260px;
+                                             background:;'>
+                            <div style='width: 240px;
+                                        height: 24.37px;
+                                        background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#5 345 256 26)'>
+                                <input type='button'
+                                       name='account_button'
+                                       style="width: 120px;
+                                              height: 24.37px;
+                                              color: #ffffff;
+                                              background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#5 378 128 26);"
+                                       value='<%= "账号注册" %>'
+                                       onclick='set_account_mode'/>
+                                <input type='button'
+                                       name='phone_button'
+                                       style="width: 120px;height: 24.37px;color: #ffffff;background:;"
+                                       value='<%= "手机注册" %>'
+                                       onclick='set_phone_mode'/>
                             </div>
-                            <pe:container name="agree_field_error" visible="false" style="display:none;background:">
-                                <!-- error message -->
-                                <div>
-                                    <label style="font-size: 12px;base-font-size: 12px;color: #EB2222;margin-left: 62px;" name="agree_field_error_msg" />
-                                </div>
-                            </pe:container>
-                            <div style="width: 260px;margin-top: 0px;margin-bottom: 5px;margin-left: -5px;">
-                                <input name="agree"
-                                       type="checkbox"
-                                       checked="true"
-                                       iconsize="12"
-                                       CheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#275 79 12 12"
-                                       UncheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#295 79 12 12"
-                                       style="float:left;margin-top:3px;min-width:90px;"
-                                       onclick="set_register_agree" />
-                                <div style="float:left; color: white;base-font-size: 11px;font-size: 11px;margin-left: 4px;">
-                                    <div style="float:left;width: 2px;"></div>
-                                    <%= L"我同意" %>
-                                    <div style="float:left;color: #EDB853" onclick="user_agreement()"><%= L"《用户许可协议》" %></div>
-                                    <%= L'与' %>
-                                    <div style="float:left;color: #EDB853" onclick="user_privacy()"><%= L"《用户隐私协议》" %></div>
-                                </div>
-                            </div>
-                            <div>
-                                <input type="button"
-                                       name='account_register_button'
-                                       class="main_login_blue_button"
-                                       style="margin-top: 10px;"
-                                       onclick="account_register()"
-                                       value='<%= L"注册"%>' />
-                            </div>
-                        </pe:container>
-                        <!-- phone number register -->
-                        <pe:container name='phone_register_mode' visible='false' style='position: relative;width: 240px;height: 240px;background:;margin-top: -260px;'>
-                            <pe:container name='phone_register_mode_step_1' visible='true' style='position: relative;background:;'>
-                                <div style="color: #FFFFFF;">
-                                    <pe:container name="phone_field_error" visible="false" style="background:;">
-                                        <!-- error message -->
-                                        <div>
-                                            <label style="font-size: 12px;base-font-size: 12px;color: #EB2222;" name="phone_field_error_msg" />
-                                        </div>
-                                    </pe:container>
-                                    <div style='width: 240px;height: 131.25px;padding-left: 10px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#9 96 256 140)'>
-                                        <div>
-                                            <input type="text"
-                                                   EmptyText='<%= L"请输入手机号" %>'
-                                                   style='background:;textcolor: #FFFFFF;height: 30px;width: 200px;margin-top: 12px;font-size: 12px;'
-                                                   onchange='update_register_phone_next_button_status'
-                                                   onfocusin='set_phone_register_show_field'
-                                                   name="phonenumber" />
-                                        </div>
-                                        <div>
-                                            <input type="text"
-                                                onchange='update_register_phone_next_button_status'
-                                                EmptyText='<%= L"请输入验证码" %>'
-                                                style='background:;textcolor: #FFFFFF;height: 30px;width: 120px;margin-top: 12px;font-size: 12px;'
-                                                onfocusin='set_phone_register_show_field'
-                                                name="phonecaptcha" />
-                                            <input
-                                                type="button"
-                                                name="get_phone_captcha"
-                                                style="margin-top: 7px;
-                                                    margin-left:5px;
-                                                    color: #3E9CE5;
-                                                    font-size: 12px;
-                                                    base-font-size: 12px;
-                                                    width: 90px;
-                                                    height:30px;
-                                                    background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#331 70 90 22:5 5 5 5)"
-                                                onclick="get_phone_captcha()"
-                                                disabled="disabled"
-                                                value='<%= L"获取验证码"%>'
-                                            />
-                                        </div>
-                                        <div>
-                                            <div style="float: left;width: 200px;">
-                                                <input type="text"
-                                                    onchange='update_register_phone_next_button_status'
-                                                    EmptyText='<%= L"请输入4位以上的密码" %>'
-                                                    SkipAutoBadWordFilter="true"
-                                                    style='background:;textcolor: #FFFFFF;height: 30px;width: 200px;margin-top: 12px;font-size: 12px;'
-                                                    name="phonepassword_show"
-                                                    onfocusin='set_phone_register_show_field'
-                                                    visible="false" />
-                                                <input type="text"
-                                                    onchange='update_register_phone_next_button_status'
-                                                    PasswordChar="*"
-                                                    SkipAutoBadWordFilter="true"
-                                                    EmptyText='<%= L"请输入4位以上的密码" %>'
-                                                    style='background:;textcolor: #FFFFFF;height: 30px;width: 200px;margin-top: 12px;font-size: 12px;margin-left: -200px;'
-                                                    name="phonepassword_hide"
-                                                    onfocusin='set_phone_register_show_field'
-                                                    visible="true" />
-                                                <input type="hidden" name="phonepassword" value="" />
-                                            </div>
-                                            <input type="checkbox"
-                                                   checked="false"
-                                                   iconsize="20"
-                                                   CheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#272 52 20 20"
-                                                   UncheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#297 52 20 20"
-                                                   style="position: relative;margin-left: -5px;margin-top: 12px;"
-                                                   onclick="set_show_password1"/>
-                                        </div>
-                                    </div>
-                                    <pe:container name="phone_agree_field_error" visible="false" style="background:">
-                                        <!-- error message -->
-                                        <div>
-                                            <label style="font-size: 12px;base-font-size: 12px;color: #EB2222;margin-left: 62px;" name="phone_agree_field_error_msg" />
-                                        </div>
-                                    </pe:container>
-                                    <div style="width: 260px;margin-top: 0px;margin-bottom: 5px;margin-left: -5px;">
-                                        <input type="checkbox"
-                                            iconsize="12"
-                                            CheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#275 79 12 12"
-                                            UncheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#295 79 12 12"
-                                            style="float:left;margin-top:3px;min-width:90px;"
-                                            name="phone_agree"
-                                            onclick="set_phone_agree"
-                                            checked="checked"/>
-                                        <div style="float:left; color: white;base-font-size: 12px;font-size: 12px;margin-left: 4px;">
-                                            <div style="float:left;width: 2px;"></div>
-                                            <%= L"我同意" %>
-                                            <div style="float:left;color: #EDB853" onclick="user_agreement()"><%= L"《用户许可协议》" %></div>
-                                            <%= L'与' %>
-                                            <div style="float:left;color: #EDB853" onclick="user_privacy()"><%= L"《用户隐私协议》" %></div>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <input type='button'
-                                               name='phone_register_next_button'
-                                               class='main_login_gray_button'
-                                               style='margin-top: 10px'
-                                               onclick='phone_register_next()'
-                                               value='<%= L"下一步"%>' />
-                                    </div>
-                                </div>
-                            </pe:container>
-                            <pe:container name='phone_register_mode_step_2' visible='false' style="position: relative;background:;">
-                                <pe:container name="phone_account_field_error" visible="false" style="background:;margin-top: 5px;">
+                            <!-- account -->
+                            <pe:container name='account_register_mode' visible='true' style="width: 260px;height: 260px;background:;">
+                                <pe:container name="register_account_field_error" visible="false" style="display:none;background:">
                                     <!-- error message -->
                                     <div>
-                                        <label style="font-size: 12px;base-font-size: 12px;color: #EB2222;" name="phone_account_field_error_msg" />
+                                        <label style="font-size: 12px;base-font-size: 12px;color: #EB2222;" name="register_account_field_error_msg" />
                                     </div>
                                 </pe:container>
-                                <div style="width: 240px;
-                                            height: 46.87px;
-                                            padding-left: 15px;
-                                            padding-top: 12px;
-                                            background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#9 951 256 50);">
-                                    <input type='text'
-                                        name='phone_register_account'
-                                        onchange='update_register_phone_button_status'
-                                        EmptyText='<%= L"为自己取一个个性账号名吧" %>'
-                                        style='width: 210px;
-                                               height: 30px;
-                                               textcolor: #FFFFFF;
-                                               base-font-size: 12px;
-                                               font-size: 12px;
-                                               background:; ' />
+                                <pe:container name="register_account_password_field_error" visible="false" style="display:none;background:">
+                                    <!-- error message -->
+                                    <div>
+                                        <label style="font-size: 12px;base-font-size: 12px;color: #EB2222;" name="register_account_password_field_error_msg" />
+                                    </div>
+                                </pe:container>
+                                <div style='width: 240px; height: 88.1px;padding-left: 35px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#9 0 256 94)'>
+                                    <div>
+                                        <input type="text"
+                                               EmptyText='<%= L"请输入账号" %>'
+                                               style='background:;textcolor: #FFFFFF;height: 30px;width: 200px;margin-top: 12px;font-size: 12px;'
+                                               name="register_account" />
+                                    </div>
+                                    <div>
+                                        <div style="float: left;width: 200px;">
+                                            <input type="text"
+                                                   onchange="update_register_account_button_status"
+                                                   SkipAutoBadWordFilter="true"
+                                                   EmptyText='<%= L"请输入4位以上的密码" %>'
+                                                   style='background:;
+                                                          textcolor: #FFFFFF;
+                                                          height: 30px;
+                                                          width: 200px;
+                                                          margin-top: 10px;
+                                                          font-size: 12px;'
+                                                   name="register_account_password_show"
+                                                   visible="false" />
+                                            <input type="text"
+                                                   onchange="update_register_account_button_status"
+                                                   PasswordChar="*"
+                                                   SkipAutoBadWordFilter="true"
+                                                   EmptyText='<%= L"请输入4位以上的密码" %>'
+                                                   style='background:;
+                                                          textcolor: #FFFFFF;
+                                                          height: 30px;
+                                                          width: 200px;
+                                                          margin-top: 10px;
+                                                          font-size: 12px;
+                                                          margin-left: -200px;'
+                                                   name="register_account_password_hide"
+                                                   visible="true" />
+                                            <input type="hidden"
+                                                   name="register_account_password"
+                                                   value="" />
+                                        </div>
+                                        <input name="checkbox_password"
+                                            type="checkbox"
+                                            checked="false"
+                                            iconsize="20"
+                                            style="position: relative;margin-left: -30px;margin-top: 10px;"
+                                            CheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#272 52 20 20"
+                                            UncheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#297 52 20 20"
+                                            onclick="set_show_password"/>
+                                    </div>
+                                </div>
+                                <pe:container name="agree_field_error" visible="false" style="display:none;background:">
+                                    <!-- error message -->
+                                    <div>
+                                        <label style="font-size: 12px;base-font-size: 12px;color: #EB2222;margin-left: 62px;" name="agree_field_error_msg" />
+                                    </div>
+                                </pe:container>
+                                <div style="width: 260px;margin-top: 0px;margin-bottom: 5px;margin-left: -5px;">
+                                    <input name="agree"
+                                           type="checkbox"
+                                           checked="true"
+                                           iconsize="12"
+                                           CheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#275 79 12 12"
+                                           UncheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#295 79 12 12"
+                                           style="float:left;margin-top:3px;min-width:90px;"
+                                           onclick="set_register_agree" />
+                                    <div style="float:left; color: white;base-font-size: 11px;font-size: 11px;margin-left: 4px;">
+                                        <div style="float:left;width: 2px;"></div>
+                                        <%= L"我同意" %>
+                                        <div style="float:left;color: #EDB853" onclick="user_agreement()"><%= L"《用户许可协议》" %></div>
+                                        <%= L'与' %>
+                                        <div style="float:left;color: #EDB853" onclick="user_privacy()"><%= L"《用户隐私协议》" %></div>
+                                    </div>
                                 </div>
                                 <div>
-                                    <input type='button'
-                                           name='phone_register_button'
-                                           class='main_login_gray_button'
-                                           style='margin-top: 130px'
-                                           onclick='phone_register()'
+                                    <input type="button"
+                                           name='account_register_button'
+                                           class="main_login_blue_button"
+                                           style="margin-top: 28px;"
+                                           onclick="account_register()"
                                            value='<%= L"注册"%>' />
                                 </div>
                             </pe:container>
+                            <!-- phone number register -->
+                            <pe:container name='phone_register_mode' visible='false' style='position: relative;width: 240px;height: 240px;background:;margin-top: -260px;'>
+                                <pe:container name='phone_register_mode_step_1' visible='true' style='position: relative;background:;'>
+                                    <div style="color: #FFFFFF;">
+                                        <pe:container name="phone_field_error" visible="false" style="background:;">
+                                            <!-- error message -->
+                                            <div>
+                                                <label style="font-size: 12px;base-font-size: 12px;color: #EB2222;" name="phone_field_error_msg" />
+                                            </div>
+                                        </pe:container>
+                                        <div style='width: 240px;height: 131.25px;padding-left: 10px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#9 96 256 140)'>
+                                            <div>
+                                                <input type="text"
+                                                       EmptyText='<%= L"请输入手机号" %>'
+                                                       style='background:;textcolor: #FFFFFF;height: 30px;width: 200px;margin-top: 12px;font-size: 12px;'
+                                                       onchange='update_register_phone_next_button_status'
+                                                       onfocusin='set_phone_register_show_field'
+                                                       name="phonenumber" />
+                                            </div>
+                                            <div>
+                                                <input type="text"
+                                                    onchange='update_register_phone_next_button_status'
+                                                    EmptyText='<%= L"请输入验证码" %>'
+                                                    style='background:;textcolor: #FFFFFF;height: 30px;width: 120px;margin-top: 12px;font-size: 12px;'
+                                                    onfocusin='set_phone_register_show_field'
+                                                    name="phonecaptcha" />
+                                                <input
+                                                    type="button"
+                                                    name="get_phone_captcha"
+                                                    style="margin-top: 7px;
+                                                        margin-left:5px;
+                                                        color: #3E9CE5;
+                                                        font-size: 12px;
+                                                        base-font-size: 12px;
+                                                        width: 90px;
+                                                        height:30px;
+                                                        background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#331 70 90 22:5 5 5 5)"
+                                                    onclick="get_phone_captcha()"
+                                                    disabled="disabled"
+                                                    value='<%= L"获取验证码"%>'
+                                                />
+                                            </div>
+                                            <div>
+                                                <div style="float: left;width: 200px;">
+                                                    <input type="text"
+                                                        onchange='update_register_phone_next_button_status'
+                                                        EmptyText='<%= L"请输入4位以上的密码" %>'
+                                                        SkipAutoBadWordFilter="true"
+                                                        style='background:;textcolor: #FFFFFF;height: 30px;width: 200px;margin-top: 12px;font-size: 12px;'
+                                                        name="phonepassword_show"
+                                                        onfocusin='set_phone_register_show_field'
+                                                        visible="false" />
+                                                    <input type="text"
+                                                        onchange='update_register_phone_next_button_status'
+                                                        PasswordChar="*"
+                                                        SkipAutoBadWordFilter="true"
+                                                        EmptyText='<%= L"请输入4位以上的密码" %>'
+                                                        style='background:;textcolor: #FFFFFF;height: 30px;width: 200px;margin-top: 12px;font-size: 12px;margin-left: -200px;'
+                                                        name="phonepassword_hide"
+                                                        onfocusin='set_phone_register_show_field'
+                                                        visible="true" />
+                                                    <input type="hidden" name="phonepassword" value="" />
+                                                </div>
+                                                <input type="checkbox"
+                                                       checked="false"
+                                                       iconsize="20"
+                                                       CheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#272 52 20 20"
+                                                       UncheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#297 52 20 20"
+                                                       style="position: relative;margin-left: -5px;margin-top: 12px;"
+                                                       onclick="set_show_password1"/>
+                                            </div>
+                                        </div>
+                                        <pe:container name="phone_agree_field_error" visible="false" style="background:">
+                                            <!-- error message -->
+                                            <div>
+                                                <label style="font-size: 12px;base-font-size: 12px;color: #EB2222;margin-left: 62px;" name="phone_agree_field_error_msg" />
+                                            </div>
+                                        </pe:container>
+                                        <div style="width: 260px;margin-top: 0px;margin-bottom: 5px;margin-left: -5px;">
+                                            <input type="checkbox"
+                                                iconsize="12"
+                                                CheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#275 79 12 12"
+                                                UncheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#295 79 12 12"
+                                                style="float:left;margin-top:3px;min-width:90px;"
+                                                name="phone_agree"
+                                                onclick="set_phone_agree"
+                                                checked="checked"/>
+                                            <div style="float:left; color: white;base-font-size: 12px;font-size: 12px;margin-left: 4px;">
+                                                <div style="float:left;width: 2px;"></div>
+                                                <%= L"我同意" %>
+                                                <div style="float:left;color: #EDB853" onclick="user_agreement()"><%= L"《用户许可协议》" %></div>
+                                                <%= L'与' %>
+                                                <div style="float:left;color: #EDB853" onclick="user_privacy()"><%= L"《用户隐私协议》" %></div>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <input type='button'
+                                                   name='phone_register_next_button'
+                                                   class='main_login_gray_button'
+                                                   style='margin-top: 10px'
+                                                   onclick='phone_register_next()'
+                                                   value='<%= L"下一步"%>' />
+                                        </div>
+                                    </div>
+                                </pe:container>
+                                <pe:container name='phone_register_mode_step_2' visible='false' style="position: relative;background:;">
+                                    <pe:container name="phone_account_field_error" visible="false" style="background:;margin-top: 5px;">
+                                        <!-- error message -->
+                                        <div>
+                                            <label style="font-size: 12px;base-font-size: 12px;color: #EB2222;" name="phone_account_field_error_msg" />
+                                        </div>
+                                    </pe:container>
+                                    <div style="width: 240px;
+                                                height: 46.87px;
+                                                padding-left: 15px;
+                                                padding-top: 12px;
+                                                background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#9 951 256 50);">
+                                        <input type='text'
+                                            name='phone_register_account'
+                                            onchange='update_register_phone_button_status'
+                                            EmptyText='<%= L"为自己取一个个性账号名吧" %>'
+                                            style='width: 210px;
+                                                   height: 30px;
+                                                   textcolor: #FFFFFF;
+                                                   base-font-size: 12px;
+                                                   font-size: 12px;
+                                                   background:; ' />
+                                    </div>
+                                    <div>
+                                        <input type='button'
+                                               name='phone_register_button'
+                                               class='main_login_gray_button'
+                                               style='margin-top: 130px'
+                                               onclick='phone_register()'
+                                               value='<%= L"注册"%>' />
+                                    </div>
+                                </pe:container>
+                            </pe:container>
                         </pe:container>
-                    </pe:container>
-                    <pe:container name='register_finish' visible='false' style='position: relative;width: 240px;height: 260px;margin-top: -260px;background:;'>
-                        <div>
-                            <div style="margin-top: 10px;width: 240px;height: 25.26px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#287 269 247 26)"></div>
-                            <div style="margin-top: 10px;width: 240px;height: 24.56px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#470 891 254 26)"></div>
-                            <div style="margin-top: 25px;width: 240px;height: 86.25px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#9 242 256 92)">
-                                <div style="margin-left: 65px;margin-top: 11px;">
-                                    <input type='text'
-                                           name='account_result'
-                                           style='width: 160px;
-                                                  height: 28px;
-                                                  font-weight: bolder;
-                                                  base-font-size: 16px;
-                                                  font-size: 16px;
-                                                  text-singleline: true;
-                                                  background:;' value='' />
+                        <pe:container name='register_finish'
+                                      visible='false'
+                                      style='position: relative;
+                                             width: 240px;
+                                             height: 260px;
+                                             margin-top: -260px;
+                                             background:;'>
+                            <div>
+                                <div style="margin-top: 10px;width: 240px;height: 25.26px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#287 269 247 26)"></div>
+                                <div style="margin-top: 10px;width: 240px;height: 24.56px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#470 891 254 26)"></div>
+                                <div style="margin-top: 25px;width: 240px;height: 86.25px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#9 242 256 92)">
+                                    <div style="margin-left: 65px;margin-top: 11px;">
+                                        <input type='text'
+                                               name='account_result'
+                                               style='width: 160px;
+                                                      height: 28px;
+                                                      font-weight: bolder;
+                                                      base-font-size: 16px;
+                                                      font-size: 16px;
+                                                      text-singleline: true;
+                                                      background:;' value='' />
+                                    </div>
+                                    <div style="margin-left: 65px;margin-top: 12px;">
+                                        <input type='text'
+                                               name='password_result'
+                                               style='width: 160px;
+                                                      height: 28px;
+                                                      font-weight: bolder;
+                                                      base-font-size: 16px;
+                                                      font-size: 16px;
+                                                      text-singleline: true;
+                                                      background:;' value='' />
+                                    </div>
                                 </div>
-                                <div style="margin-left: 65px;margin-top: 12px;">
-                                    <input type='text'
-                                           name='password_result'
-                                           style='width: 160px;
-                                                  height: 28px;
-                                                  font-weight: bolder;
-                                                  base-font-size: 16px;
-                                                  font-size: 16px;
-                                                  text-singleline: true;
-                                                  background:;' value='' />
+                                <div style="margin-top: 12px;">
+                                    <div style="margin-left: 8px;color:#FFFFFF">回家后可登录paracraft.cn安装帕拉卡</div>
+                                    <input type="button"
+                                           class="main_login_green_button"
+                                           style="margin-top: 10px"
+                                           onclick="finish()"
+                                           value='<%= L"已完成"%>' />
                                 </div>
                             </div>
-                            <div style="margin-top: 12px;">
-                                <div style="margin-left: 8px;color:#FFFFFF">回家后可登录paracraft.cn安装帕拉卡</div>
-                                <input type="button"
-                                       class="main_login_green_button"
-                                       style="margin-top: 10px"
-                                       onclick="finish()"
-                                       value='<%= L"已完成"%>' />
-                            </div>
+                        </pe:container>
+                    </div>
+                    <div width='50%'
+                         style='float: left;
+                                padding-left: 30px;'>
+                        <div style='width: 208px;
+                                    height: 262px;
+                                    padding: 12px;
+                                    font-size: 12px;
+                                    base-font-size: 12px;
+                                    color: #999999;
+                                    background: url(Texture/Aries/Creator/paracraft/jianjiediban_46x51_32bits.png#0 0 46 51: 10 10 10 10);'>
+                            <div style='width: 54px;
+                                        height: 21px;
+                                        margin-bottom: 5px;
+                                        background: url(Texture/Aries/Creator/paracraft/tishi_54x21_32bits.png#0 0 54 21);'></div>
+                            <div><span style='color: #99a1b4'>1. </span><%= L'账号必须由字母开头' %></div>
+                            <div><span style='color: #99a1b4'>2. </span><%= L'账号可以由字母、数字组成，不可添加特殊符号、空格' %></div>
+                            <div><span style='color: #99a1b4'>3. </span><%= L'账号长度要大于4位' %></div>
+                            <div align='center'
+                                 style='width: 190px;
+                                        height: 9px;
+                                        margin-top: 2.5px;
+                                        margin-bottom: 2.5px;
+                                        background: url(Texture/Aries/Creator/paracraft/fenggexian_190x9_32bits.png#0 0 190 9);'></div>
+                            <div><span style='color: #99a1b4'>1. </span><%= L'密码长度超过4位' %></div>
+                            <div><span style='color: #99a1b4'>2. </span><%= L'密码可以由字母、数字、符号组成' %></div>
+                            <div><span style='color: #99a1b4'>3. </span><span style='color: #f2b763'><%= L'密码不与用户名重复' %></span></div>
+                            <div><span style='color: #99a1b4'>4. </span><%= L'不可使用空格键' %></div>
+                            <div><span style='color: #99a1b4'>5. </span><%= L'修改密码两次密码要一致' %></div>
                         </div>
-                    </pe:container>
+                    </div>
                 </div>
             </pe:container>
         </pe:mcml>
