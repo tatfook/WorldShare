@@ -21,7 +21,7 @@ local ForgetPassword = NPL.export()
 function ForgetPassword:ShowPage(isKick)
     self.isKick = isKick
 
-    local params = 
+    local params =
         Mod.WorldShare.Utils.ShowWindow(
             0,
             0,
@@ -30,7 +30,8 @@ function ForgetPassword:ShowPage(isKick)
             0,
             0,
             '_fi',
-            false
+            false,
+            6
         )
 end
 

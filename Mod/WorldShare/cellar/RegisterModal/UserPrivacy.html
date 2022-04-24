@@ -24,14 +24,18 @@
                     }
                 }
             </style>
-            <aries:window mode="thin" width="400" style="float:left;" title_height="40" close_height="25" title='<%=L"用户隐私协议" %>' onclose="close()">
+            <kp:window mode='lite'
+                       width='400'
+                       title='<%=L"用户隐私协议" %>'
+                       onclose='close()'>
+                <div style='height: 40px;'></div>
                 <pe:treeview name="user_agreement" class="user_agreement" style="background:;" VerticalScrollBarOffsetX="10" VerticalScrollBarStep=“20”>
-                    <div style="color: #ffffff">
+                    <div style="color: #000000">
                         <div style="height: 15px;width: 15px;"></div>
                         <div width='100%' style='text-align: center'>Paracraft用户隐私协议</div>
                         欢迎您使用paracraft。为保证您的权益，便于更好地使用paracraft，请您务必在使用前认真阅读本协议，若您阅读并接受本协议，使用paracraft提供的产品和服务，即视为您受本协议的约束，若您不同意本协议，请勿使用本产品和服务。<br/>
                         一、服务内容<br/>
-                        paracraft 是一个综合型少儿编程软件，用户可通过该软件进行编程及动画的学习和制作。<br/>
+                        paracraft 是一个综合型少儿编程软件，用户可通过该软件进行编程及动画的学习和制作。<br/>
                         二、服务的提供、修改及终止<br/>
                         1、您保证在您同意接受本协议并注册成为paracraft用户时，您已经年满6周岁。<br/>
                         2、您有权选择不接受本App提供的各类服务。<br/>
@@ -74,7 +78,7 @@
                         </div>
                     </div>
                 </pe:treeview>
-            </aries:window>
+            </kp:window>
         </pe:mcml>
     </body>
 </html>

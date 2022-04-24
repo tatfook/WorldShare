@@ -1,7 +1,7 @@
 <html>
     <body>
         <pe:mcml>
-            <script type="text/npl" refresh="false">
+            <script type='text/npl'>
                 <![CDATA[
                     page = document:GetPageCtrl()
                 
@@ -24,9 +24,17 @@
                     }
                 }
             </style>
-            <aries:window mode="thin" width="400" style="float:left;" title_height="40" close_height="25" title='<%=L"用户许可协议" %>' onclose="close()">
-                <pe:treeview name="user_agreement" class="user_agreement" style="background:;" VerticalScrollBarOffsetX="10" VerticalScrollBarStep=“20”>
-                    <div style="color: #ffffff">
+            <kp:window mode='lite'
+                       width='400'
+                       title='<%=L"用户许可协议" %>'
+                       onclose='close()'>
+                <div style='height: 40px;'></div>
+                <pe:treeview name='user_agreement'
+                             class='user_agreement'
+                             style='background:;'
+                             VerticalScrollBarOffsetX='10'
+                             VerticalScrollBarStep=“20”>
+                    <div style="color: #000000">
                         <div style="height: 15px;width: 15px;"></div>
                         1.特别提示<br />
                         1.1 帕拉卡和大富网络同意按照本协议的规定及其不时发布的操作规则提供Paracraft产品网络服务，为获得Paracraft网络服务，服务使用人（以下称“用户”）应当同意本协议的全部条款并按照页面上的提示完成全部的注册程序。用户在进行注册程序过程中点击“同意”按钮即表示用户完全接受本协议项下的全部条款。<br />
@@ -96,7 +104,7 @@
                         </div>
                     </div>
                 </pe:treeview>
-            </aries:window>
+            </kp:window>
         </pe:mcml>
     </body>
 </html>

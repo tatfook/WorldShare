@@ -2,7 +2,7 @@
 Title: Register Modal
 Author(s): big
 CreateDate: 2019.09.20
-ModifyDate: 2021.09.10
+ModifyDate: 2022.04.24
 City: Foshan
 Desc: 
 use the lib:
@@ -24,6 +24,7 @@ local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkServ
 
 -- bottles
 local Certificate = NPL.load('(gl)Mod/WorldShare/cellar/Certificate/Certificate.lua')
+local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
 
 local RegisterModal = NPL.export()
 
@@ -36,44 +37,49 @@ RegisterModal.phonecaptcha = ''
 RegisterModal.bindphone = nil
 
 function RegisterModal:ShowPage(callback, zorder)
-    local LoginModalPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.LoginModal')
-
-    if LoginModalPage then
-        LoginModalPage:CloseWindow()
-    end
-
-    self.callback = callback
-    self.m_mode = 'account'
-    self.account = ''
-    self.password = ''
-    self.phonenumber = ''
-    self.phonepassword = ''
-    self.phonecaptcha = ''
-    self.bindphone = nil
-
-    Mod.WorldShare.Utils.ShowWindow(
-        320,
-        360,
-        'Mod/WorldShare/cellar/RegisterModal/Theme/RegisterModal.html',
-        'Mod.WorldShare.RegisterModal',
-        nil,
-        nil,
-        nil,
-        nil,
-        zorder
-    )
+    MainLogin:ShowRegister(true, callback, zorder or 5)
 end
 
 function RegisterModal:ShowUserAgreementPage()
-    Mod.WorldShare.Utils.ShowWindow(400, 580, 'Mod/WorldShare/cellar/RegisterModal/UserAgreement.html', 'Mod.WorldShare.RegisterModal.UserAgreement')
+    Mod.WorldShare.Utils.ShowWindow(
+        400,
+        580,
+        'Mod/WorldShare/cellar/RegisterModal/UserAgreement.html',
+        'Mod.WorldShare.RegisterModal.UserAgreement',
+        nil,
+        nil,
+        nil,
+        nil,
+        5
+    )
 end
 
 function RegisterModal:ShowUserPrivacyPage()
-    Mod.WorldShare.Utils.ShowWindow(400, 580, 'Mod/WorldShare/cellar/RegisterModal/UserPrivacy.html', 'Mod.WorldShare.RegisterModal.UserPrivacy')
+    Mod.WorldShare.Utils.ShowWindow(
+        400,
+        580,
+        'Mod/WorldShare/cellar/RegisterModal/UserPrivacy.html',
+        'Mod.WorldShare.RegisterModal.UserPrivacy',
+        nil,
+        nil,
+        nil,
+        nil,
+        5
+    )
 end
 
 function RegisterModal:ShowBindingPage()
-    Mod.WorldShare.Utils.ShowWindow(360, 480, 'Mod/WorldShare/cellar/RegisterModal/Binding.html', 'Mod.WorldShare.RegisterModal.Binding')
+    Mod.WorldShare.Utils.ShowWindow(
+        360,
+        480,
+        'Mod/WorldShare/cellar/RegisterModal/Binding.html',
+        'Mod.WorldShare.RegisterModal.Binding',
+        nil,
+        nil,
+        nil,
+        nil,
+        5
+    )
 end
 
 function RegisterModal:ShowClassificationPage(callback, forceCallback)

@@ -247,11 +247,6 @@
                     end
 
                     function register()
-                        if System.options.isForceOffline then
-                            --_guihelper.MessageBox(L'只有最新版才能登录， 否则只能用离线版，请退出程序后更新。')
-                            --return
-                        end
-
                         LoginModal:Close('REGISTER')
                         RegisterModal:ShowPage(function()
                             page:SetValue('account', RegisterModal.account)

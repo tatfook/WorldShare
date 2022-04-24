@@ -16,6 +16,7 @@
 
                     local page = document:GetPageCtrl()
 
+                    local is_modal = page:GetRequestParam('is_modal') == 'true' and true or false
                     local be_show_password = false
                     local account_agree = true
                     local phone_agree = true
@@ -23,6 +24,10 @@
                     local phone_show_field = ''
                     local b_next_button_right = true
                     local phone_account_exist = false
+
+                    function get_is_modal()
+                        return is_modal
+                    end
 
                     function close()
                         local MainLoginRegisterPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Register')
@@ -34,7 +39,7 @@
 
                     function back()
                         close()
-                        MainLogin:ShowLogin1()
+                        MainLogin:ShowLogin()
                     end
 
                     function get_register_mode()
@@ -277,6 +282,10 @@
                             page:SetValue('account_result', username)
                             page:SetValue('password_result', phonepassword)
                             set_finish()
+
+                            if type(MainLogin.registerCallback) == 'function' then
+                                MainLogin.registerCallback()
+                            end
                         end
 
                         MainLogin:RegisterWithPhone()
@@ -296,7 +305,7 @@
                         close()
 
                         if true then
-                            MainLogin:ShowLogin1()
+                            MainLogin:ShowLogin()
                             return
                         end
 
@@ -553,7 +562,11 @@
                         MainLogin:Exit()
                     end
 
-
+                    function get_container_style()
+                        if get_is_modal() then
+                            return 'margin-top: -200px;'
+                        end
+                    end
                 ]]>
             </script>
             <style type="text/mcss" src='Mod/WorldShare/cellar/Theme/Mcss/MainLoginMcss.mcss'>
@@ -575,45 +588,58 @@
                     },
                 }
             </style>
-            <pe:container
-                alignment='_lt'
-                zorder='-1'
-                width='100px'
-                height='100px'
-                style='position: relative; background:;'>
-                <div align='left'
-                    style='width: 55px;
-                        margin-left: 20px;
-                        margin-top: 20px;'>
-                    <input type='button'
+            <pe:if condition='<%= not get_is_modal() %>'>
+                <pe:container
+                    alignment='_lt'
+                    zorder='-1'
+                    width='100px'
+                    height='100px'
+                    style='position: relative; background:;'>
+                    <div align='left'
                         style='width: 55px;
-                            height: 59px;
-                            background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#533 8 55 59)'
-                            onclick="parent"/>
-                </div>
-            </pe:container>
-            <pe:container
-                alignment='_rt'
-                zorder='-1'
-                width='100px'
-                height='100px'
-                style='position: relative; background:;'>
-                <div style='width: 80px;
-                        margin-right: 18px;
-                        margin-top: 20px;'>
-                    <input type='button'
-                        style='width: 80px;height: 44px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#281 885 81 44)'
-                        onclick='on_click_exit' />
-                </div>
-            </pe:container>
-            <pe:container alignment='_ct' ClickThrough='true' class='main_login_container_bg container_size'>
-                <div style='padding-top: 12px;padding-left: 18px;'>
+                            margin-left: 20px;
+                            margin-top: 20px;'>
+                        <input type='button'
+                            style='width: 55px;
+                                height: 59px;
+                                background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#533 8 55 59)'
+                                onclick="parent"/>
+                    </div>
+                </pe:container>
+                <pe:container
+                    alignment='_rt'
+                    zorder='-1'
+                    width='100px'
+                    height='100px'
+                    style='position: relative; background:;'>
+                    <div style='width: 80px;
+                            margin-right: 18px;
+                            margin-top: 20px;'>
+                        <input type='button'
+                            style='width: 80px;height: 44px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#281 885 81 44)'
+                            onclick='on_click_exit' />
+                    </div>
+                </pe:container>
+            </pe:if>
+            <pe:container alignment='_ct'
+                          ClickThrough='true'
+                          style='<%= get_container_style() %>'
+                          class='main_login_container_bg container_size'>
+                <div style='padding-top: 12px;
+                            padding-left: 18px;'>
                     <div class='main_login_title_bg' style='float: left;width: 172px;height: 49px;'>
                         <img style='margin-top: 13px;margin-left: 30px;width: 53px;height: 24px;' src='Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#12 421 53 24' />
                     </div>
-                    <div style='float: left;margin-left: 70px;margin-top: 10px;'>
-                        <input type='button' class='main_login_back_button' onclick="back"/>
-                    </div>
+                    <pe:if condition='<%= get_is_modal() %>'>
+                        <div style='float: left;margin-left: 70px;margin-top: 10px;'>
+                            <input type='button' class='main_login_close_button' onclick="back"/>
+                        </div>
+                    </pe:if>
+                    <pe:if condition='<%= not get_is_modal() %>'>
+                        <div style='float: left;margin-left: 70px;margin-top: 10px;'>
+                            <input type='button' class='main_login_back_button' onclick="back"/>
+                        </div>
+                    </pe:if>
                 </div>
                 <div class='main_area'>
                     <!-- register finish -->

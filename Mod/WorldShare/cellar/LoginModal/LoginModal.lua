@@ -2,7 +2,7 @@
 Title: Login Modal
 Author(s): big
 CreateDate: 2018.11.05
-ModifyDate: 2021.09.10
+ModifyDate: 2022.04.24
 City: Foshan
 Desc: 
 use the lib:
@@ -13,19 +13,20 @@ LoginModal:CheckSignedIn('desc', function(bSucceed) end)
 ------------------------------------------------------------
 ]]
 
-local Translation = commonlib.gettable('MyCompany.Aries.Game.Common.Translation')
-
 -- helper
 local Validated = NPL.load('(gl)Mod/WorldShare/helper/Validated.lua')
+
 -- service
 local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
 local KeepworkServiceSchoolAndOrg = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/SchoolAndOrg.lua")
+
 -- utils
 local Utils = NPL.load('(gl)Mod/WorldShare/helper/Utils.lua')
 
--- UI
+-- bottles
 local RegisterModal = NPL.load('(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua')
+local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
 
 -- database
 local SessionsData = NPL.load('(gl)Mod/WorldShare/database/SessionsData.lua')
@@ -63,75 +64,22 @@ function LoginModal:CheckSignedIn(desc, callback)
 end
 
 function LoginModal:ShowPage()
-    local RegisterModalPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.RegisterModal')
-
-    if RegisterModalPage then
-        RegisterModalPage:CloseWindow()
-    end
-
-    if KeepworkServiceSession:GetCurrentUserToken() then
-        return false
-    end
-
-    local params = Mod.WorldShare.Utils.ShowWindow(
-        0,
-        0,
-        'Mod/WorldShare/cellar/LoginModal/Theme/LoginModal.html',
-        'Mod.WorldShare.LoginModal',
-        0,
-        0,
-        '_fi',
-        false,
-        12
-    )
-
-    local LoginModalPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.LoginModal')
-
-    if not LoginModalPage then
-        return false
-    end
-
-    local PWDInfo = KeepworkServiceSession:LoadSigninInfo()
-
-    if PWDInfo then
-        LoginModalPage:SetUIValue('account', PWDInfo.account or '')
-        self.account = PWDInfo.account
-    end
-end
-
-function LoginModal:ClosePage()
-    local LoginModalPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.LoginModal')
-
-    if(not LoginModalPage) then
-        return false
-    end
-
-    self.account = nil
-    Mod.WorldShare.Store:Remove('user/loginText')
-
-    LoginModalPage:CloseWindow()
-end
-
-function LoginModal:Refresh(times)
-    local LoginModalPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.LoginModal')
-
-    if LoginModalPage then
-        LoginModalPage:Refresh(times or 0.01)
-    end
+    MainLogin:ShowLogin(true, 5)
 end
 
 function LoginModal:Close(params)
     local AfterLogined = Mod.WorldShare.Store:Get('user/AfterLogined')
-    local callback
 
-    if type(AfterLogined) == 'function' then
-        callback = AfterLogined(params or false)
+    if AfterLogined and type(AfterLogined) == 'function' then
+        AfterLogined(params or false)
         Mod.WorldShare.Store:Remove('user/AfterLogined')
     end
 
-    self:ClosePage()
+    local MainLoginLoginPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Login')
 
-    return callback
+    if MainLoginLoginPage then
+        MainLoginLoginPage:CloseWindow()
+    end
 end
 
 function LoginModal:LoginAction()

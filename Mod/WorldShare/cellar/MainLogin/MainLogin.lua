@@ -2,7 +2,7 @@
 Title: Main Login
 Author: big  
 CreateDate: 2019.12.25
-ModifyDate: 2022.1.5
+ModifyDate: 2022.04.24
 place: Foshan
 Desc: 
 use the lib:
@@ -24,8 +24,7 @@ local KeepworkServiceSchoolAndOrg = NPL.load("(gl)Mod/WorldShare/service/Keepwor
 -- bottles
 local Create = NPL.load('(gl)Mod/WorldShare/cellar/Create/Create.lua')
 local RedSummerCampMainPage = NPL.load('(gl)script/apps/Aries/Creator/Game/Tasks/RedSummerCamp/RedSummerCampMainPage.lua')
-
-local OfflineAccountManager = commonlib.gettable('Mod.WorldShare.cellar.OfflineAccountManager')
+local OfflineAccountManager = NPL.load('(gl)Mod/WorldShare/cellar/OfflineAccount/OfflineAccountManager.lua')
 
 -- helper
 local Validated = NPL.load('(gl)Mod/WorldShare/helper/Validated.lua')
@@ -115,34 +114,6 @@ function MainLogin:ShowAndroid()
     self:ShowAndroidLogin()
 end
 
-function MainLogin:Show1()
-    Mod.WorldShare.Utils.ShowWindow({
-        url = 'Mod/WorldShare/cellar/MainLogin/Theme/MainLogin.html', 
-        name = 'MainLogin', 
-        isShowTitleBar = false,
-        DestroyOnClose = true,
-        style = CommonCtrl.WindowFrame.ContainerStyle,
-        zorder = -1,
-        allowDrag = false,
-        directPosition = true,
-        align = '_fi',
-        x = 0,
-        y = 0,
-        width = 0,
-        height = 0,
-        cancelShowAnimation = true,
-    })
-
-    local MainLoginPage = Mod.WorldShare.Store:Get('page/MainLogin')
-
-    if not MainLoginPage then
-        return false
-    end
-
-    self:ShowExtra()
-    self:ShowLogin()
-end
-
 function MainLogin:Show2()
     Mod.WorldShare.Utils.ShowWindow({
         url = 'Mod/WorldShare/cellar/MainLogin/Theme/MainLogin.html', 
@@ -199,69 +170,32 @@ function MainLogin:Show3()
 
     -- tricky: Delay show login because in this step some UI library may be not loaded.
     Mod.WorldShare.Utils.SetTimeOut(function()
-        self:ShowLogin1()
+        self:ShowLogin()
     end, 0)
 end
 
-function MainLogin:ShowLogin()
-    Mod.WorldShare.Utils.ShowWindow(
-        0,
-        0,
-        'Mod/WorldShare/cellar/MainLogin/Theme/MainLoginLogin.html',
-        'Mod.WorldShare.cellar.MainLogin.Login',
-        0,
-        0,
-        '_fi',
-        false,
-        -1
-    )
-
+function MainLogin:ShowLogin(isModal, zorder)
     local MainLoginLoginPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Login')
 
-    if not MainLoginLoginPage then
-        return
-    end
+    if MainLoginLoginPage then
+        MainLoginLoginPage:CloseWindow()
+    end 
 
-    local PWDInfo = KeepworkServiceSession:LoadSigninInfo()
-
-    if PWDInfo then
-        MainLoginLoginPage:SetUIValue('account', PWDInfo.account or '')
-
-        if PWDInfo.rememberMe and PWDInfo.password then
-            MainLoginLoginPage:SetUIValue('password_show', PWDInfo.password or '')
-            MainLoginLoginPage:SetUIValue('password_hide', PWDInfo.password or '')
-            MainLoginLoginPage:SetUIValue('password', PWDInfo.account or '')
-            MainLoginLoginPage:SetUIValue('remember_username', PWDInfo.account or '')
-            MainLoginLoginPage:SetUIValue('remember_password_name', true)
-            MainLoginLoginPage:FindControl('remember_mode').visible = true
-            MainLoginLoginPage:FindControl('phone_mode').visible = false
-            MainLoginLoginPage:FindControl('account_mode').visible = false
-            MainLoginLoginPage:FindControl('title_login').visible = false
-            MainLoginLoginPage:FindControl('title_username').visible = true
-            MainLoginLoginPage:FindControl('remember_login_button'):SetDefault(true)
-            MainLoginLoginPage:SetUIBackground('login_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 98 258 44')
-        else
-            MainLoginLoginPage:FindControl('login_button'):SetDefault(true)
-        end
-    end
-end
-
-function MainLogin:ShowLogin1()
     Mod.WorldShare.Utils.ShowWindow(
         0,
         0,
-        'Mod/WorldShare/cellar/MainLogin/Theme/MainLoginLogin1.html',
+        'Mod/WorldShare/cellar/MainLogin/Theme/MainLoginLogin.html?is_modal=' .. (isModal and 'true' or 'false'),
         'Mod.WorldShare.cellar.MainLogin.Login',
         0,
         0,
         '_fi',
         false,
-        -1,
+        zorder or -1,
         nil,
         false
     )
 
-    local MainLoginLoginPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Login')
+    MainLoginLoginPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Login')
 
     if not MainLoginLoginPage then
         return
@@ -471,17 +405,19 @@ function MainLogin:ShowRegisterNew(mode)
     )
 end
 
-function MainLogin:ShowRegister()
+function MainLogin:ShowRegister(isModal, callback, zorder)
+    self.registerCallback = callback
+
     Mod.WorldShare.Utils.ShowWindow(
         0,
         0,
-        'Mod/WorldShare/cellar/MainLogin/Theme/MainLoginRegister.html',
+        'Mod/WorldShare/cellar/MainLogin/Theme/MainLoginRegister.html?is_modal=' .. (isModal and 'true' or 'false'),
         'Mod.WorldShare.cellar.MainLogin.Register',
         0,
         0,
         '_fi',
         false,
-        -1
+        zorder or -1
     )
 end
 
