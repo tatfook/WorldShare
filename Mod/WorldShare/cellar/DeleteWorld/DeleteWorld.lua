@@ -54,7 +54,7 @@ function DeleteWorld:DeleteWorld(callback)
         return
     end
 
-    if isEnterWorld then
+    if isEnterWorld and not Mod.WorldShare.Store:Get('world/isShowExitPage') then
         if currentWorld.foldername == currentEnterWorld.foldername and
            currentWorld.shared == currentEnterWorld.shared and
            currentWorld.is_zip == currentEnterWorld.is_zip then
