@@ -37,7 +37,6 @@ end
 
 function MenuCommand:Call(cmdName, cmdText, cmdParams)
     local name, cmdText = CmdParser.ParseString(cmdText);
-
     if name and type(name) == 'string' then
         local action = "click.menu." .. name
 
@@ -62,6 +61,12 @@ function MenuCommand:Call(cmdName, cmdText, cmdParams)
     elseif name == "project.apply" then
         self:Apply()
         return true
+    elseif name == "project.unfavorite" then
+        self:Favorite(true)
+        return true
+    elseif name == "project.favorite" then
+        self:Favorite(false)
+        return true
     end
 
     return false
@@ -69,6 +74,77 @@ end
 
 function MenuCommand:Share()
     ShareWorld:Init()
+end
+
+GameLogic.GetFilters():add_filter(
+    "favorite_change",
+    function (data)
+        MenuCommand:ChangeFavoriteItemState(data.showFavorite)
+    end
+)
+
+function MenuCommand:ChangeFavoriteItemState(showFavorite)
+    NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/DesktopMenu.lua");
+    local DesktopMenu = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.DesktopMenu")
+    local projectMenu = DesktopMenu.GetMenuItem("project")
+    if projectMenu then
+        for index, item in ipairs(projectMenu.children) do
+            if(item.Type ~= "Separator" ) then
+                if showFavorite and item.name == "project.unfavorite" then
+                    item.name = "project.favorite"
+                    item.text = L"收藏项目"
+                elseif not showFavorite and item.name == "project.favorite"  then
+                    item.name = "project.unfavorite"
+                    item.text = L"取消收藏"
+                end
+            end
+        end
+        DesktopMenu.RebuildMenuItem(projectMenu)
+    end
+end
+
+function MenuCommand:Favorite(isFavorited)
+    if not GameLogic.GetFilters():apply_filters('is_signed_in') then
+		GameLogic.GetFilters():apply_filters('check_signed_in', "请先登录", function(result)
+			if result == true then
+				commonlib.TimerManager.SetTimeout(function()
+
+				end, 500)
+			end
+		end)
+
+		return
+	end
+
+    NPL.load("(gl)script/apps/Aries/Creator/HttpAPI/keepwork.user.lua")
+    NPL.load("(gl)script/apps/Aries/Creator/HttpAPI/keepwork.world.lua")
+    local ProjectId = GameLogic.options:GetProjectId()
+    if ProjectId then
+        if isFavorited then
+            keepwork.world.unfavorite({objectId = ProjectId, objectType = 5}, function(err, msg, data)
+                if (err == 200) then
+                    --GameLogic.AddBBS(nil, L"项目取消收藏成功", 3000, "0 255 0")
+                    self:ChangeFavoriteItemState(true)
+                elseif (err == 500) then
+                    GameLogic.AddBBS(nil, L"该项目已被其作者删除", 3000, "0 255 0")
+                end
+            end);
+        else
+            keepwork.world.favorite({objectId = ProjectId, objectType = 5}, function(err, msg, data)
+                if (err == 200) then
+                    --GameLogic.AddBBS(nil, L"项目收藏成功", 3000, "0 255 0")
+                    self:ChangeFavoriteItemState(false)
+                elseif (err == 500) then
+                    GameLogic.AddBBS(nil, L"该项目已被其作者删除", 3000, "0 255 0")
+                else
+                    GameLogic.AddBBS(nil, L"收藏项目失败，请重试！", 3000, "0 255 0")
+                end
+            end)
+        end
+        GameLogic.GetFilters():apply_filters("user_behavior", 1, "click.home.favorited")
+    else
+        GameLogic.AddBBS(nil, L"收藏失败，请先分享该项目，再重试！", 3000, "255 0 0")
+    end
 end
 
 function MenuCommand:OpenUserOpusPage()

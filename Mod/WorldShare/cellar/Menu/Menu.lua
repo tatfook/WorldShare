@@ -1,9 +1,9 @@
 --[[
 Title: Menu
-Author: big  
+Author: big
 Date: 2020.8.4
 place: Foshan
-Desc: 
+Desc:
 use the lib:
 ------------------------------------------------------------
 local Menu = NPL.load("(gl)Mod/WorldShare/cellar/Menu/Menu.lua")
@@ -27,9 +27,13 @@ function Menu:Init(menuItems)
         end
     end
 
+    local STATES = {
+        ["FAVORITE"] = 1,
+        ["UNFAVORITE"] = 2
+    }
+    local state = STATES.FAVORITE
     local currentEnterWorld = Mod.WorldShare.Store:Get("world/currentEnterWorld") or {}
     local projectMenu = {}
-
     if currentEnterWorld and currentEnterWorld.kpProjectId and currentEnterWorld.kpProjectId ~= 0 then
         if KeepworkServiceSession:IsSignedIn() then
             local username = Mod.WorldShare.Store:Get("user/username")
@@ -39,7 +43,7 @@ function Menu:Init(menuItems)
                currentEnterWorld.user.username and
                currentEnterWorld.user.username == username then
                 projectMenu = {
-                    text = L"项目", order=3, name="project", children = 
+                    text = L"项目", order=3, name="project", children =
                     {
                         {text = Mod.WorldShare.Utils.WordsLimit(currentEnterWorld.text) or "", name = "project.name", Enable = false, onclick = nil},
                         {text = format(L"项目ID：%d", currentEnterWorld.kpProjectId or 0), name = "project.pid", Enable = false, onclick = nil},
@@ -59,7 +63,7 @@ function Menu:Init(menuItems)
                 }
             else
                 projectMenu = {
-                    text = L"项目", order=3, name="project", children = 
+                    text = L"项目", order=3, name="project", children =
                     {
                         {text = Mod.WorldShare.Utils.WordsLimit(currentEnterWorld.text) or "", name = "project.name", Enable = false, onclick = nil},
                         {text = format(L"项目ID：%d", currentEnterWorld.kpProjectId or 0), name = "project.pid", Enable = false, onclick = nil},
@@ -96,7 +100,7 @@ function Menu:Init(menuItems)
             end
         else
             projectMenu = {
-                text = L"项目", order=3, name="project", children = 
+                text = L"项目", order=3, name="project", children =
                 {
                     {text = Mod.WorldShare.Utils.WordsLimit(currentEnterWorld.text) or "", name = "project.name", Enable = false, onclick = nil},
                     {text = format(L"项目ID：%d", currentEnterWorld.kpProjectId or 0), name = "project.pid", Enable = false, onclick = nil},
@@ -111,7 +115,7 @@ function Menu:Init(menuItems)
         end
     else
         projectMenu = {
-            text = L"项目", order=3, name="project", children = 
+            text = L"项目", order=3, name="project", children =
             {
                 {text = Mod.WorldShare.Utils.WordsLimit(currentEnterWorld.text) or "", name = "project.name", Enable = false, onclick = nil},
                 {Type = "Separator"},
@@ -123,8 +127,23 @@ function Menu:Init(menuItems)
         }
     end
 
-    menuItems[#menuItems + 1] = projectMenu
-        
+    NPL.load("(gl)script/apps/Aries/Creator/HttpAPI/keepwork.user.lua")
+    NPL.load("(gl)script/apps/Aries/Creator/HttpAPI/keepwork.world.lua")
+    keepwork.world.is_favorited({objectId = currentEnterWorld.kpProjectId, objectType = 5}, function(err, msg, data)
+        if (err == 200) then
+            state = data == true and STATES.UNFAVORITE or STATES.FAVORITE
+        end
+        table.insert(projectMenu.children,{Type = "Separator"})
+        if state == STATES.FAVORITE then
+            table.insert(projectMenu.children,{text = L"收藏项目", name = "project.favorite", onclick = nil})
+        else
+            table.insert(projectMenu.children,{text = L"取消收藏", name = "project.unfavorite", onclick = nil})
+        end
+        NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/DesktopMenu.lua");
+        local DesktopMenu = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.DesktopMenu")
+        DesktopMenu.RebuildMenuItem(projectMenu)
+    end)
 
+    menuItems[#menuItems + 1] = projectMenu
     return menuItems
 end
