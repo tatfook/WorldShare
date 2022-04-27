@@ -810,6 +810,10 @@ function MainLogin:LoginAction(callback)
                 Mod.WorldShare.MsgBox:Close()
 
                 if response and response.code and response.message then
+                    if response.code == 77 then
+                        _guihelper.MessageBox(format(L'*%s(%d)', response.message, response.code))
+                    end
+
                     MainLoginPage:SetUIValue('account_field_error_msg', format(L'*%s(%d)', response.message, response.code))
                     MainLoginPage:FindControl('account_field_error').visible = true
                     MainLogin:CheckAutoRegister(account, password, callback)
