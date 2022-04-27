@@ -54,7 +54,7 @@ function KickOut:ShowKickOutPage(reason)
             0,
             '_fi',
             false,
-            1000
+            10000
         )
     end, 2000)
 end
