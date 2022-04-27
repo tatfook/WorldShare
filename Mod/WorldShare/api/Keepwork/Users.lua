@@ -29,8 +29,12 @@ local KeepworkUsersApi = NPL.export()
 -- return: object
 function KeepworkUsersApi:Login(params, success, error)
     if not params or type(params) ~= 'table' then
-        return false
+        return
     end
+
+    local versionXml = ParaXML.LuaXML_ParseFile('config/Aries/creator/paracraft_script_version.xml')
+
+    params.version = versionXml[1][1]
 
     KeepworkBaseApi:Post("/users/login", params, nil, success, error, { 503, 400 }, 8)
 end
