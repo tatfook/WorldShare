@@ -30,6 +30,7 @@ function KickOut:ShowKickOutPage(reason)
     self.isKickOutPageOpened = true
 
     NplBrowserPlugin.CloseAllBrowsers()
+    GameLogic.RunCommand("/macro stop")
 
     Mod.WorldShare.MsgBox:Show(L'您的账号已经在其他地方登录，正在登出...', nil, nil, 460, nil, 1000)
     Mod.WorldShare.Utils.SetTimeOut(function()
