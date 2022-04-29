@@ -175,6 +175,10 @@ function MainLogin:Show3()
 end
 
 function MainLogin:ShowLogin(isModal, zorder)
+    if KeepworkServiceSession:IsSignedIn() and isModal then
+        return
+    end
+
     local MainLoginLoginPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Login')
 
     if MainLoginLoginPage then
