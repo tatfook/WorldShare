@@ -10,7 +10,9 @@ local KeepworkServicePermission = NPL.load('(gl)Mod/WorldShare/service/KeepworkS
 ------------------------------------------------------------
 ]]
 
+-- api
 local KeepworkPermissionsApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/Permissions.lua')
+local KeepworkCommonApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/KeepworkCommonApi.lua")
 
 local KeepworkServicePermission = NPL.export()
 
@@ -303,4 +305,208 @@ function KeepworkServicePermission:Authentication(authName, callback)
             end
         end
     )
+end
+
+function KeepworkServicePermission:TimesFilter(timeRules)
+    local serverTime = Mod.WorldShare.Store:Get('world/currentServerTime')
+    local weekDay = Mod.WorldShare.Utils.GetWeekNum(serverTime)
+    local dateList = {'一', '二', '三', '四', '五', '六', '日'}
+
+    local function Check(timeRule)
+        local year, month, day = timeRule.startDay:match('^(%d+)%D(%d+)%D(%d+)') 
+        local startDateTimestamp = 
+            os.time(
+                {
+                    day = tonumber(day),
+                    month = tonumber(month),
+                    year = tonumber(year),
+                    hour = 0,
+                    min = 0,
+                    sec = 0
+                }
+            )
+
+        year, month, day = timeRule.endDay:match('^(%d+)%D(%d+)%D(%d+)')
+        local endDateTimestamp =
+            os.time(
+                {
+                    day = tonumber(day),
+                    month = tonumber(month),
+                    year = tonumber(year),
+                    hour = 23,
+                    min = 59,
+                    sec=59
+                }
+            )
+
+        if serverTime < startDateTimestamp then
+            return false, string.format(L'未到上课时间，请在%s之后来学习吧。', timeRule.startDay)
+        end
+
+        if serverTime > endDateTimestamp then
+            return false, L'上课时间已过'
+        end
+
+        local weeks = timeRule.weeks
+        local inWeekDay = false
+
+        local dateStr = ''
+
+        for i, v in ipairs(weeks) do
+            if v == weekDay then
+                inWeekDay = true
+            end
+
+            dateStr = dateStr .. L'周' .. dateList[v] or ''
+
+            if i ~= #weeks then
+                dateStr = dateStr .. '，'
+            end
+        end
+
+        if not inWeekDay then
+            return false, string.format(L'现在不是上课时间哦，请在上课时间（%s）内再来上课吧。', dateStr)
+        end
+
+        local startTimeStr = timeRule.startTime or '0:0'
+        local startHour, startMin = startTimeStr:match('^(%d+)%D(%d+)') 
+        startHour = tonumber(startHour)
+        startMin = tonumber(startMin)
+
+        local endTimeStr = timeRule.endTime or '23:59'
+        local endHour, endMin = endTimeStr:match('^(%d+)%D(%d+)') 
+        endHour = tonumber(endHour)
+        endMin = tonumber(endMin)
+
+        local timeStr = startTimeStr .. '-' .. endTimeStr
+
+        local todayWeehours = commonlib.timehelp.GetWeeHoursTimeStamp(serverTime)
+        local limitTimeStamp = todayWeehours + startHour * 60 * 60 + startMin * 60
+        local limitTimeEndStamp = todayWeehours + endHour * 60 * 60 + endMin * 60
+
+        if serverTime < limitTimeStamp or serverTime > limitTimeEndStamp then
+            return false, string.format(L'现在不是上课时间哦，请在上课时间（%s）内再来上课吧。', timeStr)
+        end
+
+        return true
+    end
+
+    local failedReasonList = {}
+    local bIsSuccessed = nil
+
+    for _, timeRule in ipairs(timeRules) do
+        if not timeRule.dateType and 
+           timeRule.startDate or
+           timeRule.endDate or
+           timeRule.weeks then
+            local result, reason = Check(timeRule)
+
+            if result then
+                bIsSuccessed = true
+                break
+            end
+
+            bIsSuccessed = false
+            failedReasonList[#failedReasonList + 1] = reason
+        end
+    end
+
+    if bIsSuccessed == nil or bIsSuccessed == true then
+        return true
+    else
+        return false, failedReasonList[1]
+    end
+end
+
+function KeepworkServicePermission:HolidayTimesFilter(timeRules, callback)
+    if not callback or type(callback) ~= 'function' then
+        return
+    end
+
+    local hasHoliday = false
+    local curTimeRule = nil
+
+    for _, timeRule in ipairs(timeRules) do
+        if type(timeRule.dateType) == 'number' then
+            hasHoliday = true
+            curTimeRule = timeRule
+            break
+        end
+    end
+
+    if hasHoliday then
+        KeepworkCommonApi:Holiday(
+            nil,
+            function(data, err)
+                if data and type(data) == 'table' and type(data.isHoliday) == 'boolean' then
+                    if curTimeRule.dateType == 0 then
+                        callback(true)
+                    elseif curTimeRule.dateType == 1 then
+                        local serverTime = Mod.WorldShare.Store:Get('world/currentServerTime')
+                        local startTimeStr = curTimeRule.startTime or '0:0'
+                        local endTimeStr = curTimeRule.endTime or '23:59'
+                        local timeStr = startTimeStr .. '-' .. endTimeStr
+
+                        if data.isHoliday then
+                            callback(false, string.format(L'现在不是上课时间哦，请在上课时间（上学日%s）内再来上课吧。', timeStr))
+                        else
+                            local startHour, startMin = startTimeStr:match('^(%d+)%D(%d+)')
+                            startHour = tonumber(startHour)
+                            startMin = tonumber(startMin)
+
+                            local endHour, endMin = endTimeStr:match('^(%d+)%D(%d+)')
+                            endHour = tonumber(endHour)
+                            endMin = tonumber(endMin)
+
+                            local todayWeehours = commonlib.timehelp.GetWeeHoursTimeStamp(serverTime)
+                            local limitTimeStamp = todayWeehours + startHour * 60 * 60 + startMin * 60
+                            local limitTimeEndStamp = todayWeehours + endHour * 60 * 60 + endMin * 60
+
+                            if serverTime < limitTimeStamp or serverTime > limitTimeEndStamp then
+                                callback(false, string.format(L'现在不是上课时间哦，请在上课时间（%s）内再来上课吧。', timeStr))
+                            else
+                                callback(true)
+                            end
+                        end
+                    elseif curTimeRule.dateType == 2 then
+                        local serverTime = Mod.WorldShare.Store:Get('world/currentServerTime')
+                        local startTimeStr = curTimeRule.startTime or '0:0'
+                        local endTimeStr = curTimeRule.endTime or '23:59'
+                        local timeStr = startTimeStr .. '-' .. endTimeStr
+
+                        if not data.isHoliday then
+                            callback(false, string.format(L'现在不是上课时间哦，请在上课时间（节假日%s）内再来上课吧。', timeStr))
+                        else
+                            local startHour, startMin = startTimeStr:match('^(%d+)%D(%d+)')
+                            startHour = tonumber(startHour)
+                            startMin = tonumber(startMin)
+
+                            local endHour, endMin = endTimeStr:match('^(%d+)%D(%d+)')
+                            endHour = tonumber(endHour)
+                            endMin = tonumber(endMin)
+
+                            local todayWeehours = commonlib.timehelp.GetWeeHoursTimeStamp(serverTime)
+                            local limitTimeStamp = todayWeehours + startHour * 60 * 60 + startMin * 60
+                            local limitTimeEndStamp = todayWeehours + endHour * 60 * 60 + endMin * 60
+
+                            if serverTime < limitTimeStamp or serverTime > limitTimeEndStamp then
+                                callback(false, string.format(L'现在不是上课时间哦，请在上课时间（%s）内再来上课吧。', timeStr))
+                            else
+                                callback(true)
+                            end
+                        end
+                    else
+                        callback(false, L'校验上课时间失败')
+                    end
+                else
+                    callback(false, L'校验上课时间失败')
+                end
+            end,
+            function()
+                callback(false, L'校验上课时间失败')
+            end
+        )
+    else
+        callback(true)
+    end
 end

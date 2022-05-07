@@ -32,6 +32,7 @@ local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkServ
 local LocalServiceWorld = NPL.load('(gl)Mod/WorldShare/service/LocalService/LocalServiceWorld.lua')
 local HttpRequest = NPL.load('(gl)Mod/WorldShare/service/HttpRequest.lua')
 local LocalServiceHistory = NPL.load('(gl)Mod/WorldShare/service/LocalService/LocalServiceHistory.lua')
+local KeepworkServicePermission = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Permission.lua')
 
 -- bottles
 local LoginModal = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua')
@@ -199,7 +200,7 @@ function CommonLoadWorld:CheckLoadWorldFromCmdLine(cmdLineWorld)
                                     if err == 200 then
                                         if data.timeRules and
                                            data.timeRules[1] then
-                                            local result, reason = self:TimesFilter(data.timeRules)
+                                            local result, reason = KeepworkServicePermission:TimesFilter(data.timeRules)
 
                                             if result then
                                                 System.options.cmdline_world = nil
@@ -507,100 +508,6 @@ function CommonLoadWorld:IdsFilter(id)
     end
 
     return false
-end
-
-function CommonLoadWorld:TimesFilter(timeRules)
-    local serverTime = Mod.WorldShare.Store:Get('world/currentServerTime')
-    local weekDay = Mod.WorldShare.Utils.GetWeekNum(serverTime)
-    local dateList = {'一', '二', '三', '四', '五', '六', '日'}
-
-    local function Check(timeRule)
-        local year, month, day = timeRule.startDay:match('^(%d+)%D(%d+)%D(%d+)') 
-        local startDateTimestamp = os.time(
-                                    {
-                                        day = tonumber(day),
-                                        month = tonumber(month),
-                                        year = tonumber(year),
-                                        hour = 0,
-                                        min = 0,
-                                        sec = 0
-                                    }
-                                   )
-
-        year, month, day = timeRule.endDay:match('^(%d+)%D(%d+)%D(%d+)')
-        local endDateTimestamp = os.time(
-                                    {
-                                        day = tonumber(day),
-                                        month = tonumber(month),
-                                        year = tonumber(year),
-                                        hour = 23,
-                                        min = 59,
-                                        sec=59
-                                    }
-                                )
-
-        if serverTime < startDateTimestamp then
-            return false, string.format(L'未到上课时间，请在%s之后来学习吧。', timeRule.startDay)
-        end
-
-        if serverTime > endDateTimestamp then
-            return false, L'上课时间已过'
-        end
-
-        local weeks = timeRule.weeks
-        local inWeekDay = false
-
-        local dateStr = ''
-        for i, v in ipairs(weeks) do
-            if v == weekDay then
-                inWeekDay = true
-            end
-
-            dateStr = dateStr .. L'周' .. dateList[v] or ''
-
-            if i ~= #weeks then
-                dateStr = dateStr .. '，'
-            end
-        end
-
-        if not inWeekDay then
-            return false, string.format(L'现在不是上课时间哦，请在上课时间（%s）内再来上课吧。', dateStr)
-        end
-
-        local startTimeStr = timeRule.startTime or '0:0'
-        local startHour, startMin = startTimeStr:match('^(%d+)%D(%d+)') 
-        startHour = tonumber(startHour)
-        startMin = tonumber(startMin)
-
-        local endTimeStr = timeRule.endTime or '23:59'
-        local endHour, endMin = endTimeStr:match('^(%d+)%D(%d+)') 
-        endHour = tonumber(endHour)
-        endMin = tonumber(endMin)
-
-        local timeStr = startTimeStr .. '-' .. endTimeStr
-
-        local todayWeehours = commonlib.timehelp.GetWeeHoursTimeStamp(serverTime)
-        local limitTimeStamp = todayWeehours + startHour * 60 * 60 + startMin * 60
-        local limitTimeEndStamp = todayWeehours + endHour * 60 * 60 + endMin * 60
-
-        if serverTime < limitTimeStamp or serverTime > limitTimeEndStamp then
-            return false, string.format(L'现在不是上课时间哦，请在上课时间（%s）内再来上课吧。', timeStr)
-        end
-
-        return true
-    end
-
-    local failedReasonList = {}
-    for _, timeRule in ipairs(timeRules) do
-        local result, reason = Check(timeRule)
-        if result then
-            return true
-        end
-
-        failedReasonList[#failedReasonList + 1] = reason
-    end
-
-    return false, failedReasonList[1]
 end
 
 function CommonLoadWorld.StartOldVersion(index)
@@ -1374,6 +1281,7 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                 self.encryptWorldVerified = false
                 self.freeUserVerified = false
                 self.timesVerified = false
+                self.holidayTimesVerified = false
                 self.systemGroupMemberVerified = false
             end
 
@@ -1432,7 +1340,7 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                 if data.timeRules and
                    data.timeRules[1] and
                    not self.timesVerified then
-                    local result, reason = self:TimesFilter(data.timeRules)
+                    local result, reason = KeepworkServicePermission:TimesFilter(data.timeRules)
 
                     if result then
                         self.timesVerified = true
@@ -1441,6 +1349,23 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                     else
                         _guihelper.MessageBox(reason)
                     end
+
+                    return
+                end
+
+                -- holiday times verified
+                if data.timeRules and
+                   data.timeRules[1] and
+                   not self.holidayTimesVerified then
+                    KeepworkServicePermission:HolidayTimesFilter(data.timeRules, function(bAllowed, reason)
+                        if bAllowed then
+                            self.holidayTimesVerified = true
+
+                            HandleVerified()
+                        else
+                            _guihelper.MessageBox(reason)
+                        end
+                    end)
 
                     return
                 end
