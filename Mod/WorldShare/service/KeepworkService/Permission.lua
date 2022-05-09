@@ -393,9 +393,10 @@ function KeepworkServicePermission:TimesFilter(timeRules)
 
     local failedReasonList = {}
     local bIsSuccessed = nil
+    local hasDateType = false
 
     for _, timeRule in ipairs(timeRules) do
-        if not timeRule.dateType and 
+        if not timeRule.dateType and
            timeRule.startDate or
            timeRule.endDate or
            timeRule.weeks then
@@ -408,13 +409,21 @@ function KeepworkServicePermission:TimesFilter(timeRules)
 
             bIsSuccessed = false
             failedReasonList[#failedReasonList + 1] = reason
+        else
+            if timeRule.dateType then
+                hasDateType = true
+            end
         end
     end
 
     if bIsSuccessed == nil or bIsSuccessed == true then
         return true
     else
-        return false, failedReasonList[1]
+        if hasDateType then
+            return true
+        else
+            return false, failedReasonList[1]
+        end
     end
 end
 
@@ -423,18 +432,35 @@ function KeepworkServicePermission:HolidayTimesFilter(timeRules, callback)
         return
     end
 
-    local hasHoliday = false
+    local hasLimit = nil
+    local lastDateType = nil
     local curTimeRule = nil
 
     for _, timeRule in ipairs(timeRules) do
         if type(timeRule.dateType) == 'number' then
-            hasHoliday = true
-            curTimeRule = timeRule
-            break
+            if timeRule.dateType == 0 then
+                if not lastDateType or lastDateType > 0 then
+                    lastDateType = 0
+                    hasLimit = false
+                    curTimeRule = timeRule
+                end
+            elseif timeRule.dateType == 1 then
+                if not lastDateType or lastDateType > 1 then
+                    lastDateType = 1
+                    hasLimit = true
+                    curTimeRule = timeRule
+                end
+            elseif timeRule.dateType == 2 then
+                if not lastDateType then
+                    lastDateType = 2
+                    hasLimit = true
+                    curTimeRule = timeRule
+                end
+            end
         end
     end
 
-    if hasHoliday then
+    if hasLimit == true then
         KeepworkCommonApi:Holiday(
             nil,
             function(data, err)
@@ -506,7 +532,9 @@ function KeepworkServicePermission:HolidayTimesFilter(timeRules, callback)
                 callback(false, L'校验上课时间失败')
             end
         )
-    else
+    elseif hasLimit == false then
         callback(true)
+    else
+        callback(false, '校验上课时间失败')
     end
 end
