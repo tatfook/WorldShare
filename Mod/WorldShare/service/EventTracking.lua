@@ -107,6 +107,10 @@ function EventTrackingService:Send(eventType, action, extra, offlineMode)
         return false
     end
 
+    if not self:GetServerTime() then
+        return false
+    end
+
     if not eventType or
        type(eventType) ~= 'number' or
        (eventType ~= 1 and eventType ~= 2) or
