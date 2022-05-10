@@ -340,11 +340,11 @@ function KeepworkServicePermission:TimesFilter(timeRules)
             )
 
         if serverTime < startDateTimestamp then
-            return false, string.format(L'未到上课时间，请在%s之后来学习吧。', timeRule.startDay)
+            return false, L'不在项目开放时间内，暂时无法进入。'
         end
 
         if serverTime > endDateTimestamp then
-            return false, L'上课时间已过'
+            return false, L'不在项目开放时间内，暂时无法进入。'
         end
 
         local weeks = timeRule.weeks
@@ -365,7 +365,7 @@ function KeepworkServicePermission:TimesFilter(timeRules)
         end
 
         if not inWeekDay then
-            return false, string.format(L'现在不是上课时间哦，请在上课时间（%s）内再来上课吧。', dateStr)
+            return false, L'不在项目开放时间内，暂时无法进入。'
         end
 
         local startTimeStr = timeRule.startTime or '0:0'
@@ -385,7 +385,7 @@ function KeepworkServicePermission:TimesFilter(timeRules)
         local limitTimeEndStamp = todayWeehours + endHour * 60 * 60 + endMin * 60
 
         if serverTime < limitTimeStamp or serverTime > limitTimeEndStamp then
-            return false, string.format(L'现在不是上课时间哦，请在上课时间（%s）内再来上课吧。', timeStr)
+            return false, L'不在项目开放时间内，暂时无法进入。'
         end
 
         return true
@@ -393,10 +393,10 @@ function KeepworkServicePermission:TimesFilter(timeRules)
 
     local failedReasonList = {}
     local bIsSuccessed = nil
-    local hasDateType = false
+    local hasCourseId = false
 
     for _, timeRule in ipairs(timeRules) do
-        if not timeRule.dateType and
+        if not timeRule.courseId and
            timeRule.startDate or
            timeRule.endDate or
            timeRule.weeks then
@@ -410,8 +410,8 @@ function KeepworkServicePermission:TimesFilter(timeRules)
             bIsSuccessed = false
             failedReasonList[#failedReasonList + 1] = reason
         else
-            if timeRule.dateType then
-                hasDateType = true
+            if timeRule.courseId then
+                hasCourseId = true
             end
         end
     end
@@ -419,8 +419,8 @@ function KeepworkServicePermission:TimesFilter(timeRules)
     if bIsSuccessed == nil or bIsSuccessed == true then
         return true
     else
-        if hasDateType then
-            return true
+        if hasCourseId then
+            return false, 'CHECK_COURSE_ID'
         else
             return false, failedReasonList[1]
         end
@@ -438,7 +438,7 @@ function KeepworkServicePermission:HolidayTimesFilter(timeRules, callback)
 
     for _, timeRule in ipairs(timeRules) do
         if type(timeRule.dateType) == 'number' then
-            if timeRule.dateType == 0 then
+            if not timeRule.dateType or timeRule.dateType == 0 then
                 if not lastDateType or lastDateType > 0 then
                     lastDateType = 0
                     hasLimit = false
@@ -465,7 +465,7 @@ function KeepworkServicePermission:HolidayTimesFilter(timeRules, callback)
             nil,
             function(data, err)
                 if data and type(data) == 'table' and type(data.isHoliday) == 'boolean' then
-                    if curTimeRule.dateType == 0 then
+                    if not curTimeRule.dateType or curTimeRule.dateType == 0 then
                         callback(true)
                     elseif curTimeRule.dateType == 1 then
                         local serverTime = Mod.WorldShare.Store:Get('world/currentServerTime')
@@ -474,7 +474,7 @@ function KeepworkServicePermission:HolidayTimesFilter(timeRules, callback)
                         local timeStr = startTimeStr .. '-' .. endTimeStr
 
                         if data.isHoliday then
-                            callback(false, string.format(L'现在不是上课时间哦，请在上课时间（上学日%s）内再来上课吧。', timeStr))
+                            callback(false, L'不在项目开放时间内，暂时无法进入。')
                         else
                             local startHour, startMin = startTimeStr:match('^(%d+)%D(%d+)')
                             startHour = tonumber(startHour)
@@ -489,7 +489,7 @@ function KeepworkServicePermission:HolidayTimesFilter(timeRules, callback)
                             local limitTimeEndStamp = todayWeehours + endHour * 60 * 60 + endMin * 60
 
                             if serverTime < limitTimeStamp or serverTime > limitTimeEndStamp then
-                                callback(false, string.format(L'现在不是上课时间哦，请在上课时间（%s）内再来上课吧。', timeStr))
+                                callback(false, L'不在项目开放时间内，暂时无法进入。')
                             else
                                 callback(true)
                             end
@@ -501,7 +501,7 @@ function KeepworkServicePermission:HolidayTimesFilter(timeRules, callback)
                         local timeStr = startTimeStr .. '-' .. endTimeStr
 
                         if not data.isHoliday then
-                            callback(false, string.format(L'现在不是上课时间哦，请在上课时间（节假日%s）内再来上课吧。', timeStr))
+                            callback(false, L'不在项目开放时间内，暂时无法进入。')
                         else
                             local startHour, startMin = startTimeStr:match('^(%d+)%D(%d+)')
                             startHour = tonumber(startHour)
@@ -516,7 +516,7 @@ function KeepworkServicePermission:HolidayTimesFilter(timeRules, callback)
                             local limitTimeEndStamp = todayWeehours + endHour * 60 * 60 + endMin * 60
 
                             if serverTime < limitTimeStamp or serverTime > limitTimeEndStamp then
-                                callback(false, string.format(L'现在不是上课时间哦，请在上课时间（%s）内再来上课吧。', timeStr))
+                                callback(false, L'不在项目开放时间内，暂时无法进入。')
                             else
                                 callback(true)
                             end

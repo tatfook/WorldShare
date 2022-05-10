@@ -1344,10 +1344,15 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
 
                     if result then
                         self.timesVerified = true
+                        self.holidayTimesVerified = true
 
                         HandleVerified()
                     else
-                        _guihelper.MessageBox(reason)
+                        if reason == 'CHECK_COURSE_ID' then
+                            self.timesVerified = true
+                        else
+                            _guihelper.MessageBox(reason)
+                        end
                     end
 
                     return
