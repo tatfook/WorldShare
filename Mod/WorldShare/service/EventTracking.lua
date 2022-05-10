@@ -51,6 +51,10 @@ function EventTrackingService:GenerateDataPacket(eventType, userId, action, star
         return
     end
 
+    if not self:GetServerTime() then
+        return
+    end
+
     local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
     local projectId
 
