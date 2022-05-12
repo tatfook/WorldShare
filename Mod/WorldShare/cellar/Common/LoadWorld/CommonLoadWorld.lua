@@ -1350,6 +1350,8 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                     else
                         if reason == 'CHECK_COURSE_ID' then
                             self.timesVerified = true
+
+                            HandleVerified()
                         else
                             _guihelper.MessageBox(reason)
                         end

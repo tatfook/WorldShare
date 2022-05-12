@@ -395,28 +395,32 @@ function KeepworkServicePermission:TimesFilter(timeRules)
     local bIsSuccessed = nil
     local hasCourseId = false
 
-    for _, timeRule in ipairs(timeRules) do
-        if not timeRule.courseId and
-           timeRule.startDate or
-           timeRule.endDate or
-           timeRule.weeks then
-            local result, reason = Check(timeRule)
+    if timeRules and #timeRules > 0 then
+        for _, timeRule in ipairs(timeRules) do
+            if not timeRule.courseId and
+               timeRule.startDate or
+               timeRule.endDate or
+               timeRule.weeks then
+                local result, reason = Check(timeRule)
+    
+                if result then
+                    bIsSuccessed = true
+                    break
+                end
 
-            if result then
-                bIsSuccessed = true
-                break
-            end
-
-            bIsSuccessed = false
-            failedReasonList[#failedReasonList + 1] = reason
-        else
-            if timeRule.courseId then
-                hasCourseId = true
+                bIsSuccessed = false
+                failedReasonList[#failedReasonList + 1] = reason
+            else
+                if timeRule.courseId then
+                    hasCourseId = true
+                end
             end
         end
+    else
+        bIsSuccessed = true
     end
 
-    if bIsSuccessed == nil or bIsSuccessed == true then
+    if bIsSuccessed == true then
         return true
     else
         if hasCourseId then
