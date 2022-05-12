@@ -448,6 +448,8 @@ function KeepworkServicePermission:HolidayTimesFilter(timeRules, callback)
                         lastDateType = 0
                         hasLimit = false
                         curTimeRule = timeRule
+
+                        break
                     end
                 elseif timeRule.dateType == 1 then
                     if not lastDateType or lastDateType > 1 then
@@ -467,7 +469,7 @@ function KeepworkServicePermission:HolidayTimesFilter(timeRules, callback)
                 hasLimit = false
                 curTimeRule = timeRule
     
-                break;
+                break
             end
         end
     end
