@@ -441,25 +441,33 @@ function KeepworkServicePermission:HolidayTimesFilter(timeRules, callback)
     local curTimeRule = nil
 
     for _, timeRule in ipairs(timeRules) do
-        if type(timeRule.dateType) == 'number' then
-            if not timeRule.dateType or timeRule.dateType == 0 then
-                if not lastDateType or lastDateType > 0 then
-                    lastDateType = 0
-                    hasLimit = false
-                    curTimeRule = timeRule
+        if timeRule.courseId then
+            if type(timeRule.dateType) == 'number' then
+                if timeRule.dateType == 0 then
+                    if not lastDateType or lastDateType > 0 then
+                        lastDateType = 0
+                        hasLimit = false
+                        curTimeRule = timeRule
+                    end
+                elseif timeRule.dateType == 1 then
+                    if not lastDateType or lastDateType > 1 then
+                        lastDateType = 1
+                        hasLimit = true
+                        curTimeRule = timeRule
+                    end
+                elseif timeRule.dateType == 2 then
+                    if not lastDateType then
+                        lastDateType = 2
+                        hasLimit = true
+                        curTimeRule = timeRule
+                    end
                 end
-            elseif timeRule.dateType == 1 then
-                if not lastDateType or lastDateType > 1 then
-                    lastDateType = 1
-                    hasLimit = true
-                    curTimeRule = timeRule
-                end
-            elseif timeRule.dateType == 2 then
-                if not lastDateType then
-                    lastDateType = 2
-                    hasLimit = true
-                    curTimeRule = timeRule
-                end
+            else
+                lastDateType = 0
+                hasLimit = false
+                curTimeRule = timeRule
+    
+                break;
             end
         end
     end
