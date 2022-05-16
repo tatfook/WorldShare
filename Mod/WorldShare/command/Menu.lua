@@ -152,7 +152,30 @@ function MenuCommand:OpenUserOpusPage()
 end
 
 function MenuCommand:OpenUserPage()
-    ParaGlobal.ShellExecute("open", format("%s/u/%s", KeepworkService:GetKeepworkUrl(), Mod.WorldShare.Store:Get("user/username") or ""), "", "", 1)
+    local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
+    local username = ''
+
+    if currentEnterWorld and type(currentEnterWorld) == 'table' then
+        if currentEnterWorld.user and currentEnterWorld.user.username then
+            username = currentEnterWorld.user.username
+        else
+            return
+        end
+    else
+        return
+    end
+
+    ParaGlobal.ShellExecute(
+        'open',
+        format(
+            '%s/u/%s',
+            KeepworkService:GetKeepworkUrl(),
+            username
+        ),
+        '',
+        '',
+        1
+    )
 end
 
 function MenuCommand:OpusSetting()
