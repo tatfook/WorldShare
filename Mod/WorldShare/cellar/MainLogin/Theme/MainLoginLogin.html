@@ -950,10 +950,20 @@
                                 </div>
                             </div>
                             <pe:if condition='<%= System.os.GetPlatform() == "win32" %>'>
-                                <div style='float:left;base-font-size: 13px;font-size: 13px;color: #9A9DA2;margin-left: 97px;' onclick='forget_password()'><%= L"找回密码" %></div>
+                                <div style='float: left;
+                                            base-font-size: 13px;
+                                            font-size: 13px;
+                                            color: #C6C6C6;
+                                            margin-left: 97px;'
+                                     onclick='forget_password()'><%= L"找回密码" %></div>
                             </pe:if>
                             <pe:if condition='<%= System.os.GetPlatform() ~= "win32" %>'>
-                                <div style='float:left;base-font-size: 13px;font-size: 13px;color: #9A9DA2;margin-left: 117px;' onclick='forget_password()'><%= L"找回密码" %></div>
+                                <div style='float: left;
+                                            base-font-size: 13px;
+                                            font-size: 13px;
+                                            color: #C6C6C6;
+                                            margin-left: 117px;'
+                                     onclick='forget_password()'><%= L"找回密码" %></div>
                             </pe:if>
                         </div>
                         <div style='margin-top:5px;margin-bottom:10px;'>
