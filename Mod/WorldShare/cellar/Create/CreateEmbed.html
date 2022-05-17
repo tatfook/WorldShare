@@ -644,6 +644,10 @@
                             return 'share_unselect_item_bg'
                         end
                     end
+
+                    function get_open_folder_tips()
+                        return format('%s%s', L'打开世界文件夹\n', Eval('worldpath') or '')
+                    end
                 ]]>
             </script>
             <style type='text/mcss' src='Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss'>

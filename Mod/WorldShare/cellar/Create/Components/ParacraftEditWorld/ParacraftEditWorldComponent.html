@@ -230,7 +230,7 @@
                                        class='share_button'
                                        style='<%= get_share_button("folder") %>'
                                        onclick='open_folder'
-                                       tooltip='<%=L"打开世界文件夹" %>'
+                                       tooltip='<%= get_open_folder_tips() %>'
                                        name='<%= Eval("index") %>' />
                                 <pe:if condition='<%= is_show_exit_button() %>'>
                                     <!-- exit world -->

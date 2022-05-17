@@ -98,9 +98,9 @@ function LocalServiceWorld:GetWorldList()
             revision = WorldRevision:new():init(value.worldpath):GetDiskRevision()
             foldername = value.foldername
             Title = value.Title
-            text = value.Title
 
             local tag = SaveWorldHandler:new():Init(value.worldpath):LoadWorldInfo()
+            text = tag.name
             kpProjectId = tag.kpProjectId
             size = tag.size
             name = tag.name
@@ -260,7 +260,7 @@ function LocalServiceWorld:SetWorldInstanceByFoldername(foldername)
     local shared = string.match(worldpath, 'shared') == 'shared' and true or false
     
     if worldTag.name ~= commonlib.Encoding.DefaultToUtf8(foldername) then
-        text = worldTag.name .. '(' .. commonlib.Encoding.DefaultToUtf8(foldername) .. ')'
+        text = worldTag.name
     end
 
     local fromProjectId = 0

@@ -443,6 +443,10 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
             local instituteVipEnabled
             local name = ''
 
+            if DItem.extra and DItem.extra.worldTagName then
+                text = DItem.extra.worldTagName
+            end
+
             if DItem.project.managed == 1 then
                 remoteShared = true
             else
@@ -529,7 +533,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
             -- shared world text
             if remoteShared and remoteWorldUserId ~= tonumber(userId) then
                 if DItem.extra and DItem.extra.worldTagName then
-                    text = (DItem.user and DItem.user.username or '') .. '/' .. (DItem.extra and DItem.extra.worldTagName or '') .. '(' .. text .. ')'
+                    text = (DItem.user and DItem.user.username or '') .. '/' .. (DItem.extra and DItem.extra.worldTagName or '')
                 else
                     text = (DItem.user and DItem.user.username or '') .. '/' .. text
                 end
@@ -539,7 +543,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
             if not remoteShared then
                 if DItem.extra and DItem.extra.worldTagName and
                    text ~= DItem.extra.worldTagName then
-                    text = DItem.extra.worldTagName .. '(' .. text .. ')'
+                    text = DItem.extra.worldTagName
                 end
             end
 
