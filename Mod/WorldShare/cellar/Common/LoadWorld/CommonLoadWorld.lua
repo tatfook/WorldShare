@@ -1241,18 +1241,10 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
 
             if err == 404 or
                not data or
-               not data.world or
-               not data.world.archiveUrl or
-               #data.world.archiveUrl == 0 then
-                local archiveUrlLength = 0
-
-                if data and data.world and data.world.archiveUrl then
-                    archiveUrlLength = #data.world.archiveUrl
-                end
-
+               not data.world then
                 GameLogic.AddBBS(
                     nil,
-                    format(L'未找到对应项目信息（项目ID：%d）（URL长度：%d）（ERR：%d）', pid, archiveUrlLength, err),
+                    format(L'未找到对应项目信息（项目ID：%d）（ERR：%d）', pid, err),
                     10000,
                     '255 0 0'
                 )
