@@ -82,7 +82,7 @@ function Utils.ShowWindow(option, height, url, name, x, y, align, allowDrag, zor
 
     if params.url and type(params.url) == 'string' then
         local matchUrl, matched = string.gsub(params.url, '^%(ws%)', '') -- ws: worldshare
-    
+
         if matched == 1 then
             if not string.match(matchUrl, '%.html$') then
                 matchUrl = matchUrl .. '/' .. matchUrl .. '.html'
@@ -90,7 +90,7 @@ function Utils.ShowWindow(option, height, url, name, x, y, align, allowDrag, zor
     
             params.url = 'Mod/WorldShare/cellar/' .. matchUrl
         end
-    
+
         local matchUrl, matched = string.gsub(params.url, '^%(ep%)', '') -- ep: explorerapp
     
         if matched == 1 then
@@ -103,6 +103,7 @@ function Utils.ShowWindow(option, height, url, name, x, y, align, allowDrag, zor
     
         if Mod.WorldShare.Utils.IsEnglish() then
             local enUrl = string.gsub(params.url, '.html', '.en.html')
+            enUrl = string.gsub(params.url, '.xml', '.en.xml')
     
             if ParaIO.DoesFileExist(enUrl, true) then
                 params.url = enUrl

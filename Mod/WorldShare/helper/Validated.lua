@@ -24,6 +24,12 @@ function Validated:Account(str)
             if string.match(str, '^%d+') then
                 return false
             else
+                local sStr = string.match(str, '[%a%d]+')
+
+                if sStr ~= str then
+                    return false
+                end
+
                 return true
             end
         else
@@ -73,6 +79,10 @@ function Validated:Password(str)
        #str > 24 then
         return false
     else
+        if string.match(str, '[ ]+') then
+            return false
+        end
+
         return true
     end
 end

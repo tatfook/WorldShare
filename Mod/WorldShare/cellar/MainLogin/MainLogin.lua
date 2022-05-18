@@ -415,7 +415,7 @@ function MainLogin:ShowRegister(isModal, callback, zorder)
     Mod.WorldShare.Utils.ShowWindow(
         0,
         0,
-        'Mod/WorldShare/cellar/MainLogin/Theme/MainLoginRegister.html?is_modal=' .. (isModal and 'true' or 'false'),
+        'Mod/WorldShare/cellar/MainLogin/Theme/MainLoginRegister.xml?is_modal=' .. (isModal and 'true' or 'false'),
         'Mod.WorldShare.cellar.MainLogin.Register',
         0,
         0,
