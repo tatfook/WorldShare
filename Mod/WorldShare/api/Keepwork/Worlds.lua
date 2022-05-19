@@ -54,8 +54,11 @@ end
 -- method: PUT
 -- return: object
 function KeepworkWorldsApi:UpdateWorldInfo(worldId, params, success, error)
-    if type(worldId) ~= 'number' or type(params) ~= 'table' then
-        return false
+    if not worldId or
+       type(worldId) ~= 'number' or
+       not params or
+       type(params) ~= 'table' then
+        return
     end
 
     local url = format("/worlds/%s", worldId)

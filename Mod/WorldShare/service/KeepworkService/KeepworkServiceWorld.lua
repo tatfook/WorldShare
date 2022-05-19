@@ -232,10 +232,10 @@ end
 
 -- updat world info
 function KeepworkServiceWorld:PushWorld(worldId, params, callback)
-    if type(params) ~= 'table' or
+    if params and type(params) ~= 'table' or
        not worldId or
        not KeepworkService:IsSignedIn() then
-        return false
+        return
     end
 
     KeepworkWorldsApi:UpdateWorldInfo(worldId, params, callback)

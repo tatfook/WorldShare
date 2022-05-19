@@ -583,27 +583,27 @@ function Create:WorldRename(currentItemIndex, tempModifyWorldname, callback)
     local CreatePage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Create')
 
     if not CreatePage then
-        return false
+        return
     end
 
     local currentWorld = Compare:GetSelectedWorld(currentItemIndex)
 
     if not currentWorld then
-        return false
+        return
     end
 
     if currentWorld.is_zip then
         GameLogic.AddBBS(nil, L'暂不支持重命名zip世界', 3000, '255 0 0')
-        return false
+        return
     end
 
     if tempModifyWorldname == '' then
-        return false
+        return
     end
 
     if currentWorld.status ~= 2 then
         if currentWorld.name == tempModifyWorldname then
-            return false
+            return
         end
 
         local tag = LocalService:GetTag(currentWorld.worldpath)
@@ -621,8 +621,8 @@ function Create:WorldRename(currentItemIndex, tempModifyWorldname, callback)
        currentWorld.status ~= 1 and
        currentWorld.kpProjectId and
        currentWorld.kpProjectId ~= 0 then
-        -- update project info
 
+        -- update project info
         local tag = LocalService:GetTag(currentWorld.worldpath)
 
         if currentWorld.status ~= 2 then
@@ -643,41 +643,36 @@ function Create:WorldRename(currentItemIndex, tempModifyWorldname, callback)
                 Mod.WorldShare.Store:Set('world/currentWorld', currentWorld)
     
                 SyncMain:SyncToDataSource(function(result, msg)
-                    if type(callback) == 'function' then
+                    if callback and type(callback) == 'function' then
                         callback()
                     end
                 end)
             end)
         elseif currentWorld.status == 2 then
             -- just remote world exist
-            KeepworkServiceWorld:GetWorld(currentWorld.foldername, currentWorld.shared, currentWorld.user.id, function(data)
-                local extra = data and data.extra or {}
+            KeepworkServiceWorld:GetWorld(
+                currentWorld.foldername,
+                currentWorld.shared,
+                currentWorld.user.id,
+                function(data)
+                    local extra = data and data.extra or {}
 
-                extra.worldTagName = tempModifyWorldname
+                    extra.worldTagName = tempModifyWorldname
 
-                -- local world not exist
-                KeepworkServiceProject:UpdateProject(
-                    currentWorld.kpProjectId,
-                    {
-                        extra = extra
-                    },
-                    function(data, err)
-                        -- update world info
-                        KeepworkServiceWorld:PushWorld(
-                            data.id,
-                            {
-                                worldName = currentWorld.foldername,
-                                extra = extra
-                            },
-                            function()
-                                if type(callback) == 'function' then
-                                    callback()
-                                end
+                    -- local world not exist
+                    KeepworkServiceProject:UpdateProject(
+                        currentWorld.kpProjectId,
+                        {
+                            extra = extra
+                        },
+                        function(data, err)
+                            if callback and type(callback) == 'function' then
+                                callback()
                             end
-                        )
-                    end
-                )
-            end)
+                        end
+                    )
+                end
+            )
         end
     else
         if callback and type(callback) == 'function' then

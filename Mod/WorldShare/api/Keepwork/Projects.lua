@@ -40,7 +40,10 @@ end
 ]]
 -- return: object
 function KeepworkProjectsApi:UpdateProject(kpProjectId, params, success, error)
-    if type(kpProjectId) ~= 'number' or type(params) ~= 'table' then
+    if not kpProjectId or
+       type(kpProjectId) ~= 'number' or
+       not params or
+       type(params) ~= 'table' then
         return false
     end
 
