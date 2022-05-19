@@ -19,13 +19,11 @@ local phone_account_exist = false
 
 MainLogin.registerValidates = {
     modify = {
-        [1] = true,
-        [2] = true,
-        [3] = true,
-        [4] = true,
-        [5] = true,
-        [6] = true,
-        [7] = true,
+        [1] = nil,
+        [2] = nil,
+        [3] = nil,
+        [4] = nil,
+        [5] = nil,
     }
 }
 
@@ -113,8 +111,10 @@ function on_change_new_password()
     local account = Mod.WorldShare.Store:Get('user/username') or ''
 
     if not password or type(password) ~= 'string' or password == '' then
-        MainLogin.registerValidates.modify[1] = true
-        MainLogin.registerValidates.modify[3] = true
+        MainLogin.registerValidates.modify[1] = nil
+        MainLogin.registerValidates.modify[2] = nil
+        MainLogin.registerValidates.modify[3] = nil
+        MainLogin.registerValidates.modify[4] = nil
 
         get_notice_page():Refresh(0.01)
 
@@ -126,6 +126,8 @@ function on_change_new_password()
     else
         MainLogin.registerValidates.modify[1] = false
     end
+
+    MainLogin.registerValidates.modify[2] = true
 
     if not string.match(password, '[ ]+') then
         MainLogin.registerValidates.modify[3] = true
@@ -145,6 +147,14 @@ end
 function on_change_new_password_again()
     local password = get_page():GetValue('new_password')
     local password_again = get_page():GetValue('new_password_again')
+
+    if not password_again or type(password_again) ~= 'string' or password_again == '' then
+        MainLogin.registerValidates.modify[5] = nil
+
+        get_notice_page():Refresh(0.01)
+
+        return
+    end
 
     if password == password_again then
         MainLogin.registerValidates.modify[5] = true

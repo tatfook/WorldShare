@@ -17,25 +17,25 @@ local phone_account_exist = false
 
 MainLogin.registerValidates = {
     account = {
-        [1] = true,
-        [2] = true,
-        [3] = true,
-        [4] = true,
-        [5] = true,
-        [6] = true,
-        [7] = true,
-        [8] = true,
+        [1] = nil,
+        [2] = nil,
+        [3] = nil,
+        [4] = nil,
+        [5] = nil,
+        [6] = nil,
+        [7] = nil,
+        [8] = nil,
     },
     phone = {
-        [1] = true,
-        [2] = true,
-        [3] = true,
-        [4] = true,
-        [5] = true,
-        [6] = true,
-        [7] = true,
-        [8] = true,
-        [9] = true,
+        [1] = nil,
+        [2] = nil,
+        [3] = nil,
+        [4] = nil,
+        [5] = nil,
+        [6] = nil,
+        [7] = nil,
+        [8] = nil,
+        [9] = nil,
     }
 }
 
@@ -140,9 +140,9 @@ function on_change_account_account()
     local account = get_page():GetValue('register_account')
 
     if not account or type(account) ~= 'string' or account == '' then
-        MainLogin.registerValidates.account[1] = true
-        MainLogin.registerValidates.account[2] = true
-        MainLogin.registerValidates.account[3] = true
+        MainLogin.registerValidates.account[1] = nil
+        MainLogin.registerValidates.account[2] = nil
+        MainLogin.registerValidates.account[3] = nil
 
         get_notice_page():Refresh(0.01)
 
@@ -190,11 +190,11 @@ function on_change_account_password()
     local account = get_page():GetValue('register_account') or ''
 
     if not password or type(password) ~= 'string' or password == '' then
-        MainLogin.registerValidates.account[4] = true
-        MainLogin.registerValidates.account[5] = true
-        MainLogin.registerValidates.account[6] = true
-        MainLogin.registerValidates.account[7] = true
-        MainLogin.registerValidates.account[8] = true
+        MainLogin.registerValidates.account[4] = nil
+        MainLogin.registerValidates.account[5] = nil
+        MainLogin.registerValidates.account[6] = nil
+        MainLogin.registerValidates.account[7] = nil
+        MainLogin.registerValidates.account[8] = nil
 
         get_notice_page():Refresh(0.01)
 
@@ -206,6 +206,8 @@ function on_change_account_password()
     else
         MainLogin.registerValidates.account[4] = false
     end
+
+    MainLogin.registerValidates.account[5] = true
 
     if password ~= account then
         MainLogin.registerValidates.account[6] = true
@@ -397,7 +399,7 @@ function on_change_phone_phone()
     local phonenumber = get_page():GetValue('phonenumber')
 
     if not phonenumber or type(phonenumber) ~= 'string' or phonenumber == '' then
-        MainLogin.registerValidates.phone[1] = true
+        MainLogin.registerValidates.phone[1] = nil
         get_notice_page():Refresh(0.01)
 
         return
@@ -426,8 +428,9 @@ function on_change_phone_password()
     on_change_next()
 
     if not phonepassword or type(phonepassword) ~= 'string' or phonepassword == '' then
-        MainLogin.registerValidates.phone[3] = true
-        MainLogin.registerValidates.phone[5] = true
+        MainLogin.registerValidates.phone[3] = nil
+        MainLogin.registerValidates.phone[4] = nil
+        MainLogin.registerValidates.phone[5] = nil
 
         get_notice_page():Refresh(0.01)
 
@@ -439,6 +442,8 @@ function on_change_phone_password()
     else
         MainLogin.registerValidates.phone[3] = false
     end
+
+    MainLogin.registerValidates.phone[4] = true
 
     if not string.match(phonepassword, '[ ]+') then
         MainLogin.registerValidates.phone[5] = true
@@ -455,14 +460,14 @@ function on_change_phone_captcha()
     local phonecaptcha = get_page():GetValue('phonecaptcha')
 
     if not phonecaptcha or type(phonecaptcha) ~= 'string' then
-        MainLogin.registerValidates.phone[2] = true
+        MainLogin.registerValidates.phone[2] = nil
         get_notice_page():Refresh(0.01)
 
         return
     end
 
     if #phonecaptcha == 0 then
-        MainLogin.registerValidates.phone[2] = false
+        MainLogin.registerValidates.phone[2] = nil
     else
         MainLogin.registerValidates.phone[2] = true
     end
@@ -512,10 +517,10 @@ function on_change_phone_account()
     end
 
     if not account or type(account) ~= 'string' or account == '' then
-        MainLogin.registerValidates.phone[6] = true
-        MainLogin.registerValidates.phone[7] = true
-        MainLogin.registerValidates.phone[8] = true
-        MainLogin.registerValidates.phone[9] = true
+        MainLogin.registerValidates.phone[6] = nil
+        MainLogin.registerValidates.phone[7] = nil
+        MainLogin.registerValidates.phone[8] = nil
+        MainLogin.registerValidates.phone[9] = nil
 
         get_notice_page():Refresh(0.01)
 
