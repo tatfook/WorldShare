@@ -668,13 +668,11 @@ end
 function get_phone_captcha()
     if #get_page():GetValue('phonenumber') ~= 11 then
         get_page():SetUIValue('phone_field_error_msg', L'*手机号码位数不对')
-        get_page():FindControl('phone_field_error').visible = true
         return false
     end
 
     if phone_account_exist then
         get_page():SetUIValue('phone_field_error_msg', L'*手机号码已存在')
-        get_page():FindControl('phone_field_error').visible = true
         return false
     end
 
