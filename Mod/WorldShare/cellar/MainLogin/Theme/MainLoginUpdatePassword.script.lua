@@ -112,8 +112,6 @@ function on_change_new_password()
     local password = get_page():GetValue('new_password')
     local account = Mod.WorldShare.Store:Get('user/username') or ''
 
-    echo(password, true)
-
     if not password or type(password) ~= 'string' or password == '' then
         MainLogin.registerValidates.modify[1] = true
         MainLogin.registerValidates.modify[3] = true

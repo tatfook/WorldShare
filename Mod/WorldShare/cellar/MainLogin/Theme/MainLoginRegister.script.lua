@@ -227,12 +227,10 @@ function update_register_button_status()
     local password = get_page():GetValue('register_account_password') or ''
     local b_button_right = true
 
-    echo(account, true)
     if not Validated:Account(account) then
         b_button_right = false
     end
 
-    echo(password, true)
     if not Validated:Password(password) then
         b_button_right = false
     end
