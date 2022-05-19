@@ -132,6 +132,15 @@ function SyncToDataSource:IsProjectExist(callback)
     local worldUserId = 0
 
     if self.currentWorld.shared then
+        if not self.currentWorld.user then
+            _guihelper.MessageBox(L'您没有权限同步此世界')
+
+            self.callback(false, L'您没有权限同步此世界')
+            self:SetFinish(true)
+
+            return
+        end
+
         worldUserId = self.currentWorld.user.id
     end
 
