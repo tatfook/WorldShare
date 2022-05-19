@@ -700,10 +700,10 @@ function get_phone_captcha()
         end
     })
 
-    KeepworkServiceSession:GetPhoneCaptcha(page:GetValue('phonenumber'), function(data, err)
+    KeepworkServiceSession:GetPhoneCaptcha(get_page():GetValue('phonenumber'), function(data, err)
         if err == 400 and data and data.code and data.message then
             is_clicked_get_phone_captcha = false
-            page:SetValue('getPhonecaptcha', L'获取验证码')
+            get_page():SetValue('getPhonecaptcha', L'获取验证码')
             GameLogic.AddBBS(nil, format('%s%s(%d)', L'获取验证码失败，错误信息：', data.message, data.code), 3000, '255 0 0')
             timer:Change(nil, nil)
         end
