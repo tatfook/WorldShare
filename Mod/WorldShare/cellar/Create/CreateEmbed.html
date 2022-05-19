@@ -646,7 +646,14 @@
                     end
 
                     function get_open_folder_tips()
-                        return format('%s%s', L'打开世界文件夹\n', Eval('worldpath') or '')
+                        local world_path =  Eval('worldpath') or ''
+
+                        if System.os.GetPlatform() == 'win32' then
+                            world_path = commonlib.Encoding.DefaultToUtf8(world_path)
+                            world_path = world_path:gsub('/', "\\")
+                        end
+
+                        return format('%s%s', L'打开世界文件夹\n', world_path)
                     end
                 ]]>
             </script>
