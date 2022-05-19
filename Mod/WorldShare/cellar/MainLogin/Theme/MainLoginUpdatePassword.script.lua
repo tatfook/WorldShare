@@ -17,8 +17,24 @@ local phone_show_field = ''
 local b_next_button_right = true
 local phone_account_exist = false
 
+MainLogin.registerValidates = {
+    modify = {
+        [1] = true,
+        [2] = true,
+        [3] = true,
+        [4] = true,
+        [5] = true,
+        [6] = true,
+        [7] = true,
+    }
+}
+
 function get_page()
     return Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.UpdatePassword')
+end
+
+function get_notice_page()
+    return Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Register.Notice')
 end
 
 function close()
@@ -87,6 +103,58 @@ function update_password()
             end
         end
     )
+end
+
+function on_change_cur_password()
+end
+
+function on_change_new_password()
+    local password = get_page():GetValue('new_password')
+    local account = Mod.WorldShare.Store:Get('user/username') or ''
+
+    echo(password, true)
+
+    if not password or type(password) ~= 'string' or password == '' then
+        MainLogin.registerValidates.modify[1] = true
+        MainLogin.registerValidates.modify[3] = true
+
+        get_notice_page():Refresh(0.01)
+
+        return
+    end
+
+    if #password >= 4 then
+        MainLogin.registerValidates.modify[1] = true
+    else
+        MainLogin.registerValidates.modify[1] = false
+    end
+
+    if not string.match(password, '[ ]+') then
+        MainLogin.registerValidates.modify[3] = true
+    else
+        MainLogin.registerValidates.modify[3] = false
+    end
+
+    if password ~= account then
+        MainLogin.registerValidates.modify[4] = true
+    else
+        MainLogin.registerValidates.modify[4] = false
+    end
+
+    get_notice_page():Refresh(0.01)
+end
+
+function on_change_new_password_again()
+    local password = get_page():GetValue('new_password')
+    local password_again = get_page():GetValue('new_password_again')
+
+    if password == password_again then
+        MainLogin.registerValidates.modify[5] = true
+    else
+        MainLogin.registerValidates.modify[5] = false
+    end
+
+    get_notice_page():Refresh(0.01)
 end
 
 function parent()

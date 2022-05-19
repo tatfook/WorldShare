@@ -27,6 +27,12 @@
                             else
                                 return false
                             end
+                        elseif kind == 'modify' then
+                            if MainLogin.registerValidates.modify[i] then
+                                return true
+                            else
+                                return false
+                            end
                         end
 
                         return true
@@ -211,7 +217,51 @@
                     </div>
                 </pe:if>
                 <pe:if condition='<%= get_mode() == 4 %>'>
-                    <div>33333</div>
+                    <div>
+                        <span style='color: #99a1b4'>1. </span>
+                        <pe:if condition='<%= is_active("modify", 1) %>'>
+                            <%= L'密码长度超过4位' %>
+                        </pe:if>
+                        <pe:if condition='<%= not is_active("modify", 1) %>'>
+                            <span style='color: #f2b763'><%= L'密码长度超过4位' %></span>
+                        </pe:if>
+                    </div>
+                    <div>
+                        <span style='color: #99a1b4'>2. </span>
+                        <pe:if condition='<%= is_active("modify", 2) %>'>
+                            <%= L'密码可以由字母、数字、符号组成' %>
+                        </pe:if>
+                        <pe:if condition='<%= not is_active("modify", 2) %>'>
+                            <span style='color: #f2b763'><%= L'密码可以由字母、数字、符号组成' %></span>
+                        </pe:if>
+                    </div>
+                    <div>
+                        <span style='color: #99a1b4'>3. </span>
+                        <pe:if condition='<%= is_active("modify", 3) %>'>
+                            <%= L'不可使用空格键' %>
+                        </pe:if>
+                        <pe:if condition='<%= not is_active("modify", 3) %>'>
+                            <span style='color: #f2b763'><%= L'不可使用空格键' %></span>
+                        </pe:if>
+                    </div>
+                    <div>
+                        <span style='color: #99a1b4'>4. </span>
+                        <pe:if condition='<%= is_active("modify", 4) %>'>
+                            <%= L'账号不与密码重复' %>
+                        </pe:if>
+                        <pe:if condition='<%= not is_active("modify", 4) %>'>
+                            <span style='color: #f2b763'><%= L'账号不与密码重复' %></span>
+                        </pe:if>
+                    </div>
+                    <div>
+                        <span style='color: #99a1b4'>5. </span>
+                        <pe:if condition='<%= is_active("modify", 5) %>'>
+                            <%= L'两次输入的密码不一致，请检查输入是否有误。' %>
+                        </pe:if>
+                        <pe:if condition='<%= not is_active("modify", 5) %>'>
+                            <span style='color: #f2b763'><%= L'两次输入的密码不一致，请检查输入是否有误。' %></span>
+                        </pe:if>
+                    </div>
                 </pe:if>
             </div>
         </pe:mcml>
