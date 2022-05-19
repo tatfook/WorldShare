@@ -429,7 +429,7 @@ function MainLogin:ShowUpdatePassword()
     Mod.WorldShare.Utils.ShowWindow(
         0,
         0,
-        'Mod/WorldShare/cellar/MainLogin/Theme/MainLoginUpdatePassword.html',
+        'Mod/WorldShare/cellar/MainLogin/Theme/MainLoginUpdatePassword.xml',
         'Mod.WorldShare.cellar.MainLogin.UpdatePassword',
         0,
         0,

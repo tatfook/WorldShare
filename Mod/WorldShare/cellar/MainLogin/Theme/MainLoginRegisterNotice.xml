@@ -145,7 +145,6 @@
                                 margin-bottom: 2.5px;
                                 background: url(Texture/Aries/Creator/paracraft/fenggexian_190x9_32bits.png#0 0 190 9);'></div>
                     <div>
-                    <div>
                         <span style='color: #99a1b4'>1. </span>
                         <pe:if condition='<%= is_active("phone", 3) %>'>
                             <%= L'密码长度超过4位' %>
@@ -202,7 +201,7 @@
                         </pe:if>
                     </div>
                     <div>
-                        <span style='color: #99a1b4'>3. </span>
+                        <span style='color: #99a1b4'>4. </span>
                         <pe:if condition='<%= is_active("phone", 9) %>'>
                             <%= L'账号不与密码重复' %>
                         </pe:if>

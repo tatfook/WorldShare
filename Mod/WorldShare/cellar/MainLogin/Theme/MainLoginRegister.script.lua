@@ -35,7 +35,7 @@ MainLogin.registerValidates = {
         [6] = true,
         [7] = true,
         [8] = true,
-        [8] = true,
+        [9] = true,
     }
 }
 
@@ -89,7 +89,11 @@ function set_phone_mode()
     get_page():FindControl('account_register_mode').visible = false
     get_page():FindControl('phone_register_mode').visible = true
 
-    get_notice_page().set_mode(2)
+    if get_page().phone_step == 1 then
+        get_notice_page().set_mode(2)
+    elseif get_page().phone_step == 2 then
+        get_notice_page().set_mode(3)
+    end
 end
 
 function set_finish()
@@ -131,6 +135,8 @@ function on_focus_account_password()
 end
 
 function on_change_account_account()
+    update_register_button_status()
+
     local account = get_page():GetValue('register_account')
 
     if not account or type(account) ~= 'string' or account == '' then
@@ -178,6 +184,8 @@ function on_change_account_password()
 
     get_page():SetValue('register_account_password', password)
 
+    update_register_button_status()
+
     -- validate
     local account = get_page():GetValue('register_account') or ''
 
@@ -212,6 +220,36 @@ function on_change_account_password()
     end
 
     get_notice_page():Refresh(0.01)
+end
+
+function update_register_button_status()
+    local account = get_page():GetValue('register_account') or ''
+    local password = get_page():GetValue('register_account_password') or ''
+    local b_button_right = true
+
+    echo(account, true)
+    if not Validated:Account(account) then
+        b_button_right = false
+    end
+
+    echo(password, true)
+    if not Validated:Password(password) then
+        b_button_right = false
+    end
+
+    if account == password then
+        b_button_right = false
+    end
+
+    if not account_agree then
+        b_button_right = false
+    end
+
+    if b_button_right then
+        get_page():SetUIBackground('account_register_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 98 258 44')
+    else
+        get_page():SetUIBackground('account_register_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 197 258 44')
+    end
 end
 
 function set_show_password()
@@ -249,59 +287,69 @@ function account_register()
         return
     end
 
-    if not account_agree then
-        _guihelper.MessageBox(L'*您未同意用户协议')
-        return
-    end
-
     if not Validated:Password(password) then
         _guihelper.MessageBox(L'*密码不合法')
         return
     end
 
+    if account == password then
+        _guihelper.MessageBox(L'*密码不能与账号相同')
+        return
+    end
+
+    if not account_agree then
+        _guihelper.MessageBox(L'*您未同意用户协议')
+        return
+    end
+
     Mod.WorldShare.MsgBox:Show(L'正在注册，请稍候...', 10000, L'链接超时', 500, 120, 10)
 
-    check_account(function(result)
-        if not result then
-            Mod.WorldShare.MsgBox:Close()
-            return
-        end
-
-        keepwork.tatfook.sensitive_words_check(
-            {
-                word = account,
-            },
-            function(err, msg, data)
+    KeepworkServiceSession:CheckUsernameExist(
+        account,
+        function(bIsExist)
+            if bIsExist then
                 Mod.WorldShare.MsgBox:Close()
-
-                if err == 200 then
-                    -- 敏感词判断
-                    if data and #data > 0 then
-                        local limit_world = data[1]
-                        local begain_index, end_index = string.find(account, limit_world)
-                        local begain_str = string.sub(account, 1, begain_index-1)
-                        local end_str = string.sub(account, end_index+1, #account)
-
-                        local limit_name = string.format([[%s<div style="color: #ff0000;float: lefr;">%s</div>%s]], begain_str, limit_world, end_str)
-                        _guihelper.MessageBox(string.format("您设定的用户名包含敏感字符 %s，请换一个。", limit_name))
-                        return
-                    end
-
-                    MainLogin.account = account
-                    MainLogin.password = password
-                    MainLogin.agree = agree
-
-                    MainLogin.callback = function()
-                        get_page():SetValue('account_result', account)
-                        get_page():SetValue('password_result', password)
-                        set_finish()
-                    end
-
-                    MainLogin:RegisterWithAccount()
-                end
+                _guihelper.MessageBox(format(L'*账号名%s已经被其他人注册，请使用其他账号名。', account))
+                
+                return
             end
-        )
-    end)
+
+            keepwork.tatfook.sensitive_words_check(
+                {
+                    word = account,
+                },
+                function(err, msg, data)
+                    Mod.WorldShare.MsgBox:Close()
+    
+                    if err == 200 then
+                        -- 敏感词判断
+                        if data and #data > 0 then
+                            local limit_world = data[1]
+                            local begain_index, end_index = string.find(account, limit_world)
+                            local begain_str = string.sub(account, 1, begain_index-1)
+                            local end_str = string.sub(account, end_index+1, #account)
+    
+                            local limit_name = string.format([[%s<div style="color: #ff0000;float: lefr;">%s</div>%s]], begain_str, limit_world, end_str)
+                            _guihelper.MessageBox(string.format("您设定的用户名包含敏感字符 %s，请换一个。", limit_name))
+                            return
+                        end
+
+                        MainLogin.account = account
+                        MainLogin.password = password
+                        MainLogin.agree = agree
+    
+                        MainLogin.callback = function()
+                            get_page():SetValue('account_result', account)
+                            get_page():SetValue('password_result', password)
+                            set_finish()
+                        end
+    
+                        MainLogin:RegisterWithAccount()
+                    end
+                end
+            )
+        end
+    )
 end
 
 function finish()
@@ -328,32 +376,6 @@ function set_register_agree()
     else
         get_page():FindControl('agree_field_error').visible = false
     end
-end
-
-function check_account(callback)
-    if not callback or type(callback) ~='function' then
-        return
-    end
-
-    local username = get_page():GetValue('register_account')
-
-    if not Validated:Account(username) then
-        _guihelper.MessageBox(L'*账号需大于3位且非数字开头的字母、数字组合形式')
-        callback(false)
-        return
-    end
-
-    KeepworkServiceSession:CheckUsernameExist(
-        username,
-        function(bIsExist)
-            if bIsExist then
-                _guihelper.MessageBox(format(L'*账号名%s已经被其他人注册，请使用其他账号名。', username))
-                callback(false)
-            else
-                callback(true)
-            end
-        end
-    )
 end
 
 -- phone
@@ -473,23 +495,62 @@ function on_change_next()
 end
 
 function on_change_phone_account()
-    -- local username = get_page():GetValue('phone_register_account')
+    local account = get_page():GetValue('phone_register_account')
+    local phonepassword = get_page():GetValue('phonepassword')
+    local b_button_right = true
+    
+    if not Validated:Account(account) then
+        b_button_right = false
+    end
 
-    -- if #username < 4 then
-    --     get_page():SetUIValue('phone_account_field_error_msg', L'请输入4位以上的英文字母、数字')
-    --     _guihelper.SetFontColor(get_page():FindControl('phone_account_field_error_msg'), '#00FF00')
-    --     get_page():FindControl('phone_account_field_error').visible = true
-    --     get_page():SetUIBackground('phone_register_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 197 258 44')
-    --     return
-    -- else
-    --     if not Validated:Account(username) then
-    --         get_page():SetUIValue('phone_account_field_error_msg', L'*账号需大于3位且非数字开头的字母、数字组合形式')
-    --         _guihelper.SetFontColor(get_page():FindControl('phone_account_field_error_msg'), '#FF0000')
-    --         get_page():FindControl('phone_account_field_error').visible = true
-    --         get_page():SetUIBackground('phone_register_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 197 258 44')
-    --         return
-    --     end
-    -- end
+    if account == phonepassword then
+        b_button_right = false 
+    end
+
+    if b_button_right then
+        get_page():SetUIBackground('phone_register_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 98 258 44')
+    else
+        get_page():SetUIBackground('phone_register_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 197 258 44')
+    end
+
+    if not account or type(account) ~= 'string' or account == '' then
+        MainLogin.registerValidates.phone[6] = true
+        MainLogin.registerValidates.phone[7] = true
+        MainLogin.registerValidates.phone[8] = true
+        MainLogin.registerValidates.phone[9] = true
+
+        get_notice_page():Refresh(0.01)
+
+        return
+    end
+
+    if string.match(account, '^%a') then
+        MainLogin.registerValidates.phone[6] = true
+    else
+        MainLogin.registerValidates.phone[6] = false
+    end
+
+    local sAccount = string.match(account, '[%a%d]+')
+
+    if sAccount == account then
+        MainLogin.registerValidates.phone[7] = true
+    else
+        MainLogin.registerValidates.phone[7] = false
+    end
+
+    if #account >= 4 then
+        MainLogin.registerValidates.phone[8] = true
+    else
+        MainLogin.registerValidates.phone[8] = false
+    end
+
+    if phonepassword ~= account then
+        MainLogin.registerValidates.phone[9] = true
+    else
+        MainLogin.registerValidates.phone[9] = false
+    end
+
+    get_notice_page():Refresh(0.01)
 end
 
 function phone_register_next()
@@ -507,6 +568,12 @@ function phone_register_next()
 
     if not check_phone_password() then
         _guihelper.MessageBox(L'*密码不合法')
+
+        return
+    end
+
+    if not phone_agree then
+        _guihelper.MessageBox(L'*您未同意用户协议')
 
         return
     end
@@ -530,6 +597,7 @@ function phone_register_next()
 
             get_page():FindControl('phone_register_mode_step_1').visible = false
             get_page():FindControl('phone_register_mode_step_2').visible = true
+            get_page().phone_step = 2
             get_notice_page().set_mode(3)
         end)
     end)
@@ -543,6 +611,18 @@ function phone_register()
 
     if not Validated:Account(username) then
         _guihelper.MessageBox(L'*账号需4位以上且非数字开头的字母、数字组合形式')
+
+        return
+    end
+
+    if not Validated:Password(phonepassword) then
+        _guihelper.MessageBox(L'*密码格式错误')
+
+        return
+    end
+
+    if username == phonepassword then
+        _guihelper.MessageBox(L'*密码不能与账号相同')
 
         return
     end

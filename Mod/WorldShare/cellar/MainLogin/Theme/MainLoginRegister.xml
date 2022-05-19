@@ -7,6 +7,8 @@
                     local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
                     MainLogin.registerPage = page
 
+                    page.phone_step = 1
+
                     -- don't remove, beacause set account mode button realtime
                     Mod.WorldShare.Utils.SetTimeOut(function()
                         set_account_mode()
@@ -377,7 +379,7 @@
                                         <div>
                                             <input type='button'
                                                    name='phone_register_next_button'
-                                                   class='main_login_gray_button'
+                                                   class='main_login_blue_button'
                                                    style='margin-top: 10px'
                                                    onclick='phone_register_next()'
                                                    value='<%= L"下一步"%>' />
@@ -388,22 +390,11 @@
                                               visible='false'
                                               style='position: relative;
                                                      background:;'>
-                                    <pe:container name='phone_account_field_error'
-                                                  visible='false'
-                                                  style='background:;
-                                                         margin-top: 5px;'>
-                                        <!-- error message -->
-                                        <div>
-                                            <label style='font-size: 12px;
-                                                          base-font-size: 12px;
-                                                          color: #EB2222;'
-                                                   name='phone_account_field_error_msg' />
-                                        </div>
-                                    </pe:container>
                                     <div style='width: 240px;
                                                 height: 46.87px;
                                                 padding-left: 15px;
                                                 padding-top: 12px;
+                                                margin-top: 12px;
                                                 background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#9 951 256 50);'>
                                         <input type='text'
                                             name='phone_register_account'
@@ -420,7 +411,7 @@
                                     <div>
                                         <input type='button'
                                                name='phone_register_button'
-                                               class='main_login_gray_button'
+                                               class='main_login_blue_button'
                                                style='margin-top: 130px'
                                                onclick='phone_register()'
                                                value='<%= L"注册"%>' />
