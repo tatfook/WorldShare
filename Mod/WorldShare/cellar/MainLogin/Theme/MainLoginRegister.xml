@@ -9,6 +9,30 @@
 
                     page.phone_step = 1
 
+                    MainLogin.registerValidates = {
+                        account = {
+                            [1] = nil,
+                            [2] = nil,
+                            [3] = nil,
+                            [4] = nil,
+                            [5] = nil,
+                            [6] = nil,
+                            [7] = nil,
+                            [8] = nil,
+                        },
+                        phone = {
+                            [1] = nil,
+                            [2] = nil,
+                            [3] = nil,
+                            [4] = nil,
+                            [5] = nil,
+                            [6] = nil,
+                            [7] = nil,
+                            [8] = nil,
+                            [9] = nil,
+                        }
+                    }
+
                     -- don't remove, beacause set account mode button realtime
                     Mod.WorldShare.Utils.SetTimeOut(function()
                         set_account_mode()
