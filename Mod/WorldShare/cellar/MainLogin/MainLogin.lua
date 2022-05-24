@@ -135,7 +135,7 @@ function MainLogin:Show2()
     local MainLoginPage = Mod.WorldShare.Store:Get('page/MainLogin')
 
     if not MainLoginPage then
-        return false
+        return
     end
 
     self:ShowExtra()
@@ -163,7 +163,7 @@ function MainLogin:Show3()
     local MainLoginPage = Mod.WorldShare.Store:Get('page/MainLogin')
 
     if not MainLoginPage then
-        return false
+        return
     end
 
     self:ShowExtra()
@@ -511,8 +511,8 @@ function MainLogin:ShowExtra()
     if Mod.WorldShare.Utils.IsEnglish() then
         width = 500
         height = 130
-        left = 1000
-        top = 160
+        left = 780
+        top = 200
     else
         width = 400
         height = 140

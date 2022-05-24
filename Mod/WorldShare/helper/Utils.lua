@@ -103,8 +103,8 @@ function Utils.ShowWindow(option, height, url, name, x, y, align, allowDrag, zor
     
         if Mod.WorldShare.Utils.IsEnglish() then
             local enUrl = string.gsub(params.url, '.html', '.en.html')
-            enUrl = string.gsub(params.url, '.xml', '.en.xml')
-    
+            enUrl = string.gsub(enUrl, '.xml', '.en.xml')
+
             if ParaIO.DoesFileExist(enUrl, true) then
                 params.url = enUrl
             end
