@@ -1,7 +1,8 @@
 ﻿--[[
 Title: LocalService
-Author(s):  big
-Date:  2016.12.11
+Author(s): big
+CreateDate: 2016.12.11
+ModifyDate: 2022.5.26
 Desc: 
 use the lib:
 ------------------------------------------------------------
@@ -467,6 +468,25 @@ function LocalService:GetZipProjectId(path)
     end
 
     return projectId
+end
+
+function LocalService:GetRevision(worldpath)
+    if not string.match(worldpath, '/$') then
+        worldpath = worldpath .. '/'
+    end
+
+    local file = ParaIO.open(worldpath .. 'revision.xml', 'r')
+
+    if file:IsValid() then
+        revision = file:GetText(0, -1)
+        file:close()
+    end
+
+    if not revision then
+        revision = 0
+    end
+
+    return tonumber(revision)
 end
 
 function LocalService:GetZipRevision(path)

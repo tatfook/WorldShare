@@ -413,12 +413,18 @@ function KeepworkServiceWorld:UnlockWorld(callback)
 end
 
 function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
-    if type(callback) ~= 'function' then
-        return false
+    if not callback and type(callback) ~= 'function' then
+        return
     end
 
     localWorlds = localWorlds or {}
     local userId = Mod.WorldShare.Store:Get('user/userId')
+    local username = Mod.WorldShare.Store:Get('user/username')
+    local syncBackUpWorld = {}
+
+    if ParaIO.DoesFileExist('temp/sync_backup_world') then
+        syncBackUpWorld = commonlib.Files.Find({}, 'temp/sync_backup_world', 0, 10000, '*')
+    end
 
     self:GetWorldsList(function(data, err)
         if type(data) ~= 'table' then
@@ -476,12 +482,28 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                         instituteVipEnabled = LItem.instituteVipEnabled
                         name = LItem.name
     
-                        -- update project id for different user
+                        -- update project for different user
                         if tonumber(LItem.kpProjectId) ~= tonumber(DItem.projectId) then
-                            local tag = SaveWorldHandler:new():Init(worldpath):LoadWorldInfo()
-    
-                            tag.kpProjectId = DItem.projectId
-                            LocalService:SetTag(worldpath, tag)
+                            if not string.match(LItem.foldername, '_main$') and
+                               not remoteShared then
+                                Mod.WorldShare.worldpath = nil -- force update world data.
+                                local curWorldUsername = Mod.WorldShare:GetWorldData('username', LItem.worldpath) or ''
+
+                                if curWorldUsername then
+                                    local backUpWorldPath =
+                                        'temp/sync_backup_world/' ..
+                                        curWorldUsername ..
+                                        '_' ..
+                                        commonlib.Encoding.Utf8ToDefault(LItem.foldername)
+
+                                    commonlib.Files.MoveFolder(LItem.worldpath, backUpWorldPath)
+                                end
+
+                                ParaIO.DeleteFile(LItem.worldpath)
+
+                                status = 2
+                                isExist = false
+                            end
                         end
                     end
 
@@ -527,6 +549,32 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                         Mod.WorldShare.Utils.GetWorldFolderFullPath(),
                         commonlib.Encoding.Utf8ToDefault(DItem.worldName)
                     )
+
+                    local matchStr = '^' .. username .. '_(.+)'
+
+                    for SKey, SItem in ipairs(syncBackUpWorld) do
+                        if SItem.fileattr == 16 then
+                            local matchFoldername = string.match(SItem.filename, matchStr)
+
+                            if matchFoldername and
+                               type(matchFoldername) == 'string' and
+                               matchFoldername == DItem.worldName then
+                                commonlib.Files.MoveFolder('temp/sync_backup_world/' .. SItem.filename, worldpath)
+
+                                local curRevision = LocalService:GetRevision(worldpath)
+
+                                if curRevision == tonumber(DItem.revision or 0) then
+                                    status = 3 -- both
+                                elseif curRevision > tonumber(DItem.revision or 0) then
+                                    status = 4 -- network newest
+                                elseif curRevision < tonumber(DItem.revision or 0) then
+                                    status = 5 -- local newest
+                                end
+
+                                break
+                            end
+                        end
+                    end
                 end
             end
 
@@ -610,7 +658,9 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
             if not isExist then
                 currentWorld = LocalServiceWorld:GenerateWorldInstance(LItem)
 
-                currentWorldList:push_back(currentWorld)
+                if not currentWorld.kpProjectId or currentWorld.kpProjectId == 0 then
+                    currentWorldList:push_back(currentWorld)
+                end
             end
         end
 
