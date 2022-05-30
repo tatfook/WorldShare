@@ -716,7 +716,10 @@ function CommonLoadWorld:InjectShowCustomDownloadWorldFilter(worldInfo, download
                 {
                     callbackFunc = function()
                         if count > 0 then
-                            downloadWorldInstance.startOldVersionButtonNode.text = format(L'启动旧版(%d)', count)
+                            if downloadWorldInstance.startOldVersionButtonNode then
+                                downloadWorldInstance.startOldVersionButtonNode.text = format(L'启动旧版(%d)', count)
+                            end
+
                             count = count - 1
                         else
                             downloadWorldInstance.startOldVersionButtonNode.text = L'启动旧版'
