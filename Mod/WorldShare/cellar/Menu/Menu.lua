@@ -129,21 +129,32 @@ function Menu:Init(menuItems)
 
     NPL.load("(gl)script/apps/Aries/Creator/HttpAPI/keepwork.user.lua")
     NPL.load("(gl)script/apps/Aries/Creator/HttpAPI/keepwork.world.lua")
-    keepwork.world.is_favorited({objectId = currentEnterWorld.kpProjectId, objectType = 5}, function(err, msg, data)
+    keepwork.world.is_stared({router_params = {id = currentEnterWorld.kpProjectId}}, function(err, msg, data)
+        local isLiked = false
         if (err == 200) then
-            state = data == true and STATES.UNFAVORITE or STATES.FAVORITE
+            isLiked = data == true
         end
         table.insert(projectMenu.children,{Type = "Separator"})
-        if state == STATES.FAVORITE then
-            table.insert(projectMenu.children,{text = L"收藏项目", name = "project.favorite", onclick = nil})
+        if isLiked then
+            table.insert(projectMenu.children,{text = L"已点赞", name = "project.unlike", onclick = nil})
         else
-            table.insert(projectMenu.children,{text = L"取消收藏", name = "project.unfavorite", onclick = nil})
+            table.insert(projectMenu.children,{text = L"点赞项目", name = "project.like", onclick = nil})
         end
-        NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/DesktopMenu.lua");
-        local DesktopMenu = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.DesktopMenu")
-        DesktopMenu.RebuildMenuItem(projectMenu)
+        keepwork.world.is_favorited({objectId = currentEnterWorld.kpProjectId, objectType = 5}, function(err, msg, data)
+            if (err == 200) then
+                state = data == true and STATES.UNFAVORITE or STATES.FAVORITE
+            end
+           
+            if state == STATES.FAVORITE then
+                table.insert(projectMenu.children,{text = L"收藏项目", name = "project.favorite", onclick = nil})
+            else
+                table.insert(projectMenu.children,{text = L"取消收藏", name = "project.unfavorite", onclick = nil})
+            end
+            NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/DesktopMenu.lua");
+            local DesktopMenu = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.DesktopMenu")
+            DesktopMenu.RebuildMenuItem(projectMenu)
+        end)
     end)
-
     menuItems[#menuItems + 1] = projectMenu
     return menuItems
 end

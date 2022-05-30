@@ -67,6 +67,11 @@ function MenuCommand:Call(cmdName, cmdText, cmdParams)
     elseif name == "project.favorite" then
         self:Favorite(false)
         return true
+    elseif name == "project.like" then
+        self:LikeProject()
+        return true
+    elseif name == "project.unlike" then
+        return true
     end
 
     return false
@@ -100,6 +105,48 @@ function MenuCommand:ChangeFavoriteItemState(showFavorite)
             end
         end
         DesktopMenu.RebuildMenuItem(projectMenu)
+    end
+end
+
+function MenuCommand:LikeProject()
+    if not GameLogic.GetFilters():apply_filters('is_signed_in') then
+		GameLogic.GetFilters():apply_filters('check_signed_in', "请先登录", function(result)
+			if result == true then
+				commonlib.TimerManager.SetTimeout(function()
+
+				end, 500)
+			end
+		end)
+
+		return
+	end
+
+    NPL.load("(gl)script/apps/Aries/Creator/HttpAPI/keepwork.user.lua")
+    NPL.load("(gl)script/apps/Aries/Creator/HttpAPI/keepwork.world.lua")
+    local ProjectId = GameLogic.options:GetProjectId()
+    if ProjectId then
+        keepwork.world.star({router_params = {id = ProjectId}}, function(err, msg, data)
+            local isLiked = err == 200
+            NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/DesktopMenu.lua");
+            local DesktopMenu = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.DesktopMenu")
+            local projectMenu = DesktopMenu.GetMenuItem("project")
+            if projectMenu then
+                for index, item in ipairs(projectMenu.children) do
+                    if(item.Type ~= "Separator" ) then
+                        if isLiked and item.name == "project.like" then
+                            item.name = "project.unlike"
+                            item.text = L"已点赞"
+                        elseif not isLiked and item.name == "project.unlike"  then
+                            item.name = "project.like"
+                            item.text = L"点赞项目"
+                        end
+                    end
+                end
+                DesktopMenu.RebuildMenuItem(projectMenu)
+            end
+        end)
+    else
+        GameLogic.AddBBS(nil, L"点赞失败，请先分享该项目，再重试！", 3000, "255 0 0")
     end
 end
 
