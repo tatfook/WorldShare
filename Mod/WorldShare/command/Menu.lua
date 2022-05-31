@@ -135,7 +135,7 @@ function MenuCommand:LikeProject()
                     if(item.Type ~= "Separator" ) then
                         if isLiked and item.name == "project.like" then
                             item.name = "project.unlike"
-                            item.text = L"已点赞"
+                            item.text = L"今日已点"
                         elseif not isLiked and item.name == "project.unlike"  then
                             item.name = "project.like"
                             item.text = L"点赞项目"

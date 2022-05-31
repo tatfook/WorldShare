@@ -136,7 +136,7 @@ function Menu:Init(menuItems)
         end
         table.insert(projectMenu.children,{Type = "Separator"})
         if isLiked then
-            table.insert(projectMenu.children,{text = L"已点赞", name = "project.unlike", onclick = nil})
+            table.insert(projectMenu.children,{text = L"今日已点", name = "project.unlike", onclick = nil})
         else
             table.insert(projectMenu.children,{text = L"点赞项目", name = "project.like", onclick = nil})
         end
