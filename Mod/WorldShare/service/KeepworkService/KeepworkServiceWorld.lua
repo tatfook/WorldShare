@@ -500,7 +500,9 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                                 else
                                     backUpWorldPath =
                                         'temp/sync_backup_world/' ..
-                                        commonlib.Encoding.Utf8ToDefault(LItem.foldername)
+                                        commonlib.Encoding.Utf8ToDefault(LItem.foldername) ..
+                                        '_' ..
+                                        ParaMisc.md5(tostring(os.time()))
                                 end
 
                                 commonlib.Files.MoveFolder(LItem.worldpath, backUpWorldPath)
