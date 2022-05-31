@@ -648,6 +648,12 @@ function SyncToDataSource:UpdateRecord(callback)
                                     extra = extra,
                                 }
 
+                                if currentWorldTag and type(currentWorldTag) == 'table' then
+                                    params.fromProjects = currentWorldTag.fromProjects
+                                    params.worldGenerator = currentWorldTag.worldGenerator
+                                    params.tag = currentWorldTag
+                                end
+
                                 local setPrivateDuringSync = Mod.WorldShare.Store:Get('world/setPrivateDuringSync')
 
                                 if setPrivateDuringSync then
