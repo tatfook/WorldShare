@@ -232,7 +232,8 @@ end
 
 -- updat world info
 function KeepworkServiceWorld:PushWorld(worldId, params, callback)
-    if params and type(params) ~= 'table' or
+    if params and
+       type(params) ~= 'table' or
        not worldId or
        not KeepworkService:IsSignedIn() then
         return
@@ -487,17 +488,22 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                             if not string.match(LItem.foldername, '_main$') and
                                not remoteShared then
                                 Mod.WorldShare.worldpath = nil -- force update world data.
-                                local curWorldUsername = Mod.WorldShare:GetWorldData('username', LItem.worldpath) or ''
+                                local curWorldUsername = Mod.WorldShare:GetWorldData('username', LItem.worldpath)
+                                local backUpWorldPath
 
                                 if curWorldUsername then
-                                    local backUpWorldPath =
+                                    backUpWorldPath =
                                         'temp/sync_backup_world/' ..
                                         curWorldUsername ..
                                         '_' ..
                                         commonlib.Encoding.Utf8ToDefault(LItem.foldername)
-
-                                    commonlib.Files.MoveFolder(LItem.worldpath, backUpWorldPath)
+                                else
+                                    backUpWorldPath =
+                                        'temp/sync_backup_world/' ..
+                                        commonlib.Encoding.Utf8ToDefault(LItem.foldername)
                                 end
+
+                                commonlib.Files.MoveFolder(LItem.worldpath, backUpWorldPath)
 
                                 ParaIO.DeleteFile(LItem.worldpath)
 

@@ -57,18 +57,45 @@ function CreateWorld:CreateNewWorld(foldername, callback)
 end
 
 function CreateWorld.OnClickCreateWorld()
-    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+    local foldername = CreateNewWorld.page:GetValue('new_world_name')
     local currentWorldList = Mod.WorldShare.Store:Get('world/compareWorldList') or {}
 
-    local beExisted = false
-    local foldername = CreateNewWorld.page:GetValue('new_world_name')
-
     for key, item in ipairs(currentWorldList) do
-        if item.foldername == foldername and
-           currentWorld.foldername ~= foldername then
+        if item.foldername == foldername then
             _guihelper.MessageBox(L'世界名已存在，请列表中进入')
             return true
         end
+    end
+
+    local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
+
+    if currentEnterWorld and currentEnterWorld.foldername == foldername then
+        _guihelper.MessageBox(L'世界名已存在，请列表中进入')
+        return true
+    end
+
+    local worldPath = ParaIO.GetWritablePath() .. 'worlds/DesignHouse/' .. foldername
+
+    if ParaIO.DoesFileExist(worldPath, true) == true then
+        Mod.WorldShare.worldpath = nil -- force update world data.
+        local curWorldUsername = Mod.WorldShare:GetWorldData('username', worldPath)
+        local backUpWorldPath
+
+        if curWorldUsername then
+            backUpWorldPath =
+                'temp/sync_backup_world/' ..
+                curWorldUsername ..
+                '_' ..
+                commonlib.Encoding.Utf8ToDefault(foldername)
+        else
+            backUpWorldPath =
+                'temp/sync_backup_world/' ..
+                commonlib.Encoding.Utf8ToDefault(foldername)
+        end
+
+        commonlib.Files.MoveFolder(worldPath, backUpWorldPath)
+
+        ParaIO.DeleteFile(worldPath)
     end
 
     Mod.WorldShare.Store:Remove('world/currentWorld')
