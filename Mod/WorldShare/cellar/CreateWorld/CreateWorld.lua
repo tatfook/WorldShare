@@ -87,15 +87,11 @@ function CreateWorld.OnClickCreateWorld()
                 curWorldUsername ..
                 '_' ..
                 commonlib.Encoding.Utf8ToDefault(foldername)
-        else
-            backUpWorldPath =
-                'temp/sync_backup_world/' ..
-                commonlib.Encoding.Utf8ToDefault(foldername)
+
+            commonlib.Files.MoveFolder(worldPath, backUpWorldPath)
+
+            ParaIO.DeleteFile(worldPath)
         end
-
-        commonlib.Files.MoveFolder(worldPath, backUpWorldPath)
-
-        ParaIO.DeleteFile(worldPath)
     end
 
     Mod.WorldShare.Store:Remove('world/currentWorld')
