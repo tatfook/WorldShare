@@ -88,6 +88,33 @@ GameLogic.GetFilters():add_filter(
     end
 )
 
+GameLogic.GetFilters():add_filter(
+    "like_change",
+    function (data)
+        MenuCommand:ChangeLikeItemState(data.isLiked)
+    end
+)
+
+function MenuCommand:ChangeLikeItemState(isLiked)
+    NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/DesktopMenu.lua");
+    local DesktopMenu = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.DesktopMenu")
+    local projectMenu = DesktopMenu.GetMenuItem("project")
+    if projectMenu then
+        for index, item in ipairs(projectMenu.children) do
+            if(item.Type ~= "Separator" ) then
+                if isLiked and item.name == "project.like" then
+                    item.name = "project.unlike"
+                    item.text = L"今日已点"
+                elseif not isLiked and item.name == "project.unlike"  then
+                    item.name = "project.like"
+                    item.text = L"点赞项目"
+                end
+            end
+        end
+        DesktopMenu.RebuildMenuItem(projectMenu)
+    end
+end
+
 function MenuCommand:ChangeFavoriteItemState(showFavorite)
     NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/DesktopMenu.lua");
     local DesktopMenu = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.DesktopMenu")
@@ -127,23 +154,7 @@ function MenuCommand:LikeProject()
     if ProjectId then
         keepwork.world.star({router_params = {id = ProjectId}}, function(err, msg, data)
             local isLiked = err == 200
-            NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/DesktopMenu.lua");
-            local DesktopMenu = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.DesktopMenu")
-            local projectMenu = DesktopMenu.GetMenuItem("project")
-            if projectMenu then
-                for index, item in ipairs(projectMenu.children) do
-                    if(item.Type ~= "Separator" ) then
-                        if isLiked and item.name == "project.like" then
-                            item.name = "project.unlike"
-                            item.text = L"今日已点"
-                        elseif not isLiked and item.name == "project.unlike"  then
-                            item.name = "project.like"
-                            item.text = L"点赞项目"
-                        end
-                    end
-                end
-                DesktopMenu.RebuildMenuItem(projectMenu)
-            end
+            self:ChangeLikeItemState(isLiked)
         end)
     else
         GameLogic.AddBBS(nil, L"点赞失败，请先分享该项目，再重试！", 3000, "255 0 0")
