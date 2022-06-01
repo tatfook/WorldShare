@@ -19,7 +19,14 @@ function MySchoolFilter:Init()
     GameLogic.GetFilters():add_filter(
         'cellar.my_school.select_school',
         function(callback)
-            MySchool:ShowJoinSchool(callback)
+            local RedSummerCampCourseScheduling = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/RedSummerCamp/RedSummerCampCourseSchedulingV2.lua") 
+            RedSummerCampCourseScheduling.CheckHasUnGraduationClasses(function(bool)
+                if bool then
+                    GameLogic.AddBBS(nil,L"你当前所在学校有课程未结业，暂时不可变更学校",nil,"255 0 0")
+                else
+                    MySchool:ShowJoinSchool(callback)
+                end
+            end)
         end
     )
 

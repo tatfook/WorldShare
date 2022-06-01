@@ -44,8 +44,15 @@
                 end
 
                 function join_school()
-                    MySchool:ShowJoinSchool()
-                    page:CloseWindow()
+                    local RedSummerCampCourseScheduling = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/RedSummerCamp/RedSummerCampCourseSchedulingV2.lua") 
+                    RedSummerCampCourseScheduling.CheckHasUnGraduationClasses(function(bool)
+                        if bool then
+                            GameLogic.AddBBS(nil,L"你当前所在学校有课程未结业，暂时不可变更学校",nil,"255 0 0")
+                        else
+                            MySchool:ShowJoinSchool()
+                            page:CloseWindow()
+                        end
+                    end)
                 end
 
                 function join_institute()
