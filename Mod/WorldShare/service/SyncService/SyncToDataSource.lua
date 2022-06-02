@@ -650,7 +650,7 @@ function SyncToDataSource:UpdateRecord(callback)
 
                                 if currentWorldTag and type(currentWorldTag) == 'table' then
                                     params.fromProjects = currentWorldTag.fromProjects
-                                    params.worldGenerator = currentWorldTag.worldGenerator
+                                    params.worldGenerator = currentWorldTag.world_generator
                                     params.tag = currentWorldTag
                                 end
 
