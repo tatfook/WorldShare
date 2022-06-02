@@ -160,7 +160,9 @@ function EventTrackingService:Send(eventType, action, extra, offlineMode)
     if (abPath and abPath ~= "") then
         dataPacket["abPath"] = abPath;
     end
-
+    if System.options.channelId~="" then
+        dataPacket.channelId = System.options.channelId
+    end
     if EventTrackingDatabase:PutPacket(userId, action, dataPacket) then
         EventGatewayEventsApi:Send(
             "behavior",
