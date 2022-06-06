@@ -456,7 +456,7 @@ function SyncMain:CheckWorldSize(callback)
     local filesTotal = LocalService:GetWorldSize(currentWorld.worldpath)
     local maxSize = 0
 
-    if filesTotal > 10 * 1024 * 1024 then
+    if filesTotal > 20 * 1024 * 1024 then
         GameLogic.IsVip('LimitWorldSize20Mb', true, function(result)
             if result then
                 Permission:CheckPermission('OnlineWorldData50Mb', false, function(result)
