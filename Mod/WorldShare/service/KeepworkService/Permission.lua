@@ -143,9 +143,9 @@ KeepworkServicePermission.AllLocalAuth = {
     --         'vip'
     --     }
     -- },
-    LimitWorldSize10Mb = {
-        key = 'limit_world_size_10_mb',
-        desc = L'免费用户只能分享不超过10M的世界',
+    LimitWorldSize20Mb = {
+        key = 'limit_world_size_20_mb',
+        desc = L'免费用户只能分享不超过20M的世界',
         role = {
             'student',
             'teacher',
