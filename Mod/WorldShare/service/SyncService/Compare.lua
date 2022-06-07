@@ -59,7 +59,7 @@ Compare.compareFinish = true
 
 function Compare:Init(worldPath, callback)
     if not callback or type(callback) ~= 'function' then
-        return false
+        return
     end
 
     self.worldPath = worldPath
@@ -69,7 +69,7 @@ function Compare:Init(worldPath, callback)
     Mod.WorldShare.Store:Set('world/remoteRevision', 0)
 
     if not self:IsCompareFinish() then
-        return false
+        return
     end
 
     self:SetFinish(false)

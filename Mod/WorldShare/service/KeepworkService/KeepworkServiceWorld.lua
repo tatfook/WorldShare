@@ -737,6 +737,28 @@ function KeepworkServiceWorld:LimitFreeUser(isShowUI, callback,allowMax)
     end)
 end
 
+function KeepworkServiceWorld:OnCreateHomeWorld(homeWorldName)
+    local worldPath = 'worlds/DesignHouse/' .. homeWorldName
+
+    KeepworkWorldsApi:GetWorldByName(
+        homeWorldName,
+        function(data, err)
+            if not data or
+               type(data) ~= 'table' or
+               not data[1] or
+               type(data[1]) ~= 'table' then
+                return
+            end
+
+            local worldTag = LocalService:GetTag(worldPath)
+
+            worldTag.kpProjectId = data[1].projectId
+
+            LocalService:SetTag(worldPath, worldTag)
+        end
+    )
+end
+
 function KeepworkServiceWorld:GenerateWorldInstance(params)
     if not params or type(params) ~= 'table' then
         return {}

@@ -31,4 +31,11 @@ function KeepworkServiceWorldFilter:Init()
             return KeepworkServiceWorld:LimitFreeUser(...)
         end
     )
+
+    GameLogic.GetFilters():add_filter(
+        'OnCreateHomeWorld',
+        function(...)
+            KeepworkServiceWorld:OnCreateHomeWorld(...)
+        end
+    )
 end

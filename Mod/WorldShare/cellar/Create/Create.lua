@@ -182,7 +182,7 @@ end
 
 function Create:Sync()
     if not KeepworkServiceSession:IsSignedIn() then
-        return false
+        return
     end
 
     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
@@ -194,7 +194,7 @@ function Create:Sync()
 
         if not result then
             GameLogic.AddBBS(nil, L'版本号对比失败', 3000, '255 0 0')
-            return false
+            return
         end
 
         if result == Compare.JUSTLOCAL then
