@@ -209,7 +209,9 @@ function WorldExitDialog.OnDialogResult(res)
                 GameLogic.QuickSave()
             end
 
-            if KeepworkServiceSession:IsSignedIn() then
+            local UserMacBindsService = NPL.load('(gl)Mod/WorldShare/service/UserMacBindsService.lua')
+            local isBind = UserMacBindsService:IsBindDeviceFromLocal()
+            if KeepworkServiceSession:IsSignedIn() or isBind then
                 local titlename = GameLogic.GetFilters():apply_filters('GameName', L"帕拉卡 Paracraft")
                 local desc = GameLogic.GetFilters():apply_filters('GameDescription', L"3D动画编程创作工具")
 
