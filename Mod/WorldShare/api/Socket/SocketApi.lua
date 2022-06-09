@@ -39,8 +39,8 @@ function SocketApi:Connect(callback)
             table.insert(_args, v)
         end
 
-        if type(_args[1]) == 'table' then
-            _args[1].token = Mod.WorldShare.Store:Get('user/token')
+        if _args[1] and type(_args[1]) == 'table' then
+            -- _args[1].token = Mod.WorldShare.Store:Get('user/token')
         end
 
         if #_args == 1 then
