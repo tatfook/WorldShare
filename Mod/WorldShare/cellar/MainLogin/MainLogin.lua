@@ -610,10 +610,18 @@ function MainLogin:LoginWithToken(token, callback)
         -- response.rememberMe = true
 
         local socketTimer
+        local tryTimes = 0
         
         socketTimer = commonlib.Timer:new(
             {
                 callbackFunc = function()
+                    if tryTimes > 1000 then
+                        socketTimer:Change(nil, nil)
+                        return
+                    end
+
+                    tryTimes = tryTimes + 1
+
                     if Mod.WorldShare.Store:Get('user/isSocketConnected') then
                         socketTimer:Change(nil, nil)
 
