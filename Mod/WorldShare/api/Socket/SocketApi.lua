@@ -40,7 +40,7 @@ function SocketApi:Connect(callback)
         end
 
         if _args[1] and type(_args[1]) == 'table' then
-            -- _args[1].token = Mod.WorldShare.Store:Get('user/token')
+            _args[1].token = Mod.WorldShare.Store:Get('user/token')
         end
 
         if #_args == 1 then
@@ -54,7 +54,7 @@ function SocketApi:Connect(callback)
         elseif #_args == 5 then
             args = connectionSelf:GetArgs(name, _args[1], _args[2], _args[3], _args[4], _args[5])
         elseif #_args == 6 then
-            args = connectionSelf:GetArgs(name, _args[1], _args[2], _args[3], _args[4], _args[5], _args[6])
+            args = connectionSelf:GetArgs(name, _args[1], _argswo[2], _args[3], _args[4], _args[5], _args[6])
         elseif #_args == 7 then
             args = connectionSelf:GetArgs(name, _args[1], _args[2], _args[3], _args[4], _args[5], _args[6], _args[7])
         elseif #_args == 8 then

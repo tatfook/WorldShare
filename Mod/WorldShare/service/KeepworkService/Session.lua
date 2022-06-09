@@ -87,6 +87,8 @@ function KeepworkServiceSession:OnMsg(msg)
                 connection.uiCallback(msg.data.body[2])
             end
         end
+    elseif msg.data.sio_pkt_name and msg.data.sio_pkt_name == 'connect' then
+        Mod.WorldShare.Store:Set('user/isSocketConnected', true)
     end
 end
 

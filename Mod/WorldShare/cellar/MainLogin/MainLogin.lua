@@ -582,7 +582,6 @@ function MainLogin:LoginWithToken(token, callback)
     end
 
     Mod.WorldShare.MsgBox:Show(L'正在登录，请稍候(TOKEN登录)...', 24000, L'链接超时', 450, 120)
-
     KeepworkServiceSession:LoginWithToken(token, function(response, err)
         if err ~= 200 or not response then
             Mod.WorldShare.MsgBox:Close()
@@ -610,19 +609,33 @@ function MainLogin:LoginWithToken(token, callback)
         response.autoLogin = true
         -- response.rememberMe = true
 
-        KeepworkServiceSession:LoginResponse(response, err, function(bSucceed, message)
-            Mod.WorldShare.MsgBox:Close()
-            if not bSucceed then
-                if callback and type(callback) == 'function' then
-                    callback(false, 'RESPONSE', format(L'*%s', message))
-                end
-                return
-            end
+        local socketTimer
+        
+        socketTimer = commonlib.Timer:new(
+            {
+                callbackFunc = function()
+                    if Mod.WorldShare.Store:Get('user/isSocketConnected') then
+                        socketTimer:Change(nil, nil)
 
-            if callback and type(callback) == 'function' then
-                callback(true)
-            end
-        end)
+                        KeepworkServiceSession:LoginResponse(response, err, function(bSucceed, message)
+                            Mod.WorldShare.MsgBox:Close()
+                            if not bSucceed then
+                                if callback and type(callback) == 'function' then
+                                    callback(false, 'RESPONSE', format(L'*%s', message))
+                                end
+                                return
+                            end
+                
+                            if callback and type(callback) == 'function' then
+                                callback(true)
+                            end
+                        end)
+                    end
+                end
+            }
+        )
+
+        socketTimer:Change(0, 100)
     end)
 end
 
