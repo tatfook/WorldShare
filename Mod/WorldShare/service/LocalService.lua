@@ -260,7 +260,7 @@ function LocalService:MoveFolderToZipThread(rootFolder, zipPath)
     local writer = ParaIO.CreateZip(zipPath, '')
 
     for key, item in ipairs(fileList) do
-        writer:ZipAdd(item.filename, item.file_path)
+        writer:ZipAdd(commonlib.Encoding.Utf8ToDefault(item.filename), item.file_path)
     end
 
     writer:close();
