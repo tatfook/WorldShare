@@ -191,16 +191,24 @@ function GitKeepworkService:GetWorldRevision(kpProjectId, isGetMine, callback)
         kpProjectId,
         function(data, err)
             if isGetMine then
-                if type(data) ~= 'table' or not data.id or tonumber(data.id) ~= tonumber(kpProjectId) then
+                if data and
+                   type(data) ~= 'table' or
+                   not data.id or
+                   tonumber(data.id) ~= tonumber(kpProjectId) then
                     if type(callback) == 'function' then
                         callback()
                     end
-                    return false
+
+                    return
                 end
             end
 
-            if type(data) ~= 'table' or not data.username or not data.name or not data.world then
-                return false
+            if data and
+               type(data) ~= 'table' or
+               not data.username or
+               not data.name or
+               not data.world then
+                return
             end
 
             KeepworkReposApi:Raw(
@@ -209,15 +217,17 @@ function GitKeepworkService:GetWorldRevision(kpProjectId, isGetMine, callback)
                 'revision.xml',
                 data.world.commitId,
                 function(data, err)
-                    if type(callback) == 'function' then
+                    if callback and type(callback) == 'function' then
                         callback(tonumber(data) or 0, err)
                     end
                 end,
                 function()
-                    if type(callback) == 'function' then
+                    if callback and type(callback) == 'function' then
                         callback(0, err)
                     end
-                end
+                end,
+                nil,
+                {0, 403}
             )
         end,
         function(_, err)

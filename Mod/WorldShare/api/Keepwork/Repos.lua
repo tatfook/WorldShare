@@ -117,20 +117,28 @@ end
     filePath string 必须 文件路径
 ]]
 -- return: object
-function KeepworkReposApi:Raw(foldername, username, filePath, commitId, success, error, cdnState)
-    if type(filePath) ~= 'string' then
-        return false
+function KeepworkReposApi:Raw(foldername, username, filePath, commitId, success, error, cdnState, noTryStatus)
+    if not filePath or type(filePath) ~= 'string' then
+        return
     end
 
     local commitIdUrl = ''
 
-    if type(commitId) == 'string' and string.lower(commitId) ~= 'master'then
+    if commitId and
+       type(commitId) == 'string' and
+       string.lower(commitId) ~= 'master'then
         commitIdUrl = format('?commitId=%s', commitId)
     end
 
-    local url = format('/repos/%s/files/%s/raw%s', self:GetRepoPath(foldername, username), Mod.WorldShare.Utils.EncodeURIComponent(filePath), commitIdUrl)
+    local url =
+        format(
+            '/repos/%s/files/%s/raw%s',
+            self:GetRepoPath(foldername, username),
+            Mod.WorldShare.Utils.EncodeURIComponent(filePath),
+            commitIdUrl
+        )
 
-    KeepworkBaseApi:Get(url, nil, nil, success, error, nil, nil, cdnState)
+    KeepworkBaseApi:Get(url, nil, nil, success, error, noTryStatus, nil, cdnState)
 end
 
 -- url: /repos/:repoPath/files/:filePath/history
