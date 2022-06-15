@@ -18,9 +18,13 @@ local PlayerAssetFile = commonlib.gettable('MyCompany.Aries.Game.EntityManager.P
 -- helper
 local Validated = NPL.load('(gl)Mod/WorldShare/helper/Validated.lua')
 
+-- parser
+local MdParser = NPL.load('(gl)Mod/WorldShare/parser/MdParser.lua')
+
 -- service
 local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+local HttpRequest = NPL.load('(gl)Mod/WorldShare/service/HttpRequest.lua')
 
 -- bottles
 local Certificate = NPL.load('(gl)Mod/WorldShare/cellar/Certificate/Certificate.lua')
@@ -41,31 +45,44 @@ function RegisterModal:ShowPage(callback, zorder)
 end
 
 function RegisterModal:ShowUserAgreementPage()
-    Mod.WorldShare.Utils.ShowWindow(
-        400,
-        580,
-        'Mod/WorldShare/cellar/RegisterModal/UserAgreement.html',
-        'Mod.WorldShare.RegisterModal.UserAgreement',
-        nil,
-        nil,
-        nil,
-        nil,
-        5
-    )
+    local url = 'https://api.keepwork.com/core/v0/repos/official%2Fdocs/files/official%2Fdocs%2Freferences%2Flicense.md'
+
+    HttpRequest:Get(url, nil, nil, function(data, err)
+        self.userAgreementData = MdParser:MdToHtml(data, true)
+
+        Mod.WorldShare.Utils.ShowWindow(
+            400,
+            580,
+            'Mod/WorldShare/cellar/RegisterModal/UserAgreement.html',
+            'Mod.WorldShare.RegisterModal.UserAgreement',
+            nil,
+            nil,
+            nil,
+            nil,
+            5
+        )
+    end)
 end
 
 function RegisterModal:ShowUserPrivacyPage()
-    Mod.WorldShare.Utils.ShowWindow(
-        400,
-        580,
-        'Mod/WorldShare/cellar/RegisterModal/UserPrivacy.html',
-        'Mod.WorldShare.RegisterModal.UserPrivacy',
-        nil,
-        nil,
-        nil,
-        nil,
-        5
-    )
+    local url = 'https://api.keepwork.com/core/v0/repos/official%2Fdocs/files/official%2Fdocs%2Freferences%2Fprivacy.md'
+
+    HttpRequest:Get(url, nil, nil, function(data, err)
+        self.userPrivacyData = MdParser:MdToHtml(data, true)
+
+        Mod.WorldShare.Utils.ShowWindow(
+            400,
+            580,
+            'Mod/WorldShare/cellar/RegisterModal/UserPrivacy.html',
+            'Mod.WorldShare.RegisterModal.UserPrivacy',
+            nil,
+            nil,
+            nil,
+            nil,
+            5
+        )
+    end)
+    
 end
 
 function RegisterModal:ShowBindingPage()

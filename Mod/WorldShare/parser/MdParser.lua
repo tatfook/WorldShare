@@ -2,7 +2,7 @@
 Title: MdParser
 Author(s): big
 CreateDate: 2018.09.14
-ModifyDate: 2021.11.08
+ModifyDate: 2022.06.15
 Place: Foshan
 Desc: parse markdown document
 -------------------------------------------------------
@@ -15,18 +15,107 @@ local TREE = 'TREE'
 local ITEMS = 'ITEMS'
 local KEY = 'KEY'
 
+local HASHTAG = 'HASHTAG'
+local DASH = 'DASH'
+local CONTENT = 'CONTENT'
+local CODE = 'CODE'
+local BOLD = 'BOLD'
+
+MdParser.hashTag = {} 
+
+function MdParser:MdToHtml(data, toString)
+    if not data or type(data) ~= 'string' then
+        return
+    end
+
+    local dataList = commonlib.split(data, '\r\n')
+    local htmlDataList = {}
+    local htmlStr = ''
+
+    if not dataList or type(dataList) ~= 'table' then
+        return
+    end
+
+    for key, line in ipairs(dataList) do
+        if self:GetLineType(line) == HASHTAG then
+            local hashTagNum = self:GetHashTagNum(line)
+            local fontSize = 24 - hashTagNum * 2
+            local lineFormat =
+                format(
+                    '<div style="font-size: %dpx;base-font-size: %dpx;margin-top: 2px;margin-bottom: 3px;">%s</div>',
+                    fontSize,
+                    fontSize,
+                    self:GetHashTagVal(hashTagNum, line)
+                )
+
+            htmlDataList[#htmlDataList + 1] = lineFormat
+
+            if toString then
+                htmlStr = htmlStr .. lineFormat .. '\r\n'
+            end
+        elseif self:GetLineType(line) == DASH then
+            local lineFormat = format('<div>%s</div>', line) 
+            htmlDataList[#htmlDataList + 1] = lineFormat
+
+            if toString then
+                htmlStr = htmlStr .. lineFormat .. '\r\n'
+            end
+        elseif self:GetLineType(line) == BOLD then
+            local lineFormat = line
+
+            lineFormat = lineFormat:gsub('^***', '<b style="font-size: 15px;base-font-size: 15px;">')
+            lineFormat = lineFormat:gsub('***$', '</b>')
+
+            if toString then
+                htmlStr = htmlStr .. lineFormat .. '\r\n'
+            end
+        elseif self:GetLineType(line) == CONTENT then
+            local lineFormat = format('<p>%s</p>', line) 
+            htmlDataList[#htmlDataList + 1] = lineFormat
+
+            if toString then
+                htmlStr = htmlStr .. lineFormat .. '\r\n'
+            end
+        end
+    end
+
+    if toString then
+        echo(htmlStr, true)
+        return htmlStr
+    else
+        return htmlDataList
+    end
+end
+
+function MdParser:GetLineType(line)
+    if line and
+       type(line) == 'string' then
+        if string.find(line, '^#') then
+            return HASHTAG
+        elseif string.find(line, '^-') then
+            return DASH
+        elseif string.find(line, '^```') then
+            return CODE
+        elseif string.find(line, '^***') then
+            return BOLD
+        else
+            return CONTENT
+        end
+    end
+end
+
 function MdParser:MdToTable(data)
     self.tree = {}
     self.items = {}
 
-    if (not data or type(data) ~= 'string') then
-        return false
+    if not data or type(data) ~= 'string' then
+        return
     end
 
     local dataList = commonlib.split(data, '\r\n')
 
-    if (not dataList or type(dataList) ~= 'table') then
-        return false
+    if not dataList or type(dataList) ~= 'table' then
+        return
     end
 
     local currentType
@@ -37,7 +126,9 @@ function MdParser:MdToTable(data)
             self:GetBlockStringList(curBlockStrList, line)
         end
 
-        if (blockType == TREE or blockType == ITEMS or isEnd) then
+        if blockType == TREE or
+           blockType == ITEMS or
+           isEnd then
             if currentType == TREE then
                 local items, name = self:GetBlockTree(curBlockStrList)
 
@@ -45,7 +136,7 @@ function MdParser:MdToTable(data)
                     self.tree[name] = items
                 end
             end
-    
+
             if currentType == ITEMS then
                 local items = self:GetBlockItems(curBlockStrList)
 
@@ -83,23 +174,26 @@ function MdParser:MdToTable(data)
 end
 
 function MdParser:GetType(line)
-    if string.find(line, '^#') then
-        local num = self:GetHashTagNum(line)
+    if line and
+       type(line) == 'string' then
+        if string.find(line, '^#') then
+            local num = self:GetHashTagNum(line)
 
-        if (num == 2) then
-            return TREE
+            if num == 2 then
+                return TREE
+            end
+
+            if num == 3 then
+                return ITEMS
+            end
         end
 
-        if (num == 3) then
-            return ITEMS
+        if string.find(line, '^- ') then
+            return KEY
         end
-    end
 
-    if string.find(line, '^- ') then
-        return KEY
+        return
     end
-
-    return false
 end
 
 function MdParser:GetHashTagNum(sinput)
@@ -107,14 +201,11 @@ function MdParser:GetHashTagNum(sinput)
 
     local function CountHashTag(s)
         local exist = string.find(s, '^#')
-        
-        if (exist) then
+
+        if exist then
             count = count + 1
             CountHashTag(string.sub(s, 2, #s))
-            return
-        end
-
-        if (not exist) then
+        else
             if string.sub(s, 1, 1) ~= ' ' then
                 count = 0
             end
@@ -128,7 +219,7 @@ end
 
 function MdParser:GetBlockStringList(curBlockStrList, line)
     if not curBlockStrList or type(curBlockStrList) ~= 'table' then
-        return false
+        return
     end
 
     curBlockStrList[#curBlockStrList + 1] = line
@@ -142,7 +233,8 @@ function MdParser:GetBlockTree(strBlockList)
 
     for key, item in ipairs(strBlockList) do
         if key == 1 then
-            items['displayName'] = self:GetTreeVal(item)
+            items['displayName'] = self:GetHashTagVal(2, item)
+            name = items['displayName']
         else
             local keyName, keyVal = self:GetKeyVal(item)
             items[keyName] = keyVal
@@ -161,7 +253,7 @@ function MdParser:GetBlockItems(strBlockList)
 
     for key, item in ipairs(strBlockList) do
         if key == 1 then
-            items['displayName'] = self:GetItemsVal(item)
+            items['displayName'] = self:GetHashTagVal(3, item)
         else
             local keyName, keyVal = self:GetKeyVal(item)
             items[keyName] = keyVal
@@ -171,22 +263,27 @@ function MdParser:GetBlockItems(strBlockList)
     return items
 end
 
-function MdParser:GetTreeVal(str)
-    if not str or type(str) ~= 'string' then
-        return false
+function MdParser:GetHashTagVal(hashTagNum, str)
+    if not hashTagNum or
+       type(hashTagNum) ~= 'number' or
+       not str or
+       type(str) ~= 'string' then
+        return
     end
 
-    local startIndex, endIndex = string.find(str, '^## ')
+    if not self.hashTag[hashTagNum] then
+        local reStr = '^'
+    
+        for i = 1, hashTagNum do
+            reStr = reStr .. '#'
+        end
+    
+        reStr = reStr .. ' '
 
-    return string.sub(str, endIndex + 1, #str)
-end
-
-function MdParser:GetItemsVal(str)
-    if not str or type(str) ~= 'string' then
-        return false
+        self.hashTag[hashTagNum] = reStr
     end
 
-    local startIndex, endIndex = string.find(str, '^### ')
+    local startIndex, endIndex = string.find(str, self.hashTag[hashTagNum])
 
     return string.sub(str, endIndex + 1, #str)
 end
