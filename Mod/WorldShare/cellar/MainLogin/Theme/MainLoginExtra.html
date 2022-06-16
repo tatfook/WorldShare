@@ -68,6 +68,15 @@
                         ShowSettingMenu()
                         GameLogic.RunCommand("/lan -server_setting=true")
                     end
+
+                    function OnSwitchTo430Channel()
+                        ShowSettingMenu()
+                        NPL.load("(gl)script/apps/Aries/Creator/Game/Login/SwitchTo430ChannelPage.lua");
+                        local SwitchTo430ChannelPage = commonlib.gettable("MyCompany.Aries.Game.MainLogin.SwitchTo430ChannelPage")
+                        SwitchTo430ChannelPage.ShowPage(function()
+                            page:Refresh(0)
+                        end)
+                    end
                 ]]>
             </script>
             <style type="text/mcss" src='Mod/WorldShare/cellar/Theme/Mcss/MainLoginMcss.mcss'>
@@ -85,6 +94,24 @@
                 </pe:if> -->
                 <pe:container name="setting_menu" visible="false" style="position: relative; width: 120px;height: 100px;background:;">
                     <div name="menu_bg" style="padding: 5px;padding-bottom: 20px; width: 120px;min-height: 44px;background: url(Texture/Aries/Creator/paracraft/login/menu_bg_36X36_32bits.png#0 0 36 36:9 9 9 9);">
+                        <pe:if condition='<%= System.options.channelId ~= "430" and System.os.GetPlatform()=="win32" %>'>
+                            <input type="button"
+                            value='<%=L"校园版"%>'
+                                    icon="Texture/Aries/Creator/paracraft/login/xiaoyuanban_15x15_32bits.png#0 0 15 15"
+                                    icon_width=15
+                                    icon_height=15
+                                    icon_off_y=0
+                                    icon_off_x=-49
+                                    style="width: 110px;height: 32px;margin-left: 5px; 
+                                        color: #ffffff;
+                                        text-align: left;
+                                        text-offset-x: 20;
+                                        text-offset-y: 1;
+                                        font-size: 13px;
+                                        background: url()"
+                                   onclick="OnSwitchTo430Channel" /> 
+                        </pe:if>
+                        
                         <pe:if condition='<%= System.options.isDevEnv == false %>'>
                             <pe:if  condition='<%= System.os.GetPlatform() ~= "ios" and System.os.GetPlatform() ~= "android" %>'>
                                 <input type="button"
