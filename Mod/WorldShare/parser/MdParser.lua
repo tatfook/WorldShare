@@ -80,7 +80,6 @@ function MdParser:MdToHtml(data, toString)
     end
 
     if toString then
-        echo(htmlStr, true)
         return htmlStr
     else
         return htmlDataList
