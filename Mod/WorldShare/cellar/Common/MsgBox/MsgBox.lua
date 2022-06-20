@@ -21,7 +21,7 @@ function MsgBox:Wait(sec)
     self:Show(L'请稍候...', sec)
 end
 
-function MsgBox:Show(msg, sec, overtimeMsg, width, height, index, align, isTopLevel)
+function MsgBox:Show(msg, sec, overtimeMsg, width, height, index, align, isTopLevel, isWait)
     self.msgIdCount = self.msgIdCount + 1
 
     local msgId = self.msgIdCount
@@ -37,7 +37,9 @@ function MsgBox:Show(msg, sec, overtimeMsg, width, height, index, align, isTopLe
             '&width=' ..
             (width or 0) ..
             '&height=' ..
-            (height or 0),
+            (height or 0) ..
+            '&is_wait=' ..
+            (isWait and 'true' or 'false'),
         'MsgBox',
         0,
         0,
