@@ -544,6 +544,24 @@ function Filters:Init()
         end
     )
 
+    --vip button
+    GameLogic.GetFilters():add_filter("get_vip_btn_div", function(styleStr)
+        if System.options.channelId=="430" then
+            return nil
+        end
+        if _G._main_on_vipbtn_click==nil then
+            _G._main_on_vipbtn_click = function()
+                GameLogic.RunCommand("/vip show");
+            end
+        end
+        local str =  [[
+            <input type="button" value='' onclick="_main_on_vipbtn_click" class="red_summer_camp_open_vip_btn" style="%s" />
+        ]]
+        styleStr = styleStr or "margin-right:20px;margin-top:5px;";
+        str = string.format(str,styleStr)
+        return str
+    end);
+
     -- filter escape key
     -- GameLogic.GetFilters():add_filter(
     --     "EscFramePage.ShowPage",
