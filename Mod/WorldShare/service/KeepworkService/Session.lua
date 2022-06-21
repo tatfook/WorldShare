@@ -11,6 +11,7 @@ local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkServ
 
 -- libs
 local KeepWorkItemManager = NPL.load('(gl)script/apps/Aries/Creator/HttpAPI/KeepWorkItemManager.lua')
+local Desktop = commonlib.gettable('MyCompany.Aries.Creator.Game.Desktop')
 
 -- service
 local KeepworkService = NPL.load('../KeepworkService.lua')
@@ -1327,4 +1328,19 @@ function KeepworkServiceSession:GetEncodeDeviceId()
     local base64_str = System.Encoding.base64(json_str)
 
     return base64_str
+end
+
+function KeepworkServiceSession:RemoveAccount(password, callback)
+    KeepworkUsersApi:DeleteAccount(
+        password,
+        function(data, err)
+            echo('already removeed!!!!', true)
+            Desktop.ForceExit(true)
+        end,
+        function(data, err)
+            if data and type(data) == 'table' then
+                _guihelper.MessageBox(format('%s（%d）', data.message or '', data.code))
+            end
+        end
+    )
 end

@@ -2,11 +2,11 @@
 Title: Keepwork Users API
 Author(s): big
 CreateDate: 2019.11.8
-ModifyDate: 2022.1.5
+ModifyDate: 2022.6.21
 Place: Foshan
 use the lib:
 ------------------------------------------------------------
-local KeepworkUsersApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Users.lua")
+local KeepworkUsersApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/Users.lua')
 ------------------------------------------------------------
 ]]
 local Encoding = commonlib.gettable("System.Encoding.basexx")
@@ -416,7 +416,7 @@ end
 -- return: object
 function KeepworkUsersApi:CellphoneCaptchaVerify(cellphone, captcha, success, error)
     if not cellphone or not captcha then
-        return false
+        return
     end
 
     local params = {
@@ -425,4 +425,20 @@ function KeepworkUsersApi:CellphoneCaptchaVerify(cellphone, captcha, success, er
     }
 
     KeepworkBaseApi:Post('/users/cellphone_captcha_verify', params, nil, success, error)
+end
+
+-- url:/users/account
+-- method: DELETE
+-- header:
+-- params:
+--[[
+    password string necessary
+]]
+-- return: object
+function KeepworkUsersApi:DeleteAccount(password, success, error)
+    if not password or type(password) ~= 'string' then
+        return
+    end
+
+    KeepworkBaseApi:Delete('/users/account', { password = password }, nil, success, error)
 end

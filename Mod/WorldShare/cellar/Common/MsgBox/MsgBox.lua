@@ -7,6 +7,8 @@ City: Foshan
 use the lib:
 ------------------------------------------------------------
 local MsgBox = NPL.load('(gl)Mod/WorldShare/cellar/Common/MsgBox/MsgBox.lua')
+
+Mod.WorldShare.MsgBox:Show(L'请稍候...', nil, nil, nil, nil, 10, nil, nil, true)
 ------------------------------------------------------------
 ]]
 local MsgBox = NPL.export()
