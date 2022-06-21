@@ -49,8 +49,8 @@ function KeepworkServiceSchoolAndOrg:GetUserAllOrgs(callback)
 end
 
 function KeepworkServiceSchoolAndOrg:GetUserAllSchools(callback)
-    if type(callback) ~= "function" then
-        return false
+    if not callback or type(callback) ~= "function" then
+        return
     end
 
     KeepworkUsersApi:School(
