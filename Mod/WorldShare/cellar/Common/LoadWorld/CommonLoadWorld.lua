@@ -722,8 +722,11 @@ function CommonLoadWorld:InjectShowCustomDownloadWorldFilter(worldInfo, download
 
                             count = count - 1
                         else
-                            downloadWorldInstance.startOldVersionButtonNode.text = L'启动旧版'
-                            downloadWorldInstance.startOldVersionButtonNode.enabled = true
+                            if downloadWorldInstance.startOldVersionButtonNode then
+                                downloadWorldInstance.startOldVersionButtonNode.text = L'启动旧版'
+                                downloadWorldInstance.startOldVersionButtonNode.enabled = true
+                            end
+                            
                             downloadWorldInstance.startCountdownTimer:Change(nil, nil)
                         end
                     end
