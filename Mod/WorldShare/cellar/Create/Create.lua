@@ -285,7 +285,17 @@ function Create:EnterWorld(index, skip)
     else
         LoginModal:CheckSignedIn(L'请先登录！', function(bIsSuccessed)
             if bIsSuccessed then
-                self:GetWorldList()
+                self:GetWorldList(nil, function()
+                    local currentWorldList = Mod.WorldShare.Store:Get('world/compareWorldList') or {}
+
+                    for key, item in ipairs(currentWorldList) do
+                        if item.kpProjectId == currentSelectedWorld.kpProjectId and
+                           item.foldername == currentSelectedWorld.foldername then
+                            self:HandleEnterWorld(key)
+                            break
+                        end
+                    end
+                end)
             end
         end)
     end
