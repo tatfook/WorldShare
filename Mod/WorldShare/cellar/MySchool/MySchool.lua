@@ -41,7 +41,13 @@ function MySchool:Show(callback)
                     600,
                     380,
                     '(ws)MySchool/Theme/MySchool.html',
-                    'Mod.WorldShare.MySchool'
+                    'Mod.WorldShare.MySchool',
+                    nil,
+                    nil,
+                    nil,
+                    false,
+                    1,
+                    true
                    )
 
     KeepworkServiceSchoolAndOrg:GetUserAllOrgs(function(orgData)
