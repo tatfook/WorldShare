@@ -432,9 +432,15 @@ end
 function MySchool:ShowJoinInstitute()
     local params = Mod.WorldShare.Utils.ShowWindow(
                     600,
-                    200,
+                    243,
                     '(ws)MySchool/Theme/JoinInstitute.html',
-                    'Mod.WorldShare.JoinInstitute'
+                    'Mod.WorldShare.JoinInstitute',
+                    nil,
+                    nil,
+                    nil,
+                    false,
+                    1,
+                    true
                    )
 end
 
