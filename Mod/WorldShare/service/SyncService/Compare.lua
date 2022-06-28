@@ -32,7 +32,7 @@ local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
 local KeepworkServiceWorld = NPL.load('../KeepworkService/KeepworkServiceWorld.lua')
 local GitService = NPL.load('(gl)Mod/WorldShare/service/GitService.lua')
-local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
+local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceProject.lua')
 
 -- helper
 local GitEncoding = NPL.load('(gl)Mod/WorldShare/helper/GitEncoding.lua')

@@ -14,7 +14,7 @@ local Encoding = commonlib.gettable("commonlib.Encoding")
 
 -- service
 local KeepworkService = NPL.load("../KeepworkService.lua")
-local KeepworkServiceProject = NPL.load('../KeepworkService/Project.lua')
+local KeepworkServiceProject = NPL.load('../KeepworkService/KeepworkServiceProject.lua')
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local LocalServiceWorld = NPL.load('(gl)Mod/WorldShare/service/LocalService/LocalServiceWorld.lua')
 local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")

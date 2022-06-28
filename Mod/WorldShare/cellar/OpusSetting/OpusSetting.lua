@@ -16,7 +16,7 @@ local WorldCommon = commonlib.gettable('MyCompany.Aries.Creator.WorldCommon')
 local SlashCommand = commonlib.gettable("MyCompany.Aries.SlashCommand.SlashCommand")
 
 --- service
-local KeepworkServiceProject = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Project.lua")
+local KeepworkServiceProject = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceProject.lua")
 
 local OpusSetting = NPL.export()
 

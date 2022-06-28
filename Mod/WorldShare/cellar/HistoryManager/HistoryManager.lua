@@ -15,7 +15,7 @@ local Screen = commonlib.gettable('System.Windows.Screen')
 local MdParser = NPL.load('(gl)Mod/WorldShare/parser/MdParser.lua')
 local HttpRequest = NPL.load('(gl)Mod/WorldShare/service/HttpRequest.lua')
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
-local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
+local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceProject.lua')
 local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
 local Config = NPL.load('(gl)Mod/WorldShare/config/Config.lua')
 

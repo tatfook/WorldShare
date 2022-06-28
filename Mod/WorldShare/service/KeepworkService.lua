@@ -13,7 +13,7 @@ local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua
 local GitService = NPL.load('./GitService.lua')
 local GitGatewayService = NPL.load('./GitGatewayService.lua')
 local LocalService = NPL.load('./LocalService.lua')
-local KeepworkServiceProject = NPL.load('./KeepworkService/Project.lua')
+local KeepworkServiceProject = NPL.load('./KeepworkService/KeepworkServiceProject.lua')
 local KeepworkServiceSession = NPL.load('./KeepworkService/Session.lua')
 
 -- config

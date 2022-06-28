@@ -209,7 +209,11 @@ function MainLogin:ShowLogin(isModal, zorder)
         MainLoginLoginPage:FindControl('phone_mode').visible = false
         MainLoginLoginPage:FindControl('account_mode').visible = false
         MainLoginLoginPage:FindControl('auto_login_mode').visible = true
-        MainLoginLoginPage:FindControl('change_button').visible = true
+
+        if MainLoginLoginPage:FindControl('change_button') then
+            MainLoginLoginPage:FindControl('change_button').visible = true
+        end
+
         MainLoginLoginPage:FindControl('update_password_button').visible = true
         MainLoginLoginPage:SetUIValue('auto_username', Mod.WorldShare.Store:Get('user/username') or '')
 
@@ -239,7 +243,11 @@ function MainLogin:ShowLogin(isModal, zorder)
                         MainLoginLoginPage:FindControl('phone_mode').visible = false
                         MainLoginLoginPage:FindControl('account_mode').visible = false
                         MainLoginLoginPage:FindControl('auto_login_mode').visible = true
-                        MainLoginLoginPage:FindControl('change_button').visible = true
+
+                        if MainLoginLoginPage:FindControl('change_button') then
+                            MainLoginLoginPage:FindControl('change_button').visible = true
+                        end
+
                         MainLoginLoginPage:FindControl('update_password_button').visible = true
                         MainLoginLoginPage:SetUIValue('auto_username', PWDInfo.account or '')
     
@@ -278,7 +286,11 @@ function MainLogin:ShowLogin(isModal, zorder)
                                 MainLoginLoginPage:FindControl('phone_mode').visible = false
                                 MainLoginLoginPage:FindControl('account_mode').visible = false
                                 MainLoginLoginPage:FindControl('auto_login_mode').visible = true
-                                MainLoginLoginPage:FindControl('change_button').visible = true
+
+                                if MainLoginLoginPage:FindControl('change_button') then
+                                    MainLoginLoginPage:FindControl('change_button').visible = true
+                                end
+
                                 MainLoginLoginPage:FindControl('update_password_button').visible = true
                                 MainLoginLoginPage:SetUIValue('auto_username', PWDInfo.account or '')
             

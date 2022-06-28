@@ -55,16 +55,30 @@
                         local sel_online = page:FindControl('sel_online')
                         local sel_local = page:FindControl('sel_local')
 
-                        sel_all.visible = false
-                        sel_online.visible = false
-                        sel_local.visible = false
+                        if sel_all then
+                            sel_all.visible = false
+                        end
+                        
+                        if sel_online then
+                            sel_online.visible = false
+                        end
+                        
+                        if sel_local then
+                            sel_local.visible = false
+                        end
 
                         if Create.statusFilter == nil then
-                            sel_all.visible = true
+                            if sel_all then
+                                sel_all.visible = true
+                            end
                         elseif Create.statusFilter == 'ONLINE' then
-                            sel_online.visible = true
+                            if sel_online then
+                                sel_online.visible = true
+                            end
                         elseif Create.statusFilter == 'LOCAL' then
-                            sel_local.visible = true
+                            if sel_local then
+                                sel_local.visible = true
+                            end
                         end
                     end, 0)
                 ]]>

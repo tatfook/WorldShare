@@ -378,7 +378,9 @@
                             end
 
                             if auto_login_mode then
-                                change_button.visible = false
+                                if change_button then
+                                    change_button.visible = false
+                                end
                             end
 
                             if auto_login_mode then
@@ -400,7 +402,9 @@
                             end
 
                             if auto_login_mode then
-                                change_button.visible = false
+                                if change_button then
+                                    change_button.visible = false
+                                end
                             end
 
                             if auto_login_mode then
@@ -422,7 +426,9 @@
                             end
 
                             if auto_login_mode then
-                                change_button.visible = true
+                                if change_button then
+                                    change_button.visible = true
+                                end
                                 MainLogin:UpdatePasswordRemindVisible(true)
                             end
 

@@ -11,7 +11,7 @@ KeepworkServiceProjectFilter:Init()
 ]]
 
 -- libs
-local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
+local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceProject.lua')
 
 local KeepworkServiceProjectFilter = NPL.export()
 

@@ -221,7 +221,9 @@ function MySchool:ShowJoinSchool(callback)
                         local province_node =  params._page:FindControl('province_bg')
                         local bg = 'Texture/Aries/Creator/paracraft/my_school_32bits.png#53 241 48 70:16 16 16 16'
                         local function set_default(node)
-                            node.background = bg
+                            if node then
+                                node.background = bg
+                            end
                         end
                         set_default(province_node)
                     end

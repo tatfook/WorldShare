@@ -25,7 +25,7 @@ local Compare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
 local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
 local KeepworkServiceWorld = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceWorld.lua')
-local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
+local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceProject.lua')
 local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
 
 -- UI
@@ -223,7 +223,7 @@ function WorldExitDialog.OnDialogResult(res)
                 return
             end
 
-            if WorldExitDialogPage.callback then
+            if WorldExitDialogPage and WorldExitDialogPage.callback then
                 NplBrowserPlugin.CloseAllBrowsers()
                 WorldExitDialogPage.callback(res)
             end
@@ -243,7 +243,7 @@ function WorldExitDialog.OnDialogResult(res)
         end
 
     else
-        if WorldExitDialogPage.callback then
+        if WorldExitDialogPage and WorldExitDialogPage.callback then
             WorldExitDialogPage.callback(res)
         end
     end

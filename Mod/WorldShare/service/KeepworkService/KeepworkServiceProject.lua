@@ -2,11 +2,11 @@
 Title: Keepwork Service Project
 Author(s):  big
 CreateDate: 2019.02.18
-ModifyDate: 2021.09.01
+ModifyDate: 2022.6.28
 Place: Foshan
 use the lib:
 ------------------------------------------------------------
-local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
+local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceProject.lua')
 ------------------------------------------------------------
 ]]
 
