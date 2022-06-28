@@ -1,16 +1,15 @@
 --[[
 Title: lesson store
-Author(s):  big
-Date:  2018.11.9
-Desc: 
+Author(s): big
+CreateDate: 2018.11.9
+ModifyDate: 2022.6.28
 use the lib:
 ------------------------------------------------------------
-NPL.load("(gl)Mod/WorldShare/store/Page.lua")
-local PageStore = commonlib.gettable('Mod.WorldShare.store.Page')
+local LessonStore = NPL.load('(gl)Mod/WorldShare/store/LessonStore.lua')
 ------------------------------------------------------------
 ]]
 
-local LessonStore = commonlib.gettable('Mod.WorldShare.store.Lesson')
+local LessonStore = NPL.export()
 
 function LessonStore:Action()
     return {

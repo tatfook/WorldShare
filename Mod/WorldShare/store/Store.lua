@@ -2,7 +2,7 @@
 Title: store
 Author(s): big
 CreateDate: 2018.6.20
-ModifyDate: 2022.1.4
+ModifyDate: 2022.6.28
 City: Foshan 
 use the lib:
 ------------------------------------------------------------
@@ -10,86 +10,92 @@ local Store = NPL.load('(gl)Mod/WorldShare/store/Store.lua')
 ------------------------------------------------------------
 ]]
 
-NPL.load('./UserStore.lua')
-NPL.load('./PageStore.lua')
-NPL.load('./WorldStore.lua')
-NPL.load('./LessonStore.lua')
-
-local UserStore = commonlib.gettable('Mod.WorldShare.store.User')
-local PageStore = commonlib.gettable('Mod.WorldShare.store.Page')
-local WorldStore = commonlib.gettable('Mod.WorldShare.store.World')
-local LessonStore = commonlib.gettable('Mod.WorldShare.store.Lesson')
+local UserStore = NPL.load('./UserStore.lua')
+local PageStore = NPL.load('./PageStore.lua')
+local WorldStore = NPL.load('./WorldStore.lua')
+local LessonStore = NPL.load('./LessonStore.lua')
 
 local Store = NPL.export()
 
-Store.storeList = {
-    user = UserStore,
-    page = PageStore,
-    world = WorldStore,
-    lesson = LessonStore,
+-- private table
+local storeList = {
+    user = {
+        store = UserStore,
+        data = {},
+    },
+    page = {
+        store = PageStore,
+        data = {},
+    },
+    world = {
+        store = WorldStore,
+        data = {},
+    },
+    lesson = {
+        store = LessonStore,
+        data = {},
+    },
 }
 
 function Store:Subscribe(key, callback)
     if not key or type(key) ~= 'string' then
-        return false
+        return
     end
 
     local storeType = self:GetStoreType(key)
     local storeKey = self:GetStoreKey(key)
 
-    self.storeList[storeType]:Connect('on' .. storeKey, nil, callback, 'UniqueConnection')
+    storeList[storeType].store:Connect('on' .. storeKey, nil, callback, 'UniqueConnection')
 end
 
 function Store:Unsubscribe(key)
     if not key or type(key) ~= 'string' then
-        return false
+        return
     end
 
     local storeType = self:GetStoreType(key)
     local storeKey = self:GetStoreKey(key)
 
-    self.storeList[storeType]:Disconnect('on' .. storeKey)
+    storeList[storeType].store:Disconnect('on' .. storeKey)
 end
 
 function Store:Set(key, value)
     if not key or type(key) ~= 'string' then
-        return false
+        return
     end
 
     local storeType = self:GetStoreType(key)
     local storeKey = self:GetStoreKey(key)
 
-    if self.storeList[storeType] then
-        self.storeList[storeType][storeKey] = value
+    if storeList[storeType] then
+        storeList[storeType].data[storeKey] = value
     end
 end
 
 function Store:Get(key)
     if not key or type(key) ~= 'string' then
-        return false
+        return
     end
 
     local storeType = self:GetStoreType(key)
     local storeKey = self:GetStoreKey(key)
 
-    if self.storeList[storeType] then
-        return self.storeList[storeType][storeKey]
+    if storeList[storeType] then
+        return storeList[storeType].data[storeKey]
     end
-
-    return nil
 end
 
 function Store:Action(key)
     if not key or type(key) ~= 'string' then
-        return false
+        return
     end
 
     local storeType = self:GetStoreType(key)
     local storeKey = self:GetStoreKey(key)
 
-    if self.storeList[storeType] then
-        local CurStore = self.storeList[storeType]
-        local CurFun = CurStore:Action()[storeKey]
+    if storeList[storeType] then
+        local curStore = storeList[storeType]
+        local CurFun = curStore.store:Action(curStore.data)[storeKey]
 
         if CurFun and type(CurFun) == 'function' then
             return CurFun
@@ -99,17 +105,17 @@ end
 
 function Store:Getter(key)
     if not key or type(key) ~= 'string' then
-        return false
+        return
     end
 
     local storeType = self:GetStoreType(key)
     local storeKey = self:GetStoreKey(key)
 
-    if self.storeList[storeType] then
-        local CurStore = self.storeList[storeType]
-        local CurFun = CurStore:Getter()[storeKey]
+    if storeList[storeType] then
+        local curStore = storeList[storeType]
+        local CurFun = curStore.store:Getter(curStore.data)[storeKey]
 
-        if type(CurFun) == 'function' then
+        if CurFun and type(CurFun) == 'function' then
             return CurFun()
         end
     end

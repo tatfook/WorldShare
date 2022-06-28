@@ -1,30 +1,34 @@
 --[[
 Title: world store
 Author(s): big
-Date: 2018.8.24
+CreateDate: 2018.8.24
+ModifyDate: 2022.6.28
 City: Foshan 
 use the lib:
 ------------------------------------------------------------
-NPL.load("(gl)Mod/WorldShare/store/WorldStore.lua")
-local WorldStore = commonlib.gettable('Mod.WorldShare.store.World')
+local WorldStore = NPL.load('(gl)Mod/WorldShare/store/WorldStore.lua')
 ------------------------------------------------------------
 ]]
 
-local WorldStore = commonlib.gettable('Mod.WorldShare.store.World')
+local WorldStore = NPL.export()
 
-function WorldStore:Action()
+function WorldStore:Action(data)
+    local self = data
+
     return {
         ClearSelectWorld = function() end
     }
 end
 
-function WorldStore:Getter()
+function WorldStore:Getter(data)
+    local self = data
+
     return {
         GetWorldTextName = function()
             if self.currentWorld and self.currentWorld.text then
                 return self.currentWorld.text
             else
-                return ""
+                return ''
             end
         end
     }
