@@ -37,6 +37,17 @@ local storeList = {
     },
 }
 
+function Store:RegisterStore(name, store)
+    if storeList[name] then
+        return
+    end
+
+    storeList[name] = {
+        store = store,
+        data = {}
+    }
+end
+
 function Store:Subscribe(key, callback)
     if not key or type(key) ~= 'string' then
         return
