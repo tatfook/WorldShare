@@ -27,6 +27,7 @@ local LoginModal = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua
 -- service
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
 local KeepworkServiceWorld = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceWorld.lua')
+local LocalServiceWorld = NPL.load('(gl)Mod/WorldShare/service/LocalService/LocalServiceWorld.lua')
 
 local CreateWorld = NPL.export()
 
@@ -109,7 +110,7 @@ function CreateWorld:OnClickCreateWorldImp()
 
 	local item = CreateNewWorld.cur_terrain
 
-	-- 迷你地块
+	-- mini terrain chunk
 	if item and item.terrain == "paraworldMini" then
 		CreateModulPage.Show(foldername)
 
@@ -183,9 +184,9 @@ function CreateWorld:GetWorldFolder()
     local username = Mod.WorldShare.Store:Get('user/username')
 
     if username then
-        return LocalLoadWorld.GetDefaultSaveWorldPath() .. '/_user/' .. username
+        return LocalServiceWorld:GetDefaultSaveWorldPath() .. '/_user/' .. username
     else
-        return LocalLoadWorld.GetDefaultSaveWorldPath()
+        return LocalServiceWorld:GetDefaultSaveWorldPath()
     end
 end
 

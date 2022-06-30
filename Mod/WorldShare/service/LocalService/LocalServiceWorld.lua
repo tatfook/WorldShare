@@ -35,11 +35,15 @@ local MdParser = NPL.load('(gl)Mod/WorldShare/parser/MdParser.lua')
 
 local LocalServiceWorld = NPL.export()
 
+function LocalServiceWorld:GetDefaultSaveWorldPath()
+    return 'worlds/DesignHouse'
+end
+
 function LocalServiceWorld:GetUserFolderPath()
     local username = Mod.WorldShare.Store:Get('user/username')
 
     if username then
-        local curUserFolderPath = LocalLoadWorld.GetDefaultSaveWorldPath() .. '/_user/' .. username
+        local curUserFolderPath = self:GetDefaultSaveWorldPath() .. '/_user/' .. username
 
         if not ParaIO.DoesFileExist(curUserFolderPath .. '/', false) then
             ParaIO.CreateDirectory(curUserFolderPath .. '/')
@@ -55,9 +59,9 @@ function LocalServiceWorld:BuildLocalWorldList()
     self.dsWorlds = {}
     self.SelectedWorld_Index = nil
 
-    local folderPath = LocalLoadWorld.GetDefaultSaveWorldPath() -- design house folder
+    local folderPath = self:GetDefaultSaveWorldPath() -- design house folder
     local username = Mod.WorldShare.Store:Get('user/username')
-    local curUserFolderPath = LocalServiceWorld:GetUserFolderPath()
+    local curUserFolderPath = self:GetUserFolderPath()
     local myHomeWorldName
 
     if username then
@@ -385,7 +389,7 @@ function LocalServiceWorld:GetSharedWorldList()
         end
     end
 
-    local sharedWorldPath = LocalLoadWorld.GetDefaultSaveWorldPath() .. '/_shared/'
+    local sharedWorldPath = self:GetDefaultSaveWorldPath() .. '/_shared/'
 
     if not ParaIO.DoesFileExist(sharedWorldPath) then
         return dsWorlds
