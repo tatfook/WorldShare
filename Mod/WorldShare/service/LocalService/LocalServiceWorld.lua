@@ -78,16 +78,11 @@ function LocalServiceWorld:BuildLocalWorldList()
     end
 
     local function Handle(path)
-        echo('handle!!!!', true)
-        echo(path, true)
         local output = self:SearchFiles(nil, path, LocalLoadWorld.MaxItemPerFolder)
-        echo(output, true)
 
-        if output and #output > 0 then    
+        if output and #output > 0 then
             for _, item in ipairs(output) do
                 local bLoadedWorld
-                echo(path, true)
-                echo(item.filename, true)
                 local xmlRoot = ParaXML.LuaXML_ParseFile(path .. "/" .. item.filename .. '/tag.xml')
     
                 if xmlRoot then
