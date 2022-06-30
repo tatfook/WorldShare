@@ -1,9 +1,9 @@
 ﻿--[[
 Title: WorldShareMod
 Author(s): big
-CreateDate: 2017.04.17
-ModifyDate: 2022.04.21
-Version: 0.5
+CreateDate: 2017.4.17
+ModifyDate: 2022.6.28
+Version: 0.6
 use the lib:
 ------------------------------------------------------------
 NPL.load('(gl)Mod/WorldShare/main.lua')
@@ -89,7 +89,7 @@ function WorldShare:init()
 
     -- init long tcp connection
     KeepworkServiceSession:LongConnectionInit(function(result)
-        if type(result) ~= 'table' then
+        if not result or type(result) ~= 'table' then
             return false
         end
 
@@ -114,14 +114,14 @@ function WorldShare:init()
     end
 
     -- load diff world
-    Mod.WorldShare.Utils.SetTimeOut(function()
-        NPL.load('(gl)Mod/DiffWorld/main.lua')
-        local DiffWorld = commonlib.gettable('Mod.DiffWorld')
+    -- Mod.WorldShare.Utils.SetTimeOut(function()
+    --     NPL.load('(gl)Mod/DiffWorld/main.lua')
+    --     local DiffWorld = commonlib.gettable('Mod.DiffWorld')
 
-        if DiffWorld and type(DiffWorld) == 'table' and DiffWorld.init then
-            DiffWorld:init()
-        end
-    end, 3000)
+    --     if DiffWorld and type(DiffWorld) == 'table' and DiffWorld.init then
+    --         DiffWorld:init()
+    --     end
+    -- end, 3000)
 
     System.options.useFreeworldWhitelist = true
     System.options.maxFreeworldUploadCount = 3
@@ -137,7 +137,7 @@ function WorldShare:init()
     end)
 
     if ParaEngine.GetAppCommandLineByParam('IsSettingLanguage', nil) == 'true' and
-       Mod.WorldShare.Store:Get('user/isSettingLanguage') == nil then
+        Mod.WorldShare.Store:Get('user/isSettingLanguage') == nil then
         Mod.WorldShare.Store:Set('user/isSettingLanguage', true)
     end
 end
