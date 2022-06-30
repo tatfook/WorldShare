@@ -487,6 +487,8 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                         if tonumber(LItem.kpProjectId) ~= tonumber(DItem.projectId) then
                             if not string.match(LItem.foldername, '_main$') and
                                not remoteShared then
+                                -- TODO: !!!!!!!
+
                                 Mod.WorldShare.worldpath = nil -- force update world data.
                                 local curWorldUsername = Mod.WorldShare:GetWorldData('username', LItem.worldpath)
                                 local backUpWorldPath
@@ -546,7 +548,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                     -- shared world path
                     worldpath = format(
                         '%s/_shared/%s/%s/',
-                        Mod.WorldShare.Utils.GetWorldFolderFullPath(),
+                        LocalServiceWorld:GetUserFolderPath(),
                         DItem.user.username,
                         commonlib.Encoding.Utf8ToDefault(DItem.worldName)
                     )
@@ -554,7 +556,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                     -- mine world path
                     worldpath = format(
                         '%s/%s/',
-                        Mod.WorldShare.Utils.GetWorldFolderFullPath(),
+                        LocalServiceWorld:GetUserFolderPath(),
                         commonlib.Encoding.Utf8ToDefault(DItem.worldName)
                     )
 
@@ -567,6 +569,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                             if matchFoldername and
                                type(matchFoldername) == 'string' and
                                matchFoldername == DItem.worldName then
+                                -- TODO: !!!!!!!
                                 commonlib.Files.MoveFolder('temp/sync_backup_world/' .. SItem.filename, worldpath)
 
                                 local curRevision = LocalService:GetRevision(worldpath)
