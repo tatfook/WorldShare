@@ -422,7 +422,7 @@ function SyncToDataSource:UploadOne(file, callback)
         currentLocalItem.file_content_t,
         function(bIsUpload)
             if bIsUpload then
-                if type(callback) == 'function' then
+                if callback and type(callback) == 'function' then
                     callback()
                 end
             else    
@@ -458,7 +458,7 @@ function SyncToDataSource:UpdateOne(file, callback)
     end
 
     if currentLocalItem.sha1 == currentRemoteItem.id and string.lower(currentLocalItem.filename) ~= 'revision.xml' then
-        if type(callback) == 'function' then
+        if callback and type(callback) == 'function' then
             self.callback(false, {
                 method = 'UPDATE-PROGRESS',
                 current = self.compareListIndex,
@@ -466,7 +466,7 @@ function SyncToDataSource:UpdateOne(file, callback)
                 msg = format(L'%s （%s） 文件一致，跳过', currentLocalItem.filename, Mod.WorldShare.Utils.FormatFileSize(currentLocalItem.filesize, 'KB'))
             })
 
-            Mod.WorldShare.Utils.SetTimeOut(callback, 10)
+            callback()
         end
 
         return false
@@ -486,7 +486,7 @@ function SyncToDataSource:UpdateOne(file, callback)
         currentLocalItem.file_content_t,
         function(bIsUpdate)
             if bIsUpdate then
-                if type(callback) == 'function' then
+                if callback and type(callback) == 'function' then
                     callback()
                 end
             else
@@ -522,7 +522,7 @@ function SyncToDataSource:DeleteOne(file, callback)
         currentRemoteItem.path,
         function(bIsDelete)
             if bIsDelete then
-                if type(callback) == 'function' then
+                if callback and type(callback) == 'function' then
                     callback()
                 end
             else

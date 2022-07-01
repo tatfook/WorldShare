@@ -202,7 +202,6 @@ function Progress:Cancel(callback)
 
             checkTimer:Change(nil, nil)
 
-            self.syncInstance:SetBroke(true)
             self.syncInstance:SetFinish(true)
 
             Mod.WorldShare.MsgBox:Close()
