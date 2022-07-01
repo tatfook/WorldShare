@@ -20,7 +20,7 @@ local KeepworkServiceWorld = NPL.load('(gl)Mod/WorldShare/service/KeepworkServic
 local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceProject.lua')
 
 -- UI
-local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
+local SyncWorld = NPL.load('(gl)Mod/WorldShare/cellar/Sync/SyncWorld.lua')
 local LoginModal = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua')
 
 local LoadPersonalWorldCommand = NPL.export()
@@ -82,7 +82,7 @@ function LoadPersonalWorldCommand:Init()
                         end)
                     else
                         KeepworkServiceWorld:SetWorldInstanceByPid(kpProjectId, function()
-                            SyncMain:SyncToLocal(function()
+                            SyncWorld:SyncToLocal(function()
                                 local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
                                 if currentWorld and currentWorld.worldpath then

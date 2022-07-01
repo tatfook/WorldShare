@@ -2,7 +2,7 @@
     <pe:mcml>
         <script type='text/npl'>
             <![CDATA[
-                local SyncMain = NPL.load('../Main.lua')
+                local SyncWorld = NPL.load('../SyncWorld.lua')
 
                 local page = document:GetPageCtrl()
                 Mod.WorldShare.Store:Set('page/BeyondVolume', document:GetPageCtrl())
@@ -35,7 +35,7 @@
                 end
 
                 function open_world_folder()
-                    SyncMain:CloseBeyondVolumePage()
+                    SyncWorld:CloseBeyondVolumePage()
 
                     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
                     ParaGlobal.ShellExecute('open', currentWorld and currentWorld.worldpath, '', '', 1);
@@ -46,7 +46,7 @@
                 end
 
                 function close()
-                    SyncMain:CloseBeyondVolumePage()
+                    SyncWorld:CloseBeyondVolumePage()
                 end
             ]]>
         </script>

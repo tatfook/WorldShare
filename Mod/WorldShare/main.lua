@@ -30,7 +30,7 @@ local EntityManager = commonlib.gettable("MyCompany.Aries.Game.EntityManager")
 
 -- bottles
 local KickOut = NPL.load('(gl)Mod/WorldShare/cellar/Common/KickOut/KickOut.lua')
-local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
+local SyncWorld = NPL.load('(gl)Mod/WorldShare/cellar/Sync/SyncWorld.lua')
 local OpusSetting = NPL.load('(gl)Mod/WorldShare/cellar/OpusSetting/OpusSetting.lua')
 local PreventIndulge = NPL.load('(gl)Mod/WorldShare/cellar/PreventIndulge/PreventIndulge.lua')
 local Certificate = NPL.load('(gl)Mod/WorldShare/cellar/Certificate/Certificate.lua')
@@ -154,7 +154,7 @@ function WorldShare:OnWorldLoad()
         Mod.WorldShare.MsgBox:Close()
     end
 
-    SyncMain:OnWorldLoad(function()
+    SyncWorld:OnWorldLoad(function()
         Mod.WorldShare.Store:Set('world/loadWorldFinish', true)
 
         -- need to get current enter world info
