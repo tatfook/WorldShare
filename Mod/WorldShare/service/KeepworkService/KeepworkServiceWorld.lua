@@ -93,17 +93,18 @@ function KeepworkServiceWorld:SetWorldInstanceByPid(pid, callback)
         end
 
         if sharedFolder then
-            worldPath = Mod.WorldShare.Utils.GetWorldFolderFullPath() ..
-                        '/_shared/' ..
-                        data.username ..
-                        '/' ..
-                        commonlib.Encoding.Utf8ToDefault(foldername) ..
-                        '/'
+            worldPath = format(
+                '%s/_shared/%s/%s/',
+                LocalServiceWorld:GetDefaultSaveWorldPath(),
+                data.username,
+                commonlib.Encoding.Utf8ToDefault(DItem.worldName)
+            )
         else
-            worldPath = Mod.WorldShare.Utils.GetWorldFolderFullPath() ..
-                        '/' ..
-                        commonlib.Encoding.Utf8ToDefault(foldername) ..
-                        '/'
+            worldPath = format(
+                '%s/%s/',
+                LocalServiceWorld:GetUserFolderPath(),
+                commonlib.Encoding.Utf8ToDefault(DItem.worldName)
+            )
         end
 
         if data and data.memberCount > 1 then
@@ -427,12 +428,11 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
         syncBackUpWorld = commonlib.Files.Find({}, 'temp/sync_backup_world', 0, 10000, '*')
     end
 
-    self:GetWorldsList(function(data, err)
-        if type(data) ~= 'table' then
-            return false
+    self:GetWorldsList(function(remoteWorldsList, err)
+        if not remoteWorldsList or type(remoteWorldsList) ~= 'table' then
+            return
         end
 
-        local remoteWorldsList = data
         local currentWorldList = commonlib.vector:new()
         local currentWorld
 
@@ -548,10 +548,11 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                     -- shared world path
                     worldpath = format(
                         '%s/_shared/%s/%s/',
-                        LocalServiceWorld:GetUserFolderPath(),
+                        LocalServiceWorld:GetDefaultSaveWorldPath(),
                         DItem.user.username,
                         commonlib.Encoding.Utf8ToDefault(DItem.worldName)
                     )
+
                 else
                     -- mine world path
                     worldpath = format(
@@ -680,7 +681,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
 end
 
 --allowMax 保存的时候允许临界值（localWorldListCount==freeMaxWorldCount）
-function KeepworkServiceWorld:LimitFreeUser(isShowUI, callback,allowMax)
+function KeepworkServiceWorld:LimitFreeUser(isShowUI, callback, allowMax)
     if not callback or type(callback) ~= 'function' then
         return
     end
