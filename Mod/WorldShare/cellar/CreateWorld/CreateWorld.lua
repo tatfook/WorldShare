@@ -86,25 +86,26 @@ function CreateWorld:OnClickCreateWorldImp()
         return
     end
 
-    -- local worldPath = ParaIO.GetWritablePath() .. 'worlds/DesignHouse/' .. foldername
+    local worldPath = ParaIO.GetWritablePath() .. 'worlds/DesignHouse/' .. foldername
 
-    -- if ParaIO.DoesFileExist(worldPath, true) == true then
-    --     Mod.WorldShare.worldpath = nil -- force update world data.
-    --     local curWorldUsername = Mod.WorldShare:GetWorldData('username', worldPath)
-    --     local backUpWorldPath
+    if ParaIO.DoesFileExist(worldPath, true) == true then
+        Mod.WorldShare.worldpath = nil -- force update world data.
+        local curWorldUsername = Mod.WorldShare:GetWorldData('username', worldPath)
+        local backUpWorldPath
 
-    --     if curWorldUsername then
-    --         backUpWorldPath =
-    --             'temp/sync_backup_world/' ..
-    --             curWorldUsername ..
-    --             '_' ..
-    --             commonlib.Encoding.Utf8ToDefault(foldername)
+        if curWorldUsername then
+            backUpWorldPath =
+                LocalServiceWorld:GetDefaultSaveWorldPath() ..
+                '/_user/' ..
+                curWorldUsername ..
+                '/' ..
+                commonlib.Encoding.Utf8ToDefault(foldername)
 
-    --         commonlib.Files.MoveFolder(worldPath, backUpWorldPath)
+            commonlib.Files.MoveFolder(worldPath, backUpWorldPath)
 
-    --         ParaIO.DeleteFile(worldPath)
-    --     end
-    -- end
+            ParaIO.DeleteFile(worldPath)
+        end
+    end
 
     Mod.WorldShare.Store:Remove('world/currentWorld')
 
