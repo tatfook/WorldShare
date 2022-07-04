@@ -487,17 +487,16 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                         if tonumber(LItem.kpProjectId) ~= tonumber(DItem.projectId) then
                             if not string.match(LItem.foldername, '_main$') and
                                not remoteShared then
-                                -- TODO: !!!!!!!
-
                                 Mod.WorldShare.worldpath = nil -- force update world data.
                                 local curWorldUsername = Mod.WorldShare:GetWorldData('username', LItem.worldpath)
                                 local backUpWorldPath
-
+ 
                                 if curWorldUsername then
                                     backUpWorldPath =
-                                        'temp/sync_backup_world/' ..
+                                        LocalServiceWorld:GetDefaultSaveWorldPath() ..
+                                        '/_user/' ..
                                         curWorldUsername ..
-                                        '_' ..
+                                        '/' ..
                                         commonlib.Encoding.Utf8ToDefault(LItem.foldername)
                                 else
                                     backUpWorldPath =
@@ -570,7 +569,6 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                             if matchFoldername and
                                type(matchFoldername) == 'string' and
                                matchFoldername == DItem.worldName then
-                                -- TODO: !!!!!!!
                                 commonlib.Files.MoveFolder('temp/sync_backup_world/' .. SItem.filename, worldpath)
 
                                 local curRevision = LocalService:GetRevision(worldpath)
