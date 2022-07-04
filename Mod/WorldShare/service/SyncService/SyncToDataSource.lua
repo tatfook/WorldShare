@@ -2,7 +2,7 @@
 Title: SyncToDataSource
 Author(s): big
 CreateDate: 2018.06.20
-ModifyDate: 2021.09.14
+ModifyDate: 2022.7.1
 Desc: 
 use the lib:
 ------------------------------------------------------------
@@ -38,7 +38,7 @@ local UPLOAD = 'UPLOAD'
 local DELETE = 'DELETE'
 
 function SyncToDataSource:Init(callback)
-    if type(callback) ~= 'function' then
+    if not callback or type(callback) ~= 'function' then
         return false
     end
 
@@ -61,20 +61,26 @@ function SyncToDataSource:Init(callback)
             function(beExisted)
                 if beExisted then
                     -- update world
-                    KeepworkServiceProject:GetProjectIdByWorldName(self.currentWorld.foldername, self.currentWorld.shared, function(pid)
-                        currentWorld = Mod.WorldShare.Store:Get('world/currentWorld') 
-    
-                        if currentWorld and currentWorld.kpProjectId and currentWorld.kpProjectId ~= 0 then
-                            local tag = LocalService:GetTag(currentWorld.worldpath)
-    
-                            if type(tag) == 'table' then
-                                tag.kpProjectId = currentWorld.kpProjectId
-                                LocalService:SetTag(currentWorld.worldpath, tag)
+                    KeepworkServiceProject:GetProjectIdByWorldName(
+                        self.currentWorld.foldername,
+                        self.currentWorld.shared,
+                        function(pid)
+                            currentWorld = Mod.WorldShare.Store:Get('world/currentWorld') 
+
+                            if currentWorld and
+                               currentWorld.kpProjectId and
+                               currentWorld.kpProjectId ~= 0 then
+                                local tag = LocalService:GetTag(currentWorld.worldpath)
+
+                                if tag and type(tag) == 'table' then
+                                    tag.kpProjectId = currentWorld.kpProjectId
+                                    LocalService:SetTag(currentWorld.worldpath, tag)
+                                end
                             end
+        
+                            self:Start()
                         end
-    
-                        self:Start()
-                    end)
+                    )
                 else
                     KeepworkServiceProject:CreateProject(
                         self.currentWorld.foldername,
@@ -125,7 +131,7 @@ function SyncToDataSource:Init(callback)
 end
 
 function SyncToDataSource:IsProjectExist(callback)
-    if type(callback) ~= 'function' then
+    if not callback or type(callback) ~= 'function' then
         return false
     end
 
@@ -180,7 +186,7 @@ function SyncToDataSource:Start()
     self.callback(false, { method = 'UPDATE-PROGRESS', current = 0, total = 0, msg = L'正在对比文件列表...' })
 
     local function Handle(data, err)
-        if type(data) ~= 'table' then
+        if not data or type(data) ~= 'table' then
             self.callback(false, L'获取列表失败（上传）')
             self:SetFinish(true)
             return false
@@ -416,7 +422,7 @@ function SyncToDataSource:UploadOne(file, callback)
         currentLocalItem.file_content_t,
         function(bIsUpload)
             if bIsUpload then
-                if type(callback) == 'function' then
+                if callback and type(callback) == 'function' then
                     callback()
                 end
             else    
@@ -452,7 +458,7 @@ function SyncToDataSource:UpdateOne(file, callback)
     end
 
     if currentLocalItem.sha1 == currentRemoteItem.id and string.lower(currentLocalItem.filename) ~= 'revision.xml' then
-        if type(callback) == 'function' then
+        if callback and type(callback) == 'function' then
             self.callback(false, {
                 method = 'UPDATE-PROGRESS',
                 current = self.compareListIndex,
@@ -460,7 +466,7 @@ function SyncToDataSource:UpdateOne(file, callback)
                 msg = format(L'%s （%s） 文件一致，跳过', currentLocalItem.filename, Mod.WorldShare.Utils.FormatFileSize(currentLocalItem.filesize, 'KB'))
             })
 
-            Mod.WorldShare.Utils.SetTimeOut(callback, 10)
+            callback()
         end
 
         return false
@@ -480,7 +486,7 @@ function SyncToDataSource:UpdateOne(file, callback)
         currentLocalItem.file_content_t,
         function(bIsUpdate)
             if bIsUpdate then
-                if type(callback) == 'function' then
+                if callback and type(callback) == 'function' then
                     callback()
                 end
             else
@@ -516,7 +522,7 @@ function SyncToDataSource:DeleteOne(file, callback)
         currentRemoteItem.path,
         function(bIsDelete)
             if bIsDelete then
-                if type(callback) == 'function' then
+                if callback and type(callback) == 'function' then
                     callback()
                 end
             else

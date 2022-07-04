@@ -15,7 +15,7 @@ local Commands = commonlib.gettable('MyCompany.Aries.Game.Commands')
 local CreateNewWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.CreateNewWorld")
 
 -- bottles
-local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
+local SyncWorld = NPL.load('(gl)Mod/WorldShare/cellar/Sync/SyncWorld.lua')
 
 -- services
 local KeepworkServiceWorld = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceWorld.lua')
@@ -172,7 +172,7 @@ e.g.
 
                 if isLocalWorldExisted and isRemoteWorldExisted then
                     if isUpdate then
-                        SyncMain:CheckAndUpdatedByFoldername(name, function()
+                        SyncWorld:CheckAndUpdatedByFoldername(name, function()
                             SetParentProjectIdAndRedirectLoadWorld()
                             GameLogic.RunCommand('/sendevent createworld_callback '..worldPath)
                         end)
