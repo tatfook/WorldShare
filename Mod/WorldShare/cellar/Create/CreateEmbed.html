@@ -668,6 +668,29 @@
 
                         return format('%s%s', L'打开世界文件夹\n', world_path)
                     end
+
+                    function is_show_modify_button()
+                        local is_shared = Create:GetCurWorldInfo('shared', Eval('index'))
+
+                        if is_shared then
+                            local username = Mod.WorldShare.Store:Get('user/username')
+                            local user = Create:GetCurWorldInfo('user', Eval('index'))
+
+                            if not user or
+                               type(user) ~= 'table' or
+                               not user.username then
+                                return false
+                            end
+
+                            if username == user.username then
+                                return true
+                            else
+                                return false
+                            end
+                        else
+                            return true
+                        end
+                    end
                 ]]>
             </script>
             <style type='text/mcss' src='Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss'>

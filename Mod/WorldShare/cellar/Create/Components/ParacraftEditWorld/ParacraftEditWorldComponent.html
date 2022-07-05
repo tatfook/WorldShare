@@ -118,16 +118,18 @@
                                     </span>
                                 </div>
                             </pe:if>
-                            <div onclick='covert_status'
-                                 tooltip='<%=Eval("text")%>'
-                                 style='float: left;
-                                        margin-top: 6px;
-                                        margin-left: 1px;
-                                        background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#340 311 14 15);
-                                        width: 10px;
-                                        height: 12px;
-                                        z-index: 10' >
-                            </div>
+                            <pe:if condition='<%= is_show_modify_button() %>'>
+                                <div onclick='covert_status'
+                                     tooltip='<%=Eval("text")%>'
+                                     style='float: left;
+                                            margin-top: 6px;
+                                            margin-left: 1px;
+                                            background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#340 311 14 15);
+                                            width: 10px;
+                                            height: 12px;
+                                            z-index: 10' >
+                                </div>
+                            </pe:if>
                         </pe:if>
                     </pe:if>
                     <pe:if condition='<%= not be_selected() %>'>
