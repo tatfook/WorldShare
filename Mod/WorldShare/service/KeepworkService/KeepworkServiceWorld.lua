@@ -2,7 +2,7 @@
 Title: KeepworkService World
 Author(s): big
 CreateDate: 2019.12.09
-ModifyDate: 2021.11.04
+ModifyDate: 2022.7.5
 Place: Foshan
 use the lib:
 ------------------------------------------------------------
@@ -739,9 +739,7 @@ function KeepworkServiceWorld:LimitFreeUser(isShowUI, callback, allowMax)
     end)
 end
 
-function KeepworkServiceWorld:OnCreateHomeWorld(homeWorldName)
-    local worldPath = 'worlds/DesignHouse/' .. homeWorldName
-
+function KeepworkServiceWorld:OnCreateHomeWorld(worldPath, homeWorldName)
     KeepworkWorldsApi:GetWorldByName(
         homeWorldName,
         function(data, err)

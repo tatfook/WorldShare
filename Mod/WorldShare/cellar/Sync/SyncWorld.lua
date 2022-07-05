@@ -52,10 +52,11 @@ function SyncWorld:OnWorldLoad(callback)
 end
 
 function SyncWorld:ShowNewVersionFoundPage(callback)
-    local params = SyncWorld:ShowDialog(
-                    'Mod/WorldShare/cellar/Sync/Theme/NewVersionFound.html',
-                    'Mod.WorldShare.Sync.NewVersionFound'
-                   )
+    local params =
+        SyncWorld:ShowDialog(
+            'Mod/WorldShare/cellar/Sync/Theme/NewVersionFound.html',
+            'Mod.WorldShare.Sync.NewVersionFound'
+        )
 
     params._page.afterSyncCallback = callback
 end
@@ -93,19 +94,21 @@ function SyncWorld:CloseBeyondVolumePage()
 end
 
 function SyncWorld:ShowStartSyncUseLocalPage(callback)
-    local params = SyncWorld:ShowDialog(
-                    'Mod/WorldShare/cellar/Sync/Theme/UseLocal.html',
-                    'Mod.WorldShare.Sync.UseLocal'
-                   )
+    local params =
+        SyncWorld:ShowDialog(
+            'Mod/WorldShare/cellar/Sync/Theme/UseLocal.html',
+            'Mod.WorldShare.Sync.UseLocal'
+        )
 
     params._page.afterSyncCallback = callback
 end
 
 function SyncWorld:ShowStartSyncUseDataSourcePage(callback)
-    local params = SyncWorld:ShowDialog(
-                    'Mod/WorldShare/cellar/Sync/Theme/UseDataSource.html',
-                    'Mod.WorldShare.Sync.UseDataSource'
-                   )
+    local params =
+        SyncWorld:ShowDialog(
+            'Mod/WorldShare/cellar/Sync/Theme/UseDataSource.html',
+            'Mod.WorldShare.Sync.UseDataSource'
+        )
 
     params._page.afterSyncCallback = callback
 end

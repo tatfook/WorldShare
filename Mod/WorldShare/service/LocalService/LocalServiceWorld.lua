@@ -16,6 +16,7 @@ local KeepworkService = NPL.load('../KeepworkService.lua')
 local KeepworkServiceSession = NPL.load('../KeepworkService/Session.lua')
 local GitService = NPL.load('(gl)Mod/WorldShare/service/GitService.lua')
 local GitKeepworkService = NPL.load('(gl)Mod/WorldShare/service/GitService/GitKeepworkService.lua')
+local KeepworkServiceWorld = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceWorld.lua')
 
 -- libs
 NPL.load('(gl)Mod/WorldShare/service/FileDownloader/FileDownloader.lua')
@@ -265,9 +266,7 @@ function LocalServiceWorld:CreateHomeWorld(myHomeWorldName)
 		inherit_char = true,
 	})
 
-	if worldPath and type(worldPath) == 'string' then
-		GameLogic.GetFilters():apply_filters('OnCreateHomeWorld', myHomeWorldName)
-	end
+    KeepworkServiceWorld:OnCreateHomeWorld(worldPath, myHomeWorldName)
 
 	return worldPath
 end
