@@ -50,6 +50,10 @@ function Permission:CheckPermission(authName, bOpenUIIfNot, callback, uiType)
                 -- update user info
                 KeepworkServiceSession:Profile(
                     function(response)
+                        if not response then
+                            return
+                        end
+
                         -- update user vip info
                         if response.vip and response.vip == 1 then
                             Mod.WorldShare.Store:Set('user/isVip', true)
