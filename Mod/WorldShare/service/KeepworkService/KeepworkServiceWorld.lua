@@ -157,7 +157,7 @@ end
 -- get world list
 function KeepworkServiceWorld:GetWorldsList(callback)
     if not KeepworkService:IsSignedIn() then
-        return false
+        return
     end
 
     KeepworkWorldsApi:GetWorldList(10000, 1, callback)
@@ -685,7 +685,23 @@ function KeepworkServiceWorld:LimitFreeUser(isShowUI, callback, allowMax)
     end
 
     local localWorldList = LocalServiceWorld:GetWorldList()
-    local localWorldListCount = #localWorldList
+    local localWorldListCount = 0
+    local username = Mod.WorldShare.Store:Get('user/username')
+
+    for key, item in ipairs(localWorldList) do
+        if not item.shared then
+            if not string.match(item.worldpath, '/_user/') then
+                Mod.WorldShare.worldpath = nil -- force update world data.
+                local curWorldUsername = Mod.WorldShare:GetWorldData('username', item.worldpath)
+    
+                if curWorldUsername == username then
+                    localWorldListCount = localWorldListCount + 1
+                end
+            else
+                localWorldListCount = localWorldListCount + 1
+            end
+        end
+    end
 
     if isShowUI == true then
         isShowUI = true
@@ -695,7 +711,8 @@ function KeepworkServiceWorld:LimitFreeUser(isShowUI, callback, allowMax)
 
     local freeMaxWorldCount = 2 --免费用户最多能创建几个本地世界（包含家园）
 
-    if localWorldListCount > freeMaxWorldCount or (not allowMax and localWorldListCount == freeMaxWorldCount) then
+    if localWorldListCount > freeMaxWorldCount or
+       (not allowMax and localWorldListCount == freeMaxWorldCount) then
         GameLogic.IsVip('UnlimitWorldsNumber', isShowUI, callback)
         return
     end
@@ -710,18 +727,23 @@ function KeepworkServiceWorld:LimitFreeUser(isShowUI, callback, allowMax)
         if localWorldListCount > 0 then
             if dataCount > 0 then
                 local totalCount = localWorldListCount
+
                 for DKey, DItem in ipairs(data) do
                     local contain = false
+
                     for key, item in ipairs(localWorldList) do
                         if item.foldername == DItem.worldName then
                             contain = true
                         end
                     end
+
                     if not contain then 
                         totalCount = totalCount + 1
                     end
                 end
-                if totalCount > freeMaxWorldCount or (not allowMax and totalCount == freeMaxWorldCount) then
+
+                if totalCount > freeMaxWorldCount or
+                   (not allowMax and totalCount == freeMaxWorldCount) then
                     GameLogic.IsVip('UnlimitWorldsNumber', isShowUI, callback)
                 else
                     callback(true)
@@ -730,7 +752,8 @@ function KeepworkServiceWorld:LimitFreeUser(isShowUI, callback, allowMax)
                 callback(true)
             end
         else
-            if dataCount > freeMaxWorldCount or (not allowMax and dataCount == freeMaxWorldCount) then
+            if dataCount > freeMaxWorldCount or
+               (not allowMax and dataCount == freeMaxWorldCount) then
                 GameLogic.IsVip('UnlimitWorldsNumber', isShowUI, callback)
             else
                 callback(true)
