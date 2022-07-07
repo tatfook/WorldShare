@@ -17,13 +17,6 @@ local LocalServiceWorldFilter = NPL.export()
 
 function LocalServiceWorldFilter:Init()
     GameLogic.GetFilters():add_filter(
-        'service.local_service_world.get_user_folder_path',
-        function()
-            return LocalServiceWorld:GetUserFolderPath()
-        end
-    )
-
-    GameLogic.GetFilters():add_filter(
         'service.local_service_world.is_community_world',
         function()
             return LocalServiceWorld:IsCommunityWorld()

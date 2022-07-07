@@ -160,12 +160,6 @@ function Panorama:StartShooting()
     _guihelper.MessageBox(L"拍摄全景图期间，请勿操作窗口，否则可能导致拍摄失败。", function(res)
         if res and res == _guihelper.DialogResult.Yes then
             local entityPlayer = EntityManager.GetFocus()
-
-            if not entityPlayer then
-                GameLogic.AddBBS(nil, L"拍摄全景图失败", 3000, "255 0 0")
-                return
-            end
-
             local x, y, z = entityPlayer:GetBlockPos()
         
             GameLogic.GetCodeGlobal():RegisterTextEvent("after_generate_panorama", self.AfterGeneratePanorama)

@@ -1334,6 +1334,7 @@ function KeepworkServiceSession:RemoveAccount(password, callback)
     KeepworkUsersApi:DeleteAccount(
         password,
         function(data, err)
+            echo('already removeed!!!!', true)
             Desktop.ForceExit(true)
         end,
         function(data, err)

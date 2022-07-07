@@ -11,7 +11,7 @@ local GenerateMdPage = NPL.load("(gl)Mod/WorldShare/cellar/Common/GenerateMdPage
 ]]
 
 -- bottles
-local SyncWorld = NPL.load("(gl)Mod/WorldShare/cellar/Sync/SyncWorld.lua")
+local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
 
 -- helper
 local KeepworkGen = NPL.load("(gl)Mod/WorldShare/helper/KeepworkGen.lua")

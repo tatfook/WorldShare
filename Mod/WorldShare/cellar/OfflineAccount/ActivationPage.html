@@ -35,29 +35,13 @@
                         local binded_sync_node = page:FindControl('binded_sync')
 
                         if index == 1 then -- not bind
-                            if not_bind_node then
-                                not_bind_node.visible = true
-                            end
-
-                            if binded_node then
-                                binded_node.visible = false
-                            end
-
-                            if binded_sync_node then
-                                binded_sync_node.visible = false
-                            end
+                            not_bind_node.visible = true
+                            binded_node.visible = false
+                            binded_sync_node.visible = false
                         elseif index == 2 then -- binded
-                            if not_bind_node then
-                                not_bind_node.visible = false
-                            end
-
-                            if binded_node then
-                                binded_node.visible = true
-                            end
-
-                            if binded_sync_node then
-                                binded_sync_node.visible = true
-                            end
+                            not_bind_node.visible = false
+                            binded_node.visible = true
+                            binded_sync_node.visible = true
 
                             local not_bind_notice_node = page:FindControl('not_bind_notice')
                             local binded_notice_node = page:FindControl('binded_notice')
@@ -68,45 +52,21 @@
                             local anonymous_login_node = page:FindControl('anonymous_login')
 
                             if is_binded() then
-                                if not_bind_notice_node then
-                                    not_bind_notice_node.visible = false
-                                end
+                                not_bind_notice_node.visible = false
+                                binded_notice_node.visible = true
 
-                                if binded_notice_node then
-                                    binded_notice_node.visible = true
-                                end
+                                unbind_device_node.visible = true
+                                bind_device_node.visible = false
 
-                                if unbind_device_node then
-                                    unbind_device_node.visible = true
-                                end
-
-                                if bind_device_node then
-                                    bind_device_node.visible = false
-                                end
-
-                                if anonymous_login_node then
-                                    anonymous_login_node.visible = true
-                                end
+                                anonymous_login_node.visible = true
                             else
-                                if not_bind_notice_node then
-                                    not_bind_notice_node.visible = true
-                                end
+                                not_bind_notice_node.visible = true
+                                binded_notice_node.visible = false
 
-                                if binded_notice_node then
-                                    binded_notice_node.visible = false
-                                end
+                                unbind_device_node.visible = false
+                                bind_device_node.visible = true
 
-                                if not_bind_notice_node then
-                                    unbind_device_node.visible = false
-                                end
-
-                                if not_bind_notice_node then
-                                    bind_device_node.visible = true
-                                end
-
-                                if not_bind_notice_node then
-                                    anonymous_login_node.visible = false
-                                end
+                                anonymous_login_node.visible = false
                             end
                         end
                     end

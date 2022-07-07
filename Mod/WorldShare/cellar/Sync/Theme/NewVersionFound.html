@@ -4,14 +4,14 @@
             <script type='text/npl'>
                 <![CDATA[
                     -- UI
-                    local SyncWorld = NPL.load('(gl)Mod/WorldShare/cellar/Sync/SyncWorld.lua')
+                    local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
                     local Compare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
 
                     page = document:GetPageCtrl()
 
                     function use_remote()
                         close()
-                        SyncWorld:SyncToLocal(page.afterSyncCallback, nil, true)
+                        SyncMain:SyncToLocal(page.afterSyncCallback, nil, true)
                     end
 
                     function get_window_style()
@@ -35,11 +35,11 @@
                     end
 
                     function get_bigger_style(type)
-                        if type == 'remote' and SyncWorld.GetRemoteRevision() > SyncWorld.GetCurrentRevision() then
+                        if type == 'remote' and SyncMain.GetRemoteRevision() > SyncMain.GetCurrentRevision() then
                             return 'background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#150 104 16 16:4 4 4 4)'
                         end
 
-                        if type == 'local' and SyncWorld.GetRemoteRevision() < SyncWorld.GetCurrentRevision() then
+                        if type == 'local' and SyncMain.GetRemoteRevision() < SyncMain.GetCurrentRevision() then
                             return 'background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#150 104 16 16:4 4 4 4)'
                         end
 
@@ -47,11 +47,11 @@
                     end
 
                     function get_remote_revision()
-                        return SyncWorld.GetRemoteRevision()
+                        return SyncMain.GetRemoteRevision()
                     end
 
                     function get_current_revision()
-                        return SyncWorld.GetCurrentRevision()
+                        return SyncMain.GetCurrentRevision()
                     end
                 ]]>
             </script>

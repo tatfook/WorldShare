@@ -1,6 +1,6 @@
 <body>
     <pe:mcml>
-        <script type='text/npl'>
+        <script type="text/npl">
             <![CDATA[
                 local Progress = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Progress/Progress.lua')
                 local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
@@ -46,7 +46,7 @@
                 function open_url()
                     local url = get_world_url()
 
-                    ParaGlobal.ShellExecute('open', url, '', '', 1)
+                    ParaGlobal.ShellExecute("open", url, "", "", 1)
                 end
 
                 function get_bar_maximun()
@@ -56,52 +56,37 @@
                 function get_bar_current()
                     return Progress.current
                 end
-
-                function get_title()
-                    return Mod.WorldShare.Store:Get('world/currentWorld').text
-                end
              ]]>
         </script>
-        <style type='text/mcss' src='Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss'>
+        <style type="text/mcss" src="Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss">
             {
-                 ['common_button'] = {
+                 ["common_button"] = {
                     height = 30,
                     width = 60,
-                    ['margin-left'] = 2,
-                    ['font-weight'] = 'bold',
-                    ['font-size'] = 13,
-                    ['base-font-size'] = 13,
+                    ["margin-left"] = 2,
+                    ["font-weight"] = "bold",
+                    ["font-size"] = 13,
+                    ["base-font-size"] = 13,
                  },
             }
         </style>
-        <div width='100%' height='100%'>
-            <kp:window width='550' height='320' style='<%= get_window_style() %>' title='<%= format(L"%s同步中", get_title()) %>' >
-                <div style='height: 40px;'></div>
-                <div style='padding: 20px;
-                            font-size: 18px;
-                            base-font-size: 18px;
-                            color:#000000'>
-                    <div style='height: 120px;'>
-                        <pe:if condition='<%= not finish() and not broke() %>'>
-                            <div style='margin-right: 20px;
-                                        margin-top: 20px;'>
-                                <%= L'同步进度：' %><%= current() %> / <%= total() %>
-                                <br />
-                                <%= msg() %>
-                            </div>
-                        </pe:if>
-                        <pe:if condition='<%= broke() %>'>
+        <div width="100%" height="100%">
+            <kp:window width="550" height="320" style="<%= get_window_style()%>"  title='<%=L"同步中" %>'>
+                <div style="height: 40px;"></div>
+                <div style="padding:20px;font-size:18px;base-font-size:18px;color:#000000">
+                    <pe:if condition="<%= not finish() and not broke() %>">
+                        <div style="margin-right:20px;margin-top:20px;">
+                            <%=L"同步进度：" %><%= current() %> / <%= total() %>
+                            <br />
                             <%= msg() %>
-                        </pe:if>
-                    </div>
-                    <pe:if condition='<%= not finish() %>'>
-                        <div style='margin-top: 30px;'>
-                            <pe:progressbar
-                                name='progressbar'
-                                block_bg_autosize='true'
-                                Minimum='0'
-                                Maximum='<%= get_bar_maximun() %>'
-                                Value='<%= get_bar_current() %>' />
+                        </div>
+                    </pe:if>
+                    <pe:if condition="<%= broke() %>">
+                        <%= msg() %>
+                    </pe:if>
+                    <pe:if condition="<%= not finish() %>">
+                        <div style="margin-top:30px;">
+                            <pe:progressbar name="progressbar"  block_bg_autosize = "true" Minimum="0" Maximum="<%= get_bar_maximun() %>" Value="<%= get_bar_current() %>"/>
                         </div>
                     </pe:if>
                 </div>

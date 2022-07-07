@@ -18,7 +18,7 @@ local CommandManager = commonlib.gettable('MyCompany.Aries.Game.CommandManager')
 local SessionsData = NPL.load('(gl)Mod/WorldShare/database/SessionsData.lua')
 
 -- UI
-local SyncWorld = NPL.load('(gl)Mod/WorldShare/cellar/Sync/SyncWorld.lua')
+local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
 local LoginModal = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua')
 local Certificate = NPL.load('(gl)Mod/WorldShare/cellar/Certificate/Certificate.lua')
 
@@ -191,8 +191,8 @@ function ShareWorld:OnClick()
     local function Handle()
         Mod.WorldShare.Store:Set('world/currentWorld', Mod.WorldShare.Store:Get('world/currentEnterWorld'))
 
-        SyncWorld:CheckTagName(function()
-            SyncWorld:SyncToDataSource(function(result, msg)
+        SyncMain:CheckTagName(function()
+            SyncMain:SyncToDataSource(function(result, msg)
                 Compare:GetCurrentWorldInfo(function()
 				    if self.callback and type(self.callback) == 'function' then
                         self.callback(true)

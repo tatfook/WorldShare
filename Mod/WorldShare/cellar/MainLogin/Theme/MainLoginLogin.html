@@ -408,9 +408,7 @@
                             end
 
                             if auto_login_mode then
-                                if update_password_button then
-                                    update_password_button.visible = false
-                                end
+                                update_password_button.visible = false
                             end
                         elseif mode == 'auto_login' then
                             page:FindControl('login_button'):SetDefault(false)

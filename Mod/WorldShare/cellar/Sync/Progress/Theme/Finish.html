@@ -65,11 +65,11 @@
                     Panorama:ShowCreate(true)
                 end
 
-                function get_text()
+                function get_foldername()
                     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
-                    if currentWorld and currentWorld.text then
-                        return currentWorld.text
+                    if currentWorld and currentWorld.foldername then
+                        return currentWorld.foldername
                     else
                         return L'同步完成'
                     end
@@ -107,7 +107,7 @@
         </style>
         <kp:window width='550'
                    height='400'
-                   title='<%= get_text() %>'
+                   title='<%= get_foldername() %>'
                    onclose='close()'>
             <div style='height: 40px;'></div>
             <div style='padding:20px;

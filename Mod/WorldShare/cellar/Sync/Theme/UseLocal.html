@@ -3,7 +3,7 @@
         <pe:mcml>
             <script type='text/npl'>
                 <![CDATA[
-                    local SyncWorld = NPL.load('../SyncWorld.lua')
+                    local SyncMain = NPL.load('../Main.lua')
 
                     page = document:GetPageCtrl()
 
@@ -12,12 +12,12 @@
                     end
 
                     function replace()
-                        SyncWorld:SyncToDataSource(page.afterSyncCallback)
+                        SyncMain:SyncToDataSource(page.afterSyncCallback)
                         close()
                     end
 
                     function cancel()
-                        SyncWorld:ShowStartSyncPage(page.afterSyncCallback)
+                        SyncMain:ShowStartSyncPage(page.afterSyncCallback)
                         close()
                     end
 

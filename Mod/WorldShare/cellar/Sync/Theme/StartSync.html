@@ -4,7 +4,7 @@
             <script type='text/npl'>
                 <![CDATA[
                     -- bottles
-                    local SyncWorld = NPL.load('(gl)Mod/WorldShare/cellar/Sync/SyncWorld.lua')
+                    local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
 
                     -- service
                     local Compare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
@@ -14,12 +14,12 @@
                     use_offline = page:GetRequestParam('useOffline')
 
                     function use_local()
-                        SyncWorld:CloseStartSyncPage()
+                        SyncMain:CloseStartSyncPage()
 
-                        if SyncWorld.GetCurrentRevision() < SyncWorld.GetRemoteRevision() then
-                            SyncWorld:ShowStartSyncUseLocalPage(page.afterSyncCallback)
-                        elseif SyncWorld.GetCurrentRevision() >= SyncWorld.GetRemoteRevision() then
-                            SyncWorld:CheckTagName(function(result, remoteName)
+                        if SyncMain.GetCurrentRevision() < SyncMain.GetRemoteRevision() then
+                            SyncMain:ShowStartSyncUseLocalPage(page.afterSyncCallback)
+                        elseif SyncMain.GetCurrentRevision() >= SyncMain.GetRemoteRevision() then
+                            SyncMain:CheckTagName(function(result, remoteName)
                                 if not result or type(result) ~= 'string' then
                                     return
                                 end
@@ -35,19 +35,19 @@
                                     Mod.WorldShare.Store:Set('world/currentWorld', currentWorld)
                                 end
 
-                                SyncWorld:SyncToDataSource(page.afterSyncCallback)
+                                SyncMain:SyncToDataSource(page.afterSyncCallback)
                             end)
                         end
                     end
 
                     function use_remote()
-                        SyncWorld:CloseStartSyncPage()
+                        SyncMain:CloseStartSyncPage()
 
-                        if SyncWorld.GetRemoteRevision() < SyncWorld.GetCurrentRevision() then
-                            SyncWorld:ShowStartSyncUseDataSourcePage(page.afterSyncCallback)
-                        elseif SyncWorld.GetRemoteRevision() >= SyncWorld.GetCurrentRevision() then
-                            SyncWorld:SyncToLocal(function()
-                                SyncWorld:CheckTagName(function(result, remoteName)
+                        if SyncMain.GetRemoteRevision() < SyncMain.GetCurrentRevision() then
+                            SyncMain:ShowStartSyncUseDataSourcePage(page.afterSyncCallback)
+                        elseif SyncMain.GetRemoteRevision() >= SyncMain.GetCurrentRevision() then
+                            SyncMain:SyncToLocal(function()
+                                SyncMain:CheckTagName(function(result, remoteName)
                                     if not result or type(result) ~= 'string' then
                                         return
                                     end
@@ -73,7 +73,7 @@
                     end
 
                     function be_show_use_remote()
-                        return Compare:IsCompareFinish() and SyncWorld.GetRemoteRevision() ~= 0
+                        return Compare:IsCompareFinish() and SyncMain.GetRemoteRevision() ~= 0
                     end
 
                     function get_window_style()
@@ -84,11 +84,11 @@
                         local isEnterWorld = Mod.WorldShare.Store:Get('world/isEnterWorld')
 
                         if isEnterWorld then
-                            SyncWorld:CloseStartSyncPage()
+                            SyncMain:CloseStartSyncPage()
                             return true
                         end
 
-                        SyncWorld:CloseStartSyncPage()
+                        SyncMain:CloseStartSyncPage()
                     end
 
                     function enter_offline_world()
@@ -99,7 +99,7 @@
                         end
 
                         Game.Start(currentWorld.worldpath)
-                        SyncWorld:CloseStartSyncPage()
+                        SyncMain:CloseStartSyncPage()
                     end
 
                     function get_current_world_name()
@@ -107,11 +107,11 @@
                     end
 
                     function get_bigger_class(type)
-                        if type == 'remote' and SyncWorld.GetRemoteRevision() > SyncWorld.GetCurrentRevision() then
+                        if type == 'remote' and SyncMain.GetRemoteRevision() > SyncMain.GetCurrentRevision() then
                             return 'theme1_orange_button'
                         end
 
-                        if type == 'local' and SyncWorld.GetRemoteRevision() < SyncWorld.GetCurrentRevision() then
+                        if type == 'local' and SyncMain.GetRemoteRevision() < SyncMain.GetCurrentRevision() then
                             return 'theme1_orange_button'
                         end
 
@@ -119,11 +119,11 @@
                     end
 
                     function get_remote_revision()
-                        return SyncWorld.GetRemoteRevision()
+                        return SyncMain.GetRemoteRevision()
                     end
 
                     function get_current_revision()
-                        return SyncWorld.GetCurrentRevision()
+                        return SyncMain.GetCurrentRevision()
                     end
                 ]]>
             </script>

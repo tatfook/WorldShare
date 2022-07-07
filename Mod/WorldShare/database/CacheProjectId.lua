@@ -10,8 +10,6 @@ use the lib:
 local CacheProjectId = NPL.load('(gl)Mod/WorldShare/database/CacheProjectId.lua')
 ------------------------------------------------------------
 ]]
-NPL.load("(gl)script/ide/System/localserver/LocalStorageUtil.lua");
-local LocalStorageUtil = commonlib.gettable("System.localserver.LocalStorageUtil");
 
 local CacheProjectId = NPL.export()
 
@@ -29,8 +27,7 @@ function CacheProjectId:SetProjectIdInfo(pid, worldInfo)
 
     projects[pid] = project
 
-    -- GameLogic.GetPlayerController():SaveLocalData('pid' .. pid, project, true)
-    LocalStorageUtil.Save_localserver('pid' .. pid, project, true)
+    GameLogic.GetPlayerController():SaveLocalData('pid' .. pid, project, true)
 end
 
 function CacheProjectId:GetProjectIdInfo(pid)
@@ -41,9 +38,7 @@ function CacheProjectId:GetProjectIdInfo(pid)
     if projects[pid] then
         return projects[pid]
     else
-        -- local project = GameLogic.GetPlayerController():LoadLocalData('pid' .. pid, nil, true)
-        LocalStorageUtil.CheckFristInit()
-        local project = LocalStorageUtil.Load_localserver('pid' .. pid, nil, true)
+        local project = GameLogic.GetPlayerController():LoadLocalData('pid' .. pid, nil, true)
 
         if project then
             projects[pid] = project
@@ -60,6 +55,5 @@ function CacheProjectId:RemoveProjectIdInfo(pid)
 
     projects[pid] = nil
 
-    -- GameLogic.GetPlayerController():SaveLocalData('pid' .. pid, nil ,true)
-    LocalStorageUtil.Save_localserver('pid' .. pid, nil, true)
+    GameLogic.GetPlayerController():SaveLocalData('pid' .. pid, nil ,true)
 end

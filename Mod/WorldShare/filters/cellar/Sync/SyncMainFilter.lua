@@ -11,7 +11,7 @@ SyncMainFilter:Init()
 ]]
 
 -- UI
-local SyncWorld = NPL.load('(gl)Mod/WorldShare/cellar/Sync/SyncWorld.lua')
+local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
 
 local SyncMainFilter = NPL.export()
 
@@ -20,7 +20,7 @@ function SyncMainFilter:Init()
     GameLogic.GetFilters():add_filter(
         'cellar.sync.sync_main.sync_to_data_source_by_world_name',
         function(...)
-            SyncWorld:SyncToDataSourceByWorldName(...)
+            SyncMain:SyncToDataSourceByWorldName(...)
         end
     )
 end

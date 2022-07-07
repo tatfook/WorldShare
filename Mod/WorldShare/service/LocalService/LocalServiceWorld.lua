@@ -1,8 +1,8 @@
 --[[
 Title: LocalService World
 Author(s):  big
-CreateDate: 2020.2.12
-ModifyDate: 2022.6.28
+CreateDate: 2020.02.12
+ModifyDate: 2021.11.08
 Place: Foshan
 use the lib:
 ------------------------------------------------------------
@@ -16,13 +16,10 @@ local KeepworkService = NPL.load('../KeepworkService.lua')
 local KeepworkServiceSession = NPL.load('../KeepworkService/Session.lua')
 local GitService = NPL.load('(gl)Mod/WorldShare/service/GitService.lua')
 local GitKeepworkService = NPL.load('(gl)Mod/WorldShare/service/GitService/GitKeepworkService.lua')
-local KeepworkServiceWorld = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceWorld.lua')
 
 -- libs
 NPL.load('(gl)Mod/WorldShare/service/FileDownloader/FileDownloader.lua')
-NPL.load("(gl)script/apps/Aries/Creator/Game/Login/CreateNewWorld.lua")
 
-local CreateNewWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.CreateNewWorld")
 local FileDownloader = commonlib.gettable('Mod.WorldShare.service.FileDownloader.FileDownloader')
 local LocalLoadWorld = commonlib.gettable('MyCompany.Aries.Game.MainLogin.LocalLoadWorld')
 local WorldRevision = commonlib.gettable('MyCompany.Aries.Creator.Game.WorldRevision')
@@ -36,243 +33,8 @@ local MdParser = NPL.load('(gl)Mod/WorldShare/parser/MdParser.lua')
 
 local LocalServiceWorld = NPL.export()
 
-function LocalServiceWorld:GetDefaultSaveWorldPath()
-    return 'worlds/DesignHouse'
-end
-
-function LocalServiceWorld:GetUserFolderPath()
-    local username = Mod.WorldShare.Store:Get('user/username')
-
-    if username then
-        local curUserFolderPath = self:GetDefaultSaveWorldPath() .. '/_user/' .. username
-
-        if not ParaIO.DoesFileExist(curUserFolderPath .. '/', false) then
-            ParaIO.CreateDirectory(curUserFolderPath .. '/')
-        end
-
-        return curUserFolderPath
-    end
-end
-
-function LocalServiceWorld:BuildLocalWorldList()
-	-- get all contents in folder. 
-    -- clear ds
-    self.dsWorlds = {}
-    self.SelectedWorld_Index = nil
-
-    local folderPath = self:GetDefaultSaveWorldPath() -- design house folder
-    local username = Mod.WorldShare.Store:Get('user/username')
-    local curUserFolderPath = self:GetUserFolderPath()
-    local myHomeWorldName
-
-    if username then
-        myHomeWorldName = username .. '_main'
-
-        -- move old home world to new world folder.
-        if ParaIO.DoesFileExist(folderPath .. '/' .. myHomeWorldName .. '/tag.xml', false) then
-            commonlib.Files.MoveFolder(
-                folderPath .. '/' .. myHomeWorldName .. '/',
-                curUserFolderPath .. '/' .. myHomeWorldName
-            )
-        end
-
-        -- create home world if not exist
-        if not ParaIO.DoesFileExist(curUserFolderPath .. '/' .. myHomeWorldName .. '/tag.xml', false) then
-            self:CreateHomeWorld(myHomeWorldName)
-        end
-    end
-
-    local function Handle(path)
-        local output = self:SearchFiles(nil, path, LocalLoadWorld.MaxItemPerFolder)
-
-        if output and #output > 0 then
-            for _, item in ipairs(output) do
-                local bLoadedWorld
-                local xmlRoot = ParaXML.LuaXML_ParseFile(path .. "/" .. item.filename .. '/tag.xml')
-    
-                if xmlRoot then
-                    for node in commonlib.XPath.eachNode(xmlRoot, '/pe:mcml/pe:world') do
-                        if node.attr then
-                            local display_name = node.attr.name or item.filename
-                            local filenameUTF8 = commonlib.Encoding.DefaultToUtf8(item.filename)
-    
-                            if filenameUTF8 ~= node.attr.name then
-                                -- show dir name if differs from world name
-                                display_name = format("%s(%s)", node.attr.name or '', filenameUTF8)
-                            end
-    
-                            if myHomeWorldName and item.filename == myHomeWorldName then
-                                -- use a different display format
-                                display_name = node.attr.name or filenameUTF8
-                            end
-    
-                            -- only add world with the same nid
-                            LocalServiceWorld:AddWorldToDS({
-                                worldpath = path .. '/' .. item.filename, 
-                                foldername = filenameUTF8,
-                                Title = display_name,
-                                writedate = item.writedate,
-                                filesize = item.filesize,
-                                nid = node.attr.nid,
-                                author = item.author or 'None',
-                                mode = item.mode or 'survival',
-                                progress = item.progress or '0', -- the max value of the progress is 1
-                                costTime = item.progress or '0:0:0', -- the format of costTime: 'day:hour:minute'
-                                grade = item.grade or 'primary', -- maybe grade is 'primary' or 'middle' or 'adventure' or 'difficulty' or 'ultimate'
-                                ip = item.ip or '127.0.0.1',
-                                order = item.order,
-                                IsFolder = true,
-                                time_text = item.time_text
-                            })
-    
-                            bLoadedWorld = true
-    
-                            break
-                        end
-                    end
-                end
-    
-                if not bLoadedWorld and
-                   ParaIO.DoesFileExist(path .. '/' .. item.filename .. '/worldconfig.txt') then
-                    local filenameUTF8 = commonlib.Encoding.DefaultToUtf8(item.filename)
-    
-                    LOG.std(nil, 'info', 'LocalServiceWorld', 'missing tag.xml in %s', filenameUTF8)
-    
-                    LocalServiceWorld:AddWorldToDS({
-                        worldpath = path .. '/' .. item.filename, 
-                        foldername = filenameUTF8,
-                        Title = filenameUTF8,
-                        writedate = item.writedate,
-                        filesize = item.filesize,
-                        order = item.order,
-                        IsFolder=true,
-                    })
-    
-                    bLoadedWorld = true
-                end	
-            end
-        end
-    
-        -- add *.zip world package file 
-        local output = LocalLoadWorld.SearchFiles(nil, path, LocalLoadWorld.MaxItemPerFolder, '*.zip')
-
-        if output and #output > 0 then    
-            for _, item in ipairs(output) do
-                local zip_filename = path .. '/' .. item.filename
-                local world_name = zip_filename:match('([^/\\]+)%.zip$')
-    
-                if world_name then
-                    world_name = commonlib.Encoding.DefaultToUtf8(world_name:gsub('^[%d_]*', ''))
-                end
-    
-                LocalServiceWorld:AddWorldToDS({
-                    worldpath = zip_filename, 
-                    Title = world_name or '',
-                    writedate = item.writedate,
-                    filesize = item.filesize,
-                    costTime = item.progress or '0:0:0',
-                    nid = 0,
-                    order = item.order,
-                    IsFolder = false,
-                    time_text = item.time_text
-                })	
-            end
-        end
-    end
-
-    -- add folders in worlds/DesignHouse
-    Handle(folderPath)
-
-    -- add folders in worlds/DesignHouse/_user/<username>
-    Handle(curUserFolderPath)
-
-    table.sort(self.dsWorlds, function(a, b)
-        return (a.order or 0) > (b.order or 0)
-    end)
-
-	return self.dsWorlds	
-end
-
--- add a given world to datasource
-function LocalServiceWorld:AddWorldToDS(worldInfo)
-	if LocalLoadWorld.AutoCompleteWorldInfo(worldInfo) then
-		table.insert(self.dsWorlds, worldInfo)
-	end
-end
-
--- only return the sub folders of the current folder
--- @param rootFolder: the folder which will be searched.
--- @param nMaxFilesNum: one can limit the total number of files in the search result. Default value is 50. the search will stop at this value even there are more matching files.
--- @param filter: if nil, it defaults to "*."
--- @return a table array containing relative to rootFolder file name.
-function LocalServiceWorld:SearchFiles(output, rootFolder, nMaxFilesNum, filter)
-	if rootFolder == nil then
-        return
-    end
-
-	if filter == nil then
-        filter = '*.'
-    end
-
-	output = output or {}
-
-	local sInitDir
-
-	if commonlib.Files.IsAbsolutePath(rootFolder) then
-		sInitDir = rootFolder .. '/'
-	else
-        if System.os.GetPlatform() ~= 'win32' then
-            sInitDir = ParaIO.GetWritablePath() .. rootFolder .. '/'
-        else
-            sInitDir = ParaIO.GetCurDirectory(0) .. rootFolder .. '/'
-        end
-	end
-
-	local search_result = ParaIO.SearchFiles(sInitDir, filter, '', 0, nMaxFilesNum or 5000, 0)
-	local nCount = search_result:GetNumOfResult()
-	local nextIndex = #output + 1
-
-	local i
-
-    for i = 0, nCount - 1 do 
-		output[nextIndex] = search_result:GetItemData(i, {})
-
-        local date = output[nextIndex].writedate
-		local year, month, day, hour, mins = string.match(date, "(%d+)%D+(%d+)%D+(%d+)%D+(%d+)%D+(%d+)")
-		year, month, day,hour, mins = tonumber(year) or 0, tonumber(month) or 0, tonumber(day) or 0, tonumber(hour) or 0, tonumber(mins) or 0
-		output[nextIndex].order = (year * 380 + (month - 1) * 31 + day - 1) * 1440 + (hour - 1) * 60 + mins - 1
-		output[nextIndex].time_text = string.format("%d年%d月%d日(%d点%d分)", year, month, day, hour, mins)
-		nextIndex = nextIndex + 1
-	end
-
-	-- sort output by file.writedate
-	table.sort(output, function(a, b)
-		return a.order > b.order
-	end)
-
-	search_result:Release()
-
-    return output
-end
-
-function LocalServiceWorld:CreateHomeWorld(myHomeWorldName)
-	local worldPath = CreateNewWorld.CreateWorld({
-		worldname = myHomeWorldName, 
-		title = format(L'%s的家园', Mod.WorldShare.Store:Get('user/username')),
-		creationfolder = self:GetUserFolderPath(),
-		world_generator = 'paraworldMini',
-		seed = worldname,
-		inherit_scene = true,
-		inherit_char = true,
-	})
-
-    KeepworkServiceWorld:OnCreateHomeWorld(worldPath, myHomeWorldName)
-
-	return worldPath
-end
-
 function LocalServiceWorld:GetWorldList()
-    local localWorlds = self:BuildLocalWorldList()
+    local localWorlds = LocalLoadWorld.BuildLocalWorldList(true)
     local filterLocalWorlds = {}
 
     -- not main world filter
@@ -388,7 +150,7 @@ function LocalServiceWorld:GetSharedWorldList()
         end
     end
 
-    local sharedWorldPath = self:GetDefaultSaveWorldPath() .. '/_shared/'
+    local sharedWorldPath = LocalLoadWorld.GetDefaultSaveWorldPath() .. '/_shared/'
 
     if not ParaIO.DoesFileExist(sharedWorldPath) then
         return dsWorlds
@@ -400,7 +162,7 @@ function LocalServiceWorld:GetSharedWorldList()
         if item and item.filesize == 0 and item.filename ~= username then
             local folderPath = sharedWorldPath .. item.filename 
 
-            local output = self:SearchFiles(nil, folderPath, LocalLoadWorld.MaxItemPerFolder)
+            local output = LocalLoadWorld.SearchFiles(nil, folderPath, LocalLoadWorld.MaxItemPerFolder)
 
             if output and #output > 0 then
                 for _, item in ipairs(output) do

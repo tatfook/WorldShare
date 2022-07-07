@@ -10,7 +10,7 @@ local Progress = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Progress/Progress.lua'
 ]]
 
 -- UI
-local SyncWorld = NPL.load('../SyncWorld.lua')
+local SyncMain = NPL.load('../Main.lua')
 
 -- service
 local Compare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
@@ -29,16 +29,8 @@ Progress.finish = false
 Progress.broke = false
 
 function Progress:Init(syncInstance)
-    self.syncInstance = syncInstance
-
-    self.current = 0
-    self.total = 0
-    self.msg = L'同步中，请稍候...'
-    self.finish = false
-    self.broke = false
-
-    local ProgressPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Progress')
-    local ProgressOperatePage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Progress.ProgressOperate')
+    local ProgressPage = Mod.WorldShare.Store:Get('page/Progress')
+    local ProgressOperate = Mod.WorldShare.Store:Get('page/ProgressOperate')
 
     if ProgressPage then
         ProgressPage:CloseWindow()
@@ -57,9 +49,7 @@ function Progress:Init(syncInstance)
         0,
         '_fi',
         false,
-        2,
-        nil,
-        false
+        2
     )
 
     local operateParams = Mod.WorldShare.Utils.ShowWindow(
@@ -71,13 +61,11 @@ function Progress:Init(syncInstance)
         -150,
         '_ct',
         false,
-        4,
-        nil,
-        false
+        3
     )
 
     if not progressParams._page or not operateParams._page then
-        return
+        return false
     end
 
     progressParams._page.OnClose = function()
@@ -85,6 +73,17 @@ function Progress:Init(syncInstance)
         Mod.WorldShare.Store:Remove('page/Mod.WorldShare.Progress')
         Mod.WorldShare.Store:Remove('page/Mod.WorldShare.Progress.ProgressOperate')
     end
+
+    Mod.WorldShare.Store:Set('page/Progress', progressParams._page)
+    Mod.WorldShare.Store:Set('page/ProgressOperate', operateParams._page)
+
+    self.syncInstance = syncInstance
+
+    self.current = 0
+    self.total = 0
+    self.msg = L'同步中，请稍候...'
+    self.finish = false
+    self.broke = false
 
     self:Refresh()
 
@@ -133,7 +132,7 @@ function Progress:GetProgressBar()
     local ProgressPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Progress')
 
     if not ProgressPage then
-        return
+        return false
     end
 
     return ProgressPage:GetNode('progressbar')
@@ -184,38 +183,36 @@ function Progress:Cancel(callback)
 
     self.syncInstance:SetBroke(true)
 
-    Mod.WorldShare.MsgBox:Show(L'正在等待上次同步完成，请稍候...', 8000, nil, 380, 130, 11)
+    Mod.WorldShare.MsgBox:Show(L'正在等待上次同步完成，请稍候...', nil, nil, 380, 130, 11)
 
     self.broke = true
     self.finish = true
 
-    local checkI = 0
-    local checkTimer
-
-    checkTimer = commonlib.Timer:new({
-        callbackFunc = function()
-            if not self.syncInstance.finish and
-               checkI <= 7 then
-                checkI = checkI + 1
-                return
-            end
-
-            checkTimer:Change(nil, nil)
-
-            self.syncInstance:SetFinish(true)
-
-            Mod.WorldShare.MsgBox:Close()
-            self:ClosePage()
+    local function CheckFinish()
+        if not self.syncInstance.finish then
+            Mod.WorldShare.Utils.SetTimeOut(
+                function()
+                    CheckFinish()
+                end,
+                100
+            )
+            return false
         end
-    })
 
-    checkTimer:Change(0, 1000)
+        Mod.WorldShare.MsgBox:Close()
+        self:ClosePage()
+
+        if type(callback) == 'function' then
+            callback()
+        end
+    end
+
+    CheckFinish()
 end
 
 function Progress:Retry()
     self:Cancel(function()
         local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
-
         Compare:Init(currentWorld.worldpath, function(result)
             if not result then
                 GameLogic.AddBBS(nil, L'同步失败', 3000, '255 0 0')
@@ -223,15 +220,15 @@ function Progress:Retry()
             end
 
             if result == Compare.JUSTLOCAL then
-                SyncWorld:SyncToDataSource()
+                SyncMain:SyncToDataSource()
             end
 
             if result == Compare.JUSTREMOTE then
-                SyncWorld:SyncToLocal()
+                SyncMain:SyncToLocal()
             end
 
             if result == Compare.REMOTEBIGGER or result == Compare.LOCALBIGGER or result == Compare.EQUAL then
-                SyncWorld:ShowStartSyncPage()
+                SyncMain:ShowStartSyncPage()
             end
         end)
     end)
@@ -241,7 +238,7 @@ function Progress:UpdateDataBar(current, total, msg)
     local ProgressPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Progress')
 
     if not ProgressPage then
-        return
+        return false
     end
 
     self.current = current
@@ -270,7 +267,7 @@ function Progress:GetCurrent()
     local ProgressPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Progress')
 
     if not ProgressPage then
-        return
+        return false
     end
 
     return self.current
@@ -280,7 +277,7 @@ function Progress:GetTotal()
     local ProgressPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Progress')
 
     if not ProgressPage then
-        return
+        return false
     end
 
     return self.total
@@ -290,7 +287,7 @@ function Progress:GetMsg()
     local ProgressPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Progress')
 
     if not ProgressPage then
-        return
+        return false
     end
 
     return self.msg
@@ -300,7 +297,7 @@ function Progress:SetFinish(value)
     local ProgressPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Progress')
 
     if not ProgressPage then
-        return
+        return false
     end
 
     self.finish = value
@@ -310,7 +307,7 @@ function Progress:GetFinish()
     local ProgressPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Progress')
 
     if not ProgressPage then
-        return
+        return false
     end
 
     return self.finish
@@ -320,7 +317,7 @@ function Progress:SetBroke(value)
     local ProgressPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Progress')
 
     if not ProgressPage then
-        return
+        return false
     end
 
     self.broke = value
@@ -330,7 +327,7 @@ function Progress:GetBroke()
     local ProgressPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Progress')
 
     if not ProgressPage then
-        return
+        return false
     end
 
     return self.broke

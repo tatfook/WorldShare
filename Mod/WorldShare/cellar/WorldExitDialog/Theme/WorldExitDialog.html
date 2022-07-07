@@ -10,7 +10,7 @@
                     local ShareWorld = NPL.load('(gl)Mod/WorldShare/cellar/ShareWorld/ShareWorld.lua')
                     local Grade = NPL.load('Mod/WorldShare/cellar/WorldExitDialog/Grade.lua')
                     local Panorama = NPL.load('Mod/WorldShare/cellar/Panorama/Panorama.lua')
-                    local SyncWorld = NPL.load('(gl)Mod/WorldShare/cellar/Sync/SyncWorld.lua')
+                    local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
                     local Compare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
  
                     -- service
@@ -111,7 +111,7 @@
                                 Compare:Init(currentEnterWorld.worldpath, function()
                                     Mod.WorldShare.Store:Set('world/currentWorld', currentEnterWorld)
 
-                                    SyncWorld:SyncToDataSource(function()
+                                    SyncMain:SyncToDataSource(function()
                                         _guihelper.MessageBox(L'保存并上传成功！是否要继续退出世界', function()
                                             WorldExitDialog.OnDialogResult(_guihelper.DialogResult.No)
                                         end)

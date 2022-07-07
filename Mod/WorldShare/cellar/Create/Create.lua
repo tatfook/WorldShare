@@ -17,7 +17,7 @@ local DownloadWorld = commonlib.gettable('MyCompany.Aries.Game.MainLogin.Downloa
 local LoginModal = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua')
 local VipTypeWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/VipTypeWorld.lua')
 local ShareTypeWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/ShareTypeWorld.lua')
-local SyncWorld = NPL.load('(gl)Mod/WorldShare/cellar/Sync/SyncWorld.lua')
+local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
 local DeleteWorld = NPL.load('(gl)Mod/WorldShare/cellar/DeleteWorld/DeleteWorld.lua')
 local CommonLoadWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/CommonLoadWorld.lua')
 local CreateWorld = NPL.load('(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua')
@@ -198,14 +198,14 @@ function Create:Sync()
         end
 
         if result == Compare.JUSTLOCAL then
-            SyncWorld:SyncToDataSource(function()
+            SyncMain:SyncToDataSource(function()
                 self:GetWorldList(self.statusFilter)
             end)
         end
 
         if result == Compare.JUSTREMOTE then
-            SyncWorld:SyncToLocal(function()
-                SyncWorld:CheckTagName(function(result, remoteName)
+            SyncMain:SyncToLocal(function()
+                SyncMain:CheckTagName(function(result, remoteName)
                     if result and result == 'remote' then
                         local tag = LocalService:GetTag(currentWorld.worldpath)
     
@@ -236,7 +236,7 @@ function Create:Sync()
                 currentWorld.members = members
                 Mod.WorldShare.Store:Set('world/currentWorld', currentWorld)
                 
-                SyncWorld:ShowStartSyncPage(nil, function()
+                SyncMain:ShowStartSyncPage(nil, function()
                     self:GetWorldList(self.statusFilter)
                 end)
             end)
@@ -546,11 +546,11 @@ function Create:HandleEnterWorld(index, skip)
             if ShareTypeWorld:IsSharedWorld(currentWorld) then
                 ShareTypeWorld:CompareVersion(result, function(result)
                     if result == 'SYNC' then
-                        SyncWorld:BackupWorld()
+                        SyncMain:BackupWorld()
 
                         Mod.WorldShare.MsgBox:Wait()
 
-                        SyncWorld:SyncToLocalSingle(function(result, option)
+                        SyncMain:SyncToLocalSingle(function(result, option)
                             Mod.WorldShare.MsgBox:Close()
 
                             if result == true then
@@ -565,7 +565,7 @@ function Create:HandleEnterWorld(index, skip)
                 end)
             else
                 if result == Compare.REMOTEBIGGER then
-                    SyncWorld:ShowStartSyncPage(true, function()
+                    SyncMain:ShowStartSyncPage(true, function()
                         self:GetWorldList(self.statusFilter)
                     end)
                 else
@@ -652,7 +652,7 @@ function Create:WorldRename(currentItemIndex, tempModifyWorldname, callback)
                 Mod.WorldShare.Store:Set('world/currentRevision', currentWorld.revision)
                 Mod.WorldShare.Store:Set('world/currentWorld', currentWorld)
     
-                SyncWorld:SyncToDataSource(function(result, msg)
+                SyncMain:SyncToDataSource(function(result, msg)
                     if callback and type(callback) == 'function' then
                         callback()
                     end

@@ -21,7 +21,7 @@ local Permission = NPL.load('(gl)Mod/WorldShare/cellar/Permission/Permission.lua
 local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
 local Server = NPL.load("(gl)Mod/WorldShare/cellar/Server/Server.lua")
 local Menu = NPL.load('(gl)Mod/WorldShare/cellar/Menu/Menu.lua')
-local SyncWorld = NPL.load('(gl)Mod/WorldShare/cellar/Sync/SyncWorld.lua')
+local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
 local Certificate = NPL.load("(gl)Mod/WorldShare/cellar/Certificate/Certificate.lua")
 
 -- api
@@ -441,7 +441,7 @@ function Filters:Init()
     GameLogic.GetFilters():add_filter(
         'check_and_updated_before_enter_my_home',
         function(callback)
-            SyncWorld:CheckAndUpdatedBeforeEnterMyHome(function()
+            SyncMain:CheckAndUpdatedBeforeEnterMyHome(function()
                 GameLogic.RunCommand("/loadworld home");
             end)
         end

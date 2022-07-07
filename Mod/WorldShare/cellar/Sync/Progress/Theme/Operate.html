@@ -1,6 +1,6 @@
 <body>
     <pe:mcml>
-        <script type='text/npl'>
+        <script type="text/npl">
             <![CDATA[
                 local Progress = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Progress/Progress.lua')
     
@@ -21,27 +21,16 @@
                 end
             ]]>
         </script>
-        <style type='text/mcss' src='Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss'></style>
-        <div style='width: 270px;height: 65px;'>
-            <div style='margin-top:20px;'>
-                <pe:if condition='<%= not finish() %>'>
-                    <input type='button'
-                           name=''
-                           onclick='cancel()'
-                           value='<%=L"取消" %>'
-                           class='theme1_gray_button'
-                           style='width: 85px;
-                                  height: 30px;
-                                  margin-left: 40px' />
-                    <input type='button'
-                           name=''
-                           onclick='retry()'
-                           value='<%=L"重试" %>'
-                           class='theme1_gray_button'
-                           style='width: 85px;
-                                  height: 30px;
-                                  margin-left: 15px' />
+        <style type="text/mcss" src="Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss"></style>
+        <div style="width: 270px;height: 65px;">
+            <div style="margin-top:20px;">
+                <pe:if condition="<%=not finish() %>">
+                    <input type="button" name="" onclick="cancel()" value='<%=L"取消" %>' class="theme1_gray_button" style="width: 85px;height: 30px;margin-left: 40px" />
+                    <input type="button" name="" onclick="retry()" value='<%=L"重试" %>' class="theme1_gray_button" style="width: 85px;height: 30px;margin-left: 15px" />
                 </pe:if>
+                <!-- <pe:if condition="<%= finish() %>">
+                    <input type="button" name="" onclick="close()" value='<%=L"关闭" %>'  class="theme1_orange_button" style="width: 85px;height: 30px;margin-left: 90x" />
+                </pe:if> -->
             </div>
         </div>
     </pe:mcml>

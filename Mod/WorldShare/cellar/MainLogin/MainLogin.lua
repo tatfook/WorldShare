@@ -240,46 +240,19 @@ function MainLogin:ShowLogin(isModal, zorder)
                         MainLoginLoginPage:SetUIValue('auto_login_name', true)
                         MainLoginLoginPage:SetUIBackground('login_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 98 258 44')
 
-                        local phone_mode = MainLoginLoginPage:FindControl('phone_mode')
-                        local account_mode = MainLoginLoginPage:FindControl('account_mode')
-                        local auto_login_mode = MainLoginLoginPage:FindControl('auto_login_mode')
+                        MainLoginLoginPage:FindControl('phone_mode').visible = false
+                        MainLoginLoginPage:FindControl('account_mode').visible = false
+                        MainLoginLoginPage:FindControl('auto_login_mode').visible = true
 
-                        if phone_mode then
-                            phone_mode.visible = false
+                        if MainLoginLoginPage:FindControl('change_button') then
+                            MainLoginLoginPage:FindControl('change_button').visible = true
                         end
 
-                        if account_mode then
-                            account_mode.visible = false
-                        end
-
-                        if auto_login_mode then
-                            auto_login_mode.visible = true
-                        end
-
-                        local change_button = MainLoginLoginPage:FindControl('change_button')
-
-                        if change_button then
-                            change_button.visible = true
-                        end
-
-                        local update_password_button = MainLoginLoginPage:FindControl('update_password_button')
-
-                        if update_password_button then
-                            update_password_button.visible = true
-                        end
-
+                        MainLoginLoginPage:FindControl('update_password_button').visible = true
                         MainLoginLoginPage:SetUIValue('auto_username', PWDInfo.account or '')
-
-                        local title_login = MainLoginLoginPage:FindControl('title_login')
-                        local title_username = MainLoginLoginPage:FindControl('title_username')
-
-                        if title_login then
-                            title_login.visible = false
-                        end
-
-                        if title_username then
-                            title_username.visible = true
-                        end
+    
+                        MainLoginLoginPage:FindControl('title_login').visible = false
+                        MainLoginLoginPage:FindControl('title_username').visible = true
 
                         if Mod.WorldShare.Store:Get('user/isSettingLanguage') then
                             Mod.WorldShare.Store:Set('user/isSettingLanguage', false)
