@@ -2,7 +2,7 @@
 Title: KeepworkService World
 Author(s): big
 CreateDate: 2019.12.09
-ModifyDate: 2021.11.04
+ModifyDate: 2022.7.5
 Place: Foshan
 use the lib:
 ------------------------------------------------------------
@@ -93,17 +93,18 @@ function KeepworkServiceWorld:SetWorldInstanceByPid(pid, callback)
         end
 
         if sharedFolder then
-            worldPath = Mod.WorldShare.Utils.GetWorldFolderFullPath() ..
-                        '/_shared/' ..
-                        data.username ..
-                        '/' ..
-                        commonlib.Encoding.Utf8ToDefault(foldername) ..
-                        '/'
+            worldPath = format(
+                '%s/_shared/%s/%s/',
+                LocalServiceWorld:GetDefaultSaveWorldPath(),
+                data.username,
+                commonlib.Encoding.Utf8ToDefault(DItem.worldName)
+            )
         else
-            worldPath = Mod.WorldShare.Utils.GetWorldFolderFullPath() ..
-                        '/' ..
-                        commonlib.Encoding.Utf8ToDefault(foldername) ..
-                        '/'
+            worldPath = format(
+                '%s/%s/',
+                LocalServiceWorld:GetUserFolderPath(),
+                commonlib.Encoding.Utf8ToDefault(DItem.worldName)
+            )
         end
 
         if data and data.memberCount > 1 then
@@ -156,7 +157,7 @@ end
 -- get world list
 function KeepworkServiceWorld:GetWorldsList(callback)
     if not KeepworkService:IsSignedIn() then
-        return false
+        return
     end
 
     KeepworkWorldsApi:GetWorldList(10000, 1, callback)
@@ -427,12 +428,11 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
         syncBackUpWorld = commonlib.Files.Find({}, 'temp/sync_backup_world', 0, 10000, '*')
     end
 
-    self:GetWorldsList(function(data, err)
-        if type(data) ~= 'table' then
-            return false
+    self:GetWorldsList(function(remoteWorldsList, err)
+        if not remoteWorldsList or type(remoteWorldsList) ~= 'table' then
+            return
         end
 
-        local remoteWorldsList = data
         local currentWorldList = commonlib.vector:new()
         local currentWorld
 
@@ -490,12 +490,13 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                                 Mod.WorldShare.worldpath = nil -- force update world data.
                                 local curWorldUsername = Mod.WorldShare:GetWorldData('username', LItem.worldpath)
                                 local backUpWorldPath
-
+ 
                                 if curWorldUsername then
                                     backUpWorldPath =
-                                        'temp/sync_backup_world/' ..
+                                        LocalServiceWorld:GetDefaultSaveWorldPath() ..
+                                        '/_user/' ..
                                         curWorldUsername ..
-                                        '_' ..
+                                        '/' ..
                                         commonlib.Encoding.Utf8ToDefault(LItem.foldername)
                                 else
                                     backUpWorldPath =
@@ -546,15 +547,16 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                     -- shared world path
                     worldpath = format(
                         '%s/_shared/%s/%s/',
-                        Mod.WorldShare.Utils.GetWorldFolderFullPath(),
+                        LocalServiceWorld:GetDefaultSaveWorldPath(),
                         DItem.user.username,
                         commonlib.Encoding.Utf8ToDefault(DItem.worldName)
                     )
+
                 else
                     -- mine world path
                     worldpath = format(
                         '%s/%s/',
-                        Mod.WorldShare.Utils.GetWorldFolderFullPath(),
+                        LocalServiceWorld:GetUserFolderPath(),
                         commonlib.Encoding.Utf8ToDefault(DItem.worldName)
                     )
 
@@ -677,13 +679,29 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
 end
 
 --allowMax 保存的时候允许临界值（localWorldListCount==freeMaxWorldCount）
-function KeepworkServiceWorld:LimitFreeUser(isShowUI, callback,allowMax)
+function KeepworkServiceWorld:LimitFreeUser(isShowUI, callback, allowMax)
     if not callback or type(callback) ~= 'function' then
         return
     end
 
     local localWorldList = LocalServiceWorld:GetWorldList()
-    local localWorldListCount = #localWorldList
+    local localWorldListCount = 0
+    local username = Mod.WorldShare.Store:Get('user/username')
+
+    for key, item in ipairs(localWorldList) do
+        if not item.shared then
+            if not string.match(item.worldpath, '/_user/') then
+                Mod.WorldShare.worldpath = nil -- force update world data.
+                local curWorldUsername = Mod.WorldShare:GetWorldData('username', item.worldpath)
+    
+                if curWorldUsername == username then
+                    localWorldListCount = localWorldListCount + 1
+                end
+            else
+                localWorldListCount = localWorldListCount + 1
+            end
+        end
+    end
 
     if isShowUI == true then
         isShowUI = true
@@ -693,7 +711,8 @@ function KeepworkServiceWorld:LimitFreeUser(isShowUI, callback,allowMax)
 
     local freeMaxWorldCount = 2 --免费用户最多能创建几个本地世界（包含家园）
 
-    if localWorldListCount > freeMaxWorldCount or (not allowMax and localWorldListCount == freeMaxWorldCount) then
+    if localWorldListCount > freeMaxWorldCount or
+       (not allowMax and localWorldListCount == freeMaxWorldCount) then
         GameLogic.IsVip('UnlimitWorldsNumber', isShowUI, callback)
         return
     end
@@ -708,18 +727,23 @@ function KeepworkServiceWorld:LimitFreeUser(isShowUI, callback,allowMax)
         if localWorldListCount > 0 then
             if dataCount > 0 then
                 local totalCount = localWorldListCount
+
                 for DKey, DItem in ipairs(data) do
                     local contain = false
+
                     for key, item in ipairs(localWorldList) do
                         if item.foldername == DItem.worldName then
                             contain = true
                         end
                     end
+
                     if not contain then 
                         totalCount = totalCount + 1
                     end
                 end
-                if totalCount > freeMaxWorldCount or (not allowMax and totalCount == freeMaxWorldCount) then
+
+                if totalCount > freeMaxWorldCount or
+                   (not allowMax and totalCount == freeMaxWorldCount) then
                     GameLogic.IsVip('UnlimitWorldsNumber', isShowUI, callback)
                 else
                     callback(true)
@@ -728,7 +752,8 @@ function KeepworkServiceWorld:LimitFreeUser(isShowUI, callback,allowMax)
                 callback(true)
             end
         else
-            if dataCount > freeMaxWorldCount or (not allowMax and dataCount == freeMaxWorldCount) then
+            if dataCount > freeMaxWorldCount or
+               (not allowMax and dataCount == freeMaxWorldCount) then
                 GameLogic.IsVip('UnlimitWorldsNumber', isShowUI, callback)
             else
                 callback(true)
@@ -737,9 +762,7 @@ function KeepworkServiceWorld:LimitFreeUser(isShowUI, callback,allowMax)
     end)
 end
 
-function KeepworkServiceWorld:OnCreateHomeWorld(homeWorldName)
-    local worldPath = 'worlds/DesignHouse/' .. homeWorldName
-
+function KeepworkServiceWorld:OnCreateHomeWorld(worldPath, homeWorldName)
     KeepworkWorldsApi:GetWorldByName(
         homeWorldName,
         function(data, err)

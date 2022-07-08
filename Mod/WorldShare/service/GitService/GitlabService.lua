@@ -14,7 +14,7 @@ local FileDownloader = commonlib.gettable("Mod.WorldShare.service.FileDownloader
 local WorldShare = commonlib.gettable("Mod.WorldShare")
 local Encoding = commonlib.gettable("commonlib.Encoding")
 
-local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
+local SyncWorld = NPL.load('(gl)Mod/WorldShare/cellar/Sync/SyncWorld.lua')
 local HttpRequest = NPL.load('./HttpRequest.lua')
 local KeepworkService = NPL.load('./KeepworkService.lua')
 local Store = NPL.load('(gl)Mod/WorldShare/store/Store.lua')

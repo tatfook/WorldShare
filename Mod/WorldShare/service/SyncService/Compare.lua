@@ -39,7 +39,7 @@ local GitEncoding = NPL.load('(gl)Mod/WorldShare/helper/GitEncoding.lua')
 local Utils = NPL.load('(gl)Mod/WorldShare/helper/Utils.lua')
 
 -- UI
-local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
+local SyncWorld = NPL.load('(gl)Mod/WorldShare/cellar/Sync/SyncWorld.lua')
 local CreateWorld = NPL.load('(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua')
 
 local Compare = NPL.export()

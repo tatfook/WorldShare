@@ -1,12 +1,12 @@
 --[[
-Title: SyncMain
+Title: SyncWorld
 Author(s): big
 CreateDate: 2017.04.17
-ModifyDate: 2021.12.17
+ModifyDate: 2022.7.1
 Desc: 
 use the lib:
 ------------------------------------------------------------
-local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
+local SyncWorld = NPL.load('(gl)Mod/WorldShare/cellar/Sync/SyncWorld.lua')
 ------------------------------------------------------------
 ]]
 
@@ -35,9 +35,9 @@ local WorldShare = commonlib.gettable('Mod.WorldShare')
 local WorldRevision = commonlib.gettable('MyCompany.Aries.Creator.Game.WorldRevision')
 local SaveWorldHandler = commonlib.gettable('MyCompany.Aries.Game.SaveWorldHandler')
 
-local SyncMain = NPL.export()
+local SyncWorld = NPL.export()
 
-function SyncMain:OnWorldLoad(callback)
+function SyncWorld:OnWorldLoad(callback)
     Compare:GetCurrentWorldInfo(function()
         local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
@@ -51,17 +51,18 @@ function SyncMain:OnWorldLoad(callback)
     end)
 end
 
-function SyncMain:ShowNewVersionFoundPage(callback)
-    local params = SyncMain:ShowDialog(
-                    'Mod/WorldShare/cellar/Sync/Theme/NewVersionFound.html',
-                    'Mod.WorldShare.Sync.NewVersionFound'
-                   )
+function SyncWorld:ShowNewVersionFoundPage(callback)
+    local params =
+        SyncWorld:ShowDialog(
+            'Mod/WorldShare/cellar/Sync/Theme/NewVersionFound.html',
+            'Mod.WorldShare.Sync.NewVersionFound'
+        )
 
     params._page.afterSyncCallback = callback
 end
 
-function SyncMain:ShowStartSyncPage(useOffline, callback)
-    local params = SyncMain:ShowDialog(
+function SyncWorld:ShowStartSyncPage(useOffline, callback)
+    local params = SyncWorld:ShowDialog(
         'Mod/WorldShare/cellar/Sync/Theme/StartSync.html?useOffline=' .. (useOffline and 'true' or 'false'),
         'Mod.WorldShare.Sync.StartSync'
     )
@@ -69,7 +70,7 @@ function SyncMain:ShowStartSyncPage(useOffline, callback)
     params._page.afterSyncCallback = callback
 end
 
-function SyncMain:CloseStartSyncPage()
+function SyncWorld:CloseStartSyncPage()
     local StartSyncPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Sync.StartSync')
 
     if StartSyncPage then
@@ -77,14 +78,14 @@ function SyncMain:CloseStartSyncPage()
     end
 end
 
-function SyncMain:ShowBeyondVolume(bEnabled)
-    SyncMain:ShowDialog(
+function SyncWorld:ShowBeyondVolume(bEnabled)
+    SyncWorld:ShowDialog(
         'Mod/WorldShare/cellar/Sync/Theme/BeyondVolume.html?bEnabled=' .. (bEnabled and 'true' or 'false'),
         'Mod.WorldShare.Sync.BeyondVolume'
     )
 end
 
-function SyncMain:CloseBeyondVolumePage()
+function SyncWorld:CloseBeyondVolumePage()
     local BeyondVolumePage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Sync.BeyondVolume')
 
     if BeyondVolumePage then
@@ -92,29 +93,31 @@ function SyncMain:CloseBeyondVolumePage()
     end
 end
 
-function SyncMain:ShowStartSyncUseLocalPage(callback)
-    local params = SyncMain:ShowDialog(
-                    'Mod/WorldShare/cellar/Sync/Theme/UseLocal.html',
-                    'Mod.WorldShare.Sync.UseLocal'
-                   )
+function SyncWorld:ShowStartSyncUseLocalPage(callback)
+    local params =
+        SyncWorld:ShowDialog(
+            'Mod/WorldShare/cellar/Sync/Theme/UseLocal.html',
+            'Mod.WorldShare.Sync.UseLocal'
+        )
 
     params._page.afterSyncCallback = callback
 end
 
-function SyncMain:ShowStartSyncUseDataSourcePage(callback)
-    local params = SyncMain:ShowDialog(
-                    'Mod/WorldShare/cellar/Sync/Theme/UseDataSource.html',
-                    'Mod.WorldShare.Sync.UseDataSource'
-                   )
+function SyncWorld:ShowStartSyncUseDataSourcePage(callback)
+    local params =
+        SyncWorld:ShowDialog(
+            'Mod/WorldShare/cellar/Sync/Theme/UseDataSource.html',
+            'Mod.WorldShare.Sync.UseDataSource'
+        )
 
     params._page.afterSyncCallback = callback
 end
 
-function SyncMain:ShowDialog(url, name)
+function SyncWorld:ShowDialog(url, name)
     return Mod.WorldShare.Utils.ShowWindow(0, 0, url, name, 0, 0, '_fi', false)
 end
 
-function SyncMain:BackupWorld()
+function SyncWorld:BackupWorld()
     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
     local revision = WorldRevision:new():init(currentWorld and currentWorld.worldpath)
@@ -122,7 +125,7 @@ function SyncMain:BackupWorld()
     revision:Backup()
 end
 
-function SyncMain:SyncToLocal(callback, _, noShownResult)
+function SyncWorld:SyncToLocal(callback, _, noShownResult)
     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
     if not currentWorld.kpProjectId or currentWorld.kpProjectId == 0 then
@@ -195,7 +198,7 @@ function SyncMain:SyncToLocal(callback, _, noShownResult)
     )
 end
 
-function SyncMain:SyncToLocalSingle(callback)
+function SyncWorld:SyncToLocalSingle(callback)
     local syncInstance = SyncToLocal:Init(function(result, option)
         if result == false then
             if type(option) == 'string' then
@@ -241,7 +244,7 @@ function SyncMain:SyncToLocalSingle(callback)
     Progress:Init(syncInstance)
 end
 
-function SyncMain:SyncToDataSourceByWorldName(worldName, callback)
+function SyncWorld:SyncToDataSourceByWorldName(worldName, callback)
     if not KeepworkServiceSession:IsSignedIn() then
         return
     end
@@ -266,7 +269,7 @@ function SyncMain:SyncToDataSourceByWorldName(worldName, callback)
                         currentWorld.members = members
                         Mod.WorldShare.Store:Set('world/currentWorld', currentWorld)
 
-                        SyncMain:SyncToDataSource(function(result)
+                        SyncWorld:SyncToDataSource(function(result)
                             if callback and type(callback) == 'function' then
                                 callback(result, currentWorld.kpProjectId)
                             end
@@ -275,7 +278,7 @@ function SyncMain:SyncToDataSourceByWorldName(worldName, callback)
                 else
                     Mod.WorldShare.Store:Set('world/currentWorld', currentWorld)
 
-                    SyncMain:SyncToDataSource(function(result)
+                    SyncWorld:SyncToDataSource(function(result)
                         if callback and type(callback) == 'function' then
                             callback(result, currentWorld.kpProjectId)
                         end
@@ -285,7 +288,7 @@ function SyncMain:SyncToDataSourceByWorldName(worldName, callback)
         else
             LocalServiceWorld:SetWorldInstanceByFoldername(worldName)
             local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
-            SyncMain:SyncToDataSource(function(result)
+            SyncWorld:SyncToDataSource(function(result)
                 if callback and type(callback) == 'function' then
                     callback(result, currentWorld.kpProjectId)
                 end
@@ -294,20 +297,20 @@ function SyncMain:SyncToDataSourceByWorldName(worldName, callback)
     end)
 end
 
-function SyncMain:SyncToDataSource(callback)
+function SyncWorld:SyncToDataSource(callback)
     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
     local function Handle()
         -- close the notice
         Mod.WorldShare.MsgBox:Close()
-    
+
         if not currentWorld.worldpath or currentWorld.worldpath == '' then
             return
         end
-    
+
         local syncInstance = SyncToDataSource:Init(function(result, option)
             if result == false then
-                if type(option) == 'string' then
+                if option and type(option) == 'string' then
                     Progress:ClosePage()
     
                     if option == 'RE-ENTRY' then
@@ -329,7 +332,7 @@ function SyncMain:SyncToDataSource(callback)
                     GameLogic.AddBBS(nil, option, 3000, '255 0 0')
                 end
     
-                if type(option) == 'table' then
+                if option and type(option) == 'table' then
                     if option.method == 'UPDATE-PROGRESS' then
                         Progress:UpdateDataBar(option.current, option.total, option.msg)
                         return
@@ -350,7 +353,7 @@ function SyncMain:SyncToDataSource(callback)
                 end
             end
 
-            if type(callback) == 'function' then
+            if callback and type(callback) == 'function' then
                 callback(result, option)
             end
         end)
@@ -390,7 +393,7 @@ function SyncMain:SyncToDataSource(callback)
     end)
 end
 
-function SyncMain:CheckTagName(callback)
+function SyncWorld:CheckTagName(callback)
     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
     if currentWorld and currentWorld.kpProjectId and currentWorld.kpProjectId ~= 0 then
@@ -431,22 +434,22 @@ function SyncMain:CheckTagName(callback)
     end
 end
 
-function SyncMain.GetCurrentRevision()
+function SyncWorld.GetCurrentRevision()
     return tonumber(Mod.WorldShare.Store:Get('world/currentRevision')) or 0
 end
 
-function SyncMain.GetRemoteRevision()
+function SyncWorld.GetRemoteRevision()
     return tonumber(Mod.WorldShare.Store:Get('world/remoteRevision')) or 0
 end
 
-function SyncMain:GetCurrentRevisionInfo()
+function SyncWorld:GetCurrentRevisionInfo()
     WorldShare.worldData = nil
     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
     return WorldShare:GetWorldData('revision', currentWorld and currentWorld.worldpath .. '/')
 end
 
-function SyncMain:CheckWorldSize(callback)
+function SyncWorld:CheckWorldSize(callback)
     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
     if not currentWorld or not currentWorld.worldpath  or #currentWorld.worldpath == 0 then
@@ -483,7 +486,7 @@ function SyncMain:CheckWorldSize(callback)
     end
 end
 
-function SyncMain:GetWorldDateTable()
+function SyncWorld:GetWorldDateTable()
     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
     local date = {}
 
@@ -500,7 +503,7 @@ function SyncMain:GetWorldDateTable()
     return date
 end
 
-function SyncMain:CheckAndUpdatedBeforeEnterMyHome(callback)
+function SyncWorld:CheckAndUpdatedBeforeEnterMyHome(callback)
     if not KeepworkServiceSession:IsSignedIn() then
         return false
     end
@@ -516,7 +519,7 @@ function SyncMain:CheckAndUpdatedBeforeEnterMyHome(callback)
     self:CheckAndUpdatedByFoldername(foldername, callback)
 end
 
-function SyncMain:CheckAndUpdatedByFoldername(folderName, callback)
+function SyncWorld:CheckAndUpdatedByFoldername(folderName, callback)
     KeepworkServiceProject:GetProjectIdByWorldName(folderName, false, function(projectId)
         local worldPath = Mod.WorldShare.Utils:GetWorldPathByFolderName(folderName)
         local worldTagPath = worldPath .. 'tag.xml'
@@ -547,7 +550,7 @@ function SyncMain:CheckAndUpdatedByFoldername(folderName, callback)
     end)
 end
 
-function SyncMain:CheckAndUpdated(callback)
+function SyncWorld:CheckAndUpdated(callback)
     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
     if currentWorld.status == 5 then

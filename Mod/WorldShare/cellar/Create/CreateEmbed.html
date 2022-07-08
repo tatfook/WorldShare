@@ -547,6 +547,12 @@
                     end
 
                     function open_folder(index)
+                        if System.os.GetPlatform() ~= 'win32' and
+                           System.os.GetPlatform() ~= 'mac' then
+                            _guihelper.MessageBox(L'暂不支持当前系统打开文件夹')
+                            return
+                        end
+
                         local currentSelectedWorld = Create:GetSelectWorld(index)
 
                         if currentSelectedWorld and
@@ -558,7 +564,14 @@
                         end
 
                         local worldpath = currentSelectedWorld.worldpath or ''
-                        Map3DSystem.App.Commands.Call('File.WinExplorer', {filepath = worldpath, silentmode=true});
+
+                        Map3DSystem.App.Commands.Call(
+                            'File.WinExplorer',
+                            {
+                                filepath = ParaIO.GetWritablePath() .. worldpath,
+                                silentmode = true
+                            }
+                        )
                     end
 
                     function set_default(name)
@@ -654,6 +667,29 @@
                         end
 
                         return format('%s%s', L'打开世界文件夹\n', world_path)
+                    end
+
+                    function is_show_modify_button()
+                        local is_shared = Create:GetCurWorldInfo('shared', Eval('index'))
+
+                        if is_shared then
+                            local username = Mod.WorldShare.Store:Get('user/username')
+                            local user = Create:GetCurWorldInfo('user', Eval('index'))
+
+                            if not user or
+                               type(user) ~= 'table' or
+                               not user.username then
+                                return false
+                            end
+
+                            if username == user.username then
+                                return true
+                            else
+                                return false
+                            end
+                        else
+                            return true
+                        end
                     end
                 ]]>
             </script>
