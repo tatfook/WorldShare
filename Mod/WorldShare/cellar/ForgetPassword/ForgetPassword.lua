@@ -12,7 +12,7 @@ ForgetPassword:ShowPage()
 ]]
 
 local Validated = NPL.load("(gl)Mod/WorldShare/helper/Validated.lua")
-local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/Service/KeepworkService/Session.lua")
+local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/Service/KeepworkService/KeepworkServiceSession.lua")
 
 local Desktop = commonlib.gettable('MyCompany.Aries.Creator.Game.Desktop')
 

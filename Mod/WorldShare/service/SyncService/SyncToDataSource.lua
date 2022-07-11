@@ -19,7 +19,7 @@ local LocalService = NPL.load('../LocalService.lua')
 local KeepworkService = NPL.load('../KeepworkService.lua')
 local KeepworkServiceProject = NPL.load('../KeepworkService/KeepworkServiceProject.lua')
 local KeepworkServiceWorld = NPL.load('../KeepworkService/KeepworkServiceWorld.lua')
-local KeepworkServiceSession = NPL.load('../KeepworkService/Session.lua')
+local KeepworkServiceSession = NPL.load('../KeepworkService/KeepworkServiceSession.lua')
 local Compare = NPL.load('./Compare.lua')
 local EventTrackingService = NPL.load('../EventTracking.lua')
 

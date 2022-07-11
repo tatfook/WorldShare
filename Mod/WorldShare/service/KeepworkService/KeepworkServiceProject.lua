@@ -14,7 +14,7 @@ local WorldCommon = commonlib.gettable('MyCompany.Aries.Creator.WorldCommon')
 local Encoding = commonlib.gettable('commonlib.Encoding')
 
 -- service
-local KeepworkServiceSession = NPL.load('./Session.lua')
+local KeepworkServiceSession = NPL.load('./KeepworkServiceSession.lua')
 
 -- api
 local KeepworkProjectsApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkProjectsApi.lua')

@@ -16,7 +16,7 @@ local SaveWorldHandler = commonlib.gettable('MyCompany.Aries.Game.SaveWorldHandl
 
 -- service
 local KeepworkService = NPL.load('../KeepworkService.lua')
-local KeepworkServiceSession = NPL.load('./Session.lua')
+local KeepworkServiceSession = NPL.load('./KeepworkServiceSession.lua')
 local LocalServiceWorld = NPL.load('(gl)Mod/WorldShare/service/LocalService/LocalServiceWorld.lua')
 local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
 local GitService = NPL.load('(gl)Mod/WorldShare/service/GitService.lua')
