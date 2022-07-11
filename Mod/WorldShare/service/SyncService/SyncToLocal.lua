@@ -263,7 +263,7 @@ function SyncToLocal:HandleCompareList()
         end
     })
 
-    handleTimer:Change(0, 5)
+    handleTimer:Change(0, 1)
 end
 
 function SyncToLocal:SetFinish(value)
