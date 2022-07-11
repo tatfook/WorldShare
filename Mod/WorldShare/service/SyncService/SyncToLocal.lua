@@ -30,14 +30,14 @@ local DELETE = 'DELETE'
 local DOWNLOAD = 'DOWNLOAD'
 
 function SyncToLocal:Init(callback)
-    if type(callback) ~= 'function' then
-        return false
+    if not callback or type(callback) ~= 'function' then
+        return
     end
 
     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
     if not currentWorld then
-        return false
+        return
     end
 
     self.currentWorld = currentWorld
@@ -77,14 +77,14 @@ function SyncToLocal:Init(callback)
 
     if not self.currentWorld.worldpath or self.currentWorld.worldpath == '' then
         self.callback(false, L'下载失败，原因：下载目录为空')
-        return false
+        return
     end
 
     self:SetFinish(false)
 
     if not self.currentWorld.lastCommitId then
         self.callback(false, L'commitId不存在')
-        return false
+        return
     end
 
     self:Start()
