@@ -17,7 +17,7 @@ local ParaWorldAnalytics = NPL.load("(gl)script/apps/Aries/Creator/Game/Login/Pa
 local EventGatewayEventsApi = NPL.load("(gl)Mod/WorldShare/api/EventGateway/Events.lua")
 
 -- service
-local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
+local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceSession.lua")
 
 -- database
 local EventTrackingDatabase = NPL.load("(gl)Mod/WorldShare/database/EventTracking.lua")

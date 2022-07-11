@@ -11,7 +11,7 @@ local LocalServiceSession = NPL.load("(gl)Mod/WorldShare/service/LocalService/Lo
 
 -- database
 local SessionsData = NPL.load('(gl)Mod/WorldShare/database/SessionsData.lua')
-local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceSession.lua')
 
 -- libs
 local EntityManager = commonlib.gettable("MyCompany.Aries.Game.EntityManager")

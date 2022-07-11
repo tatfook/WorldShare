@@ -2,7 +2,7 @@
 Title: GitlabService
 Author(s):  big
 CreateDate: 2019.12.10
-UpdateDate: 2021.08.05
+UpdateDate: 2022.7.11
 Desc: 
 use the lib:
 ------------------------------------------------------------
@@ -11,8 +11,8 @@ local GitKeepworkService = NPL.load('(gl)Mod/WorldShare/service/GitService/GitKe
 ]]
 
 -- api
-local KeepworkReposApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/Repos.lua')
-local KeepworkProjectsApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/Projects.lua')
+local KeepworkReposApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkReposApi.lua')
+local KeepworkProjectsApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkProjectsApi.lua')
 
 -- service
 local GitService = NPL.load('(gl)Mod/WorldShare/service/GitService.lua')
@@ -135,8 +135,8 @@ end
 local recursiveData = {}
 function GitKeepworkService:GetTree(foldername, username, commitId, callback)
     KeepworkReposApi:Tree(foldername, username, commitId, function(data, err)
-        if type(data) ~= 'table' then
-            return false
+        if not data or type(data) ~= 'table' then
+            return
         end
 
         local _data = {}
@@ -160,7 +160,7 @@ function GitKeepworkService:GetTree(foldername, username, commitId, callback)
             end
         end
 
-        if type(callback) == 'function' then
+        if callback and type(callback) == 'function' then
             callback(_data, err)
         end
     end, callback)

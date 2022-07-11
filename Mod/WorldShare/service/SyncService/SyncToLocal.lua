@@ -99,7 +99,7 @@ function SyncToLocal:Start()
     self.callback(false, { method = 'UPDATE-PROGRESS', current = 0, total = 0, msg = L'正在对比文件列表...' })
 
     local function Handle(data, err)
-        if type(data) ~= 'table' then
+        if not data or type(data) ~= 'table' then
             self.callback(false, L'获取列表失败（下载）')
             self:SetFinish(true)
             return
@@ -205,44 +205,65 @@ function SyncToLocal:Close()
 end
 
 function SyncToLocal:HandleCompareList()
-    if self.compareListTotal < self.compareListIndex then
-        Mod.WorldShare.Store:Set('world/currentWorld', self.currentWorld)
-        KeepworkService:SetCurrentCommitId()
-        -- sync finish
-        self:SetFinish(true)
-        self.callback(false, {
-            method = 'UPDATE-PROGRESS-FINISH'
-        })
+    local handleTimer
+    local handling = false
 
-        self.compareListIndex = 1
-        return true
-    end
+    handleTimer = commonlib.Timer:new({
+        callbackFunc = function()
+            if self.compareListTotal < self.compareListIndex then
+                Mod.WorldShare.Store:Set('world/currentWorld', self.currentWorld)
+                KeepworkService:SetCurrentCommitId()
 
-    if self.broke then
-        self.compareListIndex = 1
-        self:SetFinish(true)
-        LOG.std('SyncToLocal', 'debug', 'SyncToLocal', L'下载被中断')
-        return false
-    end
+                -- sync finish
+                self:SetFinish(true)
 
-    local currentItem = self.compareList[self.compareListIndex]
+                self.callback(false, {
+                    method = 'UPDATE-PROGRESS-FINISH'
+                })
+        
+                self.compareListIndex = 1
 
-    local function Retry()
-        self.compareListIndex = self.compareListIndex + 1
-        self:HandleCompareList()
-    end
+                handleTimer:Change(nil, nil)
 
-    if currentItem.status == UPDATE then
-        self:UpdateOne(currentItem.file, Retry)
-    end
+                return
+            end
+        
+            if self.broke then
+                self.compareListIndex = 1
 
-    if currentItem.status == DOWNLOAD then
-        self:DownloadOne(currentItem.file, Retry)
-    end
+                self:SetFinish(true)
 
-    if currentItem.status == DELETE then
-        self:DeleteOne(currentItem.file, Retry)
-    end
+                LOG.std('SyncToLocal', 'debug', 'SyncToLocal', L'下载被中断')
+
+                return
+            end
+
+            if not handling then
+                handling = true
+
+                local currentItem = self.compareList[self.compareListIndex]
+            
+                local function Retry()
+                    self.compareListIndex = self.compareListIndex + 1
+                    handling = false
+                end
+
+                if currentItem.status == UPDATE then
+                    self:UpdateOne(currentItem.file, Retry)
+                end
+            
+                if currentItem.status == DOWNLOAD then
+                    self:DownloadOne(currentItem.file, Retry)
+                end
+            
+                if currentItem.status == DELETE then
+                    self:DeleteOne(currentItem.file, Retry)
+                end
+            end
+        end
+    })
+
+    handleTimer:Change(0, 5)
 end
 
 function SyncToLocal:SetFinish(value)

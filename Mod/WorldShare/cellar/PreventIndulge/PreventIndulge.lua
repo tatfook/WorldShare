@@ -10,7 +10,7 @@ local PreventIndulge = NPL.load("(gl)Mod/WorldShare/cellar/PreventIndulge/Preven
 ------------------------------------------------------------
 ]]
 
-local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
+local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceSession.lua")
 
 local PreventIndulge = NPL.export()
 

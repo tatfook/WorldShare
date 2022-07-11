@@ -14,7 +14,7 @@ local KeepWorkItemManager = NPL.load('(gl)script/apps/Aries/Creator/HttpAPI/Keep
 local CommandManager = commonlib.gettable("MyCompany.Aries.Game.CommandManager")
 
 -- service
-local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceSession.lua')
 local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
 
 local Beginner = NPL.export()

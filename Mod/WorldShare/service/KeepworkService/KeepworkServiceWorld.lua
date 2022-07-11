@@ -23,8 +23,8 @@ local GitService = NPL.load('(gl)Mod/WorldShare/service/GitService.lua')
 local Compare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
 
 -- api
-local KeepworkWorldsApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/Worlds.lua')
-local KeepworkProjectsApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/Projects.lua')
+local KeepworkWorldsApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkWorldsApi.lua')
+local KeepworkProjectsApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkProjectsApi.lua')
 local KeepworkWorldLocksApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/WorldLocks.lua')
 
 local KeepworkServiceWorld = NPL.export()
@@ -199,15 +199,15 @@ function KeepworkServiceWorld:GetWorld(foldername, shared, worldUserId, callback
        not worldUserId or
        not callback or
        type(callback) ~= 'function' then
-        return false
+        return
     end
 
     if not KeepworkService:IsSignedIn() then
-        return false
+        return
     end
 
     KeepworkWorldsApi:GetWorldByName(foldername, function(data, err)
-        if type(data) ~= 'table' then
+        if not data or type(data) ~= 'table' then
             return
         end
 

@@ -11,7 +11,7 @@ KeepworkProjectsApiFilter:Init()
 ]]
 
 -- api
-local KeepworkProjectsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Projects.lua")
+local KeepworkProjectsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/KeepworkProjectsApi.lua")
 
 local KeepworkProjectsApiFilter = NPL.export()
 

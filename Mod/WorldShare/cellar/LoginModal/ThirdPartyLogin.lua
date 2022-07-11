@@ -20,7 +20,7 @@ local GameLogic = commonlib.gettable("MyCompany.Aries.Game.GameLogic")
 
 -- service
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
-local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
+local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceSession.lua")
 local NPLServerService = NPL.load("(gl)Mod/WorldShare/service/NPLServerService.lua")
 
 local ThirdPartyLogin = NPL.export()

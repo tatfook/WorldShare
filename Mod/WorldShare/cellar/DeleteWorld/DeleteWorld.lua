@@ -15,7 +15,7 @@ local WorldCommon = commonlib.gettable('MyCompany.Aries.Creator.WorldCommon')
 
 -- service
 local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceProject.lua')
-local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceSession.lua')
 local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
 
 local DeleteWorld = NPL.export()

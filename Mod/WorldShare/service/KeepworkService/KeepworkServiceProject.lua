@@ -17,9 +17,9 @@ local Encoding = commonlib.gettable('commonlib.Encoding')
 local KeepworkServiceSession = NPL.load('./Session.lua')
 
 -- api
-local KeepworkProjectsApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/Projects.lua')
+local KeepworkProjectsApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkProjectsApi.lua')
 local KeepworkProjectStarApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/ProjectStar.lua')
-local KeepworkWorldsApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/Worlds.lua')
+local KeepworkWorldsApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkWorldsApi.lua')
 local KeepworkMembersApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/Members.lua')
 local KeepworkAppliesApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/Applies.lua')
 
@@ -35,8 +35,11 @@ end
 
 -- This api will create a keepwork paracraft project and associated with paracraft world.
 function KeepworkServiceProject:CreateProject(foldername, callback)
-    if not KeepworkServiceSession:IsSignedIn() or not foldername then
-        return false
+    if not KeepworkServiceSession:IsSignedIn() or
+       not foldername or
+       not callback or
+       type(callback) ~= 'function' then
+        return
     end
 
     KeepworkProjectsApi:CreateProject(foldername, callback, callback)
@@ -104,19 +107,19 @@ end
 
 -- get project id by worldname
 function KeepworkServiceProject:GetProjectIdByWorldName(foldername, shared, callback)
-    if type(callback) ~= 'function' then
-        return false
+    if not callback or type(callback) ~= 'function' then
+        return
     end
 
     if not KeepworkServiceSession:IsSignedIn() then
-        return false
+        return
     end
 
     local userId = tonumber(Mod.WorldShare.Store:Get('user/userId'))
 
     KeepworkWorldsApi:GetWorldByName(foldername, function(data, err)
-        if type(data) ~= 'table' then
-            return false
+        if not data or type(data) ~= 'table' then
+            return
         end
 
         local bIsExist = false
@@ -141,9 +144,11 @@ function KeepworkServiceProject:GetProjectIdByWorldName(foldername, shared, call
         end
 
         if bIsExist then
-            if type(world) ~= 'table' or not world.projectId then
+            if not world or
+               type(world) ~= 'table' or
+               not world.projectId then
                 callback()
-                return false
+                return
             end
 
             local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')

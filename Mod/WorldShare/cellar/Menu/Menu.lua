@@ -14,7 +14,7 @@ local Menu = NPL.load("(gl)Mod/WorldShare/cellar/Menu/Menu.lua")
 local ShareWorld = NPL.load("(gl)Mod/WorldShare/cellar/ShareWorld/ShareWorld.lua")
 
 -- service
-local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
+local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceSession.lua")
 
 local Menu = NPL.export()
 

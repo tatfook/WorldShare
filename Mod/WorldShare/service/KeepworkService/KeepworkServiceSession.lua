@@ -5,7 +5,7 @@ Date:  2019.09.22
 Place: Foshan
 use the lib:
 ------------------------------------------------------------
-local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceSession.lua')
 ------------------------------------------------------------
 ]]
 
@@ -20,7 +20,7 @@ local KeepworkServiceSchoolAndOrg = NPL.load('(gl)Mod/WorldShare/service/Keepwor
 local SyncServiceCompare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
 
 -- api
-local KeepworkUsersApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/Users.lua')
+local KeepworkUsersApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkUsersApi.lua')
 local KeepworkKeepworksApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkKeepworksApi.lua')
 local KeepworkOauthUsersApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/OauthUsers.lua')
 local SocketApi = NPL.load('(gl)Mod/WorldShare/api/Socket/SocketApi.lua')
@@ -957,8 +957,10 @@ function KeepworkServiceSession:GetUserTokenFromUrlProtocol()
 end
 
 function KeepworkServiceSession:CheckTokenExpire(callback)
-    if not self:IsSignedIn() then
-        return false
+    if not self:IsSignedIn() or
+       not callback or
+       type(callback) then
+        return
     end
 
     local token = Mod.WorldShare.Store:Get('user/token')
@@ -978,7 +980,7 @@ function KeepworkServiceSession:CheckTokenExpire(callback)
                 callback(false)
             end
 
-            return false
+            return
         end
 
         currentUser.password = string.gsub(currentUser.password, ' ', '')
@@ -988,14 +990,15 @@ function KeepworkServiceSession:CheckTokenExpire(callback)
             currentUser.password,
             function(response, err)
                 if err ~= 200 then
-                    if type(callback) == 'function' then
+                    if callback and type(callback) == 'function' then
                         callback(false)
                     end
-                    return false
+
+                    return
                 end
 
                 self:LoginResponse(response, err, function()
-                    if type(callback) == 'function' then
+                    if callback and type(callback) == 'function' then
                         callback(true)
                     end
                 end)
@@ -1012,10 +1015,10 @@ function KeepworkServiceSession:CheckTokenExpire(callback)
     self:Profile(function(data, err)
         if err ~= 200 then
             ReEntry()
-            return false
+            return
         end
 
-        if type(callback) == 'function' then
+        if callback and type(callback) == 'function' then
             callback(true)
         end
     end, token)

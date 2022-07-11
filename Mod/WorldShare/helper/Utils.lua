@@ -16,7 +16,7 @@ local LocalLoadWorld = commonlib.gettable('MyCompany.Aries.Game.MainLogin.LocalL
 
 -- service
 local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
-local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceSession.lua')
 
 -- config
 local Config = NPL.load('(gl)Mod/WorldShare/config/Config.lua')

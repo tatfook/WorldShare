@@ -39,14 +39,14 @@ local DELETE = 'DELETE'
 
 function SyncToDataSource:Init(callback)
     if not callback or type(callback) ~= 'function' then
-        return false
+        return
     end
 
     self.callback = callback
 
     local function Handle()
         self.currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
-    
+
         if not self.currentWorld.worldpath or self.currentWorld.worldpath == '' then
             callback(false, L'上传失败，将使用离线模式，原因：上传目录为空')
             return false
@@ -132,7 +132,7 @@ end
 
 function SyncToDataSource:IsProjectExist(callback)
     if not callback or type(callback) ~= 'function' then
-        return false
+        return
     end
 
     local worldUserId = 0
@@ -189,7 +189,7 @@ function SyncToDataSource:Start()
         if not data or type(data) ~= 'table' then
             self.callback(false, L'获取列表失败（上传）')
             self:SetFinish(true)
-            return false
+            return
         end
 
         self.dataSourceFiles = data
@@ -326,53 +326,76 @@ function SyncToDataSource:Close()
 end
 
 function SyncToDataSource:HandleCompareList()
-    if self.compareListTotal < self.compareListIndex then
-        -- sync finish
-        GameLogic.GetFilters():apply_filters('SyncWorldFinish');
-        self:SetFinish(true)
-        self:UpdateRecord(
-            function()
-                self.callback(false, {
-                    method = 'UPDATE-PROGRESS-FINISH'
-                })
+    local handleTimer
+    local handling = false
+
+    handleTimer = commonlib.Timer:new({
+        callbackFunc = function()
+            if self.compareListTotal < self.compareListIndex then
+                -- sync finish
+                GameLogic.GetFilters():apply_filters('SyncWorldFinish')
+
+                self:SetFinish(true)
+
+                self:UpdateRecord(
+                    function()
+                        self.callback(false, {
+                            method = 'UPDATE-PROGRESS-FINISH'
+                        })
+                    end
+                )
+
+                self.compareListIndex = 1
+
+                handleTimer:Change(nil, nil)
+
+                return
             end
-        )
 
-        self.compareListIndex = 1
-        return false
-    end
+            if self.broke then
+                self:SetFinish(true)
 
-    if self.broke then
-        self:SetFinish(true)
-        LOG.std('SyncToDataSource', 'debug', 'SyncToDataSource', '上传被中断')
-        return false
-    end
+                LOG.std('SyncToDataSource', 'debug', 'SyncToDataSource', '上传被中断')
 
-    local currentItem = self.compareList[self.compareListIndex]
+                handleTimer:Change(nil, nil)
 
-    local function Retry()
-        self.callback(false, {
-            method = 'UPDATE-PROGRESS',
-            current = self.compareListIndex,
-            total = self.compareListTotal,
-            msg = format(L'%s 处理完成', currentItem.file)
-        })
+                return
+            end
 
-        self.compareListIndex = self.compareListIndex + 1
-        self:HandleCompareList()
-    end
+            if not handling then
+                handling = true
 
-    if currentItem.status == UPDATE then
-        self:UpdateOne(currentItem.file, Retry)
-    end
+                local currentItem = self.compareList[self.compareListIndex]
+    
+                local function Retry()
+                    self.callback(false, {
+                        method = 'UPDATE-PROGRESS',
+                        current = self.compareListIndex,
+                        total = self.compareListTotal,
+                        msg = format(L'%s 处理完成', currentItem.file)
+                    })
+            
+                    self.compareListIndex = self.compareListIndex + 1
 
-    if currentItem.status == UPLOAD then
-        self:UploadOne(currentItem.file, Retry)
-    end
+                    handling = false
+                end
+    
+                if currentItem.status == UPDATE then
+                    self:UpdateOne(currentItem.file, Retry)
+                end
+            
+                if currentItem.status == UPLOAD then
+                    self:UploadOne(currentItem.file, Retry)
+                end
+            
+                if currentItem.status == DELETE then
+                    self:DeleteOne(currentItem.file, Retry)
+                end
+            end
+        end
+    })
 
-    if currentItem.status == DELETE then
-        self:DeleteOne(currentItem.file, Retry)
-    end
+    handleTimer:Change(0, 5)
 end
 
 function SyncToDataSource:GetLocalFileByFilename(filename)
@@ -457,7 +480,8 @@ function SyncToDataSource:UpdateOne(file, callback)
         end
     end
 
-    if currentLocalItem.sha1 == currentRemoteItem.id and string.lower(currentLocalItem.filename) ~= 'revision.xml' then
+    if currentLocalItem.sha1 == currentRemoteItem.id and
+       string.lower(currentLocalItem.filename) ~= 'revision.xml' then
         if callback and type(callback) == 'function' then
             self.callback(false, {
                 method = 'UPDATE-PROGRESS',

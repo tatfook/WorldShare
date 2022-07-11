@@ -5,13 +5,13 @@ Date:  2019.11.8
 Place: Foshan
 use the lib:
 ------------------------------------------------------------
-local KeepworkProjectsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Projects.lua")
+local KeepworkProjectsApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkProjectsApi.lua')
 ------------------------------------------------------------
 ]]
-local Encoding = commonlib.gettable("commonlib.Encoding")
+local Encoding = commonlib.gettable('commonlib.Encoding')
 
 local KeepworkBaseApi = NPL.load('./BaseApi.lua')
-local GitEncoding = NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua")
+local GitEncoding = NPL.load('(gl)Mod/WorldShare/helper/GitEncoding.lua')
 
 local KeepworkProjectsApi = NPL.export()
 
@@ -47,7 +47,7 @@ function KeepworkProjectsApi:UpdateProject(kpProjectId, params, success, error)
         return false
     end
 
-    local url = format("/projects/%d", kpProjectId)
+    local url = format('/projects/%d', kpProjectId)
 
     KeepworkBaseApi:Put(url, params, nil, success, error)
 end
@@ -64,7 +64,7 @@ function KeepworkProjectsApi:GetProject(kpProjectId, success, error, noTryStatus
         return false
     end
 
-    local url = format("/projects/%d/detail", kpProjectId)
+    local url = format('/projects/%d/detail', kpProjectId)
 
     KeepworkBaseApi:Get(url, nil, nil, success, error, noTryStatus)
 end
@@ -80,7 +80,7 @@ function KeepworkProjectsApi:Visit(kpProjectId, callback)
         return false
     end
 
-    local url = format("/projects/%d/visit", kpProjectId)
+    local url = format('/projects/%d/visit', kpProjectId)
 
     KeepworkBaseApi:Get(url, nil, nil, callback)
 end
@@ -138,7 +138,7 @@ function KeepworkProjectsApi:RemoveProject(kpProjectId, success, error)
         return false
     end
 
-    local url = format("/projects/%d", kpProjectId)
+    local url = format('/projects/%d', kpProjectId)
 
     KeepworkBaseApi:Delete(url, nil, nil ,success, error)
 end
