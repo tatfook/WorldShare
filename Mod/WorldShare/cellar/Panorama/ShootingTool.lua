@@ -2,7 +2,8 @@ local Screen = commonlib.gettable("System.Windows.Screen")
 local ViewportManager = commonlib.gettable("System.Scene.Viewports.ViewportManager")
 local viewport = ViewportManager:GetSceneViewport()
 local CameraController = commonlib.gettable("MyCompany.Aries.Game.CameraController")
-
+NPL.load("(gl)script/apps/Aries/Creator/Game/block_engine.lua");
+local BlockEngine = commonlib.gettable("MyCompany.Aries.Game.BlockEngine")
 local ShootingTool = NPL.export()
 
 --https://keepwork.com/dreamanddead/working/panorama
@@ -21,7 +22,7 @@ function ShootingTool:init()
 	self.currentTime = os.time()
 	local entityPlayer = GameLogic.EntityManager.GetFocus()
     local x, y, z = entityPlayer:GetBlockPos()
-    GameLogic.RunCommand(format("/goto %d,%d,%d", x,y,z))
+	entityPlayer:SetBlockPos(x,y,z)
 
     self.center = {x=x,y=y,z=z}
 
@@ -56,7 +57,9 @@ function ShootingTool:setEye(i)
     -- x = x + of[1]*cameraDis
     -- y = y + of[1]*cameraDis
     -- z = z + of[1]*cameraDis
-    GameLogic.RunCommand(format("/goto %d,%d,%d", x,y,z))
+    -- GameLogic.RunCommand(format("/goto %d,%d,%d", x,y,z))
+	-- local entityPlayer = GameLogic.EntityManager.GetFocus()
+	-- entityPlayer:SetBlockPos(x,y,z)
 end
 
 --name : 1,2,3,4,5,6。  共6个方向
@@ -123,6 +126,25 @@ function ShootingTool:autoShoot(callback)
 	GameLogic.RunCommand("/hide tips")
 	GameLogic.RunCommand("/hide")
 
+	self._blockRecord = {}
+	local entityPlayer = GameLogic.EntityManager.GetFocus()
+    local x, y, z = entityPlayer:GetBlockPos()
+	for i=-1,1 do
+		for j=-1,1 do
+			for k=0,1 do
+				local bx = x + i
+				local bz = z + j
+				local by = y + k
+
+				local blockId = BlockEngine:GetBlockIdAndData(bx,by,bz)
+				if blockId~=0 then
+					self._blockRecord[{bx,by,bz}] = blockId
+					BlockEngine:SetBlock(bx,by,bz, 0, nil, 3, nil);
+				end
+			end
+		end
+	end
+
 	local onFinish = function ()
 		GameLogic.RunCommand("/show desktop")
 		GameLogic.RunCommand("/show tips")
@@ -139,6 +161,12 @@ function ShootingTool:autoShoot(callback)
 
 		ParaScene.GetAttributeObject():SetField("BlockInput", false)
 		ParaCamera.GetAttributeObject():SetField("BlockInput", false)
+
+		for arr,blockId in pairs(self._blockRecord) do
+			local x,y,z = unpack(arr)
+			BlockEngine:SetBlock(x,y,z, blockId, nil, 3, nil);
+		end
+
 		if callback then
 			callback()
 		end
