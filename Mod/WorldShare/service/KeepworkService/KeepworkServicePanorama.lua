@@ -13,7 +13,7 @@ local KeepworkServicePanorama = NPL.export()
 
 -- api
 local StoragePanoramasApi = NPL.load('(gl)Mod/WorldShare/api/Storage/Panoramas.lua')
-local QiniuRootApi = NPL.load('(gl)Mod/WorldShare/api/Qiniu/Root.lua')
+local QiniuRootApi = NPL.load('(gl)Mod/WorldShare/api/Qiniu/QiniuRootApi.lua')
 local KeepworkProjectsApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkProjectsApi.lua')
 
 -- service

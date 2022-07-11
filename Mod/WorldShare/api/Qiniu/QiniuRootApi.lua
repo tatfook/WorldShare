@@ -1,11 +1,12 @@
 --[[
 Title: Qiniu Root API
-Author(s):  big
-Date:  2019.12.16
+Author(s): big
+CreateDate: 2019.12.16
+ModifyDate: 2022.7.11
 Place: Foshan
 use the lib:
 ------------------------------------------------------------
-local QiniuRootApi = NPL.load("(gl)Mod/WorldShare/api/Qiniu/Root.lua")
+local QiniuRootApi = NPL.load("(gl)Mod/WorldShare/api/Qiniu/QiniuRootApi.lua")
 ------------------------------------------------------------
 ]]
 

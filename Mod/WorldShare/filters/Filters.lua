@@ -25,7 +25,7 @@ local SyncWorld = NPL.load('(gl)Mod/WorldShare/cellar/Sync/SyncWorld.lua')
 local Certificate = NPL.load("(gl)Mod/WorldShare/cellar/Certificate/Certificate.lua")
 
 -- api
-local QiniuRootApi = NPL.load("(gl)Mod/WorldShare/api/Qiniu/Root.lua")
+local QiniuRootApi = NPL.load("(gl)Mod/WorldShare/api/Qiniu/QiniuRootApi.lua")
 local SocketBaseApi = NPL.load("(gl)Mod/WorldShare/api/Socket/BaseApi.lua")
 
 -- service

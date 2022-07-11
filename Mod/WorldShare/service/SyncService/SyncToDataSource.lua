@@ -28,8 +28,8 @@ local KeepworkGen = NPL.load('(gl)Mod/WorldShare/helper/KeepworkGen.lua')
 local GitEncoding = NPL.load('(gl)Mod/WorldShare/helper/GitEncoding.lua')
 
 -- api
-local StorageFilesApi = NPL.load('(gl)Mod/WorldShare/api/Storage/Files.lua')
-local QiniuRootApi = NPL.load('(gl)Mod/WorldShare/api/Qiniu/Root.lua')
+local StorageFilesApi = NPL.load('(gl)Mod/WorldShare/api/Storage/StorageFilesApi.lua')
+local QiniuRootApi = NPL.load('(gl)Mod/WorldShare/api/Qiniu/QiniuRootApi.lua')
 
 local SyncToDataSource = NPL.export()
 
@@ -563,11 +563,12 @@ end
 -- update world info
 function SyncToDataSource:UpdateRecord(callback)
     if not self.currentWorld then
-        return false
+        return
     end
 
     local function Handle(data, err)
-        if type(data) ~= 'table' or
+        if not data or
+           type(data) ~= 'table' or
            not data.commitId or
            not data.message then
             self.callback(false, L'获取COMMIT列表失败')
@@ -742,15 +743,17 @@ function SyncToDataSource:UpdateRecord(callback)
                         )
                     end
                 )
-
             end
 
             StorageFilesApi:Token(
                 'preview.jpg',
                 function(data, err)
-                    if not data.token or not data.key then
+                    if not data or
+                       type(data) ~= 'table' or
+                       not data.token or
+                       not data.key then
                         AfterHandlePreview()
-                        return false
+                        return
                     end
 
                     local targetDir = format('%s/%s/preview.jpg', Mod.WorldShare.Utils.GetWorldFolderFullPath(), commonlib.Encoding.Utf8ToDefault(self.currentWorld.foldername))
@@ -758,14 +761,14 @@ function SyncToDataSource:UpdateRecord(callback)
 
                     if not content then
                         AfterHandlePreview()
-                        return false
+                        return
                     end
 
                     if not self.currentWorld or
-                    not self.currentWorld.kpProjectId or
-                    self.currentWorld.kpProjectId == 0 or
-                    not lastCommitSha then
-                        return false
+                       not self.currentWorld.kpProjectId or
+                       self.currentWorld.kpProjectId == 0 or
+                       not lastCommitSha then
+                        return
                     end
 
                     QiniuRootApi:Upload(
