@@ -561,7 +561,81 @@ function Filters:Init()
         str = string.format(str,styleStr)
         return str
     end);
+    -- vip time icon
+    GameLogic.GetFilters():add_filter("get_vip_time_icon_div" ,function (margin_top,click_func_name)
+        local KeepWorkItemManager = NPL.load("(gl)script/apps/Aries/Creator/HttpAPI/KeepWorkItemManager.lua");
+        local profile = KeepWorkItemManager.GetProfile()
+        if not profile.vipDeadline or profile.vipDeadline == "" then
+            return ""
+        end
+        if System.options.channelId=="430" then
+            return ""
+        end
 
+        local time_stamp = commonlib.timehelp.GetTimeStampByDateTime(profile.vipDeadline)
+        --time_stamp = RedSummerCampSchoolMainPage.TimeVip or time_stamp
+        local QuestAction = commonlib.gettable("MyCompany.Aries.Game.Tasks.Quest.QuestAction");
+        local cur_time_stamp = QuestAction.GetServerTime()
+
+        --test
+        -- time_stamp = test_time1 or time_stamp
+        -- cur_time_stamp = test2 or cur_time_stamp
+
+        local left_time = time_stamp - cur_time_stamp
+        if left_time < 0 then
+            return ""
+        end
+
+        local min = math.floor(left_time/60)
+        local hour = math.floor(min/60) 
+        local day = math.floor(hour/24)
+
+        
+        if day > 30 then
+            return ""
+        end
+
+        local show_value = day >= 1 and day or hour
+        local unit_icon = day >= 1 and "Texture/Aries/Creator/keepwork/vip/vip_time/tian_10x9_32bits.png#0 0 10 9" or "Texture/Aries/Creator/keepwork/vip/vip_time/xiaoshi_9x8_32bits.png#0 0 9 8"
+
+        local show_value_desc = "0" .. show_value
+        local num_margin_left = -8
+        local unit_margin_left = -10
+
+        if show_value == 21 then
+            num_margin_left = -13
+            unit_margin_left = 0
+        elseif show_value == 1 then
+            num_margin_left = -2
+            unit_margin_left = -20 
+        elseif show_value == 11 then
+            num_margin_left = -5
+            unit_margin_left = -15
+        elseif show_value >= 20 then
+            num_margin_left = -16
+            unit_margin_left = 3
+        elseif show_value >= 10 then
+            num_margin_left = -13
+            unit_margin_left = -3 
+        end
+
+        margin_top = margin_top or 16
+        click_func_name = click_func_name or "OpenVip"
+        local div = [[
+        <pe:container name="VipLimitTimeIcon" style="float: left;margin-right:15px;margin-top:%s; width: 66px;height: 67px; background: url()">
+            <input zorder = "-1" type="button" value='' onclick="%s" is_tool_tip_click_enabled="true" is_lock_position="true" enable_tooltip_hover="true"
+                tooltip='page_static://script/apps/Aries/Creator/Game/Tasks/RedSummerCamp/VipTimeToolTip.html'
+                style="position:relative;margin-left:0px;margin-top:0px;width:66px;height:70px;background: url(Texture/Aries/Creator/keepwork/vip/vip_time/dipan_66x70_32bits.png#0 0 66 70)" />
+            <div style="margin-top: 18px;">
+                <pe:textsprite ClickThrough="true" name="VipLimitTimeNum" fontName="VipLimitTime" value = '%s' style="float: left;width: 63px; margin-left:%s;margin-top:2px;font-size:20pt;" />
+                <div style="float: left;margin-left: %s;margin-top: 13px; width: 10px;height: 9px; background: url(%s)"></div>
+            </div>
+        </pe:container>
+        ]]
+
+        div = string.format(div, margin_top, click_func_name, show_value_desc, num_margin_left, unit_margin_left, unit_icon)
+        return div
+    end)
     -- filter escape key
     -- GameLogic.GetFilters():add_filter(
     --     "EscFramePage.ShowPage",
