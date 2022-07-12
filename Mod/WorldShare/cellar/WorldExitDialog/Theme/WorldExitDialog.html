@@ -177,6 +177,9 @@
                     end
 
                     function snapshot()
+                        if GameLogic.IsReadOnly() then
+                            return 
+                        end
                         WorldExitDialog.Snapshot()
                     end
 
@@ -620,13 +623,15 @@
                         <div style='padding-left: 20px;
                                     color: #000000'>
                             <pe:if condition='<%= is_community_world_exit() %>'>
-                                <div style='margin-top: -10x;
-                                            margin-bottom: 5px;
+                                <pe:if condition="<%=not GameLogic.IsReadOnly()%>">
+                                    <div style='position: relative;
+                                            margin-top: -5x;
                                             base-font-size: 15px;
                                             font-size:15px;'>
-                                    <%= get_last_world_name() %>
-                                </div>
-                                <div style='margin-top: 10px;'>
+                                        <%= get_last_world_name() %>
+                                    </div>
+                                </pe:if>
+                                <div style='margin-top: 50px;'>
                                     <input type='button'
                                            onclick='on_click_exit_without_save()'
                                            value='<%= L"返回" %>'
@@ -638,7 +643,7 @@
                                            onclick='on_click_cancel()'
                                            value='<%= L"取消" %>'
                                            class='theme1_gray_button'
-                                           style='margin-left: 60px;
+                                           style='margin-left: 80px;
                                                   min-width: 130px;
                                                   height:50px;' />
                                 </div>
@@ -652,26 +657,28 @@
                                     </div>
                                 </pe:if>
                                 
-                                <div style='margin-left: 5px; 
-                                            color: #181818;
-                                            margin-top: 5x;
-                                            base-font-size: 15px;
-                                            font-size:15px;'>
-                                    <%= L'您上次保存世界是:'%>
-                                        <span style='color:#ef6500'>
-                                            <%= format(L'%d秒前', get_elapsed_unsaved_seconds())%>
-                                        </span>
-                                    <%= notice() %>
-                                </div>
+                                <pe:if condition='<%=not GameLogic.IsReadOnly() %>'>
+                                    <div style='position: relative; margin-left: 5px; 
+                                                color: #181818;
+                                                margin-top: 5x;
+                                                base-font-size: 15px;
+                                                font-size:15px;'>
+                                        <%= L'您上次保存世界是:'%>
+                                            <span style='color:#ef6500'>
+                                                <%= format(L'%d秒前', get_elapsed_unsaved_seconds())%>
+                                            </span>
+                                        <%= notice() %>
+                                    </div>
+                                </pe:if>
 
-                                <div style='margin-top: 38x;'>
+                                <div style='margin-top: 50x;'>
                                     <pe:if condition='<%= GameLogic.IsReadOnly() %>'>
                                         <input type='button'
                                                onclick='save_as()'
                                                value='<%= L"另存为..." %>'
                                                class='theme1_orange_button'
                                                style='min-width: 114px;
-                                                      margin-left: 57px;
+                                                      margin-left: 64px;
                                                       height: 44px;' />
                                     </pe:if>
                                     <pe:if condition='<%= not GameLogic.IsReadOnly() and (not has_project_id() or is_user_world()) %>'>
