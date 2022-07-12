@@ -959,7 +959,7 @@ end
 function KeepworkServiceSession:CheckTokenExpire(callback)
     if not self:IsSignedIn() or
        not callback or
-       type(callback) then
+       type(callback) ~= 'function' then
         return
     end
 

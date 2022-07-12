@@ -2,7 +2,7 @@
 Title: share world to datasource
 Author(s): big
 CreateDate: 2017.05.12
-ModifyDate: 2021.09.10
+ModifyDate: 2022.7.12
 Desc:  It can take snapshot for the current world. It can quick save or full save the world to datasource. 
 use the lib:
 ------------------------------------------------------------
@@ -216,13 +216,13 @@ function ShareWorld:OnClick()
         _guihelper.MessageBox(
             msg,
             function(res)
-                if (res and res == 6) then
+                if res and res == 6 then
                     Handle()
                 end
             end
         )
 
-        return false
+        return
     end
 
     Handle()
