@@ -78,8 +78,10 @@ function KeepworkServiceWorld:SetWorldInstanceByPid(pid, callback)
     end
 
     self:GetWorldByProjectId(pid, function(data, err)
-        if type(data) ~= 'table' or not data.worldName then
-            return false
+        if not data or
+           type(data) ~= 'table' or
+           not data.worldName then
+            return
         end
 
         local foldername = data.worldName
@@ -97,13 +99,13 @@ function KeepworkServiceWorld:SetWorldInstanceByPid(pid, callback)
                 '%s/_shared/%s/%s/',
                 LocalServiceWorld:GetDefaultSaveWorldPath(),
                 data.username,
-                commonlib.Encoding.Utf8ToDefault(DItem.worldName)
+                commonlib.Encoding.Utf8ToDefault(data.worldName)
             )
         else
             worldPath = format(
                 '%s/%s/',
                 LocalServiceWorld:GetUserFolderPath(),
-                commonlib.Encoding.Utf8ToDefault(DItem.worldName)
+                commonlib.Encoding.Utf8ToDefault(data.worldName)
             )
         end
 
