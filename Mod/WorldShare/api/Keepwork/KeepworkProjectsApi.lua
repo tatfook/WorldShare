@@ -133,14 +133,20 @@ end
 -- url: /projects/%d
 -- method: DELETE
 -- return: object
-function KeepworkProjectsApi:RemoveProject(kpProjectId, success, error)
-    if type(kpProjectId) ~= 'number' then
-        return false
+function KeepworkProjectsApi:RemoveProject(kpProjectId, password, success, error)
+    if not kpProjectId or
+       type(kpProjectId) ~= 'number' or
+       not password or
+       type(password) ~= 'string' then
+        return
     end
 
     local url = format('/projects/%d', kpProjectId)
+    local params = {
+        password = password
+    }
 
-    KeepworkBaseApi:Delete(url, nil, nil ,success, error)
+    KeepworkBaseApi:Delete(url, params, nil ,success, error)
 end
 
 -- url: /projects/shareWxacode

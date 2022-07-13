@@ -198,16 +198,14 @@ function KeepworkServiceProject:Visit(pid)
 end
 
 -- remove a project
-function KeepworkServiceProject:RemoveProject(kpProjectId, callback)
-    if not kpProjectId then
-        return false
+function KeepworkServiceProject:RemoveProject(kpProjectId, password, callback)
+    if not kpProjectId or
+       not password or
+       not KeepworkServiceSession:IsSignedIn() then
+        return
     end
 
-    if not KeepworkServiceSession:IsSignedIn() then
-        return false
-    end
-
-    KeepworkProjectsApi:RemoveProject(tonumber(kpProjectId), callback, callback)
+    KeepworkProjectsApi:RemoveProject(tonumber(kpProjectId), password, callback, callback)
 end
 
 function KeepworkServiceProject:GenerateMiniProgramCode(projectId, callback)

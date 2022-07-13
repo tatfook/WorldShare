@@ -24,7 +24,7 @@ function DeleteWorld:ShowPage()
     Mod.WorldShare.Utils.ShowWindow(
         0,
         0,
-        'Mod/WorldShare/cellar/DeleteWorld/Theme/DeleteWorld.html',
+        'Mod/WorldShare/cellar/DeleteWorld/Theme/DeleteWorld.xml',
         'Mod.WorldShare.DeleteWorld',
         0,
         0,
@@ -94,7 +94,7 @@ function DeleteWorld:DeleteLocal(callback, isSlient)
 
         if currentWorld.is_zip then
             if ParaIO.DeleteFile(currentWorld.worldpath) then
-                if type(callback) == 'function' then
+                if callback and type(callback) == 'function' then
                     callback()
                 else
                     self:ClosePage()
@@ -113,7 +113,7 @@ function DeleteWorld:DeleteLocal(callback, isSlient)
             end
 
             if commonlib.Files.DeleteFolder(currentWorld.worldpath) then
-                if type(callback) == 'function' then
+                if callback and type(callback) == 'function' then
                     callback()
                 else
                     self:ClosePage()
@@ -146,7 +146,11 @@ function DeleteWorld:DeleteLocal(callback, isSlient)
     end
 end
 
-function DeleteWorld:DeleteRemote()
+function DeleteWorld:DeleteRemote(pwd, callback)
+    if not pwd or type(pwd) ~= 'string' then
+        return
+    end
+
     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
     _guihelper.MessageBox(
@@ -155,6 +159,7 @@ function DeleteWorld:DeleteRemote()
             if res and res == 6 then
                 KeepworkServiceProject:RemoveProject(
                     currentWorld.kpProjectId,
+                    pwd,
                     function(data, err)
                         if err ~= 204 and err ~= 200 then
                             if data and type(data) == 'table' and data.message then
@@ -165,8 +170,6 @@ function DeleteWorld:DeleteRemote()
                             return
                         end
 
-                        self:ClosePage()
-
                         if currentWorld and currentWorld.worldpath and #currentWorld.worldpath > 0 then
                             local tag = LocalService:GetTag(currentWorld.worldpath)
 
@@ -176,9 +179,15 @@ function DeleteWorld:DeleteRemote()
                             end
                         end
 
-                        if self.afterDeleteWorldCallback and type(self.afterDeleteWorldCallback) == 'function' then
-                            self.afterDeleteWorldCallback()
-                            self.afterDeleteWorldCallback = nil
+                        if callback and type(callback) == 'function' then
+                            callback()
+                        else
+                            self:ClosePasswordAuthenticationOnDeletion()
+
+                            if self.afterDeleteWorldCallback and type(self.afterDeleteWorldCallback) == 'function' then
+                                self.afterDeleteWorldCallback()
+                                self.afterDeleteWorldCallback = nil
+                            end
                         end
                     end
                 )
@@ -187,10 +196,49 @@ function DeleteWorld:DeleteRemote()
     )
 end
 
-function DeleteWorld:DeleteAll()
-    self:DeleteLocal(
+function DeleteWorld:DeleteAll(pwd)
+    self:DeleteRemote(
+        pwd,
         function()
-            self:DeleteRemote()
+            self:ClosePasswordAuthenticationOnDeletion()
+
+            self:DeleteLocal(function()
+                if self.afterDeleteWorldCallback and type(self.afterDeleteWorldCallback) == 'function' then
+                    self.afterDeleteWorldCallback()
+                    self.afterDeleteWorldCallback = nil
+                end
+            end)
         end
     )
+end
+
+function DeleteWorld:ClosePasswordAuthenticationOnDeletion()
+    local page = Mod.WorldShare.Store:Get('page/Mod.WorldShare.DeleteWorld.PasswordAuthenticationOnDeletion')
+
+    if page then
+        page:CloseWindow()
+    end
+end
+
+function DeleteWorld:PasswordAuthenticationOnDeletion(deleteType, callback)
+    self:ClosePage()
+
+    local params = Mod.WorldShare.Utils.ShowWindow(
+        0,
+        0,
+        'Mod/WorldShare/cellar/DeleteWorld/Theme/PasswordAuthenticationOnDeletion.xml',
+        'Mod.WorldShare.DeleteWorld.PasswordAuthenticationOnDeletion',
+        0,
+        0,
+        '_fi',
+        false
+    )
+
+    params._page.callback = function(pwd)
+        if deleteType == 'all' then
+            self:DeleteAll(pwd)
+        elseif deleteType == 'remote' then
+            self:DeleteRemote(pwd)
+        end
+    end
 end
