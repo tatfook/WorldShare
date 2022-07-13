@@ -138,6 +138,11 @@ function DeleteWorld:DeleteLocal(callback, isSlient)
                 function(res)
                     if res and res == _guihelper.DialogResult.Yes then
                         Delete()
+                    else
+                        if self.afterDeleteWorldCallback and type(self.afterDeleteWorldCallback) == 'function' then
+                            self.afterDeleteWorldCallback()
+                            self.afterDeleteWorldCallback = nil
+                        end
                     end
                 end,
                 _guihelper.MessageBoxButtons.YesNo
