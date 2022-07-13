@@ -507,18 +507,20 @@ function Create:HandleEnterWorld(index, skip)
 
             SyncToLocal:Init(function(result, option)
                 if not result then
-                    if type(option) == 'string' then
+                    if option and type(option) == 'string' then
+                        DownloadWorld.Close()
+
                         if option == 'NEWWORLD' then
                             GameLogic.AddBBS(nil, L'服务器未找到您的世界数据，请新建', 3000, '255 255 0')
-
-                            DownloadWorld.Close()
                             CreateWorld:CreateNewWorld(currentWorld.foldername)
                         end
+
+                        GameLogic.AddBBS(nil, option, 3000, '255 0 0')
 
                         return
                     end
 
-                    if type(option) == 'table' then
+                    if option and type(option) == 'table' then
                         if option.method == 'UPDATE-PROGRESS-FINISH' then
                             if not LocalServiceWorld:CheckWorldIsCorrect(currentWorld) then
                                 _guihelper.MessageBox(L'文件损坏，请再试一次。如果还是出现问题，请联系作者或者管理员。')

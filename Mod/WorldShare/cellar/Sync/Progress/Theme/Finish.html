@@ -39,8 +39,8 @@
                     Mod.WorldShare.Utils.OpenKeepworkUrlByToken(url)
                 end
 
-                function close()
-                    Progress:CloseFinishPage()
+                function close(from_button)
+                    Progress:CloseFinishPage(from_button or 'close')
                 end
 
                 function is_show_panorama_button()
@@ -61,7 +61,7 @@
                 end
 
                 function show_panorama()
-                    close()
+                    close('panorama')
                     Panorama:ShowCreate(true)
                 end
 

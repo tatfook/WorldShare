@@ -321,8 +321,8 @@ function SyncToDataSource:GetCompareList()
     self.compareListTotal = #self.compareList
 end
 
-function SyncToDataSource:Close()
-    self.callback(true, 'success')
+function SyncToDataSource:Close(params)
+    self.callback(true, { status = 'success', params = params })
 end
 
 function SyncToDataSource:HandleCompareList()

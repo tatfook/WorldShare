@@ -163,14 +163,14 @@ function Progress:ClosePage()
     end
 end
 
-function Progress:CloseFinishPage()
+function Progress:CloseFinishPage(fromButton)
     local FinishPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Progress.Finish')
 
     if FinishPage then
         FinishPage:CloseWindow()
 
         if self.syncInstance and self.syncInstance.Close then
-            self.syncInstance:Close()
+            self.syncInstance:Close({ fromButton = fromButton })
         end
     end
 end

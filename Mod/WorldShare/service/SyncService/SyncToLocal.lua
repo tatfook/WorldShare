@@ -200,8 +200,8 @@ function SyncToLocal:GetCompareList()
     self.compareListTotal = #self.compareList
 end
 
-function SyncToLocal:Close()
-    self.callback(true, 'success')
+function SyncToLocal:Close(params)
+    self.callback(true, { status = 'success', params = params })
 end
 
 function SyncToLocal:HandleCompareList()
@@ -418,8 +418,10 @@ function SyncToLocal:DeleteOne(file, callback)
 end
 
 function SyncToLocal:DownloadZIP()
-    if not self.currentWorld or not self.currentWorld.kpProjectId or self.currentWorld.kpProjectId == 0 then
-        return false
+    if not self.currentWorld or
+       not self.currentWorld.kpProjectId or
+       self.currentWorld.kpProjectId == 0 then
+        return
     end
 
     ParaIO.CreateDirectory(self.currentWorld.worldpath)

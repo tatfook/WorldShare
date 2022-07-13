@@ -35,9 +35,11 @@ function CreateWorld:CreateNewWorld(foldername, callback)
     local function Handle()
         CreateNewWorld.ShowPage(true)
 
-        if type(foldername) == 'string' then
-            CreateNewWorld.page:SetValue('new_world_name', foldername)
-            CreateNewWorld.page:Refresh(0.01)
+        if foldername and type(foldername) == 'string' then
+            if CreateNewWorld.page then
+                CreateNewWorld.page:SetValue('new_world_name', foldername)
+                CreateNewWorld.page:Refresh(0.01)
+            end
         end
     end
 

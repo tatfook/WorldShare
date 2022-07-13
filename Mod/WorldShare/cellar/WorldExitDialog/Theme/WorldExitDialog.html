@@ -111,13 +111,20 @@
                                 Compare:Init(currentEnterWorld.worldpath, function()
                                     Mod.WorldShare.Store:Set('world/currentWorld', currentEnterWorld)
 
-                                    SyncWorld:SyncToDataSource(function()
-                                        _guihelper.MessageBox(L'保存并上传成功！是否要继续退出世界', function()
-                                            WorldExitDialog.OnDialogResult(_guihelper.DialogResult.No)
-                                        end)
+                                    SyncWorld:SyncToDataSource(function(result, option)
+                                        if result == true then
+                                            if option and
+                                               type(option) == 'table' and
+                                               option.params and
+                                               type(option.params) == 'table' and
+                                               option.params.fromButton == 'close' then
+                                                _guihelper.MessageBox(L'保存并上传成功！是否要继续退出世界', function()
+                                                    WorldExitDialog.OnDialogResult(_guihelper.DialogResult.No)
+                                                end)
+                                            end
+                                        end
                                     end)
                                 end)
-
                             else
                                 _guihelper.MessageBox(L'操作被禁止了，免费用户最多只能拥有家园+1个本地世界，请删除不要的本地世界，或者联系老师（或家长）开通权限。')
                             end
@@ -240,10 +247,11 @@
                     end
 
                     function has_project_id()
-                        local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
-                        if currentWorld and
-                           currentWorld.kpProjectId and
-                           currentWorld.kpProjectId ~= 0 then
+                        local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
+
+                        if currentEnterWorld and
+                           currentEnterWorld.kpProjectId and
+                           currentEnterWorld.kpProjectId ~= 0 then
                             return true
                         else
                             return false

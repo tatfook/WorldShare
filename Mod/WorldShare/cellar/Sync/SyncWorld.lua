@@ -129,7 +129,7 @@ function SyncWorld:SyncToLocal(callback, _, noShownResult)
     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
     if not currentWorld.kpProjectId or currentWorld.kpProjectId == 0 then
-        return false
+        return
     end
 
     -- get latest commidId
@@ -144,7 +144,7 @@ function SyncWorld:SyncToLocal(callback, _, noShownResult)
 
             local syncInstance = SyncToLocal:Init(function(result, option)
                 if result == false then
-                    if type(option) == 'string' then
+                    if option and type(option) == 'string' then
                         Progress:ClosePage()
 
                         if option == 'NEWWORLD' then
@@ -157,7 +157,7 @@ function SyncWorld:SyncToLocal(callback, _, noShownResult)
                         GameLogic.AddBBS(nil, option, 3000, '255 0 0')
                     end
 
-                    if type(option) == 'table' then
+                    if option and type(option) == 'table' then
                         if option.method == 'UPDATE-PROGRESS' then
                             Progress:UpdateDataBar(option.current, option.total, option.msg)
                             return false

@@ -167,8 +167,13 @@ function WorldExitDialog:IsUserWorld()
     local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
     local userId = Mod.WorldShare.Store:Get('user/userId')
 
-    if currentEnterWorld and currentEnterWorld.kpProjectId and currentEnterWorld.kpProjectId ~= 0 and userId then
-        if self.currentWorldKeepworkInfo and self.currentWorldKeepworkInfo.userId and self.currentWorldKeepworkInfo.userId == userId then
+    if currentEnterWorld and
+       currentEnterWorld.kpProjectId and
+       currentEnterWorld.kpProjectId ~= 0 and
+       userId then
+        if self.currentWorldKeepworkInfo and
+           self.currentWorldKeepworkInfo.userId and
+           self.currentWorldKeepworkInfo.userId == userId then
             return true
         else
             return false
