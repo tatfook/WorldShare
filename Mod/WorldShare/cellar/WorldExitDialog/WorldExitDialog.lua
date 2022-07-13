@@ -225,6 +225,11 @@ function WorldExitDialog.OnDialogResult(res)
 
                 Mod.WorldShare.Store:Set('world/isShowExitPage', true)
                 RedSummerCampMainPage.Show()
+
+                Mod.WorldShare.Store:Remove('world/currentWorld')
+                Mod.WorldShare.Store:Remove('world/currentEnterWorld')
+                Mod.WorldShare.Store:Remove('world/isEnterWorld')
+
                 return
             end
 
