@@ -53,8 +53,8 @@ function ShareTypeWorld:Lock(world, callback)
                         ),
                         {
                             Title = L"世界被占用",
-                            Yes = L"退出",
-                            No = L"只读模式"
+                            Yes = L"知道了",
+                            No = L"强制打开"
                         },
                         function(res)
                             if res and res == _guihelper.DialogResult.No then
