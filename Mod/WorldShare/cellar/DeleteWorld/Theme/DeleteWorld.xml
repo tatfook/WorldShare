@@ -86,6 +86,9 @@
                         ['margin-right'] = 10,
                         ['min-width'] = 95,
                         height = 40,
+                    },
+                    cur_button = {
+                        background = 'Texture/Aries/Creator/paracraft/anniukedian_73x35_32bits.png#0 0 73 35:5 5 5 5',
                     }
                 }
             </style>
@@ -102,12 +105,13 @@
                                 base-font-size: 18px;
                                 color: #000000;
                                 padding: 30px;'>
-                        <div style='margin-top: 30px;
-                                    text-align: center;'>
-                            <img style='width: 60px;
-                                        height: 60px;
-                                        margin-left: 193px;'
-                                src='Texture/Aries/Creator/keepwork/worldshare_32bits.png#15 512 46 46' />
+                        <div style='width: 72px;
+                                    margin-top: 30px;
+                                    text-align: center;'
+                             align='center'>
+                            <img style='width: 73px;
+                                        height: 73px;'
+                                 src='Texture/Aries/Creator/paracraft/jinggao_73x73_32bits.png#0 0 73 73' />
                         </div>
                         <div style='text-align: center;
                                     margin-top: 10px;'>
@@ -118,25 +122,25 @@
                                     margin-left: 15px;'>
                             <input
                                 type='button'
-                                class='theme1_orange_button button_common'
+                                class='cur_button button_common'
                                 enabled='<%= get_status("local") %>'
                                 onclick='delete_local()'
                                 value='<%=L"删除本地"%>' />
                             <input
                                 type='button'
-                                class='theme1_orange_button button_common'
+                                class='cur_button button_common'
                                 enabled='<%= get_status("remote") and not is_multiplayer_world() %>'
                                 onclick='delete_remote()'
                                 value='<%= L"删除在线" %>' />
                             <input
                                 type='button'
-                                class='theme1_green_button button_common'
+                                class='cur_button button_common'
                                 enabled='<%= get_status("all") and not is_multiplayer_world() %>'
                                 onclick='delete_all()'
                                 value='<%= L"全部删除" %>' />
                             <input
                                 type='button'
-                                class='theme1_gray_button button_common'
+                                class='cur_button button_common'
                                 onclick='close_page()'
                                 value='<%= L"取消" %>' />
                         </div>
