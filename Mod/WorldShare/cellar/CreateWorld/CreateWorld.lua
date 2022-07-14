@@ -74,6 +74,8 @@ function CreateWorld:OnClickCreateWorldImp()
     local foldername = CreateNewWorld.page:GetValue('new_world_name')
     local currentWorldList = Mod.WorldShare.Store:Get('world/compareWorldList') or {}
 
+    foldername = foldername:gsub('[%s/\\]', '')
+
     for key, item in ipairs(currentWorldList) do
         if item.foldername == foldername then
             _guihelper.MessageBox(L'世界名已存在，请列表中进入')
