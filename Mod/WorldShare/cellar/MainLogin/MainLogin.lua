@@ -51,6 +51,8 @@ function MainLogin:Init()
 end
 
 function MainLogin:Show()
+    GameMainLogin:ShowLoginBackgroundPage(true, true, true, true)
+
     local platform = System.os.GetPlatform()
     local isTouchDevice = ParaEngine.GetAppCommandLineByParam('IsTouchDevice', nil);
 
