@@ -45,4 +45,20 @@ function LocalServiceWorldFilter:Init()
             LocalServiceWorld:SetWorldInstanceByFoldername(...)
         end
     )
+
+    -- filter set_world_instance_by_foldername
+    GameLogic.GetFilters():add_filter(
+        'service.local_service_world.set_world_instance_by_foldername',
+        function(...)
+            LocalServiceWorld:SetWorldInstanceByFoldername(...)
+        end
+    )
+
+    -- filter get user folder path
+    GameLogic.GetFilters():add_filter(
+        'service.local_service_world.get_user_folder_path',
+        function(...)
+            return LocalServiceWorld:GetUserFolderPath(...)
+        end
+    )
 end

@@ -118,7 +118,7 @@ function CreateWorld:OnClickCreateWorldImp()
 		CreateModulPage.Show(foldername)
 
 		CreateNewWorld.ClosePage()
-		return 
+		return
 	end
 
 	self:CreateWorldByName(foldername, CreateNewWorld.cur_terrain.terrain)

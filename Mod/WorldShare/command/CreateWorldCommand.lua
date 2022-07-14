@@ -114,7 +114,14 @@ e.g.
                 redirectLoadWorld = string.match(redirectLoadWorld, '^"(.+)"')
             end
 
-            local worldPath = 'worlds/DesignHouse/' .. commonlib.Encoding.Utf8ToDefault(name) .. '/'
+            local worldPath
+
+            if KeepworkServiceSession:IsSignedIn() then
+                worldPath = LocalServiceWorld:GetUserFolderPath() .. '/' .. commonlib.Encoding.Utf8ToDefault(name) .. '/'
+            else
+                worldPath = LocalServiceWorld:GetDefaultSaveWorldPath() .. '/' .. commonlib.Encoding.Utf8ToDefault(name) .. '/'
+            end
+            
             local tagPath = worldPath .. 'tag.xml'
 
             local isLocalWorldExisted = false

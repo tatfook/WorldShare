@@ -51,8 +51,11 @@ function LocalServiceSession:OnWillLeaveWorld()
     local lastWorld = Mod.WorldShare.Store:Get('world/lastWorld')
     local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
-    if (not lastWorld or lastWorld.foldername ~= currentEnterWorld.foldername) and not Mod.WorldShare.Store:Get('world/reloadStatus') then
-        Mod.WorldShare.Store:Set('world/lastWorld', Mod.WorldShare.Store:Get('world/currentEnterWorld'))
+    if currentEnterWorld then
+        if (not lastWorld or lastWorld.foldername ~= currentEnterWorld.foldername) and
+            not Mod.WorldShare.Store:Get('world/reloadStatus') then
+            Mod.WorldShare.Store:Set('world/lastWorld', Mod.WorldShare.Store:Get('world/currentEnterWorld'))
+        end
     end
 
     if Mod.WorldShare.Store:Get('world/reloadStatus') then
