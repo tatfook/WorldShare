@@ -80,12 +80,7 @@
                         if result then
                             local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
-                            if currentWorld and
-                               type(currentWorld) == 'table' and
-                               currentWorld.kpProjectId and
-                               currentWorld.kpProjectId ~= 0 then
-                                CommandManager:RunCommand('/loadpersonalworld -nosync ' .. currentWorld.kpProjectId)
-                            end
+                            CommandManager:RunCommand('/loadworld ' .. currentWorld.worldpath)
                         else
                             _guihelper.MessageBox(L'操作被禁止了，免费用户最多只能拥有家园+1个本地世界，请删除不要的本地世界，或者联系老师（或家长）开通权限。')
                         end
