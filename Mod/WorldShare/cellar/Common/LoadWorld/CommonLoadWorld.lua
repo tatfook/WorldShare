@@ -712,6 +712,7 @@ function CommonLoadWorld:InjectShowCustomDownloadWorldFilter(worldInfo, download
             )
 
             local count = 10
+            local startCountdownTimer
             downloadWorldInstance.startCountdownTimer = commonlib.Timer:new(
                 {
                     callbackFunc = function()
@@ -735,7 +736,7 @@ function CommonLoadWorld:InjectShowCustomDownloadWorldFilter(worldInfo, download
                 }
             )
 
-            local startCountdownTimer = downloadWorldInstance.startCountdownTimer
+            startCountdownTimer = downloadWorldInstance.startCountdownTimer
 
             downloadWorldInstance.startCountdownTimer:Change(0, 1000)
 
