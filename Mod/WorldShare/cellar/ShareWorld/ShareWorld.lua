@@ -37,12 +37,16 @@ function ShareWorld:Init(callback)
         return
     end
 
-	self.callback = callback
-
     local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
+    if not currentEnterWorld then
+        return
+    end
+
+    self.callback = callback
+
     -- read only world
-    if GameLogic.IsReadOnly() or not currentEnterWorld or currentEnterWorld.is_zip then
+    if GameLogic.IsReadOnly() or currentEnterWorld.is_zip then
         self:ShowWorldCode(currentEnterWorld.kpProjectId)
         return
     end
