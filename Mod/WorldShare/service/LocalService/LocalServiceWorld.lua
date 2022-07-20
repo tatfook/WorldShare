@@ -558,6 +558,7 @@ end
 
 function LocalServiceWorld:SetCommunityWorld(bValue)
     WorldCommon.SetWorldTag('communityWorld', bValue)
+    GameLogic.QuickSave()
 end
 
 function LocalServiceWorld:IsCommunityWorld()

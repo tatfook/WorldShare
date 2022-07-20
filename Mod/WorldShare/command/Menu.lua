@@ -10,8 +10,11 @@ NPL.load('(gl)Mod/WorldShare/command/Menu.lua')
 ]]
 
 -- load lib
+NPL.load('(gl)script/apps/Aries/Creator/Game/Areas/DesktopMenu.lua')
+
 local CmdParser = commonlib.gettable('MyCompany.Aries.Game.CmdParser')
 local Commands = commonlib.gettable('MyCompany.Aries.Game.Commands')
+local DesktopMenu = commonlib.gettable('MyCompany.Aries.Creator.Game.Desktop.DesktopMenu')
 
 -- service
 local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
@@ -76,6 +79,9 @@ function MenuCommand:Call(cmdName, cmdText, cmdParams)
         return true
     elseif name == 'project.unlike' then
         return true
+    elseif name == 'online.community' then
+        self:SetCommunityWorld()
+        return true
     end
 
     return false
@@ -100,9 +106,8 @@ GameLogic.GetFilters():add_filter(
 )
 
 function MenuCommand:ChangeLikeItemState(isLiked)
-    NPL.load('(gl)script/apps/Aries/Creator/Game/Areas/DesktopMenu.lua');
-    local DesktopMenu = commonlib.gettable('MyCompany.Aries.Creator.Game.Desktop.DesktopMenu')
     local projectMenu = DesktopMenu.GetMenuItem('project')
+
     if projectMenu then
         for index, item in ipairs(projectMenu.children) do
             if(item.Type ~= 'Separator' ) then
@@ -115,14 +120,14 @@ function MenuCommand:ChangeLikeItemState(isLiked)
                 end
             end
         end
+
         DesktopMenu.RebuildMenuItem(projectMenu)
     end
 end
 
 function MenuCommand:ChangeFavoriteItemState(showFavorite)
-    NPL.load('(gl)script/apps/Aries/Creator/Game/Areas/DesktopMenu.lua');
-    local DesktopMenu = commonlib.gettable('MyCompany.Aries.Creator.Game.Desktop.DesktopMenu')
     local projectMenu = DesktopMenu.GetMenuItem('project')
+
     if projectMenu then
         for index, item in ipairs(projectMenu.children) do
             if(item.Type ~= 'Separator' ) then
@@ -135,6 +140,7 @@ function MenuCommand:ChangeFavoriteItemState(showFavorite)
                 end
             end
         end
+
         DesktopMenu.RebuildMenuItem(projectMenu)
     end
 end
@@ -254,4 +260,38 @@ end
 
 function MenuCommand:CreateWorld()
     CreateWorld:CreateNewWorld()
+end
+
+function MenuCommand:SetCommunityWorld()
+    if GameLogic.IsReadOnly() then
+        return
+    end
+
+    local onlineMenu = DesktopMenu.GetMenuItem('online')
+    local result
+
+    if GameLogic.options:IsCommunityWorld() then
+        result = true
+    else
+        result = false
+    end
+
+    GameLogic.options:SetCommunityWorld(not result)
+
+    if onlineMenu and
+       type(onlineMenu) == 'table' and
+       onlineMenu.children and
+       type(onlineMenu.children) == 'table' then
+        for _, item in ipairs(onlineMenu.children) do
+            if item.name == 'online.community' then
+                if not result then
+                    item.text = L'关闭 社区联网'
+                else
+                    item.text = L'开启 社区联网'
+                end
+            end
+        end
+    end
+
+    DesktopMenu.RebuildMenuItem(onlineMenu)
 end

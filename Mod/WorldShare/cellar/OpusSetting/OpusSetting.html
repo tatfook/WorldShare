@@ -17,11 +17,6 @@
                         end
                     end
 
-                    function set_community(value)
-                        if not GameLogic.IsReadOnly() then
-                            GameLogic.options:SetCommunityWorld(value)
-                        end
-                    end
 
                     function set_public(val)
                         GameLogic.IsVip(
@@ -168,16 +163,6 @@
                                    onclick='ban_not_institute_vip_save_as' />
                             <%= L'禁止非机构用户另存（一旦设定，仅原作者才可撤销）' %>
                         </div>
-                    </div>
-                    <div style='margin-top: 10px;'><%= L'社区世界：' %></div>
-                    <div style='margin-left: 20px;'>
-                        <div>
-                            <input type='checkbox'
-                                   checked='<%=GameLogic.options:IsCommunityWorld()%>'
-                                   onclick='set_community' />
-                            <%= L'开启社区世界' %>
-                        </div>
-                        <div><%= L'*支持多人联机访问，也可用“/ggs”命令控制' %></div>
                     </div>
                     <div style='margin-top: 10px;'><%= L'权限访问：' %></div>
                     <div style='margin-left: 20px;'>
