@@ -158,8 +158,8 @@ function Panorama:ShowShare(beShowButton)
 end
 
 function Panorama:StartShooting()
-    _guihelper.MessageBox(L'拍摄全景图期间，请勿操作窗口，否则可能导致拍摄失败。', function(res)
-        if res and res == _guihelper.DialogResult.Yes then
+    -- _guihelper.MessageBox(L'拍摄全景图期间，请勿操作窗口，否则可能导致拍摄失败。', function(res)
+    --     if res and res == _guihelper.DialogResult.Yes then
             local entityPlayer = EntityManager.GetFocus()
 
             if not entityPlayer then
@@ -172,10 +172,10 @@ function Panorama:StartShooting()
             GameLogic.GetCodeGlobal():RegisterTextEvent('after_generate_panorama', self.AfterGeneratePanorama)
 
             CommandManager:Run(format('/panorama %d,%d,%d', x, y, z))
-        end
+    --     end
 
-    end,
-    _guihelper.MessageBoxButtons.YesNo)
+    -- end,
+    -- _guihelper.MessageBoxButtons.YesNo)
 end
 
 function Panorama.AfterGeneratePanorama()
