@@ -12,16 +12,22 @@ local CreateWorld = NPL.load('(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.
 ]]
 
 -- libs
+local CreateModulPage = NPL.load('(gl)script/apps/Aries/Creator/Game/Tasks/World2In1/CreateModulPage.lua')
+
 NPL.load('(gl)script/apps/Aries/Creator/Game/Login/CreateNewWorld.lua')
+NPL.load('(gl)script/apps/Aries/Creator/Game/Login/LocalLoadWorld.lua')
 
 local CreateNewWorld = commonlib.gettable('MyCompany.Aries.Game.MainLogin.CreateNewWorld')
+local LocalLoadWorld = commonlib.gettable('MyCompany.Aries.Game.MainLogin.LocalLoadWorld')
+local WorldCommon = commonlib.gettable('MyCompany.Aries.Creator.WorldCommon')
 
 -- bottles
 local LoginModal = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua')
 
 -- service
-local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceSession.lua')
 local KeepworkServiceWorld = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceWorld.lua')
+local LocalServiceWorld = NPL.load('(gl)Mod/WorldShare/service/LocalService/LocalServiceWorld.lua')
 
 local CreateWorld = NPL.export()
 
@@ -29,9 +35,11 @@ function CreateWorld:CreateNewWorld(foldername, callback)
     local function Handle()
         CreateNewWorld.ShowPage(true)
 
-        if type(foldername) == 'string' then
-            CreateNewWorld.page:SetValue('new_world_name', foldername)
-            CreateNewWorld.page:Refresh(0.01)
+        if foldername and type(foldername) == 'string' then
+            if CreateNewWorld.page then
+                CreateNewWorld.page:SetValue('new_world_name', foldername)
+                CreateNewWorld.page:Refresh(0.01)
+            end
         end
     end
 
@@ -57,13 +65,21 @@ function CreateWorld:CreateNewWorld(foldername, callback)
 end
 
 function CreateWorld.OnClickCreateWorld()
+    CreateWorld:OnClickCreateWorldImp()
+
+    return true
+end
+
+function CreateWorld:OnClickCreateWorldImp()
     local foldername = CreateNewWorld.page:GetValue('new_world_name')
     local currentWorldList = Mod.WorldShare.Store:Get('world/compareWorldList') or {}
+
+    foldername = foldername:gsub('[%s/\\]', '')
 
     for key, item in ipairs(currentWorldList) do
         if item.foldername == foldername then
             _guihelper.MessageBox(L'世界名已存在，请列表中进入')
-            return true
+            return
         end
     end
 
@@ -71,7 +87,7 @@ function CreateWorld.OnClickCreateWorld()
 
     if currentEnterWorld and currentEnterWorld.foldername == foldername then
         _guihelper.MessageBox(L'世界名已存在，请列表中进入')
-        return true
+        return
     end
 
     local worldPath = ParaIO.GetWritablePath() .. 'worlds/DesignHouse/' .. foldername
@@ -83,9 +99,10 @@ function CreateWorld.OnClickCreateWorld()
 
         if curWorldUsername then
             backUpWorldPath =
-                'temp/sync_backup_world/' ..
+                LocalServiceWorld:GetDefaultSaveWorldPath() ..
+                '/_user/' ..
                 curWorldUsername ..
-                '_' ..
+                '/' ..
                 commonlib.Encoding.Utf8ToDefault(foldername)
 
             commonlib.Files.MoveFolder(worldPath, backUpWorldPath)
@@ -96,7 +113,86 @@ function CreateWorld.OnClickCreateWorld()
 
     Mod.WorldShare.Store:Remove('world/currentWorld')
 
-    return false
+	local item = CreateNewWorld.cur_terrain
+
+	-- mini terrain chunk
+	if item and item.terrain == "paraworldMini" then
+		CreateModulPage.Show(foldername)
+
+		CreateNewWorld.ClosePage()
+		return
+	end
+
+	self:CreateWorldByName(foldername, CreateNewWorld.cur_terrain.terrain)
+end
+
+function CreateWorld:CreateWorldByName(worldName, terrain)
+	worldName = worldName:gsub('[%s/\\]', '')
+
+	local worldNameLocale = commonlib.Encoding.Utf8ToDefault(worldName)
+
+	if worldName == '' then
+		_guihelper.MessageBox(L'世界名字不能为空, 请输入世界名称')
+		return
+	else
+		local count = 0
+
+		for uchar in string.gfind(worldName, '([%z\1-\127\194-\244][\128-\191]*)') do
+			if #uchar ~= 1 then
+				count = count + 2
+			else
+				count = count + 1
+			end
+		end
+
+		if count > 66 then
+			_guihelper.MessageBox(format(L'世界名字超过%d个字符, 请重新输入', 66))
+			return
+		end
+	end
+
+	local params = {
+		worldname = worldNameLocale,
+		title = worldName,
+		creationfolder = self:GetWorldFolder(),
+		parentworld = nil,
+		world_generator = terrain,
+		seed = worldName,
+		inherit_scene = true,
+		inherit_char = true,
+	}
+
+	LOG.std(nil, 'info', 'CreateWorld', params)
+
+	GameLogic.GetFilters():apply_filters('user_event_stat', 'world', 'create:' .. tostring(worldName), 10, nil)
+
+	local worldPath, errorMsg = CreateNewWorld.CreateWorld(params)
+
+	if not worldPath then
+		if errorMsg then
+			_guihelper.MessageBox(errorMsg)
+		end
+	else
+		LOG.std(nil, 'info', 'CreateNewWorld', 'new world created at %s', worldPath)
+
+        CreateNewWorld.ClosePage()
+
+		WorldCommon.OpenWorld(worldPath, true)
+
+        GameLogic:UserAction('introduction')
+
+		GameLogic.GetFilters():apply_filters('OnWorldCreate', worldNameLocale)
+	end
+end
+
+function CreateWorld:GetWorldFolder()
+    local username = Mod.WorldShare.Store:Get('user/username')
+
+    if username then
+        return LocalServiceWorld:GetDefaultSaveWorldPath() .. '/_user/' .. username
+    else
+        return LocalServiceWorld:GetDefaultSaveWorldPath()
+    end
 end
 
 function CreateWorld.ClosePage()

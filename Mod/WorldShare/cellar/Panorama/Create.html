@@ -40,7 +40,7 @@
                     end
 
                     function get_window_style()
-                        local style = 'background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#224 475 128 128:40 40 40 40);'
+                        local style = 'background: url(Texture/Aries/Creator/keepwork/kuang_187x128_32bits.png#0 0 187 128:55 45 90 45);'
 
                         local marginLeft = (tonumber(width) - tonumber(scale_width)) / 2
                         local marginTop = (tonumber(height) - tonumber(scale_height)) / 2
@@ -62,13 +62,19 @@
                     end
 
                     function get_center_point_style()
-                        local style = 'position: relative;width: 28px;height: 28px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#370 475 28 28);'
+                        local style = 'position: relative;width: 28px;height: 28px;background: url(Texture/Aries/Creator/keepwork/zhunxing_31x31_32bits.png#0 0 31 31);'
 
                         local marginTop = scale_height / 2 - 40
                         local marginLeft = scale_width / 2
 
                         style = style .. 'margin-left: ' .. marginLeft .. 'px;' .. 'margin-top: ' .. marginTop .. 'px;'
 
+                        return style
+                    end
+
+                    function get_textBgStyle()
+                        local style = 'width: %spx;height: 54px;margin-left:%spx;background: url(Texture/Aries/Creator/keepwork/kuang_54x54_32bits.png#0 0 54 54:20 20 20 20);'
+                        style = string.format(style,tonumber(scale_width)-100,100*0.5)
                         return style
                     end
                 ]]>
@@ -85,18 +91,26 @@
                     </div>
                     <div>
                         <!-- body -->
-                        <!-- <div style="margin-left: 16px;margin-top: 7px;">
-                            <%= L'你搭建的世界太棒了，快去选择一个能展示你世界的最佳位置进行3D全景图拍摄吧' %>
-                        </div> -->
+                        
                         <div style="<%= get_center_point_style() %>"></div>
-                        <div style="<%= 'margin-left: ' .. (get_scale_width() / 2 - 62.5) .. 'px;margin-top: ' .. (get_scale_height() - 40) .. 'px;' %>">
+                        <!-- <div style="<%= 'margin-left: ' .. (get_scale_width() / 2 - 62.5) .. 'px;margin-top: ' .. (get_scale_height() - 40) .. 'px;' %>">
                             <input type="button"
                                    class="theme1_orange_button"
                                    style="width: 125px;height: 45px;"
                                    onclick="start_shooting()"
                                    value="<%= L'开始拍摄' %>" />
-                        </div>
+                        </div> -->
+                        
+                        
                     </div>
+                </div>
+                <div style='<%= get_textBgStyle() %>'>
+                    <div style="float:left;color:#ffffff;font-weight: bold;font-size: 18;margin-left: 10;margin-top: 13px;">
+                        <%= L'选择一个位置，系统将围绕这里生成360度的全景展示图' %>
+                    </div>
+                    <input type="button" style="float:right;width: 100px;height: 44px;margin-top: 7;margin-right: 5; background: url(Texture/Aries/Creator/keepwork/luzhianniu_100x44_32bits.png#0 0 100 44);font-weight:bold;font-size:14;text-offset-y:-2"
+                        onclick="start_shooting()" align="right"
+                        value="<%= L'开始拍摄' %>" />
                 </div>
             </div>
         </pe:mcml>

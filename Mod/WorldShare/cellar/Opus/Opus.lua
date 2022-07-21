@@ -20,7 +20,7 @@ local Create = NPL.load('(gl)Mod/WorldShare/cellar/Create/Create.lua')
 local MainPage = NPL.load('(gl)Mod/ExplorerApp/pages/MainPage/MainPage.lua')
 
 -- service
-local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceSession.lua')
 
 local Opus = NPL.export()
 

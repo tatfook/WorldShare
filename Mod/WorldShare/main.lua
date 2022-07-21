@@ -1,9 +1,9 @@
 ﻿--[[
 Title: WorldShareMod
 Author(s): big
-CreateDate: 2017.04.17
-ModifyDate: 2022.04.21
-Version: 0.5
+CreateDate: 2017.4.17
+ModifyDate: 2022.6.28
+Version: 0.6
 use the lib:
 ------------------------------------------------------------
 NPL.load('(gl)Mod/WorldShare/main.lua')
@@ -30,7 +30,7 @@ local EntityManager = commonlib.gettable("MyCompany.Aries.Game.EntityManager")
 
 -- bottles
 local KickOut = NPL.load('(gl)Mod/WorldShare/cellar/Common/KickOut/KickOut.lua')
-local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
+local SyncWorld = NPL.load('(gl)Mod/WorldShare/cellar/Sync/SyncWorld.lua')
 local OpusSetting = NPL.load('(gl)Mod/WorldShare/cellar/OpusSetting/OpusSetting.lua')
 local PreventIndulge = NPL.load('(gl)Mod/WorldShare/cellar/PreventIndulge/PreventIndulge.lua')
 local Certificate = NPL.load('(gl)Mod/WorldShare/cellar/Certificate/Certificate.lua')
@@ -38,10 +38,10 @@ local Cellar = NPL.load('(gl)Mod/WorldShare/cellar/cellar.lua')
 local CommonLoadWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/CommonLoadWorld.lua')
 
 -- service
-local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceSession.lua')
 local EventTrackingService = NPL.load('(gl)Mod/WorldShare/service/EventTracking.lua')
 local LocalServiceSession = NPL.load('(gl)Mod/WorldShare/service/LocalService/LocalServiceSession.lua')
-local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
+local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceProject.lua')
 
 -- database
 local SessionsData = NPL.load('(gl)Mod/WorldShare/database/SessionsData.lua')
@@ -89,7 +89,7 @@ function WorldShare:init()
 
     -- init long tcp connection
     KeepworkServiceSession:LongConnectionInit(function(result)
-        if type(result) ~= 'table' then
+        if not result or type(result) ~= 'table' then
             return false
         end
 
@@ -114,14 +114,14 @@ function WorldShare:init()
     end
 
     -- load diff world
-    Mod.WorldShare.Utils.SetTimeOut(function()
-        NPL.load('(gl)Mod/DiffWorld/main.lua')
-        local DiffWorld = commonlib.gettable('Mod.DiffWorld')
+    -- Mod.WorldShare.Utils.SetTimeOut(function()
+    --     NPL.load('(gl)Mod/DiffWorld/main.lua')
+    --     local DiffWorld = commonlib.gettable('Mod.DiffWorld')
 
-        if DiffWorld and type(DiffWorld) == 'table' and DiffWorld.init then
-            DiffWorld:init()
-        end
-    end, 3000)
+    --     if DiffWorld and type(DiffWorld) == 'table' and DiffWorld.init then
+    --         DiffWorld:init()
+    --     end
+    -- end, 3000)
 
     System.options.useFreeworldWhitelist = true
     System.options.maxFreeworldUploadCount = 3
@@ -137,7 +137,7 @@ function WorldShare:init()
     end)
 
     if ParaEngine.GetAppCommandLineByParam('IsSettingLanguage', nil) == 'true' and
-       Mod.WorldShare.Store:Get('user/isSettingLanguage') == nil then
+        Mod.WorldShare.Store:Get('user/isSettingLanguage') == nil then
         Mod.WorldShare.Store:Set('user/isSettingLanguage', true)
     end
 end
@@ -154,7 +154,7 @@ function WorldShare:OnWorldLoad()
         Mod.WorldShare.MsgBox:Close()
     end
 
-    SyncMain:OnWorldLoad(function()
+    SyncWorld:OnWorldLoad(function()
         Mod.WorldShare.Store:Set('world/loadWorldFinish', true)
 
         -- need to get current enter world info

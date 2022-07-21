@@ -18,7 +18,7 @@ local Validated = NPL.load('(gl)Mod/WorldShare/helper/Validated.lua')
 
 -- service
 local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
-local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceSession.lua')
 local KeepworkServiceSchoolAndOrg = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/SchoolAndOrg.lua")
 
 -- utils
@@ -252,6 +252,9 @@ function LoginModal:SelectAccount(username)
 end
 
 function LoginModal:GetHistoryUsers()
+    if System.options.IgnoreRememberAccount then
+        return {}
+    end
     if self.account and #self.account > 0 then
         local allUsers = commonlib.Array:new(SessionsData:GetSessions().allUsers)
         local beExist = false

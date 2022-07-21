@@ -14,7 +14,7 @@ local TeacherAgent = commonlib.gettable("MyCompany.Aries.Creator.Game.Teacher.Te
 local TeacherIcon = commonlib.gettable("MyCompany.Aries.Creator.Game.Teacher.TeacherIcon")
 
 -- service
-local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceSession.lua')
 
 local Certificate = NPL.export()
 
@@ -38,7 +38,8 @@ function Certificate:ShowCertificateNoticePage(callback)
         nil,
         nil,
         nil,
-        1
+        1,
+        true
     )
 
     params._page.callback = callback
@@ -53,7 +54,13 @@ function Certificate:ShowCertificatePage()
         800,
         400,
         '(ws)Certificate',
-        'Mod.WorldShare.Certificate'
+        'Mod.WorldShare.Certificate',
+        nil,
+        nil,
+        nil,
+        nil,
+        1,
+        true
     )
 
     if params and type(params) == 'table' and params._page then
@@ -67,7 +74,13 @@ function Certificate:ShowCertificateTypePage()
         605,
         410,
         '(ws)Certificate/CertificateType.html',
-        'Mod.WorldShare.Certificate.CertificateType'
+        'Mod.WorldShare.Certificate.CertificateType',
+        nil,
+        nil,
+        nil,
+        nil,
+        1,
+        true
     )
 
     if params and type(params) == 'table' and params._page then
@@ -82,7 +95,13 @@ function Certificate:ShowSchoolPage()
         800,
         680,
         '(ws)Certificate/School.html',
-        'Mod.WorldShare.Certificate.School'
+        'Mod.WorldShare.Certificate.School',
+        nil,
+        nil,
+        nil,
+        nil,
+        1,
+        true
     )
 
     if params and type(params) == 'table' and params._page then
@@ -104,7 +123,13 @@ function Certificate:ShowMyHomePage(callback)
         760,
         490,
         '(ws)Certificate/MyHome.html',
-        'Mod.WorldShare.Certificate.MyHome'
+        'Mod.WorldShare.Certificate.MyHome',
+        nil,
+        nil,
+        nil,
+        nil,
+        1,
+        true
     )
 
     if params and type(params) == 'table' and params._page then

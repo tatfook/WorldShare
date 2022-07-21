@@ -27,8 +27,8 @@ local UrlProtocolHandler = commonlib.gettable("MyCompany.Aries.Creator.Game.UrlP
 local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
 local GitService = NPL.load('(gl)Mod/WorldShare/service/GitService.lua')
 local GitKeepworkService = NPL.load('(gl)Mod/WorldShare/service/GitService/GitKeepworkService.lua')
-local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
-local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceProject.lua')
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceSession.lua')
 local LocalServiceWorld = NPL.load('(gl)Mod/WorldShare/service/LocalService/LocalServiceWorld.lua')
 local HttpRequest = NPL.load('(gl)Mod/WorldShare/service/HttpRequest.lua')
 local LocalServiceHistory = NPL.load('(gl)Mod/WorldShare/service/LocalService/LocalServiceHistory.lua')
@@ -680,7 +680,7 @@ function CommonLoadWorld:InjectShowCustomDownloadWorldFilter(worldInfo, download
 
     downloadWorldInstance.ToggleStartOldVersionButton = function(isShow)
         if isShow == true then
-            if downloadWorldInstance.startOldVersionButtonNode then
+            if downloadWorldInstance and downloadWorldInstance.startOldVersionButtonNode then
                 downloadWorldInstance.startOldVersionButtonNode = nil
                 ParaUI.Destroy('start_old_version_button')
             end
@@ -712,29 +712,37 @@ function CommonLoadWorld:InjectShowCustomDownloadWorldFilter(worldInfo, download
             )
 
             local count = 10
+            local startCountdownTimer
             downloadWorldInstance.startCountdownTimer = commonlib.Timer:new(
                 {
                     callbackFunc = function()
                         if count > 0 then
-                            if downloadWorldInstance.startOldVersionButtonNode then
+                            if downloadWorldInstance and downloadWorldInstance.startOldVersionButtonNode then
                                 downloadWorldInstance.startOldVersionButtonNode.text = format(L'启动旧版(%d)', count)
                             end
 
                             count = count - 1
                         else
-                            downloadWorldInstance.startOldVersionButtonNode.text = L'启动旧版'
-                            downloadWorldInstance.startOldVersionButtonNode.enabled = true
-                            downloadWorldInstance.startCountdownTimer:Change(nil, nil)
+                            if downloadWorldInstance and downloadWorldInstance.startOldVersionButtonNode then
+                                downloadWorldInstance.startOldVersionButtonNode.text = L'启动旧版'
+                                downloadWorldInstance.startOldVersionButtonNode.enabled = true
+                            end
+
+                            if startCountdownTimer then
+                                startCountdownTimer:Change(nil, nil)
+                            end
                         end
                     end
                 }
             )
 
+            startCountdownTimer = downloadWorldInstance.startCountdownTimer
+
             downloadWorldInstance.startCountdownTimer:Change(0, 1000)
 
             rootNode:AddChild(downloadWorldInstance.startOldVersionButtonNode)
         elseif isShow == false then
-            if downloadWorldInstance.startOldVersionButtonNode then
+            if downloadWorldInstance and downloadWorldInstance.startOldVersionButtonNode then
                 downloadWorldInstance.startCountdownTimer:Change(nil, nil)
                 downloadWorldInstance.startOldVersionButtonNode = nil
                 ParaUI.Destroy('start_old_version_button')

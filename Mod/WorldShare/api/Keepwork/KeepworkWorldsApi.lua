@@ -1,16 +1,17 @@
 --[[
 Title: Keepwork Worlds API
-Author(s):  big
-Date:  2019.11.8
+Author(s): big
+CreateDate: 2019.11.8
+ModifyDate: 2022.7.11
 Place: Foshan
 use the lib:
 ------------------------------------------------------------
-local KeepworkWorldsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Worlds.lua")
+local KeepworkWorldsApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkWorldsApi.lua')
 ------------------------------------------------------------
 ]]
-local Encoding = commonlib.gettable("commonlib.Encoding")
+local Encoding = commonlib.gettable('commonlib.Encoding')
 
-local GitEncoding = NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua")
+local GitEncoding = NPL.load('(gl)Mod/WorldShare/helper/GitEncoding.lua')
 
 local KeepworkBaseApi = NPL.load('./BaseApi.lua')
 
@@ -38,14 +39,14 @@ function KeepworkWorldsApi:GetWorldList(xPerPage, xPage, success, error)
     KeepworkBaseApi:Get(url, nil, nil, success, error)
 end
 
--- url: /worlds?worldName=%s
+-- url: /joinedWorlds?worldName=%s
 -- method: GET
 -- params:
 --[[
 ]]
 -- return: object
 function KeepworkWorldsApi:GetWorldByName(foldername, success, error)
-    local url = format("/joinedWorlds?worldName=%s", Encoding.url_encode(foldername or ''))
+    local url = format('/joinedWorlds?worldName=%s', Encoding.url_encode(foldername or ''))
 
     KeepworkBaseApi:Get(url, nil, nil, success, error)
 end
@@ -61,7 +62,7 @@ function KeepworkWorldsApi:UpdateWorldInfo(worldId, params, success, error)
         return
     end
 
-    local url = format("/worlds/%s", worldId)
+    local url = format('/worlds/%s', worldId)
 
     KeepworkBaseApi:Put(url, params, nil, success, error)
 end

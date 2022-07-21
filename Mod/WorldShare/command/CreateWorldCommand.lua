@@ -15,12 +15,12 @@ local Commands = commonlib.gettable('MyCompany.Aries.Game.Commands')
 local CreateNewWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.CreateNewWorld")
 
 -- bottles
-local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
+local SyncWorld = NPL.load('(gl)Mod/WorldShare/cellar/Sync/SyncWorld.lua')
 
 -- services
 local KeepworkServiceWorld = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceWorld.lua')
-local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
-local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceSession.lua')
+local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceProject.lua')
 local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
 local LocalServiceWorld = NPL.load('(gl)Mod/WorldShare/service/LocalService/LocalServiceWorld.lua')
 
@@ -114,7 +114,14 @@ e.g.
                 redirectLoadWorld = string.match(redirectLoadWorld, '^"(.+)"')
             end
 
-            local worldPath = 'worlds/DesignHouse/' .. commonlib.Encoding.Utf8ToDefault(name) .. '/'
+            local worldPath
+
+            if KeepworkServiceSession:IsSignedIn() then
+                worldPath = LocalServiceWorld:GetUserFolderPath() .. '/' .. commonlib.Encoding.Utf8ToDefault(name) .. '/'
+            else
+                worldPath = LocalServiceWorld:GetDefaultSaveWorldPath() .. '/' .. commonlib.Encoding.Utf8ToDefault(name) .. '/'
+            end
+            
             local tagPath = worldPath .. 'tag.xml'
 
             local isLocalWorldExisted = false
@@ -172,7 +179,7 @@ e.g.
 
                 if isLocalWorldExisted and isRemoteWorldExisted then
                     if isUpdate then
-                        SyncMain:CheckAndUpdatedByFoldername(name, function()
+                        SyncWorld:CheckAndUpdatedByFoldername(name, function()
                             SetParentProjectIdAndRedirectLoadWorld()
                             GameLogic.RunCommand('/sendevent createworld_callback '..worldPath)
                         end)

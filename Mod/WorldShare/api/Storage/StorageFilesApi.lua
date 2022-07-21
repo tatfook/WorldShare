@@ -1,11 +1,12 @@
 --[[
 Title: Storage Files API
-Author(s):  big
-Date:  2019.12.16
+Author(s): big
+CreateDate: 2019.12.16
+ModifyDate: 2022.7.11
 Place: Foshan
 use the lib:
 ------------------------------------------------------------
-local StorageFilesApi = NPL.load("(gl)Mod/WorldShare/api/Storage/Files.lua")
+local StorageFilesApi = NPL.load('(gl)Mod/WorldShare/api/Storage/StorageFilesApi.lua')
 ------------------------------------------------------------
 ]]
 
@@ -48,7 +49,7 @@ end
 function StorageFilesApi:List(key, success, error)
     local params = {}
 
-    if type(key) == "string" then
+    if key and type(key) == 'string' then
         params.key = key
     end
 

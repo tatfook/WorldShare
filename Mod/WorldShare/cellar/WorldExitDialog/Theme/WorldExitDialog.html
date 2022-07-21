@@ -10,12 +10,12 @@
                     local ShareWorld = NPL.load('(gl)Mod/WorldShare/cellar/ShareWorld/ShareWorld.lua')
                     local Grade = NPL.load('Mod/WorldShare/cellar/WorldExitDialog/Grade.lua')
                     local Panorama = NPL.load('Mod/WorldShare/cellar/Panorama/Panorama.lua')
-                    local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
+                    local SyncWorld = NPL.load('(gl)Mod/WorldShare/cellar/Sync/SyncWorld.lua')
                     local Compare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
  
                     -- service
                     local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
-                    local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+                    local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceSession.lua')
                     local KeepworkServiceWorld = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceWorld.lua')
 
                     -- lib
@@ -111,13 +111,20 @@
                                 Compare:Init(currentEnterWorld.worldpath, function()
                                     Mod.WorldShare.Store:Set('world/currentWorld', currentEnterWorld)
 
-                                    SyncMain:SyncToDataSource(function()
-                                        _guihelper.MessageBox(L'保存并上传成功！是否要继续退出世界', function()
-                                            WorldExitDialog.OnDialogResult(_guihelper.DialogResult.No)
-                                        end)
+                                    SyncWorld:SyncToDataSource(function(result, option)
+                                        if result == true then
+                                            if option and
+                                               type(option) == 'table' and
+                                               option.params and
+                                               type(option.params) == 'table' and
+                                               option.params.fromButton == 'close' then
+                                                _guihelper.MessageBox(L'保存并上传成功！是否要继续退出世界', function()
+                                                    WorldExitDialog.OnDialogResult(_guihelper.DialogResult.No)
+                                                end)
+                                            end
+                                        end
                                     end)
                                 end)
-
                             else
                                 _guihelper.MessageBox(L'操作被禁止了，免费用户最多只能拥有家园+1个本地世界，请删除不要的本地世界，或者联系老师（或家长）开通权限。')
                             end
@@ -177,6 +184,9 @@
                     end
 
                     function snapshot()
+                        if GameLogic.IsReadOnly() then
+                            return 
+                        end
                         WorldExitDialog.Snapshot()
                     end
 
@@ -237,10 +247,11 @@
                     end
 
                     function has_project_id()
-                        local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
-                        if currentWorld and
-                           currentWorld.kpProjectId and
-                           currentWorld.kpProjectId ~= 0 then
+                        local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
+
+                        if currentEnterWorld and
+                           currentEnterWorld.kpProjectId and
+                           currentEnterWorld.kpProjectId ~= 0 then
                             return true
                         else
                             return false
@@ -620,13 +631,15 @@
                         <div style='padding-left: 20px;
                                     color: #000000'>
                             <pe:if condition='<%= is_community_world_exit() %>'>
-                                <div style='margin-top: -10x;
-                                            margin-bottom: 5px;
+                                <pe:if condition="<%=not GameLogic.IsReadOnly()%>">
+                                    <div style='position: relative;
+                                            margin-top: -5x;
                                             base-font-size: 15px;
                                             font-size:15px;'>
-                                    <%= get_last_world_name() %>
-                                </div>
-                                <div style='margin-top: 10px;'>
+                                        <%= get_last_world_name() %>
+                                    </div>
+                                </pe:if>
+                                <div style='margin-top: 50px;'>
                                     <input type='button'
                                            onclick='on_click_exit_without_save()'
                                            value='<%= L"返回" %>'
@@ -638,7 +651,7 @@
                                            onclick='on_click_cancel()'
                                            value='<%= L"取消" %>'
                                            class='theme1_gray_button'
-                                           style='margin-left: 60px;
+                                           style='margin-left: 80px;
                                                   min-width: 130px;
                                                   height:50px;' />
                                 </div>
@@ -652,26 +665,28 @@
                                     </div>
                                 </pe:if>
                                 
-                                <div style='margin-left: 5px; 
-                                            color: #181818;
-                                            margin-top: 5x;
-                                            base-font-size: 15px;
-                                            font-size:15px;'>
-                                    <%= L'您上次保存世界是:'%>
-                                        <span style='color:#ef6500'>
-                                            <%= format(L'%d秒前', get_elapsed_unsaved_seconds())%>
-                                        </span>
-                                    <%= notice() %>
-                                </div>
+                                <pe:if condition='<%=not GameLogic.IsReadOnly() %>'>
+                                    <div style='position: relative; margin-left: 5px; 
+                                                color: #181818;
+                                                margin-top: 5x;
+                                                base-font-size: 15px;
+                                                font-size:15px;'>
+                                        <%= L'您上次保存世界是:'%>
+                                            <span style='color:#ef6500'>
+                                                <%= format(L'%d秒前', get_elapsed_unsaved_seconds())%>
+                                            </span>
+                                        <%= notice() %>
+                                    </div>
+                                </pe:if>
 
-                                <div style='margin-top: 38x;'>
+                                <div style='margin-top: 50x;'>
                                     <pe:if condition='<%= GameLogic.IsReadOnly() %>'>
                                         <input type='button'
                                                onclick='save_as()'
                                                value='<%= L"另存为..." %>'
                                                class='theme1_orange_button'
                                                style='min-width: 114px;
-                                                      margin-left: 57px;
+                                                      margin-left: 64px;
                                                       height: 44px;' />
                                     </pe:if>
                                     <pe:if condition='<%= not GameLogic.IsReadOnly() and (not has_project_id() or is_user_world()) %>'>

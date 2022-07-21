@@ -11,7 +11,7 @@ KeepworkServiceSessionFilter:Init()
 ]]
 
 -- service
-local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceSession.lua')
 
 local KeepworkServiceSessionFilter = NPL.export()
 

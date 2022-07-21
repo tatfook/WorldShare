@@ -12,11 +12,11 @@ local VersionChange = NPL.load('(gl)Mod/WorldShare/cellar/VersionChange/VersionC
 ]]
 
 -- bottles
-local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
+local SyncWorld = NPL.load('(gl)Mod/WorldShare/cellar/Sync/SyncWorld.lua')
 
 -- service
 local KeepworkServiceWorld = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceWorld.lua')
-local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceSession.lua')
 local Compare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
 
 local Encoding = commonlib.gettable('commonlib.Encoding')
@@ -105,7 +105,7 @@ end
 
 function VersionChange:GetVersionSource(callback)
     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
-    local commitId = SyncMain:GetCurrentRevisionInfo() or {}
+    local commitId = SyncWorld:GetCurrentRevisionInfo() or {}
 
     if not currentWorld then
         return false
@@ -171,7 +171,7 @@ function VersionChange:SelectVersion(index)
     currentWorld.lastCommitId = commitId
     Mod.WorldShare.Store:Set('world/currentWorld', currentWorld)
 
-    SyncMain:SyncToLocalSingle(function(result, msg)
+    SyncWorld:SyncToLocalSingle(function(result, msg)
         if result == false then
             if msg == 'NEWWORLD' then
                 return false

@@ -27,7 +27,7 @@
                 ]]>
             </script>
             <style type="text/mcss" src="Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss"></style>
-            <kp:window width="600" height="200" icon="Texture/Aries/Creator/keepwork/Window/title/biaoti_xuexiao_32bits.png" onclose="close()">
+            <!-- <kp:window width="600" height="200" icon="Texture/Aries/Creator/keepwork/Window/title/biaoti_xuexiao_32bits.png" onclose="close()">
                 <div width="100%" height="100%">
                     <div style="width: 600px; height: 40px;">
                         <div style="margin-left: 120px;margin-top: 14px;font-size: 14px;base-font-size: 14px;color: #ffffff;"><%=L"加入机构"%></div>
@@ -41,6 +41,19 @@
                             <input type="button" class="theme1_gray_button" style="height: 38px;width: 108px;font-size: 18px;base-font-size: 18px;color: #000000" value="<%= L'提交' %>" onclick="submit()"/>
                             <input type="button" class="theme1_orange_button" style="height: 38px;width: 108px;margin-left: 10px;font-size: 18px;base-font-size: 18px;color: #000000" value="<%= L'取消' %>" onclick="close()"/>
                         </div>
+                    </div>
+                </div>
+            </kp:window> -->
+            <!-- new window -->
+            <kp:window width="488" height="243" title='<%=L"激活码"%>' onclose="close()">
+                <div style="margin-top: 57px;">
+                    <div style="text-align: center; font-size: 16px; base-font-size: 16px; color: #333333;"><%= L"请输入从机构处获得的激活码" %></div>
+                    <div style="margin-left: 47px; margin-top: 28px;">
+                        <input type="text" style="color: #000000; font-size: 16px; base-font-size: 16px; width: 395px;height: 42px; background: url(Texture/Aries/Creator/keepwork/Certification/zi_shurudi_32X32_32bits.png#0 0 32 32:8 8 8 8);" name="code" value="" />
+                    </div>
+                    <div style="margin-top: 28px;margin-left:94px;">
+                        <input type="button" class="theme1_orange_button" style="height: 42px;width: 126px;font-size: 18px;base-font-size: 18px;color: #000000" value="<%= L'提交' %>" onclick="submit()"/>
+                        <input type="button" class="theme1_gray_button" style="height: 42px;width: 126px;margin-left: 52px;font-size: 18px;base-font-size: 18px;color: #000000" value="<%= L'取消' %>" onclick="close()"/>
                     </div>
                 </div>
             </kp:window>

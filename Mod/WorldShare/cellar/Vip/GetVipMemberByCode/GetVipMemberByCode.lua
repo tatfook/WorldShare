@@ -10,7 +10,7 @@ local VipNotice = NPL.load("(gl)Mod/WorldShare/cellar/Vip/GetVipMemberByCode/Get
 ------------------------------------------------------------
 ]]
 
-local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
+local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceSession.lua")
 
 local GetVipMemberByCode = NPL.export()
 

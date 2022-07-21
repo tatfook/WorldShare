@@ -12,7 +12,7 @@ local Permission = NPL.load('(gl)Mod/WorldShare/cellar/Permission/Permission.lua
 ]]
 
 -- service
-local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceSession.lua')
 local KeepworkServicePermission = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Permission.lua')
 
 -- bottles
@@ -50,6 +50,10 @@ function Permission:CheckPermission(authName, bOpenUIIfNot, callback, uiType)
                 -- update user info
                 KeepworkServiceSession:Profile(
                     function(response)
+                        if not response then
+                            return
+                        end
+
                         -- update user vip info
                         if response.vip and response.vip == 1 then
                             Mod.WorldShare.Store:Set('user/isVip', true)

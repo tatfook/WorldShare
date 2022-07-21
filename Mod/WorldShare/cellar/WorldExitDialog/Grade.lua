@@ -14,7 +14,7 @@ local TeacherAgent = commonlib.gettable("MyCompany.Aries.Creator.Game.Teacher.Te
 local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 
 local KeepworkServiceRate = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Rate.lua")
-local KeepworkServiceProject = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Project.lua")
+local KeepworkServiceProject = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceProject.lua")
 local GradeLocalData = NPL.load("(gl)Mod/WorldShare/database/GradeLocalData.lua")
 
 local Grade = NPL.export()

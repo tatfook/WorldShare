@@ -6,7 +6,7 @@ ModifyDate: 2022.6.21
 Place: Foshan
 use the lib:
 ------------------------------------------------------------
-local KeepworkUsersApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/Users.lua')
+local KeepworkUsersApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkUsersApi.lua')
 ------------------------------------------------------------
 ]]
 local Encoding = commonlib.gettable("System.Encoding.basexx")

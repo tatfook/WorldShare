@@ -1,37 +1,38 @@
 --[[
 Title: Panorama
-Author(s):  big
-Date: 2020.10.16
+Author(s): big
+CreateDate: 2020.10.16
+ModifyDate: 2022.7.11
 place: Foshan
 Desc: 
 use the lib:
 ------------------------------------------------------------
-local Panorama = NPL.load("(gl)Mod/WorldShare/cellar/Panorama/Panorama.lua")
+local Panorama = NPL.load('(gl)Mod/WorldShare/cellar/Panorama/Panorama.lua')
 Panorama:ShowCreate(true)
 ------------------------------------------------------------
 ]]
 
 -- lib
-local Screen = commonlib.gettable("System.Windows.Screen")
-local CommandManager = commonlib.gettable("MyCompany.Aries.Game.CommandManager")
-local EntityManager = commonlib.gettable("MyCompany.Aries.Game.EntityManager")
+local Screen = commonlib.gettable('System.Windows.Screen')
+local CommandManager = commonlib.gettable('MyCompany.Aries.Game.CommandManager')
+local EntityManager = commonlib.gettable('MyCompany.Aries.Game.EntityManager')
 
 -- UI
-local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
-local ShareWorld = NPL.load("(gl)Mod/WorldShare/cellar/ShareWorld/ShareWorld.lua")
+local LoginModal = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua')
+local ShareWorld = NPL.load('(gl)Mod/WorldShare/cellar/ShareWorld/ShareWorld.lua')
 
 -- service
-local KeepworkServicePanorama = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Panorama.lua")
-local KeepworkServiceProject = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Project.lua")
-local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
-local EventTrackingService = NPL.load("(gl)Mod/WorldShare/service/EventTracking.lua")
+local KeepworkServicePanorama = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServicePanorama.lua')
+local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceProject.lua')
+local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
+local EventTrackingService = NPL.load('(gl)Mod/WorldShare/service/EventTracking.lua')
 
 local Panorama = NPL.export()
 
 --宇哥的需求，录制模式下不显示esc，记录原有的esc状态
 Panorama.IsShowEscDock = nil
 function Panorama.UpdateEscDock(bShow)
-	local EscDock = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/Dock/EscDock.lua") 
+	local EscDock = NPL.load('(gl)script/apps/Aries/Creator/Game/Tasks/Dock/EscDock.lua') 
     if not EscDock or not EscDock.ShowView then
         return 
     end
@@ -48,13 +49,13 @@ function Panorama.UpdateEscDock(bShow)
 end
 
 function Panorama:ShowCreate(force)
-    LoginModal:CheckSignedIn(L"登录后才能分享全景图", function(bSucceed)
+    LoginModal:CheckSignedIn(L'登录后才能分享全景图', function(bSucceed)
         if bSucceed then
             local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
             if not currentEnterWorld or not currentEnterWorld.kpProjectId or currentEnterWorld.kpProjectId == 0 then
                 _guihelper.MessageBox(
-                    L"你还没将你的世界分享至服务器哦，请先将世界分享至服务器，再进行全景图分享",
+                    L'你还没将你的世界分享至服务器哦，请先将世界分享至服务器，再进行全景图分享',
                     function(res)
                         ShareWorld:Init(nil, function()
                             self:ShowCreate(force)
@@ -72,7 +73,7 @@ function Panorama:ShowCreate(force)
             local scaleWidth = width * 0.6
             local scaleHeight = height * 0.7
 
-            Mod.WorldShare.MsgBox:Show(L"请稍候...")
+            Mod.WorldShare.MsgBox:Show(L'请稍候...')
             KeepworkServiceProject:GetProject(currentEnterWorld.kpProjectId, function(data, err)
                 Mod.WorldShare.MsgBox:Close()
 
@@ -101,20 +102,20 @@ function Panorama:ShowCreate(force)
                             width,
                             height,
                             format(
-                                "Mod/WorldShare/cellar/Panorama/Create.html?width=%d&height=%d&scaleWidth=%d&scaleHeight=%d",
+                                'Mod/WorldShare/cellar/Panorama/Create.html?width=%d&height=%d&scaleWidth=%d&scaleHeight=%d',
                                 tonumber(width),
                                 tonumber(height),
                                 scaleWidth,
                                 scaleHeight
                             ),
-                            "Mod.WorldShare.Panorama.Create",
+                            'Mod.WorldShare.Panorama.Create',
                             nil,
                             nil,
                             nil,
                             false
                         )
                     else
-                        GameLogic.AddBBS(nil, L"这个作品的创建者还没拍摄过全景图哦，暂时无法进行全景图分享。", 4000, "255 0 0")
+                        GameLogic.AddBBS(nil, L'这个作品的创建者还没拍摄过全景图哦，暂时无法进行全景图分享。', 4000, '255 0 0')
                     end
                 end
             end)
@@ -123,25 +124,25 @@ function Panorama:ShowCreate(force)
 end
 
 function Panorama:ShowPreview()
-    local params = Mod.WorldShare.Utils.ShowWindow(500, 653, "(ws)Panorama/Preview.html", "Mod.WorldShare.Panorama.Preview")
+    local params = Mod.WorldShare.Utils.ShowWindow(500, 653, '(ws)Panorama/Preview.html', 'Mod.WorldShare.Panorama.Preview')
 
     if params._page then
-        params._page:CallMethod("panorama_preview", "SetVisible", bShow ~= false) 
+        params._page:CallMethod('panorama_preview', 'SetVisible', bShow ~= false) 
         params._page.OnClose = function()
             if params._page then
-                params._page:CallMethod("panorama_preview", "SetVisible", false)
+                params._page:CallMethod('panorama_preview', 'SetVisible', false)
             end
         end
     end
 end
 
 function Panorama:ShowShare(beShowButton)
-    Mod.WorldShare.MsgBox:Show(L"正在生成小程序二维码...", 8000)
+    Mod.WorldShare.MsgBox:Show(L'正在生成小程序二维码...', 8000)
     KeepworkServicePanorama:GenerateMiniProgramCode(function(bSucceed, wxacode)
         Mod.WorldShare.MsgBox:Close()
 
         if not bSucceed then
-            GameLogic.AddBBS(nil, L"生成小程序二维码失败", 3000, "255 0 0")
+            GameLogic.AddBBS(nil, L'生成小程序二维码失败', 3000, '255 0 0')
             return
         end
 
@@ -152,23 +153,29 @@ function Panorama:ShowShare(beShowButton)
         end
 
         self.wxacodeUrl = wxacode
-        local params = Mod.WorldShare.Utils.ShowWindow(520, height, "Mod/WorldShare/cellar/Panorama/Share.html?height=" .. height, "Mod.WorldShare.Panorama.Share")
+        local params = Mod.WorldShare.Utils.ShowWindow(520, height, 'Mod/WorldShare/cellar/Panorama/Share.html?height=' .. height, 'Mod.WorldShare.Panorama.Share')
     end)
 end
 
 function Panorama:StartShooting()
-    _guihelper.MessageBox(L"拍摄全景图期间，请勿操作窗口，否则可能导致拍摄失败。", function(res)
-        if res and res == _guihelper.DialogResult.Yes then
+    -- _guihelper.MessageBox(L'拍摄全景图期间，请勿操作窗口，否则可能导致拍摄失败。', function(res)
+    --     if res and res == _guihelper.DialogResult.Yes then
             local entityPlayer = EntityManager.GetFocus()
+
+            if not entityPlayer then
+                GameLogic.AddBBS(nil, L'拍摄全景图失败', 3000, '255 0 0')
+                return
+            end
+
             local x, y, z = entityPlayer:GetBlockPos()
         
-            GameLogic.GetCodeGlobal():RegisterTextEvent("after_generate_panorama", self.AfterGeneratePanorama)
+            GameLogic.GetCodeGlobal():RegisterTextEvent('after_generate_panorama', self.AfterGeneratePanorama)
 
-            CommandManager:Run(format("/panorama %d,%d,%d", x, y, z))
-        end
+            CommandManager:Run(format('/panorama %d,%d,%d', x, y, z))
+    --     end
 
-    end,
-    _guihelper.MessageBoxButtons.YesNo)
+    -- end,
+    -- _guihelper.MessageBoxButtons.YesNo)
 end
 
 function Panorama.AfterGeneratePanorama()
@@ -176,10 +183,10 @@ function Panorama.AfterGeneratePanorama()
 end
 
 function Panorama:FinishShooting()
-    GameLogic.AddBBS(nil, L"生成全景图完成", 3000, "0 255 0")
-    GameLogic.GetCodeGlobal():UnregisterTextEvent("after_generate_panorama", self.AfterGeneratePanorama)
+    GameLogic.AddBBS(nil, L'生成全景图完成', 3000, '0 255 0')
+    GameLogic.GetCodeGlobal():UnregisterTextEvent('after_generate_panorama', self.AfterGeneratePanorama)
 
-    Mod.WorldShare.MsgBox:Show(L"正在上传全景图，请稍候...", 30000, L"分享失败", 320, 120)
+    Mod.WorldShare.MsgBox:Show(L'正在上传全景图，请稍候...', 30000, L'分享失败', 320, 120)
     self:UploadPanoramaPhoto(function(bSucceed)
         Mod.WorldShare.MsgBox:Close()
 
@@ -189,7 +196,7 @@ function Panorama:FinishShooting()
 
         local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
-        self.shareUrl = KeepworkService:GetKeepworkUrl() .. "/wx/Pannellum/" .. currentEnterWorld.kpProjectId
+        self.shareUrl = KeepworkService:GetKeepworkUrl() .. '/wx/Pannellum/' .. currentEnterWorld.kpProjectId
 
         self:ShowPreview()
     end)
@@ -208,7 +215,7 @@ function Panorama:UploadPanoramaPhoto(callback)
 
     KeepworkServiceProject:GetProject(currentEnterWorld.kpProjectId, function(data, err)
         if err ~= 200 or not data or not data.id or not data.userId then
-            GameLogic.AddBBS(nil, L"项目不存在", 3000, "255 0 0")
+            GameLogic.AddBBS(nil, L'项目不存在', 3000, '255 0 0')
             callback(false)
             return
         end
@@ -216,14 +223,14 @@ function Panorama:UploadPanoramaPhoto(callback)
         local userId = Mod.WorldShare.Store:Get('user/userId')
 
         if data.userId ~= userId then
-            GameLogic.AddBBS(nil, L"此项目不属于你，不能分享", 3000, "255 0 0")
+            GameLogic.AddBBS(nil, L'此项目不属于你，不能分享', 3000, '255 0 0')
             callback(false)
             return
         end
 
         KeepworkServicePanorama:Upload(function(bSucceed, fileArray)
             if not bSucceed then
-                GameLogic.AddBBS(nil, L"上传全景图失败", 3000, "255 0 0")
+                GameLogic.AddBBS(nil, L'上传全景图失败', 3000, '255 0 0')
                 callback(false)
                 return
             end
@@ -236,7 +243,7 @@ function Panorama:UploadPanoramaPhoto(callback)
 
             KeepworkServiceProject:UpdateProject(currentEnterWorld.kpProjectId, params, function(data, err)
                 if err ~= 200 then
-                    GameLogic.AddBBS(nil, L"上传全景图失败", 3000, "255 0 0")
+                    GameLogic.AddBBS(nil, L'上传全景图失败', 3000, '255 0 0')
                     callback(false)
                 end
 

@@ -17,7 +17,7 @@ local DownloadWorld = commonlib.gettable('MyCompany.Aries.Game.MainLogin.Downloa
 local LoginModal = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua')
 local VipTypeWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/VipTypeWorld.lua')
 local ShareTypeWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/ShareTypeWorld.lua')
-local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
+local SyncWorld = NPL.load('(gl)Mod/WorldShare/cellar/Sync/SyncWorld.lua')
 local DeleteWorld = NPL.load('(gl)Mod/WorldShare/cellar/DeleteWorld/DeleteWorld.lua')
 local CommonLoadWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/CommonLoadWorld.lua')
 local CreateWorld = NPL.load('(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua')
@@ -31,8 +31,8 @@ local Compare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
 local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
 local LocalServiceWorld = NPL.load('(gl)Mod/WorldShare/service/LocalService/LocalServiceWorld.lua')
 local KeepworkServiceWorld = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceWorld.lua')
-local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
-local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceSession.lua')
+local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceProject.lua')
 local SyncToLocal = NPL.load('(gl)Mod/WorldShare/service/SyncService/SyncToLocal.lua')
 local LocalServiceHistory = NPL.load('(gl)Mod/WorldShare/service/LocalService/LocalServiceHistory.lua')
 
@@ -198,14 +198,14 @@ function Create:Sync()
         end
 
         if result == Compare.JUSTLOCAL then
-            SyncMain:SyncToDataSource(function()
+            SyncWorld:SyncToDataSource(function()
                 self:GetWorldList(self.statusFilter)
             end)
         end
 
         if result == Compare.JUSTREMOTE then
-            SyncMain:SyncToLocal(function()
-                SyncMain:CheckTagName(function(result, remoteName)
+            SyncWorld:SyncToLocal(function()
+                SyncWorld:CheckTagName(function(result, remoteName)
                     if result and result == 'remote' then
                         local tag = LocalService:GetTag(currentWorld.worldpath)
     
@@ -236,7 +236,7 @@ function Create:Sync()
                 currentWorld.members = members
                 Mod.WorldShare.Store:Set('world/currentWorld', currentWorld)
                 
-                SyncMain:ShowStartSyncPage(nil, function()
+                SyncWorld:ShowStartSyncPage(nil, function()
                     self:GetWorldList(self.statusFilter)
                 end)
             end)
@@ -285,7 +285,17 @@ function Create:EnterWorld(index, skip)
     else
         LoginModal:CheckSignedIn(L'请先登录！', function(bIsSuccessed)
             if bIsSuccessed then
-                self:GetWorldList()
+                self:GetWorldList(nil, function()
+                    local currentWorldList = Mod.WorldShare.Store:Get('world/compareWorldList') or {}
+
+                    for key, item in ipairs(currentWorldList) do
+                        if item.kpProjectId == currentSelectedWorld.kpProjectId and
+                           item.foldername == currentSelectedWorld.foldername then
+                            self:HandleEnterWorld(key)
+                            break
+                        end
+                    end
+                end)
             end
         end)
     end
@@ -497,18 +507,20 @@ function Create:HandleEnterWorld(index, skip)
 
             SyncToLocal:Init(function(result, option)
                 if not result then
-                    if type(option) == 'string' then
+                    if option and type(option) == 'string' then
+                        DownloadWorld.Close()
+
                         if option == 'NEWWORLD' then
                             GameLogic.AddBBS(nil, L'服务器未找到您的世界数据，请新建', 3000, '255 255 0')
-
-                            DownloadWorld.Close()
                             CreateWorld:CreateNewWorld(currentWorld.foldername)
                         end
+
+                        GameLogic.AddBBS(nil, option, 3000, '255 0 0')
 
                         return
                     end
 
-                    if type(option) == 'table' then
+                    if option and type(option) == 'table' then
                         if option.method == 'UPDATE-PROGRESS-FINISH' then
                             if not LocalServiceWorld:CheckWorldIsCorrect(currentWorld) then
                                 _guihelper.MessageBox(L'文件损坏，请再试一次。如果还是出现问题，请联系作者或者管理员。')
@@ -536,11 +548,11 @@ function Create:HandleEnterWorld(index, skip)
             if ShareTypeWorld:IsSharedWorld(currentWorld) then
                 ShareTypeWorld:CompareVersion(result, function(result)
                     if result == 'SYNC' then
-                        SyncMain:BackupWorld()
+                        SyncWorld:BackupWorld()
 
                         Mod.WorldShare.MsgBox:Wait()
 
-                        SyncMain:SyncToLocalSingle(function(result, option)
+                        SyncWorld:SyncToLocalSingle(function(result, option)
                             Mod.WorldShare.MsgBox:Close()
 
                             if result == true then
@@ -555,7 +567,7 @@ function Create:HandleEnterWorld(index, skip)
                 end)
             else
                 if result == Compare.REMOTEBIGGER then
-                    SyncMain:ShowStartSyncPage(true, function()
+                    SyncWorld:ShowStartSyncPage(true, function()
                         self:GetWorldList(self.statusFilter)
                     end)
                 else
@@ -642,7 +654,7 @@ function Create:WorldRename(currentItemIndex, tempModifyWorldname, callback)
                 Mod.WorldShare.Store:Set('world/currentRevision', currentWorld.revision)
                 Mod.WorldShare.Store:Set('world/currentWorld', currentWorld)
     
-                SyncMain:SyncToDataSource(function(result, msg)
+                SyncWorld:SyncToDataSource(function(result, msg)
                     if callback and type(callback) == 'function' then
                         callback()
                     end

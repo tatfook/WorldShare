@@ -23,7 +23,7 @@ local MdParser = NPL.load('(gl)Mod/WorldShare/parser/MdParser.lua')
 
 -- service
 local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
-local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceSession.lua')
 local HttpRequest = NPL.load('(gl)Mod/WorldShare/service/HttpRequest.lua')
 
 -- bottles

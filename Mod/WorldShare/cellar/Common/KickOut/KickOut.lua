@@ -13,7 +13,7 @@ local KickOut = NPL.load('(gl)Mod/WorldShare/cellar/Common/KickOut/KickOut.lua')
 local NplBrowserPlugin = commonlib.gettable("NplBrowser.NplBrowserPlugin")
 
 -- service
-local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceSession.lua')
 
 local KickOut = NPL.export()
 

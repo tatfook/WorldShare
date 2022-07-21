@@ -12,9 +12,9 @@ WorldExitDialog.ShowPage()
 ]]
 
 -- lib
-NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/ShareWorldPage.lua")
+NPL.load('(gl)script/kids/3DMapSystemUI/ScreenShot/SnapshotPage.lua')
 
-local ShareWorldPage = commonlib.gettable('MyCompany.Aries.Creator.Game.Desktop.Areas.ShareWorldPage')
+local SnapshotPage = commonlib.gettable('MyCompany.Apps.ScreenShot.SnapshotPage')
 local WorldRevision = commonlib.gettable('MyCompany.Aries.Creator.Game.WorldRevision')
 local NplBrowserPlugin = commonlib.gettable('NplBrowser.NplBrowserPlugin')
 local Desktop = commonlib.gettable('MyCompany.Aries.Creator.Game.Desktop')
@@ -23,9 +23,9 @@ local ParaWorldLoginAdapter = commonlib.gettable('MyCompany.Aries.Game.Tasks.Par
 -- service
 local Compare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
 local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
-local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceSession.lua')
 local KeepworkServiceWorld = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceWorld.lua')
-local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
+local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceProject.lua')
 local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
 
 -- UI
@@ -33,6 +33,7 @@ local RedSummerCampMainPage = NPL.load('(gl)script/apps/Aries/Creator/Game/Tasks
 local LoginModal = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua')
 local CommonLoadWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/CommonLoadWorld.lua')
 local Grade = NPL.load('./Grade.lua')
+local ShareWorld = NPL.load('(gl)Mod/WorldShare/cellar/ShareWorld/ShareWorld.lua')
 
 local WorldExitDialog = NPL.export()
 local self = WorldExitDialog
@@ -167,8 +168,13 @@ function WorldExitDialog:IsUserWorld()
     local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
     local userId = Mod.WorldShare.Store:Get('user/userId')
 
-    if currentEnterWorld and currentEnterWorld.kpProjectId and currentEnterWorld.kpProjectId ~= 0 and userId then
-        if self.currentWorldKeepworkInfo and self.currentWorldKeepworkInfo.userId and self.currentWorldKeepworkInfo.userId == userId then
+    if currentEnterWorld and
+       currentEnterWorld.kpProjectId and
+       currentEnterWorld.kpProjectId ~= 0 and
+       userId then
+        if self.currentWorldKeepworkInfo and
+           self.currentWorldKeepworkInfo.userId and
+           self.currentWorldKeepworkInfo.userId == userId then
             return true
         else
             return false
@@ -220,10 +226,15 @@ function WorldExitDialog.OnDialogResult(res)
 
                 Mod.WorldShare.Store:Set('world/isShowExitPage', true)
                 RedSummerCampMainPage.Show()
+
+                Mod.WorldShare.Store:Remove('world/currentWorld')
+                Mod.WorldShare.Store:Remove('world/currentEnterWorld')
+                Mod.WorldShare.Store:Remove('world/isEnterWorld')
+
                 return
             end
 
-            if WorldExitDialogPage.callback then
+            if WorldExitDialogPage and WorldExitDialogPage.callback then
                 NplBrowserPlugin.CloseAllBrowsers()
                 WorldExitDialogPage.callback(res)
             end
@@ -243,22 +254,28 @@ function WorldExitDialog.OnDialogResult(res)
         end
 
     else
-        if WorldExitDialogPage.callback then
+        if WorldExitDialogPage and WorldExitDialogPage.callback then
             WorldExitDialogPage.callback(res)
         end
     end
 end
 
 function WorldExitDialog.Snapshot()
-    ShareWorldPage.TakeSharePageImage()
-    WorldExitDialog.UpdateImage(true)
+    if SnapshotPage.TakeSnapshot(
+        ShareWorld:GetPreviewImagePath(),
+        300,
+        200,
+        false
+       ) then
+        WorldExitDialog.UpdateImage(true)
+    end
 end
 
 function WorldExitDialog.UpdateImage(bRefreshAsset)
     local WorldExitDialogPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.WorldExitDialog')
 
     if WorldExitDialogPage then
-        local filepath = ShareWorldPage.GetPreviewImagePath()
+        local filepath = ShareWorld:GetPreviewImagePath()
 
         WorldExitDialogPage:SetUIValue('ShareWorldImage', filepath)
 

@@ -1,42 +1,43 @@
 --[[
 Title: SyncToLocal
-Author(s):  big
-Date:  2018.6.20
+Author(s): big
+CreateDate: 2018.6.20
+ModifyDate: 2022.7.1
 Place: Foshan 
 use the lib:
 ------------------------------------------------------------
-local SyncToLocal = NPL.load("(gl)Mod/WorldShare/service/SyncService/SyncToLocal.lua")
+local SyncToLocal = NPL.load('(gl)Mod/WorldShare/service/SyncService/SyncToLocal.lua')
 ------------------------------------------------------------
 ]]
 
 -- libs
-local Encoding = commonlib.gettable("commonlib.Encoding")
+local Encoding = commonlib.gettable('commonlib.Encoding')
 
 -- service
-local KeepworkService = NPL.load("../KeepworkService.lua")
-local KeepworkServiceProject = NPL.load('../KeepworkService/Project.lua')
-local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
+local KeepworkService = NPL.load('../KeepworkService.lua')
+local KeepworkServiceProject = NPL.load('../KeepworkService/KeepworkServiceProject.lua')
+local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
 local LocalServiceWorld = NPL.load('(gl)Mod/WorldShare/service/LocalService/LocalServiceWorld.lua')
-local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
+local GitService = NPL.load('(gl)Mod/WorldShare/service/GitService.lua')
 
 -- bottles
-local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
+local CreateWorld = NPL.load('(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua')
 
 local SyncToLocal = NPL.export()
 
-local UPDATE = "UPDATE"
-local DELETE = "DELETE"
-local DOWNLOAD = "DOWNLOAD"
+local UPDATE = 'UPDATE'
+local DELETE = 'DELETE'
+local DOWNLOAD = 'DOWNLOAD'
 
 function SyncToLocal:Init(callback)
-    if type(callback) ~= 'function' then
-        return false
+    if not callback or type(callback) ~= 'function' then
+        return
     end
 
     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
     if not currentWorld then
-        return false
+        return
     end
 
     self.currentWorld = currentWorld
@@ -45,34 +46,45 @@ function SyncToLocal:Init(callback)
     self.callback = callback
 
     -- we build a world folder path if worldpath is not exit
-    if not self.currentWorld.worldpath or self.currentWorld.worldpath == "" then
-        local userId = Mod.WorldShare.Store:Get("user/userId")
+    if not self.currentWorld.worldpath or self.currentWorld.worldpath == '' then
+        local userId = Mod.WorldShare.Store:Get('user/userId')
+
         -- update shared world path
-        if self.currentWorld.user and self.currentWorld.user.id and tonumber(self.currentWorld.user.id) ~= tonumber(userId) then
+        if self.currentWorld.user and
+           self.currentWorld.user.id and
+           tonumber(self.currentWorld.user.id) ~= tonumber(userId) then
             self.currentWorld.worldpath = Encoding.Utf8ToDefault(
                 format(
-                    "%s/_shared/%s/%s/",
-                    Mod.WorldShare.Utils.GetWorldFolderFullPath(),
+                    '%s/_shared/%s/%s/',
+                    LocalServiceWorld:GetDefaultSaveWorldPath(),
                     self.currentWorld.user.username,
                     self.currentWorld.foldername
                 )
             )
         else
-            self.currentWorld.worldpath = Encoding.Utf8ToDefault(format("%s/%s/", Mod.WorldShare.Utils.GetWorldFolderFullPath(), self.currentWorld.foldername))
+            self.currentWorld.worldpath =
+                Encoding.Utf8ToDefault(
+                    format(
+                        '%s/%s/',
+                        LocalServiceWorld:GetUserFolderPath(),
+                        self.currentWorld.foldername
+                    )
+                )
         end
-        self.currentWorld.remotefile = "local://" .. self.currentWorld.worldpath
+
+        self.currentWorld.remotefile = 'local://' .. self.currentWorld.worldpath
     end
 
-    if not self.currentWorld.worldpath or self.currentWorld.worldpath == "" then
-        self.callback(false, L"下载失败，原因：下载目录为空")
-        return false
+    if not self.currentWorld.worldpath or self.currentWorld.worldpath == '' then
+        self.callback(false, L'下载失败，原因：下载目录为空')
+        return
     end
 
     self:SetFinish(false)
 
     if not self.currentWorld.lastCommitId then
-        self.callback(false, L"commitId不存在")
-        return false
+        self.callback(false, L'commitId不存在')
+        return
     end
 
     self:Start()
@@ -84,11 +96,11 @@ function SyncToLocal:Start()
     self.compareListIndex = 1
     self.compareListTotal = 0
 
-    self.callback(false, { method = 'UPDATE-PROGRESS', current = 0, total = 0, msg = L"正在对比文件列表..." })
+    self.callback(false, { method = 'UPDATE-PROGRESS', current = 0, total = 0, msg = L'正在对比文件列表...' })
 
     local function Handle(data, err)
-        if type(data) ~= 'table' then
-            self.callback(false, L"获取列表失败（下载）")
+        if not data or type(data) ~= 'table' then
+            self.callback(false, L'获取列表失败（下载）')
             self:SetFinish(true)
             return
         end
@@ -122,15 +134,15 @@ function SyncToLocal:Start()
 end
 
 function SyncToLocal:IgnoreFiles()
-    local filePath = format("%s/.paraignore", self.currentWorld.worldpath)
-    local file = ParaIO.open(filePath, "r")
+    local filePath = format('%s/.paraignore', self.currentWorld.worldpath)
+    local file = ParaIO.open(filePath, 'r')
     local content = file:GetText(0, -1)
     file:close()
 
     local ignoreFiles = {}
 
     if #content > 0 then
-        for item in string.gmatch(content, "[^\r\n]+") do
+        for item in string.gmatch(content, '[^\r\n]+') do
             ignoreFiles[#ignoreFiles + 1] = item
         end
     end
@@ -188,49 +200,70 @@ function SyncToLocal:GetCompareList()
     self.compareListTotal = #self.compareList
 end
 
-function SyncToLocal:Close()
-    self.callback(true, 'success')
+function SyncToLocal:Close(params)
+    self.callback(true, { status = 'success', params = params })
 end
 
 function SyncToLocal:HandleCompareList()
-    if self.compareListTotal < self.compareListIndex then
-        Mod.WorldShare.Store:Set('world/currentWorld', self.currentWorld)
-        KeepworkService:SetCurrentCommitId()
-        -- sync finish
-        self:SetFinish(true)
-        self.callback(false, {
-            method = 'UPDATE-PROGRESS-FINISH'
-        })
+    local handleTimer
+    local handling = false
 
-        self.compareListIndex = 1
-        return true
-    end
+    handleTimer = commonlib.Timer:new({
+        callbackFunc = function()
+            if self.compareListTotal < self.compareListIndex then
+                Mod.WorldShare.Store:Set('world/currentWorld', self.currentWorld)
+                KeepworkService:SetCurrentCommitId()
 
-    if self.broke then
-        self.compareListIndex = 1
-        self:SetFinish(true)
-        LOG.std("SyncToLocal", "debug", "SyncToLocal", L"下载被中断")
-        return false
-    end
+                -- sync finish
+                self:SetFinish(true)
 
-    local currentItem = self.compareList[self.compareListIndex]
+                self.callback(false, {
+                    method = 'UPDATE-PROGRESS-FINISH'
+                })
+        
+                self.compareListIndex = 1
 
-    local function Retry()
-        self.compareListIndex = self.compareListIndex + 1
-        self:HandleCompareList()
-    end
+                handleTimer:Change(nil, nil)
 
-    if currentItem.status == UPDATE then
-        self:UpdateOne(currentItem.file, Retry)
-    end
+                return
+            end
+        
+            if self.broke then
+                self.compareListIndex = 1
 
-    if currentItem.status == DOWNLOAD then
-        self:DownloadOne(currentItem.file, Retry)
-    end
+                self:SetFinish(true)
 
-    if currentItem.status == DELETE then
-        self:DeleteOne(currentItem.file, Retry)
-    end
+                LOG.std('SyncToLocal', 'debug', 'SyncToLocal', L'下载被中断')
+
+                return
+            end
+
+            if not handling then
+                handling = true
+
+                local currentItem = self.compareList[self.compareListIndex]
+            
+                local function Retry()
+                    self.compareListIndex = self.compareListIndex + 1
+                    handling = false
+                end
+
+                if currentItem.status == UPDATE then
+                    self:UpdateOne(currentItem.file, Retry)
+                end
+            
+                if currentItem.status == DOWNLOAD then
+                    self:DownloadOne(currentItem.file, Retry)
+                end
+            
+                if currentItem.status == DELETE then
+                    self:DeleteOne(currentItem.file, Retry)
+                end
+            end
+        end
+    })
+
+    handleTimer:Change(0, 1)
 end
 
 function SyncToLocal:SetFinish(value)
@@ -265,7 +298,7 @@ function SyncToLocal:DownloadOne(file, callback)
         method = 'UPDATE-PROGRESS',
         current = self.compareListIndex,
         total = self.compareListTotal,
-        msg = format(L"%s 下载中", currentRemoteItem.path)
+        msg = format(L'%s 下载中', currentRemoteItem.path)
     })
 
     GitService:GetContentWithRaw(
@@ -290,10 +323,10 @@ function SyncToLocal:DownloadOne(file, callback)
                 method = 'UPDATE-PROGRESS',
                 current = self.compareListIndex,
                 total = self.compareListTotal,
-                msg = format(L"%s （%s） 下载成功", currentRemoteItem.path, Mod.WorldShare.Utils.FormatFileSize(size, "KB"))
+                msg = format(L'%s （%s） 下载成功', currentRemoteItem.path, Mod.WorldShare.Utils.FormatFileSize(size, 'KB'))
             })
 
-            if type(callback) == "function" then
+            if type(callback) == 'function' then
                 callback()
             end
         end
@@ -310,10 +343,10 @@ function SyncToLocal:UpdateOne(file, callback)
             method = 'UPDATE-PROGRESS',
             current = self.compareListIndex,
             total = self.compareListTotal,
-            msg = format(L"%s 相等跳过", currentRemoteItem.path)
+            msg = format(L'%s 相等跳过', currentRemoteItem.path)
         })
 
-        if callback and type(callback) == "function" then
+        if callback and type(callback) == 'function' then
             callback()
         end
 
@@ -324,7 +357,7 @@ function SyncToLocal:UpdateOne(file, callback)
         method = 'UPDATE-PROGRESS',
         current = self.compareListIndex,
         total = self.compareListTotal,
-        msg = format(L"%s 更新中", currentRemoteItem.path)
+        msg = format(L'%s 更新中', currentRemoteItem.path)
     })
 
     GitService:GetContentWithRaw(
@@ -349,10 +382,10 @@ function SyncToLocal:UpdateOne(file, callback)
                 method = 'UPDATE-PROGRESS',
                 current = self.compareListIndex,
                 total = self.compareListTotal,
-                msg = format(L"%s （%s） 更新成功", currentRemoteItem.path, Mod.WorldShare.Utils.FormatFileSize(size, "KB"))
+                msg = format(L'%s （%s） 更新成功', currentRemoteItem.path, Mod.WorldShare.Utils.FormatFileSize(size, 'KB'))
             })
     
-            if type(callback) == "function" then
+            if type(callback) == 'function' then
                 callback()
             end
         end
@@ -367,7 +400,7 @@ function SyncToLocal:DeleteOne(file, callback)
         method = 'UPDATE-PROGRESS',
         current = self.compareListIndex,
         total = self.compareListTotal,
-        msg = format(L"%s （%s） 删除中", currentLocalItem.filename, Mod.WorldShare.Utils.FormatFileSize(currentLocalItem.size, "KB"))
+        msg = format(L'%s （%s） 删除中', currentLocalItem.filename, Mod.WorldShare.Utils.FormatFileSize(currentLocalItem.size, 'KB'))
     })
 
     LocalService:Delete(self.currentWorld.worldpath, currentLocalItem.filename)
@@ -376,17 +409,19 @@ function SyncToLocal:DeleteOne(file, callback)
         method = 'UPDATE-PROGRESS',
         current = self.compareListIndex,
         total = self.compareListTotal,
-        msg = format(L"%s （%s） 删除成功", currentLocalItem.filename, Mod.WorldShare.Utils.FormatFileSize(currentLocalItem.size, "KB"))
+        msg = format(L'%s （%s） 删除成功', currentLocalItem.filename, Mod.WorldShare.Utils.FormatFileSize(currentLocalItem.size, 'KB'))
     })
 
-    if type(callback) == "function" then
+    if callback and type(callback) == 'function' then
         callback()
     end
 end
 
 function SyncToLocal:DownloadZIP()
-    if not self.currentWorld or not self.currentWorld.kpProjectId or self.currentWorld.kpProjectId == 0 then
-        return false
+    if not self.currentWorld or
+       not self.currentWorld.kpProjectId or
+       self.currentWorld.kpProjectId == 0 then
+        return
     end
 
     ParaIO.CreateDirectory(self.currentWorld.worldpath)
@@ -394,8 +429,8 @@ function SyncToLocal:DownloadZIP()
     self.localFiles = LocalService:LoadFiles(self.currentWorld.worldpath)
 
     if #self.localFiles ~= 0 then
-        LOG.std(nil, "warn", "WorldShare", "target directory: %s is not empty, we will overwrite files in the folder", Encoding.DefaultToUtf8(self.currentWorld.worldpath))
-        GameLogic.RunCommand(format("/menu %s", "file.worldrevision"))
+        LOG.std(nil, 'warn', 'WorldShare', 'target directory: %s is not empty, we will overwrite files in the folder', Encoding.DefaultToUtf8(self.currentWorld.worldpath))
+        GameLogic.RunCommand(format('/menu %s', 'file.worldrevision'))
     end
 
     LocalServiceWorld:DownLoadZipWorld(

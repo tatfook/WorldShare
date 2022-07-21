@@ -17,7 +17,7 @@ local Desktop = commonlib.gettable('MyCompany.Aries.Creator.Game.Desktop')
 local PlayerAssetFile = commonlib.gettable('MyCompany.Aries.Game.EntityManager.PlayerAssetFile')
 
 -- service
-local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceSession.lua')
 local SessionsData = NPL.load('(gl)Mod/WorldShare/database/SessionsData.lua')
 local KeepworkServiceSchoolAndOrg = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/SchoolAndOrg.lua")
 
@@ -51,6 +51,8 @@ function MainLogin:Init()
 end
 
 function MainLogin:Show()
+    GameMainLogin:ShowLoginBackgroundPage(true, true, true, true)
+
     local platform = System.os.GetPlatform()
     local isTouchDevice = ParaEngine.GetAppCommandLineByParam('IsTouchDevice', nil);
 
@@ -67,7 +69,7 @@ function MainLogin:Show()
         if KeepworkServiceSession:GetUserWhere() == 'LOCAL' then
             local token = Mod.WorldShare.Store:Get('user/token')
 
-            if token then
+            if token and not System.options.IgnoreRememberAccount then
                 KeepworkServiceSession:LoginWithToken(token, function(data, err)
                     data.token = token
 
@@ -209,7 +211,11 @@ function MainLogin:ShowLogin(isModal, zorder)
         MainLoginLoginPage:FindControl('phone_mode').visible = false
         MainLoginLoginPage:FindControl('account_mode').visible = false
         MainLoginLoginPage:FindControl('auto_login_mode').visible = true
-        MainLoginLoginPage:FindControl('change_button').visible = true
+
+        if MainLoginLoginPage:FindControl('change_button') then
+            MainLoginLoginPage:FindControl('change_button').visible = true
+        end
+
         MainLoginLoginPage:FindControl('update_password_button').visible = true
         MainLoginLoginPage:SetUIValue('auto_username', Mod.WorldShare.Store:Get('user/username') or '')
 
@@ -218,7 +224,7 @@ function MainLogin:ShowLogin(isModal, zorder)
     else
         local PWDInfo = KeepworkServiceSession:LoadSigninInfo()
 
-        if PWDInfo then
+        if PWDInfo and not System.options.IgnoreRememberAccount then
             MainLoginLoginPage:SetUIValue('account', PWDInfo.account or '')
 
             if PWDInfo.rememberMe then
@@ -236,15 +242,46 @@ function MainLogin:ShowLogin(isModal, zorder)
                         MainLoginLoginPage:SetUIValue('auto_login_name', true)
                         MainLoginLoginPage:SetUIBackground('login_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 98 258 44')
 
-                        MainLoginLoginPage:FindControl('phone_mode').visible = false
-                        MainLoginLoginPage:FindControl('account_mode').visible = false
-                        MainLoginLoginPage:FindControl('auto_login_mode').visible = true
-                        MainLoginLoginPage:FindControl('change_button').visible = true
-                        MainLoginLoginPage:FindControl('update_password_button').visible = true
+                        local phone_mode = MainLoginLoginPage:FindControl('phone_mode')
+                        local account_mode = MainLoginLoginPage:FindControl('account_mode')
+                        local auto_login_mode = MainLoginLoginPage:FindControl('auto_login_mode')
+
+                        if phone_mode then
+                            phone_mode.visible = false
+                        end
+
+                        if account_mode then
+                            account_mode.visible = false
+                        end
+
+                        if auto_login_mode then
+                            auto_login_mode.visible = true
+                        end
+
+                        local change_button = MainLoginLoginPage:FindControl('change_button')
+
+                        if change_button then
+                            change_button.visible = true
+                        end
+
+                        local update_password_button = MainLoginLoginPage:FindControl('update_password_button')
+
+                        if update_password_button then
+                            update_password_button.visible = true
+                        end
+
                         MainLoginLoginPage:SetUIValue('auto_username', PWDInfo.account or '')
-    
-                        MainLoginLoginPage:FindControl('title_login').visible = false
-                        MainLoginLoginPage:FindControl('title_username').visible = true
+
+                        local title_login = MainLoginLoginPage:FindControl('title_login')
+                        local title_username = MainLoginLoginPage:FindControl('title_username')
+
+                        if title_login then
+                            title_login.visible = false
+                        end
+
+                        if title_username then
+                            title_username.visible = true
+                        end
 
                         if Mod.WorldShare.Store:Get('user/isSettingLanguage') then
                             Mod.WorldShare.Store:Set('user/isSettingLanguage', false)
@@ -278,7 +315,11 @@ function MainLogin:ShowLogin(isModal, zorder)
                                 MainLoginLoginPage:FindControl('phone_mode').visible = false
                                 MainLoginLoginPage:FindControl('account_mode').visible = false
                                 MainLoginLoginPage:FindControl('auto_login_mode').visible = true
-                                MainLoginLoginPage:FindControl('change_button').visible = true
+
+                                if MainLoginLoginPage:FindControl('change_button') then
+                                    MainLoginLoginPage:FindControl('change_button').visible = true
+                                end
+
                                 MainLoginLoginPage:FindControl('update_password_button').visible = true
                                 MainLoginLoginPage:SetUIValue('auto_username', PWDInfo.account or '')
             
@@ -358,7 +399,7 @@ function MainLogin:ShowLoginNew()
 
     local PWDInfo = KeepworkServiceSession:LoadSigninInfo()
 
-    if PWDInfo then
+    if PWDInfo and not System.options.IgnoreRememberAccount then
         MainLoginLoginNewPage:SetUIValue('account', PWDInfo.account or '')
         self.account = PWDInfo.account
     end
@@ -389,7 +430,7 @@ function MainLogin:ShowLoginAtSchool(mode)
 
     local PWDInfo = KeepworkServiceSession:LoadSigninInfo()
 
-    if PWDInfo then
+    if PWDInfo and not System.options.IgnoreRememberAccount then
         MainLoginLoginAtSchoolPage:SetUIValue('account', PWDInfo.account or '')
         self.account = PWDInfo.account
     end
@@ -578,6 +619,9 @@ end
 
 function MainLogin:LoginWithToken(token, callback)
     if not token then
+        return
+    end
+    if System.options.IgnoreRememberAccount then
         return
     end
 
@@ -1196,6 +1240,9 @@ function MainLogin:EnterUserConsole(isOffline)
 end
 
 function MainLogin:GetHistoryUsers()
+    if System.options.IgnoreRememberAccount then
+        return {}
+    end
     return SessionsData:GetSessions().allUsers
 end
 

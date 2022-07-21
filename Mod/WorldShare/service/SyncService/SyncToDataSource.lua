@@ -2,7 +2,7 @@
 Title: SyncToDataSource
 Author(s): big
 CreateDate: 2018.06.20
-ModifyDate: 2021.09.14
+ModifyDate: 2022.7.1
 Desc: 
 use the lib:
 ------------------------------------------------------------
@@ -17,9 +17,9 @@ local WorldCommon = commonlib.gettable('MyCompany.Aries.Creator.WorldCommon')
 local GitService = NPL.load('../GitService.lua')
 local LocalService = NPL.load('../LocalService.lua')
 local KeepworkService = NPL.load('../KeepworkService.lua')
-local KeepworkServiceProject = NPL.load('../KeepworkService/Project.lua')
+local KeepworkServiceProject = NPL.load('../KeepworkService/KeepworkServiceProject.lua')
 local KeepworkServiceWorld = NPL.load('../KeepworkService/KeepworkServiceWorld.lua')
-local KeepworkServiceSession = NPL.load('../KeepworkService/Session.lua')
+local KeepworkServiceSession = NPL.load('../KeepworkService/KeepworkServiceSession.lua')
 local Compare = NPL.load('./Compare.lua')
 local EventTrackingService = NPL.load('../EventTracking.lua')
 
@@ -28,8 +28,8 @@ local KeepworkGen = NPL.load('(gl)Mod/WorldShare/helper/KeepworkGen.lua')
 local GitEncoding = NPL.load('(gl)Mod/WorldShare/helper/GitEncoding.lua')
 
 -- api
-local StorageFilesApi = NPL.load('(gl)Mod/WorldShare/api/Storage/Files.lua')
-local QiniuRootApi = NPL.load('(gl)Mod/WorldShare/api/Qiniu/Root.lua')
+local StorageFilesApi = NPL.load('(gl)Mod/WorldShare/api/Storage/StorageFilesApi.lua')
+local QiniuRootApi = NPL.load('(gl)Mod/WorldShare/api/Qiniu/QiniuRootApi.lua')
 
 local SyncToDataSource = NPL.export()
 
@@ -38,15 +38,15 @@ local UPLOAD = 'UPLOAD'
 local DELETE = 'DELETE'
 
 function SyncToDataSource:Init(callback)
-    if type(callback) ~= 'function' then
-        return false
+    if not callback or type(callback) ~= 'function' then
+        return
     end
 
     self.callback = callback
 
     local function Handle()
         self.currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
-    
+
         if not self.currentWorld.worldpath or self.currentWorld.worldpath == '' then
             callback(false, L'上传失败，将使用离线模式，原因：上传目录为空')
             return false
@@ -61,20 +61,26 @@ function SyncToDataSource:Init(callback)
             function(beExisted)
                 if beExisted then
                     -- update world
-                    KeepworkServiceProject:GetProjectIdByWorldName(self.currentWorld.foldername, self.currentWorld.shared, function(pid)
-                        currentWorld = Mod.WorldShare.Store:Get('world/currentWorld') 
-    
-                        if currentWorld and currentWorld.kpProjectId and currentWorld.kpProjectId ~= 0 then
-                            local tag = LocalService:GetTag(currentWorld.worldpath)
-    
-                            if type(tag) == 'table' then
-                                tag.kpProjectId = currentWorld.kpProjectId
-                                LocalService:SetTag(currentWorld.worldpath, tag)
+                    KeepworkServiceProject:GetProjectIdByWorldName(
+                        self.currentWorld.foldername,
+                        self.currentWorld.shared,
+                        function(pid)
+                            currentWorld = Mod.WorldShare.Store:Get('world/currentWorld') 
+
+                            if currentWorld and
+                               currentWorld.kpProjectId and
+                               currentWorld.kpProjectId ~= 0 then
+                                local tag = LocalService:GetTag(currentWorld.worldpath)
+
+                                if tag and type(tag) == 'table' then
+                                    tag.kpProjectId = currentWorld.kpProjectId
+                                    LocalService:SetTag(currentWorld.worldpath, tag)
+                                end
                             end
+        
+                            self:Start()
                         end
-    
-                        self:Start()
-                    end)
+                    )
                 else
                     KeepworkServiceProject:CreateProject(
                         self.currentWorld.foldername,
@@ -125,8 +131,8 @@ function SyncToDataSource:Init(callback)
 end
 
 function SyncToDataSource:IsProjectExist(callback)
-    if type(callback) ~= 'function' then
-        return false
+    if not callback or type(callback) ~= 'function' then
+        return
     end
 
     local worldUserId = 0
@@ -180,10 +186,10 @@ function SyncToDataSource:Start()
     self.callback(false, { method = 'UPDATE-PROGRESS', current = 0, total = 0, msg = L'正在对比文件列表...' })
 
     local function Handle(data, err)
-        if type(data) ~= 'table' then
+        if not data or type(data) ~= 'table' then
             self.callback(false, L'获取列表失败（上传）')
             self:SetFinish(true)
-            return false
+            return
         end
 
         self.dataSourceFiles = data
@@ -315,58 +321,81 @@ function SyncToDataSource:GetCompareList()
     self.compareListTotal = #self.compareList
 end
 
-function SyncToDataSource:Close()
-    self.callback(true, 'success')
+function SyncToDataSource:Close(params)
+    self.callback(true, { status = 'success', params = params })
 end
 
 function SyncToDataSource:HandleCompareList()
-    if self.compareListTotal < self.compareListIndex then
-        -- sync finish
-        GameLogic.GetFilters():apply_filters('SyncWorldFinish');
-        self:SetFinish(true)
-        self:UpdateRecord(
-            function()
-                self.callback(false, {
-                    method = 'UPDATE-PROGRESS-FINISH'
-                })
+    local handleTimer
+    local handling = false
+
+    handleTimer = commonlib.Timer:new({
+        callbackFunc = function()
+            if self.compareListTotal < self.compareListIndex then
+                -- sync finish
+                GameLogic.GetFilters():apply_filters('SyncWorldFinish')
+
+                self:SetFinish(true)
+
+                self:UpdateRecord(
+                    function()
+                        self.callback(false, {
+                            method = 'UPDATE-PROGRESS-FINISH'
+                        })
+                    end
+                )
+
+                self.compareListIndex = 1
+
+                handleTimer:Change(nil, nil)
+
+                return
             end
-        )
 
-        self.compareListIndex = 1
-        return false
-    end
+            if self.broke then
+                self:SetFinish(true)
 
-    if self.broke then
-        self:SetFinish(true)
-        LOG.std('SyncToDataSource', 'debug', 'SyncToDataSource', '上传被中断')
-        return false
-    end
+                LOG.std('SyncToDataSource', 'debug', 'SyncToDataSource', '上传被中断')
 
-    local currentItem = self.compareList[self.compareListIndex]
+                handleTimer:Change(nil, nil)
 
-    local function Retry()
-        self.callback(false, {
-            method = 'UPDATE-PROGRESS',
-            current = self.compareListIndex,
-            total = self.compareListTotal,
-            msg = format(L'%s 处理完成', currentItem.file)
-        })
+                return
+            end
 
-        self.compareListIndex = self.compareListIndex + 1
-        self:HandleCompareList()
-    end
+            if not handling then
+                handling = true
 
-    if currentItem.status == UPDATE then
-        self:UpdateOne(currentItem.file, Retry)
-    end
+                local currentItem = self.compareList[self.compareListIndex]
+    
+                local function Retry()
+                    self.callback(false, {
+                        method = 'UPDATE-PROGRESS',
+                        current = self.compareListIndex,
+                        total = self.compareListTotal,
+                        msg = format(L'%s 处理完成', currentItem.file)
+                    })
+            
+                    self.compareListIndex = self.compareListIndex + 1
 
-    if currentItem.status == UPLOAD then
-        self:UploadOne(currentItem.file, Retry)
-    end
+                    handling = false
+                end
+    
+                if currentItem.status == UPDATE then
+                    self:UpdateOne(currentItem.file, Retry)
+                end
+            
+                if currentItem.status == UPLOAD then
+                    self:UploadOne(currentItem.file, Retry)
+                end
+            
+                if currentItem.status == DELETE then
+                    self:DeleteOne(currentItem.file, Retry)
+                end
+            end
+        end
+    })
 
-    if currentItem.status == DELETE then
-        self:DeleteOne(currentItem.file, Retry)
-    end
+    handleTimer:Change(0, 5)
 end
 
 function SyncToDataSource:GetLocalFileByFilename(filename)
@@ -416,7 +445,7 @@ function SyncToDataSource:UploadOne(file, callback)
         currentLocalItem.file_content_t,
         function(bIsUpload)
             if bIsUpload then
-                if type(callback) == 'function' then
+                if callback and type(callback) == 'function' then
                     callback()
                 end
             else    
@@ -451,8 +480,9 @@ function SyncToDataSource:UpdateOne(file, callback)
         end
     end
 
-    if currentLocalItem.sha1 == currentRemoteItem.id and string.lower(currentLocalItem.filename) ~= 'revision.xml' then
-        if type(callback) == 'function' then
+    if currentLocalItem.sha1 == currentRemoteItem.id and
+       string.lower(currentLocalItem.filename) ~= 'revision.xml' then
+        if callback and type(callback) == 'function' then
             self.callback(false, {
                 method = 'UPDATE-PROGRESS',
                 current = self.compareListIndex,
@@ -460,7 +490,7 @@ function SyncToDataSource:UpdateOne(file, callback)
                 msg = format(L'%s （%s） 文件一致，跳过', currentLocalItem.filename, Mod.WorldShare.Utils.FormatFileSize(currentLocalItem.filesize, 'KB'))
             })
 
-            Mod.WorldShare.Utils.SetTimeOut(callback, 10)
+            callback()
         end
 
         return false
@@ -480,7 +510,7 @@ function SyncToDataSource:UpdateOne(file, callback)
         currentLocalItem.file_content_t,
         function(bIsUpdate)
             if bIsUpdate then
-                if type(callback) == 'function' then
+                if callback and type(callback) == 'function' then
                     callback()
                 end
             else
@@ -516,7 +546,7 @@ function SyncToDataSource:DeleteOne(file, callback)
         currentRemoteItem.path,
         function(bIsDelete)
             if bIsDelete then
-                if type(callback) == 'function' then
+                if callback and type(callback) == 'function' then
                     callback()
                 end
             else
@@ -533,11 +563,12 @@ end
 -- update world info
 function SyncToDataSource:UpdateRecord(callback)
     if not self.currentWorld then
-        return false
+        return
     end
 
     local function Handle(data, err)
-        if type(data) ~= 'table' or
+        if not data or
+           type(data) ~= 'table' or
            not data.commitId or
            not data.message then
             self.callback(false, L'获取COMMIT列表失败')
@@ -712,15 +743,17 @@ function SyncToDataSource:UpdateRecord(callback)
                         )
                     end
                 )
-
             end
 
             StorageFilesApi:Token(
                 'preview.jpg',
                 function(data, err)
-                    if not data.token or not data.key then
+                    if not data or
+                       type(data) ~= 'table' or
+                       not data.token or
+                       not data.key then
                         AfterHandlePreview()
-                        return false
+                        return
                     end
 
                     local targetDir = format('%s/%s/preview.jpg', Mod.WorldShare.Utils.GetWorldFolderFullPath(), commonlib.Encoding.Utf8ToDefault(self.currentWorld.foldername))
@@ -728,14 +761,14 @@ function SyncToDataSource:UpdateRecord(callback)
 
                     if not content then
                         AfterHandlePreview()
-                        return false
+                        return
                     end
 
                     if not self.currentWorld or
-                    not self.currentWorld.kpProjectId or
-                    self.currentWorld.kpProjectId == 0 or
-                    not lastCommitSha then
-                        return false
+                       not self.currentWorld.kpProjectId or
+                       self.currentWorld.kpProjectId == 0 or
+                       not lastCommitSha then
+                        return
                     end
 
                     QiniuRootApi:Upload(

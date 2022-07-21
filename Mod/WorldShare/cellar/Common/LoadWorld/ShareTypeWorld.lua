@@ -46,15 +46,15 @@ function ShareTypeWorld:Lock(world, callback)
                     Mod.WorldShare.MsgBox:Dialog(
                         "MultiPlayerWolrdOthersOccupy",
                         format(
-                            L'%s正在以独占模式编辑世界"%s"，请联系%s退出编辑或者以只读模式打开世界',
+                            L'%s正在以独占模式编辑世界"%s"，请联系%s退出编辑或者以强制模式打开世界',
                             data.owner.username,
                             world.foldername,
                             data.owner.username
                         ),
                         {
                             Title = L"世界被占用",
-                            Yes = L"退出",
-                            No = L"只读模式"
+                            Yes = L"知道了",
+                            No = L"强制打开"
                         },
                         function(res)
                             if res and res == _guihelper.DialogResult.No then

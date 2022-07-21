@@ -2,7 +2,7 @@
 Title: share world to datasource
 Author(s): big
 CreateDate: 2017.05.12
-ModifyDate: 2021.09.10
+ModifyDate: 2022.7.12
 Desc:  It can take snapshot for the current world. It can quick save or full save the world to datasource. 
 use the lib:
 ------------------------------------------------------------
@@ -12,13 +12,15 @@ ShareWorld:Init()
 ]]
 
 -- libs
-local PackageShareWorld = commonlib.gettable('MyCompany.Aries.Creator.Game.Desktop.Areas.ShareWorldPage')
+NPL.load('(gl)script/kids/3DMapSystemUI/ScreenShot/SnapshotPage.lua')
+
+local SnapshotPage = commonlib.gettable('MyCompany.Apps.ScreenShot.SnapshotPage')
 local WorldCommon = commonlib.gettable('MyCompany.Aries.Creator.WorldCommon')
 local CommandManager = commonlib.gettable('MyCompany.Aries.Game.CommandManager')
 local SessionsData = NPL.load('(gl)Mod/WorldShare/database/SessionsData.lua')
 
 -- UI
-local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
+local SyncWorld = NPL.load('(gl)Mod/WorldShare/cellar/Sync/SyncWorld.lua')
 local LoginModal = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua')
 local Certificate = NPL.load('(gl)Mod/WorldShare/cellar/Certificate/Certificate.lua')
 
@@ -26,8 +28,8 @@ local Certificate = NPL.load('(gl)Mod/WorldShare/cellar/Certificate/Certificate.
 local Compare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
 local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
 local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
-local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
-local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceProject.lua')
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceSession.lua')
 
 local ShareWorld = NPL.export()
 
@@ -37,12 +39,16 @@ function ShareWorld:Init(callback)
         return
     end
 
-	self.callback = callback
-
     local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
+    if not currentEnterWorld then
+        return
+    end
+
+    self.callback = callback
+
     -- read only world
-    if GameLogic.IsReadOnly() or not currentEnterWorld or currentEnterWorld.is_zip then
+    if GameLogic.IsReadOnly() or currentEnterWorld.is_zip then
         self:ShowWorldCode(currentEnterWorld.kpProjectId)
         return
     end
@@ -50,7 +56,7 @@ function ShareWorld:Init(callback)
     -- confirm preview jpg exist
     if not GameLogic.IsReadOnly() and
        not ParaIO.DoesFileExist(self:GetPreviewImagePath(), false) then
-        PackageShareWorld.TakeSharePageImage()
+        self:TakeSharePageImage()
     end
 
     -- must login
@@ -135,7 +141,11 @@ function ShareWorld:ShowPage()
 end
 
 function ShareWorld:GetPreviewImagePath()
-    return format('%spreview.jpg', ParaWorld.GetWorldDirectory() or '')
+    if not ParaWorld.GetWorldDirectory() then
+        return ''
+    end
+
+    return ParaIO.GetWritablePath() .. ParaWorld.GetWorldDirectory() .. 'preview.jpg'
 end
 
 function ShareWorld:GetPage()
@@ -191,8 +201,8 @@ function ShareWorld:OnClick()
     local function Handle()
         Mod.WorldShare.Store:Set('world/currentWorld', Mod.WorldShare.Store:Get('world/currentEnterWorld'))
 
-        SyncMain:CheckTagName(function()
-            SyncMain:SyncToDataSource(function(result, msg)
+        SyncWorld:CheckTagName(function()
+            SyncWorld:SyncToDataSource(function(result, msg)
                 Compare:GetCurrentWorldInfo(function()
 				    if self.callback and type(self.callback) == 'function' then
                         self.callback(true)
@@ -216,22 +226,32 @@ function ShareWorld:OnClick()
         _guihelper.MessageBox(
             msg,
             function(res)
-                if (res and res == 6) then
+                if res and res == 6 then
                     Handle()
                 end
             end
         )
 
-        return false
+        return
     end
 
     Handle()
 end
 
+function ShareWorld:TakeSharePageImage()
+    if SnapshotPage.TakeSnapshot(
+        self:GetPreviewImagePath(),
+        300,
+        200,
+        false
+       ) then
+        self:UpdateImage(true)
+    end
+end
+
 function ShareWorld:Snapshot()
     -- take a new screenshot
-    PackageShareWorld.TakeSharePageImage()
-    self:UpdateImage(true)
+    self:TakeSharePageImage()
 
     -- incremental version number if version equal
     if self:GetRemoteRevision() == self:GetCurrentRevision() then

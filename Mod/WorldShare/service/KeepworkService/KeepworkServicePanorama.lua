@@ -5,25 +5,25 @@ Date:  2020.10.19
 Place: Foshan
 use the lib:
 ------------------------------------------------------------
-local KeepworkServicePanorama = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Panorama.lua")
+local KeepworkServicePanorama = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServicePanorama.lua')
 ------------------------------------------------------------
 ]]
 
 local KeepworkServicePanorama = NPL.export()
 
 -- api
-local StoragePanoramasApi = NPL.load("(gl)Mod/WorldShare/api/Storage/Panoramas.lua")
-local QiniuRootApi = NPL.load("(gl)Mod/WorldShare/api/Qiniu/Root.lua")
-local KeepworkProjectsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Projects.lua")
+local StoragePanoramasApi = NPL.load('(gl)Mod/WorldShare/api/Storage/Panoramas.lua')
+local QiniuRootApi = NPL.load('(gl)Mod/WorldShare/api/Qiniu/QiniuRootApi.lua')
+local KeepworkProjectsApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkProjectsApi.lua')
 
 -- service
-local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
+local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
 
 KeepworkServicePanorama.uploadIndex = 0
 KeepworkServicePanorama.fileArray = {}
 
 function KeepworkServicePanorama:GetBasePath()
-    return Mod.WorldShare.Utils.GetRootFolderFullPath() .. "Screen Shots/"
+    return Mod.WorldShare.Utils.GetRootFolderFullPath() .. 'Screen Shots/'
 end
 
 function KeepworkServicePanorama:Upload(callback, recursive)
@@ -41,7 +41,7 @@ function KeepworkServicePanorama:Upload(callback, recursive)
         return false
     end
 
-    local filename = self.uploadIndex .. ".jpg"
+    local filename = self.uploadIndex .. '.jpg'
     local projectId = currentEnterWorld.kpProjectId
 
     if self.uploadIndex > 5 then

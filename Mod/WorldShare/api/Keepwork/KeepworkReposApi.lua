@@ -1,17 +1,18 @@
 --[[
 Title: Keepwork Repos API
-Author(s):  big
-Date:  2019.11.8
+Author(s): big
+CreateDate: 2019.11.8
+ModifyDate: 2022.7.11
 Place: Foshan
 use the lib:
 ------------------------------------------------------------
-local KeepworkReposApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Repos.lua")
+local KeepworkReposApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkReposApi.lua')
 ------------------------------------------------------------
 ]]
 
 -- libs
 local FileDownloader = commonlib.gettable('Mod.WorldShare.service.FileDownloader.FileDownloader')
-local Encoding = commonlib.gettable("System.Encoding")
+local Encoding = commonlib.gettable('System.Encoding')
 
 -- api
 local KeepworkBaseApi = NPL.load('./BaseApi.lua')
@@ -45,20 +46,20 @@ function KeepworkReposApi:Download(foldername, username, commitId, success, erro
     FileDownloader:new():Init(
         foldername,
         url,
-        "temp/archive.zip",
+        'temp/archive.zip',
         function(bSuccess, downloadPath)
             if bSuccess then
-                if type(success) == "function" then
+                if success and type(success) == 'function' then
                     success(true, downloadPath)
                 end
             else
-                if type(error) == "function" then
+                if error and type(error) == 'function' then
                     error(false)
                 end
             end
 
         end,
-        "access plus 5 mins",
+        'access plus 5 mins',
         false
     )
 end
@@ -161,8 +162,11 @@ end
 ]]
 -- return: object
 function KeepworkReposApi:UpdateFile(foldername, username, filePath, content, success, error)
-    if type(foldername) ~= 'string' or type(filePath) ~= 'string' then
-        return false
+    if not foldername or
+       type(foldername) ~= 'string' or
+       not filePath or
+       type(filePath) ~= 'string' then
+        return
     end
 
     local url = format('/repos/%s/files/%s', self:GetRepoPath(foldername, username), Mod.WorldShare.Utils.EncodeURIComponent(filePath))
@@ -180,8 +184,11 @@ end
 ]]
 -- return: object
 function KeepworkReposApi:CreateFile(foldername, username, filePath, content, success, error)
-    if type(foldername) ~= 'string' or type(filePath) ~= 'string' then
-        return false
+    if not foldername or
+       type(foldername) ~= 'string' or
+       not filePath or
+       type(filePath) ~= 'string' then
+        return
     end
 
     local url = format('/repos/%s/files/%s', self:GetRepoPath(foldername, username), Mod.WorldShare.Utils.EncodeURIComponent(filePath))
@@ -198,8 +205,11 @@ end
 ]]
 -- return: object
 function KeepworkReposApi:RemoveFile(foldername, username, filePath, success, error)
-    if type(foldername) ~= 'string' or type(filePath) ~= 'string' then
-        return false
+    if not foldername or
+       type(foldername) ~= 'string' or
+       not filePath or
+       type(filePath) ~= 'string' then
+        return
     end
 
     local url = format('/repos/%s/files/%s', self:GetRepoPath(foldername, username), Mod.WorldShare.Utils.EncodeURIComponent(filePath))

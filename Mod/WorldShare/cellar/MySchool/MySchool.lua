@@ -20,7 +20,7 @@ local Screen = commonlib.gettable('System.Windows.Screen')
 -- service
 local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
 local KeepworkServiceSchoolAndOrg = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/SchoolAndOrg.lua')
-local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceSession.lua')
 
 -- database
 local SessionsData = NPL.load('(gl)Mod/WorldShare/database/SessionsData.lua')
@@ -41,7 +41,13 @@ function MySchool:Show(callback)
                     600,
                     380,
                     '(ws)MySchool/Theme/MySchool.html',
-                    'Mod.WorldShare.MySchool'
+                    'Mod.WorldShare.MySchool',
+                    nil,
+                    nil,
+                    nil,
+                    false,
+                    1,
+                    true
                    )
 
     KeepworkServiceSchoolAndOrg:GetUserAllOrgs(function(orgData)
@@ -215,7 +221,9 @@ function MySchool:ShowJoinSchool(callback)
                         local province_node =  params._page:FindControl('province_bg')
                         local bg = 'Texture/Aries/Creator/paracraft/my_school_32bits.png#53 241 48 70:16 16 16 16'
                         local function set_default(node)
-                            node.background = bg
+                            if node then
+                                node.background = bg
+                            end
                         end
                         set_default(province_node)
                     end
@@ -426,9 +434,15 @@ end
 function MySchool:ShowJoinInstitute()
     local params = Mod.WorldShare.Utils.ShowWindow(
                     600,
-                    200,
+                    243,
                     '(ws)MySchool/Theme/JoinInstitute.html',
-                    'Mod.WorldShare.JoinInstitute'
+                    'Mod.WorldShare.JoinInstitute',
+                    nil,
+                    nil,
+                    nil,
+                    false,
+                    1,
+                    true
                    )
 end
 

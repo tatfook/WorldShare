@@ -29,17 +29,17 @@ local DesktopMenuPage = commonlib.gettable('MyCompany.Aries.Creator.Game.Desktop
 local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
 local LocalServiceWorld = NPL.load('../LocalService/LocalServiceWorld.lua')
 local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
-local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceSession.lua')
 local KeepworkServiceWorld = NPL.load('../KeepworkService/KeepworkServiceWorld.lua')
 local GitService = NPL.load('(gl)Mod/WorldShare/service/GitService.lua')
-local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
+local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceProject.lua')
 
 -- helper
 local GitEncoding = NPL.load('(gl)Mod/WorldShare/helper/GitEncoding.lua')
 local Utils = NPL.load('(gl)Mod/WorldShare/helper/Utils.lua')
 
 -- UI
-local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
+local SyncWorld = NPL.load('(gl)Mod/WorldShare/cellar/Sync/SyncWorld.lua')
 local CreateWorld = NPL.load('(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua')
 
 local Compare = NPL.export()

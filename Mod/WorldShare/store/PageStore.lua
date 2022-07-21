@@ -1,13 +1,12 @@
 --[[
 Title: page store
-Author(s):  big
-Date:  2018.8.17
-Desc: 
+Author(s): big
+CreateDate: 2018.8.17
+ModifyDate: 2022.6.28
 use the lib:
 ------------------------------------------------------------
-NPL.load("(gl)Mod/WorldShare/store/Page.lua")
-local PageStore = commonlib.gettable('Mod.WorldShare.store.Page')
+local PageStore = NPL.load('(gl)Mod/WorldShare/store/Page.lua')
 ------------------------------------------------------------
 ]]
 
-local PageStore = commonlib.gettable('Mod.WorldShare.store.Page')
+local PageStore = NPL.export()

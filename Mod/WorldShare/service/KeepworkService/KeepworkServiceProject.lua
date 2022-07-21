@@ -2,11 +2,11 @@
 Title: Keepwork Service Project
 Author(s):  big
 CreateDate: 2019.02.18
-ModifyDate: 2021.09.01
+ModifyDate: 2022.6.28
 Place: Foshan
 use the lib:
 ------------------------------------------------------------
-local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
+local KeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceProject.lua')
 ------------------------------------------------------------
 ]]
 
@@ -14,12 +14,12 @@ local WorldCommon = commonlib.gettable('MyCompany.Aries.Creator.WorldCommon')
 local Encoding = commonlib.gettable('commonlib.Encoding')
 
 -- service
-local KeepworkServiceSession = NPL.load('./Session.lua')
+local KeepworkServiceSession = NPL.load('./KeepworkServiceSession.lua')
 
 -- api
-local KeepworkProjectsApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/Projects.lua')
+local KeepworkProjectsApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkProjectsApi.lua')
 local KeepworkProjectStarApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/ProjectStar.lua')
-local KeepworkWorldsApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/Worlds.lua')
+local KeepworkWorldsApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkWorldsApi.lua')
 local KeepworkMembersApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/Members.lua')
 local KeepworkAppliesApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/Applies.lua')
 
@@ -35,8 +35,11 @@ end
 
 -- This api will create a keepwork paracraft project and associated with paracraft world.
 function KeepworkServiceProject:CreateProject(foldername, callback)
-    if not KeepworkServiceSession:IsSignedIn() or not foldername then
-        return false
+    if not KeepworkServiceSession:IsSignedIn() or
+       not foldername or
+       not callback or
+       type(callback) ~= 'function' then
+        return
     end
 
     KeepworkProjectsApi:CreateProject(foldername, callback, callback)
@@ -104,19 +107,19 @@ end
 
 -- get project id by worldname
 function KeepworkServiceProject:GetProjectIdByWorldName(foldername, shared, callback)
-    if type(callback) ~= 'function' then
-        return false
+    if not callback or type(callback) ~= 'function' then
+        return
     end
 
     if not KeepworkServiceSession:IsSignedIn() then
-        return false
+        return
     end
 
     local userId = tonumber(Mod.WorldShare.Store:Get('user/userId'))
 
     KeepworkWorldsApi:GetWorldByName(foldername, function(data, err)
-        if type(data) ~= 'table' then
-            return false
+        if not data or type(data) ~= 'table' then
+            return
         end
 
         local bIsExist = false
@@ -141,9 +144,11 @@ function KeepworkServiceProject:GetProjectIdByWorldName(foldername, shared, call
         end
 
         if bIsExist then
-            if type(world) ~= 'table' or not world.projectId then
+            if not world or
+               type(world) ~= 'table' or
+               not world.projectId then
                 callback()
-                return false
+                return
             end
 
             local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
@@ -193,16 +198,14 @@ function KeepworkServiceProject:Visit(pid)
 end
 
 -- remove a project
-function KeepworkServiceProject:RemoveProject(kpProjectId, callback)
-    if not kpProjectId then
-        return false
+function KeepworkServiceProject:RemoveProject(kpProjectId, password, callback)
+    if not kpProjectId or
+       not password or
+       not KeepworkServiceSession:IsSignedIn() then
+        return
     end
 
-    if not KeepworkServiceSession:IsSignedIn() then
-        return false
-    end
-
-    KeepworkProjectsApi:RemoveProject(tonumber(kpProjectId), callback, callback)
+    KeepworkProjectsApi:RemoveProject(tonumber(kpProjectId), password, callback, callback)
 end
 
 function KeepworkServiceProject:GenerateMiniProgramCode(projectId, callback)
