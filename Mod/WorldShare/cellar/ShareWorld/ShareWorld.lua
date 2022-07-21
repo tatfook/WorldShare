@@ -12,7 +12,9 @@ ShareWorld:Init()
 ]]
 
 -- libs
-local PackageShareWorld = commonlib.gettable('MyCompany.Aries.Creator.Game.Desktop.Areas.ShareWorldPage')
+NPL.load('(gl)script/kids/3DMapSystemUI/ScreenShot/SnapshotPage.lua')
+
+local SnapshotPage = commonlib.gettable('MyCompany.Apps.ScreenShot.SnapshotPage')
 local WorldCommon = commonlib.gettable('MyCompany.Aries.Creator.WorldCommon')
 local CommandManager = commonlib.gettable('MyCompany.Aries.Game.CommandManager')
 local SessionsData = NPL.load('(gl)Mod/WorldShare/database/SessionsData.lua')
@@ -54,7 +56,7 @@ function ShareWorld:Init(callback)
     -- confirm preview jpg exist
     if not GameLogic.IsReadOnly() and
        not ParaIO.DoesFileExist(self:GetPreviewImagePath(), false) then
-        PackageShareWorld.TakeSharePageImage()
+        self:TakeSharePageImage()
     end
 
     -- must login
@@ -139,7 +141,11 @@ function ShareWorld:ShowPage()
 end
 
 function ShareWorld:GetPreviewImagePath()
-    return format('%spreview.jpg', ParaWorld.GetWorldDirectory() or '')
+    if not ParaWorld.GetWorldDirectory() then
+        return ''
+    end
+
+    return ParaIO.GetWritablePath() .. ParaWorld.GetWorldDirectory() .. 'preview.jpg'
 end
 
 function ShareWorld:GetPage()
@@ -232,10 +238,20 @@ function ShareWorld:OnClick()
     Handle()
 end
 
+function ShareWorld:TakeSharePageImage()
+    if SnapshotPage.TakeSnapshot(
+        self:GetPreviewImagePath(),
+        300,
+        200,
+        false
+       ) then
+        self:UpdateImage(true)
+    end
+end
+
 function ShareWorld:Snapshot()
     -- take a new screenshot
-    PackageShareWorld.TakeSharePageImage()
-    self:UpdateImage(true)
+    self:TakeSharePageImage()
 
     -- incremental version number if version equal
     if self:GetRemoteRevision() == self:GetCurrentRevision() then

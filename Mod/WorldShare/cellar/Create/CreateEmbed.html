@@ -397,6 +397,7 @@
 
                     function get_world_preview(worldpath)
                         local status = Eval('status')
+                        local empty_preview = 'Texture/Aries/Creator/paracraft/konbaitu_266x134_x2_32bits.png# 0 0 532 268'
 
                         if tonumber(status) == 2 then
                             local project = Eval('project')
@@ -407,7 +408,7 @@
                                type(project.extra) ~= 'table' or
                                not project.extra.imageUrl or
                                type(project.extra.imageUrl) ~= 'string' then
-                                return ''
+                                return empty_preview
                             end
 
                             return project.extra.imageUrl
@@ -415,10 +416,16 @@
                             local worldpath = Eval('worldpath')
 
                             if not worldpath or type(worldpath) ~= 'string' then
-                                return ''
+                                return empty_preview
                             end
                             
-                            return worldpath .. 'preview.jpg'
+                            local preview = worldpath .. 'preview.jpg'
+
+                            if ParaIO.DoesFileExist(preview) then
+                                return preview
+                            else
+                                return empty_preview
+                            end
                         end
                     end
 

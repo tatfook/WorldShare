@@ -12,9 +12,9 @@ WorldExitDialog.ShowPage()
 ]]
 
 -- lib
-NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/ShareWorldPage.lua")
+NPL.load('(gl)script/kids/3DMapSystemUI/ScreenShot/SnapshotPage.lua')
 
-local ShareWorldPage = commonlib.gettable('MyCompany.Aries.Creator.Game.Desktop.Areas.ShareWorldPage')
+local SnapshotPage = commonlib.gettable('MyCompany.Apps.ScreenShot.SnapshotPage')
 local WorldRevision = commonlib.gettable('MyCompany.Aries.Creator.Game.WorldRevision')
 local NplBrowserPlugin = commonlib.gettable('NplBrowser.NplBrowserPlugin')
 local Desktop = commonlib.gettable('MyCompany.Aries.Creator.Game.Desktop')
@@ -33,6 +33,7 @@ local RedSummerCampMainPage = NPL.load('(gl)script/apps/Aries/Creator/Game/Tasks
 local LoginModal = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua')
 local CommonLoadWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/CommonLoadWorld.lua')
 local Grade = NPL.load('./Grade.lua')
+local ShareWorld = NPL.load('(gl)Mod/WorldShare/cellar/ShareWorld/ShareWorld.lua')
 
 local WorldExitDialog = NPL.export()
 local self = WorldExitDialog
@@ -260,15 +261,21 @@ function WorldExitDialog.OnDialogResult(res)
 end
 
 function WorldExitDialog.Snapshot()
-    ShareWorldPage.TakeSharePageImage()
-    WorldExitDialog.UpdateImage(true)
+    if SnapshotPage.TakeSnapshot(
+        ShareWorld:GetPreviewImagePath(),
+        300,
+        200,
+        false
+       ) then
+        WorldExitDialog.UpdateImage(true)
+    end
 end
 
 function WorldExitDialog.UpdateImage(bRefreshAsset)
     local WorldExitDialogPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.WorldExitDialog')
 
     if WorldExitDialogPage then
-        local filepath = ShareWorldPage.GetPreviewImagePath()
+        local filepath = ShareWorld:GetPreviewImagePath()
 
         WorldExitDialogPage:SetUIValue('ShareWorldImage', filepath)
 
