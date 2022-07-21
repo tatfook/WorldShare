@@ -147,7 +147,11 @@ function ShareWorld:GetPreviewImagePath()
         return ''
     end
 
-    return ParaWorld.GetWorldDirectory() .. 'preview.jpg'
+    if System.os.GetPlatform() ~= 'win32' then
+        return ParaIO.GetWritablePath() .. ParaWorld.GetWorldDirectory() .. 'preview.jpg'
+    else
+        return ParaWorld.GetWorldDirectory() .. 'preview.jpg'
+    end
 end
 
 function ShareWorld:GetPage()
