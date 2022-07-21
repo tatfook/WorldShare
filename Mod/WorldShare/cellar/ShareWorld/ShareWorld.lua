@@ -56,7 +56,7 @@ function ShareWorld:Init(callback)
     -- confirm preview jpg exist
     if not GameLogic.IsReadOnly() and
        not ParaIO.DoesFileExist(self:GetPreviewImagePath(), false) then
-        self:TakeSharePageImage()
+        -- self:TakeSharePageImage()
     end
 
     -- must login
@@ -133,11 +133,13 @@ function ShareWorld:ShowPage()
 
     local filePath = self:GetPreviewImagePath()
 
-    if ParaIO.DoesFileExist(filePath) and params._page then
-        params._page:SetNodeValue('share_world_image', filePath)
+    if params._page then
+        if ParaIO.DoesFileExist(filePath) then
+            params._page:SetUIValue('share_world_image', filePath)
+        else
+            params._page:SetUIValue('share_world_image', 'Texture/Aries/Creator/paracraft/konbaitu_266x134_x2_32bits.png# 0 0 532 268')
+        end
     end
-
-    self:Refresh()
 end
 
 function ShareWorld:GetPreviewImagePath()
@@ -145,7 +147,7 @@ function ShareWorld:GetPreviewImagePath()
         return ''
     end
 
-    return ParaIO.GetWritablePath() .. ParaWorld.GetWorldDirectory() .. 'preview.jpg'
+    return ParaWorld.GetWorldDirectory() .. 'preview.jpg'
 end
 
 function ShareWorld:GetPage()
@@ -160,7 +162,7 @@ end
 
 function ShareWorld:Refresh()
     if self:GetPage() then
-        self:GetPage():Refresh(0)
+        self:GetPage():Refresh(0.01)
     end
 end
 
@@ -270,7 +272,6 @@ function ShareWorld:UpdateImage(bRefreshAsset)
         local filePath = self:GetPreviewImagePath()
 
         self:GetPage():SetUIValue('share_world_image', filePath)
-        self:Refresh()
 
         -- release asset
         if bRefreshAsset then

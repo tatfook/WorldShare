@@ -177,7 +177,7 @@ function CreateWorld:CreateWorldByName(worldName, terrain)
 
         CreateNewWorld.ClosePage()
 
-		WorldCommon.OpenWorld(worldPath, true)
+		WorldCommon.OpenWorld(self:GetWorldFolder() .. '/' .. params.worldname, true)
 
         GameLogic:UserAction('introduction')
 
