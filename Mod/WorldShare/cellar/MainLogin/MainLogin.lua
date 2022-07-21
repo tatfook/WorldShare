@@ -69,7 +69,7 @@ function MainLogin:Show()
         if KeepworkServiceSession:GetUserWhere() == 'LOCAL' then
             local token = Mod.WorldShare.Store:Get('user/token')
 
-            if token then
+            if token and not System.options.IgnoreRememberAccount then
                 KeepworkServiceSession:LoginWithToken(token, function(data, err)
                     data.token = token
 
@@ -224,7 +224,7 @@ function MainLogin:ShowLogin(isModal, zorder)
     else
         local PWDInfo = KeepworkServiceSession:LoadSigninInfo()
 
-        if PWDInfo then
+        if PWDInfo and not System.options.IgnoreRememberAccount then
             MainLoginLoginPage:SetUIValue('account', PWDInfo.account or '')
 
             if PWDInfo.rememberMe then
@@ -399,7 +399,7 @@ function MainLogin:ShowLoginNew()
 
     local PWDInfo = KeepworkServiceSession:LoadSigninInfo()
 
-    if PWDInfo then
+    if PWDInfo and not System.options.IgnoreRememberAccount then
         MainLoginLoginNewPage:SetUIValue('account', PWDInfo.account or '')
         self.account = PWDInfo.account
     end
@@ -430,7 +430,7 @@ function MainLogin:ShowLoginAtSchool(mode)
 
     local PWDInfo = KeepworkServiceSession:LoadSigninInfo()
 
-    if PWDInfo then
+    if PWDInfo and not System.options.IgnoreRememberAccount then
         MainLoginLoginAtSchoolPage:SetUIValue('account', PWDInfo.account or '')
         self.account = PWDInfo.account
     end
@@ -619,6 +619,9 @@ end
 
 function MainLogin:LoginWithToken(token, callback)
     if not token then
+        return
+    end
+    if System.options.IgnoreRememberAccount then
         return
     end
 
@@ -1237,6 +1240,9 @@ function MainLogin:EnterUserConsole(isOffline)
 end
 
 function MainLogin:GetHistoryUsers()
+    if System.options.IgnoreRememberAccount then
+        return {}
+    end
     return SessionsData:GetSessions().allUsers
 end
 

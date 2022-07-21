@@ -945,19 +945,24 @@
                                         color: #9A9DA2;
                                         base-font-size: 13px;
                                         font-size: 13px;'>
-                                <input type="checkbox"
-                                       iconsize="12"
-                                       CheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#275 79 12 12"
-                                       UncheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#295 79 12 12"
-                                       style="float:left;margin-top:3px;min-width:90px;"
-                                       name='auto_login_name'
-                                       checked="false"
-                                       onclick="set_auto_login"/>
-                                <div style='float: left;
-                                            margin-left: 3px;
-                                            color: #ffffff' for='auto_login_name'>
-                                    <%= L"自动登录" %>
-                                </div>
+                                <pe:if condition='<%= not System.options.IgnoreRememberAccount %>'>
+                                    <input type="checkbox"
+                                            iconsize="12"
+                                            CheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#275 79 12 12"
+                                            UncheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#295 79 12 12"
+                                            style="float:left;margin-top:3px;min-width:90px;"
+                                            name='auto_login_name'
+                                            checked="false"
+                                            onclick="set_auto_login"/>
+                                    <div style='float: left;
+                                                margin-left: 3px;
+                                                color: #ffffff' for='auto_login_name'>
+                                        <%= L"自动登录" %>
+                                    </div>
+                                </pe:if>
+                                <pe:if condition='<%= System.options.IgnoreRememberAccount %>'>
+                                    <div width="77"></div>
+                                </pe:if>
                             </div>
                             <pe:if condition='<%= System.os.GetPlatform() == "win32" %>'>
                                 <div style='float:left;

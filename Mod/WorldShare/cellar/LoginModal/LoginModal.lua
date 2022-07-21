@@ -252,6 +252,9 @@ function LoginModal:SelectAccount(username)
 end
 
 function LoginModal:GetHistoryUsers()
+    if System.options.IgnoreRememberAccount then
+        return {}
+    end
     if self.account and #self.account > 0 then
         local allUsers = commonlib.Array:new(SessionsData:GetSessions().allUsers)
         local beExist = false
