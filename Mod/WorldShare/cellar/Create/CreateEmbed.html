@@ -407,7 +407,8 @@
                                not project.extra or
                                type(project.extra) ~= 'table' or
                                not project.extra.imageUrl or
-                               type(project.extra.imageUrl) ~= 'string' then
+                               type(project.extra.imageUrl) ~= 'string' or
+                               project.extra.imageUrl == '' then
                                 return empty_preview
                             end
 
