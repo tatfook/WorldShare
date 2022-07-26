@@ -545,13 +545,14 @@ function Filters:Init()
     )
 
     --vip button
-    GameLogic.GetFilters():add_filter("get_vip_btn_div", function(styleStr)
+    GameLogic.GetFilters():add_filter("get_vip_btn_div", function(styleStr,key,desc)
         if System.options.channelId=="430" then
             return nil
         end
         if _G._main_on_vipbtn_click==nil then
             _G._main_on_vipbtn_click = function()
-                GameLogic.RunCommand("/vip show");
+                local cmd = string.format("/vip show -key=%s -desc=%s",key or "",desc or "")
+                GameLogic.RunCommand(cmd);
             end
         end
         local str =  [[
