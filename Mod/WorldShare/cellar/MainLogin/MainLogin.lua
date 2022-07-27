@@ -51,6 +51,7 @@ function MainLogin:Init()
 end
 
 function MainLogin:Show()
+    ParaUI.GetUIObject('root'):RemoveAll()
     GameMainLogin:ShowLoginBackgroundPage(true, true, true, true)
 
     local platform = System.os.GetPlatform()
