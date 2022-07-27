@@ -756,7 +756,7 @@ function SyncToDataSource:UpdateRecord(callback)
                         return
                     end
 
-                    local targetDir = format('%s/%s/preview.jpg', Mod.WorldShare.Utils.GetWorldFolderFullPath(), commonlib.Encoding.Utf8ToDefault(self.currentWorld.foldername))
+                    local targetDir = format('%spreview.jpg', self.currentWorld.worldpath)
                     local content = LocalService:GetFileContent(targetDir)
 
                     if not content then
