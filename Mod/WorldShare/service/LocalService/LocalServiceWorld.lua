@@ -771,3 +771,13 @@ function LocalServiceWorld:GetWhiteList()
 
     return whiteList
 end
+
+function LocalServiceWorld:OnSaveWorld()
+    if not Mod.WorldShare.Store:Get('world/currentRevision') then
+        return
+    end
+
+    local currentRevision = tonumber(Mod.WorldShare.Store:Get('world/currentRevision'))
+    currentRevision = currentRevision + 1
+    Mod.WorldShare.Store:Set('world/currentRevision', currentRevision)
+end

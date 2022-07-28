@@ -208,13 +208,15 @@ function ShareWorld:OnClick()
         Mod.WorldShare.Store:Set('world/currentWorld', Mod.WorldShare.Store:Get('world/currentEnterWorld'))
 
         SyncWorld:CheckTagName(function()
-            SyncWorld:SyncToDataSource(function(result, msg)
-                Compare:GetCurrentWorldInfo(function()
-				    if self.callback and type(self.callback) == 'function' then
-                        self.callback(true)
-                    end
-                end)
-			end)
+            SyncWorld:SyncToDataSource(
+                function(result, msg)
+                    Compare:GetCurrentWorldInfo(function()
+                        if self.callback and type(self.callback) == 'function' then
+                            self.callback(true)
+                        end
+                    end)
+			    end
+            )
 
             self:ClosePage()
 
@@ -259,16 +261,7 @@ function ShareWorld:Snapshot()
     -- take a new screenshot
     self:TakeSharePageImage()
 
-    -- incremental version number if version equal
-    if self:GetRemoteRevision() == self:GetCurrentRevision() then
-        CommandManager:RunCommand('/save')
-        
-        local currentRevision = tonumber(Mod.WorldShare.Store:Get('world/currentRevision')) or 0
-
-        currentRevision = currentRevision + 1
-
-        self:GetPage():SetUIValue('current_revision', currentRevision)
-    end
+    CommandManager:RunCommand('/save')
 end
 
 function ShareWorld:UpdateImage(bRefreshAsset)

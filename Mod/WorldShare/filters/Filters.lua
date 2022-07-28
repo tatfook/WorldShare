@@ -35,6 +35,7 @@ local KeepworkServiceWorld = NPL.load("(gl)Mod/WorldShare/service/KeepworkServic
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceSession.lua')
 local EventTrackingService = NPL.load('(gl)Mod/WorldShare/service/EventTracking.lua')
+local LocalServiceWorld = NPL.load('(gl)Mod/WorldShare/service/LocalService/LocalServiceWorld.lua')
 
 -- libs
 local GameLogic = commonlib.gettable('MyCompany.Aries.Game.GameLogic')
@@ -637,39 +638,23 @@ function Filters:Init()
         div = string.format(div, margin_top, click_func_name, show_value_desc, num_margin_left, unit_margin_left, unit_icon)
         return div
     end)
-    -- filter escape key
-    -- GameLogic.GetFilters():add_filter(
-    --     "EscFramePage.ShowPage",
-    --     function()
-    --         local ParaWorldLoginAdapter = commonlib.gettable("MyCompany.Aries.Game.Tasks.ParaWorld.ParaWorldLoginAdapter")
+    
+    GameLogic.GetFilters():add_filter('SaveWorld', function(_, callback)
+        echo('from save world filter!!!!!!', true)
+        if not callback or type(callback) ~= 'function' then
+            return false
+        end
 
-    --         if Mod.WorldShare.Store:Get('world/isEnterWorld') then
-    --             local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
+        callback()
 
-    --             if currentEnterWorld and currentEnterWorld.communityWorld then
-    --                 local isMyWorld = false
+        LocalServiceWorld:OnSaveWorld()
 
-    --                 if currentEnterWorld.members and type(currentEnterWorld.members) == 'table' then
-    --                     local username = Mod.WorldShare.Store:Get('user/username')
+        if ShareWorld:GetPage() then
+            local currentRevision = Mod.WorldShare.Store:Get('world/currentRevision')
 
-    --                     for key, item in ipairs(currentEnterWorld.members) do
-    --                         if username == item then
-    --                             isMyWorld = true
-    --                             break
-    --                         end
-    --                     end
-    --                 end
+            ShareWorld:GetPage():SetUIValue('current_revision', currentRevision)
+        end
 
-    --                 if not isMyWorld then
-    --                     ParaWorldLoginAdapter.ShowExitWorld(true)
-    --                     return true
-    --                 else
-    --                     return
-    --                 end
-    --             else
-    --                 return false
-    --             end
-    --         end
-    --     end
-    -- )
+        return true
+    end)
 end

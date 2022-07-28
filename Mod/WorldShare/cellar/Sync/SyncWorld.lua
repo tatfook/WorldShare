@@ -235,7 +235,7 @@ function SyncWorld:SyncToLocalSingle(callback)
             end
         end
 
-        if type(callback) == 'function' then
+        if callback and type(callback) == 'function' then
             callback(result, option)
         end
     end)
@@ -362,6 +362,8 @@ function SyncWorld:SyncToDataSource(callback)
         Progress:Init(syncInstance)
     end
 
+    Mod.WorldShare.MsgBox:Wait()
+
     KeepworkServiceWorld:GetWorldsList(function(data)
         if not data or type(data) ~= 'table' then
             return
@@ -472,7 +474,7 @@ function SyncWorld:CheckWorldSize(callback)
                     if filesTotal > maxSize then
                         self:ShowBeyondVolume(result)
                     else
-                        if type(callback) == 'function' then
+                        if callback and type(callback) == 'function' then
                             callback()
                         end
                     end
@@ -480,7 +482,7 @@ function SyncWorld:CheckWorldSize(callback)
             end
         end)
     else
-        if type(callback) == 'function' then
+        if callback and type(callback) == 'function' then
             callback()
         end
     end
