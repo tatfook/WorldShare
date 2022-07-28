@@ -640,7 +640,6 @@ function Filters:Init()
     end)
     
     GameLogic.GetFilters():add_filter('SaveWorld', function(_, callback)
-        echo('from save world filter!!!!!!', true)
         if not callback or type(callback) ~= 'function' then
             return false
         end
