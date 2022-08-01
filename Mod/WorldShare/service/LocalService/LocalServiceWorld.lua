@@ -485,11 +485,15 @@ end
 
 function LocalServiceWorld:SetWorldInstanceByFoldername(foldername)
     if not foldername or type(foldername) ~= 'string' then
-        return false
+        return
     end
 
-    local worldpath = Mod.WorldShare.Utils.GetWorldFolderFullPath() .. '/' ..
-                      commonlib.Encoding.Utf8ToDefault(foldername) .. '/'
+    local worldpath =
+        format(
+            '%s/%s/',
+            self:GetUserFolderPath(),
+            commonlib.Encoding.Utf8ToDefault(foldername)
+        )
 
     local currentWorld = nil
 
