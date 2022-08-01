@@ -533,7 +533,7 @@ function SyncWorld:CheckAndUpdatedByFoldername(folderName, callback)
             format(
                 '%s/%s/',
                 LocalServiceWorld:GetDefaultSaveWorldPath(),
-                commonlib.Encoding.Utf8ToDefault(foldername)
+                commonlib.Encoding.Utf8ToDefault(folderName)
             )
 
         if not ParaIO.DoesFileExist(worldPath) then
@@ -541,7 +541,7 @@ function SyncWorld:CheckAndUpdatedByFoldername(folderName, callback)
                 format(
                     '%s/%s/',
                     LocalServiceWorld:GetUserFolderPath(),
-                    commonlib.Encoding.Utf8ToDefault(foldername)
+                    commonlib.Encoding.Utf8ToDefault(folderName)
                 )
         end
 
