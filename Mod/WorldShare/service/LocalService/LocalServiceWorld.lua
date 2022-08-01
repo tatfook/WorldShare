@@ -491,9 +491,18 @@ function LocalServiceWorld:SetWorldInstanceByFoldername(foldername)
     local worldpath =
         format(
             '%s/%s/',
-            self:GetUserFolderPath(),
+            self:GetDefaultSaveWorldPath(),
             commonlib.Encoding.Utf8ToDefault(foldername)
         )
+
+    if not ParaIO.DoesFileExist(worldpath) then
+        worldpath =
+            format(
+                '%s/%s/',
+                self:GetUserFolderPath(),
+                commonlib.Encoding.Utf8ToDefault(foldername)
+            )
+    end
 
     local currentWorld = nil
 

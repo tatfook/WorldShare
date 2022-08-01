@@ -24,7 +24,7 @@
                     if bEnabled == 'true' then
                         str = format(L'世界《%s》文件总大小超过了%dMB，是否清理文件？(请使用MP3、OGG格式音频，避免使用FBX格式)', currentWorld.foldername, 50)
                     else
-                        str = format(L'世界《%s》文件总大小超过了%dMB，是否清理文件？(请使用MP3、OGG格式音频，避免使用FBX格式，VIP用户最大可上传%dMB)', currentWorld.foldername, 25, 50)
+                        str = format(L'世界《%s》文件总大小超过了%dMB，是否清理文件？(请使用MP3、OGG格式音频，避免使用FBX格式，VIP用户最大可上传%dMB)', currentWorld.foldername, 20, 50)
                     end
 
                     return str
@@ -38,7 +38,7 @@
                     SyncWorld:CloseBeyondVolumePage()
 
                     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
-                    ParaGlobal.ShellExecute('open', currentWorld and currentWorld.worldpath, '', '', 1);
+                    ParaGlobal.ShellExecute('open', ParaIO.GetWritablePath() .. '/' .. (currentWorld and currentWorld.worldpath), '', '', 1);
                 end
 
                 function get_window_style()

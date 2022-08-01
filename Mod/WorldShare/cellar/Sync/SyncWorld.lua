@@ -300,9 +300,13 @@ end
 function SyncWorld:SyncToDataSource(callback)
     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
-    local function Handle()
+    local function Handle(checkSizeResult)
         -- close the notice
         Mod.WorldShare.MsgBox:Close()
+
+        if not checkSizeResult then
+            return
+        end
 
         if not currentWorld.worldpath or currentWorld.worldpath == '' then
             return
@@ -452,6 +456,10 @@ function SyncWorld:GetCurrentRevisionInfo()
 end
 
 function SyncWorld:CheckWorldSize(callback)
+    if not callback or type(callback) ~= 'function' then
+        return
+    end
+
     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
     if not currentWorld or not currentWorld.worldpath  or #currentWorld.worldpath == 0 then
@@ -461,31 +469,26 @@ function SyncWorld:CheckWorldSize(callback)
     local filesTotal = LocalService:GetWorldSize(currentWorld.worldpath)
     local maxSize = 0
 
-    if filesTotal > 20 * 1024 * 1024 then
-        GameLogic.IsVip('LimitWorldSize20Mb', true, function(result)
-            if result then
-                Permission:CheckPermission('OnlineWorldData50Mb', false, function(result)
-                    if result then
-                        maxSize = 50 * 1024 * 1024
+    GameLogic.IsVip('LimitWorldSize20Mb', false, function(result20mb)
+        Permission:CheckPermission('OnlineWorldData50Mb', false, function(result50mb)
+            if filesTotal > 20 * 1024 * 1024 then
+                if result20mb or result50mb then
+                    if filesTotal > 50 * 1024 * 1024 then
+                        self:ShowBeyondVolume(true)
+                        callback(false)
                     else
-                        maxSize = 25 * 1024 * 1024
+                        callback(true)
                     end
-    
-                    if filesTotal > maxSize then
-                        self:ShowBeyondVolume(result)
-                    else
-                        if callback and type(callback) == 'function' then
-                            callback()
-                        end
-                    end
-                end)
+                else
+                    GameLogic.IsVip('LimitWorldSize20Mb', true)
+                    self:ShowBeyondVolume(false)
+                    callback(false)
+                end
+            else
+                callback(true)
             end
         end)
-    else
-        if callback and type(callback) == 'function' then
-            callback()
-        end
-    end
+    end)
 end
 
 function SyncWorld:GetWorldDateTable()
@@ -523,7 +526,22 @@ end
 
 function SyncWorld:CheckAndUpdatedByFoldername(folderName, callback)
     KeepworkServiceProject:GetProjectIdByWorldName(folderName, false, function(projectId)
-        local worldPath = Mod.WorldShare.Utils:GetWorldPathByFolderName(folderName)
+        local worldPath =
+            format(
+                '%s/%s/',
+                LocalServiceWorld:GetDefaultSaveWorldPath(),
+                commonlib.Encoding.Utf8ToDefault(foldername)
+            )
+
+        if not ParaIO.DoesFileExist(worldPath) then
+            worldPath =
+                format(
+                    '%s/%s/',
+                    LocalServiceWorld:GetUserFolderPath(),
+                    commonlib.Encoding.Utf8ToDefault(foldername)
+                )
+        end
+
         local worldTagPath = worldPath .. 'tag.xml'
         local worldTag = LocalService:GetTag(worldPath)
 
