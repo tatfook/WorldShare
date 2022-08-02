@@ -24,14 +24,37 @@
                         local my_history_sel = page:FindControl('my_history_sel')
                         local my_history_unsel = page:FindControl('my_history_unsel')
 
-                        my_opus_sel.visible = false
-                        my_opus_unsel.visible = true
-                        my_home_sel.visible = false
-                        my_home_unsel.visible = true
-                        my_favorite_sel.visible = false
-                        my_favorite_unsel.visible = true
-                        my_history_sel.visible = false
-                        my_history_unsel.visible = true
+                        if my_opus_sel then
+                            my_opus_sel.visible = false
+                        end
+                        
+                        if my_opus_unsel then
+                            my_opus_unsel.visible = true
+                        end
+
+                        if my_home_sel then
+                            my_home_sel.visible = false
+                        end
+
+                        if my_home_unsel then
+                            my_home_unsel.visible = true
+                        end
+
+                        if my_favorite_sel then
+                            my_favorite_sel.visible = false
+                        end
+
+                        if my_favorite_unsel then
+                            my_favorite_unsel.visible = true
+                        end
+
+                        if my_history_sel then
+                            my_history_sel.visible = false
+                        end
+
+                        if my_history_unsel then
+                            my_history_unsel.visible = true
+                        end
 
                         if index == '1' then
                             my_opus_sel.visible = true
