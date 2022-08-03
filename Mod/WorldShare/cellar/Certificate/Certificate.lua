@@ -12,6 +12,7 @@ local Certificate = NPL.load('(gl)Mod/WorldShare/cellar/Certificate/Certificate.
 -- libs
 local TeacherAgent = commonlib.gettable("MyCompany.Aries.Creator.Game.Teacher.TeacherAgent")
 local TeacherIcon = commonlib.gettable("MyCompany.Aries.Creator.Game.Teacher.TeacherIcon")
+local Screen = commonlib.gettable('System.Windows.Screen')
 
 -- service
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceSession.lua')
@@ -20,6 +21,14 @@ local Certificate = NPL.export()
 
 Certificate.certificateCallback = nil
 Certificate.inited = false
+
+function Certificate:Init(callback)
+    if System.options.channelId == '430' then
+        self:ShowCertificateNotice430Page(callback)
+    else
+        self:ShowCertificateNoticePage(callback)
+    end
+end
 
 function Certificate:OnWorldLoad()
 end
@@ -30,9 +39,45 @@ function Certificate:ShowCertificateNoticePage(callback)
     end
 
     local params = Mod.WorldShare.Utils.ShowWindow(
+        0,
+        0,
+        '(ws)Certificate/CertificateNotice.html',
+        'Mod.WorldShare.CertificateNotice',
+        nil,
+        nil,
+        '_fi',
+        false,
+        1,
+        false,
+        nil,
+        true
+    )
+
+    Screen:Connect('sizeChanged', Certificate, Certificate.OnScreenSizeChange, 'UniqueConnection')
+
+    params._page.callback = callback
+    params._page.OnClose = function()
+        Screen:Disconnect('sizeChanged', Certificate, Certificate.OnScreenSizeChange)
+    end
+end
+
+function Certificate:OnScreenSizeChange()
+    local page = Mod.WorldShare.Store:Get('page/Mod.WorldShare.CertificateNotice')
+
+    if page then
+        page:Rebuild()
+    end
+end
+
+function Certificate:ShowCertificateNotice430Page(callback)
+    if not KeepworkServiceSession:IsSignedIn() then
+        return
+    end
+
+    local params = Mod.WorldShare.Utils.ShowWindow(
         860,
         510,
-        '(ws)Certificate/CertificateNotice.html',
+        '(ws)Certificate/CertificateNotice430.html',
         'Mod.WorldShare.CertificateNotice',
         nil,
         nil,
@@ -43,10 +88,6 @@ function Certificate:ShowCertificateNoticePage(callback)
     )
 
     params._page.callback = callback
-end
-
-function Certificate:Init(callback)
-    self:ShowCertificateNoticePage(callback)
 end
 
 function Certificate:ShowCertificatePage()
