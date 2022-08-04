@@ -63,7 +63,6 @@ local KeepworkServiceWorldFilter = NPL.load('(gl)Mod/WorldShare/filters/service/
 local SyncToDataSourceFilter = NPL.load('(gl)Mod/WorldShare/filters/service/SyncService/SyncToDataSourceFilter.lua')
 
 local KeepworkProjectsApiFilter = NPL.load('(gl)Mod/WorldShare/filters/api/Keepwork/KeepworkProjectsApiFilter.lua')
-local KeepworkDragonBoatApiFilter = NPL.load('(gl)Mod/WorldShare/filters/api/Keepwork/KeepworkDragonBoatApiFilter.lua')
 
 local SessionsDataFilter = NPL.load('(gl)Mod/WorldShare/filters/database/SessionsDataFilter.lua')
 
@@ -107,9 +106,6 @@ function Filters:Init()
 
     -- init keepwork projects api filter
     KeepworkProjectsApiFilter:Init()
-
-    -- init keepwork dragon boat api filter
-    KeepworkDragonBoatApiFilter:Init()
 
     -- init common load world filter
     CommonLoadWorldFilter:Init()
