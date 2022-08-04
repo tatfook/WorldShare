@@ -31,28 +31,30 @@
                             height: 31px;
                             background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#310 53 28 31)'></div>
             </pe:if>
-            <pe:if condition='<%= be_selected() and has_project_id() %>'>
-                <div align='right'
-                     style='position: relative;
-                            width: 28px;
-                            height: 26px;
-                            margin-top: 9px;
-                            margin-right: 10px;
-                            background: url(Texture/Aries/Creator/paracraft/paracraft_explorer_32bits.png#347 289 28 26);'>
-                    <pe:container style='position: relative;background:;'>
-                        <img src='Texture/Aries/Creator/paracraft/paracraft_explorer_32bits.png#385 294 14 14'
-                                style='width: 14px;
-                                    height: 14px;
-                                    margin-top: 4px;
-                                    margin-left: 6px;' />
-                    </pe:container>
-                    <input type='button'
-                           name='<%= Eval("index") %>'
-                           onclick='share'
-                           style='width: 28px;
-                                  height: 26px;
-                                  background: url();' />
-                </div>
+            <pe:if condition='<%= Eval("project") and tonumber(Eval("project")["visibility"]) ~= 1 %>'>
+                <pe:if condition='<%= be_selected() and has_project_id() %>'>
+                    <div align='right'
+                         style='position: relative;
+                                width: 28px;
+                                height: 26px;
+                                margin-top: 9px;
+                                margin-right: 10px;
+                                background: url(Texture/Aries/Creator/paracraft/paracraft_explorer_32bits.png#347 289 28 26);'>
+                        <pe:container style='position: relative;background:;'>
+                            <img src='Texture/Aries/Creator/paracraft/paracraft_explorer_32bits.png#385 294 14 14'
+                                    style='width: 14px;
+                                        height: 14px;
+                                        margin-top: 4px;
+                                        margin-left: 6px;' />
+                        </pe:container>
+                        <input type='button'
+                               name='<%= Eval("index") %>'
+                               onclick='share'
+                               style='width: 28px;
+                                      height: 26px;
+                                      background: url();' />
+                    </div>
+                </pe:if>
             </pe:if>
             <div width='93%'
                  align='center'

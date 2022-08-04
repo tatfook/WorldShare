@@ -338,7 +338,7 @@ function Utils:GetCurrentTime(isUTC)
     end
 end
 
--- 0000-00-00 00-00 --> 000000000
+-- 0000-00-00T00:00 --> 000000000
 function Utils:UnifiedTimestampFormat(data)
     if not data then
         return 0
@@ -387,6 +387,7 @@ end
 
 -- 0000-00-00 00:00:00 --> 000000000
 function Utils:DatetimeToTimestamp(str)
+    echo(str, true)
     local years = string.match(str or '', '^(%d+)-')
     local months = string.match(str or '', '-(%d+)-')
     local days = string.match(str or '', '-(%d+) ')
@@ -604,21 +605,21 @@ function Utils:RecentDatetimeFormat(timestamp)
         return format(L'%d天前', d)
     end
 
-    ------------ months ------------
+    -- ------------ months ------------
 
-    if timeDiff > 2592000 and timeDiff < 31104000 then
-        local m = math.ceil(timeDiff / 2592000)
+    -- if timeDiff > 2592000 and timeDiff < 31104000 then
+    --     local m = math.ceil(timeDiff / 2592000)
 
-        return format(L'%d个月前', m)
-    end
+    --     return format(L'%d个月前', m)
+    -- end
 
-    ------------ years ------------
+    -- ------------ years ------------
 
-    if timeDiff > 31104000 and timeDiff < 622080000 then
-        local y = math.ceil(timeDiff / 31104000)
+    -- if timeDiff > 31104000 and timeDiff < 622080000 then
+    --     local y = math.ceil(timeDiff / 31104000)
 
-        return format(L'%d年前', y)
-    end
+    --     return format(L'%d年前', y)
+    -- end
 
     return os.date('%Y-%m-%d %H:%M', timestamp)
 end
