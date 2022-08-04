@@ -14,6 +14,7 @@
                     local CommonLoadWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/CommonLoadWorld.lua')
                     local VersionChange = NPL.load('(gl)Mod/WorldShare/cellar/VersionChange/VersionChange.lua')
                     local DeleteWorld = NPL.load('(gl)Mod/WorldShare/cellar/DeleteWorld/DeleteWorld.lua')
+                    local ShareWorld = NPL.load('(gl)Mod/WorldShare/cellar/ShareWorld/ShareWorld.lua')
 
                     -- service
                     local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceSession.lua')
@@ -697,6 +698,32 @@
                             end
                         else
                             return true
+                        end
+                    end
+
+                    function has_project_id()
+                        local currentSelectedWorld = Create:GetSelectWorld(Eval('index'))
+
+                        if currentSelectedWorld and
+                           type(currentSelectedWorld) == 'table' and
+                           currentSelectedWorld.kpProjectId and
+                           type(currentSelectedWorld.kpProjectId) == 'number' and
+                           currentSelectedWorld.kpProjectId ~= 0 then
+                            return true
+                        else
+                            return false
+                        end
+                    end
+
+                    function share(index)
+                        local currentSelectedWorld = Create:GetSelectWorld(index)
+                        
+                        if currentSelectedWorld and
+                           type(currentSelectedWorld) == 'table' and
+                           currentSelectedWorld.kpProjectId and
+                           type(currentSelectedWorld.kpProjectId) == 'number' and
+                           currentSelectedWorld.kpProjectId ~= 0 then
+                           ShareWorld:ShowWorldCode(currentSelectedWorld.kpProjectId)
                         end
                     end
                 ]]>
