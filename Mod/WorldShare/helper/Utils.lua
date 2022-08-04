@@ -605,21 +605,21 @@ function Utils:RecentDatetimeFormat(timestamp)
         return format(L'%d天前', d)
     end
 
-    -- ------------ months ------------
+    ------------ months ------------
 
-    -- if timeDiff > 2592000 and timeDiff < 31104000 then
-    --     local m = math.ceil(timeDiff / 2592000)
+    if timeDiff > 2592000 and timeDiff < 31104000 then
+        local m = math.ceil(timeDiff / 2592000)
 
-    --     return format(L'%d个月前', m)
-    -- end
+        return format(L'%d个月前', m)
+    end
 
-    -- ------------ years ------------
+    ------------ years ------------
 
-    -- if timeDiff > 31104000 and timeDiff < 622080000 then
-    --     local y = math.ceil(timeDiff / 31104000)
+    if timeDiff > 31104000 and timeDiff < 622080000 then
+        local y = math.ceil(timeDiff / 31104000)
 
-    --     return format(L'%d年前', y)
-    -- end
+        return format(L'%d年前', y)
+    end
 
     return os.date('%Y-%m-%d %H:%M', timestamp)
 end
