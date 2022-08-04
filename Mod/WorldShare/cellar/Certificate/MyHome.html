@@ -250,15 +250,22 @@
                         </div>
     
                     </div>
-                    <div style="margin-left: 240px;margin-top: 18px;">
-                        <input type="button" class="theme1_myhome_blue_bt" value="<%= L'确认' %>" onclick="bind()" />
-                        <input type="button" style="margin-left: 56px;" class="theme1_myhome_gray_bt" value="<%= L'跳过' %>" onclick="close()" />
-                    </div>
-    
+                    <pe:if condition='<%= canClose %>'>
+                        <div style="margin-left: 240px;margin-top: 18px;">
+                            <input type="button" class="theme1_myhome_blue_bt" value="<%= L'确认' %>" onclick="bind()" />
+                            <input type="button" style="margin-left: 56px;" class="theme1_myhome_gray_bt" value="<%= L'跳过' %>" onclick="close()" />
+                        </div>
+                    </pe:if>
+                    <pe:if condition='<%= not canClose %>'>
+                        <div align='center'
+                             width='104'
+                             style='margin-top: 18px;'>
+                            <input type="button" class="theme1_myhome_blue_bt" value="<%= L'确认' %>" onclick="bind()" />
+                        </div>
+                    </pe:if>
                     <div align='center' style="width: 420px;margin-top: 15px;">
                         <img style="width: 420px;height: 161px;" src="Texture/Aries/Creator/keepwork/RedSummerCamp/UserVip/huiyuanlibao_420x161_32bits.png#0 0 420 161" />
                     </div>
-    
                 </div>
             </kp:window>
         </pe:container>
