@@ -1253,6 +1253,7 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
             if err == 404 or
                not data or
                not data.world then
+                GameLogic.GetFilters():apply_filters("enter_world_fail",pid)
                 GameLogic.AddBBS(
                     nil,
                     format(L'未找到对应项目信息（项目ID：%d）（ERR：%d）', pid, err),
@@ -1407,7 +1408,7 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                                     return
                                 end
                             end
-
+                            GameLogic.GetFilters():apply_filters("enter_world_fail",pid)
                             GameLogic.AddBBS(
                                 nil,
                                 format(L'您未获得该项目的访问权限（项目ID：%d）（用户名：%s）', pid or 0, username or ''),
@@ -1447,7 +1448,7 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                                     HandleVerified()
                                 else
                                     local username = Mod.WorldShare.Store:Get('user/username')
-
+                                    GameLogic.GetFilters():apply_filters("enter_world_fail",pid)
                                     GameLogic.AddBBS(
                                         nil,
                                         format(L'您没有权限进入此世界（VIP）(项目ID：%d)（用户名：%s）', pid or 0, username or ''),
@@ -1484,7 +1485,7 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                                 HandleVerified()
                             else
                                 local username = Mod.WorldShare.Store:Get('user/username')
-
+                                GameLogic.GetFilters():apply_filters("enter_world_fail",pid)
                                 GameLogic.AddBBS(
                                     nil,
                                     format(L'您没有权限进入此世界（机构VIP）(项目ID：%d)（用户名：%s）', pid or 0, username or ''),
@@ -1506,7 +1507,7 @@ function CommonLoadWorld:EnterWorldById(pid, refreshMode, failed)
                    not self.systemGroupMemberVerified then
                     if not data.level or data.level == 0 then
                         local username = Mod.WorldShare.Store:Get('user/username')
-
+                        GameLogic.GetFilters():apply_filters("enter_world_fail",pid)
                         GameLogic.AddBBS(
                             nil,
                             format(L'您没有权限进入此世界（系统组世界）(项目ID：%d)（用户名：%s）', pid or 0, username or ''),
