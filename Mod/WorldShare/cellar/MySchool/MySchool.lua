@@ -113,7 +113,7 @@ function MySchool:Show(callback)
     end)
 end
 
-function MySchool:ShowJoinSchool(callback)
+function MySchool:ShowJoinSchool(callback, mode)
     self.provinces = {
         {
             text = L'省',
@@ -171,7 +171,7 @@ function MySchool:ShowJoinSchool(callback)
     self.SetDefault = true
     local params = Mod.WorldShare.Utils.ShowWindow(
         {
-            url = '(ws)MySchool/Theme/JoinSchool.html',
+            url = 'Mod/WorldShare/cellar/MySchool/Theme/JoinSchool.html?mode=' .. (mode or ''),
             name = 'Mod.WorldShare.JoinSchool',
             isShowTitleBar = false,
             DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory

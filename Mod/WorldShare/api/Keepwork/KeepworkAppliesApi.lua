@@ -1,15 +1,16 @@
 --[[
 Title: Keepwork Applies API
-Author(s):  big
-Date:  2020.08.17
+Author(s): big
+CreateDate: 2020.8.17
+ModifyDate: 2022.8.4
 Place: Foshan
 use the lib:
 ------------------------------------------------------------
-local KeepworkAppliesApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Applies.lua")
+local KeepworkAppliesApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkAppliesApi.lua')
 ------------------------------------------------------------
 ]]
 
-local KeepworkBaseApi = NPL.load('./BaseApi.lua')
+local KeepworkBaseApi = NPL.load('./KeepworkAppliesApi.lua')
 
 local KeepworkAppliesApi = NPL.export()
 
@@ -24,7 +25,7 @@ local KeepworkAppliesApi = NPL.export()
 -- return: object
 function KeepworkAppliesApi:Applies(objectId, objectType, applyType, success, error)
     if not objectId or not objectType or not applyType then
-        return false
+        return
     end
 
     KeepworkBaseApi:Get(
@@ -48,7 +49,7 @@ end
 -- return: object
 function KeepworkAppliesApi:AppliesId(id, isAllow, success, error)
     if not id then
-        return false
+        return
     end
     
     local state
@@ -80,7 +81,7 @@ function KeepworkAppliesApi:PostApplies(objectId, objectType, applyType, applyId
        not objectType or
        not applyType or
        not applyId then
-        return false
+        return
     end
 
     local params = {

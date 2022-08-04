@@ -12,6 +12,26 @@
                 local page = document:GetPageCtrl()
 
                 function close()
+                    local do_not_notice = page:GetNode('do_not_notice').checked
+
+                    if do_not_notice == true then
+                        local username = Mod.WorldShare.Store:Get('user/username')
+                        local session = SessionsData:GetSessionByUsername(username)
+
+                        if session and type(session) == 'table' then
+                            session.doNotNoticeVerify = true
+                            SessionsData:SaveSession(session)
+                        end
+                    elseif do_not_notice == false then
+                        local username = Mod.WorldShare.Store:Get('user/username')
+                        local session = SessionsData:GetSessionByUsername(username)
+
+                        if session and type(session) == 'table' then
+                            session.doNotNoticeVerify = false
+                            SessionsData:SaveSession(session)
+                        end
+                    end
+
                     if page.callback and type(page.callback) == 'function' then
                         page.callback()
                     end
@@ -62,21 +82,6 @@
                     return ''
                 end
 
-                function get_background_width()
-                    local Screen = System.Windows.Screen
-                    local width = Screen:GetWidth()
-                    Screen:PushDesignResolution(1280, 720)
-
-                    return (width - 255)
-                end
-
-                function get_background_height()
-                    local Screen = System.Windows.Screen
-                    local height = Screen:GetHeight()
-
-                    return (height - 93)
-                end
-
                 Mod.WorldShare.Utils.SetTimeOut(function()
                     local username = Mod.WorldShare.Store:Get('user/username')
                     local session = SessionsData:GetSessionByUsername(username)
@@ -87,63 +92,49 @@
                 end, 0)
             ]]>
         </script>
-        <style type="text/mcss" src="Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss">
+        <style type="text/mscc" src="Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss">
+
         </style>
-            <pe:container
-                width='<%= get_background_width() %>'
-                height='100%'
-                style='background-color: #00000099;
-                       position: relative;'>
-            </pe:container>
-            <pe:container
-                alignment='_rb'
-                width='255'
-                height='<%= get_background_height() %>'
-                style='background-color: #00000099;
-                       position: relative;'>
-            </pe:container>
-            <pe:container
-                alignment='_ct'
-                ClickThrough='true'
-                style='width: 860px;
-                       height: 510px;
-                       margin-top: -255px;
-                       margin-left: -430px;
-                       position: relative;
-                       background: url();'>
-                <kp:window width="860" height="510">
-                    <div class="theme1_header"></div>
-                    <div style="padding: 30px;">
-                        <div>
-                            <img style='width: 796px;
-                                        height: 238px;'
-                                 src='Texture/Aries/Creator/paracraft/paracraft_certification_a_32bits.png#0 0 796 238' />
-                        </div>
-                        <div align='center'
-                             style='width: 360px;
-                                    font-size: 15px;
-                                    base-font-size: 15px;
-                                    padding-top: 20px;
-                                    padding-bottom: 40px;'>
-                            <%= L'请完成“实名认证”与“登记所属学校”来激活您的软件！' %><br />
-                            <%= L'有激活码的同学请在右上角“开通会员”中输入激活。' %><br />
-                        </div>
-                        <div>
-                            <input align='center'
-                                   onclick='show_certificate'
-                                   type='button'
-                                   style='width: 125px;
-                                          height: 45px;
-                                          text-align: center;
-                                          font-size: 16px;
-                                          base-font-size: 16px;
-                                          margin-bottom: 5px;'
-                                   class='theme1_orange_button'
-                                   value='<%= L"下一步" %>'/>
-                        </div>
+        <div width="100%" height="100%">
+            <kp:window width="860" height="510" onclose="close()">
+                <div class="theme1_header"></div>
+                <div style="padding: 30px;">
+                    <div>
+                        <img style='width: 796px;
+                                    height: 238px;'
+                             src='Texture/Aries/Creator/paracraft/paracraft_certification_a_32bits.png#0 0 796 238' />
                     </div>
-                </kp:window>
-            </pe:container>
+                    <div align='center'
+                         style='width: 330px;
+                                font-size: 15px;
+                                base-font-size: 15px;
+                                padding-top: 10px;
+                                padding-bottom: 10px;'>
+                        <%= L'亲爱的同学&家长，您还没有完成' %><br />
+                        【<%= get_status_desc() %>】。<br/>
+                        <%= L'请在参加赛事前完善您的个人资料！以便顺利' %><br/>
+                        <%= L'参赛和享受各项学习服务！' %><br/>
+                    </div>
+                    <div>
+                        <input align='center'
+                               onclick='show_certificate'
+                               type='button'
+                               style='width: 125px;
+                                      height: 45px;
+                                      text-align: center;
+                                      font-size: 16px;
+                                      base-font-size: 16px;
+                                      margin-bottom: 5px;'
+                               class='theme1_orange_button'
+                               value='<%= L"完善个人资料" %>'/>
+                    </div>
+                    <div>
+                        <input type='checkbox' name='do_not_notice' checked='false' />
+                        <div for='do_not_notice' style='margin-top: -2px;float: left;margin-left: 3px;'><%= L'不再提醒' %></div>
+                    </div>
+                </div>
+            </kp:window>
+        </div>
     </pe:mcml>
 </body>
 </html>

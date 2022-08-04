@@ -1,11 +1,12 @@
 --[[
 Title: Keepwork Schools API
-Author(s):  big
-Date:  2020.7.7
+Author(s): big
+CreateDate: 2020.7.7
+ModifyDate: 2022.8.4
 Place: Foshan
 use the lib:
 ------------------------------------------------------------
-local KeepworkSchoolsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Schools.lua")
+local KeepworkSchoolsApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkSchoolsApi.lua')
 ------------------------------------------------------------
 ]]
 

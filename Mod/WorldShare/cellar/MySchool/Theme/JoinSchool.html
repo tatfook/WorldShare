@@ -13,6 +13,13 @@
                     local page = document:GetPageCtrl()
                     local result_page
 
+                    local mode = page:GetRequestParam('mode')
+                    canClose = true
+
+                    if mode == 'summer' then
+                        canClose = false
+                    end
+
                     local cur_kind = ''
 
                     function close()
@@ -641,7 +648,7 @@
                 <pe:container zorder='1'
                               width='100%'
                               class='header_bar'>
-                    <pe:if condition='<%= System.options.channelId == "430" %>'>
+                    <pe:if condition='<%= canClose %>'>
                         <div align='right'
                             onclick='close'
                             class='close'

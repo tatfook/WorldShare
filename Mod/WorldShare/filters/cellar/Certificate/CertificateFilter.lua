@@ -19,7 +19,7 @@ function CertificateFilter:Init()
     GameLogic.GetFilters():add_filter(
         'cellar.certificate.show_certificate_notice_page',
         function(...)
-            Certificate:ShowCertificateNoticePage(...)
+            Certificate:Init(...)
         end
     )
 end

@@ -2,18 +2,18 @@
 Title: User Mac Binds Api
 Author(s): big
 CreateDate: 2021.09.18
-ModifyDate: 2021.09.18
+ModifyDate: 2022.8.4
 Desc: 
 use the lib:
 ------------------------------------------------------------
-local UserMacBindsApi = NPL.load('(gl)Mod/Offline/api/UserMacBindsApi.lua')
+local KeepworkUserMacBindsApi = NPL.load('(gl)Mod/Offline/api/KeepworkUserMacBindsApi.lua')
 ------------------------------------------------------------
 ]]
 
 -- api
 local KeepworkBaseApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/BaseApi.lua')
 
-local UserMacBindsApi = NPL.export()
+local KeepworkUserMacBindsApi = NPL.export()
 
 -- url: /userMacBinds
 -- method: POST
@@ -23,7 +23,7 @@ local UserMacBindsApi = NPL.export()
     uuid string necessary
 ]]
 -- return: object
-function UserMacBindsApi:BindMacAddress(macAddress, uuid, success, error)
+function KeepworkUserMacBindsApi:BindMacAddress(macAddress, uuid, success, error)
     if not macAddress or
        type(macAddress) ~= 'string' or
        not uuid or
@@ -45,7 +45,7 @@ end
 --[[
 ]]
 -- return: object
-function UserMacBindsApi:GetBindList(success, error)
+function KeepworkUserMacBindsApi:GetBindList(success, error)
     KeepworkBaseApi:Get('/userMacBinds', nil, nil, success, error)
 end
 
@@ -55,7 +55,7 @@ end
 --[[
 ]]
 -- return: object
-function UserMacBindsApi:RemoveMacAddress(id, success, error)
+function KeepworkUserMacBindsApi:RemoveMacAddress(id, success, error)
     if not id or type(id) ~= 'number' then
         return
     end

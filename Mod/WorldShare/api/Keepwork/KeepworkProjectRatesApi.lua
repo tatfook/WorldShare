@@ -1,17 +1,18 @@
 --[[
 Title: Keepwork ProjectRates API
-Author(s):  big
-Date:  2019.11.8
+Author(s): big
+CreateDate: 2019.11.8
+ModifyDate: 2022.8.4
 Place: Foshan
 use the lib:
 ------------------------------------------------------------
-local KeepworkProjectsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/ProjectRates.lua")
+local KeepworkProjectRatesApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkProjectRatesApi.lua')
 ------------------------------------------------------------
 ]]
 
 local KeepworkBaseApi = NPL.load('./BaseApi.lua')
 
-local KeepworkProjectsApi = NPL.export()
+local KeepworkProjectRatesApi = NPL.export()
 
 -- url: /projectRates?projectId=%d
 -- method: GET
@@ -19,9 +20,9 @@ local KeepworkProjectsApi = NPL.export()
 --[[
 ]]
 -- return: object
-function KeepworkProjectsApi:GetRatedProject(kpProjectId, success, error)
-    if type(kpProjectId) ~= 'number' then
-        return false
+function KeepworkProjectRatesApi:GetRatedProject(kpProjectId, success, error)
+    if not kpProjectId or type(kpProjectId) ~= 'number' then
+        return
     end
 
     local url = format('/projectRates?projectId=%d', kpProjectId)
@@ -35,7 +36,7 @@ end
 --[[
 ]]
 -- return: object
-function KeepworkProjectsApi:CreateProjectRates(params, success, error)
+function KeepworkProjectRatesApi:CreateProjectRates(params, success, error)
     local url = '/projectRates'
 
     KeepworkBaseApi:Post(url, params, nil, success, error)
@@ -46,9 +47,9 @@ end
 -- params:
 -- [[]]
 -- return: object
-function KeepworkProjectsApi:UpdateProjectRates(kpProjectId, params, success, error)
-    if type(kpProjectId) ~= 'number' then
-        return false
+function KeepworkProjectRatesApi:UpdateProjectRates(kpProjectId, params, success, error)
+    if not kpProjectId or type(kpProjectId) ~= 'number' then
+        return
     end
 
     local url = format('/projectRates/%d', kpProjectId)

@@ -25,7 +25,7 @@ local Compare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
 -- api
 local KeepworkWorldsApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkWorldsApi.lua')
 local KeepworkProjectsApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkProjectsApi.lua')
-local KeepworkWorldLocksApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/WorldLocks.lua')
+local KeepworkWorldLocksApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkWorldLocksApi.lua')
 
 local KeepworkServiceWorld = NPL.export()
 

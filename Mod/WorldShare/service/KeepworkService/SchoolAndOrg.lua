@@ -12,8 +12,8 @@ local KeepworkServiceSchoolAndOrg = NPL.load("(gl)Mod/WorldShare/service/Keepwor
 -- api
 local AccountingOrgApi = NPL.load("(gl)Mod/WorldShare/api/Accounting/Org.lua")
 local KeepworkUsersApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/KeepworkUsersApi.lua")
-local KeepworkRegionsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Regions.lua")
-local KeepworkSchoolsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Schools.lua")
+local KeepworkRegionsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/KeepworkRegionsApi.lua")
+local KeepworkSchoolsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/KeepworkSchoolsApi.lua")
 local AccountingOrgActivateCodeApi = NPL.load("(gl)Mod/WorldShare/api/Accounting/OrgActivateCode.lua")
 
 -- service

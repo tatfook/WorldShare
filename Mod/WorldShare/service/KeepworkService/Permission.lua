@@ -11,7 +11,7 @@ local KeepworkServicePermission = NPL.load('(gl)Mod/WorldShare/service/KeepworkS
 ]]
 
 -- api
-local KeepworkPermissionsApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/Permissions.lua')
+local KeepworkPermissionsApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkPermissionsApi.lua')
 local KeepworkCommonApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/KeepworkCommonApi.lua")
 
 local KeepworkServicePermission = NPL.export()

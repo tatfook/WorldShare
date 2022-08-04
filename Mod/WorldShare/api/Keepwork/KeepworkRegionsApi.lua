@@ -1,11 +1,12 @@
 --[[
 Title: Keepwork Regions API
 Author(s):  big
-Date:  2020.7.7
+CreateDate: 2020.7.7
+ModifyDate: 2022.8.4
 Place: Foshan
 use the lib:
 ------------------------------------------------------------
-local KeepworkRegionsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Regions.lua")
+local KeepworkRegionsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/KeepworkRegionsApi.lua")
 ------------------------------------------------------------
 ]]
 

@@ -18,10 +18,10 @@ local KeepworkServiceSession = NPL.load('./KeepworkServiceSession.lua')
 
 -- api
 local KeepworkProjectsApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkProjectsApi.lua')
-local KeepworkProjectStarApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/ProjectStar.lua')
+local KeepworkProjectStarApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkProjectStarApi.lua')
 local KeepworkWorldsApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkWorldsApi.lua')
-local KeepworkMembersApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/Members.lua')
-local KeepworkAppliesApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/Applies.lua')
+local KeepworkMembersApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkMembersApi.lua')
+local KeepworkAppliesApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkAppliesApi.lua')
 
 local KeepworkServiceProject = NPL.export()
 

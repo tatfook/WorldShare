@@ -1,11 +1,12 @@
 --[[
 Title: Keepwork Project Star API
-Author(s):  big
-Date:  2020.12.17
+Author(s): big
+CreateDate: 2020.12.17
+ModifyDate: 2022.8.4
 Place: Foshan
 use the lib:
 ------------------------------------------------------------
-local KeepworkProjectStarApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/ProjectStar.lua")
+local KeepworkProjectStarApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkProjectStarApi.lua')
 ------------------------------------------------------------
 ]]
 

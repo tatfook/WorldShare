@@ -9,10 +9,15 @@ local Certificate = NPL.load('(gl)Mod/WorldShare/cellar/Certificate/Certificate.
 ------------------------------------------------------------
 ]]
 
+-- api
+local KeepworkParacraftConfigsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/KeepworkParacraftConfigsApi.lua")
+
 -- libs
 local TeacherAgent = commonlib.gettable("MyCompany.Aries.Creator.Game.Teacher.TeacherAgent")
 local TeacherIcon = commonlib.gettable("MyCompany.Aries.Creator.Game.Teacher.TeacherIcon")
 local Screen = commonlib.gettable('System.Windows.Screen')
+
+local ServerConfigManager = NPL.load('(gl)script/apps/Aries/Creator/Game/Tasks/User/ServerConfigManager.lua')
 
 -- service
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceSession.lua')
@@ -24,16 +29,51 @@ Certificate.inited = false
 
 function Certificate:Init(callback)
     if System.options.channelId == '430' then
-        self:ShowCertificateNotice430Page(callback)
-    else
         self:ShowCertificateNoticePage(callback)
+    else
+        KeepworkParacraftConfigsApi:ParacraftConfigs(
+            function(data, err)
+                if not data or
+                   type(data) ~= 'table' or
+                   not data.configs or
+                   type(data.configs) ~= 'table' then
+                    self:ShowCertificateNoticePage(callback)
+                    return
+                end
+
+                local isOpened = false
+
+                for key, item in ipairs(data.configs) do
+                    if item.name == 'forceRealNameAndSchool' then
+                        if item.config and type(item.config) == 'table' then
+                            if item.config.isOpen == true then
+                                isOpened = true    
+                            end
+                        end
+
+                        break
+                    end
+                end
+
+                local isPay = Mod.WorldShare.Store:Get('user/isPay')
+
+                if isOpened and isPay == 0 then
+                    self:ShowCertificateNoticeSummerVacationPage(callback)
+                else
+                    self:ShowCertificateNoticePage(callback)
+                end
+            end,
+            function()
+                self:ShowCertificateNoticePage(callback)
+            end
+        )
     end
 end
 
 function Certificate:OnWorldLoad()
 end
 
-function Certificate:ShowCertificateNoticePage(callback)
+function Certificate:ShowCertificateNoticeSummerVacationPage(callback)
     if not KeepworkServiceSession:IsSignedIn() then
         return
     end
@@ -41,7 +81,7 @@ function Certificate:ShowCertificateNoticePage(callback)
     local params = Mod.WorldShare.Utils.ShowWindow(
         0,
         0,
-        '(ws)Certificate/CertificateNotice.html',
+        '(ws)Certificate/CertificateNoticeSummerVacation.html',
         'Mod.WorldShare.CertificateNotice',
         nil,
         nil,
@@ -69,7 +109,7 @@ function Certificate:OnScreenSizeChange()
     end
 end
 
-function Certificate:ShowCertificateNotice430Page(callback)
+function Certificate:ShowCertificateNoticePage(callback)
     if not KeepworkServiceSession:IsSignedIn() then
         return
     end
@@ -77,7 +117,7 @@ function Certificate:ShowCertificateNotice430Page(callback)
     local params = Mod.WorldShare.Utils.ShowWindow(
         860,
         510,
-        '(ws)Certificate/CertificateNotice430.html',
+        '(ws)Certificate/CertificateNotice.html',
         'Mod.WorldShare.CertificateNotice',
         nil,
         nil,
@@ -159,17 +199,19 @@ function Certificate:ShowSchoolPage()
     end
 end
 
-function Certificate:ShowMyHomePage(callback)
+function Certificate:ShowMyHomePage(callback, mode)
     local params = Mod.WorldShare.Utils.ShowWindow(
-        760,
-        490,
-        '(ws)Certificate/MyHome.html',
+        0,
+        0,
+        'Mod/WorldShare/cellar/Certificate/MyHome.html?mode=' .. (mode or ''),
         'Mod.WorldShare.Certificate.MyHome',
         nil,
         nil,
-        nil,
-        nil,
+        '_fi',
+        false,
         1,
+        false,
+        nil,
         true
     )
 

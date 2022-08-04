@@ -1,11 +1,12 @@
 --[[
 Title: Keepwork Members API
-Author(s):  big
-Date:  2020.03.31
+Author(s): big
+CreateDate: 2020.3.31
+ModifyDate: 2022.8.4
 Place: Foshan
 use the lib:
 ------------------------------------------------------------
-local KeepworkMembersApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Members.lua")
+local KeepworkMembersApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkMembersApi.lua')
 ------------------------------------------------------------
 ]]
 

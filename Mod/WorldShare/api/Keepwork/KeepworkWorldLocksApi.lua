@@ -1,11 +1,12 @@
 --[[
 Title: World Lock API
-Author(s):  big
-Date:  2020.2.10
+Author(s): big
+CreateDate: 2020.2.10
+ModifyDate: 2022.8.4
 Place: Foshan
 use the lib:
 ------------------------------------------------------------
-local KeepworkWorldLocksApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/WorldLocks.lua")
+local KeepworkWorldLocksApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkWorldLocksApi.lua')
 ------------------------------------------------------------
 ]]
 

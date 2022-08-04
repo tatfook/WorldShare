@@ -22,10 +22,9 @@ local SyncServiceCompare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Comp
 -- api
 local KeepworkUsersApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkUsersApi.lua')
 local KeepworkKeepworksApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkKeepworksApi.lua')
-local KeepworkOauthUsersApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/OauthUsers.lua')
+local KeepworkOauthUsersApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkOauthUsersApi.lua')
 local SocketApi = NPL.load('(gl)Mod/WorldShare/api/Socket/SocketApi.lua')
 local AccountingVipCodeApi = NPL.load('(gl)Mod/WorldShare/api/Accounting/ParacraftVipCode.lua')
-local KeepworkDragonBoatApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/DragonBoatApi.lua')
 
 -- database
 local SessionsData = NPL.load('(gl)Mod/WorldShare/database/SessionsData.lua')
@@ -285,6 +284,10 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
     local realname = response['realname'] or ''
     local paraWorldId = response['paraWorldId'] or nil
     local isVipSchool = false
+
+    if response.isPay then
+        Mod.WorldShare.Store:Set('user/isPay', response.isPay)
+    end
 
     if not response.realname then
         Mod.WorldShare.Store:Set('user/isVerified', false)

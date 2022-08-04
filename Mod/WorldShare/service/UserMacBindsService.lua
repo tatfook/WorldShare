@@ -10,7 +10,7 @@ local UserMacBindsService = NPL.load('(gl)Mod/service/UserMacBindsService.lua')
 ]]
 
 -- api
-local UserMacBindsApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/UserMacBindsApi.lua')
+local KeepworkUserMacBindsApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkUserMacBindsApi.lua')
 
 -- database
 local BindDatabase = NPL.load('(gl)Mod/WorldShare/database/BindDatabase.lua')
@@ -48,7 +48,7 @@ function UserMacBindsService:BindDevice(callback)
             RecordToLocal()
             callback(true)
         else
-            UserMacBindsApi:BindMacAddress(
+            KeepworkUserMacBindsApi:BindMacAddress(
                 self:GetMachineID(),
                 self:GetUUID(),
                 function(data, err)
@@ -72,7 +72,7 @@ function UserMacBindsService:UnbindDevice(callback)
         return
     end
 
-    UserMacBindsApi:GetBindList(function(data, err)
+    KeepworkUserMacBindsApi:GetBindList(function(data, err)
         if err ~= 200 or
            type(data) ~= 'table' then
             callback(false)
@@ -95,7 +95,7 @@ function UserMacBindsService:UnbindDevice(callback)
                 local macAddress = self:GetMachineID()
 
                 if item.macAddr == macAddress then
-                    UserMacBindsApi:RemoveMacAddress(item.id)
+                    KeepworkUserMacBindsApi:RemoveMacAddress(item.id)
     
                     BindDatabase:SetValue('username', nil)
                     BindDatabase:SetValue('UUID', nil)
@@ -120,7 +120,7 @@ function UserMacBindsService:IsBindDevice(callback)
         return
     end
 
-    UserMacBindsApi:GetBindList(function(data, err)
+    KeepworkUserMacBindsApi:GetBindList(function(data, err)
         if err ~= 200 or
            type(data) ~= 'table' then
             return

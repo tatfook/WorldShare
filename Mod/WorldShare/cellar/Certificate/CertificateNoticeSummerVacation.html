@@ -1,0 +1,167 @@
+<body>
+    <pe:mcml>
+        <script type="text/npl">
+            <![CDATA[
+                -- bottles
+                Certificate = NPL.load('./Certificate.lua')
+                local MySchool = NPL.load('(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua')
+
+                -- database
+                local SessionsData = NPL.load('(gl)Mod/WorldShare/database/SessionsData.lua')
+
+                local page = document:GetPageCtrl()
+
+                function close()
+                    if page.callback and type(page.callback) == 'function' then
+                        page.callback()
+                    end
+
+                    page:CloseWindow()
+                end
+
+                function show_certificate()
+                    page:CloseWindow()
+
+                    local status = get_status()
+
+                    if status == 3 then
+                        Certificate:ShowMyHomePage(
+                            function()
+                                MySchool:ShowJoinSchool(page.callback, 'summer')
+                            end,
+                            'summer'
+                        )
+                    elseif status == 2 then
+                        MySchool:ShowJoinSchool(page.callback, 'summer')
+                    elseif status == 1 then
+                        Certificate:ShowMyHomePage(page.callback, 'summer')
+                    end
+                end
+
+                function get_status()
+                    local is_verified = Mod.WorldShare.Store:Get('user/isVerified')
+                    local has_joined_school = Mod.WorldShare.Store:Get('user/hasJoinedSchool')
+
+                    if not is_verified and not has_joined_school then
+                        return 3
+                    elseif not is_verified then
+                        return 1
+                    elseif not has_joined_school then
+                        return 2
+                    end
+                end
+
+                function get_status_desc()
+                    local status = get_status()
+
+                    if status == 3 then
+                        return L'实名认证和填写学校信息'
+                    elseif status == 2 then
+                        return L'填写学校信息'
+                    elseif status == 1 then
+                        return L'实名认证'
+                    end
+
+                    return ''
+                end
+
+                function get_background_width()
+                    local Screen = System.Windows.Screen
+                    local width = Screen:GetWidth()
+                    Screen:PushDesignResolution(1280, 720)
+
+                    return (width - 255)
+                end
+
+                function get_background_height()
+                    local Screen = System.Windows.Screen
+                    local height = Screen:GetHeight()
+
+                    return (height - 93)
+                end
+
+                function get_status_desc()
+                    local status = get_status()
+
+                    if status == 3 then
+                        return L'“实名认证”与“登记所属学校”'
+                    elseif status == 2 then
+                        return L'“登记所属学校”'
+                    elseif status == 1 then
+                        return L'“实名认证”'
+                    end
+
+                    return ''
+                end
+
+                Mod.WorldShare.Utils.SetTimeOut(function()
+                    local username = Mod.WorldShare.Store:Get('user/username')
+                    local session = SessionsData:GetSessionByUsername(username)
+
+                    if session.doNotNoticeVerify then
+                        page:SetUIValue('do_not_notice', true)
+                    end
+                end, 0)
+            ]]>
+        </script>
+        <style type="text/mcss" src="Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss">
+        </style>
+            <pe:container
+                width='<%= get_background_width() %>'
+                height='100%'
+                style='background-color: #00000099;
+                       position: relative;'>
+            </pe:container>
+            <pe:container
+                alignment='_rb'
+                width='255'
+                height='<%= get_background_height() %>'
+                style='background-color: #00000099;
+                       position: relative;'>
+            </pe:container>
+            <pe:container
+                alignment='_ct'
+                ClickThrough='true'
+                style='width: 860px;
+                       height: 510px;
+                       margin-top: -255px;
+                       margin-left: -430px;
+                       position: relative;
+                       background: url();'>
+                <kp:window width="860" height="510">
+                    <div class="theme1_header"></div>
+                    <div style="padding: 30px;">
+                        <div>
+                            <img style='width: 796px;
+                                        height: 238px;'
+                                 src='Texture/Aries/Creator/paracraft/paracraft_certification_a_32bits.png#0 0 796 238' />
+                        </div>
+                        <div align='center'
+                             style='width: 360px;
+                                    font-size: 15px;
+                                    base-font-size: 15px;
+                                    padding-top: 20px;
+                                    padding-bottom: 40px;'>
+                            <%= format(L'请完成%s来激活您的软件！', get_status_desc()) %><br />
+                            <%= L'有激活码的同学请在右上角“开通会员”中输入激活。' %><br />
+                        </div>
+                        <div>
+                            <input align='center'
+                                   onclick='show_certificate'
+                                   type='button'
+                                   style='width: 125px;
+                                          height: 45px;
+                                          text-align: center;
+                                          font-size: 16px;
+                                          base-font-size: 16px;
+                                          margin-bottom: 5px;'
+                                   class='theme1_orange_button'
+                                   value='<%= L"下一步" %>'/>
+                        </div>
+                    </div>
+                </kp:window>
+            </pe:container>
+    </pe:mcml>
+</body>
+</html>
+

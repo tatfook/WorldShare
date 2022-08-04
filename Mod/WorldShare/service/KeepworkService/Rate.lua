@@ -9,7 +9,7 @@ local KeepworkServiceRate = NPL.load("(gl)Mod/WorldShare/service/KeepworkService
 ------------------------------------------------------------
 ]]
 local KeepworkService = NPL.load("../KeepworkService.lua")
-local KeepworkProjectRatesApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/ProjectRates.lua')
+local KeepworkProjectRatesApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkProjectRatesApi.lua')
 
 local KeepworkServiceRate = NPL.export()
 

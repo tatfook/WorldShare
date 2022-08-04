@@ -12,6 +12,15 @@
                 local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceSession.lua")
 
                 local page = document:GetPageCtrl()
+ 
+                local mode = page:GetRequestParam('mode')
+
+                canClose = true
+
+                if mode == 'summer' then
+                    canClose = false
+                end
+
                 isClickedGetPhoneCaptcha = false
 
                 function close()
@@ -111,6 +120,21 @@
                     timer:Change(1000, 1000)
                 end
 
+                function get_background_width()
+                    local Screen = System.Windows.Screen
+                    local width = Screen:GetWidth()
+                    Screen:PushDesignResolution(1280, 720)
+
+                    return (width - 255)
+                end
+
+                function get_background_height()
+                    local Screen = System.Windows.Screen
+                    local height = Screen:GetHeight()
+
+                    return (height - 93)
+                end
+
                 function checkRealName()
                     KeepworkServiceSession:Profile(function(data, err)
                         if err ~= 200 or not data or type(data) ~= 'table' then
@@ -166,9 +190,37 @@
                 },
             }
         </style>
-        <div width="100%" height="100%">
-            <kp:window width="760" height="490" onclose="close()">
-            
+        <pe:if condition='<%= canClose %>'>
+            <div width="100%" height="100%" style='position: relative;background: url();'>
+            </div>
+        </pe:if>
+        <pe:if condition='<%= not canClose %>'>
+            <pe:container
+                width='<%= get_background_width() %>'
+                height='100%'
+                style='background-color: #00000099;
+                       position: relative;'>
+            </pe:container>
+            <pe:container
+                alignment='_rb'
+                width='255'
+                height='<%= get_background_height() %>'
+                style='background-color: #00000099;
+                       position: relative;'>
+            </pe:container>
+        </pe:if>
+        <pe:container
+            alignment='_ct'
+            width='760'
+            height='490'
+            style='background: url();
+                   margin-top: -245px;
+                   margin-left: -380px;'>
+            <kp:window
+                width='760'
+                height='490'
+                onclose='close()'
+                is_hide_close="<%= not canClose %>">
                 <img style="position: relative; width: 97px;height: 25px;margin-left: 15px; margin-top: 7px;" src="Texture/Aries/Creator/keepwork/Certification/shiming_97X25_32bits.png#0 0 97 25" />
                 <div class="theme1_header"></div>
                 <div style="padding: 10px;padding-top: 20px;">
@@ -190,26 +242,26 @@
                         <!-- <%= L'验证码' %> -->
                         <img style="width: 53px;height: 17px;margin-top: 9px;" src="Texture/Aries/Creator/keepwork/Certification/zi_yanzhengma_53X17_32bits.png#0 0 53 17" />
                         <input type="text" style="width: 243px;height: 34px;margin-left: 15px;" class="theme1_text_editor" name="phonecaptcha"/>
-
+    
                         <div style="float: left; width: 118px;height: 38px;margin-left: 20px;">
                             <input type="button" style="position: relative;width: 118px;height: 38px;" name="getPhoneCaptcha" class="theme1_myhome_green_bt" value="<%=L'获取验证码'%>" onclick="get_phone_captcha()"/>
                             <!-- <img ClickThrough="true" zorder="1" style="position: relative; width: 88px;height: 17px;margin-top: 10px;margin-left: 16px;" 
                                 src="Texture/Aries/Creator/keepwork/Certification/zi_huoquyanzhengm_88X17_32bits.png#0 0 88 17" /> -->
                         </div>
-
+    
                     </div>
                     <div style="margin-left: 240px;margin-top: 18px;">
                         <input type="button" class="theme1_myhome_blue_bt" value="<%= L'确认' %>" onclick="bind()" />
                         <input type="button" style="margin-left: 56px;" class="theme1_myhome_gray_bt" value="<%= L'跳过' %>" onclick="close()" />
                     </div>
-
+    
                     <div align='center' style="width: 420px;margin-top: 15px;">
                         <img style="width: 420px;height: 161px;" src="Texture/Aries/Creator/keepwork/RedSummerCamp/UserVip/huiyuanlibao_420x161_32bits.png#0 0 420 161" />
                     </div>
-
+    
                 </div>
             </kp:window>
-        </div>
+        </pe:container>
     </pe:mcml>
 </body>
 </html>
