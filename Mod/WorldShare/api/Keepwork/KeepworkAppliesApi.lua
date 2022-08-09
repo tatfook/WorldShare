@@ -10,7 +10,7 @@ local KeepworkAppliesApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkApp
 ------------------------------------------------------------
 ]]
 
-local KeepworkBaseApi = NPL.load('./KeepworkAppliesApi.lua')
+local KeepworkBaseApi = NPL.load('./BaseApi.lua')
 
 local KeepworkAppliesApi = NPL.export()
 
