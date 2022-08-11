@@ -39,34 +39,14 @@ function MdParser:MdToHtml(data, toString)
     for key, line in ipairs(dataList) do
         if self:GetLineType(line) == HASHTAG then
             local hashTagNum = self:GetHashTagNum(line)
-            local handleLine = self:GetHashTagVal(hashTagNum, line)
-            local isBold = false
-
-            if string.find(handleLine, '^**') then
-                isBold = true
-                handleLine = handleLine:gsub('**', '')
-            end
-
             local fontSize = 24 - hashTagNum * 2
-            local lineFormat
-
-            if isBold then
-                lineFormat =
-                    format(
-                        '<div style="font-weight: bold;font-size: %dpx;base-font-size: %dpx;margin-top: 2px;margin-bottom: 3px;">%s</div>',
-                        fontSize,
-                        fontSize,
-                        handleLine
-                    )
-            else
-                lineFormat =
-                    format(
-                        '<div style="font-size: %dpx;base-font-size: %dpx;margin-top: 2px;margin-bottom: 3px;">%s</div>',
-                        fontSize,
-                        fontSize,
-                        handleLine
-                    )
-            end
+            local lineFormat =
+                format(
+                    '<div style="font-size: %dpx;base-font-size: %dpx;margin-top: 2px;margin-bottom: 3px;">%s</div>',
+                    fontSize,
+                    fontSize,
+                    self:GetHashTagVal(hashTagNum, line)
+                )
 
             htmlDataList[#htmlDataList + 1] = lineFormat
 
@@ -74,19 +54,7 @@ function MdParser:MdToHtml(data, toString)
                 htmlStr = htmlStr .. lineFormat .. '\r\n'
             end
         elseif self:GetLineType(line) == DASH then
-            line = line:gsub('^- ', '')
-
-            local text, link = string.match(line, '%[(.+)%]%((.+)%)')
-            local lineFormat
-
-            if text then
-                lineFormat = format('<div><a href="%s" style="color: #E4CC04;">%s</a></div>', link, text) 
-            else
-                lineFormat = format('<div>%s</div>', line) 
-            end
-
-            echo(lineFormat, true)
-
+            local lineFormat = format('<div>%s</div>', line) 
             htmlDataList[#htmlDataList + 1] = lineFormat
 
             if toString then
@@ -321,7 +289,7 @@ end
 
 function MdParser:GetKeyVal(str)
     if not str or type(str) ~= 'string' then
-        return
+        return false
     end
 
     local startIndex, endIndex = string.find(str, '^- ')

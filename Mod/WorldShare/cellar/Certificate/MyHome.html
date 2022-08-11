@@ -1,267 +1,276 @@
-<html>
-    <body>
-        <pe:mcml>
-            <script type='text/npl'>
-                <![CDATA[
-                    -- helper
-                    local Validated = NPL.load('(gl)Mod/WorldShare/helper/Validated.lua')
+<body>
+    <pe:mcml>
+        <script type="text/npl">
+            <![CDATA[
+                -- helper
+                local Validated = NPL.load("(gl)Mod/WorldShare/helper/Validated.lua")
 
-                    -- UI
-                    local RegisterModal = NPL.load('(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua')
+                -- UI
+                local RegisterModal = NPL.load("(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua")
 
-                    -- service
-                    local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceSession.lua')
+                -- service
+                local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceSession.lua")
 
-                    -- api
-                    local KeepworkUsersApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkUsersApi.lua')
+                local page = document:GetPageCtrl()
+ 
+                local mode = page:GetRequestParam('mode')
 
-                    local page = document:GetPageCtrl()
-    
-                    local mode = page:GetRequestParam('mode')
+                canClose = true
 
-                    canClose = true
+                if mode == 'summer' then
+                    canClose = false
+                end
 
-                    if mode == 'summer' then
-                        canClose = false
+                isClickedGetPhoneCaptcha = false
+
+                function close()
+                    if page.certificateCallback and type(page.certificateCallback) == 'function' then
+                        page.certificateCallback()
                     end
 
-                    hasBeenSent = false
+                    page:CloseWindow()
+                end
 
-                    function close()
-                        if page.certificateCallback and type(page.certificateCallback) == 'function' then
-                            page.certificateCallback()
-                        end
+                function bind()
+                    GameLogic.GetFilters():apply_filters("user_behavior", 1, "click.world.certificate.bind")
 
-                        page:CloseWindow()
+                    local phonenumber = page:GetValue("phonenumber")
+                    local phonecaptcha = page:GetValue("phonecaptcha")
+
+                    if not phonenumber or not Validated:Phone(phonenumber) then
+                        GameLogic.AddBBS(nil, L"手机格式错误", 3000, "255 0 0")
+                        return false
                     end
 
-                    function bind()
-                        GameLogic.GetFilters():apply_filters('user_behavior', 1, 'click.world.certificate.bind')
-
-                        local phonenumber = page:GetValue('phonenumber')
-                        local phonecaptcha = page:GetValue('phonecaptcha')
-
-                        if not phonenumber or not Validated:Phone(phonenumber) then
-                            GameLogic.AddBBS(nil, L'手机格式错误', 3000, '255 0 0')
-                            return false
-                        end
-
-                        if not phonecaptcha or #phonecaptcha == 0 then
-                            GameLogic.AddBBS(nil, L'手机验证码格式错误', 3000, '255 0 0')
-                            return false
-                        end
-
-                        -- only classification
-                        Mod.WorldShare.MsgBox:Wait()
-
-                        RegisterModal:Classification(phonenumber, phonecaptcha, function(data)
-                            KeepworkServiceSession:CheckVerify()
-                            Mod.WorldShare.MsgBox:Close()
-                            close()
-                        end, true)
+                    if not phonecaptcha or #phonecaptcha == 0 then
+                        GameLogic.AddBBS(nil, L"手机验证码格式错误", 3000, "255 0 0")
+                        return false
                     end
 
-                    function send()
-                        if hasBeenSent then
-                            return 
-                        end
+                    -- only classification
+                    Mod.WorldShare.MsgBox:Wait()
+                    RegisterModal:Classification(phonenumber, phonecaptcha, function(data)
+                        KeepworkServiceSession:CheckVerify()
+                        Mod.WorldShare.MsgBox:Close()
+                        close()
+                    end, true)
+                end
 
-                        local phoneNumber = page:GetValue('phonenumber')
+                function check_phone_number(callback)
+                    local phonenumber = page:GetValue("phonenumber")
 
-                        if not Validated:Phone(phoneNumber) then
-                            GameLogic.AddBBS(nil, L'手机格式错误', 3000, '255 0 0')
-                            return
-                        end
+                    if type(phonenumber) ~= "string" then
+                        return false
+                    end
 
-                        hasBeenSent = true
+                    if #phonenumber == 0 then
+                        return false
+                    end
 
-                        local times = 60
+                    KeepworkServiceSession:CheckPhonenumberExist(phonenumber, function(bIsExist)
+                        if bIsExist then
+                            page:SetValue("is_bind", false)
 
-                        local timer = commonlib.Timer:new({
-                            callbackFunc = function(timer)
-                                page:SetValue('send_button', format('%s(%ds)', L'重新发送', times))
-
-                                if times == 0 then
-                                    hasBeenSent = false
-                                    page:SetValue('send_button', L'发送短信')
-                                    timer:Change(nil, nil)
-                                end
-
-                                times = times - 1
+                            if page.callback and type(callback) == "function" then
+                                callback(false)
                             end
-                        })
+                        end
+                    end)
+                end
 
-                        KeepworkUsersApi:ParentCellphoneCaptcha(
-                            phoneNumber,
-                            function(data, err)
-                                if err ~= 200 or
-                                   data ~= 'OK' then
+                function get_phone_captcha()
+                    GameLogic.GetFilters():apply_filters("user_behavior", 1, "click.world.certificate.get_phone_captcha")
+
+                    if not Validated:Phone(page:GetValue("phonenumber")) then
+                        GameLogic.AddBBS(nil, L"手机格式错误", 3000, "255 0 0")
+                        return false
+                    end
+
+                    if isClickedGetPhoneCaptcha then
+                        return false 
+                    end
+
+                    isClickedGetPhoneCaptcha = true
+
+                    local times = 60
+
+                    local timer = commonlib.Timer:new({
+                        callbackFunc = function(timer)
+                            page:SetValue("getPhoneCaptcha", format("%s(%ds)", L"重新发送", times))
+
+                            if times == 0 then
+                                isClickedGetPhoneCaptcha = false
+                                page:SetValue("getPhoneCaptcha", L"获取验证码")
+                                timer:Change(nil, nil)
+                            end
+
+                            times = times - 1
+                        end
+                    })
+
+                    KeepworkServiceSession:GetPhoneCaptcha(page:GetValue("phonenumber"), function(data, err)
+                        if err ~= 200 then
+                            isClickedGetPhoneCaptcha = false
+                            page:SetValue("getPhoneCaptcha", L"获取验证码")
+                            GameLogic.AddBBS(nil, format("%s%s(%d)", L"发送验证码失败，错误信息：", data.message or '', data.code or 0), 5000, "255 0 0")
+                            timer:Change(nil, nil)
+                        end
+                    end)
+
+                    timer:Change(1000, 1000)
+                end
+
+                function get_background_width()
+                    local Screen = System.Windows.Screen
+                    local width = Screen:GetWidth()
+                    Screen:PushDesignResolution(1280, 720)
+
+                    return (width - 255)
+                end
+
+                function get_background_height()
+                    local Screen = System.Windows.Screen
+                    local height = Screen:GetHeight()
+
+                    return (height - 93)
+                end
+
+                function checkRealName()
+                    KeepworkServiceSession:Profile(function(data, err)
+                        if err ~= 200 or not data or type(data) ~= 'table' then
+                            return  
+                        end
+
+                        if data.realname then
+                            if page.Success and type(page.Success) == "function" then
+                                if page and page.Success then
+                                    page.Success()
+                                end
+                                Mod.WorldShare.MsgBox:Close()
+                                page:CloseWindow()
+                            end
+                        else
+                            Mod.WorldShare.Utils.SetTimeOut(function()
+                                if page.closed then
                                     return
                                 end
+                                checkRealName()
+                            end, 1000)
+                        end
+                    end, Mod.WorldShare.Store:Get('user/token'))
+                end
 
-                                _guihelper.MessageBox(L'发送成功')
-                            end
-                        )
+                checkRealName()
+            ]]>
+        </script>
+        <style type="text/mscc" src="Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss">
+            {
+                theme1_text_editor = {
+                    background = 'Texture/Aries/Creator/keepwork/Certification/zi_shurudi_32X32_32bits.png#0 0 32 32:8 8 8 8',
+                    textcolor = '#000000',
+                    ["font-size"] = 20,
+                },
+                theme1_myhome_green_bt = {
+                    background = 'Texture/Aries/Creator/keepwork/Certification/btn_lv_32X32_32bits.png#0 0 32 32:8 8 8 8',
+                    textcolor = '#000000',
+                },
+                
+                theme1_myhome_blue_bt = {
+                    background = 'Texture/Aries/Creator/keepwork/Certification/btn_lan_32X32_32bits.png#0 0 32 32:8 8 8 8',
+                    width = 104,
+                    height = 32,
+                    folat = "left",
+                },
 
-                        timer:Change(1000, 1000)
-                    end
-
-                    function get_background_width()
-                        local Screen = System.Windows.Screen
-                        local width = Screen:GetWidth()
-                        Screen:PushDesignResolution(1280, 720)
-
-                        return (width - 255)
-                    end
-
-                    function get_background_height()
-                        local Screen = System.Windows.Screen
-                        local height = Screen:GetHeight()
-
-                        return (height - 93)
-                    end
-                ]]>
-            </script>
-            <style type='text/mscc' src='Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss'>
-                {
-                    theme1_text_editor = {
-                        background = 'Texture/Aries/Creator/keepwork/Certification/zi_shurudi_32X32_32bits.png#0 0 32 32:8 8 8 8',
-                        textcolor = '#000000',
-                        ['font-size'] = 20,
-                    },
-                    theme1_myhome_green_bt = {
-                        background = 'Texture/Aries/Creator/keepwork/Certification/btn_lv_32X32_32bits.png#0 0 32 32:8 8 8 8',
-                        textcolor = '#000000',
-                    },
-                    theme1_myhome_blue_bt = {
-                        background = 'Texture/Aries/Creator/keepwork/Certification/btn_lan_32X32_32bits.png#0 0 32 32:8 8 8 8',
-                        width = 104,
-                        height = 32,
-                        folat = 'left',
-                    },
-                    theme1_myhome_gray_bt = {
-                        background = 'Texture/Aries/Creator/keepwork/Certification/btn_hs_32X32_32bits.png#0 0 32 32:8 8 8 8',
-                        width = 104,
-                        height = 32,
-                        folat = 'left',
-                    },
-                }
-            </style>
-            <pe:if condition='<%= canClose %>'>
-                <div width='100%' height='100%' style='position: relative;background: url();'>
-                </div>
-            </pe:if>
-            <pe:if condition='<%= not canClose %>'>
-                <pe:container
-                    width='<%= get_background_width() %>'
-                    height='100%'
-                    style='background-color: #00000099;
-                        position: relative;'>
-                </pe:container>
-                <pe:container
-                    alignment='_rb'
-                    width='255'
-                    height='<%= get_background_height() %>'
-                    style='background-color: #00000099;
-                        position: relative;'>
-                </pe:container>
-            </pe:if>
+                theme1_myhome_gray_bt = {
+                    background = 'Texture/Aries/Creator/keepwork/Certification/btn_hs_32X32_32bits.png#0 0 32 32:8 8 8 8',
+                    width = 104,
+                    height = 32,
+                    folat = "left",
+                },
+            }
+        </style>
+        <pe:if condition='<%= canClose %>'>
+            <div width="100%" height="100%" style='position: relative;background: url();'>
+            </div>
+        </pe:if>
+        <pe:if condition='<%= not canClose %>'>
             <pe:container
-                alignment='_ct'
+                width='<%= get_background_width() %>'
+                height='100%'
+                style='background-color: #00000099;
+                       position: relative;'>
+            </pe:container>
+            <pe:container
+                alignment='_rb'
+                width='255'
+                height='<%= get_background_height() %>'
+                style='background-color: #00000099;
+                       position: relative;'>
+            </pe:container>
+        </pe:if>
+        <pe:container
+            alignment='_ct'
+            width='760'
+            height='490'
+            style='background: url();
+                   margin-top: -245px;
+                   margin-left: -380px;'>
+            <kp:window
                 width='760'
                 height='490'
-                style='background: url();
-                    margin-top: -245px;
-                    margin-left: -380px;'>
-                <kp:window
-                    width='760'
-                    height='490'
-                    onclose='close()'
-                    is_hide_close='<%= not canClose %>'>
-                    <img style='position: relative;
-                                width: 97px;
-                                height: 25px;
-                                margin-left: 15px;
-                                margin-top: 7px;'
-                        src='Texture/Aries/Creator/keepwork/Certification/shiming_97X25_32bits.png#0 0 97 25' />
-                    <div class='theme1_header'></div>
-                    <div style='padding: 10px;
-                                padding-top: 40px;'>
-                        <div align='center'
-                             style='width: 525px;
-                                    height: 40px;
-                                    padding-top: 8px;
-                                    text-align: center;
-                                    background: url(Texture/Aries/Creator/keepwork/Certification/tu1_469X40_32bits.png#0 0 469 40);'>
-                            <%= L'输入家长手机号发送认证短信，并提醒家长点击认证链接，即可完成实名认证。' %>
+                onclose='close()'
+                is_hide_close="<%= not canClose %>">
+                <img style="position: relative; width: 97px;height: 25px;margin-left: 15px; margin-top: 7px;" src="Texture/Aries/Creator/keepwork/Certification/shiming_97X25_32bits.png#0 0 97 25" />
+                <div class="theme1_header"></div>
+                <div style="padding: 10px;padding-top: 20px;">
+                    <div style="margin-left: 136px;text-align: center;">
+                        <div style="width: 469px;height: 40px;padding-top: 8px; background: url(Texture/Aries/Creator/keepwork/Certification/tu1_469X40_32bits.png#0 0 469 40);">
+                            输入手机号码和验证码，即可完成实名认证。
                         </div>
-                        <div align='center'
-                             style='width: 469px;
-                                    height: 40px;
-                                    margin-top: 8px;
-                                    text-align: center;'>
-                            <%= L'完成实名认证后， 你创造的世界才能被别人看到哦。' %>
+                        <div style="width: 469px;height: 40px;margin-top: 8px;">
+                            完成实名认证后， 你创造的世界才能被别人看到哦。
                         </div>
-                        <div style='font-size: 18px;
-                                    base-font-size: 18px;
-                                    margin-left: 148px;
-                                    margin-top: 5px;'>
-                            <img style='width: 53px;height: 17px;margin-top: 9px;'
-                                src='Texture/Aries/Creator/keepwork/Certification/zi_shoujihao_53X17_32bits.png#0 0 53 17' />
-                            <input type='text'
-                                style='width: 375px;height: 34px;margin-left: 15px;'
-                                class='theme1_text_editor'
-                                name='phonenumber' />
-                        </div>
-                        <pe:if condition='<%= canClose %>'>
-                            <div align='center'
-                                 style='margin-top: 18px;
-                                        width: 312px'>
-                                <input type='button'
-                                       name='send_button'
-                                       style='width: 128px;
-                                              height: 45px;
-                                              float: left;
-                                              text-offset-y: -2;
-                                              background: url(Texture/Aries/Creator/paracraft/fasong_128x45_32bits.png#0 0 128 45)'
-                                       value='<%= L"发送短信" %>'
-                                    onclick='send()' />
-                                <input type='button'
-                                    style='margin-left: 56px;
-                                           width: 128px;
-                                           height: 45px;
-                                           float: left;
-                                           text-offset-y: -2;
-                                           background: url(Texture/Aries/Creator/paracraft/tiaoguo_128x45_32bits.png#0 0 128 45)'
-                                    value='<%= L"跳过" %>'
-                                    onclick='close()' />
-                            </div>
-                        </pe:if>
-                        <pe:if condition='<%= not canClose %>'>
-                            <div align='center'
-                                 style='margin-top: 18px;
-                                        width: 128px'>
-                                <input type='button'
-                                       style='width: 128px;
-                                              height: 45px;
-                                              float: left;
-                                              text-offset-y: -2;
-                                              background: url(Texture/Aries/Creator/paracraft/fasong_128x45_32bits.png#0 0 128 45)'
-                                       value='<%= L"发送短信" %>'
-                                    onclick='send()' />
-                            </div>
-                        </pe:if>
-                        <div align='center'
-                            style='width: 420px;
-                                    height: 161px;
-                                    margin-top: 15px;'>
-                            <img style='width: 420px;
-                                        height: 161px;'
-                                src='Texture/Aries/Creator/paracraft/jiangli2_420x161_32bits.png#0 0 420 161' />
-                        </div>
+                        <!-- <img style="width: 469px;height: 40px;" src="Texture/Aries/Creator/keepwork/Certification/tu1_469X40_32bits.png#0 0 469 40" /> -->
                     </div>
-                </kp:window>
-            </pe:container>
-        </pe:mcml>
-    </body>
+                    <div style="font-size: 18px;base-font-size: 18px;margin-left: 148px;margin-top: 5px;">
+                        <!-- <%= L'手机号' %> -->
+                        <img style="width: 53px;height: 17px;margin-top: 9px;" src="Texture/Aries/Creator/keepwork/Certification/zi_shoujihao_53X17_32bits.png#0 0 53 17" />
+                        <input type="text" style="width: 375px;height: 34px;margin-left: 15px;" class="theme1_text_editor" onfocusout="check_phone_number()" name="phonenumber"/>
+                    </div>
+                    <div style="font-size: 18px;base-font-size: 18px;margin-left: 148px;margin-top: 20px;">
+                        <!-- <%= L'验证码' %> -->
+                        <img style="width: 53px;height: 17px;margin-top: 9px;" src="Texture/Aries/Creator/keepwork/Certification/zi_yanzhengma_53X17_32bits.png#0 0 53 17" />
+                        <input type="text" style="width: 243px;height: 34px;margin-left: 15px;" class="theme1_text_editor" name="phonecaptcha"/>
+    
+                        <div style="float: left; width: 118px;height: 38px;margin-left: 20px;">
+                            <input type="button" style="position: relative;width: 118px;height: 38px;" name="getPhoneCaptcha" class="theme1_myhome_green_bt" value="<%=L'获取验证码'%>" onclick="get_phone_captcha()"/>
+                            <!-- <img ClickThrough="true" zorder="1" style="position: relative; width: 88px;height: 17px;margin-top: 10px;margin-left: 16px;" 
+                                src="Texture/Aries/Creator/keepwork/Certification/zi_huoquyanzhengm_88X17_32bits.png#0 0 88 17" /> -->
+                        </div>
+    
+                    </div>
+                    <pe:if condition='<%= canClose %>'>
+                        <div style="margin-left: 240px;margin-top: 18px;">
+                            <input type="button" class="theme1_myhome_blue_bt" value="<%= L'确认' %>" onclick="bind()" />
+                            <input type="button" style="margin-left: 56px;" class="theme1_myhome_gray_bt" value="<%= L'跳过' %>" onclick="close()" />
+                        </div>
+                    </pe:if>
+                    <pe:if condition='<%= not canClose %>'>
+                        <div align='center'
+                             width='104'
+                             style='margin-top: 18px;'>
+                            <input type="button" class="theme1_myhome_blue_bt" value="<%= L'确认' %>" onclick="bind()" />
+                        </div>
+                    </pe:if>
+                    <div align='center' style="width: 420px;margin-top: 15px;">
+                        <img style="width: 420px;height: 161px;" src="Texture/Aries/Creator/keepwork/RedSummerCamp/UserVip/huiyuanlibao_420x161_32bits.png#0 0 420 161" />
+                    </div>
+                </div>
+            </kp:window>
+        </pe:container>
+    </pe:mcml>
+</body>
 </html>
+
+
