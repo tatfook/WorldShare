@@ -12,6 +12,9 @@
                     -- service
                     local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceSession.lua')
 
+                    -- api
+                    local KeepworkUsersApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkUsersApi.lua')
+
                     local page = document:GetPageCtrl()
     
                     local mode = page:GetRequestParam('mode')
@@ -22,7 +25,7 @@
                         canClose = false
                     end
 
-                    isClickedGetPhoneCaptcha = false
+                    hasBeenSent = false
 
                     function close()
                         if page.certificateCallback and type(page.certificateCallback) == 'function' then
@@ -50,6 +53,7 @@
 
                         -- only classification
                         Mod.WorldShare.MsgBox:Wait()
+
                         RegisterModal:Classification(phonenumber, phonecaptcha, function(data)
                             KeepworkServiceSession:CheckVerify()
                             Mod.WorldShare.MsgBox:Close()
@@ -57,51 +61,29 @@
                         end, true)
                     end
 
-                    function check_phone_number(callback)
-                        local phonenumber = page:GetValue('phonenumber')
+                    function send()
+                        if hasBeenSent then
+                            return 
+                        end
 
-                        if not phonenumber or
-                        type(phonenumber) ~= 'string' or
-                        #phonenumber == 0  then
+                        local phoneNumber = page:GetValue('phonenumber')
+
+                        if not Validated:Phone(phoneNumber) then
+                            GameLogic.AddBBS(nil, L'手机格式错误', 3000, '255 0 0')
                             return
                         end
 
-                        KeepworkServiceSession:CheckPhonenumberExist(phonenumber, function(bIsExist)
-                            if bIsExist then
-                                page:SetValue('is_bind', false)
-
-                                if page.callback and
-                                callback and
-                                type(callback) == 'function' then
-                                    callback(false)
-                                end
-                            end
-                        end)
-                    end
-
-                    function get_phone_captcha()
-                        GameLogic.GetFilters():apply_filters('user_behavior', 1, 'click.world.certificate.get_phone_captcha')
-
-                        if not Validated:Phone(page:GetValue('phonenumber')) then
-                            GameLogic.AddBBS(nil, L'手机格式错误', 3000, '255 0 0')
-                            return false
-                        end
-
-                        if isClickedGetPhoneCaptcha then
-                            return false 
-                        end
-
-                        isClickedGetPhoneCaptcha = true
+                        hasBeenSent = true
 
                         local times = 60
 
                         local timer = commonlib.Timer:new({
                             callbackFunc = function(timer)
-                                page:SetValue('getPhoneCaptcha', format('%s(%ds)', L'重新发送', times))
+                                page:SetValue('sendButton', format('%s(%ds)', L'重新发送', times))
 
                                 if times == 0 then
-                                    isClickedGetPhoneCaptcha = false
-                                    page:SetValue('getPhoneCaptcha', L'获取验证码')
+                                    hasBeenSent = false
+                                    page:SetValue('sendButton', L'发送短信')
                                     timer:Change(nil, nil)
                                 end
 
@@ -109,14 +91,17 @@
                             end
                         })
 
-                        KeepworkServiceSession:GetPhoneCaptcha(page:GetValue('phonenumber'), function(data, err)
-                            if err ~= 200 then
-                                isClickedGetPhoneCaptcha = false
-                                page:SetValue('getPhoneCaptcha', L'获取验证码')
-                                GameLogic.AddBBS(nil, format('%s%s(%d)', L'发送验证码失败，错误信息：', data.message or '', data.code or 0), 5000, '255 0 0')
-                                timer:Change(nil, nil)
+                        KeepworkUsersApi:ParentCellphoneCaptcha(
+                            phoneNumber,
+                            function(data, err)
+                                if err ~= 200 or
+                                   data ~= 'OK' then
+                                    return
+                                end
+
+                                _guihelper.MessageBox(L'发送成功')
                             end
-                        end)
+                        )
 
                         timer:Change(1000, 1000)
                     end
@@ -135,37 +120,6 @@
 
                         return (height - 93)
                     end
-
-                    function checkRealName()
-                        KeepworkServiceSession:Profile(function(data, err)
-                            if err ~= 200 or
-                            not data or
-                            type(data) ~= 'table' then
-                                return  
-                            end
-
-                            if data.realname then
-                                if page.Success and type(page.Success) == 'function' then
-                                    if page and page.Success then
-                                        page.Success()
-                                    end
-
-                                    Mod.WorldShare.MsgBox:Close()
-                                    page:CloseWindow()
-                                end
-                            else
-                                Mod.WorldShare.Utils.SetTimeOut(function()
-                                    if page.closed then
-                                        return
-                                    end
-
-                                    checkRealName()
-                                end, 1500)
-                            end
-                        end, Mod.WorldShare.Store:Get('user/token'))
-                    end
-
-                    checkRealName()
                 ]]>
             </script>
             <style type='text/mscc' src='Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss'>
@@ -179,14 +133,12 @@
                         background = 'Texture/Aries/Creator/keepwork/Certification/btn_lv_32X32_32bits.png#0 0 32 32:8 8 8 8',
                         textcolor = '#000000',
                     },
-                    
                     theme1_myhome_blue_bt = {
                         background = 'Texture/Aries/Creator/keepwork/Certification/btn_lan_32X32_32bits.png#0 0 32 32:8 8 8 8',
                         width = 104,
                         height = 32,
                         folat = 'left',
                     },
-
                     theme1_myhome_gray_bt = {
                         background = 'Texture/Aries/Creator/keepwork/Certification/btn_hs_32X32_32bits.png#0 0 32 32:8 8 8 8',
                         width = 104,
@@ -259,7 +211,6 @@
                             <input type='text'
                                 style='width: 375px;height: 34px;margin-left: 15px;'
                                 class='theme1_text_editor'
-                                onfocusout='check_phone_number()'
                                 name='phonenumber' />
                         </div>
                         <pe:if condition='<%= canClose %>'>
@@ -267,13 +218,14 @@
                                  style='margin-top: 18px;
                                         width: 312px'>
                                 <input type='button'
+                                       name='sendButton'
                                        style='width: 128px;
                                               height: 45px;
                                               float: left;
                                               text-offset-y: -2;
                                               background: url(Texture/Aries/Creator/paracraft/fasong_128x45_32bits.png#0 0 128 45)'
                                        value='<%= L"发送短信" %>'
-                                    onclick='bind()' />
+                                    onclick='send()' />
                                 <input type='button'
                                     style='margin-left: 56px;
                                            width: 128px;
@@ -296,7 +248,7 @@
                                               text-offset-y: -2;
                                               background: url(Texture/Aries/Creator/paracraft/fasong_128x45_32bits.png#0 0 128 45)'
                                        value='<%= L"发送短信" %>'
-                                    onclick='bind()' />
+                                    onclick='send()' />
                             </div>
                         </pe:if>
                         <div align='center'
