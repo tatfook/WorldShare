@@ -45,7 +45,7 @@ MainLogin.phonecaptcha = ''
 MainLogin.bindphone = nil
 
 function MainLogin:GetLoginBackground()
-    return 'Texture/Aries/Creator/Paracraft/dengluye_1280x720_32bits.png#0 0 1280 720'
+    return 'Texture/Aries/Creator/Paracraft/dengluye_1280x720_32bits.png'
 end
 
 function MainLogin:Init()
