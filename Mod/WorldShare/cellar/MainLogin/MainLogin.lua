@@ -174,7 +174,7 @@ function MainLogin:Show3()
     end
 
     self:ShowExtra()
-    -- self:ShowAnnouncement()
+    self:ShowAnnouncement()
 
     -- tricky: Delay show login because in this step some UI library may be not loaded.
     Mod.WorldShare.Utils.SetTimeOut(function()
@@ -607,15 +607,15 @@ function MainLogin:ShowAnnouncement()
                 isShowTitleBar = false,
                 DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
                 style = CommonCtrl.WindowFrame.ContainerStyle,
-                zorder = zorder or -1,
+                zorder = 0,
                 allowDrag = false,
                 bShow = nil,
                 directPosition = true,
-                align = '_fi',
-                x = 0,
-                y = 0,
-                width = 0,
-                height = 0,
+                align = '_ctl',
+                x = 65,
+                y = 72,
+                width = 300,
+                height = 421,
                 cancelShowAnimation = true,
                 bToggleShowHide = true,
             }

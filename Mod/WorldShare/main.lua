@@ -90,7 +90,7 @@ function WorldShare:init()
     -- init long tcp connection
     KeepworkServiceSession:LongConnectionInit(function(result)
         if not result or type(result) ~= 'table' then
-            return false
+            return
         end
 
         if result.action == 'kickOut' then
