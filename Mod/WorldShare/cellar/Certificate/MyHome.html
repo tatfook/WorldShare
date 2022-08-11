@@ -79,11 +79,11 @@
 
                         local timer = commonlib.Timer:new({
                             callbackFunc = function(timer)
-                                page:SetValue('sendButton', format('%s(%ds)', L'重新发送', times))
+                                page:SetValue('send_button', format('%s(%ds)', L'重新发送', times))
 
                                 if times == 0 then
                                     hasBeenSent = false
-                                    page:SetValue('sendButton', L'发送短信')
+                                    page:SetValue('send_button', L'发送短信')
                                     timer:Change(nil, nil)
                                 end
 
@@ -218,7 +218,7 @@
                                  style='margin-top: 18px;
                                         width: 312px'>
                                 <input type='button'
-                                       name='sendButton'
+                                       name='send_button'
                                        style='width: 128px;
                                               height: 45px;
                                               float: left;
