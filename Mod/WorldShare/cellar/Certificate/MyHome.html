@@ -39,12 +39,12 @@
 
                     if not phonenumber or not Validated:Phone(phonenumber) then
                         GameLogic.AddBBS(nil, L"手机格式错误", 3000, "255 0 0")
-                        return false
+                        return
                     end
 
                     if not phonecaptcha or #phonecaptcha == 0 then
                         GameLogic.AddBBS(nil, L"手机验证码格式错误", 3000, "255 0 0")
-                        return false
+                        return
                     end
 
                     -- only classification
@@ -135,32 +135,45 @@
                     return (height - 93)
                 end
 
-                function checkRealName()
-                    KeepworkServiceSession:Profile(function(data, err)
-                        if err ~= 200 or not data or type(data) ~= 'table' then
-                            return  
-                        end
+                local check_timer
+                local is_finish = true
 
-                        if data.realname then
-                            if page.Success and type(page.Success) == "function" then
-                                if page and page.Success then
-                                    page.Success()
-                                end
-                                Mod.WorldShare.MsgBox:Close()
-                                page:CloseWindow()
+                function checkRealName()
+                    if not is_finish then
+                        return
+                    end
+
+                    KeepworkServiceSession:Profile(
+                        function(data, err)
+                            if err ~= 200 or not data or type(data) ~= 'table' then
+                                is_finish = true
+                                return  
                             end
-                        else
-                            Mod.WorldShare.Utils.SetTimeOut(function()
+
+                            if data.realname then
+                                KeepworkServiceSession:CheckVerify()
+                                close()
+
+                                check_timer:Change(nil, nil)
+                            else
                                 if page.closed then
-                                    return
+                                    check_timer:Change(nil, nil)
                                 end
-                                checkRealName()
-                            end, 1000)
-                        end
-                    end, Mod.WorldShare.Store:Get('user/token'))
+                            end
+
+                            is_finish = true
+                        end,
+                        Mod.WorldShare.Store:Get('user/token')
+                    )
                 end
 
-                checkRealName()
+                check_timer = commonlib.Timer:new({
+                    callbackFunc = function()
+                        checkRealName()
+                    end
+                })
+
+                check_timer:Change(1500, 1500)
             ]]>
         </script>
         <style type="text/mscc" src="Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss">
