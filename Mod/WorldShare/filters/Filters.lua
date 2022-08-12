@@ -27,6 +27,7 @@ local Certificate = NPL.load("(gl)Mod/WorldShare/cellar/Certificate/Certificate.
 -- api
 local QiniuRootApi = NPL.load("(gl)Mod/WorldShare/api/Qiniu/QiniuRootApi.lua")
 local SocketBaseApi = NPL.load("(gl)Mod/WorldShare/api/Socket/BaseApi.lua")
+local KeepworkUsersApiFilter = NPL.load('(gl)Mod/WorldShare/filters/api/Keepwork/KeepworkUsersApiFilter.lua')
 
 -- service
 local Compare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
@@ -43,6 +44,9 @@ local Desktop = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop")
 
 -- command
 local MenuCommand = NPL.load('(gl)Mod/WorldShare/command/Menu.lua')
+
+-- helper
+local ValidatedFilter = NPL.load('(gl)Mod/WorldShare/filters/helper/ValidatedFilter.lua')
 
 -- load all filters
 local MySchoolFilter = NPL.load('(gl)Mod/WorldShare/filters/cellar/MySchool/MySchoolFilter.lua')
@@ -107,6 +111,8 @@ function Filters:Init()
     -- init keepwork projects api filter
     KeepworkProjectsApiFilter:Init()
 
+    KeepworkUsersApiFilter:Init()
+
     -- init common load world filter
     CommonLoadWorldFilter:Init()
 
@@ -133,6 +139,8 @@ function Filters:Init()
     SyncToDataSourceFilter:Init()
 
     OpusFilter:Init()
+
+    ValidatedFilter:Init()
 
     GameLogic.GetFilters():add_filter(
         'ShowClientUpdaterNotice',

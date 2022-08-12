@@ -19,7 +19,8 @@ local PlayerAssetFile = commonlib.gettable('MyCompany.Aries.Game.EntityManager.P
 -- service
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceSession.lua')
 local SessionsData = NPL.load('(gl)Mod/WorldShare/database/SessionsData.lua')
-local KeepworkServiceSchoolAndOrg = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/SchoolAndOrg.lua")
+local KeepworkServiceSchoolAndOrg = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/SchoolAndOrg.lua')
+local HttpRequest = NPL.load('(gl)Mod/WorldShare/service/HttpRequest.lua')
 
 -- bottles
 local Create = NPL.load('(gl)Mod/WorldShare/cellar/Create/Create.lua')
@@ -28,6 +29,9 @@ local OfflineAccountManager = NPL.load('(gl)Mod/WorldShare/cellar/OfflineAccount
 
 -- helper
 local Validated = NPL.load('(gl)Mod/WorldShare/helper/Validated.lua')
+
+-- parser
+local MdParser = NPL.load('(gl)Mod/WorldShare/parser/MdParser.lua')
 
 local MainLogin = NPL.export()
 
@@ -170,6 +174,7 @@ function MainLogin:Show3()
     end
 
     self:ShowExtra()
+    self:ShowAnnouncement()
 
     -- tricky: Delay show login because in this step some UI library may be not loaded.
     Mod.WorldShare.Utils.SetTimeOut(function()
@@ -188,19 +193,31 @@ function MainLogin:ShowLogin(isModal, zorder)
         MainLoginLoginPage:CloseWindow()
     end 
 
-    Mod.WorldShare.Utils.ShowWindow(
-        0,
-        0,
-        'Mod/WorldShare/cellar/MainLogin/Theme/MainLoginLogin.html?is_modal=' .. (isModal and 'true' or 'false'),
-        'Mod.WorldShare.cellar.MainLogin.Login',
-        0,
-        0,
-        '_fi',
-        false,
-        zorder or -1,
-        nil,
-        false
-    )
+    local params = {
+        url = 'Mod/WorldShare/cellar/MainLogin/Theme/MainLoginLogin.html?is_modal=' .. (isModal and 'true' or 'false'),
+        name = 'Mod.WorldShare.cellar.MainLogin.Login',
+        isShowTitleBar = false,
+        DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
+        style = CommonCtrl.WindowFrame.ContainerStyle,
+        zorder = zorder or -1,
+        allowDrag = false,
+        bShow = nil,
+        directPosition = true,
+        align = '_fi',
+        x = 0,
+        y = 0,
+        width = 0,
+        height = 0,
+        cancelShowAnimation = true,
+        bToggleShowHide = true,
+    }
+
+    if not isModal then
+        params.DesignResolutionWidth = 1280
+        params.DesignResolutionHeight = 720
+    end
+
+    Mod.WorldShare.Utils.ShowWindow(params)
 
     MainLoginLoginPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Login')
 
@@ -237,7 +254,7 @@ function MainLogin:ShowLogin(isModal, zorder)
             end
 
             if PWDInfo.autoLogin then
-                GameLogic.GetFilters():apply_filters("on_start_login");
+                GameLogic.GetFilters():apply_filters('on_start_login');
                 MainLogin:LoginWithToken(PWDInfo.token, function(bSsucceed, reason, message)
                     if bSsucceed then
                         MainLoginLoginPage:SetUIValue('auto_login_name', true)
@@ -304,7 +321,7 @@ function MainLogin:ShowLogin(isModal, zorder)
                         return
                     end
     
-                    GameLogic.GetFilters():apply_filters("on_start_login");
+                    GameLogic.GetFilters():apply_filters('on_start_login');
     
                     MainLogin:LoginWithToken(
                         token,
@@ -575,7 +592,35 @@ function MainLogin:ShowExtra()
         nil,
         false
     )
-    
+end
+
+function MainLogin:ShowAnnouncement()
+    local url = 'https://api.keepwork.com/core/v0/repos/official%2Fparacraft/files/official%2Fparacraft%2FAnnouncement%2Fannouncement.md'
+
+    HttpRequest:Get(url, nil, nil, function(data, err)
+        self.announcement = MdParser:MdToHtml(data, true)
+
+        Mod.WorldShare.Utils.ShowWindow(
+            {
+                url = 'Mod/WorldShare/cellar/MainLogin/Theme/MainLoginAnnouncement.html',
+                name = 'Mod.WorldShare.cellar.MainLogin.Announcement',
+                isShowTitleBar = false,
+                DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
+                style = CommonCtrl.WindowFrame.ContainerStyle,
+                zorder = 0,
+                allowDrag = false,
+                bShow = nil,
+                directPosition = true,
+                align = '_ctl',
+                x = 65,
+                y = 72,
+                width = 300,
+                height = 421,
+                cancelShowAnimation = true,
+                bToggleShowHide = true,
+            }
+        )
+    end)
 end
 
 function MainLogin:Refresh(times)
@@ -615,6 +660,12 @@ function MainLogin:Close()
 
     if MainLoginExtraPage then
         MainLoginExtraPage:CloseWindow()
+    end
+
+    local MainLoginAnnouncementPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.MainLoginAnnouncement')
+
+    if MainLoginAnnouncementPage then
+        MainLoginAnnouncementPage:CloseWindow()
     end
 end
 
@@ -908,7 +959,7 @@ function MainLogin:LoginAction(callback)
             response.rememberMe = rememberMe
             response.password = password
 
-            if string.find(password, "paracraft.cn") == 1 then
+            if string.find(password, 'paracraft.cn') == 1 then
                 response.rememberMe = true
             end
 
@@ -1143,7 +1194,7 @@ function MainLogin:RegisterWithAccount(callback, autoLogin)
                 end
 
                 if state.isGetVip then
-                    local VipRewardPage = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/User/VipRewardPage.lua");
+                    local VipRewardPage = NPL.load('(gl)script/apps/Aries/Creator/Game/Tasks/User/VipRewardPage.lua');
                     VipRewardPage.SetShow(true);
                 end
 
@@ -1203,7 +1254,7 @@ function MainLogin:RegisterWithPhone(callback)
             end
             
             if state.isGetVip then
-                local VipRewardPage = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/User/VipRewardPage.lua");
+                local VipRewardPage = NPL.load('(gl)script/apps/Aries/Creator/Game/Tasks/User/VipRewardPage.lua');
                 VipRewardPage.SetShow(true);
             end
 
@@ -1261,11 +1312,11 @@ end
 -- 自动注册功能 账号不存在 用户的密码为：paracraft.cn+1位以上的数字 则帮其自动注册
 function MainLogin:CheckAutoRegister(account, password, callback)
     local MainLoginPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Login')
-    local start_index,end_index = string.find(password, "paracraft.cn")
-    local school_id = string.match(password, "paracraft.cn(%d+)")
-    if string.find(password, "paracraft.cn") == 1 and school_id then
+    local start_index,end_index = string.find(password, 'paracraft.cn')
+    local school_id = string.match(password, 'paracraft.cn(%d+)')
+    if string.find(password, 'paracraft.cn') == 1 and school_id then
         if MainLoginPage then
-            MainLoginPage:SetUIValue('account_field_error_msg', "")
+            MainLoginPage:SetUIValue('account_field_error_msg', '')
         end
         
         KeepworkServiceSession:CheckUsernameExist(account, function(bIsExist)
@@ -1278,7 +1329,7 @@ function MainLogin:CheckAutoRegister(account, password, callback)
                     end
                 end)
             else
-                _guihelper.MessageBox(string.format("用户名%s已经被注册，请更换用户名，建议使用名字拼音加出生日期，例如： zhangsan2010", account))
+                _guihelper.MessageBox(string.format('用户名%s已经被注册，请更换用户名，建议使用名字拼音加出生日期，例如： zhangsan2010', account))
             end
         end)
     else
@@ -1292,8 +1343,8 @@ function MainLogin:AutoRegister(account, password, login_cb, school_data)
     if not Validated:Account(account) then
         _guihelper.MessageBox([[1.账号需要4位以上的字母或字母+数字组合；<br/>
         2.必须以字母开头；<br/>
-        <div style="height: 20px;"></div>
-        *推荐使用<div style="color: #ff0000;float: lefr;">名字拼音+出生年份，例如：zhangsan2010</div>]]);
+        <div style='height: 20px;'></div>
+        *推荐使用<div style='color: #ff0000;float: lefr;'>名字拼音+出生年份，例如：zhangsan2010</div>]]);
         return false
     end
 
@@ -1313,21 +1364,21 @@ function MainLogin:AutoRegister(account, password, login_cb, school_data)
                 local begain_str = string.sub(account, 1, begain_index-1)
                 local end_str = string.sub(account, end_index+1, #account)
                 
-                local limit_name = string.format([[%s<div style="color: #ff0000;float: lefr;">%s</div>%s]], begain_str, limit_world, end_str)
-                _guihelper.MessageBox(string.format("您设定的用户名包含敏感字符 %s，请换一个。", limit_name))
+                local limit_name = string.format([[%s<div style='color: #ff0000;float: lefr;'>%s</div>%s]], begain_str, limit_world, end_str)
+                _guihelper.MessageBox(string.format('您设定的用户名包含敏感字符 %s，请换一个。', limit_name))
                 return
             end
 
-            local region_desc = ""
+            local region_desc = ''
             local region = school_data.region
             if region then
-                local state = region.state and region.state.name or ""
-                local city = region.city and region.city.name or ""
-                local county = region.county and region.county.name or ""
+                local state = region.state and region.state.name or ''
+                local city = region.city and region.city.name or ''
+                local county = region.county and region.county.name or ''
                 region_desc = state .. city .. county
             end
             
-            local register_str = string.format("%s是新用户，你是否希望注册并默认加入学校%s：%s%s", account, school_data.id, region_desc, school_data.name)
+            local register_str = string.format('%s是新用户，你是否希望注册并默认加入学校%s：%s%s', account, school_data.id, region_desc, school_data.name)
             
             _guihelper.MessageBox(register_str, function()
                 MainLogin.account = account
@@ -1357,7 +1408,7 @@ function MainLogin:UpdatePasswordRemindVisible(flag)
     local MainLoginLoginPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Login')
     local remind = MainLoginLoginPage:FindControl('update_button_remind')
     local password = MainLoginLoginPage:GetValue('password')
-    if flag and string.find(password, "paracraft.cn") == 1 then
+    if flag and string.find(password, 'paracraft.cn') == 1 then
         remind.visible = true
     else
         remind.visible = false

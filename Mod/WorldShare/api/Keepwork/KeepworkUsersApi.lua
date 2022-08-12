@@ -2,7 +2,7 @@
 Title: Keepwork Users API
 Author(s): big
 CreateDate: 2019.11.8
-ModifyDate: 2022.6.21
+ModifyDate: 2022.8.11
 Place: Foshan
 use the lib:
 ------------------------------------------------------------
@@ -14,6 +14,7 @@ local Encoding = commonlib.gettable("System.Encoding.basexx")
 local KeepworkBaseApi = NPL.load('./BaseApi.lua')
 
 local KeepworkUsersApi = NPL.export()
+
 -- url: /users/login
 -- method: POST
 -- params:
@@ -441,4 +442,20 @@ function KeepworkUsersApi:DeleteAccount(password, success, error)
     end
 
     KeepworkBaseApi:Delete('/users/account', { password = password }, nil, success, error)
+end
+
+-- url:/users/parentCellphoneCaptcha
+-- method: POST
+-- header:
+-- params:
+--[[
+    cellphone string necessary
+]]
+-- return: object
+function KeepworkUsersApi:ParentCellphoneCaptcha(cellphone, success, error)
+    if not cellphone or type(cellphone) ~= 'string' then
+        return
+    end
+
+    KeepworkBaseApi:Get('/users/parentCellphoneCaptcha', { cellphone = cellphone }, nil, success, error)
 end
