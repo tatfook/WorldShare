@@ -301,6 +301,7 @@
                         end
 
                         local text = Eval('text')
+                        text = MyCompany.Aries.Chat.BadWordFilter.FilterString(text)
                         text = Mod.WorldShare.Utils.WordsLimit(text, 150, 25)
 
                         if Eval('is_zip') == true then
@@ -433,16 +434,18 @@
 
                     function get_username()
                         local user = Eval('user')
-
+                        local ret
                         if not user or type(user) ~= 'table' then
-                            return '<%= "暂无" %>'
+                            ret = '<%= "暂无" %>'
+                        else 
+                            if user.username then
+                                ret = user.username
+                            else
+                                ret = '<%= "暂无" %>'
+                            end
                         end
-
-                        if user.username then
-                            return user.username
-                        else
-                            return '<%= "暂无" %>'
-                        end
+                        ret = MyCompany.Aries.Chat.BadWordFilter.FilterString(ret)
+                        return ret
                     end
 
                     function has_username()
