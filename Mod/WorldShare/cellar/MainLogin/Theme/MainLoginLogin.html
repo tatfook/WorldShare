@@ -25,10 +25,6 @@
                     local is_modal = page:GetRequestParam('is_modal') == 'true' and true or false
 
                     page.OnCreate = function()
-                        local PWDInfo = KeepworkServiceSession:LoadSigninInfo()
-                        if not PWDInfo or not PWDInfo.autoLogin then
-                            page:FindControl('login_button'):SetDefault(true)
-                        end
                     end
 
                     if account_list_data and
@@ -414,7 +410,7 @@
                             end
                         elseif mode == 'auto_login' then
                             page:FindControl('login_button'):SetDefault(false)
-                            
+
                             if login_with_phone_number then
                                 login_with_phone_number.visible = false
                             end
@@ -987,6 +983,7 @@
                         <div style='margin-top:5px;margin-bottom:10px;'>
                             <input type='button'
                                    name='login_button'
+                                   DefaultButton='true'
                                    class='main_login_gray_button'
                                    onclick='login()'
                                    value='<%= L"登录"%>' />
@@ -1148,18 +1145,11 @@
                         </div>
                         <div style='margin-top:17px;margin-bottom:10px;'>
                             <input type='button'
-                                   DefaultButton='true'
                                    name='start_button'
                                    class='main_login_blue_button'
                                    onclick='start()'
                                    value='<%= L"开始"%>' />
                         </div>
-                        <!-- <input type='text'
-                               enable_ime='false'
-                               name='start_button_focus'
-                               value=''
-                               CaretColor='#00000000'
-                               style='background:;'/> -->
                     </pe:container>
                 </div>
             </pe:container>
