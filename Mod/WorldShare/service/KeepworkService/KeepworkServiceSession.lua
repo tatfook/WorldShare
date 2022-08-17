@@ -72,8 +72,6 @@ function KeepworkServiceSession:OnOpen(msg)
 end
 
 function KeepworkServiceSession:OnMsg(msg)
-    LOG.std('KeepworkServiceSession', 'debug', 'OnMsg', 'data: %s', NPL.ToJson(msg.data))
-
     if not msg or not msg.data then
         return
     end
