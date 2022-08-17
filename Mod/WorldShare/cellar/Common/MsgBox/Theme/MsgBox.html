@@ -23,7 +23,11 @@
                 MsgBox.SetPage(msgId)
 
                 function get_window_style()
-                    return 'width: ' .. width .. 'px;height: ' .. height .. 'px;' .. Mod.WorldShare.Utils.FixCenter(width, height)
+                    return 'width: ' .. width .. 'px;' ..
+                           'height: ' .. height .. 'px;' ..
+                           'margin-left: ' .. -(width / 2) .. 'px;' ..
+                           'margin-top: ' .. -(height / 2) .. 'px;' ..
+                           'background: url();'
                 end
 
                 function get_msg()
@@ -31,44 +35,50 @@
                 end
             ]]>
         </script>
-        <div width='100%' height='100%'>
-            <kp:window 
-                mode='lite'
-                style='<%= get_window_style() %>'
-                icon='Texture/Aries/Creator/keepwork/Window/title/biaoti_tishi_32bits.png'
-                title='<%=L"提示" %>'>
-                <div style='height: 38px;'></div>
-                <pe:if condition='<%= is_wait %>'>
-                    <div style='width: 60px;
-                                height: 60px;
-                                margin-left: 10px;
-                                margin-top: 10px;
-                                position: relative;
-                                background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#500 15 104 109);
-                                background-animation:url(script/UIAnimation/CommonProgress.lua.table#WaitingSpin)'></div>
-                    <div style='<%= "padding: 20px;\
-                                     font-size: 18px;\
-                                     base-font-size: 18px;\
-                                     margin-top: 10px;\
-                                     margin-left: 60px;\
-                                     height: " .. height .. "px;" %>'>
-                        <div style='margin-right:60px;'>
-                            <%= get_msg() %>
+        <div width='100%'
+             height='100%'>
+            <pe:container
+                alignment='_ct'
+                style='<%= get_window_style() %>'>
+                <kp:window
+                    mode='lite'
+                    width='100%'
+                    height='100%'
+                    icon='Texture/Aries/Creator/keepwork/Window/title/biaoti_tishi_32bits.png'
+                    title='<%=L"提示" %>'>
+                    <div style='height: 38px;'></div>
+                    <pe:if condition='<%= is_wait %>'>
+                        <div style='width: 60px;
+                                    height: 60px;
+                                    margin-left: 10px;
+                                    margin-top: 10px;
+                                    position: relative;
+                                    background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#500 15 104 109);
+                                    background-animation:url(script/UIAnimation/CommonProgress.lua.table#WaitingSpin)'></div>
+                        <div style='<%= "padding: 20px;\
+                                         font-size: 18px;\
+                                         base-font-size: 18px;\
+                                         margin-top: 10px;\
+                                         margin-left: 60px;\
+                                         height: " .. height .. "px;" %>'>
+                            <div style='margin-right:60px;'>
+                                <%= get_msg() %>
+                            </div>
                         </div>
-                    </div>
-                </pe:if>
-                <pe:if condition='<%= not is_wait %>'>
-                    <div style='<%= "padding: 20px;\
-                                    font-size: 18px;\
-                                    base-font-size: 18px;\
-                                    margin-top: 10px;\
-                                    height: " .. height .. "px;" %>'>
-                        <div style='margin-right:60px;'>
-                            <%= get_msg() %>
+                    </pe:if>
+                    <pe:if condition='<%= not is_wait %>'>
+                        <div style='<%= "padding: 20px;\
+                                        font-size: 18px;\
+                                        base-font-size: 18px;\
+                                        margin-top: 10px;\
+                                        height: " .. height .. "px;" %>'>
+                            <div style='margin-right:60px;'>
+                                <%= get_msg() %>
+                            </div>
                         </div>
-                    </div>
-                </pe:if>
-            </kp:window>
+                    </pe:if>
+                </kp:window>
+            </pe:container>
         </div>
     </pe:mcml>
 </body>
