@@ -85,8 +85,6 @@ function MdParser:MdToHtml(data, toString)
                 lineFormat = format('<div>%s</div>', line) 
             end
 
-            echo(lineFormat, true)
-
             htmlDataList[#htmlDataList + 1] = lineFormat
 
             if toString then

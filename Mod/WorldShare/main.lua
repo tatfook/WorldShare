@@ -3,7 +3,6 @@ Title: WorldShareMod
 Author(s): big
 CreateDate: 2017.4.17
 ModifyDate: 2022.6.28
-Version: 0.6
 use the lib:
 ------------------------------------------------------------
 NPL.load('(gl)Mod/WorldShare/main.lua')
