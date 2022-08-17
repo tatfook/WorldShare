@@ -89,6 +89,12 @@ function CreateWorld:OnClickCreateWorldImp()
         _guihelper.MessageBox(L'世界名已存在，请列表中进入')
         return
     end
+    -- 客户端处理铭感词
+    local temp = MyCompany.Aries.Chat.BadWordFilter.FilterString(foldername);
+    if temp~=foldername then 
+        _guihelper.MessageBox(L"世界名包含敏感词，请重新输入");
+        return
+    end
 
     local worldPath = ParaIO.GetWritablePath() .. 'worlds/DesignHouse/' .. foldername
 

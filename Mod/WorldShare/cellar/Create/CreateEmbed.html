@@ -47,6 +47,12 @@
                         end
 
                         if do_modify then
+                            -- 客户端处理铭感词
+                            local temp = MyCompany.Aries.Chat.BadWordFilter.FilterString(temp_modify_worldname);
+                            if temp~=temp_modify_worldname then 
+                                _guihelper.MessageBox("世界名包含敏感词，请重新修改");
+                                return
+                            end
                             -- update world name
                             if Create:WorldRename(
                                 current_item_index,
