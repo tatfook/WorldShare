@@ -1,7 +1,8 @@
 --[[
 Title: Keepwork Service Session Filter
-Author(s):  Big
-Date: 2020.12.11
+Author(s): big
+CreateDate: 2020.12.11
+ModifyDate: 2022.8.17
 Desc: 
 use the lib:
 ------------------------------------------------------------
@@ -53,6 +54,13 @@ function KeepworkServiceSessionFilter:Init()
         'service.session.get_user_where',
         function()
             return KeepworkServiceSession:GetUserWhere()
+        end
+    )
+
+    GameLogic.GetFilters():add_filter(
+        'service.session.check_verify',
+        function()
+            KeepworkServiceSession:CheckVerify()
         end
     )
 end

@@ -2,7 +2,7 @@
 Title: filters
 Author(s): big
 CreateDate: 2020.12.11
-ModifyDate: 2021.11.15
+ModifyDate: 2022.8.17
 Desc: 
 use the lib:
 ------------------------------------------------------------
@@ -489,6 +489,20 @@ function Filters:Init()
         'store_get',
         function(key)
             return Mod.WorldShare.Store:Get(key)
+        end
+    )
+
+    GameLogic.GetFilters():add_filter(
+        'store_subscribe',
+        function(...)
+            Mod.WorldShare.Store:Subscribe(...)
+        end
+    )
+
+    GameLogic.GetFilters():add_filter(
+        'store_unsubscribe',
+        function(...)
+            Mod.WorldShare.Store:Unsubscribe(...)
         end
     )
 
