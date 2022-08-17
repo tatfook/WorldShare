@@ -78,10 +78,15 @@ function KeepworkServiceSession:OnMsg(msg)
 
     if msg.data.sio_pkt_name and msg.data.sio_pkt_name == 'event' then
         if msg.data.body and msg.data.body[1] == 'app/msg' then
-
             local connection = SocketApi:GetConnection()
 
-            if type(connection.uiCallback) == 'function' then
+            if connection and type(connection.uiCallback) == 'function' then
+                connection.uiCallback(msg.data.body[2])
+            end
+        elseif msg.data.body and msg.data.body[1] == 'msg' then
+            local connection = SocketApi:GetConnection()
+
+            if connection and type(connection.uiCallback) == 'function' then
                 connection.uiCallback(msg.data.body[2])
             end
         end

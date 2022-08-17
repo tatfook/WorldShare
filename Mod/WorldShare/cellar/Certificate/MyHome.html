@@ -76,15 +76,28 @@
                         hasBeenSent = true
 
                         local times = 60
+                        local timer
 
-                        local timer = commonlib.Timer:new({
+                        timer = commonlib.Timer:new({
                             callbackFunc = function(timer)
-                                page:SetValue('send_button', format('%s(%ds)', L'重新发送', times))
+                                if canClose then
+                                    page:SetValue('send_button_1', format('%s(%ds)', L'重新发送', times))
 
-                                if times == 0 then
-                                    hasBeenSent = false
-                                    page:SetValue('send_button', L'发送短信')
-                                    timer:Change(nil, nil)
+                                    if times == 0 then
+                                        hasBeenSent = false
+                                        page:SetValue('send_button_1', L'发送短信')
+                                        timer:Change(nil, nil)
+                                        Mod.WorldShare.Store:Unsubscribe('user/ParentPhoneVerification')
+                                    end
+                                else
+                                    page:SetValue('send_button_2', format('%s(%ds)', L'重新发送', times))
+
+                                    if times == 0 then
+                                        hasBeenSent = false
+                                        page:SetValue('send_button_2', L'发送短信')
+                                        timer:Change(nil, nil)
+                                        Mod.WorldShare.Store:Unsubscribe('user/ParentPhoneVerification')
+                                    end
                                 end
 
                                 times = times - 1
@@ -95,15 +108,24 @@
                             phoneNumber,
                             function(data, err)
                                 if err ~= 200 or
-                                   data ~= 'OK' then
+                                   data == nil or
+                                   data == '' then
                                     return
                                 end
 
-                                _guihelper.MessageBox(L'发送成功')
+                                GameLogic.AddBBS(nil, L'发送成功', 3000, '0 0 255')
                             end
                         )
 
                         timer:Change(1000, 1000)
+
+                        Mod.WorldShare.Store:Subscribe('user/ParentPhoneVerification', function()
+                            timer:Change(nil, nil)
+                            Mod.WorldShare.Store:Unsubscribe('user/ParentPhoneVerification')
+                            Mod.WorldShare.Store:Set('user/isVerified', true)
+                            KeepworkServiceSession:CheckVerify()
+                            close()
+                        end)
                     end
 
                     function get_background_width()
@@ -218,7 +240,7 @@
                                  style='margin-top: 18px;
                                         width: 312px'>
                                 <input type='button'
-                                       name='send_button'
+                                       name='send_button_1'
                                        style='width: 128px;
                                               height: 45px;
                                               float: left;
@@ -242,6 +264,7 @@
                                  style='margin-top: 18px;
                                         width: 128px'>
                                 <input type='button'
+                                       name='send_button_2'
                                        style='width: 128px;
                                               height: 45px;
                                               float: left;

@@ -18,6 +18,7 @@ local UserStore = commonlib.inherit(commonlib.gettable('System.Core.ToolBase'), 
 UserStore:Signal('onLogin', function() end)
 UserStore:Signal('onLogout', function() end)
 UserStore:Signal('onSetThirdPartyLoginAuthinfo', function() end)
+UserStore:Signal('onParentPhoneVerification', function() end)
 
 function UserStore:Action(data)
     local self = data
@@ -82,6 +83,9 @@ function UserStore:Action(data)
         SetWhereAnonymousUser = function(where)
             self.whereAnonymousUser = where
             RestartTable.whereAnonymousUser = where
+        end,
+        ParentPhoneVerification = function()
+            UserStore:onParentPhoneVerification()
         end
     }
 end
