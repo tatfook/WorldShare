@@ -146,9 +146,9 @@ function Filters:Init()
         'ShowClientUpdaterNotice',
         function()
             if Mod.WorldShare.Utils.IsEnglish() then
-                Mod.WorldShare.MsgBox:Show(L'checking for updates...', nil, nil, nil, nil, nil, '_ct')
+                Mod.WorldShare.MsgBox:Show(L'checking for updates...')
             else
-                Mod.WorldShare.MsgBox:Show(L'正在检查更新， 请稍候...', nil, nil, nil, nil, nil, '_ct')
+                Mod.WorldShare.MsgBox:Show(L'正在检查更新， 请稍候...')
             end
         end
     )
