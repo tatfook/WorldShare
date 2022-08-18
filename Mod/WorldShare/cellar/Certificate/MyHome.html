@@ -15,6 +15,9 @@
                     -- api
                     local KeepworkUsersApi = NPL.load('(gl)Mod/WorldShare/api/Keepwork/KeepworkUsersApi.lua')
 
+                    -- libs
+                    local RedSummerCampMainPage = NPL.load('(gl)script/apps/Aries/Creator/Game/Tasks/RedSummerCamp/RedSummerCampMainPage.lua')
+
                     local page = document:GetPageCtrl()
     
                     local mode = page:GetRequestParam('mode')
@@ -114,7 +117,7 @@
                                     return
                                 end
 
-                                GameLogic.AddBBS(nil, L'发送成功', 3000, '0 0 255')
+                                GameLogic.AddBBS(nil, L'发送成功', 3000, '0 255 0')
                             end
                         )
 
@@ -129,6 +132,8 @@
                         Mod.WorldShare.Store:Unsubscribe('user/ParentPhoneVerification')
                         Mod.WorldShare.Store:Set('user/isVerified', true)
                         KeepworkServiceSession:CheckVerify()
+
+                        RedSummerCampMainPage.RefreshPage()
                         close()
                     end)
 
