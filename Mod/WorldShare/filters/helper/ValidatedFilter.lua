@@ -18,7 +18,6 @@ function ValidatedFilter:Init()
     GameLogic.GetFilters():add_filter(
         'helper.validated.phone',
         function(...)
-            echo(..., true)
             return Validated:Phone(...)
         end
     )

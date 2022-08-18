@@ -61,6 +61,8 @@
                         end, true)
                     end
 
+                    local timer
+
                     function send()
                         if hasBeenSent then
                             return 
@@ -76,7 +78,6 @@
                         hasBeenSent = true
 
                         local times = 60
-                        local timer
 
                         timer = commonlib.Timer:new({
                             callbackFunc = function(timer)
@@ -118,15 +119,18 @@
                         )
 
                         timer:Change(1000, 1000)
-
-                        Mod.WorldShare.Store:Subscribe('user/ParentPhoneVerification', function()
-                            timer:Change(nil, nil)
-                            Mod.WorldShare.Store:Unsubscribe('user/ParentPhoneVerification')
-                            Mod.WorldShare.Store:Set('user/isVerified', true)
-                            KeepworkServiceSession:CheckVerify()
-                            close()
-                        end)
                     end
+
+                    Mod.WorldShare.Store:Subscribe('user/ParentPhoneVerification', function()
+                        if timer then
+                            timer:Change(nil, nil)
+                        end
+
+                        Mod.WorldShare.Store:Unsubscribe('user/ParentPhoneVerification')
+                        Mod.WorldShare.Store:Set('user/isVerified', true)
+                        KeepworkServiceSession:CheckVerify()
+                        close()
+                    end)
 
                     function get_background_width()
                         local Screen = System.Windows.Screen

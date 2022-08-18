@@ -387,7 +387,6 @@ end
 
 -- 0000-00-00 00:00:00 --> 000000000
 function Utils:DatetimeToTimestamp(str)
-    echo(str, true)
     local years = string.match(str or '', '^(%d+)-')
     local months = string.match(str or '', '-(%d+)-')
     local days = string.match(str or '', '-(%d+) ')
