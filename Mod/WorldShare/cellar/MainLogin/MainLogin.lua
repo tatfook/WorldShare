@@ -15,6 +15,7 @@ MainLogin:ShowUpdatePassword()
 local GameMainLogin = commonlib.gettable('MyCompany.Aries.Game.MainLogin')
 local Desktop = commonlib.gettable('MyCompany.Aries.Creator.Game.Desktop')
 local PlayerAssetFile = commonlib.gettable('MyCompany.Aries.Game.EntityManager.PlayerAssetFile')
+local TipRoadManager = NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/ChatSystem/ScreenTipRoad/TipRoadManager.lua")
 
 -- service
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceSession.lua')
@@ -57,6 +58,7 @@ end
 function MainLogin:Show()
     ParaUI.GetUIObject('root'):RemoveAll()
     GameMainLogin:ShowLoginBackgroundPage(true, true, true, true)
+    TipRoadManager:ReCreateRoads()
 
     local platform = System.os.GetPlatform()
     local isTouchDevice = ParaEngine.GetAppCommandLineByParam('IsTouchDevice', nil);
