@@ -34,6 +34,8 @@
                     hasBeenSent = false
 
                     function close()
+                        Mod.WorldShare.Store:Unsubscribe('user/ParentPhoneVerification')
+
                         if page.certificateCallback and type(page.certificateCallback) == 'function' then
                             page.certificateCallback()
                         end
@@ -141,7 +143,6 @@
                                         hasBeenSent = false
                                         page:SetValue('send_button_1', L'发送短信')
                                         timer:Change(nil, nil)
-                                        Mod.WorldShare.Store:Unsubscribe('user/ParentPhoneVerification')
                                     end
                                 else
                                     page:SetValue('send_button_2', format('%s(%ds)', L'重新发送', times))
@@ -150,7 +151,6 @@
                                         hasBeenSent = false
                                         page:SetValue('send_button_2', L'发送短信')
                                         timer:Change(nil, nil)
-                                        Mod.WorldShare.Store:Unsubscribe('user/ParentPhoneVerification')
                                     end
                                 end
 
