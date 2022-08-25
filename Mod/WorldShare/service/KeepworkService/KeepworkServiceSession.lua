@@ -463,7 +463,8 @@ function KeepworkServiceSession:RegisterWithAccount(username, password, callback
     local params = {
         username = username,
         password = password,
-        channel = 3
+        channel = 3,
+        macAddress = self:GetEncodeDeviceId(),
     }
 
     KeepworkUsersApi:Register(
@@ -538,7 +539,8 @@ function KeepworkServiceSession:RegisterWithPhoneAndLogin(username, cellphone, c
         captcha = cellphoneCaptcha,
         password = password,
         channel = 3,
-        isBind = true
+        isBind = true,
+        macAddress = self:GetEncodeDeviceId(),
     }
 
     KeepworkUsersApi:Register(
@@ -604,7 +606,8 @@ function KeepworkServiceSession:RegisterWithPhone(username, cellphone, cellphone
         captcha = cellphoneCaptcha,
         password = password,
         channel = 3,
-        isBind = true
+        isBind = true,
+        macAddress = self:GetEncodeDeviceId(),
     }
 
     KeepworkUsersApi:Register(
