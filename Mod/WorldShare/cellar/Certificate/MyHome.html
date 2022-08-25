@@ -202,7 +202,11 @@
                     end
 
                     function exit_app()
-                        Desktop.ForceExit()
+                        Mod.WorldShare.MsgBox:Show(L'正在退出，请稍后...')
+
+                        KeepworkServiceSession:Logout(nil, function()
+                            Desktop.ForceExit()
+                        end)
                     end
 
                     function use_code()
