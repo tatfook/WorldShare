@@ -17,6 +17,7 @@
 
                     -- libs
                     local RedSummerCampMainPage = NPL.load('(gl)script/apps/Aries/Creator/Game/Tasks/RedSummerCamp/RedSummerCampMainPage.lua')
+                    local Desktop = commonlib.gettable('MyCompany.Aries.Creator.Game.Desktop')
 
                     local page = document:GetPageCtrl()
     
@@ -111,6 +112,7 @@
                         KeepworkUsersApi:ParentCellphoneCaptcha(
                             phoneNumber,
                             function(data, err)
+                                echo(data, true)
                                 if err ~= 200 or
                                    data == nil or
                                    data == '' then
@@ -122,6 +124,10 @@
                         )
 
                         timer:Change(1000, 1000)
+                    end
+
+                    function exit_app()
+                        Desktop.ForceExit()
                     end
 
                     Mod.WorldShare.Store:Subscribe('user/ParentPhoneVerification', function()
@@ -136,21 +142,6 @@
                         RedSummerCampMainPage.RefreshPage()
                         close()
                     end)
-
-                    function get_background_width()
-                        local Screen = System.Windows.Screen
-                        local width = Screen:GetWidth()
-                        Screen:PushDesignResolution(1280, 720)
-
-                        return (width - 255)
-                    end
-
-                    function get_background_height()
-                        local Screen = System.Windows.Screen
-                        local height = Screen:GetHeight()
-
-                        return (height - 93)
-                    end
                 ]]>
             </script>
             <style type='text/mscc' src='Mod/WorldShare/cellar/Theme/Mcss/Theme1.mcss'>
@@ -178,122 +169,185 @@
                     },
                 }
             </style>
+            <pe:if condition='<%= not canClose %>'>
+                <pe:container
+                    width='100%'
+                    height='100%'
+                    style='background-color: #00000099;
+                           position: relative;'>
+                </pe:container>
+                <pe:container
+                    alignment='_ct'
+                    width='761'
+                    height='456'
+                    style='background: url(Texture/Aries/Creator/paracraft/di_761x456_32bits.png#0 0 761 456);
+                           margin-top: -228px;
+                           margin-left: -380.5px;'>
+                    <div>
+                        <div style='width: 232px;
+                                    height: 30px;
+                                    margin-top: 254px;
+                                    margin-left: 379px;'>
+                            <input type='text'
+                                   style='width: 232px;
+                                          height: 30px;
+                                          background: url(Texture/Aries/Creator/paracraft/shurukuang_232x30_32bits.png#0 0 232 30);' />
+                        </div>
+                    </div>
+                    <div>
+                        <div style='width: 15px;
+                                    height: 15px;
+                                    margin-left: 380.5px;
+                                    margin-top: 4px;
+                                    background: url();'>
+                            <input type='checkbox'
+                                   iconsize='13'
+                                   CheckedBG='Texture/Aries/Creator/paracraft/duigou_13x10_32bits.png#0 0 13 10'
+                                   UncheckedBG=''
+                                   style='margin-top: 3px;
+                                          min-width: 90px;'
+                                   name='is_bind_account'
+                                   checked='true' />
+                        </div>
+                    </div>
+                    <div>
+                        <div width='143px'
+                             height='43px'
+                             style='margin-top: 20px;
+                                    margin-left: 120px;'
+                             align='center'>
+                            <input type='button'
+                                   value='<%= L"发送短信" %>'
+                                   style='width: 113px;
+                                          height: 43px;
+                                          background: url(Texture/Aries/Creator/paracraft/fasongduanxin_113x43_32bits.png#0 0 113 43);' />
+                        </div>
+                    </div>
+                    <div>
+                        <div style='margin-left: 255px;
+                                    margin-top: 40px;'>
+                            <div style='width: 75px;
+                                        height: 24px;
+                                        float: left;'>
+                                <input type='button'
+                                       style='width: 75px;
+                                              height: 24px;
+                                              background: url(Texture/Aries/Creator/paracraft/jihuoma_75x24_32bits.png#0 0 75 24);' />
+                            </div>
+                            <div style='width: 62px;
+                                        height: 24px;
+                                        margin-left: 320px;
+                                        float: left;'>
+                                <input type='button'
+                                       onclick='exit_app()'
+                                       style='width: 62px;
+                                              height: 24px;
+                                              background: url(Texture/Aries/Creator/paracraft/tuichu_62x24_32bits.png#0 0 62 24);' />
+                            </div>
+                        </div>
+                    </div>
+                </pe:container>
+            </pe:if>
             <pe:if condition='<%= canClose %>'>
                 <div width='100%' height='100%' style='position: relative;background: url();'>
                 </div>
-            </pe:if>
-            <pe:if condition='<%= not canClose %>'>
                 <pe:container
-                    width='<%= get_background_width() %>'
-                    height='100%'
-                    style='background-color: #00000099;
-                        position: relative;'>
-                </pe:container>
-                <pe:container
-                    alignment='_rb'
-                    width='255'
-                    height='<%= get_background_height() %>'
-                    style='background-color: #00000099;
-                        position: relative;'>
-                </pe:container>
-            </pe:if>
-            <pe:container
-                alignment='_ct'
-                width='760'
-                height='490'
-                style='background: url();
-                    margin-top: -245px;
-                    margin-left: -380px;'>
-                <kp:window
+                    alignment='_ct'
                     width='760'
                     height='490'
-                    onclose='close()'
-                    is_hide_close='<%= not canClose %>'>
-                    <img style='position: relative;
-                                width: 97px;
-                                height: 25px;
-                                margin-left: 15px;
-                                margin-top: 7px;'
-                        src='Texture/Aries/Creator/keepwork/Certification/shiming_97X25_32bits.png#0 0 97 25' />
-                    <div class='theme1_header'></div>
-                    <div style='padding: 10px;
-                                padding-top: 40px;'>
-                        <div align='center'
-                             style='width: 525px;
-                                    height: 40px;
-                                    padding-top: 8px;
-                                    text-align: center;
-                                    background: url(Texture/Aries/Creator/keepwork/Certification/tu1_469X40_32bits.png#0 0 469 40);'>
-                            <%= L'输入家长手机号发送认证短信，并提醒家长点击认证链接，即可完成实名认证。' %>
-                        </div>
-                        <div align='center'
-                             style='width: 469px;
-                                    height: 40px;
-                                    margin-top: 8px;
-                                    text-align: center;'>
-                            <%= L'完成实名认证后， 你创造的世界才能被别人看到哦。' %>
-                        </div>
-                        <div style='font-size: 18px;
-                                    base-font-size: 18px;
-                                    margin-left: 148px;
-                                    margin-top: 5px;'>
-                            <img style='width: 53px;height: 17px;margin-top: 9px;'
-                                src='Texture/Aries/Creator/keepwork/Certification/zi_shoujihao_53X17_32bits.png#0 0 53 17' />
-                            <input type='text'
-                                style='width: 375px;height: 34px;margin-left: 15px;'
-                                class='theme1_text_editor'
-                                name='phonenumber' />
-                        </div>
-                        <pe:if condition='<%= canClose %>'>
+                    style='background: url();
+                        margin-top: -245px;
+                        margin-left: -380px;'>
+                    <kp:window
+                        width='760'
+                        height='490'
+                        onclose='close()'>
+                        <img style='position: relative;
+                                    width: 97px;
+                                    height: 25px;
+                                    margin-left: 15px;
+                                    margin-top: 7px;'
+                            src='Texture/Aries/Creator/keepwork/Certification/shiming_97X25_32bits.png#0 0 97 25' />
+                        <div class='theme1_header'></div>
+                        <div style='padding: 10px;
+                                    padding-top: 40px;'>
                             <div align='center'
-                                 style='margin-top: 18px;
-                                        width: 312px'>
-                                <input type='button'
-                                       name='send_button_1'
-                                       style='width: 128px;
-                                              height: 45px;
-                                              float: left;
-                                              text-offset-y: -2;
-                                              background: url(Texture/Aries/Creator/paracraft/fasong_128x45_32bits.png#0 0 128 45)'
-                                       value='<%= L"发送短信" %>'
-                                    onclick='send()' />
-                                <input type='button'
-                                    style='margin-left: 56px;
-                                           width: 128px;
-                                           height: 45px;
-                                           float: left;
-                                           text-offset-y: -2;
-                                           background: url(Texture/Aries/Creator/paracraft/tiaoguo_128x45_32bits.png#0 0 128 45)'
-                                    value='<%= L"跳过" %>'
-                                    onclick='close()' />
+                                    style='width: 525px;
+                                        height: 40px;
+                                        padding-top: 8px;
+                                        text-align: center;
+                                        background: url(Texture/Aries/Creator/keepwork/Certification/tu1_469X40_32bits.png#0 0 469 40);'>
+                                <%= L'输入家长手机号发送认证短信，并提醒家长点击认证链接，即可完成实名认证。' %>
                             </div>
-                        </pe:if>
-                        <pe:if condition='<%= not canClose %>'>
                             <div align='center'
-                                 style='margin-top: 18px;
-                                        width: 128px'>
-                                <input type='button'
-                                       name='send_button_2'
-                                       style='width: 128px;
-                                              height: 45px;
-                                              float: left;
-                                              text-offset-y: -2;
-                                              background: url(Texture/Aries/Creator/paracraft/fasong_128x45_32bits.png#0 0 128 45)'
-                                       value='<%= L"发送短信" %>'
-                                    onclick='send()' />
+                                    style='width: 469px;
+                                        height: 40px;
+                                        margin-top: 8px;
+                                        text-align: center;'>
+                                <%= L'完成实名认证后，你创造的世界才能被别人看到哦。' %>
                             </div>
-                        </pe:if>
-                        <div align='center'
-                            style='width: 420px;
-                                    height: 161px;
-                                    margin-top: 15px;'>
-                            <img style='width: 420px;
-                                        height: 161px;'
-                                src='Texture/Aries/Creator/paracraft/jiangli2_420x161_32bits.png#0 0 420 161' />
+                            <div style='font-size: 18px;
+                                        base-font-size: 18px;
+                                        margin-left: 148px;
+                                        margin-top: 5px;'>
+                                <img style='width: 53px;height: 17px;margin-top: 9px;'
+                                    src='Texture/Aries/Creator/keepwork/Certification/zi_shoujihao_53X17_32bits.png#0 0 53 17' />
+                                <input type='text'
+                                    style='width: 375px;height: 34px;margin-left: 15px;'
+                                    class='theme1_text_editor'
+                                    name='phonenumber' />
+                            </div>
+                            <pe:if condition='<%= canClose %>'>
+                                <div align='center'
+                                        style='margin-top: 18px;
+                                            width: 312px'>
+                                    <input type='button'
+                                            name='send_button_1'
+                                            style='width: 128px;
+                                                    height: 45px;
+                                                    float: left;
+                                                    text-offset-y: -2;
+                                                    background: url(Texture/Aries/Creator/paracraft/fasong_128x45_32bits.png#0 0 128 45)'
+                                            value='<%= L"发送短信" %>'
+                                        onclick='send()' />
+                                    <input type='button'
+                                        style='margin-left: 56px;
+                                                width: 128px;
+                                                height: 45px;
+                                                float: left;
+                                                text-offset-y: -2;
+                                                background: url(Texture/Aries/Creator/paracraft/tiaoguo_128x45_32bits.png#0 0 128 45)'
+                                        value='<%= L"跳过" %>'
+                                        onclick='close()' />
+                                </div>
+                            </pe:if>
+                            <pe:if condition='<%= not canClose %>'>
+                                <div align='center'
+                                        style='margin-top: 18px;
+                                            width: 128px'>
+                                    <input type='button'
+                                            name='send_button_2'
+                                            style='width: 128px;
+                                                    height: 45px;
+                                                    float: left;
+                                                    text-offset-y: -2;
+                                                    background: url(Texture/Aries/Creator/paracraft/fasong_128x45_32bits.png#0 0 128 45)'
+                                            value='<%= L"发送短信" %>'
+                                        onclick='send()' />
+                                </div>
+                            </pe:if>
+                            <div align='center'
+                                style='width: 420px;
+                                        height: 161px;
+                                        margin-top: 15px;'>
+                                <img style='width: 420px;
+                                            height: 161px;'
+                                    src='Texture/Aries/Creator/paracraft/jiangli2_420x161_32bits.png#0 0 420 161' />
+                            </div>
                         </div>
-                    </div>
-                </kp:window>
-            </pe:container>
+                    </kp:window>
+                </pe:container>
+            </pe:if>
         </pe:mcml>
     </body>
 </html>

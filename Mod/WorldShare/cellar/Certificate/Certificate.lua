@@ -28,45 +28,12 @@ Certificate.certificateCallback = nil
 Certificate.inited = false
 
 function Certificate:Init(callback)
-    if System.options.channelId == '430' then
+    local isPay = Mod.WorldShare.Store:Get('user/isPay')
+
+    if System.options.channelId == '430' or isPay ~= 0 then
         self:ShowCertificateNoticePage(callback)
     else
-        KeepworkParacraftConfigsApi:ParacraftConfigs(
-            function(data, err)
-                if not data or
-                   type(data) ~= 'table' or
-                   not data.configs or
-                   type(data.configs) ~= 'table' then
-                    self:ShowCertificateNoticePage(callback)
-                    return
-                end
-
-                local isOpened = false
-
-                for key, item in ipairs(data.configs) do
-                    if item.name == 'forceRealNameAndSchool' then
-                        if item.config and type(item.config) == 'table' then
-                            if item.config.isOpen == true then
-                                isOpened = true    
-                            end
-                        end
-
-                        break
-                    end
-                end
-
-                local isPay = Mod.WorldShare.Store:Get('user/isPay')
-
-                if isOpened and isPay == 0 then
-                    self:ShowCertificateNoticeSummerVacationPage(callback)
-                else
-                    self:ShowCertificateNoticePage(callback)
-                end
-            end,
-            function()
-                self:ShowCertificateNoticePage(callback)
-            end
-        )
+        self:ShowMyHomePage(callback, 'summer')
     end
 end
 
