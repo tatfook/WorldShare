@@ -1361,8 +1361,21 @@ function KeepworkServiceSession:CheckVerify()
     end
 end
 
-function KeepworkServiceSession:GetEncodeDeviceId()
+function KeepworkServiceSession:GetDeviceUUID()
+    local sessionsData = SessionsData:GetSessions()
+
+    if not sessionsData.softwareUUID then
+        sessionsData.softwareUUID = System.Encoding.guid.uuid()
+        GameLogic.GetPlayerController():SaveLocalData('sessions', sessionsData, true)
+    end
+
     local machineID = ParaEngine.GetAttributeObject():GetField('MachineID', '')
+
+    return sessionsData.softwareUUID .. '-' .. machineID
+end
+
+function KeepworkServiceSession:GetEncodeDeviceId()
+    local machineID = self:GetDeviceUUID()
 
     if not machineID or machineID == '' then
         return ''
