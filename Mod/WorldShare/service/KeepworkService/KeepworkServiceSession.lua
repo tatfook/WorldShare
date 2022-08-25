@@ -464,7 +464,7 @@ function KeepworkServiceSession:RegisterWithAccount(username, password, callback
         username = username,
         password = password,
         channel = 3,
-        -- macAddress = self:GetEncodeDeviceId(),
+        macAddress = self:GetEncodeDeviceId(),
     }
 
     KeepworkUsersApi:Register(
@@ -540,7 +540,7 @@ function KeepworkServiceSession:RegisterWithPhoneAndLogin(username, cellphone, c
         password = password,
         channel = 3,
         isBind = true,
-        -- macAddress = self:GetEncodeDeviceId(),
+        macAddress = self:GetEncodeDeviceId(),
     }
 
     KeepworkUsersApi:Register(
@@ -607,7 +607,7 @@ function KeepworkServiceSession:RegisterWithPhone(username, cellphone, cellphone
         password = password,
         channel = 3,
         isBind = true,
-        -- macAddress = self:GetEncodeDeviceId(),
+        macAddress = self:GetEncodeDeviceId(),
     }
 
     KeepworkUsersApi:Register(
