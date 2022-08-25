@@ -251,12 +251,12 @@ function SessionsData:GetDeviceUUID()
        sessionsData.paracraftDir ~= currentParacraftDir then
         sessionsData.paracraftDir = ParaIO.GetWritablePath()
         sessionsData.softwareUUID = System.Encoding.guid.uuid()
-        GameLogic.GetPlayerController():SaveLocalData("sessions", sessionsData, true)
+        GameLogic.GetPlayerController():SaveLocalData('sessions', sessionsData, true)
     end
 
-    local machineID = ParaEngine.GetAttributeObject():GetField("MachineID","")
+    local machineID = ParaEngine.GetAttributeObject():GetField('MachineID', '')
 
-    return sessionsData.softwareUUID .. "-" .. machineID
+    return sessionsData.softwareUUID .. '-' .. machineID
 end
 
 function SessionsData:GetUserLastPosition(projectId, username)

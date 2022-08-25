@@ -1362,14 +1362,14 @@ function KeepworkServiceSession:CheckVerify()
 end
 
 function KeepworkServiceSession:GetEncodeDeviceId()
-    local machineID = ParaEngine.GetAttributeObject():GetField("MachineID","")
+    local machineID = ParaEngine.GetAttributeObject():GetField('MachineID', '')
 
     if not machineID or machineID == '' then
         return ''
     end
 
     local tab = { macAddress = machineID }
-    local jsonStr = NPL.ToJson(tab);
+    local jsonStr = NPL.ToJson(tab)
 
     return System.Encoding.base64(jsonStr)
 end
