@@ -453,9 +453,6 @@ end
 ]]
 -- return: object
 function KeepworkUsersApi:ParentCellphoneCaptcha(cellphone, isBind, macAddress, success, error)
-    echo(cellphone, true)
-    echo(isBind, true)
-    echo(macAddress, true)
     if not cellphone or
        type(cellphone) ~= 'string' or
        isBind == nil or
