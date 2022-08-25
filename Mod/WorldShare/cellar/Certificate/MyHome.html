@@ -201,7 +201,8 @@
 
                         if payload and
                            type(payload) == 'table' and
-                           payload.bindResult == false then
+                           payload.bindResult == false and
+                           payload.isBind == true then
                             show_bind_error_msg()
                         end
                     end)
