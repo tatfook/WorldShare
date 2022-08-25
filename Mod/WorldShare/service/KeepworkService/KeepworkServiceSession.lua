@@ -1362,17 +1362,16 @@ function KeepworkServiceSession:CheckVerify()
 end
 
 function KeepworkServiceSession:GetEncodeDeviceId()
-    local device_uid = SessionsData:GetDeviceUUID()
-    -- device_uid = device_uid .. os.time()
-    if not device_uid or device_uid == "" then
-        return ""
-    end
-    -- local device_uid = "19eb2894-9e6b-45f3-87f4-30f31ad7eb1a-4C4C4544-0056-3110-804A-C8C04F373433"
-    local tab = {macAddress=device_uid}
-    local json_str = NPL.ToJson(tab);
-    local base64_str = System.Encoding.base64(json_str)
+    local machineID = ParaEngine.GetAttributeObject():GetField("MachineID","")
 
-    return base64_str
+    if not machineID or machineID == '' then
+        return ''
+    end
+
+    local tab = { macAddress = machineID }
+    local jsonStr = NPL.ToJson(tab);
+
+    return System.Encoding.base64(jsonStr)
 end
 
 function KeepworkServiceSession:RemoveAccount(password, callback)
