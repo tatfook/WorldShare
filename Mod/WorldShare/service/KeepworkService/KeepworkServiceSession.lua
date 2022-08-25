@@ -464,7 +464,7 @@ function KeepworkServiceSession:RegisterWithAccount(username, password, callback
         username = username,
         password = password,
         channel = 3,
-        macAddress = self:GetEncodeDeviceId(),
+        -- macAddress = self:GetEncodeDeviceId(),
     }
 
     KeepworkUsersApi:Register(
@@ -540,7 +540,7 @@ function KeepworkServiceSession:RegisterWithPhoneAndLogin(username, cellphone, c
         password = password,
         channel = 3,
         isBind = true,
-        macAddress = self:GetEncodeDeviceId(),
+        -- macAddress = self:GetEncodeDeviceId(),
     }
 
     KeepworkUsersApi:Register(
@@ -607,7 +607,7 @@ function KeepworkServiceSession:RegisterWithPhone(username, cellphone, cellphone
         password = password,
         channel = 3,
         isBind = true,
-        macAddress = self:GetEncodeDeviceId(),
+        -- macAddress = self:GetEncodeDeviceId(),
     }
 
     KeepworkUsersApi:Register(
@@ -1364,7 +1364,7 @@ end
 function KeepworkServiceSession:GetDeviceUUID()
     local machineID = ParaEngine.GetAttributeObject():GetField('MachineID', '')
 
-    return 'c3b472f4-0bfb-46d0-916e-6773210d7b64' .. '-' .. machineID
+    return '00000000-0000-0000-0000-000000000000' .. '-' .. machineID
 end
 
 function KeepworkServiceSession:GetEncodeDeviceId()

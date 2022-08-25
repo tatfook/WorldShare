@@ -465,7 +465,7 @@ function KeepworkUsersApi:ParentCellphoneCaptcha(cellphone, isBind, macAddress, 
     local params = {
         cellphone = cellphone,
         isBind = isBind,
-        macAddress = macAddress
+        -- macAddress = macAddress
     }
 
     KeepworkBaseApi:Get('/users/parentCellphoneCaptcha', params, nil, success, error)
