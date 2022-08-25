@@ -832,6 +832,39 @@ function KeepworkServiceSession:GetPhoneCaptcha(phone, callback)
     KeepworkUsersApi:CellphoneCaptcha(phone, callback, callback)
 end
 
+function KeepworkServiceSession:ParentCellphoneCaptcha(phoneNumber, isBind, callback)
+    if not callback or type(callback) ~= 'function' then
+        return
+    end
+
+    local macAddress = self:GetEncodeDeviceId()
+
+    KeepworkUsersApi:ParentCellphoneCaptcha(
+        phoneNumber,
+        isBind,
+        macAddress,
+        function(data, err)
+            if err ~= 200 or
+               data == nil or
+               data == '' then
+                callback(false, 0, L'未知错误')
+                return
+            end
+
+            callback(true)            
+        end,
+        function(data, err)
+            if not data or
+               type(data) ~= 'table' then
+                callback(false, 0, L'未知错误')
+                return
+            end
+
+            callback(false, data.code, data.message)
+        end
+    )
+end
+
 function KeepworkServiceSession:ClassificationPhone(cellphone, captcha, callback, is_bind_mac_address)
     -- 加上设备唯一标识
     local macAddress

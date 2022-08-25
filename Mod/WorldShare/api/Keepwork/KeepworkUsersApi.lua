@@ -452,10 +452,24 @@ end
     cellphone string necessary
 ]]
 -- return: object
-function KeepworkUsersApi:ParentCellphoneCaptcha(cellphone, success, error)
-    if not cellphone or type(cellphone) ~= 'string' then
+function KeepworkUsersApi:ParentCellphoneCaptcha(cellphone, isBind, macAddress, success, error)
+    echo(cellphone, true)
+    echo(isBind, true)
+    echo(macAddress, true)
+    if not cellphone or
+       type(cellphone) ~= 'string' or
+       isBind == nil or
+       type(isBind) ~= 'boolean' or
+       not macAddress or
+       type(macAddress) ~= 'string' then
         return
     end
 
-    KeepworkBaseApi:Get('/users/parentCellphoneCaptcha', { cellphone = cellphone }, nil, success, error)
+    local params = {
+        cellphone = cellphone,
+        isBind = isBind,
+        macAddress = macAddress
+    }
+
+    KeepworkBaseApi:Get('/users/parentCellphoneCaptcha', params, nil, success, error)
 end
