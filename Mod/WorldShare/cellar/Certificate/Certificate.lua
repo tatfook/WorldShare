@@ -17,7 +17,8 @@ local TeacherAgent = commonlib.gettable("MyCompany.Aries.Creator.Game.Teacher.Te
 local TeacherIcon = commonlib.gettable("MyCompany.Aries.Creator.Game.Teacher.TeacherIcon")
 local Screen = commonlib.gettable('System.Windows.Screen')
 
-local ServerConfigManager = NPL.load('(gl)script/apps/Aries/Creator/Game/Tasks/User/ServerConfigManager.lua')
+-- bottles
+local MySchool = NPL.load('(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua')
 
 -- service
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/KeepworkServiceSession.lua')
@@ -33,7 +34,18 @@ function Certificate:Init(callback)
     if System.options.channelId == '430' or isPay ~= 0 then
         self:ShowCertificateNoticePage(callback)
     else
-        self:ShowMyHomePage(callback, 'summer')
+        local isVerified = Mod.WorldShare.Store:Get('user/isVerified')
+        local hasJoinedSchool = Mod.WorldShare.Store:Get('user/hasJoinedSchool')
+
+        if not isVerified and not hasJoinedSchool then
+            self:ShowMyHomePage(function()
+                MySchool:ShowJoinSchool(callback, 'summer')
+            end, 'summer')
+        elseif not isVerified then
+            self:ShowMyHomePage(callback, 'summer')
+        elseif not hasJoinedSchool then
+            MySchool:ShowJoinSchool(callback, 'summer')
+        end
     end
 end
 

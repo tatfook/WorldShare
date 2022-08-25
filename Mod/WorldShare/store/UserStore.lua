@@ -84,8 +84,8 @@ function UserStore:Action(data)
             self.whereAnonymousUser = where
             RestartTable.whereAnonymousUser = where
         end,
-        ParentPhoneVerification = function()
-            UserStore:onParentPhoneVerification()
+        ParentPhoneVerification = function(payload)
+            UserStore:onParentPhoneVerification(payload)
         end
     }
 end

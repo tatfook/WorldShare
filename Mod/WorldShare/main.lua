@@ -102,7 +102,7 @@ function WorldShare:init()
             KickOut:ShowKickOutPage(reason)
         elseif result.action == 'msg' then
             if result.payload.action == 'parentPhoneVerification' then
-                Mod.WorldShare.Store:Action('user/ParentPhoneVerification')()
+                Mod.WorldShare.Store:Action('user/ParentPhoneVerification')(result.payload)
             end
         end
     end)
