@@ -57,8 +57,13 @@
                         end
 
                         if index == '1' then
-                            my_opus_sel.visible = true
-                            my_opus_unsel.visible = false
+                            if my_opus_sel then
+                                my_opus_sel.visible = true
+                            end
+
+                            if my_opus_unsel then
+                                my_opus_unsel.visible = false
+                            end
 
                             if index ~= Opus.cur_sel then
                                 Opus.cur_sel = index
