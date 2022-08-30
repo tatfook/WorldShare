@@ -87,6 +87,9 @@
                             if result then
                                 WorldExitDialog.OnDialogResult(_guihelper.DialogResult.Yes)
                             else
+                                if GameLogic.GetFilters():apply_filters('check_unavailable_before_open_vip')==true then
+                                    return
+                                end
                                 _guihelper.MessageBox(L'操作被禁止了，免费用户最多只能拥有家园+1个本地世界，请删除不要的本地世界，或者联系老师（或家长）开通权限。')
                             end
                         end,true)
@@ -109,6 +112,9 @@
                                 --ShareWorld:ClosePage()
                                 ShareWorld:OnClick()
                             else
+                                if GameLogic.GetFilters():apply_filters('check_unavailable_before_open_vip')==true then
+                                    return
+                                end
                                 _guihelper.MessageBox(L'操作被禁止了，免费用户最多只能拥有家园+1个本地世界，请删除不要的本地世界，或者联系老师（或家长）开通权限。')
                             end
                         end,true)
@@ -120,6 +126,9 @@
                                 WorldExitDialog.OnDialogResult(_guihelper.DialogResult.Cancel)
                                 GameLogic.RunCommand('/menu file.saveworldas')
                             else
+                                if GameLogic.GetFilters():apply_filters('check_unavailable_before_open_vip')==true then
+                                    return
+                                end
                                 _guihelper.MessageBox(L'操作被禁止了，免费用户最多只能拥有家园+1个本地世界，请删除不要的本地世界，或者联系老师（或家长）开通权限。')
                             end
                         end)

@@ -563,6 +563,24 @@ function Filters:Init()
         end
     )
 
+    --尝试打开或间接打开vip弹窗前，检查是否开启了vip功能
+    GameLogic.GetFilters():add_filter('check_unavailable_before_open_vip',function(param)
+        param = param or {}
+        local is_unavailable = System.options.channelId=="430" --是否禁用vip
+
+        if is_unavailable then
+            if param.noBoxTip~=true then
+                _guihelper.MessageBox(param.tipStr or L"您的账号未拥有该功能权限。", function(result)
+                    if result == _guihelper.DialogResult.OK then
+                        
+                    end
+                end, _guihelper.MessageBoxButtons.OK, nil, nil, nil, nil, {ok=L"确定"});
+            end
+        end
+        
+        return is_unavailable
+    end)
+
     --vip button
     GameLogic.GetFilters():add_filter("get_vip_btn_div", function(styleStr,key,desc)
         if System.options.channelId=="430" then
