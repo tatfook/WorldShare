@@ -85,11 +85,11 @@ function Menu:Projects(menuItems)
                             onclick = nil
                         },
                         { Type = 'Separator' },
-                        {
-                            text = L'上传分享',
-                            name = 'project.share',
-                            onclick = nil
-                        },
+                        -- {
+                        --     text = L'上传分享',
+                        --     name = 'project.share',
+                        --     onclick = nil
+                        -- },
                         { Type = 'Separator' },
                         {
                             text = L'项目首页',
@@ -247,11 +247,11 @@ function Menu:Projects(menuItems)
                     onclick = nil
                 },
                 { Type = 'Separator' },
-                {
-                    text = L'上传分享',
-                    name = 'project.share',
-                    onclick = nil
-                },
+                -- {
+                --     text = L'上传分享',
+                --     name = 'project.share',
+                --     onclick = nil
+                -- },
                 { Type = 'Separator' },
                 {
                     text = L'本地目录',
