@@ -1364,7 +1364,7 @@ end
 function KeepworkServiceSession:GetDeviceUUID()
     local machineID = ParaEngine.GetAttributeObject():GetField('MachineID', '')
 
-    return '00000000-0000-0000-0000-000000000000' .. '-' .. machineID
+    return machineID
 end
 
 function KeepworkServiceSession:GetEncodeDeviceId()
