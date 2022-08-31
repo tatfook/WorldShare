@@ -454,7 +454,7 @@
                                     color:#ffffff;'>
                             <div style='margin-bottom: 5px;'>
                                 <pe:if condition='<%= System.os.GetPlatform() == "win32" %>'>
-                                    <input type='button'
+                                    <!-- <input type='button'
                                            class='theme1_gray_button'
                                            style='height: 36px;
                                                   width: 110px;'
@@ -483,8 +483,9 @@
                                                     margin-top: 1px;'>
                                             <%= L'全景图分享' %>
                                         </div>
-                                    </div>
-                                    </pe:if>
+                                    </div> -->
+                                    <!-- </pe:if> -->
+                                    <div height="30"></div>
                                 </pe:if>
                                 <pe:if condition='<%= System.os.GetPlatform() ~= "win32" %>'>
                                     <div class='theme1_black_button'
@@ -688,7 +689,7 @@
                                     </div>
                                 </pe:if>
 
-                                <div style='margin-top: 50x;'>
+                                <div style='margin-top: 66x;'>
                                     <pe:if condition='<%= GameLogic.IsReadOnly() %>'>
                                         <input type='button'
                                                onclick='save_as()'
