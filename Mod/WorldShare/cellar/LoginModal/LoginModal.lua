@@ -64,7 +64,7 @@ function LoginModal:CheckSignedIn(desc, callback)
 end
 
 function LoginModal:ShowPage()
-    MainLogin:ShowLogin(true, 5)
+    MainLogin:ShowLogin(true, 10)
 end
 
 function LoginModal:Close(params)
