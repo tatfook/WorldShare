@@ -120,6 +120,7 @@ function MainLogin:ShowAndroid()
         bToggleShowHide = false
     })
 
+    self:ShowExtra()
     self:ShowAndroidLogin()
 end
 
