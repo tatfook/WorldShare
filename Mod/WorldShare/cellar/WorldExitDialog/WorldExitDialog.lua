@@ -13,12 +13,14 @@ WorldExitDialog.ShowPage()
 
 -- lib
 NPL.load('(gl)script/kids/3DMapSystemUI/ScreenShot/SnapshotPage.lua')
+NPL.load('(gl)script/apps/Aries/Creator/Game/GUI/TouchMiniKeyboard.lua')
 
 local SnapshotPage = commonlib.gettable('MyCompany.Apps.ScreenShot.SnapshotPage')
 local WorldRevision = commonlib.gettable('MyCompany.Aries.Creator.Game.WorldRevision')
 local NplBrowserPlugin = commonlib.gettable('NplBrowser.NplBrowserPlugin')
 local Desktop = commonlib.gettable('MyCompany.Aries.Creator.Game.Desktop')
 local ParaWorldLoginAdapter = commonlib.gettable('MyCompany.Aries.Game.Tasks.ParaWorld.ParaWorldLoginAdapter')
+local TouchMiniKeyboard = commonlib.gettable('MyCompany.Aries.Game.GUI.TouchMiniKeyboard')
 
 -- service
 local Compare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
@@ -230,6 +232,8 @@ function WorldExitDialog.OnDialogResult(res)
                 Mod.WorldShare.Store:Remove('world/currentWorld')
                 Mod.WorldShare.Store:Remove('world/currentEnterWorld')
                 Mod.WorldShare.Store:Remove('world/isEnterWorld')
+
+                TouchMiniKeyboard.CheckShow(false)
 
                 return
             end
