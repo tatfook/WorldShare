@@ -433,7 +433,7 @@
                                     color:#ffffff;'>
                             <div style='margin-bottom: 5px;'>
                                 <pe:if condition='<%= System.os.GetPlatform() == "win32" %>'>
-                                    <input type='button'
+                                    <!-- <input type='button'
                                            class='theme1_gray_button'
                                            style='height: 36px;
                                                   width: 150px;'
@@ -463,6 +463,9 @@
                                             <%= L'全景图分享' %>
                                         </div>
                                     </div>
+                                    </pe:if> -->
+                                    <pe:if condition='<%= not is_show_unlock_button() %>'>
+                                        <div height="30"></div>
                                     </pe:if>
                                 </pe:if>
                                 <pe:if condition='<%= System.os.GetPlatform() ~= "win32" %>'>
@@ -616,7 +619,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div style='padding-left: 20px;
+                        <div style='padding-left: 20px;margin-top: 16px;
                                     color: #000000'>
                             <pe:if condition='<%= is_community_world_exit() %>'>
                                 <div style='margin-top: -10x;

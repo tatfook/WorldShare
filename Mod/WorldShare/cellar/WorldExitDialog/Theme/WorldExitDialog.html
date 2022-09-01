@@ -485,7 +485,9 @@
                                         </div>
                                     </div> -->
                                     <!-- </pe:if> -->
-                                    <div height="30"></div>
+                                    <pe:if condition='<%= not is_show_unlock_button() %>'>
+                                        <div height="30"></div>
+                                    </pe:if>
                                 </pe:if>
                                 <pe:if condition='<%= System.os.GetPlatform() ~= "win32" %>'>
                                     <div class='theme1_black_button'
@@ -638,7 +640,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div style='padding-left: 20px;
+                        <div style='padding-left: 20px;margin-top: 16px;
                                     color: #000000'>
                             <pe:if condition='<%= is_community_world_exit() %>'>
                                 <pe:if condition="<%=not GameLogic.IsReadOnly()%>">
@@ -689,7 +691,7 @@
                                     </div>
                                 </pe:if>
 
-                                <div style='margin-top: 66x;'>
+                                <div style='margin-top: 50x;'>
                                     <pe:if condition='<%= GameLogic.IsReadOnly() %>'>
                                         <input type='button'
                                                onclick='save_as()'
