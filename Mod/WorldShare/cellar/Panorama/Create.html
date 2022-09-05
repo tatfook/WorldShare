@@ -14,7 +14,7 @@
                     local scale_height = page:GetRequestParam('scaleHeight') or 0
 
                     function close()
-                        Panorama.UpdateEscDock(false)
+                    GameLogic.GetFilters():apply_filters("update_dock",false)
                         page:CloseWindow()
                     end
 
