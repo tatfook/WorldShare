@@ -166,6 +166,7 @@ function update_login_button_status()
     if string.find(password, 'pa') == 1 and not has_click_change_show_password then
         local check_str = {'p','a','r','a'} 
         local is_macth = true
+
         for i = 1, #check_str do
             local char = string.sub(password, i, i)
             if char and char ~= '' and check_str[i] ~= char then
@@ -173,6 +174,7 @@ function update_login_button_status()
                 break
             end
         end
+
         if not is_macth then
             if auto_show_password then
                 get_page():SetValue('eye_show_password', false)
@@ -639,14 +641,3 @@ function get_container_style()
         return 'margin-top: -200px;'
     end
 end
-
--- don't remove
-Mod.WorldShare.Utils.SetTimeOut(function()
-    local val = get_page():GetValue('password_show')
-    get_page():SetValue('password_hide', val)
-    get_page():SetValue('password', val)
-
-    get_page():FindControl('password_show').visible = false
-    get_page():FindControl('password_hide').visible = true
-    update_login_button_status()
-end, 0)

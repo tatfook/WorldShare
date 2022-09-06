@@ -7,6 +7,17 @@
                         'page/Mod.WorldShare.cellar.MainLogin.Login',
                         document:GetPageCtrl()
                     )
+
+                    -- don't remove
+                    Mod.WorldShare.Utils.SetTimeOut(function()
+                        local val = get_page():GetValue('password_show')
+                        get_page():SetValue('password_hide', val)
+                        get_page():SetValue('password', val)
+
+                        get_page():FindControl('password_show').visible = false
+                        get_page():FindControl('password_hide').visible = true
+                        update_login_button_status()
+                    end, 0)
                 ]]>
             </script>
             <style type='text/mcss' src='Mod/WorldShare/cellar/Theme/Mcss/MainLoginMcss.mcss'>
