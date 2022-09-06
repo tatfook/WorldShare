@@ -656,9 +656,13 @@
                                     if currentWorld.kpProjectId == selectedWorld.kpProjectId then
                                         KeepworkServiceProject:LeaveMultiProject(currentWorld.kpProjectId, function(data, err)
                                             if err == 200 then
-                                                DeleteWorld:DeleteLocal(function()
+                                                if currentWorld.status == 2 then
                                                     Create:GetWorldList(Create.statusFilter)
-                                                end, true)
+                                                else
+                                                    DeleteWorld:DeleteLocal(function()
+                                                        Create:GetWorldList(Create.statusFilter)
+                                                    end, true)
+                                                end
                                             end
                                         end)
                                     end
