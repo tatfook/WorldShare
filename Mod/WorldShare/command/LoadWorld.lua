@@ -90,14 +90,14 @@ function LoadWorldCommand:Init()
 
                 if cmdText == 'home' then
                     local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
+                    local optionsStr = ''
 
                     if currentEnterWorld and not Mod.WorldShare.Store:Get('world/isShowExitPage') then
                         _guihelper.MessageBox(
                             format(L'即将离开【%s】进入【%s】', currentEnterWorld.name or '', L'家园'),
                             function(res)
                                 if res and res == _guihelper.DialogResult.Yes then
-                                    local optionsStr = ''
-        
+
                                     for key, item in pairs(options) do
                                         if key ~= 's' then
                                             optionsStr = optionsStr .. '-' .. key .. ' '
@@ -137,6 +137,7 @@ function LoadWorldCommand:Init()
                 end
 
                 local pid = string.match(cmdText, '^%s-(%d+)%s-$')
+
                 if pid then
                     local cacheWorldInfo = CacheProjectId:GetProjectIdInfo(tonumber(pid))
 
@@ -144,7 +145,7 @@ function LoadWorldCommand:Init()
                         System.options.loginmode == 'local' or
                         not System.options.networkNormal or
                         options.e) and
-                       cacheWorldInfo then
+                        cacheWorldInfo then
                         local optionsStr = ''
     
                         for key, item in pairs(options) do
@@ -181,8 +182,10 @@ function LoadWorldCommand:Init()
                     end
 
                     Mod.WorldShare.MsgBox:Wait()
+
                     KeepworkServiceProject:GetProject(pid, function(data, err)
                         Mod.WorldShare.MsgBox:Close()
+
                         if err ~= 200 or not data or type(data) ~='table' or not data.name then
                             GameLogic.AddBBS(nil, L'加载世界失败，无法在服务器找到该资源', 3000, '255 0 0')
                             return
