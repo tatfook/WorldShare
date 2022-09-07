@@ -152,8 +152,11 @@ function KeepworkServiceProject:GetProjectIdByWorldName(foldername, shared, call
             end
 
             local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
-            currentWorld.kpProjectId = world.projectId
-            Mod.WorldShare.Store:Set('world/currentWorld', currentWorld)
+
+            if currentWorld then
+                currentWorld.kpProjectId = world.projectId
+                Mod.WorldShare.Store:Set('world/currentWorld', currentWorld)
+            end
     
             callback(world.projectId)
         else
