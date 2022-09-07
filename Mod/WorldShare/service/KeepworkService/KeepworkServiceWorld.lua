@@ -72,7 +72,7 @@ function KeepworkServiceWorld:GetSingleFileByCommitId(pid, commitId, filename, c
 end
 
 -- set world instance by pid 
-function KeepworkServiceWorld:SetWorldInstanceByPid(pid, callback)
+function KeepworkServiceWorld:SetWorldInstanceByPid(pid, callback, worldPath)
     if not KeepworkServiceSession:IsSignedIn() then
         return
     end
@@ -88,25 +88,26 @@ function KeepworkServiceWorld:SetWorldInstanceByPid(pid, callback)
         local sharedFolder = false
         local shared = false
         local userId = Mod.WorldShare.Store:Get('user/userId')
-        local worldPath = ''
 
         if data.userId and tonumber(data.userId) ~= (userId) then
             sharedFolder = true
         end
 
-        if sharedFolder then
-            worldPath = format(
-                '%s/_shared/%s/%s/',
-                LocalServiceWorld:GetDefaultSaveWorldPath(),
-                data.username,
-                commonlib.Encoding.Utf8ToDefault(data.worldName)
-            )
-        else
-            worldPath = format(
-                '%s/%s/',
-                LocalServiceWorld:GetUserFolderPath(),
-                commonlib.Encoding.Utf8ToDefault(data.worldName)
-            )
+        if not worldPath or type(worldPath) ~= 'string' then
+            if sharedFolder then
+                worldPath = format(
+                    '%s/_shared/%s/%s/',
+                    LocalServiceWorld:GetDefaultSaveWorldPath(),
+                    data.username,
+                    commonlib.Encoding.Utf8ToDefault(data.worldName)
+                )
+            else
+                worldPath = format(
+                    '%s/%s/',
+                    LocalServiceWorld:GetUserFolderPath(),
+                    commonlib.Encoding.Utf8ToDefault(data.worldName)
+                )
+            end
         end
 
         if data and data.memberCount > 1 then

@@ -513,13 +513,13 @@ end
 
 function SyncWorld:CheckAndUpdatedBeforeEnterMyHome(callback)
     if not KeepworkServiceSession:IsSignedIn() then
-        return false
+        return
     end
 
     local username = Mod.WorldShare.Store:Get('user/username')
 
     if not username then
-        return false
+        return
     end
 
     local foldername = username .. '_main'
@@ -557,9 +557,13 @@ function SyncWorld:CheckAndUpdatedByFoldername(folderName, callback)
             worldTag.kpProjectId = projectId
             LocalService:SetTag(worldPath, worldTag)
 
-            KeepworkServiceWorld:SetWorldInstanceByPid(projectId, function()
-                self:CheckAndUpdated(callback)
-            end)
+            KeepworkServiceWorld:SetWorldInstanceByPid(
+                projectId,
+                function()
+                    self:CheckAndUpdated(callback)
+                end,
+                worldPath
+            )
         else
             -- not exist
             worldTag.kpProjectId = 0
