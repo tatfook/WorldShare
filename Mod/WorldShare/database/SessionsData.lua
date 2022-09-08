@@ -243,20 +243,7 @@ function SessionsData:GetSessionByUsername(username)
 end
 
 function SessionsData:GetDeviceUUID()
-    local sessionsData = self:GetSessions()
-    local currentParacraftDir = ParaIO.GetWritablePath()
-
-    if not sessionsData.softwareUUID or
-       not sessionsData.paracraftDir or
-       sessionsData.paracraftDir ~= currentParacraftDir then
-        sessionsData.paracraftDir = ParaIO.GetWritablePath()
-        sessionsData.softwareUUID = System.Encoding.guid.uuid()
-        GameLogic.GetPlayerController():SaveLocalData('sessions', sessionsData, true)
-    end
-
-    local machineID = ParaEngine.GetAttributeObject():GetField('MachineID', '')
-
-    return sessionsData.softwareUUID .. '-' .. machineID
+    return ParaEngine.GetAttributeObject():GetField('MachineID', '')
 end
 
 function SessionsData:GetUserLastPosition(projectId, username)
