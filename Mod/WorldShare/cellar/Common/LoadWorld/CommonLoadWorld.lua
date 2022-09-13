@@ -182,86 +182,98 @@ function CommonLoadWorld:CheckLoadWorldFromCmdLine(cmdLineWorld)
             return
         end
 
-        if self:IdsFilter(id) then
-            GameLogic.RunCommand(format('/loadworld -auto %d', id))
-        else
-            if not Mod.WorldShare.Store:Get('world/isEnterWorld') then
-                if KeepworkServiceSession:IsSignedIn() then
-                    GameLogic.IsVip('LimitUserOpenShareWorld', true, function(result)
-                        if not result then
-                            System.options.cmdline_world = nil
-                            MainLogin:Next()
+        KeepworkServiceProject:GetProject(
+            id,
+            function(data)
+                if data and
+                   type(data) == 'table' and
+                   data.isFreeWorld then
+                    GameLogic.RunCommand(format('/loadworld -auto %d', id))
+                else
+                    if not Mod.WorldShare.Store:Get('world/isEnterWorld') then
+                        if KeepworkServiceSession:IsSignedIn() then
+                            GameLogic.IsVip('LimitUserOpenShareWorld', true, function(result)
+                                if not result then
+                                    System.options.cmdline_world = nil
+                                    MainLogin:Next()
+                                else
+                                    Mod.WorldShare.MsgBox:Wait()
+        
+                                    KeepworkServiceProject:GetProject(
+                                        id,
+                                        function(data, err)
+                                            if err == 200 then
+                                                if data.timeRules and
+                                                   data.timeRules[1] then
+                                                    local result, reason = KeepworkServicePermission:TimesFilter(data.timeRules)
+        
+                                                    if result then
+                                                        System.options.cmdline_world = nil
+                                                        MainLogin:Next()
+                                                        GameLogic.RunCommand(format('/loadworld -auto %d', id))
+                                                    else
+                                                        _guihelper.MessageBox(reason)
+                                                        System.options.cmdline_world = nil
+                                                        MainLogin:Next()
+                                                    end
+                                                else
+                                                    System.options.cmdline_world = nil
+                                                    MainLogin:Next()
+                                                    GameLogic.RunCommand(format('/loadworld -auto %d', id))
+                                                end
+                                            else
+                                                GameLogic.RunCommand(format('/loadworld -auto %d', id)) -- show error msg
+                                                System.options.cmdline_world = nil
+                                                MainLogin:Next()
+                                            end
+                                        end
+                                    )
+                                end
+                            end)
                         else
-                            Mod.WorldShare.MsgBox:Wait()
-
                             KeepworkServiceProject:GetProject(
                                 id,
                                 function(data, err)
                                     if err == 200 then
-                                        if data.timeRules and
-                                           data.timeRules[1] then
-                                            local result, reason = KeepworkServicePermission:TimesFilter(data.timeRules)
-
-                                            if result then
-                                                System.options.cmdline_world = nil
-                                                MainLogin:Next()
-                                                GameLogic.RunCommand(format('/loadworld -auto %d', id))
-                                            else
-                                                _guihelper.MessageBox(reason)
-                                                System.options.cmdline_world = nil
-                                                MainLogin:Next()
-                                            end
-                                        else
-                                            System.options.cmdline_world = nil
-                                            MainLogin:Next()
-                                            GameLogic.RunCommand(format('/loadworld -auto %d', id))
+                                        local info = KeepworkServiceSession:LoadSigninInfo()
+        
+                                        if info and type(info) == 'table' then
+                                            info.autoLogin = false
+                                            KeepworkServiceSession:SaveSigninInfo(info)
                                         end
+        
+                                        MainLogin:Show()
+                                        Game.MainLogin.cmdWorldLoaded = false
                                     else
                                         GameLogic.RunCommand(format('/loadworld -auto %d', id)) -- show error msg
                                         System.options.cmdline_world = nil
-                                        MainLogin:Next()
+                                        Game.MainLogin:next_step({IsLoginModeSelected = false})
                                     end
                                 end
                             )
                         end
-                    end)
-                else
-                    KeepworkServiceProject:GetProject(
-                        id,
-                        function(data, err)
-                            if err == 200 then
-                                local info = KeepworkServiceSession:LoadSigninInfo()
-
-                                if info and type(info) == 'table' then
-                                    info.autoLogin = false
-                                    KeepworkServiceSession:SaveSigninInfo(info)
-                                end
-
-                                MainLogin:Show()
-                                Game.MainLogin.cmdWorldLoaded = false
-                            else
-                                GameLogic.RunCommand(format('/loadworld -auto %d', id)) -- show error msg
-                                System.options.cmdline_world = nil
-                                Game.MainLogin:next_step({IsLoginModeSelected = false})
-                            end
-                        end
-                    )
-                end
-            else
-                if KeepworkServiceSession:IsSignedIn() then
-                    GameLogic.RunCommand(format('/loadworld -auto %d', id))
-                else
-                    LoginModal:CheckSignedIn(L'该项目需要登录后访问', function(bIsSuccessed)
-                        if bIsSuccessed then
+                    else
+                        if KeepworkServiceSession:IsSignedIn() then
                             GameLogic.RunCommand(format('/loadworld -auto %d', id))
+                        else
+                            LoginModal:CheckSignedIn(L'该项目需要登录后访问', function(bIsSuccessed)
+                                if bIsSuccessed then
+                                    GameLogic.RunCommand(format('/loadworld -auto %d', id))
+                                end
+                            end)
                         end
-                    end)
+                    end
                 end
             end
-        end
+        )
     end
 
     local urlProtocol = UrlProtocolHandler:GetParacraftProtocol() or ''
+
+    if System.os.GetPlatform() == 'mac' then
+        urlProtocol = ParaEngine.GetAppCommandLine() or ''
+    end
+
     urlProtocol = commonlib.Encoding.url_decode(urlProtocol)
 
     local userToken = urlProtocol:match('usertoken="([%S]+)"')
@@ -492,22 +504,6 @@ function CommonLoadWorld:EnterCacheWorldById(pid)
     else
         _guihelper.MessageBox(L'无效的世界文件')
     end
-end
-
-function CommonLoadWorld:IdsFilter(id)
-    if not id or type(id) ~= 'number' then
-        return
-    end
-
-    local whiteList = LocalServiceWorld:GetWhiteList()
-
-    for _, item in pairs(whiteList) do
-        if item == id then
-            return true
-        end
-    end
-
-    return false
 end
 
 function CommonLoadWorld.StartOldVersion(index)
