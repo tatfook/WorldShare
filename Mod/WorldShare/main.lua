@@ -129,15 +129,15 @@ function WorldShare:init()
     System.options.useFreeworldWhitelist = true
     System.options.maxFreeworldUploadCount = 3
 
-    GameLogic.GetFilters():add_filter('CheckInstallUrlProtocol', function()
-        local sessions = SessionsData:GetSessions()
+    -- GameLogic.GetFilters():add_filter('CheckInstallUrlProtocol', function()
+    --     local sessions = SessionsData:GetSessions()
 
-        if not sessions or not sessions.allUsers then
-            return false
-        else
-            return true
-        end
-    end)
+    --     if not sessions or not sessions.allUsers then
+    --         return false
+    --     else
+    --         return true
+    --     end
+    -- end)
 
     if ParaEngine.GetAppCommandLineByParam('IsSettingLanguage', nil) == 'true' and
         Mod.WorldShare.Store:Get('user/isSettingLanguage') == nil then

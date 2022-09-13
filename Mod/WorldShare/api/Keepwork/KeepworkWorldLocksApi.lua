@@ -21,11 +21,11 @@ local KeepworkWorldLocksApi = NPL.export()
 ]]
 -- return: object
 function KeepworkWorldLocksApi:GetWorldLockInfo(pid, success, error)
-    if type(pid) ~= 'number' then
-        return false
+    if not pid or type(pid) ~= 'number' then
+        return
     end
 
-    KeepworkBaseApi:Get("/worldlocks?pid=" .. tostring(pid), nil, nil, success, error)
+    KeepworkBaseApi:Get('/worldlocks?pid=' .. tostring(pid), nil, nil, success, error)
 end
 
 -- url: /worldlocks
@@ -48,7 +48,7 @@ function KeepworkWorldLocksApi:UpdateWorldLockRecord(pid, mode, revision, server
         password = password,
     }
 
-    KeepworkBaseApi:Post("/worldlocks", params, nil, success, error)
+    KeepworkBaseApi:Post('/worldlocks', params, nil, success, error)
 end
 
 -- url: /worldlocks
@@ -59,5 +59,5 @@ end
 ]]
 -- return: object
 function KeepworkWorldLocksApi:RemoveWorldLockRecord(pid, success, error)
-    KeepworkBaseApi:Delete("/worldlocks", { pid = pid }, nil, success, error)
+    KeepworkBaseApi:Delete('/worldlocks', { pid = pid }, nil, success, error)
 end
