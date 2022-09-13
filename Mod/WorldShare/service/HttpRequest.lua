@@ -19,8 +19,9 @@ HttpRequest.defaultSuccessCode = {200, 201, 202, 204}
 HttpRequest.defaultFailCode = {400, 401, 404, 409, 422, 500}
 
 function HttpRequest:GetUrl(params, callback, noTryStatus, timeout, noShowLog)
-    if type(params) ~= 'table' and type(params) ~= 'string' then
-        return false
+    if not params or
+       (type(params) ~= 'table' and type(params) ~= 'string') then
+        return
     end
 
     if timeout and type(timeout) == 'number' then
@@ -31,7 +32,7 @@ function HttpRequest:GetUrl(params, callback, noTryStatus, timeout, noShowLog)
 
     local formatParams = {}
 
-    if type(params) == 'string' then
+    if params and type(params) == 'string' then
         formatParams = {
             method = 'GET',
             url = params,
@@ -40,30 +41,30 @@ function HttpRequest:GetUrl(params, callback, noTryStatus, timeout, noShowLog)
         }
     end
 
-    if type(params) == 'table' then
+    if params and type(params) == 'table' then
         formatParams = {
             method = params.method or 'GET',
             url = params.url,
             json = params.json,
             headers = params.headers
         }
-
-        -- if formatParams.headers['Content-Type'] or
-        --    formatParams.headers['content-type'] then
-        --     formatParams.json = false
-        -- end
     end
 
-    if formatParams.method == 'GET' and type(params) == 'table' then
+    if formatParams and
+       type(formatParams) == 'table' and
+       formatParams.method == 'GET' and
+       params and
+       type(params) == 'table' then
         local url = params.url
         local paramsString = ''
 
         for key, value in pairs(params.form or {}) do
-            if type(value) == 'string' or type(value) == 'number' then
+            if value ~= nil and
+               (type(value) == 'string' or type(value) == 'number') then
                 paramsString = paramsString .. key .. '=' .. value .. '&'
             end
 
-            if type(value) == 'boolean' then
+            if value ~= nil and type(value) == 'boolean' then
                 if value then
                     paramsString = paramsString .. key .. '=true&'
                 else
@@ -79,7 +80,9 @@ function HttpRequest:GetUrl(params, callback, noTryStatus, timeout, noShowLog)
         end
     end
 
-    if formatParams.method ~= 'GET' then
+    if formatParams and
+       type(formatParams) == 'table' and
+       formatParams.method ~= 'GET' then
         formatParams.form = params.form or {}
     end
 
@@ -112,7 +115,7 @@ function HttpRequest:GetUrl(params, callback, noTryStatus, timeout, noShowLog)
             ---- debug code ----
 
             -- no try status code, return directly
-            if type(noTryStatus) == 'table' then
+            if noTryStatus ~= nil and type(noTryStatus) == 'table' then
                 for _, code in pairs(noTryStatus) do
                     if err == code then
                         if type(callback) == 'function' then
@@ -123,7 +126,7 @@ function HttpRequest:GetUrl(params, callback, noTryStatus, timeout, noShowLog)
                         return false
                     end
                 end
-            elseif type(noTryStatus) == 'number' then
+            elseif noTryStatus ~= nil and type(noTryStatus) == 'number' then
                 if err == noTryStatus then
                     if type(callback) == 'function' then
                         callback(data, err)
