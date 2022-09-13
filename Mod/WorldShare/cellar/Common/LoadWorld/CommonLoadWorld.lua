@@ -184,7 +184,7 @@ function CommonLoadWorld:CheckLoadWorldFromCmdLine(cmdLineWorld)
 
         KeepworkServiceProject:GetProject(
             id,
-            function(data)
+            function(data, err)
                 if data and
                    type(data) == 'table' and
                    data.isFreeWorld then
@@ -231,26 +231,21 @@ function CommonLoadWorld:CheckLoadWorldFromCmdLine(cmdLineWorld)
                                 end
                             end)
                         else
-                            KeepworkServiceProject:GetProject(
-                                id,
-                                function(data, err)
-                                    if err == 200 then
-                                        local info = KeepworkServiceSession:LoadSigninInfo()
-        
-                                        if info and type(info) == 'table' then
-                                            info.autoLogin = false
-                                            KeepworkServiceSession:SaveSigninInfo(info)
-                                        end
-        
-                                        MainLogin:Show()
-                                        Game.MainLogin.cmdWorldLoaded = false
-                                    else
-                                        GameLogic.RunCommand(format('/loadworld -auto %d', id)) -- show error msg
-                                        System.options.cmdline_world = nil
-                                        Game.MainLogin:next_step({IsLoginModeSelected = false})
-                                    end
+                            if err == 200 then
+                                local info = KeepworkServiceSession:LoadSigninInfo()
+
+                                if info and type(info) == 'table' then
+                                    info.autoLogin = false
+                                    KeepworkServiceSession:SaveSigninInfo(info)
                                 end
-                            )
+
+                                MainLogin:Show()
+                                Game.MainLogin.cmdWorldLoaded = false
+                            else
+                                GameLogic.RunCommand(format('/loadworld -auto %d', id)) -- show error msg
+                                System.options.cmdline_world = nil
+                                Game.MainLogin:next_step({IsLoginModeSelected = false})
+                            end
                         end
                     else
                         if KeepworkServiceSession:IsSignedIn() then
