@@ -160,13 +160,17 @@ function Compare:GetCurrentWorldInfo(callback)
            currentWorld.kpProjectId and
            currentWorld.kpProjectId ~= 0 and
            currentWorld.status ~= 1 then
-            KeepworkServiceWorld:UpdateLockHeartbeatStart(
-                currentWorld.kpProjectId,
-                'exclusive',
-                currentWorld.revision,
-                nil,
-                nil
-            )
+            if not Mod.WorldShare.Store:Get('world/forceOpenMultiPlayerWorld') then
+                KeepworkServiceWorld:UpdateLockHeartbeatStart(
+                    currentWorld.kpProjectId,
+                    'exclusive',
+                    currentWorld.revision,
+                    nil,
+                    nil
+                )
+            end
+
+            Mod.WorldShare.Store:Remove('world/forceOpenMultiPlayerWorld')
         end
 
         Mod.WorldShare.Store:Set('world/currentWorld', currentWorld)

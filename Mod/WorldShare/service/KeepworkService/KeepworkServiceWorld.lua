@@ -312,50 +312,37 @@ end
 
 function KeepworkServiceWorld:UpdateLockHeartbeatStart(pid, mode, revision, server, password)
     if self.isUnlockFetching or self.lockHeartbeat then
+        -- Retry after 3s.
         Mod.WorldShare.Utils.SetTimeOut(function()
             self:UpdateLockHeartbeatStart(pid, mode, revision, server, password)
         end, 3000)
-        return false
+
+        return
     end
 
     self.lockHeartbeat = true
     local lockTime = 0
 
-    local function Heartbeat()
-        if lockTime == 0 then
-            self:UpdateLock(
-                pid,
-                mode,
-                revision,
-                server,
-                password,
-                function(result)
-                if self.lockHeartbeat then
-                    lockTime = lockTime + 1
-                    Heartbeat()
-                end
-            end)
-            return true
-        end
+    self.lockTimer = commonlib.Timer:new({callbackFunc = function()
+        self:UpdateLock(
+            pid,
+            mode,
+            revision,
+            server,
+            password
+        )
+    end})
 
-        Mod.WorldShare.Utils.SetTimeOut(function()
-            if self.lockHeartbeat then
-                lockTime = lockTime + 1
-
-                if lockTime == 30 then
-                    lockTime = 0
-                end
-
-                Heartbeat()
-            end
-        end, 1000)
-    end
-
-    Heartbeat()
+    self.lockTimer:Change(0, 30 * 1000)
 end
 
 function KeepworkServiceWorld:UnlockWorld(callback)
     self.lockHeartbeat = false
+
+    if self.lockTimer then
+        self.lockTimer:Change()
+    end
+
     local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
     if not currentEnterWorld.members then
